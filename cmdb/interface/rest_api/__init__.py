@@ -24,7 +24,6 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.security.security import SecurityManager
@@ -144,6 +143,9 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
+    from cmdb.interface.rest_api.docapi_routes import docs_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
+
     app.register_blueprint(auth_blueprint)
     app.register_blueprint(object_blueprint)
     app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
@@ -166,6 +168,7 @@ def register_blueprints(app):
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
+    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docapi', '/docs'])
     app.register_blueprint(docapi_blueprint)
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)

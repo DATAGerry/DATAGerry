@@ -16,15 +16,18 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, OnDestroy, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
-import { DataTableDirective } from 'angular-datatables';
-import { BehaviorSubject, Subject, Subscription, timer } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../layout/toast/toast.service';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
 import { DocapiService } from '../../../docapi/docapi.service';
 import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
+import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-docapi-settings-list',
@@ -33,52 +36,154 @@ import { GeneralModalComponent } from '../../../layout/helpers/modals/general-mo
 })
 export class DocapiSettingsListComponent implements OnInit, OnDestroy {
 
-  @ViewChild(DataTableDirective, {static: false})
-  public dtElement: DataTableDirective;
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
-  public docTemplateList: BehaviorSubject<DocTemplate[]> = new BehaviorSubject<DocTemplate[]>([]);
-  private subscription: Subscription;
+  public subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  public messageBlock: string = 'DocAPI is an interface for generating PDF documents out of CMDB data. A user can design a\n' +
+    'Document Template in the frontend. Each Document Template consists of a Template Type, Template\n' +
+    'Content and Template Styling. The Template Type defines the kind of the template. For example the Object Template type\n' +
+    'generates documents for single CMDB objects. Each Template Type may have its own configuration settings. For Object\n' +
+    'Templates, an object type needs to be configured. In the Template Content section, the document itself can be designed\n' +
+    ' with an WYSIWYG editor. Depending on the chosen Template Type, template variables can be used at all places of the\n' +
+    ' document. These variables will then be replaced when rendering the document for a specific object.'
+
+  /**
+   * Table Template: actions column.
+   */
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+
   private modalRef: NgbModalRef;
+
+  /**
+   * Current template collection
+   */
+  public templates: Array<DocTemplate> = [];
+  public templateAPIResponse: APIGetMultiResponse<DocTemplate>;
+  public totalTemplates: number = 0;
+
+  /**
+   * Table columns definition.
+   */
+  public columns: Array<Column>;
+
+  /**
+   * Table selection enabled.
+   */
+  public selectEnabled: boolean = false;
+
+  /**
+   * Begin with first page.
+   */
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+  /**
+   * Max number of types per site.
+   * @private
+   */
+  private readonly initLimit: number = 10;
+  public limit: number = this.initLimit;
+
+  /**
+   * Filter query from the table search input.
+   */
+  public filter: string;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+
+  /**
+   * Loading indicator.
+   */
+  public loading: boolean = false;
 
 
   constructor(private docapiService: DocapiService, private router: Router,
-              private toast: ToastService, private modalService: NgbModal) { }
+              private toast: ToastService, private modalService: NgbModal) {
+  }
 
-  ngOnInit() {
-    this.dtOptions = {
-      order: [2, 'desc'],
-      ordering: true,
-      stateSave: true,
-      dom:
-        '<"row" <"col-sm-2" l><"col" f> >' +
-        '<"row" <"col-sm-12"tr>>' +
-        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
+  public ngOnInit(): void {
+    this.columns = [
+      {
+        display: 'Public ID',
+        name: 'public_id',
+        data: 'public_id',
+        searchable: true,
+        sortable: true
+      },
+      {
+        display: 'Label',
+        name: 'label',
+        data: 'label',
+        searchable: true,
+        sortable: true
+      },
+      {
+        display: 'Actions',
+        name: 'actions',
+        searchable: false,
+        sortable: false,
+        fixed: true,
+        template: this.actionsTemplate,
+        cssClasses: ['text-center'],
+        cellClasses: ['actions-buttons']
+      },
+
+    ] as Array<Column>;
+
+    this.loadTemplatesFromAPI();
+  }
+
+  /**
+   * Load/reload types from the api.
+   * @private
+   */
+  private loadTemplatesFromAPI(): void {
+    this.loading = true;
+    let query;
+    if (this.filter) {
+      query = [];
+      const or = [];
+      const searchableColumns = this.columns.filter(c => c.searchable);
+      // Searchable Columns
+      for (const column of searchableColumns) {
+        const regex: any = {};
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'ismx'
+        };
+        or.push(regex);
       }
-    };
-
-    this.subscription = timer(0, 30000).subscribe(result => {
-      this.docapiService.getDocTemplateList().subscribe((list: DocTemplate[]) => {
-        this.docTemplateList.next(list);
-        this.rerender();
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
       });
-    });
-  }
-
-  private rerender(): void {
-   if (typeof this.dtElement !== 'undefined' && typeof this.dtElement.dtInstance !== 'undefined') {
-      this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-        // Destroy the table first
-        dtInstance.destroy();
-        this.dtTrigger.next();
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ismx'
+            }
+          }
+        }
       });
-    } else {
-      this.dtTrigger.next();
+      query.push({ $match: { $or: or } });
     }
+    const params: CollectionParameters = {
+      filter: query, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.docapiService.getDocTemplateList(params).pipe(takeUntil(this.subscriber)).subscribe(
+      (apiResponse: APIGetMultiResponse<DocTemplate>) => {
+        this.templateAPIResponse = apiResponse;
+        this.templates = apiResponse.results as Array<DocTemplate>;
+        this.totalTemplates = apiResponse.total;
+        this.loading = false;
+      });
   }
+
 
   public delDocTemplate(publicId: number): void {
     this.modalRef = this.modalService.open(GeneralModalComponent);
@@ -89,21 +194,69 @@ export class DocapiSettingsListComponent implements OnInit, OnDestroy {
     this.modalRef.result.then((result) => {
       if (result) {
         this.docapiService.deleteDocTemplate(publicId).subscribe(resp => console.log(resp),
-          error => {},
-          () => this.docapiService.getDocTemplateList().subscribe((list: DocTemplate[]) => {
-            this.docTemplateList.next(list);
-          }));
+          error => {
+          },
+          () => this.loadTemplatesFromAPI());
       }
     });
   }
 
-  ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-    this.subscription.unsubscribe();
+  /**
+   * On table sort change.
+   * Reload all types.
+   *
+   * @param sort
+   */
+  public onSortChange(sort: Sort): void {
+    this.sort = sort;
+    this.loadTemplatesFromAPI();
+  }
+
+  /**
+   * On table page change.
+   * Reload all templates.
+   *
+   * @param page
+   */
+  public onPageChange(page: number) {
+    this.page = page;
+    this.loadTemplatesFromAPI();
+  }
+
+  /**
+   * On table page size change.
+   * Reload all templates.
+   *
+   * @param limit
+   */
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+    this.loadTemplatesFromAPI();
+  }
+
+  /**
+   * On table search change.
+   * Reload all templates.
+   *
+   * @param search
+   */
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
+    this.loadTemplatesFromAPI();
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
     if (this.modalRef) {
       this.modalRef.close();
     }
   }
+
   public showAlert(): void {
     $('#infobox').show();
   }

@@ -54,6 +54,7 @@ import {
 import {
   DocapiSettingsBuilderStyleStepComponent
 } from './docapi-settings-builder/docapi-settings-builder-style-step/docapi-settings-builder-style-step.component';
+import { TableModule } from '../../layout/table/table.module';
 
 @NgModule({
   declarations: [DocapiSettingsListComponent, DocapiSettingsBuilderComponent, DocapiSettingsAddComponent,
@@ -61,19 +62,20 @@ import {
     DocapiSettingsBuilderTypeStepComponent, DocapiSettingsBuilderTypeStepObjectComponent,
     DocapiSettingsBuilderTypeStepObjectlistComponent, DocapiSettingsBuilderTypeStepBaseComponent,
     DocapiSettingsBuilderStyleStepComponent],
-  imports: [
-    CommonModule,
-    EditorModule,
-    FormsModule,
-    ReactiveFormsModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    DataTablesModule,
-    NgSelectModule,
-    LayoutModule,
-    DocapiSettingsRoutingModule,
-    AuthModule
-  ]
+    imports: [
+        CommonModule,
+        EditorModule,
+        FormsModule,
+        ReactiveFormsModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        DataTablesModule,
+        NgSelectModule,
+        LayoutModule,
+        DocapiSettingsRoutingModule,
+        AuthModule,
+        TableModule
+    ]
 })
 export class DocapiSettingsModule {
 }
