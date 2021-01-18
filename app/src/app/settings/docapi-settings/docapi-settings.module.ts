@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -22,7 +22,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { EditorModule } from '@tinymce/tinymce-angular';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { ArchwizardModule } from 'angular-archwizard';
-import { DataTablesModule } from 'angular-datatables';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LayoutModule } from '../../layout/layout.module';
 import { AuthModule } from '../../auth/auth.module';
@@ -69,7 +68,6 @@ import { TableModule } from '../../layout/table/table.module';
         ReactiveFormsModule,
         FontAwesomeModule,
         ArchwizardModule,
-        DataTablesModule,
         NgSelectModule,
         LayoutModule,
         DocapiSettingsRoutingModule,
