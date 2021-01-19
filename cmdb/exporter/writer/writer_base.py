@@ -77,7 +77,7 @@ class SupportedExporterExtension:
         return _list
 
 
-class BaseExportWriter():
+class BaseExportWriter:
 
     def __init__(self, export_format: BaseExporterFormat, export_config: ExporterConfig):
         """init of FileExporter

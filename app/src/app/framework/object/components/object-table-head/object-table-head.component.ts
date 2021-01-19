@@ -48,4 +48,8 @@ export class ObjectTableHeadComponent {
       { state: { type: this.type, objects: this.selectedObjects } });
   }
 
+  public exporter(see: SupportedExporterExtension, view: string = 'native'): void {
+    see.view = view;
+    this.fileExport.emit(see);
+  }
 }

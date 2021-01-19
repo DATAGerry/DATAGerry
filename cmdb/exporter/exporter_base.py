@@ -30,7 +30,9 @@ from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.exporter.exporter_utils import ExperterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
+from cmdb.exporter.config.config_type import ExporterConfigType
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult
@@ -121,17 +123,22 @@ class CsvExportType(BaseExporterFormat):
 
         # init values
         header = ['public_id', 'active']
+        columns = [] if not data else [x['name'] for x in data[0].fields]
         rows = []
+        view = 'native'
         current_type_id = None
-        current_type_fields = []
+
+        # Export only the shown fields chosen by the user
+        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+            _meta = json.loads(args[0].get("metadata", ""))
+            view = args[0].get('view', 'native')
+            header = _meta['header']
+            columns = _meta['columns']
 
         for obj in data:
             # get type from first object and setup csv header
             if current_type_id is None:
                 current_type_id = obj.type_information['type_id']
-                current_type_fields = obj.fields
-                for type_field in current_type_fields:
-                    header.append(type_field.get('name'))
 
             # throw Exception if objects of different type are detected
             if current_type_id != obj.type_information['type_id']:
@@ -139,19 +146,20 @@ class CsvExportType(BaseExporterFormat):
 
             # get object fields as dict:
             obj_fields_dict = {}
-            for obj_field in obj.fields:
-                obj_field_name = obj_field.get('name')
-                obj_fields_dict[obj_field_name] = obj_field.get('value')
+            for field in obj.fields:
+                obj_field_name = field.get('name')
+                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
 
             # define output row
             row = []
-            row.append(str(obj.object_information['object_id']))
-            row.append(str(obj.object_information['active']))
-            for type_field in current_type_fields:
-                row.append(str(obj_fields_dict.get(type_field.get('name'), None)))
+            for head in header:
+                head = 'object_id' if head == 'public_id' else head
+                row.append(str(obj.object_information[head]))
+            for name in columns:
+                row.append(str(obj_fields_dict.get(name, None)))
             rows.append(row)
 
-        return self.csv_writer(header, rows)
+        return self.csv_writer([*header, *columns], rows)
 
     def csv_writer(self, header, rows, dialect=csv.excel):
 
@@ -184,22 +192,39 @@ class JsonExportType(BaseExporterFormat):
             Json file containing the data
         """
 
+        # init values
+        header = ['public_id', 'active', 'type_label']
+        columns = [] if not data else [x for x in data[0].fields]
+        view = 'native'
         output = []
+
+        # Export only the shown fields chosen by the user
+        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+            _meta = json.loads(args[0].get("metadata", ""))
+            view = args[0].get('view', 'native')
+            header = _meta['header']
+            columns = [x for x in columns if x['name'] in _meta['columns']]
 
         for obj in data:
             # init output element
-            output_element = {
-                'public_id': obj.object_information['object_id'],
-                'active': obj.object_information['active'],
-                'type': obj.type_information['type_label'],
-                'fields': []
-            }
+            output_element = {}
+            for head in header:
+                head = 'object_id' if head == 'public_id' else head
+                if head == 'type_label':
+                    output_element.update(
+                        {head: obj.type_information[head]}
+                    )
+                else:
+                    output_element.update(
+                        {head: obj.object_information[head]}
+                    )
+            output_element.update({'fields': []})
 
             # get object fields
-            for field in obj.fields:
+            for field in columns:
                 output_element['fields'].append({
                     'name': field.get('name'),
-                    'value': field.get('value', None),
+                    'value': ExperterUtils.summary_renderer(obj, field, view)
                 })
 
             output.append(output_element)
@@ -227,7 +252,7 @@ class XlsxExportType(BaseExporterFormat):
             Xlsx file containing the data
         """
 
-        workbook = self.create_xls_object(data)
+        workbook = self.create_xls_object(data, args)
 
         # save workbook
         with tempfile.NamedTemporaryFile() as tmp:
@@ -235,67 +260,75 @@ class XlsxExportType(BaseExporterFormat):
             tmp.seek(0)
             return tmp.read()
 
-    def create_xls_object(self, data: List[RenderResult]):
+    def create_xls_object(self, data: List[RenderResult], args):
 
         # create workbook
         workbook = openpyxl.Workbook()
 
         # sorts data_list by type_id
-        decorated = [(dict_.__dict__['type_information']['type_id'], dict_.__dict__) for dict_ in data]
+        decorated = [(dict_.type_information['type_id'], dict_) for dict_ in data]
         decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
         sorted_list = [dict_ for (key, dict_) in decorated]
 
         # init values
         current_type_id = None
-        current_type_fields = []
+        header = ['public_id', 'active']
+        columns = [] if not data else [x['name'] for x in data[0].fields]
+        view = 'native'
+
+        # Export only the shown fields chosen by the user
+        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+            _meta = json.loads(args[0].get("metadata", ""))
+            view = args[0].get('view', 'native')
+            header = _meta['header']
+            columns = _meta['columns']
+
         i = 0
         for obj in sorted_list:
 
             # check, if starting a new object type
-            if current_type_id != obj['type_information']['type_id']:
+            if current_type_id != obj.type_information['type_id']:
                 # set current type id and fields
-                current_type_id = obj['type_information']['type_id']
-                current_type_fields = obj['fields']
+                current_type_id = obj.type_information['type_id']
                 i = 1
 
                 # delete default sheet
                 workbook.remove(workbook.active)
 
                 # start a new worksheet and rename it
-                title = self.__normalize_sheet_title(obj['type_information']['type_label'])
+                title = self.__normalize_sheet_title(obj.type_information['type_label'])
                 sheet = workbook.create_sheet(title)
 
                 # insert header: public_id, active
-                cell = sheet.cell(row=i, column=1)
-                cell.value = 'public_id'
-                cell = sheet.cell(row=i, column=2)
-                cell.value = 'active'
+                for count, head in enumerate(header):
+                    cell = sheet.cell(row=i, column=count+1)
+                    cell.value = head
 
                 # insert header: get fields from type definition
-                c = 3
-                for type_field in current_type_fields:
-                    cell = sheet.cell(row=i, column=c)
-                    cell.value = type_field.get('name')
+                c = len(header)
+                for field in columns:
+                    cell = sheet.cell(row=i, column=c+1)
+                    cell.value = field
                     c = c + 1
                 i = i + 1
 
-            # insert row values: public_id, active
-            cell = sheet.cell(row=i, column=1)
-            cell.value = str(obj['object_information']["object_id"])
-            cell = sheet.cell(row=i, column=2)
-            cell.value = str(obj['object_information']["active"])
+            # insert row values: header
+            for count, head in enumerate(header):
+                head = 'object_id' if head == 'public_id' else head
+                cell = sheet.cell(row=i, column=count+1)
+                cell.value = str(obj.object_information[head])
 
             # get object fields as dict:
             obj_fields_dict = {}
-            for obj_field in obj['fields']:
-                obj_field_name = obj_field.get('name')
-                obj_fields_dict[obj_field_name] = obj_field.get('value')
+            for field in obj.fields:
+                obj_field_name = field.get('name')
+                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
 
             # insert row values: fields
-            c = 3
-            for type_field in current_type_fields:
+            c = len(header)+1
+            for field in columns:
                 cell = sheet.cell(row=i, column=c)
-                cell.value = str(obj_fields_dict.get(type_field.get('name'), None))
+                cell.value = str(obj_fields_dict.get(field))
                 c = c + 1
 
             # increase row number
@@ -327,35 +360,51 @@ class XmlExportType(BaseExporterFormat):
             Xml file containing the data
         """
 
+        # init values
+        header = ['public_id', 'active', 'type_label']
+        columns = [] if not data else [x['name'] for x in data[0].fields]
+        view = 'native'
+
+        # Export only the shown fields chosen by the user
+        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+            _meta = json.loads(args[0].get("metadata", ""))
+            view = args[0].get('view', 'native')
+            header = _meta['header']
+            columns = _meta['columns']
+
         # object list
         cmdb_object_list = ET.Element('objects')
 
         for obj in data:
             # get object fields as dict:
             obj_fields_dict = {}
-            for obj_field in obj.fields:
-                obj_field_name = obj_field.get('name')
-                obj_fields_dict[obj_field_name] = obj_field.get('value')
+            for field in obj.fields:
+                obj_field_name = field.get('name')
+                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
 
             # xml output: object
             cmdb_object = ET.SubElement(cmdb_object_list, 'object')
             cmdb_object_meta = ET.SubElement(cmdb_object, 'meta')
-            # xml output meta: public
-            cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, 'public_id')
-            cmdb_object_meta_id.text = str(obj.object_information['object_id'])
-            # xml output meta: active
-            cmdb_object_meta_active = ET.SubElement(cmdb_object_meta, 'active')
-            cmdb_object_meta_active.text = str(obj.object_information['active'])
-            # xml output meta: type
-            cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
-            cmdb_object_meta_type.text = obj.type_information['type_label']
+
+            # xml output meta: header
+            for head in header:
+                head = 'object_id' if head == 'public_id' else head
+                if head == 'type_label':
+                    cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
+                    cmdb_object_meta_type.text = obj.type_information['type_label']
+                else:
+                    cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, head)
+                    cmdb_object_meta_id.text = str(obj.object_information[head])
+
             # xml output: fields
             cmdb_object_fields = ET.SubElement(cmdb_object, 'fields')
+
             # walk over all type fields and add object field values
-            for type_field in obj.fields:
-                field_attribs = {}
-                field_attribs["name"] = str(type_field.get('name'))
-                field_attribs["value"] = str(obj_fields_dict.get(type_field.get('name'), None))
+            for field in columns:
+                field_attribs = {
+                    'name': str(field),
+                    'value': str(obj_fields_dict.get(field))
+                }
                 ET.SubElement(cmdb_object_fields, "field", field_attribs)
 
         # return xml as string (pretty printed)

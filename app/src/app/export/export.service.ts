@@ -47,10 +47,10 @@ export class FileService {
       httpParams = httpParams.set('filter', JSON.stringify(params.filter));
     }
     if (params.optional !== undefined) {
-      const {classname, zip, visibility} = (params.optional as any);
+      const {classname, zip, metadata} = (params.optional as any);
       httpParams = httpParams.set('classname', classname);
       httpParams = httpParams.set('zip', zip);
-      httpParams = httpParams.set('visibility', JSON.stringify(visibility));
+      httpParams = httpParams.set('metadata', JSON.stringify(metadata));
     }
     httpParams = httpParams.set('sort', params.sort);
     httpParams = httpParams.set('order', params.order.toString());

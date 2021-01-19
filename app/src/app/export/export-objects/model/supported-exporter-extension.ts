@@ -24,6 +24,7 @@ export class SupportedExporterExtension {
   public multiTypeSupport: boolean;
   public helperText: string;
   public active: boolean = false;
+  public view?: string = 'native';
 
   public constructor(init?: Partial<SupportedExporterExtension>) {
     Object.assign(this, init);

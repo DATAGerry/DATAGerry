@@ -463,7 +463,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public exportingFiles(see: SupportedExporterExtension) {
-    const optional = {classname: see.extension, zip: false, rendered: undefined};
+    const optional = {classname: see.extension, zip: false, metadata: undefined};
     const columns = this.columns.filter(c => !c.hidden && !c.fixed);
     const filter = this.filterBuilder(columns);
 
@@ -477,13 +477,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         properties.push(name);
       }
     }
-    optional.rendered = {header: properties, columns: fields};
+    optional.metadata = {header: properties, columns: fields};
 
     const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
     if (this.selectedObjectsIDs.length > 0) {
       exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...filter] ;
     }
-    this.fileService.callExportRoute(exportAPI)
+    this.fileService.callExportRoute(exportAPI, see.view)
       .subscribe(res => {
         this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
       });
