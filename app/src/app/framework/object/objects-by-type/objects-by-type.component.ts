@@ -390,6 +390,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param limit
    */
   public onPageSizeChange(limit: number): void {
+    this.page = this.initPage;
     this.limit = limit;
     this.loadObjects();
   }
@@ -412,6 +413,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param search
    */
   public onSearchChange(search: any): void {
+    this.page = this.initPage;
     if (search) {
       this.filter = search;
     } else {
