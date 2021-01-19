@@ -411,6 +411,11 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             params.filter.update({'$match': {'active': {"$eq": True}}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
+    else:
+        if isinstance(params.filter, dict):
+            params.filter.update({'$match': {}})
+        elif isinstance(params.filter, list):
+            params.filter.append({'$match': {}})
 
 
     try:
