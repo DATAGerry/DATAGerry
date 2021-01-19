@@ -463,9 +463,22 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public exportingFiles(see: SupportedExporterExtension) {
-    const optional = {classname: see.extension, zip: false};
+    const optional = {classname: see.extension, zip: false, rendered: undefined};
     const columns = this.columns.filter(c => !c.hidden && !c.fixed);
     const filter = this.filterBuilder(columns);
+
+    const properties = [];
+    const fields = [];
+    for (const col of columns) {
+      const {name} = (col as any);
+      if (name && name.startsWith('fields.')) {
+        fields.push(name.replace('fields.', ''));
+      } else {
+        properties.push(name);
+      }
+    }
+    optional.rendered = {header: properties, columns: fields};
+
     const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
     if (this.selectedObjectsIDs.length > 0) {
       exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...filter] ;

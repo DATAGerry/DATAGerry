@@ -16,9 +16,10 @@
 
 
 from flask import Response, abort
+from typing import List
 
-from cmdb.framework.results import IterationResult
 from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.framework.cmdb_render import RenderList, RenderResult
 
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
@@ -27,6 +28,8 @@ from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 
 try:
     from cmdb.utils.error import CMDBError
@@ -37,6 +40,9 @@ from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
 
 database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
+object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
+    **SystemConfigReader().get_all_values_from_section('Database')
+))
 
 
 class SupportedExporterExtension:
@@ -71,7 +77,7 @@ class SupportedExporterExtension:
         return _list
 
 
-class BaseExportWriter:
+class BaseExportWriter():
 
     def __init__(self, export_format: BaseExporterFormat, export_config: ExporterConfig):
         """init of FileExporter
@@ -82,7 +88,7 @@ class BaseExportWriter:
         """
         self.export_format = export_format
         self.export_config = export_config
-        self.data = []
+        self.data: List[RenderResult] = []
 
     def from_database(self, user: UserModel, permission: AccessControlPermission):
         """Get all objects from the collection"""
@@ -91,11 +97,15 @@ class BaseExportWriter:
 
         try:
             _params = self.export_config.parameters
-            self.data: IterationResult[CmdbObject] = manager.iterate(filter=_params.filter,
-                                                                     sort=_params.sort,
-                                                                     order=_params.order,
-                                                                     limit=0, skip=0,
-                                                                     user=user, permission=permission).results
+            _result: List[CmdbObject] = manager.iterate(filter=_params.filter,
+                                                        sort=_params.sort,
+                                                        order=_params.order,
+                                                        limit=0, skip=0,
+                                                        user=user, permission=permission).results
+
+            self.data = RenderList(object_list=_result, request_user=user,
+                                   object_manager=object_manager, ref_render=True).render_result_list(raw=False)
+
         except CMDBError as e:
             return abort(400, e)
 
@@ -105,7 +115,7 @@ class BaseExportWriter:
 
         conf_option = self.export_config.options
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
-        export = self.export_format.export(self.data, conf_option.get('classname', ''))
+        export = self.export_format.export(self.data, conf_option)
 
         return Response(
             export,

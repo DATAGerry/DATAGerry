@@ -23,14 +23,18 @@ import xml.dom.minidom
 import xml.etree.ElementTree as ET
 import zipfile
 import openpyxl
-from cmdb.utils.helpers import load_class
 
+from typing import List
+
+from cmdb.utils import json_encoding
+from cmdb.utils.helpers import load_class
+from cmdb.utils.system_config import SystemConfigReader
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.utils import json_encoding
-from cmdb.utils.system_config import SystemConfigReader
+from cmdb.framework.cmdb_render import RenderResult
+
 
 database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
 object_manager = CmdbObjectManager(database_manager=database_manager)
@@ -46,7 +50,7 @@ class ZipExportType(BaseExporterFormat):
     DESCRIPTION = "Export Zipped Files"
     ACTIVE = True
 
-    def export(self, data, *args):
+    def export(self, data: List[RenderResult], *args):
 
         """
         Export a zip file, containing the object list sorted by type in several files.
@@ -60,7 +64,7 @@ class ZipExportType(BaseExporterFormat):
         """
 
         # check what export type is requested and intitializes a new zip file in memory
-        export_type = load_class(f'cmdb.exporter.exporter_base.{args[0]}')()
+        export_type = load_class(f'cmdb.exporter.exporter_base.{args[0].get("classname", "")}')()
         zipped_file = io.BytesIO()
 
         # Build .zip file
@@ -70,14 +74,14 @@ class ZipExportType(BaseExporterFormat):
             while len(data) > 0:
 
                 # Set what type the loop filters to and makes an empty list
-                type_id = data[len(data) - 1].type_id
-                type_name = object_manager.get_type(type_id).get_name()
+                type_id = data[len(data) - 1].type_information['type_id']
+                type_name = data[len(data) - 1].type_information['type_name']
                 type_list = []
 
                 # Filters object list to the current type_id and inserts it into type_list
                 # When an object is inserted into type_list it gets deleted from object_list
                 for i in range(len(data) - 1, -1, -1):
-                    if data[i].type_id == type_id:
+                    if data[i].type_information['type_id'] == type_id:
                         type_list.append(data[i])
                         del data[i]
 
@@ -104,7 +108,7 @@ class CsvExportType(BaseExporterFormat):
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
 
-    def export(self, data, *args):
+    def export(self, data: List[RenderResult], *args):
 
         """ Exports data as .csv file
 
@@ -124,13 +128,13 @@ class CsvExportType(BaseExporterFormat):
         for obj in data:
             # get type from first object and setup csv header
             if current_type_id is None:
-                current_type_id = obj.type_id
-                current_type_fields = type_manager.get(obj.type_id).get_fields()
+                current_type_id = obj.type_information['type_id']
+                current_type_fields = obj.fields
                 for type_field in current_type_fields:
                     header.append(type_field.get('name'))
 
             # throw Exception if objects of different type are detected
-            if current_type_id != obj.type_id:
+            if current_type_id != obj.type_information['type_id']:
                 raise Exception({'message': 'CSV can export only object of the same type'})
 
             # get object fields as dict:
@@ -141,8 +145,8 @@ class CsvExportType(BaseExporterFormat):
 
             # define output row
             row = []
-            row.append(str(obj.public_id))
-            row.append(str(obj.active))
+            row.append(str(obj.object_information['object_id']))
+            row.append(str(obj.object_information['active']))
             for type_field in current_type_fields:
                 row.append(str(obj_fields_dict.get(type_field.get('name'), None)))
             rows.append(row)
@@ -169,7 +173,7 @@ class JsonExportType(BaseExporterFormat):
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
-    def export(self, data, *args):
+    def export(self, data: List[RenderResult], *args):
 
         """Exports data as .json file
 
@@ -184,23 +188,18 @@ class JsonExportType(BaseExporterFormat):
 
         for obj in data:
             # init output element
-            output_element = {}
-            output_element['public_id'] = obj.public_id
-            output_element['active'] = obj.active
-            output_element['type'] = type_manager.get(obj.type_id).get_label()
-            output_element['fields'] = []
+            output_element = {
+                'public_id': obj.object_information['object_id'],
+                'active': obj.object_information['active'],
+                'type': obj.type_information['type_label'],
+                'fields': []
+            }
 
-            # get object fields as dict:
-            obj_fields_dict = {}
-            for obj_field in obj.fields:
-                obj_field_name = obj_field.get('name')
-                obj_fields_dict[obj_field_name] = obj_field.get('value')
-
-            # walk over all type fields and add object field values
-            for type_field in type_manager.get(obj.type_id).get_fields():
+            # get object fields
+            for field in obj.fields:
                 output_element['fields'].append({
-                    'name': type_field.get('name'),
-                    'value': obj_fields_dict.get(type_field.get('name'), None)
+                    'name': field.get('name'),
+                    'value': field.get('value', None),
                 })
 
             output.append(output_element)
@@ -217,7 +216,7 @@ class XlsxExportType(BaseExporterFormat):
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
-    def export(self, data, *args):
+    def export(self, data: List[RenderResult], *args):
 
         """Exports object_list as .xlsx file
 
@@ -236,14 +235,13 @@ class XlsxExportType(BaseExporterFormat):
             tmp.seek(0)
             return tmp.read()
 
-    def create_xls_object(self, data):
+    def create_xls_object(self, data: List[RenderResult]):
 
         # create workbook
         workbook = openpyxl.Workbook()
 
         # sorts data_list by type_id
-        type_id = "type_id"
-        decorated = [(dict_.__dict__[type_id], dict_.__dict__) for dict_ in data]
+        decorated = [(dict_.__dict__['type_information']['type_id'], dict_.__dict__) for dict_ in data]
         decorated = sorted(decorated, key=lambda x: x[0], reverse=False)
         sorted_list = [dict_ for (key, dict_) in decorated]
 
@@ -254,17 +252,17 @@ class XlsxExportType(BaseExporterFormat):
         for obj in sorted_list:
 
             # check, if starting a new object type
-            if current_type_id != obj[type_id]:
+            if current_type_id != obj['type_information']['type_id']:
                 # set current type id and fields
-                current_type_id = obj[type_id]
-                current_type_fields = type_manager.get(obj[type_id]).get_fields()
+                current_type_id = obj['type_information']['type_id']
+                current_type_fields = obj['fields']
                 i = 1
 
                 # delete default sheet
                 workbook.remove(workbook.active)
 
                 # start a new worksheet and rename it
-                title = self.__normalize_sheet_title(object_manager.get_type(obj[type_id]).label)
+                title = self.__normalize_sheet_title(obj['type_information']['type_label'])
                 sheet = workbook.create_sheet(title)
 
                 # insert header: public_id, active
@@ -283,9 +281,9 @@ class XlsxExportType(BaseExporterFormat):
 
             # insert row values: public_id, active
             cell = sheet.cell(row=i, column=1)
-            cell.value = str(obj["public_id"])
+            cell.value = str(obj['object_information']["object_id"])
             cell = sheet.cell(row=i, column=2)
-            cell.value = str(obj["active"])
+            cell.value = str(obj['object_information']["active"])
 
             # get object fields as dict:
             obj_fields_dict = {}
@@ -318,7 +316,7 @@ class XmlExportType(BaseExporterFormat):
     DESCRIPTION = "Export as XML"
     ACTIVE = True
 
-    def export(self, data, *args):
+    def export(self, data: List[RenderResult], *args):
 
         """Exports object_list as .xml file
 
@@ -344,17 +342,17 @@ class XmlExportType(BaseExporterFormat):
             cmdb_object_meta = ET.SubElement(cmdb_object, 'meta')
             # xml output meta: public
             cmdb_object_meta_id = ET.SubElement(cmdb_object_meta, 'public_id')
-            cmdb_object_meta_id.text = str(obj.public_id)
+            cmdb_object_meta_id.text = str(obj.object_information['object_id'])
             # xml output meta: active
             cmdb_object_meta_active = ET.SubElement(cmdb_object_meta, 'active')
-            cmdb_object_meta_active.text = str(obj.active)
+            cmdb_object_meta_active.text = str(obj.object_information['active'])
             # xml output meta: type
             cmdb_object_meta_type = ET.SubElement(cmdb_object_meta, 'type')
-            cmdb_object_meta_type.text = object_manager.get_type(obj.type_id).label
+            cmdb_object_meta_type.text = obj.type_information['type_label']
             # xml output: fields
             cmdb_object_fields = ET.SubElement(cmdb_object, 'fields')
             # walk over all type fields and add object field values
-            for type_field in type_manager.get(obj.type_id).get_fields():
+            for type_field in obj.fields:
                 field_attribs = {}
                 field_attribs["name"] = str(type_field.get('name'))
                 field_attribs["value"] = str(obj_fields_dict.get(type_field.get('name'), None))

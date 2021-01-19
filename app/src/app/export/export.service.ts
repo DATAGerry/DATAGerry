@@ -47,9 +47,10 @@ export class FileService {
       httpParams = httpParams.set('filter', JSON.stringify(params.filter));
     }
     if (params.optional !== undefined) {
-      for (const key of Object.keys(params.optional)) {
-        httpParams = httpParams.set(key, params.optional[key]);
-      }
+      const {classname, zip, visibility} = (params.optional as any);
+      httpParams = httpParams.set('classname', classname);
+      httpParams = httpParams.set('zip', zip);
+      httpParams = httpParams.set('visibility', JSON.stringify(visibility));
     }
     httpParams = httpParams.set('sort', params.sort);
     httpParams = httpParams.set('order', params.order.toString());
