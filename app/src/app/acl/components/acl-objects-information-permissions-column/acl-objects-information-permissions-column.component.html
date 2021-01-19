@@ -1,0 +1,6 @@
+<ng-container *ngIf="permissions.length > 0; else unsetTemplate">
+  <span class="badge badge-secondary mr-1" *ngFor="let permission of permissions">{{permission}}</span>
+</ng-container>
+<ng-template #unsetTemplate>
+  No permissions set for this group
+</ng-template>

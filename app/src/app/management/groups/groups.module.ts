@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,9 @@ import { GroupUsersModalComponent } from './modals/group-users-modal/group-users
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
 import { GroupFormHelperComponent } from './components/group-form/group-form-helper/group-form-helper/group-form-helper.component';
-import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { GroupAclComponent } from './group-acl/group-acl.component';
+import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
   entryComponents: [
@@ -55,23 +57,25 @@ import {NgbTooltipModule} from "@ng-bootstrap/ng-bootstrap";
     GroupTableActionsComponent,
     GroupUsersModalComponent,
     GroupTableListComponent,
+    GroupAclComponent,
     GroupFormHelperComponent
   ],
   exports: [
     GroupTableListComponent
   ],
-    imports: [
-        CommonModule,
-        GroupsRoutingModule,
-        ReactiveFormsModule,
-        NgSelectModule,
-        LayoutModule,
-        FontAwesomeModule,
-        AuthModule,
-        TableModule,
-        UsersModule,
-        NgbTooltipModule
-    ]
+  imports: [
+    CommonModule,
+    GroupsRoutingModule,
+    ReactiveFormsModule,
+    NgSelectModule,
+    LayoutModule,
+    FontAwesomeModule,
+    AuthModule,
+    TableModule,
+    UsersModule,
+    AclModule,
+    NgbTooltipModule
+  ]
 })
 export class GroupsModule {
 }
