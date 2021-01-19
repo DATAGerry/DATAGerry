@@ -1,4 +1,4 @@
-<aw-wizard [defaultStepIndex]="stepIndex ? stepIndex : 0">
+<aw-wizard>
   <aw-wizard-step (stepExit)="exitBasicStep()" stepId="1" stepTitle="Basic informations">
     <cmdb-type-basic-step [preData]="typeInstance" [mode]="mode"></cmdb-type-basic-step>
     <button class="btn btn-primary next" type="button" awNextStep
