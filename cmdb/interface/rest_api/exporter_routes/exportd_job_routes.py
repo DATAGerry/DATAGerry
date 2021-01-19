@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 import logging
@@ -21,26 +21,52 @@ import json
 from datetime import datetime
 
 from flask import abort, request, jsonify, current_app
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError,\
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
     ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
+from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
+
+from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
     exportd_manager = current_app.exportd_manager
     log_manager = current_app.exportd_log_manager
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
 LOGGER = logging.getLogger(__name__)
 exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_prefix='/exportdjob')
+exportd_blueprint = APIBlueprint('exportd', __name__)
+
+
+# DEFAULT ROUTES
+@exportd_blueprint.route('/jobs', methods=['GET', 'HEAD'])
+@exportd_blueprint.protect(auth=True, right='base.exportd.job.view')
+@exportd_blueprint.parse_collection_parameters()
+def get_exportd_jobs(params: CollectionParameters):
+    """Iterate route for exportd jobs"""
+
+    job_manager = ExportDJobManager(current_app.database_manager)
+    body = request.method == 'HEAD'
+
+    try:
+        iteration_result: IterationResult[ExportdJob] = job_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        types = [ExportdJob.to_json(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
+                                        url=request.url, model=ExportdJob.MODEL, body=body)
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 # DEFAULT ROUTES
@@ -276,4 +302,3 @@ def worker(job: ExportdJob, request_user: UserModel):
     except Exception as err:
         LOGGER.error(err)
         return abort(404)
-

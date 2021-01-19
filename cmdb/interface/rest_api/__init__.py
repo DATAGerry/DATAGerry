@@ -136,7 +136,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint, exportd_blueprint
     from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
@@ -165,6 +165,7 @@ def register_blueprints(app):
     app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
+    app.register_multi_blueprint(exportd_blueprint, multi_prefix=['/exportd'])
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
