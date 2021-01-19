@@ -37,6 +37,8 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
 import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
+import { GroupFormHelperComponent } from './components/group-form/group-form-helper/group-form-helper/group-form-helper.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { GroupAclComponent } from './group-acl/group-acl.component';
 import { AclModule } from '../../acl/acl.module';
 
@@ -55,7 +57,8 @@ import { AclModule } from '../../acl/acl.module';
     GroupTableActionsComponent,
     GroupUsersModalComponent,
     GroupTableListComponent,
-    GroupAclComponent
+    GroupAclComponent,
+    GroupFormHelperComponent
   ],
   exports: [
     GroupTableListComponent
@@ -70,7 +73,8 @@ import { AclModule } from '../../acl/acl.module';
     AuthModule,
     TableModule,
     UsersModule,
-    AclModule
+    AclModule,
+    NgbTooltipModule
   ]
 })
 export class GroupsModule {

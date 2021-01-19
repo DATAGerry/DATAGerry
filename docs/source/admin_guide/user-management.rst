@@ -15,6 +15,8 @@ The following groups are defined by default and cannot be deleted:
 Also, a user cannot delete itself.
 
 
+.. _system-access-rights:
+
 Access Rights
 =============
 Access Rights can be configured for a usergroup and are designed hierachically. Please see the following example::
