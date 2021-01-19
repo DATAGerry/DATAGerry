@@ -293,6 +293,7 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
    * @param search
    */
   public onSearchChange(search: any): void {
+    this.page = 1;
     if (search) {
       this.filter = search;
     } else {
