@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,13 +12,16 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 from typing import ClassVar
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.user_manager import UserManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -27,14 +30,20 @@ class AuthenticationProvider:
     """Provider super class"""
     PASSWORD_ABLE: bool = True
     EXTERNAL_PROVIDER: bool = False
-    PROVIDER_CONFIG_CLASS: ClassVar[AuthProviderConfig] = AuthProviderConfig
+    PROVIDER_CONFIG_CLASS: 'AuthProviderConfig' = AuthProviderConfig
 
-    def __init__(self, config: AuthProviderConfig = None, *args, **kwargs):
+    def __init__(self, config: AuthProviderConfig = None, user_manager: UserManager = None,
+                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
         """
         Init constructor for provider classes
         Args:
             config: Configuration object
+            user_manager: Instance of UserManager
+            group_manager: Instance of GroupManager
         """
+        self.user_manager = user_manager
+        self.group_manager = group_manager
+        self.security_manager = security_manager
         self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:

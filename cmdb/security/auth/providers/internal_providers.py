@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,46 +16,43 @@
 
 import logging
 
-from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.manager import ManagerGetError
+from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_errors import AuthenticationError
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.user_management import UserModel
+from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.security.security import SecurityManager
-from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
 
 class LocalAuthenticationProviderConfig(AuthProviderConfig):
 
-    def __init__(self, active: bool, **kwargs):
+    def __init__(self, active: bool = None, **kwargs):
         super(LocalAuthenticationProviderConfig, self).__init__(active, **kwargs)
 
 
 class LocalAuthenticationProvider(AuthenticationProvider):
     PROVIDER_CONFIG_CLASS = LocalAuthenticationProviderConfig
 
-    def __init__(self, config: LocalAuthenticationProviderConfig = None, *args, **kwargs):
-        super(LocalAuthenticationProvider, self).__init__(config)
+    def __init__(self, config: LocalAuthenticationProviderConfig = None, user_manager: UserManager = None,
+                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
+        super(LocalAuthenticationProvider, self).__init__(config=config, user_manager=user_manager,
+                                                          group_manager=group_manager,
+                                                          security_manager=security_manager)
 
-    def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
-        __dbm = DatabaseManagerMongo(
-            **SystemConfigReader().get_all_values_from_section('Database')
-        )
-        __scm = SecurityManager(__dbm)
-        __user_manager = UserManager(__dbm)
-        LOGGER.info(f'[LocalAuthenticationProvider] Try login for user {user_name}')
+    def authenticate(self, user_name: str, password: str, *args, **kwargs) -> UserModel:
         try:
-            user: UserModel = __user_manager.get_by({'user_name': user_name})
-        except ManagerGetError as umge:
-            raise AuthenticationError(LocalAuthenticationProvider.get_name(), umge.message)
-        login_pass = __scm.generate_hmac(password)
+            user: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+        except ManagerGetError as err:
+            raise AuthenticationError(LocalAuthenticationProvider.get_name(), err.message)
+        login_pass = self.security_manager.generate_hmac(password)
         if login_pass == user.password:
             return user
-        raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'UserModel not exists')
+        raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'Password did not matched with hmac!')
 
     def is_active(self) -> bool:
         """Local auth is always activated"""

@@ -1,0 +1,9 @@
+@import '~src/scss/variables';
+
+.action-buttons{
+  i {
+    &:hover{
+      color: theme-color("primary");
+    }
+  }
+}

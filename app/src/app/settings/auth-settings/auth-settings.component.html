@@ -14,7 +14,7 @@
         </div>
       </div>
       <div class="form-group row mb-3">
-          <label class="col-sm-3 col-form-label" for="token-lifetime-input">Token lifetime</label>
+        <label class="col-sm-3 col-form-label" for="token-lifetime-input">Token lifetime</label>
         <div class="col-sm-9">
           <div class="input-group">
             <input class="form-control" type="number" id="token-lifetime-input"
@@ -25,14 +25,14 @@
       </div>
       <div *ngIf="authSettings" id="providerSettings">
         <ng-container formArrayName="providers"
-             *ngFor="let providerSettings of authSettings.providers; index as i">
+                      *ngFor="let providerSettings of authSettings.providers; index as i">
           <div class="card mb-3" [ngSwitch]="providerSettings.class_name">
-          <cmdb-local-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
-                                                   *ngSwitchCase="'LocalAuthenticationProvider'">
-          </cmdb-local-authentication-provider-form>
-          <cmdb-ldap-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
-                                                  *ngSwitchCase="'LdapAuthenticationProvider'">
-          </cmdb-ldap-authentication-provider-form>
+            <cmdb-local-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
+                                                     *ngSwitchCase="'LocalAuthenticationProvider'">
+            </cmdb-local-authentication-provider-form>
+            <cmdb-ldap-authentication-provider-form [provider]="providerSettings" [parent]="providersArray"
+                                                    [groups]="groups" *ngSwitchCase="'LdapAuthenticationProvider'">
+            </cmdb-ldap-authentication-provider-form>
           </div>
         </ng-container>
       </div>

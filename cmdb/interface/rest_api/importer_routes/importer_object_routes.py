@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import json
 import logging
 
@@ -34,7 +34,6 @@ from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
-from cmdb.interface.rest_api.auth_routes import user_manager
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, \
     right_required

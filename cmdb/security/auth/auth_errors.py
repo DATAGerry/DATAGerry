@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 from cmdb.utils.error import CMDBError
 
 
@@ -20,6 +20,12 @@ class AuthenticationError(CMDBError):
 
     def __init__(self, provider_name: str, error=None):
         self.message = f'Could not authenticate via provider: {provider_name} - error message: {error}'
+
+
+class ProviderError(CMDBError):
+
+    def __init__(self, message: str):
+        self.message = message
 
 
 class AuthenticationProviderNotExistsError(CMDBError):
@@ -41,3 +47,10 @@ class NotPasswordAbleError(CMDBError):
 
     def __init__(self, provider):
         self.message = f'The AuthenticationProvider {provider} is not password able'
+
+
+class GroupMappingError(ProviderError):
+    """Error if a ldap mapping was not found or failed."""
+
+    def __init__(self, message: str):
+        self.message = message
