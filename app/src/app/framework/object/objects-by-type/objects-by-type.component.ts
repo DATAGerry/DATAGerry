@@ -413,8 +413,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param search
    */
   public onSearchChange(search: any): void {
+    this.page = this.initPage;
     if (search) {
-      this.page = this.initPage;
       this.filter = search;
     } else {
       this.filter = undefined;
