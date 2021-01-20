@@ -186,7 +186,6 @@ export class UserService<T = User> implements ApiService {
     const options = this.options;
     let params = new HttpParams();
     params = params.set('filter', JSON.stringify({ group_id: groupID }));
-    params = params.set('limit', '0');
     options.params = params;
     return this.api.callGet<Array<T>>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
