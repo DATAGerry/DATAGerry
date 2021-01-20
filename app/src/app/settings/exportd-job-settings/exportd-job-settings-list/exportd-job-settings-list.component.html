@@ -3,12 +3,7 @@
   <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
 </span>
 <hr>
-<cmdb-info-box message="Exportd is an interface for exporting objects to external systems like monitoring systems,
-ticket systems, backup software or any kind of other system. Exports are organized in Jobs. A Job contains Sources,
-Destinations and Variables. Export Jobs can be triggered manually (by clicking on a button in the webui) or event based,
-if the configured sources of a job were changed (e.g. a new object was added). Export Jobs can be of type Push (default)
- or Pull. Push Jobs are a push to an external system, which runs in a background process, while a Pull job is triggered
- by an external system via REST. The client directly gets the result within that REST call."
+<cmdb-info-box [message]="messageBlock"
                icon="fas fa-sync-alt"
                doc="/docs/admin_guide/exportd.html"></cmdb-info-box>
 <div class="card-body" style="padding: 0 0 1em 0;">
@@ -19,7 +14,92 @@ if the configured sources of a job were changed (e.g. a new object was added). E
     <i class="fas fa-plus"></i> Add
   </button>
 </div>
-<table datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger" class="table table-striped table-bordered">
+<cmdb-table [items]="tasks" [columns]="columns" [page]="page" [sort]="sort" [id]="'exportd-jobs-table'"
+            [stateEnabled]="false" [emptyMessage]="'No tasks were found!'"
+            [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (searchChange)="onSearchChange($event)"></cmdb-table>
+
+<!-- Table templates -->
+<ng-template #activeTemplate let-data="data">
+  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+</ng-template>
+
+<ng-template #typeTemplate let-item="item">
+  <span class="badge">
+        <i [attr.class]="item.exportd_type == typeMode.PULL
+             ?'fas fa-cloud-download-alt text-primary'
+             :'fas fa-cloud-upload-alt text-primary'"></i>
+    {{item.exportd_type}}
+      </span>
+</ng-template>
+
+<ng-template #destinationTemplate let-data="data">
+  <ul>
+    <li *ngFor="let des of data">{{des?.className}}</li>
+  </ul>
+</ng-template>
+
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact [userID]="data"></cmdb-user-compact>
+</ng-template>
+
+<ng-template #runningTemplate let-data="dat">
+  <div class="progress">
+    <div [className]="data === modes.RUNNING
+            ? 'progress-bar progress-bar-striped progress-bar-animated'
+              :'progress-bar bg-success'"
+         role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100" style="width: 100%">
+      {{data === modes.RUNNING ? "is running" : "done"}}
+    </div>
+  </div>
+</ng-template>
+
+<ng-template #executionDateTemplate let-data="data">
+  {{data | date:"dd/MM/yyyy - HH:mm:ss"}}
+</ng-template>
+
+<ng-template #jobRunTemplate let-item="item">
+  <button type="button" class="btn badge-pill btn-success"
+          (click)="run_job_manual(item)" [disabled]="item.exportd_type == typeMode.PULL">
+    Run Now
+    <fa-icon icon="play"></fa-icon>
+  </button>
+</ng-template>
+
+<ng-template #jobRunStateTemplate let-data="data">
+  <h2 class="text-center">
+    <i [class]="data === modes.FAILED
+          ? 'fas fa-exclamation-triangle ng-fa-icon text-danger'
+          : 'fas fa-check-circle ng-fa-icon text-success'"></i>
+  </h2>
+</ng-template>
+
+<ng-template #actionTemplate let-data="data">
+  <div class="d-flex justify-content-center">
+    <a *permissionLink="['base.exportd.job.edit']"
+       [routerLink]="['/settings/exportdjob/edit/', data]">
+      <fa-icon [icon]="['far', 'edit']"></fa-icon>
+    </a>
+    <a *permissionLink="['base.exportd.job.edit']"
+       [routerLink]="['/settings/exportdjob/copy/', data]"
+       [queryParams]="{copy: data}">
+      <fa-icon [icon]="['far', 'copy']"></fa-icon>
+    </a>
+    <a class="pointer" *permissionLink="['base.exportd.job.delete']">
+      <fa-icon [icon]="['far', 'trash-alt']" (click)="delTask(data)"></fa-icon>
+    </a>
+  </div>
+</ng-template>
+
+<ng-template #logTemplate let-data="data">
+  <a class="ml-1 text-cmdb-primary" [routerLink]="['/settings/exportdjob/log/', data]">
+    <fa-icon [icon]="['far', 'arrow-alt-circle-right']"></fa-icon>
+  </a>
+</ng-template>
+
+<!--
+<table class="table table-striped table-bordered">
   <thead>
   <tr>
     <th scope="col">ID</th>
@@ -82,25 +162,13 @@ if the configured sources of a job were changed (e.g. a new object was added). E
       </button>
     </td>
     <td *permissionLink="['base.exportd.job.edit', 'base.exportd.job.delete']">
-      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
-         [routerLink]="['/settings/exportdjob/edit/', task?.public_id]">
-        <fa-icon [icon]="['far', 'edit']"></fa-icon>
-      </a>
-      <a class="ml-1 text-dark mr-1" *permissionLink="['base.exportd.job.edit']"
-         [routerLink]="['/settings/exportdjob/copy/', task?.public_id]"
-         [queryParams]="{copy: task?.public_id}">
-        <fa-icon [icon]="['far', 'copy']"></fa-icon>
-      </a>
-      <a class="ml-1 text-dark" *permissionLink="['base.exportd.job.delete']">
-        <fa-icon [icon]="['far', 'trash-alt']" (click)="delTask(task?.public_id)"></fa-icon>
-      </a>
+
     </td>
     <td *permissionLink="['base.exportd.log.view']">
-      <a class="ml-1 text-cmdb-primary" [routerLink]="['/settings/exportdjob/log/', task?.public_id]">
-        <fa-icon [icon]="['far', 'arrow-alt-circle-right']"></fa-icon>
-      </a>
+
     </td>
   </tr>
   </tbody>
 </table>
 
+-->

@@ -57,6 +57,8 @@ import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstr
 import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
 import { AuthModule } from '../../auth/auth.module';
+import { TableModule } from '../../layout/table/table.module';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
   entryComponents: [DeleteLogJobModalComponent],
@@ -76,21 +78,23 @@ import { AuthModule } from '../../auth/auth.module';
     FilterPipe,
     ExportdJobSettingsCopyComponent,
     DropDownDirectionDirective],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    ExportdJobSettingsRoutingModule,
-    DataTablesModule,
-    FontAwesomeModule,
-    ArchwizardModule,
-    DndModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    NgbTooltipModule,
-    FormsModule,
-    NgbProgressbarModule,
-    AuthModule
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        ExportdJobSettingsRoutingModule,
+        DataTablesModule,
+        FontAwesomeModule,
+        ArchwizardModule,
+        DndModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbTooltipModule,
+        FormsModule,
+        NgbProgressbarModule,
+        AuthModule,
+        TableModule,
+        UsersModule
+    ]
 })
 export class ExportdJobSettingsModule {
 }

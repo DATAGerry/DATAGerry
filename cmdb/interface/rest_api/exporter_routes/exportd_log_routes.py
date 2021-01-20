@@ -68,7 +68,7 @@ def get_log_list(request_user: UserModel):
 @right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: UserModel):
     try:
-        delete_ack = log_manager.delete(public_id=public_id)
+        delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError as err:
         return abort(500)
     return make_response(delete_ack)
