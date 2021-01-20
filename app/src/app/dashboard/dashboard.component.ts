@@ -285,11 +285,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       () => {
         for (let i = 0; i < values.length; i++) {
-          this.userService.getUsersByGroup(values[i].public_id).pipe(takeUntil(this.unSubscribe)).subscribe((users: User[]) => {
-            this.labelsGroup.push(values[i].label);
-            this.colorsGroup.push(this.getRandomColor());
-            this.itemsGroup.push(users.length);
-          });
+          this.userService.countUsers({group_id: values[i].public_id}).pipe(takeUntil(this.unSubscribe))
+            .subscribe((nUsers: number) => {
+              this.labelsGroup.push(values[i].label);
+              this.colorsGroup.push(this.getRandomColor());
+              this.itemsGroup.push(nUsers);
+            });
           if (i === this.maxChartValue) {
             break;
           }
