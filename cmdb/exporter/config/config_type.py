@@ -13,12 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-from cmdb.exporter.config.config_base import BaseExportConfig
 
 
-class TypeExportConfig(BaseExportConfig):
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
 
-    def __init__(self, properties, options=None):
-        self.properties = properties
-        self.options = options or []
-        super(TypeExportConfig, self).__init__(config_type='type')
+
+class ExporterConfig(BaseExporterConfig):
+
+    def __init__(self, parameters: CollectionParameters, options: dict = None):
+        """
+        Args:
+            parameters: Rest API class for parameters passed by a http request on a collection route
+            options: dict of optional parameters for given route function.
+        """
+        self.parameters = parameters
+        self.options = options or None
+        super(ExporterConfig, self).__init__(config_type=ExporterConfigType.native)

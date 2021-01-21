@@ -25,7 +25,7 @@ import { Column, Sort, SortDirection } from '../../../../layout/table/table.type
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
-import { ExportObjectsFileExtension } from '../../../../export/export-objects/model/export-objects-file-extension';
+import { SupportedExporterExtension } from '../../../../export/export-objects/model/supported-exporter-extension';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../export/export.service';
 
@@ -118,7 +118,7 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
   /**
    * Possible export formats.
    */
-  public formatList: Array<ExportObjectsFileExtension> = [];
+  public formatList: Array<SupportedExporterExtension> = [];
 
 
   constructor(private objectService: ObjectService, private datePipe: DatePipe,
@@ -246,11 +246,14 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
   /**
    * Exports the referenceList as zip
    *
-   * @param exportType the filetype to be zipped
+   * @param see the filetype to be zipped
    */
-  public exportingFiles(exportType: ExportObjectsFileExtension) {
+  public exportingFiles(see: SupportedExporterExtension) {
+    const filter = {public_id: {$in: this.selectedObjectIDs}};
+    const optional = {classname: see.extension, zip: true};
+    const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
     if (this.selectedObjects.length !== 0) {
-      this.fileService.callExportRoute(this.selectedObjectIDs, exportType.extension, true)
+      this.fileService.callExportRoute(exportAPI)
         .subscribe(res => this.downLoadFile(res));
     }
   }

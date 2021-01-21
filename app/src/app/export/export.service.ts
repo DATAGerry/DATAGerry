@@ -17,41 +17,46 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, httpFileOptions} from '../services/api-call.service';
+import { ApiCallService, httpFileOptions } from '../services/api-call.service';
 import { map } from 'rxjs/operators';
 import { HttpParams } from '@angular/common/http';
+import { CollectionParameters } from '../services/models/api-parameter';
 
 @Injectable({
   providedIn: 'root'
 })
 export class FileService {
 
-  private servicePrefix: string = 'file';
+  private servicePrefix: string = 'exporter';
 
   constructor(private api: ApiCallService) {
   }
 
   public callFileFormatRoute() {
-    return this.api.callGet<any>(this.servicePrefix + '/').pipe(
+    return this.api.callGet<any>(this.servicePrefix + '/extensions').pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
     );
   }
 
-  public callExportRoute(objectIDs: number[], exportType: string, zipping: boolean = false) {
+  public callExportRoute(params: CollectionParameters, view: string = 'native') {
     const options = httpFileOptions;
-    let params = new HttpParams();
-    params = params.set('ids', JSON.stringify(objectIDs));
-    params = params.set('classname', exportType);
-    params = params.set('zip', JSON.stringify(zipping));
-    options.params = params;
-
-    return this.api.callGet<any>(this.servicePrefix + '/object/', options);
-  }
-
-  public getObjectFileByType(typeID: number, exportType: string) {
-    return this.api.callGet(this.servicePrefix + '/object/type/' + typeID + '/' + exportType, httpFileOptions);
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      httpParams = httpParams.set('filter', JSON.stringify(params.filter));
+    }
+    if (params.optional !== undefined) {
+      const {classname, zip, metadata} = (params.optional as any);
+      httpParams = httpParams.set('classname', classname);
+      httpParams = httpParams.set('zip', zip);
+      httpParams = httpParams.set('metadata', JSON.stringify(metadata));
+    }
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('view', view);
+    options.params = httpParams;
+    return this.api.callGet<any>(this.servicePrefix + '/', options);
   }
 
   public getTypeFile() {
