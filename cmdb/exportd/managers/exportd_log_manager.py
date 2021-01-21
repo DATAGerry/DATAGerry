@@ -15,28 +15,28 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.exportd import ExportdJob
+from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog
 from cmdb.framework.managers.framework_manager import FrameworkManager as ExportDManager
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.search import Query
 
 
-class ExportDJobManager(ExportDManager):
+class ExportDLogManager(ExportDManager):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
-        Constructor of `ExportDJobManager`
+        Constructor of `ExportDLogManager`
 
         Args:
             database_manager: Connection to the database class.
         """
-        super(ExportDJobManager, self).__init__(ExportdJob.COLLECTION, database_manager=database_manager)
+        super(ExportDLogManager, self).__init__(ExportdJobLog.COLLECTION, database_manager=database_manager)
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
-            -> IterationResult[ExportdJob]:
+            -> IterationResult[ExportdJobLog]:
         """
-        Iterate over a collection of exportd jobs resources.
+        Iterate over a collection of exportd logs resources.
 
         Args:
             filter: match requirements of field values
@@ -46,7 +46,7 @@ class ExportDJobManager(ExportDManager):
             order: sort order
 
         Returns:
-            IterationResult: Instance of IterationResult with generic ExportdJob.
+            IterationResult: Instance of IterationResult with generic ExportdJobLog.
         """
 
         try:
@@ -54,6 +54,6 @@ class ExportDJobManager(ExportDManager):
             aggregation_result = next(self._aggregate(self.collection, query))
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[ExportdJob] = IterationResult.from_aggregation(aggregation_result)
-        iteration_result.convert_to(ExportdJob)
+        iteration_result: IterationResult[ExportdJobLog] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result.convert_to(ExportdJobLog)
         return iteration_result

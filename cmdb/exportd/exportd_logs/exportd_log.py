@@ -20,6 +20,8 @@ from datetime import datetime
 from enum import Enum
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
+from cmdb.framework import CmdbLog
+from cmdb.framework.utils import Model
 
 try:
     from cmdb.utils.error import CMDBError
@@ -38,50 +40,61 @@ class LogAction(Enum):
 
 class ExportdMetaLog(JobManagementBase):
     COLLECTION = 'exportd.logs'
-    REQUIRED_INIT_KEYS = [
-        'log_type',
-        'log_time',
-        'action',
-    ]
+    MODEL: Model = 'ExportdLog'
 
-    def __init__(self, log_type, log_time: datetime, action: LogAction, **kwargs):
+    def __init__(self, public_id, log_type, log_time: datetime, action: LogAction):
         self.log_type = log_type
         self.log_time: datetime = log_time
         self.action: LogAction = action
-        super(ExportdMetaLog, self).__init__(**kwargs)
+        super(ExportdMetaLog, self).__init__(public_id=public_id)
 
 
 class ExportdJobLog(ExportdMetaLog):
     UNKNOWN_USER_STRING = 'Unknown'
-    REQUIRED_INIT_KEYS = [
-                             'job_id',
-                             'version',
-                             'user_id'
-                         ] + ExportdMetaLog.REQUIRED_INIT_KEYS
 
-    def __init__(self, job_id: int, state: bool, user_id: int, user_name: str = None, event: str = None, message=None, **kwargs):
+    def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction,
+                 job_id: int, state: bool = None, user_id: int = None, user_name: str = None, event: str = None,
+                 message=None):
         self.job_id = job_id
         self.state = state
         self.user_id = user_id
         self.user_name = user_name or self.UNKNOWN_USER_STRING
         self.event = event
         self.message = message
-        super(ExportdJobLog, self).__init__(**kwargs)
+        super(ExportdJobLog, self).__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action)
 
+    @classmethod
+    def from_data(cls, data: dict, *args, **kwargs) -> "ExportdJobLog":
+        """Create a instance of ExportdJobLog from database values"""
+        return cls(
+            public_id=data.get('public_id'),
+            job_id=data.get('job_id'),
+            state=data.get('state', None),
+            user_name=data.get('user_name', None),
+            user_id=data.get('user_id', None),
+            event=data.get('event', None),
+            log_time=data.get('log_time', None),
+            log_type=data.get('log_type', None),
+            message=data.get('message', None),
+            action=data.get('action', None)
+        )
 
-class ExportdLog:
+    @classmethod
+    def to_json(cls, instance: "ExportdJobLog") -> dict:
+        """Convert a ExportdJobLog instance to json conform data"""
+        return {
+            'public_id': instance.public_id,
+            'job_id': instance.job_id,
+            'state': instance.state,
+            'user_name': instance.user_name,
+            'user_id': instance.user_id,
+            'event': instance.event,
+            'log_time': instance.log_time,
+            'log_type': instance.log_type,
+            'message': instance.message,
+            'action': instance.action
+        }
+
+class ExportdLog(CmdbLog):
     REGISTERED_LOG_TYPE = {}
     DEFAULT_LOG_TYPE = ExportdJobLog
-
-    @abstractclassmethod
-    def register_log_type(cls, log_name, log_class):
-        cls.REGISTERED_LOG_TYPE[log_name] = log_class
-
-    def __new__(cls, *args, **kwargs):
-        try:
-            _log_class = cls.REGISTERED_LOG_TYPE[kwargs['log_type']]
-        except (KeyError, ValueError):
-            _log_class = cls.DEFAULT_LOG_TYPE
-        return _log_class(*args, **kwargs)
-
-

@@ -29,8 +29,9 @@ from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse
+from cmdb.interface.rest_api.exporter_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
@@ -43,7 +44,6 @@ with current_app.app_context():
 
 LOGGER = logging.getLogger(__name__)
 exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_prefix='/exportdjob')
-exportd_blueprint = APIBlueprint('exportd', __name__)
 
 
 # DEFAULT ROUTES
