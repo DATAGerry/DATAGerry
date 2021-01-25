@@ -56,7 +56,7 @@ export class ObjectBulkChangeComponent implements OnDestroy {
   /**
    * Active status changed.
    */
-  public activeState: boolean = true;
+  public activeState: boolean | undefined = undefined;
 
   /**
    * List of to change selected items.
@@ -85,10 +85,11 @@ export class ObjectBulkChangeComponent implements OnDestroy {
     const changes = this.changeForm.getRawValue();
     const httpOptions = Object.assign({}, httpObserveOptions);
     httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
-    console.log(httpOptions.params);
     const patchValue = [];
     const newObjectInstance = new CmdbObject();
-    newObjectInstance.active = this.activeState;
+    if (this.activeState !== undefined) {
+      newObjectInstance.active = this.activeState;
+    }
     newObjectInstance.type_id = this.type.public_id;
     newObjectInstance.fields = [];
     Object.keys(changes).forEach((key: string) => {
