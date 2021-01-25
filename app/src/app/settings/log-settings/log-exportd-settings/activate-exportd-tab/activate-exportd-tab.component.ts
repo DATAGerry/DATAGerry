@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,10 +13,10 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild} from '@angular/core';
+import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { DataTableDirective } from 'angular-datatables';
 import { Subject } from 'rxjs';
 import { ExportdLog } from '../../../models/exportd-log';
@@ -26,65 +26,12 @@ import { ExportdLog } from '../../../models/exportd-log';
   templateUrl: './activate-exportd-tab.component.html',
   styleUrls: ['./activate-exportd-tab.component.scss']
 })
-export class ActivateExportdTabComponent implements AfterContentInit, OnDestroy, OnInit {
+export class ActivateExportdTabComponent {
 
-  @ViewChild(DataTableDirective, {static: false})
-  public dtElement: DataTableDirective;
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
+  public query = [
+    { $match: { action: { $ne: 3 } } },
+    { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+    { $match: { jobs: { $ne: { $size: 0 } } } },
+    { $project: { job: 0 } }];
 
-  // tslint:disable-next-line:variable-name
-  private _activeLogList: ExportdLog[];
-
-  @Input('activeLogList')
-  public set activeLogList(logList: ExportdLog[]) {
-    this._activeLogList = logList;
-    this.dtTrigger.next();
-  }
-
-  public get activeLogList() {
-    return this._activeLogList;
-  }
-
-  @Output() deleteEmitter = new EventEmitter<number>();
-
-  constructor() { }
-
-  ngOnInit() {
-    this.dtOptions = {
-      ordering: true,
-      order: [[1, 'desc']],
-      dom:
-        '<"row" <"col-sm-2" l> <"col-sm-3" B > <"col" f> >' +
-        '<"row" <"col-sm-12"tr>>' +
-        '<\"row\" <\"col-sm-12 col-md-5\"i> <\"col-sm-12 col-md-7\"p> >',
-      buttons: [],
-      orderFixed: [2, 'desc'],
-      rowGroup: {
-        enable: true,
-        endRender(rows) {
-          return `Number of logs in this action: ${ rows.count() }`;
-        },
-        dataSrc: 2
-      },
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
-  }
-
-  public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-  }
-
-  public ngAfterContentInit(): void {
-    this.dtTrigger.next();
-  }
-
-  public rerender() {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-    });
-  }
 }

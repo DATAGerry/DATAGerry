@@ -77,23 +77,11 @@ export class LogExportdSettingsComponent implements OnInit {
   }
 
   private reloadLogs() {
-    this.loadExists();
     this.loadNotExists();
   }
 
-  private loadExists() {
-    this.exportdLogService.getLogsWithExistingObject().subscribe((activeLogs: ExportdLog[]) => {
-      this.activeLogList = activeLogs;
-    }, error => {
-      console.error(error);
-      this.activeLength = 0;
-    }, () => {
-      this.activeLength = this.activeLogList.length;
-    });
-  }
-
   private loadNotExists() {
-    this.exportdLogService.getLogsWithNotExistingObject().subscribe((deActiveLogs: ExportdLog[]) => {
+    this.exportdLogService.getLogsWithNotExistingJobs().subscribe((deActiveLogs: ExportdLog[]) => {
       this.deActiveLogList = deActiveLogs;
     }, error => {
       console.error(error);
@@ -115,7 +103,6 @@ export class LogExportdSettingsComponent implements OnInit {
           () => {
             switch (reloadList) {
               case 'active':
-                this.loadExists();
                 break;
               case 'deactive':
                 this.loadNotExists();
@@ -146,7 +133,6 @@ export class LogExportdSettingsComponent implements OnInit {
       ), () => {
         switch (reloadList) {
           case 'active':
-            this.loadExists();
             break;
           case 'deactive':
             this.loadNotExists();

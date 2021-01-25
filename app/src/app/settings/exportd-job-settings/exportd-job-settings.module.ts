@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -54,14 +54,15 @@ import { DndModule } from 'ngx-drag-drop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
-import { DeleteLogJobModalComponent, ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
+import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
 import { AuthModule } from '../../auth/auth.module';
 import { TableModule } from '../../layout/table/table.module';
 import { UsersModule } from '../../management/users/users.module';
+import { LogSettingsModule } from '../log-settings/log-settings.module';
 
 @NgModule({
-  entryComponents: [DeleteLogJobModalComponent],
+  entryComponents: [],
   declarations: [
     ExportdJobSettingsListComponent,
     ExportdJobSettingsEditComponent,
@@ -74,7 +75,6 @@ import { UsersModule } from '../../management/users/users.module';
     ExportdJobSchedulingStepComponent,
     ExportdJobCompleteStepComponent,
     ExportdJobLogsComponent,
-    DeleteLogJobModalComponent,
     FilterPipe,
     ExportdJobSettingsCopyComponent,
     DropDownDirectionDirective],
@@ -93,7 +93,8 @@ import { UsersModule } from '../../management/users/users.module';
         NgbProgressbarModule,
         AuthModule,
         TableModule,
-        UsersModule
+        UsersModule,
+        LogSettingsModule
     ]
 })
 export class ExportdJobSettingsModule {

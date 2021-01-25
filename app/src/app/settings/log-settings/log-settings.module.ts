@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { LogSettingsRoutingModule } from './log-settings-routing.module';
-import { DeleteModalComponent, LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
+import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
 import { ActivateTabComponent } from './log-object-settings/activate-tab/activate-tab.component';
 import { DeactivateTabComponent } from './log-object-settings/deactivate-tab/deactivate-tab.component';
 import { DeleteTabComponent } from './log-object-settings/delete-tab/delete-tab.component';
@@ -28,7 +28,6 @@ import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import {
-  DeleteExportdModalComponent,
   LogExportdSettingsComponent
 } from './log-exportd-settings/log-exportd-settings.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -39,21 +38,25 @@ import { AuthModule } from '../../auth/auth.module';
 import { TableModule } from '../../layout/table/table.module';
 import { ObjectModule } from '../../framework/object/object.module';
 import { LogObjectTableActionsComponent } from './log-object-settings/log-object-table-actions/log-object-table-actions.component';
+import { LogExportdTableComponent } from './log-exportd-settings/components/log-exportd-table/log-exportd-table.component';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
-  entryComponents: [DeleteModalComponent, DeleteExportdModalComponent],
-  declarations: [
-    DeleteModalComponent,
-    DeleteExportdModalComponent,
-    LogObjectSettingsComponent,
-    ActivateTabComponent,
-    DeactivateTabComponent,
-    DeleteTabComponent,
-    LogSettingsComponent,
-    LogExportdSettingsComponent,
-    ActivateExportdTabComponent,
-    DeactivateExportdTabComponent,
-    LogObjectTableActionsComponent],
+    entryComponents: [],
+    declarations: [
+        LogObjectSettingsComponent,
+        ActivateTabComponent,
+        DeactivateTabComponent,
+        DeleteTabComponent,
+        LogSettingsComponent,
+        LogExportdSettingsComponent,
+        ActivateExportdTabComponent,
+        DeactivateExportdTabComponent,
+        LogObjectTableActionsComponent,
+        LogExportdTableComponent],
+    exports: [
+        LogExportdTableComponent
+    ],
   imports: [
     CommonModule,
     LayoutModule,
@@ -64,7 +67,8 @@ import { LogObjectTableActionsComponent } from './log-object-settings/log-object
     FontAwesomeModule,
     AuthModule,
     TableModule,
-    ObjectModule
+    ObjectModule,
+    UsersModule
   ]
 })
 export class LogSettingsModule {
