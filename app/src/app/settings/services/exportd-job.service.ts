@@ -21,13 +21,13 @@ import {
   ApiCallService,
   ApiService,
   HttpInterceptorHandler,
-  httpObserveOptions
+  httpObserveOptions, resp
 } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
 import { Observable, timer} from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpBackend, HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpBackend, HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
 import { AuthService } from '../../auth/services/auth.service';
 import { CollectionParameters } from '../../services/models/api-parameter';
@@ -57,20 +57,22 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   public servicePrefix: string = 'exportdjob';
   public newServicePrefix: string = 'exportd/jobs';
-  private taskList: ExportdJob[];
+
+  public readonly options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
 
   constructor(private api: ApiCallService) {
-    this.getTaskList().subscribe((list: ExportdJob[]) => {
-      this.taskList = list;
-    });
-  }
-
-  public findTask(publicID: number): ExportdJob {
-    return this.taskList.find(task => task.public_id === publicID);
   }
 
   public getTask(publicID: number) {
-    return this.api.callGet<ExportdJob>(this.servicePrefix + '/' + publicID).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<ExportdJob>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -109,8 +111,10 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
     );
   }
 
-  public getTaskList() {
-    return this.api.callGet<ExportdJob[]>(this.servicePrefix + '/').pipe(
+  public getTaskList(): Observable<Array<T>>  {
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<ExportdJob[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -121,24 +125,41 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
   }
 
   // CRUD calls
-  public postTask(taskInstance: ExportdJob): Observable<any> {
-    return this.api.callPost<ExportdJob>(this.servicePrefix + '/', taskInstance);
+  public postTask(taskInstance: ExportdJob): Observable<T> {
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPost<ExportdJob>(this.servicePrefix + '/', taskInstance, options).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   public putTask( taskInstance: ExportdJob): Observable<any> {
-    return this.api.callPut(this.servicePrefix + '/', taskInstance);
-  }
-
-  public deleteTask(publicID: number) {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID);
-  }
-
-  public run_task(publicID: number) {
-    return this.api.callGet<ExportdJob>(this.servicePrefix + '/manual/' + publicID).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPut(this.servicePrefix + '/', taskInstance, options).pipe(
       map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public deleteTask(publicID: number): Observable<any> {
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
+      map((apiResponse) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
+  public run_task(publicID: number): Observable<any> {
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<ExportdJob>(this.servicePrefix + '/manual/' + publicID, options).pipe(
+      map((apiResponse) => {
         return apiResponse.body;
       })
     );
@@ -146,6 +167,8 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
 
   // Validation functions
   public checkJobExists(typeName: string) {
-    return this.api.callGet<T>(`${ this.servicePrefix }/name/${ typeName }`);
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/name/${ typeName }`, options);
   }
 }

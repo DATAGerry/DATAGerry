@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
@@ -31,7 +31,7 @@ export class ExternalSystemService {
   constructor(private api: ApiCallService) {
   }
 
-  public getExternSytemList() {
+  public getExternSystemList() {
     return this.api.callGet<any[]>(this.servicePrefix + '/').pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -42,7 +42,7 @@ export class ExternalSystemService {
     );
   }
 
-  public getExternSytemParams(name: string) {
+  public getExternSystemParams(name: string) {
     return this.api.callGet<any>(this.servicePrefix + '/parameters/' + name).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -53,7 +53,7 @@ export class ExternalSystemService {
     );
   }
 
-  public getExternSytemVariables(name: string) {
+  public getExternSystemVariables(name: string) {
     return this.api.callGet<any>(this.servicePrefix + '/variables/' + name).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {

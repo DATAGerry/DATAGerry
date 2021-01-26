@@ -18,13 +18,13 @@
 
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../services/models/api-response';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +33,14 @@ export class ExportdJobLogService<T = any> implements ApiService {
 
   public servicePrefix: string = 'exportdlog';
   public newServicePrefix: string = 'exportd/logs';
+
+  public readonly options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
 
   constructor(private api: ApiCallService) {
   }
@@ -68,6 +76,8 @@ export class ExportdJobLogService<T = any> implements ApiService {
 
   // CRUD calls
   public getJobLogs(publicID: number) {
+    const options = this.options;
+    options.params = new HttpParams();
     return this.api.callGet<T>(`${ this.servicePrefix }/job/${ publicID }/`).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
@@ -127,7 +137,9 @@ export class ExportdJobLogService<T = any> implements ApiService {
   }
 
   public getLogsWithNotExistingJobs() {
-    return this.api.callGet<T>(`${ this.servicePrefix }/job/notexists/`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/job/notexists/`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -138,7 +150,9 @@ export class ExportdJobLogService<T = any> implements ApiService {
   }
 
   public getDeleteLogs() {
-    return this.api.callGet<T>(`${ this.servicePrefix }/job/deleted/`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(`${ this.servicePrefix }/job/deleted/`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -149,7 +163,9 @@ export class ExportdJobLogService<T = any> implements ApiService {
   }
 
   public deleteLog(publicID: number) {
-    return this.api.callDelete<boolean>(`${ this.servicePrefix }/${ publicID }/`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDelete<boolean>(`${ this.servicePrefix }/${ publicID }/`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
