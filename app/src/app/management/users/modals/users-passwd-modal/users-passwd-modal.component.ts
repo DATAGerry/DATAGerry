@@ -20,6 +20,8 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '../../../models/user';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UserService } from '../../../services/user.service';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   templateUrl: './users-passwd-modal.component.html',
@@ -32,7 +34,7 @@ export class UsersPasswdModalComponent {
 
   public passwdForm: FormGroup;
 
-  constructor(public activeModal: NgbActiveModal) {
+  constructor(private userService: UserService, public activeModal: NgbActiveModal, private toast: ToastService) {
     this.passwdForm = new FormGroup({
       public_id: new FormControl(null),
       password: new FormControl('', Validators.required)
@@ -53,7 +55,14 @@ export class UsersPasswdModalComponent {
 
   public onPasswordChange(): void {
     if (this.passwdForm.valid) {
-      this.activeModal.close({public_id: this.user.public_id, password: this.password.value});
+      const changePasswd = this.userService.changeUserPassword(
+        this.user.public_id, this.passwdForm.get('password').value).subscribe(
+        (user: User) => {
+          this.toast.success(`Password for user with ID: ${ this.user.public_id } was changed`);
+          this.activeModal.close(user);
+          changePasswd.unsubscribe();
+        }
+      );
     }
   }
 
