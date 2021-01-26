@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,10 @@ import { AuthService } from '../../auth/services/auth.service';
 import { ActivatedRoute, Data } from '@angular/router';
 import { AuthProvider } from '../../auth/models/providers';
 import { AuthSettings } from '../../auth/models/settings';
+import { GroupService } from '../../management/services/group.service';
+import { Group } from '../../management/models/group';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-auth-settings',
@@ -42,11 +46,13 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
 
   public authConfigForm: FormGroup;
   public authSettings: AuthSettings;
-
   public installedProviderList: Array<AuthProvider>;
 
+  public groups: Array<Group> = [];
+
   public constructor(private authSettingsService: AuthService, private activateRoute: ActivatedRoute,
-                     private spinner: ProgressSpinnerService, private toast: ToastService) {
+                     private groupService: GroupService, private spinner: ProgressSpinnerService,
+                     private toast: ToastService) {
     this.authConfigForm = new FormGroup({
       _id: new FormControl('auth'),
       enable_external: new FormControl(false),
@@ -63,6 +69,13 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
       this.authSettings = settings;
       this.authConfigForm.patchValue(this.authSettings);
     });
+    const groupAPIParameters: CollectionParameters = {
+      filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
+    this.groupService.getGroups(groupAPIParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<Group>) => {
+      this.groups = apiResponse.results as Array<Group>;
+    }, (error) => this.toast.error(error));
   }
 
   public get providersArray(): FormArray {

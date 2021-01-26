@@ -41,6 +41,7 @@ import { TableModule } from '../../layout/table/table.module';
 import { UserTableActionsComponent } from './components/user-table-actions/user-table-actions.component';
 import { UserTableGroupCellComponent } from './components/user-table-group-cell/user-table-group-cell.component';
 import { UserTableListComponent } from './components/user-table-list/user-table-list.component';
+import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
   entryComponents: [
@@ -69,16 +70,17 @@ import { UserTableListComponent } from './components/user-table-list/user-table-
     UserCompactComponent,
     UserTableListComponent
   ],
-  imports: [
-    CommonModule,
-    UsersRoutingModule,
-    PasswordStrengthMeterModule,
-    ReactiveFormsModule,
-    LayoutModule,
-    FontAwesomeModule,
-    AuthModule,
-    TableModule,
-  ]
+    imports: [
+        CommonModule,
+        UsersRoutingModule,
+        PasswordStrengthMeterModule,
+        ReactiveFormsModule,
+        LayoutModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule,
+        AclModule,
+    ]
 })
 export class UsersModule {
 }

@@ -26,7 +26,7 @@ from flask import abort, current_app, jsonify, request
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse
-from cmdb.interface.rest_api.exporter_routes import exportd_blueprint
+from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError

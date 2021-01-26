@@ -24,6 +24,12 @@
         Search
       </a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link" data-toggle="tab" href="#ldap-group-mapping-panel"
+         role="tab">
+        Groups Mapping
+      </a>
+    </li>
   </ul>
 </div>
 <div class="card-body" [formGroup]="form">
@@ -43,8 +49,10 @@
         <label class="col-sm-3 col-form-label" for="default-group-input">Default Group:</label>
         <div class="col-sm-9">
           <div class="input-group">
-            <input class="form-control" type="number" id="default-group-input"
-                   formControlName="default_group">
+            <select class="custom-select" id="default-group-input" formControlName="default_group">
+              <option *ngFor="let group of groups"
+                      [value]="group.public_id">{{group.label ? group.label : group.name}}</option>
+            </select>
           </div>
         </div>
       </div>
@@ -121,6 +129,34 @@
           <small class="description form-text text-muted">%username% will be inserted from the login data</small>
         </div>
       </div>
+    </div>
+    <div id="ldap-group-mapping-panel" [formGroup]="groupsControl" class="tab-pane fade" role="tabpanel">
+      <div class="form-group row mb-3">
+        <div class="col-sm-3">Active:</div>
+        <div class="col-sm-9">
+          <div class="custom-control custom-checkbox">
+            <input class="custom-control-input" type="checkbox"
+                   formControlName="active" id="ldap-provider-group-mapping-active-input">
+            <label class="custom-control-label" for="ldap-provider-group-mapping-active-input"></label>
+          </div>
+          <small class="description form-text text-muted">
+            If no mapping is activated, <strong>new</strong> users will be moved to the default group.
+          </small>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label"
+               for="ldap-provider-group-mapping-search-filter-input">Searchfilter:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="ldap-provider-group-mapping-search-filter-input"
+                   formControlName="searchfiltergroup" placeholder="(memberUid=%username%)">
+          </div>
+          <small class="description form-text text-muted">%username% will be inserted from the login data</small>
+        </div>
+      </div>
+      <cmdb-ldap-provider-form-group-mapping
+        [groups]="groups" [mappingForm]="groupMappingControl"></cmdb-ldap-provider-form-group-mapping>
     </div>
   </div>
 </div>

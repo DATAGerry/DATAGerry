@@ -15,7 +15,25 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-class BaseExportConfig:
+from enum import Enum
 
-    def __init__(self, config_type: str):
+
+class ExporterConfigType(Enum):
+    """
+        Type of exported data (native = CmdbObject, render = RenderResult)
+    """
+    native = 2
+    render = 3
+
+    def __str__(self):
+        return self.name
+
+
+class BaseExporterConfig:
+
+    def __init__(self, config_type: ExporterConfigType):
+        """
+        Args:
+            config_type: Type of exported data (CmdbObject = native, RenderResult = render)
+        """
         self.config_type = config_type

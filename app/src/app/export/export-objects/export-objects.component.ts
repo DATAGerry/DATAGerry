@@ -23,7 +23,8 @@ import { DatePipe } from '@angular/common';
 import { TypeService } from '../../framework/services/type.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../export.service';
-import { ExportObjectsFileExtension } from './model/export-objects-file-extension';
+import { SupportedExporterExtension } from './model/supported-exporter-extension';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-export-objects',
@@ -33,7 +34,7 @@ import { ExportObjectsFileExtension } from './model/export-objects-file-extensio
 export class ExportObjectsComponent implements OnInit {
 
   public typeList: CmdbType[];
-  public formatList: ExportObjectsFileExtension[] = [];
+  public formatList: SupportedExporterExtension[] = [];
   public formExport: FormGroup;
   public isSubmitted = false;
 
@@ -73,7 +74,10 @@ export class ExportObjectsComponent implements OnInit {
     const fileExtension: any = this.formExport.get('format').value;
 
     if (fileExtension != null && typeID != null) {
-      this.exportService.getObjectFileByType(typeID , fileExtension)
+      const filter = {type_id: typeID};
+      const optional = {classname: fileExtension, zip: false};
+      const exportAPI: CollectionParameters = {filter, optional, order: 1, sort: 'public_id'};
+      this.exportService.callExportRoute(exportAPI)
         .subscribe(res => this.downLoadFile(res, fileExtension));
     }
   }

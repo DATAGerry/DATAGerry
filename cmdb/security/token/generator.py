@@ -31,7 +31,6 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TokenGenerator:
-
     DEFAULT_CLAIMS = {
         'iss': {
             'essential': True,
@@ -47,7 +46,9 @@ class TokenGenerator:
         self.database_manager = database_manager or DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
-        self.auth_module = AuthModule(SystemSettingsReader(self.database_manager))
+
+        self.auth_module = AuthModule(SystemSettingsReader(self.database_manager).get_all_values_from_section(
+            'auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
     def get_expire_time(self) -> datetime:
         expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))

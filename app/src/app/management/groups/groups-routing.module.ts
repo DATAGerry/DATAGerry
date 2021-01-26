@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -24,6 +24,8 @@ import { GroupEditComponent } from './group-edit/group-edit.component';
 import { GroupResolver, GroupsResolver } from '../resolvers/group-resolver.service';
 import { RightsResolver } from '../resolvers/rights-resolver.service';
 import { GroupDeleteComponent } from './group-delete/group-delete.component';
+import { PermissionGuard } from '../../auth/guards/permission.guard';
+import { GroupAclComponent } from './group-acl/group-acl.component';
 
 const routes: Routes = [
   {
@@ -69,6 +71,15 @@ const routes: Routes = [
       groups: GroupsResolver
     },
     component: GroupDeleteComponent
+  },
+  {
+    path: 'acl',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Access Control List',
+      right: 'base.framework.type.view'
+    },
+    component: GroupAclComponent
   }
 ];
 

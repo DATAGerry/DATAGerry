@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 from datetime import datetime
@@ -20,53 +20,46 @@ from typing import List
 
 from flask import request, current_app, abort
 
-from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
     AuthenticationProviderNotActivated
 from cmdb.security.auth.response import LoginResponse
+from cmdb.security.security import SecurityManager
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import UserModel
+from cmdb.user_management import UserModel, RightManager
+from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.user_management.rights import __all__ as rights
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-auth_blueprint = RootBlueprint('auth_rest', __name__, url_prefix='/auth')
+auth_blueprint = APIBlueprint('auth', __name__)
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
-    user_manager: UserManager = UserManager(current_app.database_manager)
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
     system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
 
 
-@auth_blueprint.route('/settings/', methods=['GET'])
 @auth_blueprint.route('/settings', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.system.view')
-def get_auth_settings(request_user: UserModel):
-    auth_module = AuthModule(system_settings_reader)
+@auth_blueprint.protect(auth=True, right='base.system.view')
+def get_auth_settings():
+    auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
+    auth_module = AuthModule(auth_settings)
     return make_response(auth_module.settings)
 
 
-@auth_blueprint.route('/settings/', methods=['POST', 'PUT'])
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
-@login_required
+@auth_blueprint.protect(auth=True, right='base.system.edit')
 @insert_request_user
-@right_required('base.system.edit')
 def update_auth_settings(request_user: UserModel):
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
     try:
-        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values, default=AuthModule.__DEFAULT_SETTINGS__)
+        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values)
     except Exception as err:
         return abort(400, err)
     update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
@@ -75,26 +68,24 @@ def update_auth_settings(request_user: UserModel):
     return abort(400, 'Could not update auth settings')
 
 
-@auth_blueprint.route('/providers/', methods=['GET'])
 @auth_blueprint.route('/providers', methods=['GET'])
-@login_required
+@auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
-@right_required('base.system.view')
 def get_installed_providers(request_user: UserModel):
     provider_names: List[dict] = []
-    auth_module = AuthModule(system_settings_reader)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
     return make_response(provider_names)
 
 
-@auth_blueprint.route('/providers/<string:provider_class>/', methods=['GET'])
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
-@login_required
+@auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
-@right_required('base.system.view')
 def get_provider_config(provider_class: str, request_user: UserModel):
-    auth_module = AuthModule(system_settings_reader)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
     except StopIteration:
@@ -102,9 +93,11 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     return make_response(provider_class_config)
 
 
-@auth_blueprint.route('/login/', methods=['POST'])
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
+    user_manager: UserManager = UserManager(current_app.database_manager)
+    group_manager: GroupManager = GroupManager(current_app.database_manager, right_manager=RightManager(rights))
+    security_manager: SecurityManager = SecurityManager(current_app.database_manager)
     login_data = request.json
     if not request.json:
         return abort(400, 'No valid JSON data was provided')
@@ -112,10 +105,13 @@ def post_login():
     request_user_name = login_data['user_name']
     request_password = login_data['password']
 
-    auth_module = AuthModule(system_settings_reader)
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+        user_manager=user_manager, group_manager=group_manager,
+        security_manager=security_manager)
     user_instance = None
     try:
-        user_instance = auth_module.login(user_manager, request_user_name, request_password)
+        user_instance = auth_module.login(request_user_name, request_password)
     except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
         return abort(503, err.message)
     except Exception as e:

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -85,7 +85,7 @@ export class AuthService<T = any> implements ApiService {
   public getProviders(): Observable<Array<T>> {
     const options = httpObserveOptions;
     options.params = new HttpParams();
-    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers/`, options).pipe(
+    return this.api.callGet<Array<T>>(`${ this.servicePrefix }/providers`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body as Array<T>;
       })
@@ -96,7 +96,7 @@ export class AuthService<T = any> implements ApiService {
   public getSettings(): Observable<T> {
     const options = httpObserveOptions;
     options.params = new HttpParams();
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/settings/`, options).pipe(
+    return this.api.callGet<T[]>(`${ this.servicePrefix }/settings`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -106,7 +106,7 @@ export class AuthService<T = any> implements ApiService {
   public postSettings(data: T): Observable<T> {
     const options = httpObserveOptions;
     options.params = new HttpParams();
-    return this.api.callPost<T>(`${ this.servicePrefix }/settings/`, data, options).pipe(
+    return this.api.callPost<T>(`${ this.servicePrefix }/settings`, data, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

@@ -131,14 +131,18 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.user_management_routes.group_routes import groups_blueprint
 
     from cmdb.interface.rest_api.search_routes import search_blueprint
-    from cmdb.interface.rest_api.exporter_routes.file_routes import file_blueprint
-    from cmdb.interface.rest_api.exporter_routes.export_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.exporter_routes import exportd_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exportd_job_routes import exportd_job_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exportd_log_routes import exportd_log_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
+
+    from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
+    from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
+
     from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
@@ -147,7 +151,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.docapi_routes import docs_blueprint
     from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 
-    app.register_blueprint(auth_blueprint)
+    app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_blueprint(object_blueprint)
     app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
     app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
@@ -161,7 +165,7 @@ def register_blueprints(app):
     app.register_multi_blueprint(groups_blueprint, multi_prefix=['/group', '/groups'])
     app.register_multi_blueprint(rights_blueprint, multi_prefix=['/right', '/rights'])
     app.register_blueprint(search_blueprint)
-    app.register_blueprint(file_blueprint)
+    app.register_multi_blueprint(exporter_blueprint, multi_prefix=['/exporter', '/exporter/'])
     app.register_blueprint(type_export_blueprint)
     app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
     app.register_blueprint(settings_blueprint)
@@ -170,7 +174,6 @@ def register_blueprints(app):
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
-    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docapi', '/docs'])
     app.register_blueprint(docapi_blueprint)
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)

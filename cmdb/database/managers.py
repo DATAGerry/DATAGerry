@@ -252,7 +252,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return self.connector.get_collection(collection).insert_one(data)
 
         if 'public_id' not in data:
-            data['public_id'] = self.get_highest_id(collection=collection) + 1
+            data['public_id'] = self.get_public_id_counter(collection=collection) + 1
         self.connector.get_collection(collection).insert_one(data)
         # update the id counter
         self.update_public_id_counter(collection, data['public_id'])
@@ -499,6 +499,13 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             counter_doc['counter'] = value
             self.connector.get_collection(PublicIDCounter.COLLECTION).update(query, counter_doc)
 
+    def get_public_id_counter(self, collection: str):
+        working_collection = self.connector.get_collection(PublicIDCounter.COLLECTION)
+        query = {
+            '_id': collection
+        }
+        counter_doc = working_collection.find_one(query)
+        return counter_doc['counter']
 
 class DatabaseGridFS(GridFS):
     """

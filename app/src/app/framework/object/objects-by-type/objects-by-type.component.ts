@@ -46,7 +46,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { DatePipe } from '@angular/common';
-import { ExportObjectsFileExtension } from '../../../export/export-objects/model/export-objects-file-extension';
+import { SupportedExporterExtension } from '../../../export/export-objects/model/supported-exporter-extension';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -311,6 +311,29 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.selectedObjects = [];
     this.selectedObjectsIDs = [];
+
+    const searchableColumns = this.columns.filter(c => c.searchable);
+    const filter = this.filterBuilder(searchableColumns);
+    const params: CollectionParameters = {
+      filter, limit: this.limit,
+      sort: this.sort.name, order: this.sort.order, page: this.page
+    };
+    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
+        this.results = apiResponse.body.results as Array<RenderResult>;
+        this.totalResults = apiResponse.body.total;
+        this.loading = false;
+      });
+  }
+
+  /**
+   * DB Query / Filter Builder
+   * Creates a database query using the passed parameters.
+   *
+   * @param columns {@link Array<Column>} are taken into account in the query.
+   * @return query {@link: any[]}
+   */
+  private filterBuilder(columns: Array<Column>) {
     const query = [];
     query.push({
       $match: {
@@ -319,9 +342,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     });
     if (this.filter) {
       const or = [];
-      const searchableColumns = this.columns.filter(c => c.searchable);
-      // Searchable Columns
-      for (const column of searchableColumns) {
+      for (const column of columns) {
         const regex: any = {};
         regex[column.name] = {
           $regex: String(this.filter),
@@ -329,7 +350,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         };
         or.push(regex);
       }
-
       // Nasty public id quick hack
       query.push({
         $addFields: {
@@ -359,17 +379,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
       query.push({ $match: { $or: or } });
     }
-
-    const params: CollectionParameters = {
-      filter: query, limit: this.limit,
-      sort: this.sort.name, order: this.sort.order, page: this.page
-    };
-    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.results = apiResponse.body.results as Array<RenderResult>;
-        this.totalResults = apiResponse.body.total;
-        this.loading = false;
-      });
+    return query;
   }
 
   /**
@@ -390,6 +400,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param limit
    */
   public onPageSizeChange(limit: number): void {
+    this.page = this.initPage;
     this.limit = limit;
     this.loadObjects();
   }
@@ -412,6 +423,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param search
    */
   public onSearchChange(search: any): void {
+    this.page = this.initPage;
     if (search) {
       this.filter = search;
     } else {
@@ -452,20 +464,31 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.reload(this.type);
   }
 
-  public exportingFiles(exportType: ExportObjectsFileExtension) {
-    if (this.selectedObjectsIDs.length === 0) {
-      this.fileService.getObjectFileByType(this.type.public_id, exportType.extension)
-        .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
-        });
-    } else {
-      this.fileService.callExportRoute(this.selectedObjectsIDs, exportType.extension)
-        .subscribe(res => {
-          this.fileSaverService.save(res.body, new Date().toISOString() + '.' + exportType.label);
-        });
+  public exportingFiles(see: SupportedExporterExtension) {
+    const optional = {classname: see.extension, zip: false, metadata: undefined};
+    const columns = this.columns.filter(c => !c.hidden && !c.fixed);
+    const filter = this.filterBuilder(columns);
 
+    const properties = [];
+    const fields = [];
+    for (const col of columns) {
+      const {name} = (col as any);
+      if (name && name.startsWith('fields.')) {
+        fields.push(name.replace('fields.', ''));
+      } else {
+        properties.push(name);
+      }
     }
+    optional.metadata = {header: properties, columns: fields};
 
+    const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
+    if (this.selectedObjectsIDs.length > 0) {
+      exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...filter] ;
+    }
+    this.fileService.callExportRoute(exportAPI, see.view)
+      .subscribe(res => {
+        this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
+      });
   }
 
   public onObjectDelete(publicID: number) {

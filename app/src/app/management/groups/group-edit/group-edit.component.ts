@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ import { GroupFormComponent } from '../components/group-form/group-form.componen
 import { Right } from '../../models/right';
 import { takeUntil } from 'rxjs/operators';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
   selector: 'cmdb-group-edit',
@@ -40,8 +41,11 @@ export class GroupEditComponent implements OnInit, OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public group: Group;
 
+  private typeEditRightName = 'base.framework.type.edit';
+  public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) || this.permissionService.hasExtendedRight(this.typeEditRightName);
+
   constructor(private route: ActivatedRoute, private router: Router, private groupService: GroupService,
-              private toastService: ToastService) {
+              private toastService: ToastService, private permissionService: PermissionService) {
     this.rights = this.route.snapshot.data.rights as Array<Right>;
     this.group = this.route.snapshot.data.group as Group;
   }
@@ -61,7 +65,7 @@ export class GroupEditComponent implements OnInit, OnDestroy {
     const editGroup = Object.assign(this.group, group);
     if (this.valid) {
       this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
-          this.toastService.success(`Group ${g.label} was updated!`);
+          this.toastService.success(`Group ${ g.label } was updated!`);
           this.router.navigate(['/', 'management', 'groups']);
         }
       );

@@ -5,3 +5,8 @@
 <div id="user-add-form">
   <cmdb-user-form [providers]="providers" [groups]="groups" [user]="user" (submit)="save($event)"></cmdb-user-form>
 </div>
+<ng-container *ngIf="typeEditRight">
+  <h2>Object ACL of {{userGroup?.label}}</h2>
+  <hr/>
+  <cmdb-acl-objects-information-table [group]="userGroup"></cmdb-acl-objects-information-table>
+</ng-container>
