@@ -1,6 +1,3 @@
-<div *ngIf="cleanupInProgress" id="cleanup-progress" class="m-2">
-  <ngb-progressbar type="danger" [value]="cleanupProgress" [animated]="true" [striped]="true"></ngb-progressbar>
-</div>
 <cmdb-table [items]="logs" [columns]="columns" [page]="page" [sort]="sort" [id]="'exportd-logs-table'"
             [stateEnabled]="false" [emptyMessage]="'No logs were found!'" [customButtons]="[deleteButton]"
             [totalItems]="totalLogs" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
