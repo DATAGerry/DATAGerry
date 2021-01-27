@@ -616,7 +616,8 @@ def update_object(public_id: int, request_user: UserModel):
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      user_list=user_manager.get_users()).result()
+                                                      user_list=user_manager.get_users(),
+                                                      object_manager=object_manager, ref_render=True).result()
         except ObjectManagerGetError as err:
             LOGGER.error(err)
             return abort(404)
