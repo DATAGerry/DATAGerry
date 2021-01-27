@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
   selector: 'cmdb-exportdjob-activate-tab',
@@ -24,6 +24,11 @@ import { Component } from '@angular/core';
   styleUrls: ['./activate-exportd-tab.component.scss']
 })
 export class ActivateExportdTabComponent {
+
+  /**
+   * Outputs the total number of logs.
+   */
+  @Output() totalLogsChange: EventEmitter<number> = new EventEmitter<number>();
 
   public query = [
     { $match: { action: { $ne: 3 } } },

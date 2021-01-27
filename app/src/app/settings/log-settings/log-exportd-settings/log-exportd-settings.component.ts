@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'cmdb-log-exportd-settings',
@@ -25,5 +25,7 @@ import { Component, OnInit } from '@angular/core';
 })
 export class LogExportdSettingsComponent {
 
+  public activeTotal: number = 0;
+  public deletedTotal: number = 0;
 
 }

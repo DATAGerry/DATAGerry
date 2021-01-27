@@ -24,8 +24,8 @@
 <ng-template #actionsTemplate let-item="item">
   <div class="d-flex justify-content-center" *ngIf="item.public_id">
     <a *permissionLink="'base.exportd.log.delete'" class="pointer"
-       (click)="delLog(item.public_id)"
-       title="Delete type">
+       (click)="deleteLog(item.public_id)"
+       title="Delete log">
       <i class="far fa-trash-alt"></i>
     </a>
   </div>
@@ -33,6 +33,8 @@
 
 <!-- Custom table buttons-->
 <ng-template #deleteButton>
-  <button *permissionLink="'base.exportd.log.delete'" type="button" class="btn btn-danger btn-sm">Delete Selected
+  <button *permissionLink="'base.exportd.log.delete'" type="button" class="btn btn-danger btn-sm"
+          (click)="deleteSelectedLogs()">
+    Delete Selected
   </button>
 </ng-template>

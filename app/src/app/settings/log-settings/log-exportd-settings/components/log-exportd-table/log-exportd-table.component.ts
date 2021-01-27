@@ -16,9 +16,9 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { forkJoin, Observable, ReplaySubject } from 'rxjs';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ExportdJobLogService } from '../../../../services/exportd-job-log.service';
 import { ToastService } from '../../../../../layout/toast/toast.service';
@@ -26,6 +26,33 @@ import { CollectionParameters } from '../../../../../services/models/api-paramet
 import { ExportdLog } from '../../../../models/exportd-log';
 import { ExecuteState } from '../../../../models/modes_job.enum';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+
+@Component({
+  selector: 'cmdb-modal-content',
+  template: `
+      <div class="modal-header">
+          <h4 class="modal-title" id="modal-basic-title">Delete Log</h4>
+          <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+              <span aria-hidden="true">&times;</span>
+          </button>
+      </div>
+      <div class="modal-body">
+          Are you sure you want to delete this log?
+      </div>
+      <div class="modal-footer">
+          <button type="button" class="btn btn-danger" (click)="activeModal.close(this.publicID)">Delete</button>
+      </div>
+  `
+})
+export class DeleteLogJobModalComponent {
+
+  /**
+   * PublicID of the log.
+   */
+  @Input() public publicID: number;
+  constructor(public activeModal: NgbActiveModal) {
+  }
+}
 
 @Component({
   selector: 'cmdb-log-exportd-table',
@@ -140,10 +167,12 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
    */
   public loading: boolean = false;
 
-  public cleanupProgress: number = 0;
-  public cleanupInProgress: boolean = false;
+  /**
+   * Outputs the total number of logs.
+   */
+  @Output() totalLogsChange: EventEmitter<number> = new EventEmitter<number>();
 
-  constructor(private jobLogService: ExportdJobLogService) {
+  constructor(private jobLogService: ExportdJobLogService, private toast: ToastService, private modalService: NgbModal) {
   }
 
   public ngOnInit(): void {
@@ -284,6 +313,7 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
     this.jobLogService.getLogs(params).subscribe((apiResponse: APIGetMultiResponse<ExportdLog>) => {
       this.logs = apiResponse.results as Array<ExportdLog>;
       this.totalLogs = apiResponse.total;
+      this.totalLogsChange.emit(this.totalLogs);
       this.loading = false;
     });
   }
@@ -360,8 +390,12 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
     }
   }
 
-  public delLog(publicID: number) {
-    /*this.modalRef = this.modalService.open(DeleteLogJobModalComponent);
+  /**
+   * Delete a selected log
+   * @param publicID
+   */
+  public deleteLog(publicID: number): void {
+    this.modalRef = this.modalService.open(DeleteLogJobModalComponent);
     this.modalRef.componentInstance.publicID = publicID;
     this.modalRef.result.then(result => {
         this.jobLogService.deleteLog(publicID).subscribe(ack => {
@@ -376,25 +410,22 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
       },
       (error) => {
         this.toast.error(error);
-      });*/
+      });
   }
 
-  public deleteSelectedLogs() {
+  /**
+   * Delete the selected logs.
+   */
+  public deleteSelectedLogs(): void {
     if (this.selectedLogs.length > 0) {
-      this.cleanupInProgress = true;
-      const entriesLength = this.selectedLogs.length;
-      const step = 100 / entriesLength;
       const deleteObserves: Observable<any>[] = [];
       for (const logID of this.selectedLogIDs) {
         deleteObserves.push(this.jobLogService.deleteLog(logID));
-        this.cleanupProgress += step;
       }
       forkJoin(deleteObserves)
         .subscribe(dataArray => {
-          this.cleanupInProgress = false;
-        }, error => console.error(
-          error
-        ), () => {
+          this.toast.success('Logs deleted!');
+        }, error => this.toast.error(error), () => {
           this.loadLogsFromAPI();
         });
     }
