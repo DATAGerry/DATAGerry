@@ -22,7 +22,6 @@ import { CommonModule } from '@angular/common';
 import { ExportdJobSettingsListComponent } from './exportd-job-settings-list/exportd-job-settings-list.component';
 import { ExportdJobSettingsEditComponent } from './exportd-job-settings-edit/exportd-job-settings-edit.component';
 import { ExportdJobSettingsAddComponent } from './exportd-job-settings-add/exportd-job-settings-add.component';
-import { DataTablesModule } from 'angular-datatables';
 import { ExportdJobSettingsRoutingModule } from './exportd-job-settings-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -82,7 +81,6 @@ import { LogSettingsModule } from '../log-settings/log-settings.module';
         CommonModule,
         LayoutModule,
         ExportdJobSettingsRoutingModule,
-        DataTablesModule,
         FontAwesomeModule,
         ArchwizardModule,
         DndModule,

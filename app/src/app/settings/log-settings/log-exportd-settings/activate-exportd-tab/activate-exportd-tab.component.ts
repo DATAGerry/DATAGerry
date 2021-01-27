@@ -16,10 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
-import { ExportdLog } from '../../../models/exportd-log';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'cmdb-exportdjob-activate-tab',
