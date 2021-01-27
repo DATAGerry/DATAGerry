@@ -1,7 +1,26 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SystemService } from '../system.service';
-import { Subject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-properties',
@@ -15,32 +34,13 @@ export class PropertiesComponent implements OnInit, OnDestroy {
     properties: any[]
   };
 
-  public dtOptions: any = {};
-  public dtTrigger: Subject<any> = new Subject();
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private systemService: SystemService, private toast: ToastService) {
   }
 
   public ngOnInit(): void {
-    this.dtOptions = {
-      ordering: false,
-      columnDefs: [
-        {
-          targets: [0],
-          visible: false
-        }
-      ],
-      rowGroup: {
-        dataSrc: 0
-      }
-      ,
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
-
-    this.systemService.getConfigInformation().subscribe(config => {
+    this.systemService.getConfigInformation().pipe(takeUntil(this.subscriber)).subscribe(config => {
         this.config = {
           path: config.path,
           properties: []
@@ -56,15 +56,15 @@ export class PropertiesComponent implements OnInit, OnDestroy {
         }
       },
       (error) => {
-        console.error(error);
+        this.toast.error(error);
       },
       () => {
-        this.dtTrigger.next();
       });
   }
 
   public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }
