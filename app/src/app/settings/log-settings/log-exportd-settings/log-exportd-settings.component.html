@@ -12,15 +12,10 @@
   </li>
 </ul>
 <div class="tab-content pt-2">
-  <div *ngIf="cleanupInProgress" id="cleanup-progress" class="m-2">
-    <ngb-progressbar type="danger" [value]="cleanupProgress" [animated]="true" [striped]="true"></ngb-progressbar>
-  </div>
   <div class="tab-pane fade show active" id="activate" role="tabpanel">
     <cmdb-exportdjob-activate-tab></cmdb-exportdjob-activate-tab>
   </div>
   <div class="tab-pane fade" id="deactivate" role="tabpanel">
-    <cmdb-deactivate-exportd-tab [deActiveLogList]="deActiveLogList" (deleteEmitter)="deleteLog($event, 'deactive')"
-                         (cleanUpEmitter)="cleanup($event, 'deactive')">
-    </cmdb-deactivate-exportd-tab>
+    <cmdb-deactivate-exportd-tab></cmdb-deactivate-exportd-tab>
   </div>
 </div>

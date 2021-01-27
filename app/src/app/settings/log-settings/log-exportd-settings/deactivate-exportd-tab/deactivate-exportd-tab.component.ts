@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,79 +13,24 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { DataTableDirective } from 'angular-datatables';
-import { Subject } from 'rxjs';
-import { ExportdLog } from '../../../models/exportd-log';
+import { Component } from '@angular/core';
 
 @Component({
   selector: 'cmdb-deactivate-exportd-tab',
   templateUrl: './deactivate-exportd-tab.component.html',
   styleUrls: ['./deactivate-exportd-tab.component.scss']
 })
-export class DeactivateExportdTabComponent implements OnInit, OnDestroy, AfterContentInit {
+export class DeactivateExportdTabComponent {
 
-  @ViewChild(DataTableDirective, {static: true})
-  dtElement: DataTableDirective;
-  dtTrigger: Subject<any> = new Subject();
-  dtOptions: any = {};
-
-  // tslint:disable-next-line:variable-name
-  private _deActiveLogList: ExportdLog[];
-
-  @Input('deActiveLogList')
-  public set deActiveLogList(logList: ExportdLog[]) {
-    this._deActiveLogList = logList;
-    this.dtTrigger.next();
-  }
-
-  public get deActiveLogList() {
-    return this._deActiveLogList;
-  }
-
-  @Output() deleteEmitter = new EventEmitter<number>();
-  @Output() cleanUpEmitter = new EventEmitter<number[]>();
-
-  public ngOnInit(): void {
-    this.dtOptions = {
-      retrieve: true,
-      ordering: true,
-      order: [0, 'desc'],
-      rowGroup: {
-        dataSrc: (data) => {
-          return new Date(data[2]).toDateString();
-        }
-      },
-      language: {
-        search: '',
-        searchPlaceholder: 'Filter...'
-      }
-    };
-  }
-
-  public ngOnDestroy(): void {
-    this.dtTrigger.unsubscribe();
-  }
-
-  public ngAfterContentInit(): void {
-    this.dtTrigger.next();
-  }
-
-  public rerender() {
-    this.dtElement.dtInstance.then((dtInstance: DataTables.Api) => {
-      dtInstance.destroy();
-    });
-  }
-
-  public cleanup() {
-    const idList: number[] = [];
-    for (const log of this.deActiveLogList) {
-      idList.push(log.public_id);
-    }
-    this.cleanUpEmitter.emit(idList);
-  }
+  public query = [
+    { $match: { log_type: 'ExportdJobLog' } },
+    { $match: { action: { $ne: 3 } } },
+    { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+    { $match: { job: { $size: 0 } } },
+    { $project: { job: 0 } }
+  ];
 
 }

@@ -111,19 +111,6 @@ export class ExportdJobService<T = ExportdJob> implements ApiService {
     );
   }
 
-  public getTaskList(): Observable<Array<T>>  {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callGet<ExportdJob[]>(this.servicePrefix + '/', options).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   // CRUD calls
   public postTask(taskInstance: ExportdJob): Observable<T> {
     const options = this.options;

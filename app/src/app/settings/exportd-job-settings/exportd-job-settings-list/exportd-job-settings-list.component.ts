@@ -96,6 +96,11 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
    */
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
+  /**
+   * Table Buttons: add button.
+   */
+  @ViewChild('addButton', { static: true }) addButton: TemplateRef<any>;
+
 
   /**
    * Table columns definition.

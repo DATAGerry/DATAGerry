@@ -42,17 +42,18 @@ class ExportdMetaLog(JobManagementBase):
     COLLECTION = 'exportd.logs'
     MODEL: Model = 'ExportdLog'
 
-    def __init__(self, public_id, log_type, log_time: datetime, action: LogAction):
+    def __init__(self, public_id, log_type, log_time: datetime, action: LogAction, action_name: str):
         self.log_type = log_type
         self.log_time: datetime = log_time
         self.action: LogAction = action
+        self.action_name = action_name
         super(ExportdMetaLog, self).__init__(public_id=public_id)
 
 
 class ExportdJobLog(ExportdMetaLog):
     UNKNOWN_USER_STRING = 'Unknown'
 
-    def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction,
+    def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction, action_name: str,
                  job_id: int, state: bool = None, user_id: int = None, user_name: str = None, event: str = None,
                  message=None):
         self.job_id = job_id
@@ -61,7 +62,8 @@ class ExportdJobLog(ExportdMetaLog):
         self.user_name = user_name or self.UNKNOWN_USER_STRING
         self.event = event
         self.message = message
-        super(ExportdJobLog, self).__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action)
+        super(ExportdJobLog, self).__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action,
+                                            action_name=action_name)
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "ExportdJobLog":
@@ -76,7 +78,8 @@ class ExportdJobLog(ExportdMetaLog):
             log_time=data.get('log_time', None),
             log_type=data.get('log_type', None),
             message=data.get('message', None),
-            action=data.get('action', None)
+            action=data.get('action', None),
+            action_name=data.get('action_name', None)
         )
 
     @classmethod
@@ -94,6 +97,7 @@ class ExportdJobLog(ExportdMetaLog):
             'message': instance.message,
             'action': instance.action
         }
+
 
 class ExportdLog(CmdbLog):
     REGISTERED_LOG_TYPE = {}

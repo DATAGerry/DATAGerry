@@ -103,7 +103,9 @@
           <div class="dropdown-menu dropdown-menu-right">
             <div class="dropdown-header" *permissionLink="['base.exportd.job.view']">Task Managment</div>
             <a class="dropdown-item" *permissionLink="['base.exportd.job.view']"
-               routerLink="/settings/exportdjob">Exportd Job Settings</a>
+               routerLink="/settings/exportdjob">
+              <fa-icon icon="tasks"></fa-icon>
+              Exportd Job Settings</a>
             <div class="dropdown-header" *permissionLink="['base.exportd.log.view']">Logs</div>
             <a class="dropdown-item" *permissionLink="['base.exportd.log.view']"
                [routerLink]="['/settings/logs/exportdjobs']">

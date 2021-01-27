@@ -68,7 +68,7 @@ export class ExportdJobLogsComponent implements OnInit, OnDestroy {
   private genQuery(id: number): void {
     this.query = [{
       $match: {
-        job_id: id
+        job_id: +id
       }
     }];
   }

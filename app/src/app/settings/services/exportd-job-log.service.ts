@@ -74,20 +74,6 @@ export class ExportdJobLogService<T = any> implements ApiService {
     );
   }
 
-  // CRUD calls
-  public getJobLogs(publicID: number) {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callGet<T>(`${ this.servicePrefix }/job/${ publicID }/`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public getLogsWithExistingJobs(params: CollectionParameters = {
     filter: undefined,
     limit: 10,
@@ -95,40 +81,13 @@ export class ExportdJobLogService<T = any> implements ApiService {
     order: 1,
     page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    const query = [{
-        $match: {
-          log_type: 'ExportdJobLog'
-        }
-      },
-      {
-        $match: {
-          action: {
-            $ne: 3
-          }
-        }
-      },
-      {
-        $lookup: {
-          from: 'exportd.jobs',
-          localField: 'job_id',
-          foreignField: 'public_id',
-          as: 'job'
-        }
-      },
-      {
-        $match: {
-          jobs: {
-            $ne: {
-              $size: 0
-            }
-          }
-        }
-      },
-      {
-        $project: {
-          job: 0
-        }
-      }];
+    const query = [
+      { $match: { log_type: 'ExportdJobLog' } },
+      { $match: { action: { $ne: 3 } } },
+      { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+      { $match: { job: { $ne: { $size: 0 } } } },
+      { $project: { job: 0 } }
+      ];
     if (params.filter !== undefined) {
       query.push(params.filter);
     }
@@ -136,17 +95,26 @@ export class ExportdJobLogService<T = any> implements ApiService {
     return this.getLogs(params);
   }
 
-  public getLogsWithNotExistingJobs() {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callGet<T>(`${ this.servicePrefix }/job/notexists/`, options).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
+  public getLogsWithNotExistingJobs(params: CollectionParameters = {
+    filter: undefined,
+    limit: 10,
+    sort: 'public_id',
+    order: 1,
+    page: 1
+  }): Observable<APIGetMultiResponse<T>> {
+    const query = [
+      { $match: { log_type: 'ExportdJobLog' } },
+      { $match: { action: { $ne: 3 } } },
+      { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+      { $match: { job: { $size: 0 } } },
+      { $project: { job: 0 } }
+      ];
+
+    if (params.filter !== undefined) {
+      query.push(params.filter);
+    }
+    params.filter = query;
+    return this.getLogs(params);
   }
 
   public getDeleteLogs() {

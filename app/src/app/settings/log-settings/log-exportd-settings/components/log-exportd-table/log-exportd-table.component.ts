@@ -37,7 +37,13 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
   /**
    * Generic export parameter.
    */
-  @Input() public query: Array<any>;
+  public query: Array<any>;
+
+  @Input('query')
+  public set Query(query: Array<any> | any) {
+    this.query = query;
+    this.loadLogsFromAPI();
+  }
 
   /**
    * Table Template: active column.
@@ -137,8 +143,7 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
   public cleanupProgress: number = 0;
   public cleanupInProgress: boolean = false;
 
-  constructor(private jobLogService: ExportdJobLogService,
-              private modalService: NgbModal, private toast: ToastService) {
+  constructor(private jobLogService: ExportdJobLogService) {
   }
 
   public ngOnInit(): void {
@@ -223,15 +228,16 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
    */
   public loadLogsFromAPI() {
     this.loading = true;
-    const query = [];
+    let query = [];
     query.push({
       $match: {
         log_type: 'ExportdJobLog'
       }
     });
     if (this.query) {
-      query.concat(this.query);
+      query = query.concat(this.query);
     }
+    console.log(query);
     if (this.filter) {
       const or = [];
       const searchableColumns = this.columns.filter(c => c.searchable);
