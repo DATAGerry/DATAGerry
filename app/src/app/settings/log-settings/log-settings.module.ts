@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { LogSettingsRoutingModule } from './log-settings-routing.module';
-import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
+import { DeleteModalComponent, LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
 import { ActivateTabComponent } from './log-object-settings/activate-tab/activate-tab.component';
 import { DeactivateTabComponent } from './log-object-settings/deactivate-tab/deactivate-tab.component';
 import { DeleteTabComponent } from './log-object-settings/delete-tab/delete-tab.component';
@@ -44,22 +44,23 @@ import {
 import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
-    entryComponents: [DeleteLogJobModalComponent],
-    declarations: [
-        LogObjectSettingsComponent,
-        ActivateTabComponent,
-        DeactivateTabComponent,
-        DeleteTabComponent,
-        LogSettingsComponent,
-        LogExportdSettingsComponent,
-        ActivateExportdTabComponent,
-        DeletedExportdTabComponent,
-        LogObjectTableActionsComponent,
-        LogExportdTableComponent,
-      DeleteLogJobModalComponent],
-    exports: [
-        LogExportdTableComponent
-    ],
+  entryComponents: [DeleteLogJobModalComponent, DeleteModalComponent],
+  declarations: [
+    LogObjectSettingsComponent,
+    ActivateTabComponent,
+    DeactivateTabComponent,
+    DeleteTabComponent,
+    LogSettingsComponent,
+    LogExportdSettingsComponent,
+    ActivateExportdTabComponent,
+    DeletedExportdTabComponent,
+    LogObjectTableActionsComponent,
+    LogExportdTableComponent,
+    DeleteLogJobModalComponent,
+    DeleteModalComponent],
+  exports: [
+    LogExportdTableComponent
+  ],
   imports: [
     CommonModule,
     LayoutModule,
