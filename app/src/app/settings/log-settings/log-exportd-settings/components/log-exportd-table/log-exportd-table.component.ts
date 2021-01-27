@@ -237,7 +237,6 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
     if (this.query) {
       query = query.concat(this.query);
     }
-    console.log(query);
     if (this.filter) {
       const or = [];
       const searchableColumns = this.columns.filter(c => c.searchable);

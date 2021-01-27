@@ -95,7 +95,8 @@ class ExportdJobLog(ExportdMetaLog):
             'log_time': instance.log_time,
             'log_type': instance.log_type,
             'message': instance.message,
-            'action': instance.action
+            'action': instance.action,
+            'action_name': instance.action_name,
         }
 
 
