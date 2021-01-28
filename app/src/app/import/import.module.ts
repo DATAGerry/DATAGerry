@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -47,8 +47,7 @@ import { TypePreviewComponent } from './import-types/type-preview/type-preview.c
 import { CategoryModule } from '../framework/category/category.module';
 import { ImportTypeCompleteComponent } from './import-types/import-type-complete/import-type-complete.component';
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
-import { DataTablesModule } from 'angular-datatables';
-import { TableModule } from "../layout/table/table.module";
+import { TableModule } from '../layout/table/table.module';
 import { FailedImportTableComponent } from './import-objects/import-complete/failed-import-table/failed-import-table.component';
 
 

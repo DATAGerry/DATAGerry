@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -61,7 +61,6 @@ import { SearchBarModule } from '../search/search-bar/search-bar.module';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../auth/auth.module';
 import { IconPickerModule } from 'ngx-icon-picker';
-import { DataTablesModule } from 'angular-datatables';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
@@ -157,7 +156,6 @@ import { BlockComponent } from './components/block/block.component';
     SearchBarModule,
     NgbModule,
     FormsModule,
-    DataTablesModule,
     TableModule,
     FontAwesomeModule,
     IconPickerModule,

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { UsersRoutingModule } from './users-routing.module';
-import { DataTablesModule } from 'angular-datatables';
 import { PasswordStrengthMeterModule } from '../../layout/password-strength-meter/password-strength-meter.module';
 import { ReactiveFormsModule } from '@angular/forms';
 import { UserViewComponent } from './user-view/user-view.component';

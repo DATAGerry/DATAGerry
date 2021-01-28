@@ -20,7 +20,6 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { DataTablesModule } from 'angular-datatables';
 
 import { SearchRoutingModule } from './search-routing.module';
 import { LayoutModule } from '../layout/layout.module';
@@ -41,7 +40,6 @@ import { SearchResultBarComponent } from './search-result/search-result-bar/sear
     FormsModule,
     LayoutModule,
     ReactiveFormsModule,
-    DataTablesModule,
     RenderModule,
     NgSelectModule
   ],
