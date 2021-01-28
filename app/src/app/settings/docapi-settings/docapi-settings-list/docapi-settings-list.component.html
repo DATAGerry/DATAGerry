@@ -6,17 +6,9 @@
 <cmdb-info-box [message]="messageBlock"
                icon="fas fa-file-pdf"
                doc="/docs/admin_guide/docapi.html"></cmdb-info-box>
-<div class="card-body" style="padding: 0 0 1em 0;">
-  <button type="button"
-          *permissionLink="['base.docapi.template.add']"
-          class="btn btn-success btn-sm"
-          [routerLink]="['/settings/docapi/add']">
-    <i class="fas fa-plus"></i> Add
-  </button>
-</div>
 
 <cmdb-table [items]="templates" [columns]="columns" [page]="page" [sort]="sort" [id]="'docapi-list-datatable'"
-            [stateEnabled]="false" [emptyMessage]="'No doc templates were found!'"
+            [stateEnabled]="false" [emptyMessage]="'No doc templates were found!'" [customButtons]="[addButton]"
             [totalItems]="totalTemplates" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)"></cmdb-table>
@@ -31,4 +23,13 @@
       <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(item?.public_id)"></fa-icon>
     </a>
   </div>
+</ng-template>
+
+<ng-template #addButton>
+  <button type="button"
+          *permissionLink="['base.docapi.template.add']"
+          class="btn btn-success btn-sm"
+          [routerLink]="['/settings/docapi/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
 </ng-template>

@@ -50,6 +50,11 @@ export class DocapiSettingsListComponent implements OnInit, OnDestroy {
    */
   @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
+  /**
+   * Table Template: add button.
+   */
+  @ViewChild('addButton', { static: true }) addButton: TemplateRef<any>;
+
   private modalRef: NgbModalRef;
 
   /**
