@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,17 +18,15 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
-import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable, timer } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetListResponse, APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
+import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { FormControl } from '@angular/forms';
 
@@ -277,26 +275,6 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   public getChangedObjectsSince(timestamp: number) {
     return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/changed/${ timestamp }`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public getObjectsByFilter(typeID: number, filter: DataTableFilter) {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    httpObjectObserveOptions[PARAMETER].start = filter.start;
-    httpObjectObserveOptions[PARAMETER].length = filter.length;
-    httpObjectObserveOptions[PARAMETER].order = filter.orderBy;
-    httpObjectObserveOptions[PARAMETER].direction = filter.direction;
-    httpObjectObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search).trim();
-    httpObjectObserveOptions[PARAMETER].dtRender = filter.dtRender;
-    httpObjectObserveOptions[PARAMETER].idList = filter.idList;
-    return this.api.callGet<DataTablesResult[]>(`${ this.servicePrefix }/dt/filter/type/${ typeID }`,
-      httpObjectObserveOptions).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
