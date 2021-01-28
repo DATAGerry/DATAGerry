@@ -16,16 +16,25 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, EventEmitter, Output } from '@angular/core';
 
 @Component({
-  selector: 'cmdb-log-exportd-settings',
-  templateUrl: './log-exportd-settings.component.html',
-  styleUrls: ['./log-exportd-settings.component.scss']
+  selector: 'cmdb-deactivate-exportd-tab',
+  templateUrl: './deleted-exportd-tab.component.html',
+  styleUrls: ['./deleted-exportd-tab.component.scss']
 })
-export class LogExportdSettingsComponent {
+export class DeletedExportdTabComponent {
 
-  public activeTotal: number = 0;
-  public deletedTotal: number = 0;
+  /**
+   * Outputs the total number of logs.
+   */
+  @Output() totalLogsChange: EventEmitter<number> = new EventEmitter<number>();
+
+  public query = [
+    { $match: { log_type: 'ExportdJobLog' } },
+    { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+    { $match: { job: { $size: 0 } } },
+    { $project: { job: 0 } }
+  ];
 
 }

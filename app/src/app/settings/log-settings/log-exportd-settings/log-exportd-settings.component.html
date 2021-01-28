@@ -2,26 +2,20 @@
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item">
     <a class="nav-link active" id="log-object-activate-tab" data-toggle="tab" href="#activate" role="tab">
-      Existing Exportd Logs <span class="badge badge-secondary">{{activeLength}}</span>
+      Existing Exportd Logs <span class="badge badge-secondary">{{activeTotal}}</span>
     </a>
   </li>
   <li class="nav-item">
     <a class="nav-link" id="log-object-deactivate-tab" data-toggle="tab" href="#deactivate" role="tab">
-      Deleted Exportd Job Logs <span class="badge badge-secondary">{{deActiveLength}}</span>
+      Deleted Exportd Job Logs <span class="badge badge-secondary">{{deletedTotal}}</span>
     </a>
   </li>
 </ul>
 <div class="tab-content pt-2">
-  <div *ngIf="cleanupInProgress" id="cleanup-progress" class="m-2">
-    <ngb-progressbar type="danger" [value]="cleanupProgress" [animated]="true" [striped]="true"></ngb-progressbar>
-  </div>
   <div class="tab-pane fade show active" id="activate" role="tabpanel">
-    <cmdb-exportdjob-activate-tab [activeLogList]="activeLogList"
-                       (deleteEmitter)="deleteLog($event, 'active')"></cmdb-exportdjob-activate-tab>
+    <cmdb-exportdjob-activate-tab (totalLogsChange)="activeTotal = $event"></cmdb-exportdjob-activate-tab>
   </div>
   <div class="tab-pane fade" id="deactivate" role="tabpanel">
-    <cmdb-deactivate-exportd-tab [deActiveLogList]="deActiveLogList" (deleteEmitter)="deleteLog($event, 'deactive')"
-                         (cleanUpEmitter)="cleanup($event, 'deactive')">
-    </cmdb-deactivate-exportd-tab>
+    <cmdb-deactivate-exportd-tab (totalLogsChange)="deletedTotal = $event"></cmdb-deactivate-exportd-tab>
   </div>
 </div>

@@ -1,0 +1,37 @@
+<cmdb-table [items]="logs" [columns]="columns" [page]="page" [sort]="sort" [id]="'exportd-logs-table'"
+            [stateEnabled]="false" [emptyMessage]="'No logs were found!'" [customButtons]="[deleteButton]"
+            [totalItems]="totalLogs" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
+            (searchChange)="onSearchChange($event)"></cmdb-table>
+
+<!-- Table templates -->
+<ng-template #activeTemplate let-data="data">
+  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+</ng-template>
+
+<ng-template #logDateTemplate let-data="data">
+  {{data | date:"dd/MM/yyyy - HH:mm:ss"}}
+</ng-template>
+
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact [userID]="data"></cmdb-user-compact>
+</ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <div class="d-flex justify-content-center" *ngIf="item.public_id">
+    <a *permissionLink="'base.exportd.log.delete'" class="pointer"
+       (click)="deleteLog(item.public_id)"
+       title="Delete log">
+      <i class="far fa-trash-alt"></i>
+    </a>
+  </div>
+</ng-template>
+
+<!-- Custom table buttons-->
+<ng-template #deleteButton>
+  <button *permissionLink="'base.exportd.log.delete'" type="button" class="btn btn-danger btn-sm"
+          (click)="deleteSelectedLogs()">
+    Delete Selected
+  </button>
+</ng-template>

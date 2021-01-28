@@ -32,7 +32,7 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { CmdbType } from '../../../../framework/models/cmdb-type';
 import { TypeService } from '../../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
-import { ExternalSystemService } from '../../../services/external_system.service';
+import { ExternalSystemService } from '../../../services/external-system.service';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { TemplateHelperService } from '../../../services/template-helper.service';
 
@@ -234,7 +234,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   public getVariableHelp(value: string) {
-    this.externalService.getExternSytemVariables(value).subscribe(item => {
+    this.externalService.getExternSystemVariables(value).subscribe(item => {
       this.variableHelper = item;
     });
   }
