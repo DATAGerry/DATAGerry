@@ -144,11 +144,10 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
 
     from cmdb.interface.rest_api.external_systems_routes import external_system
-    from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
+    from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
-    from cmdb.interface.rest_api.docapi_routes import docs_blueprint
     from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
@@ -175,6 +174,7 @@ def register_blueprints(app):
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
+    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docs', '/doc'])
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
