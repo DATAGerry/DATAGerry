@@ -19,49 +19,51 @@ import logging
 import json
 
 from flask import abort, request, jsonify, current_app, Response
+
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse
+from cmdb.manager import ManagerIterationError, ManagerGetError
+from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.docapi.docapi_base import DocApiManager
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate, DocapiTemplateType
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManagerGetError, \
-    DocapiTemplateManagerInsertError, DocapiTemplateManagerUpdateError, DocapiTemplateManagerDeleteError
+    DocapiTemplateManagerInsertError, DocapiTemplateManagerUpdateError, DocapiTemplateManagerDeleteError, \
+    DocapiTemplateManager
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
     docapi_tpl_manager = current_app.docapi_tpl_manager
     object_manager = current_app.object_manager
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
 LOGGER = logging.getLogger(__name__)
+
 docapi_blueprint = RootBlueprint('docapi', __name__, url_prefix='/docapi')
+docs_blueprint = APIBlueprint('docs', __name__)
 
 
 # DEFAULT ROUTES
-@docapi_blueprint.route('/template', methods=['GET'])
-@docapi_blueprint.route('/template/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.docapi.template.view')
-def get_template_list(request_user: UserModel):
-    """
-    get all objects in database
-    Returns:
-        list of docapi templates
-    """
+@docs_blueprint.route('/template', methods=['GET', 'HEAD'])
+@docs_blueprint.protect(auth=True, right='base.docapi.template.view')
+@docs_blueprint.parse_collection_parameters()
+def get_template_list(params: CollectionParameters):
+    template_manager = DocapiTemplateManager(database_manager=current_app.database_manager)
+    body = request.method == 'HEAD'
+
     try:
-        tpl_list = docapi_tpl_manager.get_all_templates()
-    except DocapiTemplateManagerGetError as err:
+        iteration_result: IterationResult[DocapiTemplate] = template_manager.get_templates(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        types = [DocapiTemplate.to_json(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
+                                        url=request.url, model=DocapiTemplate.MODEL, body=body)
+    except ManagerIterationError as err:
         return abort(400, err.message)
-    except ModuleNotFoundError as err:
-        return abort(400, err)
-    except CMDBError as err:
-        return abort(404, jsonify(message='Not Found', error=err.message))
-    return make_response(tpl_list)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 @docapi_blueprint.route('/template/by/<string:searchfilter>/', methods=['GET'])
@@ -176,8 +178,6 @@ def delete_template(public_id: int, request_user: UserModel):
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
     except DocapiTemplateManagerDeleteError:
         return abort(400)
-    except CMDBError:
-        return abort(500)
     resp = make_response(ack)
     return resp
 

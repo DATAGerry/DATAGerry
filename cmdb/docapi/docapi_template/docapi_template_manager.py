@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 from datetime import datetime
@@ -21,6 +21,10 @@ from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
+from cmdb.framework.managers.framework_manager import FrameworkQueryBuilder
+from cmdb.framework.results import IterationResult
+from cmdb.manager import ManagerIterationError
+from cmdb.search import Query
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
@@ -32,6 +36,8 @@ class DocapiTemplateManager(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
         self.dbm = database_manager
+        self.builder = FrameworkQueryBuilder()
+        self.collection = DocapiTemplate.COLLECTION
         self._event_queue = event_queue
         super().__init__(database_manager)
 
@@ -46,14 +52,15 @@ class DocapiTemplateManager(CmdbManagerBase):
             raise err
         return DocapiTemplate(**result)
 
-    def get_all_templates(self):
-        template_list = []
-        for template in self.dbm.find_all(collection=DocapiTemplate.COLLECTION):
-            try:
-                template_list.append(DocapiTemplate(**template))
-            except CMDBError:
-                continue
-        return template_list
+    def get_templates(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[DocapiTemplate]:
+        try:
+            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            aggregation_result = next(self._aggregate(self.collection, query))
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err)
+        iteration_result: IterationResult[DocapiTemplate] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result.convert_to(DocapiTemplate)
+        return iteration_result
 
     def get_templates_by(self, **requirements):
         try:

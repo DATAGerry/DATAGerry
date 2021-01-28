@@ -17,30 +17,31 @@
 from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
+from cmdb.framework.utils import Model
 
 try:
     from cmdb.utils.error import CMDBError
 except ImportError:
     CMDBError = Exception
 
+
 class DocapiTemplateType(Enum):
     OBJECT = 0
+
 
 class DocapiTemplate(TemplateManagementBase):
     """
         Docapi Template
     """
     COLLECTION = 'docapi.templates'
-    REQUIRED_INIT_KEYS = [
-        'name',
-    ]
+    MODEL: Model = 'DocapiTemplate'
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name, label, description, active, author_id,
-                 template_data, template_style, template_type, template_parameters, **kwargs):
+    def __init__(self, name, label=None, description=None, active=None, author_id=None,
+                 template_data=None, template_style=None, template_type=None, template_parameters=None, **kwargs):
         """
         Args:
             name: name of this template
@@ -63,6 +64,36 @@ class DocapiTemplate(TemplateManagementBase):
         self.template_type = template_type or DocapiTemplateType.OBJECT.name
         self.template_parameters = template_parameters
         super(DocapiTemplate, self).__init__(**kwargs)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "DocapiTemplate":
+        return cls(
+            public_id=data.get('public_id'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            description=data.get('description', None),
+            active=data.get('active', None),
+            author_id=data.get('author_id', None),
+            template_data=data.get('template_data', None),
+            template_style=data.get('template_style', None),
+            template_type=data.get('template_type', None),
+            template_parameters=data.get('template_parameters', None),
+        )
+
+    @classmethod
+    def to_json(cls, instance: "DocapiTemplate", *args, **kwargs) -> dict:
+        return {
+            'public_id': instance.public_id,
+            'name': instance.name,
+            'label': instance.label,
+            'description': instance.description,
+            'active': instance.active,
+            'author_id': instance.author_id,
+            'template_data': instance.template_data,
+            'template_style': instance.template_style,
+            'template_type': instance.template_type,
+            'template_parameters': instance.template_parameters
+        }
 
     def get_public_id(self) -> int:
         """

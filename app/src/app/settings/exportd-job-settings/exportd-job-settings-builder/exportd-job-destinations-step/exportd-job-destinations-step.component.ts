@@ -19,7 +19,7 @@
 import { Component, Input, OnInit} from '@angular/core';
 import { CmdbMode } from '../../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ExternalSystemService } from '../../../services/external_system.service';
+import { ExternalSystemService } from '../../../services/external-system.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 
 
@@ -57,7 +57,7 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
             let description: string = '';
             const classname = forArray.controls[i].get('className').value;
             if (classname !== '' && classname !== undefined) {
-              this.externalService.getExternSytemParams(classname).subscribe(params => {
+              this.externalService.getExternSystemParams(classname).subscribe(params => {
                 required = params[c].required;
                 description = params[c].description;
                 control.push(this.createParameters('', '', description, required));
@@ -87,12 +87,12 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
       destination: this.formBuilder.array([this.createDestination()])
     });
 
-    this.externalService.getExternSytemList().subscribe(data => {
+    this.externalService.getExternSystemList().subscribe(data => {
       this.externalSystemList = data;
     }, error => {},
       () => {
         for (const className of this.externalSystemList) {
-          this.externalService.getExternSytemParams(className).subscribe(params => {
+          this.externalService.getExternSystemParams(className).subscribe(params => {
             this.externalSystems.push({name: className, parameter : params});
           });
         }
@@ -149,7 +149,7 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
   public onDraggedSystem(item: DndDropEvent, control: any, index, effect: DropEffect) {
     control.get('className').setValue(item.data.name);
     let externalSystemParams = [];
-    this.externalService.getExternSytemParams(item.data.name).subscribe(params => {
+    this.externalService.getExternSystemParams(item.data.name).subscribe(params => {
       externalSystemParams = params as [];
     }, error => console.log(error),
       () => {

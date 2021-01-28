@@ -16,20 +16,22 @@
 
 import logging
 
+from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.managers.log_manager import LogManagerDeleteError
-from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction
+from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdLog, ExportdMetaLog
 
+from flask import abort, current_app, jsonify, request
 
-from flask import abort, current_app, jsonify
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import GetMultiResponse
+from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.interface.blueprint import RootBlueprint
+from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 exportd_log_blueprint = RootBlueprint('exportd_log_rest', __name__, url_prefix='/exportdlog')
@@ -37,6 +39,28 @@ exportd_log_blueprint = RootBlueprint('exportd_log_rest', __name__, url_prefix='
 with current_app.app_context():
     exportd_manager = current_app.exportd_manager
     log_manager = current_app.exportd_log_manager
+
+
+@exportd_blueprint.route('/logs', methods=['GET', 'HEAD'])
+@exportd_blueprint.protect(auth=True, right='base.exportd.log.view')
+@exportd_blueprint.parse_collection_parameters()
+def get_exportd_logs(params: CollectionParameters):
+    """Iterate route for exportd logs"""
+
+    log_manager = ExportDLogManager(current_app.database_manager)
+    body = request.method == 'HEAD'
+
+    try:
+        iteration_result: IterationResult[ExportdJobLog] = log_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        types = [ExportdJobLog.to_json(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
+                                        url=request.url, model=ExportdMetaLog.MODEL, body=body)
+    except ManagerIterationError as err:
+        return abort(400, err.message)
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    return api_response.make_response()
 
 
 # DEFAULT ROUTES
@@ -68,7 +92,7 @@ def get_log_list(request_user: UserModel):
 @right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: UserModel):
     try:
-        delete_ack = log_manager.delete(public_id=public_id)
+        delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError as err:
         return abort(500)
     return make_response(delete_ack)

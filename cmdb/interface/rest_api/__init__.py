@@ -24,7 +24,6 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 from cmdb.media_library.media_file_manager import MediaFileManagement
 from cmdb.user_management import UserManager
 from cmdb.security.security import SecurityManager
@@ -137,12 +136,19 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
+    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
+
     from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
+
     from cmdb.interface.rest_api.external_systems_routes import external_system
-    from cmdb.interface.rest_api.docapi_routes import docapi_blueprint
+    from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
+
+    from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_blueprint(object_blueprint)
@@ -150,6 +156,7 @@ def register_blueprints(app):
     app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
     app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
     app.register_blueprint(connection_routes)
+
     app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
     app.register_multi_blueprint(users_blueprint, multi_prefix=['/user', '/users'])
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
@@ -162,10 +169,12 @@ def register_blueprints(app):
     app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
+    app.register_multi_blueprint(exportd_blueprint, multi_prefix=['/exportd'])
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
+    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docs', '/doc'])
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
