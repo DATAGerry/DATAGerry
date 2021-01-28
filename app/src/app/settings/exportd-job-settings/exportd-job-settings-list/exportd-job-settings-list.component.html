@@ -10,7 +10,7 @@
             [stateEnabled]="false" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]"
             [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (searchChange)="onSearchChange($event)" (sortChange)="onSearchChange($event)"></cmdb-table>
+            (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)"></cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">
