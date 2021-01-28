@@ -210,7 +210,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
         data: 'state',
         template: this.runningTemplate,
         searchable: false,
-        sortable: true
+        sortable: false
       },
       {
         display: 'Last Execute Date',

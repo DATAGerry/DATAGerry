@@ -10,7 +10,7 @@
             [stateEnabled]="false" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]"
             [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (searchChange)="onSearchChange($event)"></cmdb-table>
+            (searchChange)="onSearchChange($event)" (sortChange)="onSearchChange($event)"></cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">
@@ -36,7 +36,7 @@
   <cmdb-user-compact [userID]="data"></cmdb-user-compact>
 </ng-template>
 
-<ng-template #runningTemplate let-data="dat">
+<ng-template #runningTemplate let-data="data">
   <div class="progress">
     <div [className]="data === modes.RUNNING
             ? 'progress-bar progress-bar-striped progress-bar-animated'
