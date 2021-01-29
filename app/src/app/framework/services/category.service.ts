@@ -36,6 +36,7 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
@@ -72,16 +73,25 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
 
   }
 
-  public getCategoryIteration(...options): Observable<APIGetMultiResponse<T>> {
-    const httpProtocol = httpObserveOptions;
-    let params: HttpParams = new HttpParams();
-    for (const option of options) {
-      for (const key of Object.keys(option)) {
-        params = params.append(key, option[key]);
-      }
+  public getCategories(params: CollectionParameters = {
+    filter: undefined,
+    limit: 10,
+    sort: 'public_id',
+    order: 1,
+    page: 1
+  }): Observable<APIGetMultiResponse<T>> {
+    const options = httpObserveOptions;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
-    httpProtocol.params = params;
-    return this.api.callGet<T[]>(this.servicePrefix + '/', httpProtocol).pipe(
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
+    options.params = httpParams;
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
