@@ -140,7 +140,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   // CRUD calls
   public postObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -153,7 +155,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public changeState(publicID: number, status: boolean) {
-    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -161,7 +165,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public deleteManyObjects(publicID: any) {
-    return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -172,7 +178,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -251,19 +259,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getObjectsByUser(publicID: number) {
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/${ publicID }`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public getNewObjectsSince(timestamp: number) {
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -285,7 +284,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public countUncleanObjects(typeID: number): Observable<number> {
-    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
         return +apiResponse.headers.get('X-Total-Count');
       })
@@ -293,7 +294,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public getUncleanObjects(typeID: number): Observable<Array<CmdbObject>> {
-    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
         return apiResponse.body.results as Array<CmdbObject>;
       })
@@ -301,7 +304,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public getObjectCleanStatus(typeID: number): Observable<boolean> {
-    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse) => {
         return +apiResponse.headers.get('X-Total-Count') === 0;
       })
@@ -309,7 +314,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public cleanObjects(typeID: number): Observable<any> {
-    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

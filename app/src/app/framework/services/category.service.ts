@@ -102,7 +102,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * Get a category by id
    */
   public getCategory(publicID: number): Observable<T> | undefined {
-    return this.api.callGet<T>(this.servicePrefix + '/' + publicID).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
           return undefined;
@@ -176,7 +178,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category raw instance of a CategoryDAO
    */
   public postCategory(category: T): Observable<T> {
-    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
           return null;
@@ -191,8 +195,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category modified category instance
    */
   public updateCategory(category: T): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
     // @ts-ignore
-    return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category).pipe(
+    return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result;
       })
@@ -205,7 +211,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param publicID the category id
    */
   public deleteCategory(publicID: number): Observable<number> {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {
         return apiResponse.body.raw.public_id;
       })
