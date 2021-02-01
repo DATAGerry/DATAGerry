@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,14 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { RenderComponent } from '../../render/render.component';
 import { CmdbObject } from '../../models/cmdb-object';
@@ -32,6 +32,7 @@ import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { AccessControlPermission } from '../../../acl/acl.types';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-add',
@@ -41,7 +42,6 @@ import { ToastService } from '../../../layout/toast/toast.service';
 export class ObjectAddComponent implements OnInit, OnDestroy {
 
   public typeList: CmdbType[];
-  public categoryList: CmdbCategory[] = [];
   public typeIDForm: FormGroup;
   private typeIDSubject: BehaviorSubject<number>;
   public typeID: Observable<number>;
@@ -53,6 +53,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   @Output() parentSubmit = new EventEmitter<any>();
   @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
 
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
               private objectService: ObjectService, private userService: UserService, private route: ActivatedRoute,
@@ -66,7 +67,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
       }
     });
     this.typeID = this.typeIDSubject.asObservable();
-    this.typeID.subscribe(selectedTypeID => {
+    this.typeID.pipe(takeUntil(this.subscriber)).subscribe(selectedTypeID => {
       if (selectedTypeID !== null) {
         this.typeService.getType(selectedTypeID).subscribe((typeInstance: CmdbType) => {
           this.typeInstance = typeInstance;
@@ -80,14 +81,10 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.typeService.getTypeList(AccessControlPermission.CREATE).subscribe((typeList: CmdbType[]) => {
+    this.typeService.getTypeList(AccessControlPermission.CREATE).pipe(takeUntil(this.subscriber)).subscribe((typeList: CmdbType[]) => {
       this.typeList = typeList;
     }, (e) => {
-      console.error(e);
-    }, () => {
-      this.categoryService.getCategoryList().subscribe((categoryList: CmdbCategory[]) => {
-        this.categoryList = categoryList;
-      });
+      this.toastService.error(e);
     });
     this.typeIDForm = new FormGroup({
       typeID: new FormControl(null, Validators.required)
@@ -107,6 +104,8 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.typeIDSubject.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 
@@ -139,7 +138,7 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         });
       });
       let ack = null;
-      this.objectService.postObject(this.objectInstance).subscribe(newObjectID => {
+      this.objectService.postObject(this.objectInstance).pipe(takeUntil(this.subscriber)).subscribe(newObjectID => {
           ack = newObjectID;
         },
         (e) => {

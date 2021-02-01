@@ -221,7 +221,8 @@ class TypeModel(CmdbDAO):
         },
         'fields': {
             'type': 'list',
-            'default': []
+            'required': False,
+            'default': None
         },
         'version': {
             'type': 'string',
@@ -294,7 +295,7 @@ class TypeModel(CmdbDAO):
             version=data.get('version', None),
             description=data.get('description', None),
             render_meta=TypeRenderMeta.from_data(data.get('render_meta', {})),
-            fields=data.get('fields', None),
+            fields=data.get('fields', None) or [],
             acl=AccessControlList.from_data(data.get('acl', {}))
         )
 

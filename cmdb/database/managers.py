@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -252,7 +252,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return self.connector.get_collection(collection).insert_one(data)
 
         if 'public_id' not in data:
-            data['public_id'] = self.get_public_id_counter(collection=collection) + 1
+            data['public_id'] = self.get_next_public_id(collection=collection)
         self.connector.get_collection(collection).insert_one(data)
         # update the id counter
         self.update_public_id_counter(collection, data['public_id'])
@@ -499,13 +499,6 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             counter_doc['counter'] = value
             self.connector.get_collection(PublicIDCounter.COLLECTION).update(query, counter_doc)
 
-    def get_public_id_counter(self, collection: str):
-        working_collection = self.connector.get_collection(PublicIDCounter.COLLECTION)
-        query = {
-            '_id': collection
-        }
-        counter_doc = working_collection.find_one(query)
-        return counter_doc['counter']
 
 class DatabaseGridFS(GridFS):
     """

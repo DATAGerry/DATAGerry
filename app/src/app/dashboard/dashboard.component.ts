@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,7 @@ import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
-import { ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 import { CollectionParameters } from '../services/models/api-parameter';
@@ -261,19 +261,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private generateTypeChar() {
-
-    this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
-      for (let i = 0; i < data.length; i++) {
-        this.typeService.getTypeListByCategory(data[i].public_id).pipe(
-          takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
+    const params = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1
+    };
+    this.categoryService.getCategories(params).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+        const categories = apiResponse.results as Array<CmdbCategory>;
+        for (let i = 0; i < apiResponse.total; i++) {
+          this.typeService.getTypeListByCategory(categories[i].public_id).pipe(
+            takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
             this.itemsCategory.push(list.length);
-            this.labelsCategory.push(data[i].label);
+            this.labelsCategory.push(categories[i].label);
             this.colorsCategory.push(this.getRandomColor());
-        });
-        if (i === this.maxChartValue) {
-          break;
+          });
+          if (i === this.maxChartValue) {
+            break;
+          }
         }
-      }
     });
   }
 

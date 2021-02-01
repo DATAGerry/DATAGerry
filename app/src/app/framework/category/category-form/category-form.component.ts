@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,14 +17,16 @@
 */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
-import { Subscription } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbCategory } from '../../models/cmdb-category';
 import { CmdbType } from '../../models/cmdb-type';
 import { CategoryService, checkCategoryExistsValidator } from '../../services/category.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
-import { TypeService } from '../../services/type.service';
-import { AccessControlPermission } from '../../../acl/acl.types';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { ToastService } from '../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-category-form',
@@ -74,11 +76,39 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   public categories: CmdbCategory[] = [];
 
+  /**
+   * Total number of categories.
+   */
+  public totalCategories: number = 0;
+
+  /**
+   * Total number of category pages.
+   */
+  public totalCategoriesPages: number = 0;
+
+  /**
+   * Category add form.
+   */
   public categoryForm: FormGroup;
+
+  /**
+   * Are categories loading?
+   */
+  public categoriesLoading: boolean = false;
+
+  /**
+   * Category params
+   */
+  public categoryParams: CollectionParameters = {
+    filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1
+  };
+
+  public subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   @Input() public unAssignedTypes: CmdbType[] = [];
 
   private tempAssignedTypes: CmdbType[] = [];
+
   @Input()
   public set assignedTypes(value: CmdbType[]) {
     this.tempAssignedTypes = value;
@@ -94,7 +124,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Category form constructor - Inits the category form
    */
-  public constructor(private categoryService: CategoryService, private typeService: TypeService) {
+  public constructor(private categoryService: CategoryService, private toast: ToastService) {
     this.categoryForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl(''),
@@ -113,14 +143,30 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     } else if (CmdbMode.Edit === this.mode) {
       this.name.disable({ onlySelf: true });
     }
-    this.categoryServiceSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
-      this.categories = categories;
-    });
 
     this.valueChangeSubscription = this.categoryForm.statusChanges.subscribe(() => {
       this.validationEmitter.emit(this.categoryForm.valid);
     });
+    this.categoriesLoading = true;
+    this.categoryService.getCategories(this.categoryParams).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+          this.categories = apiResponse.results as Array<CmdbCategory>;
+          this.totalCategories = apiResponse.total;
+          this.totalCategoriesPages = apiResponse.pager.total_pages;
+          this.categoriesLoading = false;
+        },
+        (err) => this.toast.error(err)).add(() => this.categoriesLoading = false);
 
+  }
+
+  private loadCategoriesFromAPI() {
+    this.categoriesLoading = true;
+    this.categoryService.getCategories(this.categoryParams).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+          this.categories = this.categories.concat(apiResponse.results as Array<CmdbCategory>);
+          this.categoriesLoading = false;
+        },
+        (err) => this.toast.error(err)).add(() => this.categoriesLoading = false);
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
@@ -148,10 +194,22 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  /**
+   * Load more groups until end of list is reached.
+   */
+  public onScrollToEnd() {
+    if (this.categoryParams.page < this.totalCategoriesPages) {
+      this.categoryParams.page += 1;
+      this.loadCategoriesFromAPI();
+    }
+  }
+
   public ngOnDestroy(): void {
     this.valueChangeSubscription.unsubscribe();
     this.categoryServiceSubscription.unsubscribe();
     this.submitEmitter.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   public get name(): FormControl {
