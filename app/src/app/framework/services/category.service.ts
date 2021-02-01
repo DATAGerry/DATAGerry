@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -94,24 +94,6 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
-      })
-    );
-  }
-
-  /**
-   * Get all categories as a list
-   */
-  public getCategoryList(): Observable<T[]> {
-    const options = httpObserveOptions;
-    let params = new HttpParams();
-    params = params.set('limit', '1000');
-    options.params = params;
-    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
-      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body.results;
       })
     );
   }

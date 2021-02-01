@@ -85,8 +85,12 @@
             <div class="form-group">
               <label for="category-name">Parent:</label>
               <ng-select formControlName="parent" placeholder="No parent category" [items]="categories"
-                         bindValue="public_id" bindLabel="label" class="form-control"
+                         [virtualScroll]="true" [loading]="categoriesLoading" bindValue="public_id"
+                         bindLabel="label" class="form-control" appendTo="body" (scrollToEnd)="onScrollToEnd()"
                          [ngClass]="{ 'is-valid': parent.valid && (parent.dirty || parent.touched), 'is-invalid': parent.invalid && (parent.dirty || parent.touched)}">
+                <ng-template ng-header-tmp>
+                  <small class="form-text text-muted" *ngIf="totalCategories">Loaded {{categories.length}} of {{totalCategories}}</small>
+                </ng-template>
               </ng-select>
             </div>
           </div>

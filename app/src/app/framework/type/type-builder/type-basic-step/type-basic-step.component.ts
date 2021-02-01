@@ -48,7 +48,7 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
 
       const categoryQuery: CollectionParameters = {
-        filter: [{ $match: { types: { $in: [+data.public_id]} } }],
+        filter: [{ $match: { types: { $in: [+data.public_id] } } }],
         limit: 1, sort: 'public_id', order: -1, page: 1
       };
       this.categoryService.getCategories(categoryQuery).pipe(takeUntil(this.subscriber)).subscribe((
@@ -82,6 +82,10 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   public categories: CmdbCategory[];
   private modalRef: NgbModalRef;
 
+  public categoryQuery: CollectionParameters = {
+    filter: undefined, limit: 0, sort: 'public_id', order: -1, page: 1
+  };
+
   constructor(private typeService: TypeService, private categoryService: CategoryService, private modalService: NgbModal,
               private sidebarService: SidebarService, private toast: ToastService) {
     this.categoriesSubscription = new Subscription();
@@ -108,8 +112,8 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: CmdbCategory[]) => {
-      this.categories = categories;
+    this.categoryService.getCategories(this.categoryQuery).pipe(takeUntil(this.subscriber)).subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+      this.categories = apiResponse.results as Array<CmdbCategory>;
     });
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(checkTypeExistsValidator(this.typeService));
@@ -142,14 +146,14 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
         let categoryID = null;
         newCategory.name = result.get('name').value;
         newCategory.label = result.get('label').value;
-        this.categoryService.postCategory(newCategory).subscribe((raw: CmdbCategory) => {
+        this.categoryService.postCategory(newCategory).pipe(takeUntil(this.subscriber)).subscribe((raw: CmdbCategory) => {
             this.basicCategoryForm.get('category_id').setValue(raw.public_id);
             categoryID = raw.public_id;
           }, () => {
           },
           () => {
-            this.categoriesSubscription = this.categoryService.getCategoryList().subscribe((categories: Array<CmdbCategory>) => {
-              this.categories = categories;
+            this.categoryService.getCategories(this.categoryQuery).pipe(takeUntil(this.subscriber)).subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+              this.categories = apiResponse.results as Array<CmdbCategory>;
             });
             this.sidebarService.loadCategoryTree();
             this.toast.success('Category # ' + categoryID + ' was created');
