@@ -122,7 +122,9 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param publicID PublicID of the type
    */
   public getType(publicID: number): Observable<T> {
-    return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -190,8 +192,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Insert a new type into the database.
    */
-  public postType(typeInstance: CmdbType): Observable<T> {
-    return this.api.callPost<T>(this.servicePrefix + '/', typeInstance).pipe(
+  public postType(type: CmdbType): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPost<T>(this.servicePrefix + '/', type, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
@@ -201,8 +205,10 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Update a existing type in the database.
    */
-  public putType(typeInstance: CmdbType): Observable<T> {
-    return this.api.callPut<T>(this.servicePrefix + '/' + typeInstance.public_id, typeInstance).pipe(
+  public putType(type: CmdbType): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callPut<T>(this.servicePrefix + '/' + type.public_id, type, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result as T;
       })
@@ -214,7 +220,9 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @returns The deleted type instance.
    */
   public deleteType(publicID: number): Observable<T> {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
         return apiResponse.body.raw as T;
       })
@@ -273,7 +281,9 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get the total number of types in the system.
    */
   public countTypes(): Observable<number> {
-    return this.api.callHead<T[]>(this.servicePrefix + '/').pipe(
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
+    return this.api.callHead<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return +apiResponse.headers.get('X-Total-Count');
       })
