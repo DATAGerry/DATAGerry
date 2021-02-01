@@ -126,7 +126,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
    * Load categories from the backend.
    */
   private loadCategories(): void {
-    this.categoryService.getCategoryIteration(this.apiParameters).pipe(
+    this.categoryService.getCategories(this.apiParameters).pipe(
       takeUntil(this.unSubscribe)).subscribe((response: APIGetMultiResponse<CmdbCategory>) => {
       this.categoriesAPIResponse = response;
       this.categories = this.categoriesAPIResponse.results;

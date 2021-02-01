@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
@@ -22,11 +22,14 @@ import { checkTypeExistsValidator, TypeService } from '../../../services/type.se
 import { CmdbMode } from '../../../modes.enum';
 import { CategoryService } from '../../../services/category.service';
 import { CmdbCategory } from '../../../models/cmdb-category';
-import { Subscription } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 import { AddCategoryModalComponent } from '../../../category/components/modals/add-category-modal/add-category-modal.component';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SidebarService } from '../../../../layout/services/sidebar.service';
 import { ToastService } from '../../../../layout/toast/toast.service';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
 
 
 @Component({
@@ -36,16 +39,34 @@ import { ToastService } from '../../../../layout/toast/toast.service';
 })
 export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
   @Input()
   set preData(data: any) {
     if (data !== undefined) {
       this.basicForm.patchValue(data);
       this.basicMetaIconForm.patchValue(data.render_meta === undefined ? '' : data.render_meta);
 
-      this.categoryService.getCategoryList().subscribe(categories => {
-        this.originalCategoryID = categories.find(category => category.types.includes(data.public_id)).public_id;
-        this.basicCategoryForm.patchValue({ category_id: this.originalCategoryID});
-      });
+      const categoryQuery: CollectionParameters = {
+        filter: [{ $match: { types: { $in: [+data.public_id]} } }],
+        limit: 1, sort: 'public_id', order: -1, page: 1
+      };
+      this.categoryService.getCategories(categoryQuery).pipe(takeUntil(this.subscriber)).subscribe((
+        apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+          console.log(apiResponse);
+          if (+apiResponse.total > 0) {
+            this.originalCategoryID = apiResponse.results[0].public_id;
+          } else {
+            this.originalCategoryID = null;
+          }
+        },
+        (err) => {
+          this.originalCategoryID = null;
+        },
+        () => {
+          console.log(this.originalCategoryID);
+          this.basicCategoryForm.patchValue({ category_id: this.originalCategoryID });
+        });
     }
   }
 
@@ -106,6 +127,8 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
 
   public ngOnDestroy(): void {
     this.categoriesSubscription.unsubscribe();
+    this.subscriber.next();
+    this.subscriber.complete();
     if (this.modalRef) {
       this.modalRef.close();
     }
