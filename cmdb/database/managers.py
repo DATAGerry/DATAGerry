@@ -252,7 +252,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return self.connector.get_collection(collection).insert_one(data)
 
         if 'public_id' not in data:
-            data['public_id'] = self.get_next_public_id(collection=collection) + 1
+            data['public_id'] = self.get_next_public_id(collection=collection)
         self.connector.get_collection(collection).insert_one(data)
         # update the id counter
         self.update_public_id_counter(collection, data['public_id'])
