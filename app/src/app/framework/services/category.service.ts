@@ -22,13 +22,13 @@ import {
   ApiCallService,
   ApiService,
   httpObserveOptions,
-  HttpProtocolHelper,
+  HttpProtocolHelper, resp,
 } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -69,6 +69,14 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public servicePrefix: string = 'categories';
 
+  public options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
+
   constructor(private api: ApiCallService) {
 
   }
@@ -80,7 +88,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     order: 1,
     page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    const options = httpObserveOptions;
+    const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
       const filter = JSON.stringify(params.filter);
@@ -102,7 +110,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * Get a category by id
    */
   public getCategory(publicID: number): Observable<T> | undefined {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callGet<T>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
@@ -142,7 +150,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     const filter = {
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     };
-    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
+    const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(filter), 0);
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.body.count === 0) {
@@ -160,10 +168,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * nested structure and type instances
    */
   public getCategoryTree(): Observable<CmdbCategoryTree> {
-    const httpProtocol = httpObserveOptions;
-    httpProtocol.params = new HttpParams().append('view', 'tree');
+    const options = this.options;
+    options.params = new HttpParams().append('view', 'tree');
 
-    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, httpProtocol).pipe(
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -178,7 +186,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category raw instance of a CategoryDAO
    */
   public postCategory(category: T): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
@@ -211,7 +219,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param publicID the category id
    */
   public deleteCategory(publicID: number): Observable<number> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {

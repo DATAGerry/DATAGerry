@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,11 +18,17 @@
 
 import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
-import { ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
+import {
+  ApiCallService,
+  ApiService,
+  httpObserveOptions,
+  HttpProtocolHelper,
+  resp
+} from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { FormControl } from '@angular/forms';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -63,6 +69,13 @@ export const checkTypeExistsValidator = (typeService: TypeService, time: number 
 export class TypeService<T = CmdbType> implements ApiService {
 
   public servicePrefix: string = 'types';
+  public options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
 
   constructor(private api: ApiCallService, private userService: UserService) {
   }
@@ -77,14 +90,18 @@ export class TypeService<T = CmdbType> implements ApiService {
     const location = 'acl.groups.includes.' + this.userService.getCurrentUser().group_id;
     return {
       $or: [
-        { $or : [{acl: { $exists: false }}, {'acl.activated' : false}]},
-        { $and : [
-            {'acl.activated' : true},
-            {$and : [
-                { [location] : { $exists: true }},
-                { [location] : { $all : aclRequirement}}
-              ]},
-          ]}]
+        { $or: [{ acl: { $exists: false } }, { 'acl.activated': false }] },
+        {
+          $and: [
+            { 'acl.activated': true },
+            {
+              $and: [
+                { [location]: { $exists: true } },
+                { [location]: { $all: aclRequirement } }
+              ]
+            },
+          ]
+        }]
     };
   }
 
@@ -99,7 +116,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     order: 1,
     page: 1
   }): Observable<APIGetMultiResponse<T>> {
-    const options = httpObserveOptions;
+    const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
       const filter = JSON.stringify(params.filter);
@@ -122,7 +139,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param publicID PublicID of the type
    */
   public getType(publicID: number): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callGet<CmdbType>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
@@ -136,7 +153,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    */
   public getTypeList(aclRequirement?: AccessControlPermission | AccessControlPermission[]):
     Observable<Array<T>> {
-    const options = httpObserveOptions;
+    const options = this.options;
     let params = new HttpParams();
     params = params.set('limit', '0');
     params = params.set('filter', JSON.stringify(this.getAclFilter(aclRequirement)));
@@ -153,7 +170,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @param name Name of the type
    */
   public getTypeByName(name: string): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     const filter = { name };
     let params: HttpParams = new HttpParams();
     params = params.set('filter', JSON.stringify(filter));
@@ -176,12 +193,14 @@ export class TypeService<T = CmdbType> implements ApiService {
   public getTypesByNameOrLabel(name: string, aclRequirements?: AccessControlPermission | AccessControlPermission[]):
     Observable<Array<T>> {
     const regex = ValidatorService.validateRegex(name).trim();
-    const filter = { $and : [{
-      $or: [{ name: { $regex: regex, $options: 'ism' } }, { label: { $regex: regex, $options: 'ism' } }]
-    },
+    const filter = {
+      $and: [{
+        $or: [{ name: { $regex: regex, $options: 'ism' } }, { label: { $regex: regex, $options: 'ism' } }]
+      },
         this.getAclFilter(aclRequirements)
-      ]};
-    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
+      ]
+    };
+    const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(filter), 0);
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
@@ -193,7 +212,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Insert a new type into the database.
    */
   public postType(type: CmdbType): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callPost<T>(this.servicePrefix + '/', type, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
@@ -206,7 +225,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Update a existing type in the database.
    */
   public putType(type: CmdbType): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callPut<T>(this.servicePrefix + '/' + type.public_id, type, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
@@ -220,7 +239,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * @returns The deleted type instance.
    */
   public deleteType(publicID: number): Observable<T> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
@@ -240,8 +259,8 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $match: { categories: { $size: 0 } } },
       { $project: { categories: 0 } }
     ];
-    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);
-    return this.api.callGet<T[]>(this.servicePrefix  + '/', options).pipe(
+    const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body as APIGetMultiResponse<T>;
       })
@@ -264,13 +283,17 @@ export class TypeService<T = CmdbType> implements ApiService {
           as: 'category'
         }
       },
-      { $match: { $and: [{ category: { $gt: { $size: 0 } } },
+      {
+        $match: {
+          $and: [{ category: { $gt: { $size: 0 } } },
             this.getAclFilter(aclRequirements)
-          ] }},
+          ]
+        }
+      },
       { $project: { category: 0 } }
     ];
-    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(pipeline), 0);
-    return this.api.callGet<Array<T>>(this.servicePrefix  + '/', options).pipe(
+    const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -281,7 +304,7 @@ export class TypeService<T = CmdbType> implements ApiService {
    * Get the total number of types in the system.
    */
   public countTypes(): Observable<number> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callHead<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
