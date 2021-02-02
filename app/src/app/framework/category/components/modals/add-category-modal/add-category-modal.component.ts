@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
@@ -31,8 +31,7 @@ export class AddCategoryModalComponent implements OnInit {
 
   public catAddForm: FormGroup;
 
-  constructor(public activeModal: NgbActiveModal, private spinner: ProgressSpinnerService,
-              private categoryService: CategoryService) {
+  constructor(public activeModal: NgbActiveModal, private categoryService: CategoryService) {
     this.catAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('')
@@ -41,7 +40,6 @@ export class AddCategoryModalComponent implements OnInit {
 
   public ngOnInit(): void {
     this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
-    this.spinner.show();
   }
 
   public get name(): FormControl {
