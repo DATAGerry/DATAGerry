@@ -53,7 +53,6 @@ export class TypeBasicStepComponent implements OnInit, OnDestroy {
       };
       this.categoryService.getCategories(categoryQuery).pipe(takeUntil(this.subscriber)).subscribe((
         apiResponse: APIGetMultiResponse<CmdbCategory>) => {
-          console.log(apiResponse);
           if (+apiResponse.total > 0) {
             this.originalCategoryID = apiResponse.results[0].public_id;
           } else {
