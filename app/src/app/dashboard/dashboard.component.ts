@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import * as moment from 'moment';
@@ -197,7 +197,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.userCount = totals;
     });
 
-    this.loadNewstObjects();
+    this.loadNewestObjects();
     this.loadLatestObjects();
 
     this.generateObjectChar();
@@ -209,8 +209,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const apiParameters: CollectionParameters = { limit: 5, sort: 'count', order: -1, page: 1,
       filter: [{ $match: { } }]};
     this.objectService.getObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.objectCount = apiResponse.body.total;
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+        this.objectCount = apiResponse.total;
       });
   }
 
@@ -223,17 +223,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadNewstObjects(): void {
-    this.specialService.getNewestObjects().subscribe((results: Array<RenderResult>) => {
-      this.newestObjects = results;
-      this.newestObjectsCount = results.length;
+  private loadNewestObjects(): void {
+    this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+      this.newestObjects = apiResponse.results as Array<RenderResult>;
+      this.newestObjectsCount = apiResponse.results.length;
     });
   }
 
   private loadLatestObjects(): void {
-    this.specialService.getLatestObjects().subscribe((results: Array<RenderResult>) => {
-      this.latestObjects = results;
-      this.latestObjectsCount = results.length;
+    this.objectService.getLatestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+      this.latestObjects = apiResponse.results as Array<RenderResult>;
+      this.latestObjectsCount = apiResponse.results.length;
     });
   }
 
@@ -251,7 +251,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }]
       },
     };
-    this.objectService.groupObjectsByType('type_id').subscribe(values => {
+    this.objectService.groupObjectsByType('type_id').pipe(takeUntil(this.unSubscribe)).subscribe(values => {
       for (const obj of values) {
         this.labelsObject.push(obj.label);
         this.colorsObject.push(this.getRandomColor());
@@ -318,7 +318,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
           this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
               this.loadLatestObjects();
-              this.loadNewstObjects();
+              this.loadNewestObjects();
             }
           );
         },

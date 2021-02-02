@@ -86,7 +86,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   public getObjects(
     params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 },
     view: string = 'render'):
-    Observable<HttpResponse<APIGetMultiResponse<T>>> {
+    Observable<APIGetMultiResponse<T>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
@@ -104,7 +104,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
     return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        return apiResponse;
+        return apiResponse.body;
       })
     );
   }
@@ -136,6 +136,32 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
         return apiResponse.body;
       })
     );
+  }
+
+  /**
+   * Get the newest objects
+   * @param params
+   * @param view
+   */
+  public getNewestObjects<R>(
+    params: CollectionParameters = { limit: 10, order: 1, page: 1 },
+    view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+    params.sort = 'creation_time';
+    params.filter = [{ $match: { active: { $eq: true }, creation_time: { $ne: null } } }];
+    return this.getObjects(params, view);
+  }
+
+  /**
+   * Get the newest objects
+   * @param params
+   * @param view
+   */
+  public getLatestObjects<R>(
+    params: CollectionParameters = { limit: 10, order: 1, page: 1 },
+    view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+    params.sort = 'last_edit_time';
+    params.filter = [{ $match: { active: { $eq: true }, last_edit_time: { $ne: null } } }];
+    return this.getObjects(params, view);
   }
 
   // CRUD calls

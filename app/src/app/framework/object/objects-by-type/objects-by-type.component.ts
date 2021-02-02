@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,6 @@ import { TableComponent } from '../../../layout/table/table.component';
 import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../layout/table/table.types';
 import { ObjectService } from '../../services/object.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import { HttpResponse } from '@angular/common/http';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CmdbMode } from '../../modes.enum';
 import { FileService } from '../../../export/export.service';
@@ -319,9 +318,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.results = apiResponse.body.results as Array<RenderResult>;
-        this.totalResults = apiResponse.body.total;
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+        this.results = apiResponse.results as Array<RenderResult>;
+        this.totalResults = apiResponse.total;
         this.loading = false;
       });
   }
