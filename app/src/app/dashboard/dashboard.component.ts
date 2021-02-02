@@ -158,7 +158,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       searchable: false,
       cssClasses: ['text-center'],
       render(data: any, item?: any, column?: Column, index?: number) {
-        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
@@ -173,7 +173,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
