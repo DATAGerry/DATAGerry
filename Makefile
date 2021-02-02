@@ -87,8 +87,8 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.exportd.externals \
 		--hidden-import cmdb.exportd.externals.external_systems \
-		--hidden-import cmdb.file_export \
-		--hidden-import cmdb.file_export.file_exporter \
+		--hidden-import cmdb.exporter \
+		--hidden-import cmdb.exporter.exporter_base \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \
