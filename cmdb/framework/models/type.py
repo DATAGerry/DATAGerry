@@ -44,7 +44,7 @@ class TypeSummary:
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeSummary":
-        return cls(fields=data.get('fields', None))
+        return cls(fields=data.get('fields', []))
 
     @classmethod
     def to_json(cls, instance: "TypeSummary") -> dict:
@@ -169,7 +169,7 @@ class TypeRenderMeta:
             sections=[TypeSection.from_data(section) for section in data.get('sections', [])],
             externals=[TypeExternalLink.from_data(external) for external in
                        data.get('externals', None) or data.get('external', [])],
-            summary=TypeSummary.from_data(data.get('summary', None))
+            summary=TypeSummary.from_data(data.get('summary', {}))
         )
 
     @classmethod
