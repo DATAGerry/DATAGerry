@@ -6,32 +6,8 @@
 <cmdb-info-box [message]="INFO_MESSAGE"
                icon="fas fa-cube"
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
-<div id="type-list-buttons" class="mt-2 mb-2">
-  <button type="button"
-          *permissionLink="['base.framework.type.add']"
-          class="btn btn-success btn-sm"
-          [routerLink]="['/framework/type/add']">
-    <i class="fas fa-plus"></i> Add
-  </button>
-  <span class="float-right" *permissionLink="'base.export.type.*'">
-    <div class="btn-group">
-      <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
-              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-        <fa-icon icon="file-export"></fa-icon> Export
-      </button>
-      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
-        <li id="export-type" [className]="'dropdown-item'"
-            (click)="exportingFiles()">
-          <fa-icon icon="file-code"></fa-icon> JSON
-          <span *ngIf="selectedTypeIDs.length == 0">( all )</span>
-          <span *ngIf="selectedTypeIDs.length > 0"> ( {{selectedTypeIDs.length}} )</span>
-        </li>
-      </ul>
-    </div>
-  </span>
-</div>
 <cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="'type-list-table'"
-            [stateEnabled]="false" [emptyMessage]="'No types were found!'"
+            [stateEnabled]="false" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
             [totalItems]="totalTypes" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
@@ -54,4 +30,32 @@
 
 <ng-template #cleanTemplate let-item="item">
   <cmdb-clean-button [type]="item"></cmdb-clean-button>
+</ng-template>
+
+<ng-template #exportTemplate>
+    <span class="mr-1 ml-1" *permissionLink="'base.export.type.*'">
+    <div class="btn-group">
+      <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
+              data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+        <fa-icon icon="file-export"></fa-icon> Export
+      </button>
+      <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+        <li id="export-type" [className]="'dropdown-item'"
+            (click)="exportingFiles()">
+          <fa-icon icon="file-code"></fa-icon> JSON
+          <span *ngIf="selectedTypeIDs.length == 0">( all )</span>
+          <span *ngIf="selectedTypeIDs.length > 0"> ( {{selectedTypeIDs.length}} )</span>
+        </li>
+      </ul>
+    </div>
+  </span>
+</ng-template>
+
+<ng-template #addTemplate>
+  <button type="button"
+          *permissionLink="['base.framework.type.add']"
+          class="btn btn-primary btn-sm mr-1 ml-1"
+          [routerLink]="['/framework/type/add']">
+    <i class="fas fa-plus"></i> Add
+  </button>
 </ng-template>
