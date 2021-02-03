@@ -33,11 +33,30 @@ class APIProjection:
         self.__excludes = None
         self.__has_excludes = None
 
+    @staticmethod
+    def __validate_inclusion(projection: dict, match: int = 1) -> list:
+        """
+        Validation helper function the check the projection inclusion.
+        Args:
+            projection (dict): Projection parameters
+            match: matching value in dict or list.
+
+        Returns:
+            List of all values with the matching parameters.
+
+        Raises:
+            ValueError: if value is not 0 or 1.
+        """
+        if 0 <= match <= 1:
+            return [key for key, value in projection.items() if value == match]
+        else:
+            raise ValueError('Projection parameter must be 0 or 1.')
+
     @property
     def includes(self) -> List[str]:
         """Get all keys which includes (value set to 1)"""
         if not self.__includes:
-            self.__includes = [key for key, value in self.projection.items() if value == 1]
+            self.__includes = APIProjection.__validate_inclusion(self.projection)
         return self.__includes
 
     def has_includes(self) -> bool:
@@ -50,7 +69,7 @@ class APIProjection:
     def excludes(self) -> List[str]:
         """Get all keys which excludes (value set to 0)"""
         if not self.__excludes:
-            self.__excludes = [key for key, value in self.projection.items() if value == 0]
+            self.__excludes = APIProjection.__validate_inclusion(self.projection, match=0)
         return self.__excludes
 
     def has_excludes(self) -> bool:
