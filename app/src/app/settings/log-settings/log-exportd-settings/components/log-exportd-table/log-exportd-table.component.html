@@ -31,7 +31,10 @@
 <!-- Custom table buttons-->
 <ng-template #deleteButton>
   <button *permissionLink="'base.exportd.log.delete'" type="button" class="btn btn-danger btn-sm"
-          (click)="deleteSelectedLogs()">
+          (click)="deleteSelectedLogs()"
+          [disabled]="selectedLogs.length == 0">
+    <i class="fas fa-trash-alt"></i>
     Delete Selected
+    <span class="badge badge-secondary badge-pill">{{selectedLogs.length}}</span>
   </button>
 </ng-template>
