@@ -122,7 +122,10 @@ class APIProjector:
                     f'Projected element does not include the key: {include_key} | Error: {err}')
 
         key, rest = include_key.split('.', 1)
-        return {key: APIProjector.element_includes(rest, element[key])}
+        if isinstance(element[key], list):
+            return {key: [APIProjector.element_includes(rest, e) for e in element[key]]}
+        else:
+            return {key: APIProjector.element_includes(rest, element[key])}
 
     def __parse_element(self, data: dict) -> dict:
         """Converts a single resource based on projection."""
@@ -134,7 +137,7 @@ class APIProjector:
             for include in self.__projection.includes:
                 try:
                     element.update(self.element_includes(include, data))
-                except APIProjectionInclusionError as err:
+                except APIProjectionInclusionError:
                     continue
         else:
             element = data
@@ -142,7 +145,7 @@ class APIProjector:
         if self.__projection.has_excludes():
             for key, item in element.copy().items():
                 if key in self.__projection.excludes:
-                    del element[key]
+                    del element[key]  # TODO: Implement nested (dot .) parameter for exclusion.
 
         return element
 
