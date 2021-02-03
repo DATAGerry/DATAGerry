@@ -27,18 +27,16 @@ import { CategoryService } from '../framework/services/category.service';
 import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
-import { User } from '../management/models/user';
 import { APIGetMultiResponse } from '../services/models/api-response';
 import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
-import { Observable, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { CmdbType } from '../framework/models/cmdb-type';
-import { HttpResponse } from '@angular/common/http';
 
 
 @Component({

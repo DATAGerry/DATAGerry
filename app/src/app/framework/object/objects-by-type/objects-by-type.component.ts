@@ -16,6 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
+import * as moment from 'moment';
 import {
   Component,
   OnDestroy,
@@ -268,8 +269,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       searchable: false,
       template: this.dateTemplate,
       render(data: any, item?: any, column?: Column, index?: number) {
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column);
     columns.push({
@@ -283,8 +283,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        const date = new Date(data);
-        return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column);
 
