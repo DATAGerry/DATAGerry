@@ -104,7 +104,7 @@ def insert_setting(user_id: int, data: dict):
     try:
         settings_manager.insert(data)
         setting: UserSettingModel = settings_manager.get_user_setting(user_id=user_id,
-                                                                      resource=data.get('identifier'))
+                                                                      resource=data.get('resource'))
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerInsertError as err:

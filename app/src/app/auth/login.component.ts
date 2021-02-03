@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from './services/auth.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { Router } from '@angular/router';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
-import { forkJoin, Subscription } from 'rxjs';
-import { User } from '../management/models/user';
+import { Subscription } from 'rxjs';
 import { PermissionService } from './services/permission.service';
 import { Group } from '../management/models/group';
 import { LoginResponse } from './models/responses';
+import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-login',
@@ -50,6 +50,7 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   constructor(
     private router: Router,
+    private userSettingsDB: UserSettingsDBService,
     private authenticationService: AuthService,
     private permissionService: PermissionService,
     private render: Renderer2
@@ -88,6 +89,7 @@ export class LoginComponent implements OnInit, OnDestroy {
     this.loginSubscription = this.authenticationService.login(
       this.loginForm.controls.username.value, this.loginForm.controls.password.value).pipe(first()).subscribe(
       (response: LoginResponse) => {
+        this.userSettingsDB.syncSettings();
         this.permissionService.storeUserRights(response.user.group_id).pipe(first()).subscribe((group: Group) => {
           this.router.navigate(['/']);
         });
