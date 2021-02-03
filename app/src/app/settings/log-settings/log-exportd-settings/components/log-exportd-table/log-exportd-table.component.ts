@@ -26,6 +26,8 @@ import { CollectionParameters } from '../../../../../services/models/api-paramet
 import { ExportdLog } from '../../../../models/exportd-log';
 import { ExecuteState } from '../../../../models/modes_job.enum';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { TableComponent } from '../../../../../layout/table/table.component';
+import { RenderResult } from '../../../../../framework/models/cmdb-render';
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -96,6 +98,11 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
    * Table Template: delete column.
    */
   @ViewChild('deleteButton', { static: true }) deleteButton: TemplateRef<any>;
+
+  /**
+   * Table component.
+   */
+  @ViewChild(TableComponent, { static: false }) exportdLogsTableComponent: TableComponent<RenderResult>;
 
   /**
    * Component un-subscriber
@@ -425,6 +432,8 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
       forkJoin(deleteObserves)
         .subscribe(dataArray => {
           this.toast.success('Logs deleted!');
+          this.exportdLogsTableComponent.selectedItems = [];
+          this.selectedLogs = [];
         }, error => this.toast.error(error), () => {
           this.loadLogsFromAPI();
         });
