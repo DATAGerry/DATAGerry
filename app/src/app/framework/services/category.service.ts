@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -22,13 +22,13 @@ import {
   ApiCallService,
   ApiService,
   httpObserveOptions,
-  HttpProtocolHelper,
+  HttpProtocolHelper, resp,
 } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { FormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
   APIGetMultiResponse,
@@ -36,6 +36,7 @@ import {
   APIInsertSingleResponse,
   APIUpdateSingleResponse
 } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
   return (control: FormControl) => {
@@ -68,40 +69,39 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    */
   public servicePrefix: string = 'categories';
 
+  public options = {
+    headers: new HttpHeaders({
+      'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
+  };
+
   constructor(private api: ApiCallService) {
 
   }
 
-  public getCategoryIteration(...options): Observable<APIGetMultiResponse<T>> {
-    const httpProtocol = httpObserveOptions;
-    let params: HttpParams = new HttpParams();
-    for (const option of options) {
-      for (const key of Object.keys(option)) {
-        params = params.append(key, option[key]);
-      }
+  public getCategories(params: CollectionParameters = {
+    filter: undefined,
+    limit: 10,
+    sort: 'public_id',
+    order: 1,
+    page: 1
+  }): Observable<APIGetMultiResponse<T>> {
+    const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
+    if (params.filter !== undefined) {
+      const filter = JSON.stringify(params.filter);
+      httpParams = httpParams.set('filter', filter);
     }
-    httpProtocol.params = params;
-    return this.api.callGet<T[]>(this.servicePrefix + '/', httpProtocol).pipe(
-      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        return apiResponse.body;
-      })
-    );
-  }
-
-  /**
-   * Get all categories as a list
-   */
-  public getCategoryList(): Observable<T[]> {
-    const options = httpObserveOptions;
-    let params = new HttpParams();
-    params = params.set('limit', '1000');
-    options.params = params;
+    httpParams = httpParams.set('limit', params.limit.toString());
+    httpParams = httpParams.set('sort', params.sort);
+    httpParams = httpParams.set('order', params.order.toString());
+    httpParams = httpParams.set('page', params.page.toString());
+    options.params = httpParams;
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body.results;
+        return apiResponse.body;
       })
     );
   }
@@ -110,7 +110,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * Get a category by id
    */
   public getCategory(publicID: number): Observable<T> | undefined {
-    return this.api.callGet<T>(this.servicePrefix + '/' + publicID).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<T>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
           return undefined;
@@ -148,7 +150,7 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
     const filter = {
       $or: [{ name: { $regex: regex, $options: 'ismx' } }, { label: { $regex: regex, $options: 'ismx' } }]
     };
-    const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, JSON.stringify(filter), 0);
+    const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(filter), 0);
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         if (apiResponse.body.count === 0) {
@@ -166,10 +168,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * nested structure and type instances
    */
   public getCategoryTree(): Observable<CmdbCategoryTree> {
-    const httpProtocol = httpObserveOptions;
-    httpProtocol.params = new HttpParams().append('view', 'tree');
+    const options = this.options;
+    options.params = new HttpParams().append('view', 'tree');
 
-    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, httpProtocol).pipe(
+    return this.api.callGet<CmdbCategoryTree>(`${ this.servicePrefix }/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<CmdbCategoryNode>>) => {
         if (apiResponse.status === 204) {
           return [];
@@ -184,7 +186,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category raw instance of a CategoryDAO
    */
   public postCategory(category: T): Observable<T> {
-    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPost<CmdbCategory>(this.servicePrefix + '/', category, options).pipe(
       map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
         if (apiResponse.status === 204) {
           return null;
@@ -199,8 +203,10 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param category modified category instance
    */
   public updateCategory(category: T): Observable<T> {
+    const options = httpObserveOptions;
+    options.params = new HttpParams();
     // @ts-ignore
-    return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category).pipe(
+    return this.api.callPut<number>(this.servicePrefix + '/' + category.public_id, category, options).pipe(
       map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
         return apiResponse.body.result;
       })
@@ -213,7 +219,9 @@ export class CategoryService<T = CmdbCategory> implements ApiService {
    * @param publicID the category id
    */
   public deleteCategory(publicID: number): Observable<number> {
-    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<CmdbCategory>>) => {
         return apiResponse.body.raw.public_id;
       })

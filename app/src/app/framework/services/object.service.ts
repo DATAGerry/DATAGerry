@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,17 +18,15 @@
 
 import { Injectable } from '@angular/core';
 import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
-import { ValidatorService } from '../../services/validator.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { Observable, timer } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { DataTableFilter, DataTablesResult } from '../models/cmdb-datatable';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetListResponse, APIGetMultiResponse, APIGetSingleResponse } from '../../services/models/api-response';
+import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { FormControl } from '@angular/forms';
 
@@ -88,7 +86,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   public getObjects(
     params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 },
     view: string = 'render'):
-    Observable<HttpResponse<APIGetMultiResponse<T>>> {
+    Observable<APIGetMultiResponse<T>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
@@ -106,7 +104,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
     return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-        return apiResponse;
+        return apiResponse.body;
       })
     );
   }
@@ -140,9 +138,37 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
+  /**
+   * Get the newest objects
+   * @param params
+   * @param view
+   */
+  public getNewestObjects<R>(
+    params: CollectionParameters = { limit: 10, order: 1, page: 1 },
+    view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+    params.sort = 'creation_time';
+    params.filter = [{ $match: { active: { $eq: true }, creation_time: { $ne: null } } }];
+    return this.getObjects(params, view);
+  }
+
+  /**
+   * Get the newest objects
+   * @param params
+   * @param view
+   */
+  public getLatestObjects<R>(
+    params: CollectionParameters = { limit: 10, order: 1, page: 1 },
+    view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+    params.sort = 'last_edit_time';
+    params.filter = [{ $match: { active: { $eq: true }, last_edit_time: { $ne: null } } }];
+    return this.getObjects(params, view);
+  }
+
   // CRUD calls
   public postObject(objectInstance: CmdbObject): Observable<any> {
-    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -155,7 +181,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public changeState(publicID: number, status: boolean) {
-    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -163,7 +191,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public deleteManyObjects(publicID: any) {
-    return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -174,7 +204,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public deleteObject(publicID: any): Observable<any> {
-    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -208,7 +240,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public countObjects(): Observable<number> {
-    const options = httpObserveOptions;
+    const options = this.options;
     options.params = new HttpParams();
     return this.api.callHead<T[]>(this.newServicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -233,7 +265,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
                                       page: 1
                                     },
                                     view: string = 'render'): Observable<APIGetMultiResponse<T>> {
-    const options = httpObserveOptions;
+    const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
       const filter = JSON.stringify(params.filter);
@@ -253,19 +285,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getObjectsByUser(publicID: number) {
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/${ publicID }`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public getNewObjectsSince(timestamp: number) {
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`, options).pipe(
       map((apiResponse) => {
         if (apiResponse.status === 204) {
           return [];
@@ -286,28 +309,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getObjectsByFilter(typeID: number, filter: DataTableFilter) {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    httpObjectObserveOptions[PARAMETER].start = filter.start;
-    httpObjectObserveOptions[PARAMETER].length = filter.length;
-    httpObjectObserveOptions[PARAMETER].order = filter.orderBy;
-    httpObjectObserveOptions[PARAMETER].direction = filter.direction;
-    httpObjectObserveOptions[PARAMETER].search = ValidatorService.validateRegex(filter.search).trim();
-    httpObjectObserveOptions[PARAMETER].dtRender = filter.dtRender;
-    httpObjectObserveOptions[PARAMETER].idList = filter.idList;
-    return this.api.callGet<DataTablesResult[]>(`${ this.servicePrefix }/dt/filter/type/${ typeID }`,
-      httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public countUncleanObjects(typeID: number): Observable<number> {
-    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
         return +apiResponse.headers.get('X-Total-Count');
       })
@@ -315,7 +320,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public getUncleanObjects(typeID: number): Observable<Array<CmdbObject>> {
-    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
         return apiResponse.body.results as Array<CmdbObject>;
       })
@@ -323,7 +330,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public getObjectCleanStatus(typeID: number): Observable<boolean> {
-    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
       map((apiResponse) => {
         return +apiResponse.headers.get('X-Total-Count') === 0;
       })
@@ -331,7 +340,9 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   public cleanObjects(typeID: number): Observable<any> {
-    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null).pipe(
+    const options = this.options;
+    options.params = new HttpParams();
+    return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })

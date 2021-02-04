@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,10 +16,9 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbCategory } from '../../../../models/cmdb-category';
 import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
 import { ProgressSpinnerService } from '../../../../../layout/progress/progress-spinner.service';
 
@@ -31,10 +30,8 @@ import { ProgressSpinnerService } from '../../../../../layout/progress/progress-
 export class AddCategoryModalComponent implements OnInit {
 
   public catAddForm: FormGroup;
-  public categoryList: CmdbCategory[];
 
-  constructor(public activeModal: NgbActiveModal, private spinner: ProgressSpinnerService,
-              private categoryService: CategoryService) {
+  constructor(public activeModal: NgbActiveModal, private categoryService: CategoryService) {
     this.catAddForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('')
@@ -43,12 +40,6 @@ export class AddCategoryModalComponent implements OnInit {
 
   public ngOnInit(): void {
     this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
-    this.spinner.show();
-    this.categoryService.getCategoryList().subscribe((list: CmdbCategory[]) => {
-        this.categoryList = list;
-      }, error => {
-      },
-      () => this.spinner.hide());
   }
 
   public get name(): FormControl {

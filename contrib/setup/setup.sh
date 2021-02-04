@@ -21,6 +21,7 @@
 DIR_ETC="/etc"
 DIR_BIN="/usr/bin"
 DIR_SYSTEMD="/etc/systemd/system"
+DIR_TMPFILES="/usr/lib/tmpfiles.d"
 
 # create user and group, if not exist
 /usr/bin/getent group datagerry || /usr/sbin/groupadd -r datagerry
@@ -33,6 +34,7 @@ mkdir -p ${DIR_ETC}/datagerry
 cp files/cmdb.conf ${DIR_ETC}/datagerry
 cp files/datagerry ${DIR_BIN}
 cp files/datagerry.service ${DIR_SYSTEMD}
+cp files/datagerry.conf${DIR_TMPFILES}
 
 # enable systemd service
 systemctl daemon-reload

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -57,15 +57,6 @@ const routes: Routes = [
       right: 'base.framework.category.view'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
-  },
-  {
-    path: 'collection',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Collection',
-      right: 'base.framework.collection.view'
-    },
-    loadChildren: () => import('./collection/collection.module').then(m => m.CollectionModule)
   }
 ];
 

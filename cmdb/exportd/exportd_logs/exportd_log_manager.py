@@ -43,7 +43,7 @@ class ExportdLogManager(CmdbManagerBase):
 
     def get_log(self, public_id: int):
         try:
-            return ExportdLog(**self._get(
+            return ExportdJobLog.from_data(self._get(
                 collection=ExportdMetaLog.COLLECTION,
                 public_id=public_id
             ))
@@ -56,7 +56,7 @@ class ExportdLogManager(CmdbManagerBase):
         try:
             logs = self._get_many(collection=ExportdMetaLog.COLLECTION, sort=sort, **requirements)
             for log in logs:
-                ack.append(ExportdLog(**log))
+                ack.append(ExportdJobLog.from_data(log))
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise LogManagerGetError(err)
@@ -77,10 +77,9 @@ class ExportdLogManager(CmdbManagerBase):
         log_data = {**log_init, **kwargs}
 
         try:
-            new_log = ExportdLog(**log_data)
-            ack = self._insert(ExportdMetaLog.COLLECTION, new_log.to_database())
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err.message)
+            new_log = ExportdJobLog.from_data(log_data)
+            ack = self._insert(ExportdMetaLog.COLLECTION, ExportdJobLog.to_json(new_log))
+        except Exception as err:
             raise LogManagerInsertError(err)
         return ack
 
@@ -110,7 +109,7 @@ class ExportdLogManager(CmdbManagerBase):
             query = {'filter': {'log_type': str(ExportdJobLog.__name__), 'job_id': public_id}}
             founded_logs = self.dbm.find_all(ExportdMetaLog.COLLECTION, **query)
             for _ in founded_logs:
-                job_list.append(ExportdLog(**_))
+                job_list.append(ExportdLog.from_data(_))
         except (CMDBError, Exception) as err:
             LOGGER.error(f'Error in get_exportd_job_logs: {err}')
             raise LogManagerGetError(err)

@@ -54,19 +54,7 @@
   <div *ngIf="importResponse.failed_imports.length > 0" class="col-md-12">
     <h3>Failed Imports</h3>
     <hr/>
-    <table datatable class="table table-warning">
-      <thead class="thead-light">
-      <tr>
-        <th scope="col">Error message</th>
-        <th scope="col">Object</th>
-      </tr>
-      </thead>
-      <tbody>
-      <tr *ngFor="let failedObject of importResponse.failed_imports; let i = index">
-        <td>{{failedObject?.error_message}}</td>
-        <td>{{failedObject?.obj | json}}</td>
-      </tr>
-      </tbody>
-    </table>
+    <cmdb-failed-import-table [failedImports]="importResponse.failed_imports">
+    </cmdb-failed-import-table>
   </div>
 </div>

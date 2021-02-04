@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -37,6 +37,10 @@ import { GroupTableActionsComponent } from './components/group-table-actions/gro
 import { GroupUsersModalComponent } from './modals/group-users-modal/group-users-modal.component';
 import { UsersModule } from '../users/users.module';
 import { GroupTableListComponent } from './components/group-table-list/group-table-list.component';
+import { GroupFormHelperComponent } from './components/group-form/group-form-helper/group-form-helper/group-form-helper.component';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { GroupAclComponent } from './group-acl/group-acl.component';
+import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
   entryComponents: [
@@ -52,7 +56,9 @@ import { GroupTableListComponent } from './components/group-table-list/group-tab
     GroupTableUserCellComponent,
     GroupTableActionsComponent,
     GroupUsersModalComponent,
-    GroupTableListComponent
+    GroupTableListComponent,
+    GroupAclComponent,
+    GroupFormHelperComponent
   ],
   exports: [
     GroupTableListComponent
@@ -66,7 +72,9 @@ import { GroupTableListComponent } from './components/group-table-list/group-tab
     FontAwesomeModule,
     AuthModule,
     TableModule,
-    UsersModule
+    UsersModule,
+    AclModule,
+    NgbTooltipModule
   ]
 })
 export class GroupsModule {

@@ -87,9 +87,11 @@ export class ObjectEditComponent implements OnInit {
       const patchValue = [];
 
       Object.keys(this.renderForm.value).forEach((key: string) => {
+        let val = this.renderForm.value[key];
+        if (val === undefined || val == null) { val = ''; }
         patchValue.push({
           name: key,
-          value: !this.renderForm.value[key] ? '' : this.renderForm.value[key]
+          value: val
         });
       });
 

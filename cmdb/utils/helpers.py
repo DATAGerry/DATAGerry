@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,13 +12,13 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Collection of different helper classes and functions
 """
+import collections
 import re
-import time
 import sys
 import importlib
 
@@ -111,3 +111,15 @@ def process_bar(name, total, progress):
         status)
     sys.stdout.write(text)
     sys.stdout.flush()
+
+
+def deep_merge(dct, merge_dct):
+    """
+    Recursive dict merge.
+    """
+    for k, v in merge_dct.items():
+        if (k in dct and isinstance(dct[k], dict)
+                and isinstance(merge_dct[k], collections.Mapping)):
+            deep_merge(dct[k], merge_dct[k])
+        else:
+            dct[k] = merge_dct[k]

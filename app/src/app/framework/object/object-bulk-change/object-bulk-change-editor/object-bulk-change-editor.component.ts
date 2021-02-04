@@ -59,8 +59,11 @@ export class ObjectBulkChangeEditorComponent {
     return this.type.fields.find(field => field.name === name);
   }
 
-  public onActiveChange(event: Event): void {
-    this.activeState = (event.target as HTMLInputElement).checked;
+  public onActiveChange(value: boolean): void {
+    if (value === undefined) {
+      this.renderForm.markAsPristine();
+    } else { this.renderForm.markAsDirty(); }
+    this.activeState = value;
     this.activeChange.emit(this.activeState);
   }
 }

@@ -3,46 +3,33 @@
   <h1><i class="far fa fa-info-circle" (click)="showAlert()"></i></h1>
 </span>
 <hr/>
-<cmdb-info-box message="DocAPI is an interface for generating PDF documents out of CMDB data. A user can design a
-Document Template in the frontend. Each Document Template consists of a Template Type, Template
-Content and Template Styling. The Template Type defines the kind of the template. For example the Object Template type
-generates documents for single CMDB objects. Each Template Type may have its own configuration settings. For Object
-Templates, an object type needs to be configured. In the Template Content section, the document itself can be designed
- with an WYSIWYG editor. Depending on the chosen Template Type, template variables can be used at all places of the
- document. These variables will then be replaced when rendering the document for a specific object."
-                icon="fas fa-file-pdf"
-                doc="/docs/admin_guide/docapi.html"></cmdb-info-box>
-<div class="card-body" style="padding: 0 0 1em 0;">
+<cmdb-info-box [message]="messageBlock"
+               icon="fas fa-file-pdf"
+               doc="/docs/admin_guide/docapi.html"></cmdb-info-box>
+
+<cmdb-table [items]="templates" [columns]="columns" [page]="page" [sort]="sort" [id]="'docapi-list-datatable'"
+            [stateEnabled]="false" [emptyMessage]="'No doc templates were found!'" [customButtons]="[addButton]"
+            [totalItems]="totalTemplates" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)"></cmdb-table>
+
+<ng-template #actionsTemplate let-item="item">
+  <div class="d-flex justify-content-center">
+    <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.edit']"
+       [routerLink]="['/settings/docapi/edit/', item?.public_id]">
+      <fa-icon [icon]="['far', 'edit']"></fa-icon>
+    </a>
+    <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.delete']">
+      <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(item?.public_id)"></fa-icon>
+    </a>
+  </div>
+</ng-template>
+
+<ng-template #addButton>
   <button type="button"
           *permissionLink="['base.docapi.template.add']"
-          class="btn btn-success btn-sm"
+          class="btn btn-success btn-sm mr-1"
           [routerLink]="['/settings/docapi/add']">
     <i class="fas fa-plus"></i> Add
   </button>
-</div>
-
-<table id="docapi-list-datatable" class="table table-striped table-bordered"
-  datatable [dtOptions]="dtOptions" [dtTrigger]="dtTrigger">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Label</th>
-      <th *permissionLink="['base.docapi.template.edit', 'base.docapi.template.delete']">Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr *ngFor="let docTemplate of docTemplateList | async">
-      <td>{{docTemplate.public_id}}</td>
-      <td>{{docTemplate.label}}</td>
-      <td *permissionLink="['base.docapi.template.edit', 'base.docapi.template.delete']">
-        <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.edit']"
-            [routerLink]="['/settings/docapi/edit/', docTemplate?.public_id]">
-          <fa-icon [icon]="['far', 'edit']"></fa-icon>
-        </a>
-        <a class="ml-1 text-dark mr-1" *permissionLink="['base.docapi.template.delete']">
-          <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(docTemplate?.public_id)"></fa-icon>
-        </a>
-      </td>
-    </tr>
-  </tbody>
-</table>
+</ng-template>

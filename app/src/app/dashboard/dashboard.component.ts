@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import * as moment from 'moment';
@@ -27,7 +27,6 @@ import { CategoryService } from '../framework/services/category.service';
 import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
-import { User } from '../management/models/user';
 import { APIGetMultiResponse } from '../services/models/api-response';
 import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
@@ -38,7 +37,6 @@ import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { CmdbType } from '../framework/models/cmdb-type';
-import { HttpResponse } from '@angular/common/http';
 
 
 @Component({
@@ -158,7 +156,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       searchable: false,
       cssClasses: ['text-center'],
       render(data: any, item?: any, column?: Column, index?: number) {
-        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
@@ -173,7 +171,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data.$date)).format('DD/MM/YYYY - HH:mm:ss');
+        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
       }
     } as Column;
 
@@ -197,7 +195,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.userCount = totals;
     });
 
-    this.loadNewstObjects();
+    this.loadNewestObjects();
     this.loadLatestObjects();
 
     this.generateObjectChar();
@@ -209,8 +207,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const apiParameters: CollectionParameters = { limit: 5, sort: 'count', order: -1, page: 1,
       filter: [{ $match: { } }]};
     this.objectService.getObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
-      .subscribe((apiResponse: HttpResponse<APIGetMultiResponse<RenderResult>>) => {
-        this.objectCount = apiResponse.body.total;
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+        this.objectCount = apiResponse.total;
       });
   }
 
@@ -223,17 +221,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadNewstObjects(): void {
-    this.specialService.getNewestObjects().subscribe((results: Array<RenderResult>) => {
-      this.newestObjects = results;
-      this.newestObjectsCount = results.length;
+  private loadNewestObjects(): void {
+    this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+      this.newestObjects = apiResponse.results as Array<RenderResult>;
+      this.newestObjectsCount = apiResponse.results.length;
     });
   }
 
   private loadLatestObjects(): void {
-    this.specialService.getLatestObjects().subscribe((results: Array<RenderResult>) => {
-      this.latestObjects = results;
-      this.latestObjectsCount = results.length;
+    this.objectService.getLatestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+      this.latestObjects = apiResponse.results as Array<RenderResult>;
+      this.latestObjectsCount = apiResponse.results.length;
     });
   }
 
@@ -251,7 +249,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }]
       },
     };
-    this.objectService.groupObjectsByType('type_id').subscribe(values => {
+    this.objectService.groupObjectsByType('type_id').pipe(takeUntil(this.unSubscribe)).subscribe(values => {
       for (const obj of values) {
         this.labelsObject.push(obj.label);
         this.colorsObject.push(this.getRandomColor());
@@ -261,19 +259,27 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private generateTypeChar() {
-
-    this.categoryService.getCategoryList().subscribe((data: CmdbCategory[]) => {
-      for (let i = 0; i < data.length; i++) {
-        this.typeService.getTypeListByCategory(data[i].public_id).pipe(
-          takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
+    const params = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1
+    };
+    this.categoryService.getCategories(params).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
+        const categories = apiResponse.results as Array<CmdbCategory>;
+        for (let i = 0; i < apiResponse.total; i++) {
+          this.typeService.getTypeListByCategory(categories[i].public_id).pipe(
+            takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
             this.itemsCategory.push(list.length);
-            this.labelsCategory.push(data[i].label);
+            this.labelsCategory.push(categories[i].label);
             this.colorsCategory.push(this.getRandomColor());
-        });
-        if (i === this.maxChartValue) {
-          break;
+          });
+          if (i === this.maxChartValue) {
+            break;
+          }
         }
-      }
     });
   }
 
@@ -285,11 +291,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       },
       () => {
         for (let i = 0; i < values.length; i++) {
-          this.userService.getUsersByGroup(values[i].public_id).pipe(takeUntil(this.unSubscribe)).subscribe((users: User[]) => {
-            this.labelsGroup.push(values[i].label);
-            this.colorsGroup.push(this.getRandomColor());
-            this.itemsGroup.push(users.length);
-          });
+          this.userService.countUsers({group_id: values[i].public_id}).pipe(takeUntil(this.unSubscribe))
+            .subscribe((nUsers: number) => {
+              this.labelsGroup.push(values[i].label);
+              this.colorsGroup.push(this.getRandomColor());
+              this.itemsGroup.push(nUsers);
+            });
           if (i === this.maxChartValue) {
             break;
           }
@@ -309,7 +316,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
           this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
               this.loadLatestObjects();
-              this.loadNewstObjects();
+              this.loadNewestObjects();
             }
           );
         },

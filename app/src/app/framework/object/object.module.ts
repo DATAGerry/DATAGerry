@@ -21,7 +21,6 @@ import { CommonModule } from '@angular/common';
 
 import { ObjectRoutingModule } from './object-routing.module';
 import { ObjectViewComponent } from './object-view/object-view.component';
-import { DataTablesModule } from 'angular-datatables';
 import { LayoutModule } from '../../layout/layout.module';
 import { ObjectHeaderComponent } from './components/object-header/object-header.component';
 import { ObjectQrComponent } from './components/object-qr/object-qr.component';
@@ -112,7 +111,6 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
   imports: [
     CommonModule,
     ObjectRoutingModule,
-    DataTablesModule,
     AuthModule,
     LayoutModule,
     QRCodeModule,

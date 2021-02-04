@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -87,6 +87,8 @@ class CategoryManager(FrameworkManager):
         Returns:
             int: The Public ID of the new inserted category
         """
+        if isinstance(category, CategoryModel):
+            category = CategoryModel.to_json(category)
         return self._insert(self.collection, resource=category)
 
     def update(self, public_id: Union[PublicID, int], category: Union[CategoryModel, dict]):

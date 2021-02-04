@@ -29,7 +29,6 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
 import { GroupService } from '../services/group.service';
 import { Group } from '../models/group';
-import { ToastService } from '../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-users',
@@ -111,8 +110,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   public columns: Array<Column> = [];
   public totalUsers: number;
 
-  constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal,
-              private toast: ToastService) {
+  constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
 
   }
 
@@ -206,15 +204,6 @@ export class UsersComponent implements OnInit, OnDestroy {
   public onPasswordChange(user: User): void {
     this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
     this.modalRef.componentInstance.user = user;
-    this.modalRef.result.then(response => {
-        this.userService.changeUserPassword(response.public_id, response.password).subscribe(
-          (changedUser: User) => {
-            this.toast.success(`Password for user with ID: ${ changedUser.public_id } was changed`);
-          },
-          (error) => this.toast.error(error)
-        );
-      }
-    );
   }
 
   /**

@@ -55,5 +55,5 @@ __USER_GROUP_RIGHTS__: List[BaseRight] = [
 
 __FIXED_GROUPS__: List[UserGroupModel] = [
     UserGroupModel(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__),
-    UserGroupModel(public_id=2, name='user', label='UserModel', rights=__USER_GROUP_RIGHTS__)
+    UserGroupModel(public_id=2, name='user', label='User', rights=__USER_GROUP_RIGHTS__)
 ]

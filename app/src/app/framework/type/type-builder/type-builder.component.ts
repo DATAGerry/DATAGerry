@@ -66,6 +66,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
 
   public selectedCategoryID: number;
 
+  @Input() public stepIndex: number = 0;
+
   public groups: Array<Group> = [];
 
   public constructor(private router: Router, private typeService: TypeService,

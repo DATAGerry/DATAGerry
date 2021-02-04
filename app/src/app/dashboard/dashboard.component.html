@@ -62,7 +62,7 @@
   <h2>Newest objects</h2>
   <cmdb-table [id]="'dashboard-newest-table'" [items]="newestObjects" [totalItems]="newestObjectsCount"
               [columns]="newestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [pageSizeEnabled]="false">
+              [emptyMessage]="'No newest objects!'" [pageSizeEnabled]="false">
   </cmdb-table>
 </ng-container>
 <hr />
@@ -70,6 +70,6 @@
   <h2>Last modified objects</h2>
   <cmdb-table [id]="'dashboard-latest-table'" [items]="latestObjects" [totalItems]="latestObjectsCount"
               [columns]="latestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [pageSizeEnabled]="false">
+              [emptyMessage]="'No modified objects!'" [pageSizeEnabled]="false">
   </cmdb-table>
 </ng-container>
