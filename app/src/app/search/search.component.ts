@@ -126,6 +126,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
 
     this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.initSearch = true;
       this.onSearch();
     });
   }
