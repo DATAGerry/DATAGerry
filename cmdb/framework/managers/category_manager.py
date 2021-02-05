@@ -25,7 +25,7 @@ from cmdb.framework.managers.framework_manager import FrameworkManager
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
-from cmdb.search import Query
+from cmdb.search import Query, Pipeline
 
 
 class CategoryManager(FrameworkManager):
@@ -51,11 +51,14 @@ class CategoryManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total = next(self._aggregate(self.collection, count_query))['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[CategoryModel] = IterationResult.from_aggregation(aggregation_result)
+
+        iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CategoryModel)
         return iteration_result
 

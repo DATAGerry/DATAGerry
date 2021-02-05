@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -68,16 +68,31 @@ class FrameworkQueryBuilder(Builder):
             for pipe in filter:
                 self.query.append(pipe)
 
-        if limit == 0:
-            results_query = [self.skip_(limit)]
-        else:
-            results_query = [self.skip_(skip), self.limit_(limit)]
-
         self.query.append(self.sort_(sort=sort, order=order))
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
+        self.query.append(self.skip_(limit))
+        if limit != 0:
+            self.query.append(self.limit_(limit))
+
+        return self.query
+
+    def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
+        """
+        Count the number of documents in the stages
+        Args:
+            filter: filter requirement
+
+        Returns:
+            Query with count stages.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+        self.query.append(self.count_('total'))
         return self.query
 
 
