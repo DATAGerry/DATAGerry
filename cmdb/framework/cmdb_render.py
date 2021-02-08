@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Object/Type render
@@ -38,6 +38,7 @@ from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import UserModel, UserManager
+from dateutil.parser import parse
 
 LOGGER = logging.getLogger(__name__)
 
@@ -224,7 +225,7 @@ class CmdbRender:
                 field['value'] = curr_field['value']
                 # handle dates that are stored as strings
                 if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
-                    field['value'] = datetime.strptime(field['value'], '%Y-%m-%d %H:%M:%S')
+                    field['value'] = parse(field['value'], fuzzy=True)
 
                 if self.ref_render and field['type'] == 'ref' and field['value']:
                     field['reference'] = self.__merge_references(field)
