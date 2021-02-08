@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2019 - 2020 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,7 +11,6 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -30,7 +29,6 @@ import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component
 import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
@@ -78,6 +76,7 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 import { BlockComponent } from './components/block/block.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
   declarations: [
@@ -95,7 +94,6 @@ import { BlockComponent } from './components/block/block.component';
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
-    JwPaginationComponent,
     NameDirective,
     NameGuidePipe,
     FileDragDropDirective,
@@ -135,7 +133,6 @@ import { BlockComponent } from './components/block/block.component';
     TypeLabelComponent,
     IconPickerComponent,
     ChartsComponent,
-    JwPaginationComponent,
     SidebarComponent,
     NameDirective,
     NameGuidePipe,
@@ -163,12 +160,13 @@ import { BlockComponent } from './components/block/block.component';
     AuthModule,
     RenderModule,
     FileexplorerModule,
-    QRCodeModule
+    QRCodeModule,
+    JwPaginationModule
   ],
   providers: [
     BreadcrumbService,
     NgbActiveModal
-  ],
+  ]
 })
 export class LayoutModule {
   constructor(private iconLibrary: FaIconLibrary) {
