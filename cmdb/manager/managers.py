@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,23 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
+from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import Collection, PublicID
-from cmdb.manager import ManagerBase
-from cmdb.search import Pipeline, Query
+from cmdb.manager import AbstractManagerBase
+from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
 
 
-class AccountManagerQueryBuilder(Builder):
-    """Query/Pipeline builder class for the user management managers"""
+class ManagerQueryBuilder(Builder):
+    """Query/Pipeline builder class for the managers"""
 
     def __init__(self):
         """Init a query or a pipeline to None"""
         self.query: Union[Query, Pipeline] = Pipeline([])
-        super(AccountManagerQueryBuilder, self).__init__()
+        super(ManagerQueryBuilder, self).__init__()
 
     def __len__(self):
         """Get the length of the query"""
@@ -43,7 +45,6 @@ class AccountManagerQueryBuilder(Builder):
             Union[Query, Pipeline]:
         """
         Converts the parameters from the call to a mongodb aggregation pipeline
-
         Args:
             filter: dict or list of dict query/queries which the elements have to match.
             limit: max number of documents to return.
@@ -54,7 +55,7 @@ class AccountManagerQueryBuilder(Builder):
             **kwargs:
 
         Returns:
-            The `AccountManagerQueryBuilder` query pipeline with the parameter contents.
+            The `FrameworkQueryBuilder` query pipeline with the parameter contents.
         """
         self.clear()
         self.query = Pipeline([])
@@ -65,45 +66,65 @@ class AccountManagerQueryBuilder(Builder):
             for pipe in filter:
                 self.query.append(pipe)
 
-        if limit == 0:
-            results_query = [self.skip_(limit)]
-        else:
-            results_query = [self.skip_(skip), self.limit_(limit)]
-
         self.query.append(self.sort_(sort=sort, order=order))
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
+        self.query.append(self.skip_(limit))
+        if limit != 0:
+            self.query.append(self.limit_(limit))
+
+        return self.query
+
+    def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
+        """
+        Count the number of documents in the stages
+        Args:
+            filter: filter requirement
+
+        Returns:
+            Query with count stages.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+        self.query.append(self.count_('total'))
         return self.query
 
 
-class AccountManager(ManagerBase):
+class ManagerBase(AbstractManagerBase):
     """Framework managers implementation for all framework based CRUD operations."""
 
-    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo = None):
+    def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
         """
         Set the collection name and the database connection.
-
         Args:
             collection: Name of the database collection
             database_manager: Active database managers instance
         """
         self.collection: Collection = collection
-        self.builder = AccountManagerQueryBuilder()
-        super(AccountManager, self).__init__(database_manager)
+        self.builder = ManagerQueryBuilder()
+        super(ManagerBase, self).__init__(database_manager)
+
+    def count(self, filter: dict, *args, **kwargs) -> int:
+        raise NotImplementedError
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
         raise NotImplementedError
 
-    def get(self, *args, **kwargs) -> dict:
+    def find(self, filter: dict, *args, **kwargs) -> ListResult:
         raise NotImplementedError
 
-    def insert(self, resource: dict, *args, **kwargs) -> PublicID:
+    def get(self, public_id: PublicID) -> dict:
         raise NotImplementedError
 
-    def update(self, resource: dict, *args, **kwargs):
+    def insert(self, resource: dict) -> PublicID:
         raise NotImplementedError
 
-    def delete(self, *args, **kwargs):
+    def update(self, public_id: PublicID, resource: dict):
+        raise NotImplementedError
+
+    def delete(self, public_id: PublicID):
         raise NotImplementedError

@@ -16,10 +16,10 @@
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.exportd import ExportdJob
-from cmdb.framework.managers.framework_manager import FrameworkManager as ExportDManager
+from cmdb.manager.managers import ManagerBase as ExportDManager
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError, ManagerGetError
-from cmdb.search import Query
+from cmdb.search import Pipeline
 
 
 class ExportDJobManager(ExportDManager):
@@ -50,10 +50,12 @@ class ExportDJobManager(ExportDManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total = next(self._aggregate(self.collection, count_query))['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[ExportdJob] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[ExportdJob] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJob)
         return iteration_result

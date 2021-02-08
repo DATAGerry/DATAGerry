@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,15 +17,14 @@ from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
-from .account_manager import AccountManager
-from .. import UserGroupModel
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerUpdateError
-from ...search import Query
+from ...manager.managers import ManagerBase
+from ...search import Query, Pipeline
 
 
-class UserManager(AccountManager):
+class UserManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         super(UserManager, self).__init__(UserModel.COLLECTION, database_manager=database_manager)
@@ -48,11 +47,13 @@ class UserManager(AccountManager):
             IterationResult: Instance of IterationResult with generic UserModel.
         """
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total = next(self._aggregate(self.collection, count_query))['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[UserModel] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[UserModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(UserModel)
         return iteration_result
 

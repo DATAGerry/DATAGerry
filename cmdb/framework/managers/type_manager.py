@@ -17,7 +17,7 @@ from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import TypeModel
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
@@ -25,7 +25,7 @@ from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateEr
 from cmdb.search import Pipeline
 
 
-class TypeManager(FrameworkManager):
+class TypeManager(ManagerBase):
     """
     Manager for the type module. Manages the CRUD functions of the types and the iteration over the collection.
     """

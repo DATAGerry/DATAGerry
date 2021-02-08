@@ -20,7 +20,7 @@ from datetime import datetime
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
@@ -34,7 +34,7 @@ from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
 
 
-class LogQueryBuilder(FrameworkQueryBuilder):
+class LogQueryBuilder(ManagerQueryBuilder):
 
     def __init__(self):
         super(LogQueryBuilder, self).__init__()
@@ -110,7 +110,7 @@ class LogQueryBuilder(FrameworkQueryBuilder):
         return self.query
 
 
-class CmdbLogManager(FrameworkManager):
+class CmdbLogManager(ManagerBase):
     """
         Manager for the CmdbLog module. Manages the CRUD functions of the logs and the iteration over the collection.
         """

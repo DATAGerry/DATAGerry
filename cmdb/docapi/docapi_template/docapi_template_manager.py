@@ -21,7 +21,7 @@ from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
-from cmdb.framework.managers.framework_manager import FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError
 from cmdb.search import Query
@@ -36,7 +36,7 @@ class DocapiTemplateManager(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
         self.dbm = database_manager
-        self.builder = FrameworkQueryBuilder()
+        self.builder = ManagerQueryBuilder()
         self.collection = DocapiTemplate.COLLECTION
         self._event_queue = event_queue
         super().__init__(database_manager)

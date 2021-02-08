@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,19 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from typing import Union, List
+from typing import Union
 
-from .account_manager import AccountManager
 from .right_manager import RightManager
 from .. import UserGroupModel
 from ...database.managers import DatabaseManagerMongo
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError
-from ...search import Query
+from ...manager.managers import ManagerBase
+from ...search import Pipeline
 
 
-class GroupManager(AccountManager):
+class GroupManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo = None, right_manager: RightManager = None):
         self.right_manager: RightManager = right_manager
@@ -49,12 +49,14 @@ class GroupManager(AccountManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total = next(self._aggregate(self.collection, count_query))['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[UserGroupModel] = IterationResult.from_aggregation(aggregation_result)
-        iteration_result.results = [UserGroupModel.from_data(result, rights=self.right_manager.rights) for result in iteration_result.results]
+        iteration_result: IterationResult[UserGroupModel] = IterationResult(aggregation_result, total)
+        iteration_result.convert_to(UserGroupModel)
         return iteration_result
 
     def get(self, public_id: Union[PublicID, int]) -> UserGroupModel:

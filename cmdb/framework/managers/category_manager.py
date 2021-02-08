@@ -17,18 +17,17 @@ from typing import Union
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
-from cmdb.search import Query, Pipeline
+from cmdb.search import Pipeline
 
 
-class CategoryManager(FrameworkManager):
+class CategoryManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.__type_manager = TypeManager(database_manager=database_manager)

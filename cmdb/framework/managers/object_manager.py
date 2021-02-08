@@ -20,7 +20,7 @@ from bson import Regex
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
-from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
@@ -31,7 +31,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 
-class ObjectQueryBuilder(FrameworkQueryBuilder):
+class ObjectQueryBuilder(ManagerQueryBuilder):
 
     def __init__(self):
         super(ObjectQueryBuilder, self).__init__()
@@ -119,7 +119,7 @@ class ObjectQueryBuilder(FrameworkQueryBuilder):
         return self.query
 
 
-class ObjectManager(FrameworkManager):
+class ObjectManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.object_builder = ObjectQueryBuilder()

@@ -19,7 +19,7 @@ from typing import Union, List
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.managers.object_manager import ObjectQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
@@ -29,7 +29,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 
-class ObjectLinkManager(FrameworkManager):
+class ObjectLinkManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.query_builder = ObjectQueryBuilder()
