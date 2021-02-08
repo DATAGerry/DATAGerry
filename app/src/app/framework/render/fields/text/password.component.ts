@@ -25,7 +25,7 @@ import { ComponentsFields, RenderField } from '../components.fields';
 })
 export class PasswordComponent extends RenderField implements OnInit {
 
-  @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput') public passWordToggle: ElementRef;
 
   public displayType: string = 'text';
 

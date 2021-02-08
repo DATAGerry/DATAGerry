@@ -224,6 +224,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadNewestObjects(): void {
     this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.newestObjects = apiResponse.results as Array<RenderResult>;
+      console.log(this.newestObjects);
       this.newestObjectsCount = apiResponse.results.length;
     });
   }

@@ -28,7 +28,6 @@ import { ErrorNotFoundComponent } from './components/error-not-found/error-not-f
 
 @NgModule({
   declarations: [ErrorComponent, ErrorForbiddenComponent, DefaultErrorComponent, ErrorNotFoundComponent],
-  entryComponents: [DefaultErrorComponent, ErrorForbiddenComponent, ErrorNotFoundComponent],
   imports: [
     CommonModule,
     LayoutModule,

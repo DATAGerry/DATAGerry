@@ -62,8 +62,7 @@ import { TableModule } from '../../layout/table/table.module';
         IconPickerModule,
         AuthModule,
         TableModule
-    ],
-  entryComponents: [AddCategoryModalComponent, DeleteCategoryModalComponent]
+    ]
 })
 export class CategoryModule {
 }

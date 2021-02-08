@@ -61,7 +61,6 @@ import { UsersModule } from '../../management/users/users.module';
 import { LogSettingsModule } from '../log-settings/log-settings.module';
 
 @NgModule({
-  entryComponents: [],
   declarations: [
     ExportdJobSettingsListComponent,
     ExportdJobSettingsEditComponent,

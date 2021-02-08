@@ -66,12 +66,6 @@ import { ObjectLinksTablePartnerCellComponent } from './components/object-links-
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
 
 @NgModule({
-  entryComponents: [
-    ObjectLinkAddModalComponent,
-    ObjectDeleteModalComponent,
-    ObjectLinkDeleteModalComponent,
-    ObjectsDeleteModalComponent
-  ],
   declarations: [
     ObjectViewComponent,
     ObjectHeaderComponent,

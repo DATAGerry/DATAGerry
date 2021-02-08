@@ -169,15 +169,6 @@ import { BlockComponent } from './components/block/block.component';
     BreadcrumbService,
     NgbActiveModal
   ],
-  entryComponents: [
-    GeneralModalComponent,
-    AddAttachmentsModalComponent,
-    AttachmentsListModalComponent,
-    FilemanagerModalComponent,
-    IntroComponent,
-    StepByStepIntroComponent,
-    ObjectPreviewModalComponent
-  ]
 })
 export class LayoutModule {
   constructor(private iconLibrary: FaIconLibrary) {

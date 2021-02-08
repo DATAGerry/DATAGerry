@@ -43,9 +43,6 @@ import { GroupAclComponent } from './group-acl/group-acl.component';
 import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
-  entryComponents: [
-    GroupUsersModalComponent
-  ],
   declarations: [
     GroupsComponent,
     GroupFormComponent,
