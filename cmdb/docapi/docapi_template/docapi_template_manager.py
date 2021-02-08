@@ -24,7 +24,7 @@ from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerIn
 from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError
-from cmdb.search import Query
+from cmdb.search import Query, Pipeline
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
@@ -53,12 +53,18 @@ class DocapiTemplateManager(CmdbManagerBase):
         return DocapiTemplate(**result)
 
     def get_templates(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[DocapiTemplate]:
+
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[DocapiTemplate] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[DocapiTemplate] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(DocapiTemplate)
         return iteration_result
 

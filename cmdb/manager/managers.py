@@ -67,7 +67,7 @@ class ManagerQueryBuilder(Builder):
                 self.query.append(pipe)
 
         self.query.append(self.sort_(sort=sort, order=order))
-        self.query.append(self.skip_(limit))
+        self.query.append(self.skip_(skip))
         if limit != 0:
             self.query.append(self.limit_(limit))
 

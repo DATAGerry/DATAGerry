@@ -53,7 +53,10 @@ class CategoryManager(ManagerBase):
             query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
             count_query: Pipeline = self.builder.count(filter=filter)
             aggregation_result = list(self._aggregate(self.collection, query))
-            total = next(self._aggregate(self.collection, count_query))['total']
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
 

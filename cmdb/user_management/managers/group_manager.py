@@ -88,7 +88,7 @@ class GroupManager(ManagerBase):
             int: The Public ID of the new inserted UserGroupModel
         """
         if isinstance(group, UserGroupModel):
-            group = UserGroupModel.to_data(group)
+            group = UserGroupModel.to_dict(group)
         return self._insert(self.collection, resource=group)
 
     def update(self, public_id: Union[PublicID, int], group: Union[UserGroupModel, dict]):

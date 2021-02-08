@@ -75,15 +75,6 @@ class UserGroupModel(CmdbDAO):
         )
 
     @classmethod
-    def to_data(cls, instance: "UserGroupModel"):
-        return {
-            'public_id': instance.public_id,
-            'name': instance.name,
-            'label': instance.label,
-            'rights': [right.name for right in instance.rights]
-        }
-
-    @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
         return {
             'public_id': instance.public_id,
