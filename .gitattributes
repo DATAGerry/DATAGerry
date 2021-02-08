@@ -1,3 +1,5 @@
 docs/* linguist-documentation
 cmdb/interface/docs/static/* linguist-documentation
 cmdb/interface/net_app/_static/* linguist-vendored
+app/package.json linguist-vendored
+app/package-lock.json linguist-vendored
