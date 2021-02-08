@@ -37,8 +37,7 @@
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.js",
               "./node_modules/jszip/dist/jszip.js",
               "./node_modules/tinymce/tinymce.min.js"
-            ],
-            "es5BrowserSupport": true
+            ]
           },
           "configurations": {
             "production": {
