@@ -36,9 +36,9 @@ export class DateSimpleComponent extends RenderField implements OnInit {
     const dateValue = this.data ? this.data.value : this.data.value;
     if (dateValue) {
       if (dateValue.$date) {
-        this.data.value = moment(dateValue.$date).format('DD/MM/YYYY');
+        this.data.value = moment(new Date(dateValue.$date)).format('DD/MM/YYYY');
       } else {
-        this.data.value = moment(dateValue).format('DD/MM/YYYY');
+        this.data.value = moment(new Date(dateValue)).format('DD/MM/YYYY');
       }
     } else {
       this.data.value = 'no date set';
