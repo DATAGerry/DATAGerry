@@ -28,6 +28,10 @@
   </div>
 </ng-template>
 
+<ng-template #summaryTemplate let-data="data">
+  {{data}}
+</ng-template>
+
 <!-- Custom table buttons -->
 <ng-template #exportButtonTemplate>
   <div class="btn-group" *permissionLink="'base.export.object.*'">
