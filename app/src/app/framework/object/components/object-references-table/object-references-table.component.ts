@@ -57,12 +57,6 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
   @ViewChild('exportButtonTemplate', { static: true }) exportButtonTemplate: TemplateRef<any>;
 
   /**
-   * Table Template: Link summary column.
-   */
-  @ViewChild('summaryTemplate', {static: true}) summaryTemplate: TemplateRef<any>;
-
-
-  /**
    * Global un-subscriber for http calls to the rest backend.
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
@@ -161,8 +155,7 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
         display: 'Summary',
         name: 'summary',
         data: 'summary_line',
-        sortable: false,
-        template: this.summaryTemplate
+        sortable: false
       },
       {
         display: 'Creation Time',
