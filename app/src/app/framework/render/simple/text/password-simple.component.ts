@@ -17,13 +17,13 @@
 */
 
 import { Component } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent} from '../../fields/components.fields';
 
 @Component({
   templateUrl: './password-simple.component.html',
   styleUrls: ['./password-simple.component.scss']
 })
-export class PasswordSimpleComponent extends RenderField {
+export class PasswordSimpleComponent extends RenderFieldComponent {
 
   public showData: boolean = false;
 

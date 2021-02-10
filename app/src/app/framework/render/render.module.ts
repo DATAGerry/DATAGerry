@@ -49,6 +49,8 @@ import { DateSimpleComponent } from './simple/date/date-simple.component';
 import { NumberComponent } from './fields/math/number.component';
 import { InputAppendsComponent } from './components/input-appends/input-appends.component';
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
+import { RenderFieldComponent } from './fields/components.fields';
+import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
 
 
 @NgModule({
@@ -78,7 +80,9 @@ import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-
     DateComponent,
     NumberComponent,
     InputAppendsComponent,
-    ObjectBulkInputAppendsComponent
+    ObjectBulkInputAppendsComponent,
+    RenderFieldComponent,
+    ConfigEditBaseComponent
   ],
   exports: [
     RenderElementComponent,

@@ -19,7 +19,7 @@
 import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
 import { simpleComponents } from '../simple/simple.list';
-import { RenderField } from '../fields/components.fields';
+import { RenderFieldComponent } from '../fields/components.fields';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
@@ -29,7 +29,7 @@ import { CmdbMode } from '../../modes.enum';
   templateUrl: './render-element.component.html',
   styleUrls: ['./render-element.component.scss']
 })
-export class RenderElementComponent extends RenderField implements OnInit {
+export class RenderElementComponent extends RenderFieldComponent implements OnInit {
 
   @ViewChild('fieldContainer', { read: ViewContainerRef, static: true }) containerField;
 

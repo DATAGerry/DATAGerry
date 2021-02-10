@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../components.fields';
+import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateNativeAdapter, NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 import { NgbStringAdapter } from './NgbStringAdapter';
@@ -10,7 +10,7 @@ import { NgbStringAdapter } from './NgbStringAdapter';
   styleUrls: ['./date.component.scss'],
   providers: [{provide: NgbDateAdapter, useClass: NgbStringAdapter}]
 })
-export class DateComponent extends RenderField implements  OnInit {
+export class DateComponent extends RenderFieldComponent implements  OnInit {
 
   public constructor() {
     super();

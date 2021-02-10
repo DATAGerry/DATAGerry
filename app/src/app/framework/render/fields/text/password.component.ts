@@ -16,14 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { ComponentsFields, RenderField } from '../components.fields';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
+import { RenderFieldComponent } from '../components.fields';
 
 @Component({
   templateUrl: './password.component.html',
   styleUrls: ['./text.component.scss']
 })
-export class PasswordComponent extends RenderField implements OnInit {
+export class PasswordComponent extends RenderFieldComponent implements OnInit {
 
   @ViewChild('passWordInput') public passWordToggle: ElementRef;
 

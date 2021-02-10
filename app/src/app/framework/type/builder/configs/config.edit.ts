@@ -16,10 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Injectable, Input} from '@angular/core';
+import {Component, Input} from '@angular/core';
 
-@Injectable()
-export class ConfigEdit {
+@Component({
+  template: ''
+})
+export class ConfigEditBaseComponent {
   private innerData: any;
   private innerSections: any[];
   private editable: false;
