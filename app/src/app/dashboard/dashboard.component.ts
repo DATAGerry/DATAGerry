@@ -80,10 +80,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public newestObjects: Array<RenderResult>;
   public newestTableColumns: Array<Column>;
   public newestObjectsCount: number;
+  public readonly newestInnitPage: number = 1;
+  public newestPage: number = this.newestInnitPage;
+  public newestLoading: boolean = false;
 
   public latestObjects: Array<RenderResult>;
   public latestTableColumns: Array<Column>;
   public latestObjectsCount: number;
+  public readonly latestInnitPage: number = 1;
+  public latestPage: number = this.latestInnitPage;
+  public latestLoading: boolean = false;
 
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
@@ -221,18 +227,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  private onNewestPageChange(event) {
+    this.newestPage = event;
+    this.loadNewestObjects();
+  }
+
+  private  onLatestPageChange(event) {
+    this.latestPage = event;
+    this.loadLatestObjects();
+  }
+
   private loadNewestObjects(): void {
-    this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.newestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.newestPage, limit: 10, order: -1};
+    this.objectService.getNewestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.newestObjects = apiResponse.results as Array<RenderResult>;
-      this.newestObjectsCount = apiResponse.results.length;
-    });
+      this.newestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.newestLoading = false;
+      } );
   }
 
   private loadLatestObjects(): void {
-    this.objectService.getLatestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.latestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.latestPage, limit: 10, order: -1};
+    this.objectService.getLatestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.latestObjects = apiResponse.results as Array<RenderResult>;
-      this.latestObjectsCount = apiResponse.results.length;
-    });
+      this.latestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.latestLoading = false;
+      } );
   }
 
   private generateObjectChar() {

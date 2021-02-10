@@ -60,16 +60,16 @@
 <hr/>
 <ng-container *ngIf="newestObjects">
   <h2>Newest objects</h2>
-  <cmdb-table [id]="'dashboard-newest-table'" [items]="newestObjects" [totalItems]="newestObjectsCount"
-              [columns]="newestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [emptyMessage]="'No newest objects!'" [pageSizeEnabled]="false">
+  <cmdb-table [id]="'dashboard-newest-table'" [items]="newestObjects" [totalItems]="newestObjectsCount" [loading]="newestLoading"
+              [columns]="newestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10" [loadingEnabled]="true"
+              [emptyMessage]="'No newest objects!'" [pageSizeEnabled]="false" [paginationEnabled]="true" (pageChange)="onNewestPageChange($event)">
   </cmdb-table>
 </ng-container>
 <hr />
 <ng-container *ngIf="latestObjects">
   <h2>Last modified objects</h2>
-  <cmdb-table [id]="'dashboard-latest-table'" [items]="latestObjects" [totalItems]="latestObjectsCount"
-              [columns]="latestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [emptyMessage]="'No modified objects!'" [pageSizeEnabled]="false">
+  <cmdb-table [id]="'dashboard-latest-table'" [items]="latestObjects" [totalItems]="latestObjectsCount" [loading]="latestLoading"
+              [columns]="latestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10" [loadingEnabled]="true"
+              [emptyMessage]="'No modified objects!'" [pageSizeEnabled]="false" (pageChange)="onLatestPageChange($event)">
   </cmdb-table>
 </ng-container>
