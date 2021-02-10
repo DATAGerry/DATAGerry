@@ -147,7 +147,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     params: CollectionParameters = { limit: 10, order: 1, page: 1 },
     view: string = 'render'): Observable<APIGetMultiResponse<T>> {
     params.sort = 'creation_time';
-    params.filter = [{ $match: { active: { $eq: true }, creation_time: { $ne: null } } }];
+    params.filter = [{ $match: {creation_time: { $ne: null } } }];
     return this.getObjects(params, view);
   }
 
@@ -160,7 +160,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     params: CollectionParameters = { limit: 10, order: 1, page: 1 },
     view: string = 'render'): Observable<APIGetMultiResponse<T>> {
     params.sort = 'last_edit_time';
-    params.filter = [{ $match: { active: { $eq: true }, last_edit_time: { $ne: null } } }];
+    params.filter = [{ $match: {last_edit_time: { $ne: null } } }];
     return this.getObjects(params, view);
   }
 
