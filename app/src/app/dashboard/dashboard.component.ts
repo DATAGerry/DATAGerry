@@ -28,7 +28,6 @@ import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { APIGetMultiResponse } from '../services/models/api-response';
-import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
@@ -77,19 +76,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
-  public newestObjects: Array<RenderResult>;
-  public newestTableColumns: Array<Column>;
-  public newestObjectsCount: number;
+  public newestObjects: Array<RenderResult> = [];
+  public newestTableColumns: Array<Column> = [];
+  public newestObjectsCount: number = 0;
 
-  public latestObjects: Array<RenderResult>;
-  public latestTableColumns: Array<Column>;
-  public latestObjectsCount: number;
+  public latestObjects: Array<RenderResult> = [];
+  public latestTableColumns: Array<Column> = [];
+  public latestObjectsCount: number = 0;
 
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
               private toastService: ToastService, private sidebarService: SidebarService,
-              private userService: UserService, private groupService: GroupService,
-              private specialService: SpecialService<RenderResult>) {
+              private userService: UserService, private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -224,7 +222,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private loadNewestObjects(): void {
     this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.newestObjects = apiResponse.results as Array<RenderResult>;
-      console.log(this.newestObjects);
       this.newestObjectsCount = apiResponse.results.length;
     });
   }
