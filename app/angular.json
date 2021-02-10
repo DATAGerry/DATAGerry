@@ -18,6 +18,7 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "aot": true,
+            "allowedCommonJsDependencies": ["lodash"],
             "outputPath": "dist/datagerry-app",
             "index": "src/index.html",
             "main": "src/main.ts",

@@ -27,7 +27,6 @@ import { ConfigEdit } from '../config.edit';
 export class SectionFieldEditComponent extends ConfigEdit implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
-  @Input() data: any;
 
   public constructor() {
     super();
