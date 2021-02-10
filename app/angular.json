@@ -18,7 +18,9 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "aot": true,
-            "allowedCommonJsDependencies": ["lodash"],
+            "allowedCommonJsDependencies": [
+              "lodash", "qrcode", "file-saver", "chartjs-plugin-datalabels", "jquery", "chart.js", "zxcvbn"
+            ],
             "outputPath": "dist/datagerry-app",
             "index": "src/index.html",
             "main": "src/main.ts",
