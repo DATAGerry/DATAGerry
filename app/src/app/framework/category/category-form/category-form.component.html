@@ -72,10 +72,15 @@
                 <div class="input-group-prepend">
                   <span class="input-group-text" id="category-meta-icon-addon"><i [ngClass]="icon.value"></i></span>
                 </div>
-                <input [iconPicker] [ipPosition]="'bottom'" [ipFallbackIcon]="fallBackIcon"
+                <input [iconPicker]
+                       [ipPosition]="'bottom'"
+                       [ipFallbackIcon]="fallBackIcon"
+                       [ipIconPack]="['fa5']"
+                       [ipPlaceHolder]="'Choose an icon'"
                        (iconPickerSelect)="onIconSelect($event)" formControlName="icon" class="form-control"
-                       id="category-meta-icon" [ipPlaceHolder]="'Choose an icon'" placeholder="Choose an icon"
-                       [ngClass]="{ 'is-valid': icon.valid && (icon.dirty || icon.touched), 'is-invalid': icon.invalid && (icon.dirty || icon.touched)}">
+                       id="category-meta-icon" placeholder="Choose an icon"
+                       [ngClass]="{ 'is-valid': icon.valid && (icon.dirty || icon.touched),
+                       'is-invalid': icon.invalid && (icon.dirty || icon.touched)}">
               </div>
               <small class="form-text text-muted">The icon is a meta value, which will only be visible in the
                 frontend.</small>
