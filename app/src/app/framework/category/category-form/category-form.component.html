@@ -104,21 +104,27 @@
         <div class="row">
           <div class="col-md-12 dnd">
             <label for="category-types">Types:</label>
-            <section id="category-types" dndDropzone class="drop-zone" data-content="Drop type here" (dndDrop)="onDrop($event, assignedTypes, true)">
+            <section id="category-types" dndDropzone class="drop-zone" data-content="Drop type here"
+                     (dndDrop)="onDrop($event, assignedTypes, true)">
                 <div class="drop-zone" dndPlaceholderRef data-content="Drop type here"></div>
-              <ng-container *ngFor="let type of assignedTypes">
-                <div *permissionLink="'base.framework.type.view',acl:type?.acl;requirements:'READ'" [dndDraggable]="type" [dndEffectAllowed]="effect"
-                     (dndMoved)="onDragged(type, assignedTypes, 'move', true)"
-                     class="list-group-item list-group-item-action">
-                            <span class="d-flex justify-content-between align-items-center ">
-                              {{type?.label}} # {{type?.public_id}}
-                              <span>
-                                <i class="fa fa-arrows-alt dnd-handle" dndHandle></i>
-                                <i class="fa fa-trash-alt ml-2 pointer" (click)="clickRemoveAssignedType(type)"></i>
-                              </span>
-                            </span>
-                </div>
-              </ng-container>
+                <ng-container *ngFor="let type of assignedTypes">
+                  <li *permissionLink="'base.framework.type.view',acl:type?.acl;requirements:'READ'"
+                      [dndDraggable]="type" [dndEffectAllowed]="effect"
+                      (dndMoved)="onDragged(type, assignedTypes, 'move', true)"
+                      class="list-group-item">
+                    <div class="container">
+                      <div class="row">
+                        <div class="col-auto mr-auto">
+                          {{type?.label}} # {{type?.public_id}}
+                        </div>
+                        <div class="col-auto">
+                          <i class="fa fa-arrows-alt dnd-handle" dndHandle></i>
+                          <i class="fa fa-trash-alt ml-2 pointer" (click)="clickRemoveAssignedType(type)"></i>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
+                </ng-container>
             </section>
           </div>
         </div>

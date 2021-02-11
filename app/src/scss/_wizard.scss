@@ -335,16 +335,6 @@ aw-wizard-navigation-bar.horizontal {
       li {
         width: 100% / $number-of-components;
       }
-
-      li.current.editing.done div.step-indicator {
-        color: $cmdb-primary!important;
-        border-color: $cmdb-primary!important;
-      }
-
-      li.done.navigable div.step-indicator{
-        color: $success!important;
-        border-color: $success!important;
-      }
     }
 
     &.steps-2 {
