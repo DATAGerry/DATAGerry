@@ -56,7 +56,6 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
    */
   @ViewChild('exportButtonTemplate', { static: true }) exportButtonTemplate: TemplateRef<any>;
 
-
   /**
    * Global un-subscriber for http calls to the rest backend.
    */
@@ -151,6 +150,12 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
         data: 'type_information.type_name',
         sortable: true,
         template: this.typeNameTemplate,
+      },
+      {
+        display: 'Summary',
+        name: 'summary',
+        data: 'summary_line',
+        sortable: false
       },
       {
         display: 'Creation Time',
