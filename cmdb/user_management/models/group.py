@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -81,6 +81,15 @@ class UserGroupModel(CmdbDAO):
             'name': instance.name,
             'label': instance.label,
             'rights': [BaseRight.to_dict(right) for right in instance.rights]
+        }
+
+    @classmethod
+    def to_data(cls, instance: "UserGroupModel") -> dict:
+        return {
+            'public_id': instance.public_id,
+            'name': instance.name,
+            'label': instance.label,
+            'rights': [right.name for right in instance.rights]
         }
 
     def set_rights(self, rights: list):
