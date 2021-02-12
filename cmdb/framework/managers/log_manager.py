@@ -20,7 +20,7 @@ from datetime import datetime
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.utils import PublicID
 
 from cmdb.framework.results.iteration import IterationResult
@@ -34,7 +34,7 @@ from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
 
 
-class LogQueryBuilder(FrameworkQueryBuilder):
+class LogQueryBuilder(ManagerQueryBuilder):
 
     def __init__(self):
         super(LogQueryBuilder, self).__init__()
@@ -78,14 +78,39 @@ class LogQueryBuilder(FrameworkQueryBuilder):
 
         self.query.append(self.sort_(sort=sort, order=order))
 
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
+        self.query += results_query
+        return self.query
+
+    def count(self, filter: Union[List[dict], dict], user: UserModel = None,
+              permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
+        """
+        Count the number of documents in the stages
+        Args:
+            filter: filter requirement
+            user: request user
+            permission: acl permission
+
+        Returns:
+            Query with count stages.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+
+        if user and permission:
+            self.query += (
+                LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+
+        self.query.append(self.count_('total'))
         return self.query
 
 
-class CmdbLogManager(FrameworkManager):
+class CmdbLogManager(ManagerBase):
     """
         Manager for the CmdbLog module. Manages the CRUD functions of the logs and the iteration over the collection.
         """
@@ -125,12 +150,17 @@ class CmdbLogManager(FrameworkManager):
         try:
             query: Query = self.log_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
                                                   user=user, permission=permission)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            count_query: Pipeline = self.log_builder.count(filter=filter, user=user, permission=permission)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
 
         try:
-            iteration_result: IterationResult[CmdbMetaLog] = IterationResult.from_aggregation(aggregation_result)
+            iteration_result: IterationResult[CmdbMetaLog] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CmdbObjectLog)
         except ManagerGetError as err:
             raise ManagerGetError(err)

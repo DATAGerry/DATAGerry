@@ -22,7 +22,7 @@ from cmdb.framework.utils import Collection, PublicID
 from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError
 
 
-class ManagerBase:
+class AbstractManagerBase:
     """
     Manager base class for all core CRUD function.
     Will be replacing `CmdbManagerBase` in the future.

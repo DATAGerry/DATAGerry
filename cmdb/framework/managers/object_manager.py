@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ from bson import Regex
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
-from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
@@ -31,7 +31,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 
-class ObjectQueryBuilder(FrameworkQueryBuilder):
+class ObjectQueryBuilder(ManagerQueryBuilder):
 
     def __init__(self):
         super(ObjectQueryBuilder, self).__init__()
@@ -65,7 +65,7 @@ class ObjectQueryBuilder(FrameworkQueryBuilder):
                 self.query.append(pipe)
 
         if user and permission:
-            self.query += (AccessControlQueryBuilder().build(group_id=user.group_id, permission=permission))
+            self.query += (AccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
 
         if limit == 0:
             results_query = [self.skip_(limit)]
@@ -88,14 +88,38 @@ class ObjectQueryBuilder(FrameworkQueryBuilder):
         else:
             self.query.append(self.sort_(sort=sort, order=order))
 
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
+        self.query += results_query
+        return self.query
+
+    def count(self, filter: Union[List[dict], dict], user: UserModel = None,
+              permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
+        """
+        Count the number of documents in the stages
+        Args:
+            filter: filter requirement
+            user: request user
+            permission: acl permission
+
+        Returns:
+            Query with count stages.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+
+        if user and permission:
+            self.query += (AccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+
+        self.query.append(self.count_('total'))
         return self.query
 
 
-class ObjectManager(FrameworkManager):
+class ObjectManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.object_builder = ObjectQueryBuilder()
@@ -126,14 +150,18 @@ class ObjectManager(FrameworkManager):
     def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
-
         try:
-            query: Query = self.object_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
-                                                     user=user, permission=permission)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.object_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
+                                                        user=user, permission=permission)
+            count_query: Pipeline = self.object_builder.count(filter=filter, user=user, permission=permission)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[CmdbObject] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
 

@@ -17,15 +17,15 @@ from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import TypeModel
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
-from cmdb.search import Query
+from cmdb.search import Pipeline
 
 
-class TypeManager(FrameworkManager):
+class TypeManager(ManagerBase):
     """
     Manager for the type module. Manages the CRUD functions of the types and the iteration over the collection.
     """
@@ -56,11 +56,16 @@ class TypeManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[TypeModel] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(TypeModel)
         return iteration_result
 

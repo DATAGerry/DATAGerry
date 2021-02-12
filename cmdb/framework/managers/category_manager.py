@@ -17,18 +17,17 @@ from typing import Union
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.managers.error.framework_errors import FrameworkDeleteError
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
-from cmdb.search import Query
+from cmdb.search import Pipeline
 
 
-class CategoryManager(FrameworkManager):
+class CategoryManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.__type_manager = TypeManager(database_manager=database_manager)
@@ -51,11 +50,17 @@ class CategoryManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[CategoryModel] = IterationResult.from_aggregation(aggregation_result)
+
+        iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CategoryModel)
         return iteration_result
 

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,11 +19,11 @@ from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerDeleteError
+from cmdb.manager.managers import ManagerBase
 from cmdb.user_management.models.settings import UserSettingModel, UserSettingType
-from cmdb.user_management.managers.account_manager import AccountManager
 
 
-class UserSettingsManager(AccountManager):
+class UserSettingsManager(ManagerBase):
     """
     Manager for user settings CRUD functions.
     """
