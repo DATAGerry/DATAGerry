@@ -46,7 +46,7 @@ LOGGER = logging.getLogger(__name__)
 class RenderVisualization:
 
     def __init__(self):
-        self.current_render_time = datetime.utcnow()
+        self.current_render_time = datetime.now()
         self.object_information: dict = {}
         self.type_information: dict = {}
 
