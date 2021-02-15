@@ -75,8 +75,6 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
     this.loadObjectsFromAPI();
   }
 
-  @Output() referencesLoadedEvent = new EventEmitter<any>();
-
   /**
    * Table columns definition.
    */
@@ -201,7 +199,6 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
         this.refererAPIResponse = apiResponse;
         this.refererObjects = apiResponse.results as Array<RenderResult>;
         this.totalReferer = apiResponse.total;
-        this.referencesLoadedEvent.emit(apiResponse.results);
         this.loading = false;
       });
   }
