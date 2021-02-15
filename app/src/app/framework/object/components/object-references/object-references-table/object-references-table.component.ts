@@ -16,18 +16,18 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { ObjectService } from '../../../services/object.service';
-import { RenderResult } from '../../../models/cmdb-render';
-import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
-import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { ObjectService } from '../../../../services/object.service';
+import { RenderResult } from '../../../../models/cmdb-render';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { CollectionParameters } from '../../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
-import { SupportedExporterExtension } from '../../../../export/export-objects/model/supported-exporter-extension';
+import { SupportedExporterExtension } from '../../../../../export/export-objects/model/supported-exporter-extension';
 import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../export/export.service';
+import { FileService } from '../../../../../export/export.service';
 
 @Component({
   selector: 'cmdb-object-references-table',
@@ -74,6 +74,8 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
     this.publicID = id;
     this.loadObjectsFromAPI();
   }
+
+  @Output() referencesLoadedEvent = new EventEmitter<any>();
 
   /**
    * Table columns definition.
@@ -199,6 +201,7 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
         this.refererAPIResponse = apiResponse;
         this.refererObjects = apiResponse.results as Array<RenderResult>;
         this.totalReferer = apiResponse.total;
+        this.referencesLoadedEvent.emit(apiResponse.results);
         this.loading = false;
       });
   }

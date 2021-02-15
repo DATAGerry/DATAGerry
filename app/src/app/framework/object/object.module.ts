@@ -60,10 +60,11 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
-import { ObjectReferencesTableComponent } from './components/object-references-table/object-references-table.component';
+import { ObjectReferencesTableComponent } from './components/object-references/object-references-table/object-references-table.component';
 import { ObjectLinksTableComponent } from './components/object-links-table/object-links-table.component';
 import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
+import { ObjectReferencesComponent } from './components/object-references/object-references.component';
 
 @NgModule({
   entryComponents: [
@@ -106,7 +107,8 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
     ObjectLinksTableComponent,
     ObjectLinksTablePartnerCellComponent,
     ObjectLinksTableActionCellComponent,
-    ObjectReferencesTableComponent
+    ObjectReferencesTableComponent,
+    ObjectReferencesComponent
   ],
   imports: [
     CommonModule,
