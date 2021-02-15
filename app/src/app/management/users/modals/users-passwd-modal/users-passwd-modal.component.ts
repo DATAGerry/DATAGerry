@@ -29,7 +29,7 @@ import { ToastService } from '../../../../layout/toast/toast.service';
 })
 export class UsersPasswdModalComponent {
 
-  @ViewChild('passWordInput', { static: false }) public passWordToggle: ElementRef;
+  @ViewChild('passWordInput') public passWordToggle: ElementRef;
   @Input() public user: User;
 
   public passwdForm: FormGroup;

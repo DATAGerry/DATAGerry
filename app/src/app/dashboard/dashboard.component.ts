@@ -28,7 +28,6 @@ import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { APIGetMultiResponse } from '../services/models/api-response';
-import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
@@ -77,16 +76,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
-  public newestObjects: Array<RenderResult>;
-  public newestTableColumns: Array<Column>;
-  public newestObjectsCount: number;
+  public newestObjects: Array<RenderResult> = [];
+  public newestTableColumns: Array<Column> = [];
+  public newestObjectsCount: number = 0;
   public readonly newestInnitPage: number = 1;
   public newestPage: number = this.newestInnitPage;
   public newestLoading: boolean = false;
 
-  public latestObjects: Array<RenderResult>;
-  public latestTableColumns: Array<Column>;
-  public latestObjectsCount: number;
+  public latestObjects: Array<RenderResult> = [];
+  public latestTableColumns: Array<Column> = [];
+  public latestObjectsCount: number = 0;
   public readonly latestInnitPage: number = 1;
   public latestPage: number = this.latestInnitPage;
   public latestLoading: boolean = false;
@@ -94,8 +93,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
               private toastService: ToastService, private sidebarService: SidebarService,
-              private userService: UserService, private groupService: GroupService,
-              private specialService: SpecialService<RenderResult>) {
+              private userService: UserService, private groupService: GroupService) {
   }
 
   public ngOnInit(): void {

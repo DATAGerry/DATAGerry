@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
 
@@ -26,7 +26,7 @@ import { RenderResult } from '../../../models/cmdb-render';
   templateUrl: './ref-simple.component.html',
   styleUrls: ['./ref-simple.component.scss']
 })
-export class RefSimpleComponent extends RenderField implements OnInit {
+export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
 
   public refData: any = undefined;
 

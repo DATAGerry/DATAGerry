@@ -43,9 +43,6 @@ import { UserTableListComponent } from './components/user-table-list/user-table-
 import { AclModule } from '../../acl/acl.module';
 
 @NgModule({
-  entryComponents: [
-    UsersPasswdModalComponent
-  ],
   declarations: [
     UserViewComponent,
     UsersPasswdModalComponent,

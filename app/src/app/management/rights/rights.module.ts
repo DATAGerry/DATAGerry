@@ -30,9 +30,6 @@ import { RightGroupsModalComponent } from './modals/right-groups-modal/right-gro
 import { GroupsModule } from '../groups/groups.module';
 
 @NgModule({
-  entryComponents: [
-    RightGroupsModalComponent
-  ],
   imports: [
     CommonModule,
     RightsRoutingModule,

@@ -52,7 +52,6 @@ import { FailedImportTableComponent } from './import-objects/import-complete/fai
 
 
 @NgModule({
-  entryComponents: [JsonConfigComponent, CsvConfigComponent, JsonMappingComponent, CsvMappingComponent],
   declarations: [
     ImportComponent,
     ImportObjectsComponent,

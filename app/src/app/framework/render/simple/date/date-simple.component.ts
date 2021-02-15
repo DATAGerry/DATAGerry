@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 import { DatePipe } from '@angular/common';
 
 @Component({
@@ -25,7 +25,7 @@ import { DatePipe } from '@angular/common';
   templateUrl: './date-simple.component.html',
   styleUrls: ['./date-simple.component.scss']
 })
-export class DateSimpleComponent extends RenderField implements OnInit {
+export class DateSimpleComponent extends RenderFieldComponent implements OnInit {
 
   constructor(private datePipe: DatePipe) {
     super();

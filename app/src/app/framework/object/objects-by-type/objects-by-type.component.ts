@@ -64,7 +64,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Table component.
    */
-  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
+  @ViewChild(TableComponent) objectsTableComponent: TableComponent<RenderResult>;
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;

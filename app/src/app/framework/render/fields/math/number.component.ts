@@ -17,14 +17,14 @@
 */
 
 import { Component } from '@angular/core';
-import { RenderField } from '../components.fields';
+import { RenderFieldComponent } from '../components.fields';
 
 @Component({
   selector: 'cmdb-number',
   templateUrl: './number.component.html',
   styleUrls: ['./number.component.scss']
 })
-export class NumberComponent extends RenderField {
+export class NumberComponent extends RenderFieldComponent {
 
   public constructor() {
     super();

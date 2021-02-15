@@ -102,7 +102,7 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
   /**
    * Table component.
    */
-  @ViewChild(TableComponent, { static: false }) exportdLogsTableComponent: TableComponent<RenderResult>;
+  @ViewChild(TableComponent) exportdLogsTableComponent: TableComponent<RenderResult>;
 
   /**
    * Component un-subscriber

@@ -1,12 +1,12 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { ConfigEdit } from '../config.edit';
+import { ConfigEditBaseComponent } from '../config.edit';
 
 @Component({
   selector: 'cmdb-check-field-edit',
   templateUrl: './check-field-edit.component.html',
   styleUrls: ['./check-field-edit.component.scss']
 })
-export class CheckFieldEditComponent extends ConfigEdit implements OnInit {
+export class CheckFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
   @Input() groupList: any;
   @Input() userList: any;
