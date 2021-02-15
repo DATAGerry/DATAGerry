@@ -23,17 +23,12 @@ export class ObjectReferencesComponent {
 
   onReferencesLoaded(event: Array<RenderResult>) {
     this.referencedTypes = [];
-    const objectList: Array<RenderResult> = Array.from(event);
+    let objectList: Array<RenderResult> = Array.from(event);
     while (objectList.length > 0) {
       const typeID = objectList[0].type_information.type_id;
       const typeLabel = objectList[0].type_information.type_label;
-      let occurences: number = 0;
-      objectList.forEach((object, index) => {
-        if (object.type_information.type_id === typeID) {
-          occurences += 1;
-          objectList.splice(index, 1);
-        }
-      });
+      const occurences: number = objectList.filter(object => object.type_information.type_id === typeID).length;
+      objectList = objectList.filter(object => object.type_information.type_id !== typeID);
       this.referencedTypes.push({typeID, typeLabel, occurences});
     }
   }
