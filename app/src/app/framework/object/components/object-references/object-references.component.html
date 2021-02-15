@@ -1,12 +1,17 @@
-<ul class="nav nav-tabs mb-1">
+<ul class="nav nav-tabs mb-1" role="tablist">
   <li class="nav-item">
     <a class="nav-link active" data-toggle="tab" href="#object-references" role="tab">All References</a>
   </li>
   <li class="nav-item" *ngFor="let item of referencedTypes">
-    <a class="nav-link" data-toggle="tab" href="" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+    <a class="nav-link" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
   </li>
 </ul>
 
-<div class="tab-pane fade show active" id="object-references" role="tabpanel">
-  <cmdb-object-references-table [publicID]="publicID" (referencesLoadedEvent)="onReferencesLoaded($event)"></cmdb-object-references-table>
+<div class="tab-content">
+  <div class="tab-pane fade show active" id="object-references">
+    <cmdb-object-references-table [publicID]="publicID" (referencesLoadedEvent)="onReferencesLoaded($event)"></cmdb-object-references-table>
+  </div>
+  <div class="tab-pane fade" *ngFor="let item of referencedTypes" id="{{item.typeName}}">
+    <cmdb-object-references-by-type [publicID]="publicID" [typeID]="item.typeID"></cmdb-object-references-by-type>
+  </div>
 </div>

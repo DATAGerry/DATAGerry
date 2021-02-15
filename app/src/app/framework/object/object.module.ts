@@ -65,6 +65,7 @@ import { ObjectLinksTableComponent } from './components/object-links-table/objec
 import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
 import { ObjectReferencesComponent } from './components/object-references/object-references.component';
+import { ObjectReferencesByTypeComponent } from './components/object-references/object-references-by-type/object-references-by-type.component';
 
 @NgModule({
   entryComponents: [
@@ -108,7 +109,8 @@ import { ObjectReferencesComponent } from './components/object-references/object
     ObjectLinksTablePartnerCellComponent,
     ObjectLinksTableActionCellComponent,
     ObjectReferencesTableComponent,
-    ObjectReferencesComponent
+    ObjectReferencesComponent,
+    ObjectReferencesByTypeComponent
   ],
   imports: [
     CommonModule,
