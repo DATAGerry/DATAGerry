@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import {Component, Directive, Input, OnChanges, OnInit} from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
@@ -28,6 +28,7 @@ interface TypeRef {
   typeLabel: string;
   typeName: string;
   occurences: number;
+  hidden: boolean;
 }
 
 @Component({
@@ -36,21 +37,24 @@ interface TypeRef {
   styleUrls: ['./object-references.component.scss']
 })
 
-export class ObjectReferencesComponent implements OnInit {
+export class ObjectReferencesComponent implements OnChanges {
 
   @Input() publicID: number;
 
-  clickSubject: Subject<string> = new Subject<string>();
+  totalReferences: number = 0;
+
+  clickSubject: Subject<number> = new Subject<number>();
 
   referencedTypes: Array<TypeRef> = [];
+
+  hiddenTypes: Array<TypeRef> = [];
 
   constructor(public objectService: ObjectService) { }
   /**
    * Load/reload objects from the api.
    * @private
    */
-  public ngOnInit() {
-
+  public ngOnChanges() {
     const params: CollectionParameters = {
       filter: undefined,
       limit: 0,
@@ -66,6 +70,16 @@ export class ObjectReferencesComponent implements OnInit {
       });
   }
 
+  onSelect(type) {
+    type.hidden = !type.hidden;
+  }
+
+  onReset() {
+    this.referencedTypes.forEach((type) => {
+      type.hidden = false;
+    });
+  }
+
   onClick(event) {
     this.clickSubject.next(event);
   }
@@ -73,14 +87,19 @@ export class ObjectReferencesComponent implements OnInit {
   sortReferencesByType(event: Array<RenderResult>) {
     this.referencedTypes = [];
     let objectList: Array < RenderResult > = Array.from(event);
+    this.totalReferences = objectList.length;
     while (objectList.length > 0) {
       const typeID = objectList[0].type_information.type_id;
       const typeLabel = objectList[0].type_information.type_label;
       const typeName = objectList[0].type_information.type_name;
-      const occurences = objectList.filter(object => object.type_information.type_id === typeID);
-      this.referencedTypes.push({typeID, typeLabel, typeName, occurences : occurences.length});
+      const occurences = objectList.filter(object => object.type_information.type_id === typeID).length;
+      this.referencedTypes.push({typeID, typeLabel, typeName, occurences, hidden: false});
       objectList = objectList.filter(object => object.type_information.type_id !== typeID);
+      this.sortRefTabs();
     }
+  }
+
+  sortRefTabs() {
     this.referencedTypes = this.referencedTypes.sort((a, b) => {
       if (a.occurences > b.occurences) {
         return -1;

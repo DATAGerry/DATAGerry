@@ -1,8 +1,35 @@
+<div class="btn-group mb-2">
+  <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+    <i class="fas fa-list"></i> Hide Tabs
+  </button>
+  <div class="dropdown-menu" *ngIf="referencedTypes.length > 0">
+    <button *ngFor="let item of referencedTypes" type="button" class="dropdown-item"
+            (click)="onSelect(item)">
+        <span class="form-check">
+          <input class="form-check-input" type="checkbox" [checked]="item.hidden" title="toggle-{{item?.typeName}}">
+          <label class="form-check-label">
+            {{item?.typeLabel}}
+          </label>
+        </span>
+    </button>
+    <div class="dropdown-divider"></div>
+    <button type="button" class="dropdown-item btn text-center" (click)="onReset()">
+      <i class="fas fa-redo"></i> Reset
+    </button>
+  </div>
+</div>
+
+
 <div class="container">
   <nav class="scrollable">
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
-      <a class="nav-item nav-link active" data-toggle="tab" href="#object-references" role="tab">All References</a>
-      <a class="nav-item nav-link" (click)="onClick(item.typeID)" *ngFor="let item of referencedTypes" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+      <a class="nav-item nav-link active" data-toggle="tab" href="#object-references" role="tab">All References
+        <span class="badge badge-pill badge-primary">{{totalReferences}}</span></a>
+      <ng-container *ngFor="let item of referencedTypes">
+        <a class="nav-item nav-link" (click)="onClick(item.typeID)" *ngIf="!item.hidden"
+           data-toggle="tab" href="#{{item.typeName}}" role="tab">{{item?.typeLabel}}
+          <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+      </ng-container>
     </div>
   </nav>
 </div>
