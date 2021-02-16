@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, OnInit,  TemplateRef, ViewChild} from '@angular/core';
 import { ReplaySubject } from 'rxjs';
 import { ObjectService } from '../../../../services/object.service';
 import { RenderResult } from '../../../../models/cmdb-render';

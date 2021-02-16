@@ -1,25 +1,40 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {
-  AfterViewInit,
   Component,
-  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
-  Output,
   TemplateRef,
   ViewChild
 } from '@angular/core';
-import { RenderResult } from '../../../../models/cmdb-render';
-import {ReplaySubject, Subject} from 'rxjs';
-import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
-import {APIGetMultiResponse} from '../../../../../services/models/api-response';
-import {SupportedExporterExtension} from '../../../../../export/export-objects/model/supported-exporter-extension';
-import {ObjectService} from '../../../../services/object.service';
-import {DatePipe} from '@angular/common';
-import {FileSaverService} from 'ngx-filesaver';
-import {FileService} from '../../../../../export/export.service';
-import {CollectionParameters} from '../../../../../services/models/api-parameter';
-import {takeUntil} from 'rxjs/operators';
+import {  RenderResult } from '../../../../models/cmdb-render';
+import { ReplaySubject, Subject } from 'rxjs';
+import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { SupportedExporterExtension } from '../../../../../export/export-objects/model/supported-exporter-extension';
+import { ObjectService } from '../../../../services/object.service';
+import { DatePipe } from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from '../../../../../export/export.service';
+import { CollectionParameters } from '../../../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-object-references-by-type',
