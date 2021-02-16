@@ -3,6 +3,7 @@ import { RenderResult } from '../../../models/cmdb-render';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { ObjectService } from '../../../services/object.service';
+import { Subject } from 'rxjs';
 
 interface TypeRef {
   typeID: number;
@@ -20,6 +21,8 @@ interface TypeRef {
 export class ObjectReferencesComponent implements OnInit {
 
   @Input() publicID: number;
+
+  clickSubject: Subject<string> = new Subject<string>();
 
   referencedTypes: Array<TypeRef> = [];
 
@@ -43,6 +46,10 @@ export class ObjectReferencesComponent implements OnInit {
         this.sortReferencesByType(apiResponse.results as Array<RenderResult>);
         referenceSubscription.unsubscribe();
       });
+  }
+
+  onClick(event) {
+    this.clickSubject.next(event);
   }
 
   sortReferencesByType(event: Array<RenderResult>) {

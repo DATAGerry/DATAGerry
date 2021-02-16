@@ -1,6 +1,16 @@
-import {Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild} from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  EventEmitter,
+  Input,
+  OnDestroy,
+  OnInit,
+  Output,
+  TemplateRef,
+  ViewChild
+} from '@angular/core';
 import { RenderResult } from '../../../../models/cmdb-render';
-import {ReplaySubject} from 'rxjs';
+import {ReplaySubject, Subject} from 'rxjs';
 import {Column, Sort, SortDirection} from '../../../../../layout/table/table.types';
 import {APIGetMultiResponse} from '../../../../../services/models/api-response';
 import {SupportedExporterExtension} from '../../../../../export/export-objects/model/supported-exporter-extension';
@@ -46,29 +56,17 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
   /**
    * ID of the referenced object.
    */
-  public publicID: number;
+  @Input() publicID: number;
 
   /**
    * ID of the type for which the results will be filtered
    */
-  public typeID: number;
+  @Input() typeID: number;
 
   /**
-   * ID setter of the referenced object.
-   * @param id
+   * Listener to the initialization of this component
    */
-  @Input('publicID') public set PublicID(id: number) {
-    this.publicID = id;
-  }
-
-  /**
-   * ID setter of the type filter
-   */
-  @Input('typeID') public set TypeID(id: number) {
-    this.typeID = id;
-    this.loadObjectsFromAPI();
-  }
-
+  @Input() initSubject: Subject<number>;
 
   /**
    * Table columns definition.
@@ -175,6 +173,12 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
         style: { width: '6rem' }
       },
     ] as Array<Column>;
+    const subscription = this.initSubject.subscribe((event) => {
+      if (event === this.typeID) {
+        this.loadObjectsFromAPI();
+        subscription.unsubscribe();
+      }
+    });
   }
 
   /**

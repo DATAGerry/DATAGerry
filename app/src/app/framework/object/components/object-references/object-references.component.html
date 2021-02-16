@@ -2,7 +2,7 @@
   <nav class="scrollable">
     <div class="nav nav-tabs" id="nav-tab" role="tablist">
       <a class="nav-item nav-link active" data-toggle="tab" href="#object-references" role="tab">All References</a>
-      <a class="nav-item nav-link" *ngFor="let item of referencedTypes" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+      <a class="nav-item nav-link" (click)="onClick(item.typeID)" *ngFor="let item of referencedTypes" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
     </div>
   </nav>
 </div>
@@ -11,7 +11,7 @@
     <cmdb-object-references-table [publicID]="publicID"></cmdb-object-references-table>
   </div>
   <div class="tab-pane fade" *ngFor="let item of referencedTypes" id="{{item.typeName}}">
-    <cmdb-object-references-by-type [publicID]="publicID" [typeID]="item.typeID"></cmdb-object-references-by-type>
+    <cmdb-object-references-by-type [initSubject]="clickSubject" [publicID]="publicID" [typeID]="item.typeID"></cmdb-object-references-by-type>
   </div>
 </div>
 
