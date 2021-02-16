@@ -53,7 +53,6 @@ export class ObjectReferencesComponent implements OnInit {
       const typeLabel = objectList[0].type_information.type_label;
       const typeName = objectList[0].type_information.type_name;
       const occurences = objectList.filter(object => object.type_information.type_id === typeID);
-      console.log(occurences);
       this.referencedTypes.push({typeID, typeLabel, typeName, occurences : occurences.length});
       objectList = objectList.filter(object => object.type_information.type_id !== typeID);
     }

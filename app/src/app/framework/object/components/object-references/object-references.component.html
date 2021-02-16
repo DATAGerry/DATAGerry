@@ -1,12 +1,11 @@
-<ul class="nav nav-tabs mb-1" role="tablist">
-  <li class="nav-item">
-    <a class="nav-link active" data-toggle="tab" href="#object-references" role="tab">All References</a>
-  </li>
-  <li class="nav-item" *ngFor="let item of referencedTypes">
-    <a class="nav-link" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
-  </li>
-</ul>
-
+<div class="container">
+  <nav class="scrollable">
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <a class="nav-item nav-link active" data-toggle="tab" href="#object-references" role="tab">All References</a>
+      <a class="nav-item nav-link" *ngFor="let item of referencedTypes" data-toggle="tab" href="#{{item.typeName}}" role="tab"> {{item?.typeLabel}} <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+    </div>
+  </nav>
+</div>
 <div class="tab-content">
   <div class="tab-pane fade show active" id="object-references">
     <cmdb-object-references-table [publicID]="publicID"></cmdb-object-references-table>
@@ -15,3 +14,4 @@
     <cmdb-object-references-by-type [publicID]="publicID" [typeID]="item.typeID"></cmdb-object-references-by-type>
   </div>
 </div>
+
