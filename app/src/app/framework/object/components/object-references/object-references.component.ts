@@ -47,8 +47,6 @@ export class ObjectReferencesComponent implements OnChanges {
 
   referencedTypes: Array<TypeRef> = [];
 
-  hiddenTypes: Array<TypeRef> = [];
-
   constructor(public objectService: ObjectService) { }
   /**
    * Load/reload objects from the api.

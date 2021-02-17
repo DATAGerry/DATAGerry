@@ -2,10 +2,11 @@
   overflow-x: auto;
   overflow-y:hidden;
   flex-wrap: nowrap;
-}
+  scrollbar-width: thin;
 
-.nav-tabs::-webkit-scrollbar {
-  height: 5px;
+  &::-webkit-scrollbar {
+    height: 5px;
+  }
 }
 
 .container {
