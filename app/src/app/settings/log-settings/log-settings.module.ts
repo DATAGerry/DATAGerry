@@ -44,7 +44,6 @@ import {
 import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
-  entryComponents: [DeleteLogJobModalComponent, DeleteModalComponent],
   declarations: [
     LogObjectSettingsComponent,
     ActivateTabComponent,

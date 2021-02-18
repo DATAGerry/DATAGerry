@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,27 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
-from cmdb.manager.errors import ManagerGetError, ManagerDeleteError
-from cmdb.manager import ManagerBase
-from cmdb.framework.managers.error.framework_errors import FrameworkGetError, FrameworkNotFoundError, \
-    FrameworkIterationError, FrameworkDeleteError, FrameworkUpdateError
-from cmdb.framework.results.iteration import IterationResult
-from cmdb.framework.utils import PublicID, Collection
+from cmdb.framework.utils import Collection, PublicID
+from cmdb.manager import AbstractManagerBase
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
 
 
-class FrameworkQueryBuilder(Builder):
-    """Query/Pipeline builder class for the framework managers"""
+class ManagerQueryBuilder(Builder):
+    """Query/Pipeline builder class for the managers"""
 
     def __init__(self):
         """Init a query or a pipeline to None"""
         self.query: Union[Query, Pipeline] = Pipeline([])
-        super(FrameworkQueryBuilder, self).__init__()
+        super(ManagerQueryBuilder, self).__init__()
 
     def __len__(self):
         """Get the length of the query"""
@@ -68,20 +66,35 @@ class FrameworkQueryBuilder(Builder):
             for pipe in filter:
                 self.query.append(pipe)
 
-        if limit == 0:
-            results_query = [self.skip_(limit)]
-        else:
-            results_query = [self.skip_(skip), self.limit_(limit)]
-
         self.query.append(self.sort_(sort=sort, order=order))
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
+        self.query.append(self.skip_(skip))
+        if limit != 0:
+            self.query.append(self.limit_(limit))
+
+        return self.query
+
+    def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
+        """
+        Count the number of documents in the stages
+        Args:
+            filter: filter requirement
+
+        Returns:
+            Query with count stages.
+        """
+        self.clear()
+        self.query = Pipeline([])
+
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
+                self.query.append(pipe)
+        self.query.append(self.count_('total'))
         return self.query
 
 
-class FrameworkManager(ManagerBase):
+class ManagerBase(AbstractManagerBase):
     """Framework managers implementation for all framework based CRUD operations."""
 
     def __init__(self, collection: Collection, database_manager: DatabaseManagerMongo):
@@ -92,8 +105,8 @@ class FrameworkManager(ManagerBase):
             database_manager: Active database managers instance
         """
         self.collection: Collection = collection
-        self.builder = FrameworkQueryBuilder()
-        super(FrameworkManager, self).__init__(database_manager)
+        self.builder = ManagerQueryBuilder()
+        super(ManagerBase, self).__init__(database_manager)
 
     def count(self, filter: dict, *args, **kwargs) -> int:
         raise NotImplementedError

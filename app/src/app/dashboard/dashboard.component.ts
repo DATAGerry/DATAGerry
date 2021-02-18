@@ -28,7 +28,6 @@ import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { APIGetMultiResponse } from '../services/models/api-response';
-import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
@@ -77,19 +76,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
-  public newestObjects: Array<RenderResult>;
-  public newestTableColumns: Array<Column>;
-  public newestObjectsCount: number;
+  public newestObjects: Array<RenderResult> = [];
+  public newestTableColumns: Array<Column> = [];
+  public newestObjectsCount: number = 0;
+  public readonly newestInnitPage: number = 1;
+  public newestPage: number = this.newestInnitPage;
+  public newestLoading: boolean = false;
 
-  public latestObjects: Array<RenderResult>;
-  public latestTableColumns: Array<Column>;
-  public latestObjectsCount: number;
+  public latestObjects: Array<RenderResult> = [];
+  public latestTableColumns: Array<Column> = [];
+  public latestObjectsCount: number = 0;
+  public readonly latestInnitPage: number = 1;
+  public latestPage: number = this.latestInnitPage;
+  public latestLoading: boolean = false;
 
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
               private toastService: ToastService, private sidebarService: SidebarService,
-              private userService: UserService, private groupService: GroupService,
-              private specialService: SpecialService<RenderResult>) {
+              private userService: UserService, private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -221,18 +225,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  private onNewestPageChange(event) {
+    this.newestPage = event;
+    this.loadNewestObjects();
+  }
+
+  private  onLatestPageChange(event) {
+    this.latestPage = event;
+    this.loadLatestObjects();
+  }
+
   private loadNewestObjects(): void {
-    this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.newestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.newestPage, limit: 10, order: -1};
+    this.objectService.getNewestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.newestObjects = apiResponse.results as Array<RenderResult>;
-      this.newestObjectsCount = apiResponse.results.length;
-    });
+      this.newestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.newestLoading = false;
+      } );
   }
 
   private loadLatestObjects(): void {
-    this.objectService.getLatestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.latestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.latestPage, limit: 10, order: -1};
+    this.objectService.getLatestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.latestObjects = apiResponse.results as Array<RenderResult>;
-      this.latestObjectsCount = apiResponse.results.length;
-    });
+      this.latestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.latestLoading = false;
+      } );
   }
 
   private generateObjectChar() {

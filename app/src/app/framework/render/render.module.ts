@@ -49,33 +49,11 @@ import { DateSimpleComponent } from './simple/date/date-simple.component';
 import { NumberComponent } from './fields/math/number.component';
 import { InputAppendsComponent } from './components/input-appends/input-appends.component';
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
+import { RenderFieldComponent } from './fields/components.fields';
+import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
 
 
 @NgModule({
-  entryComponents: [
-    TextComponent,
-    PasswordComponent,
-    DummyComponent,
-    EmailComponent,
-    PhoneComponent,
-    HrefComponent,
-    NumberComponent,
-    RadioComponent,
-    SelectComponent,
-    RefComponent,
-    CheckboxComponent,
-    TextareaComponent,
-    DateComponent,
-    TextSimpleComponent,
-    PasswordSimpleComponent,
-    CheckboxSimpleComponent,
-    RadioSimpleComponent,
-    SelectSimpleComponent,
-    RefSimpleComponent,
-    DateSimpleComponent,
-    RenderComponent,
-    RenderElementComponent
-  ],
   declarations: [
     RenderComponent,
     RenderElementComponent,
@@ -102,7 +80,9 @@ import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-
     DateComponent,
     NumberComponent,
     InputAppendsComponent,
-    ObjectBulkInputAppendsComponent
+    ObjectBulkInputAppendsComponent,
+    RenderFieldComponent,
+    ConfigEditBaseComponent
   ],
   exports: [
     RenderElementComponent,

@@ -17,13 +17,13 @@
 */
 
 import {Component, OnInit} from '@angular/core';
-import { RenderField } from '../components.fields';
+import { RenderFieldComponent } from '../components.fields';
 
 @Component({
   templateUrl: './checkbox.component.html',
   styleUrls: ['./checkbox.component.scss']
 })
-export class CheckboxComponent extends RenderField implements OnInit{
+export class CheckboxComponent extends RenderFieldComponent implements OnInit{
 
   public namePrefix: string = 'dummy_';
 

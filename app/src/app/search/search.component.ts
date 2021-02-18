@@ -68,7 +68,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   public maxNumberOfSites: number[];
 
 
-  @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
+  @ViewChild('paginationComponent') pagination: JwPaginationComponent;
   private initSearch: boolean = true;
   private initFilter: boolean = true;
 
@@ -126,6 +126,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     });
 
     this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.initSearch = true;
       this.onSearch();
     });
   }

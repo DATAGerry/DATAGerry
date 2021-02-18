@@ -32,7 +32,6 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchResultBarComponent } from './search-result/search-result-bar/search-result-bar.component';
 
 @NgModule({
-  entryComponents: [SearchResultPreviewComponent],
   declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent, SearchResultMatchComponent, SearchResultBarComponent],
   imports: [
     CommonModule,

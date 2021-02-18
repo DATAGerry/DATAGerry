@@ -48,42 +48,4 @@
     <label>Helper text:</label>
     <input [(ngModel)]="data.helperText" type="text" class="form-control" value="{{data.helperText}}">
   </div>
-  <div class="form-check">
-    <input [(ngModel)]="data.access" class="form-check-input" type="checkbox" data-toggle="collapse"
-           [attr.data-target]="'#access_' + data.name">
-    <label class="form-check-label">
-      Limit access of this field
-    </label>
-  </div>
-  <div class="collapse" id="access_{{data.name}}">
-    <div class="card card-body">
-      <div class="form-group">
-        <label>Limit access to groups:</label>
-        <ng-select
-          [items]="groupList"
-          [multiple]="true"
-          bindLabel="name"
-          bindValue="public_id"
-          placeholder="Select groups"
-          [(ngModel)]="data.groups"
-        >
-        </ng-select>
-        <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
-        </small>
-      </div>
-      <div class="form-group">
-        <label>Limit access to specific users:</label>
-        <ng-select
-          [items]="userList"
-          [multiple]="true"
-          bindLabel="user_name"
-          bindValue="public_id"
-          placeholder="Select specific users"
-          [(ngModel)]="data.users">
-        </ng-select>
-        <small class="form-text text-muted">Multiple selection possible, leave blank if no limitation.
-        </small>
-      </div>
-    </div>
-  </div>
 </div>

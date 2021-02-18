@@ -19,14 +19,14 @@
 import * as moment from 'moment';
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   selector: 'cmdb-date-simple',
   templateUrl: './date-simple.component.html',
   styleUrls: ['./date-simple.component.scss']
 })
-export class DateSimpleComponent extends RenderField implements OnInit {
+export class DateSimpleComponent extends RenderFieldComponent implements OnInit {
 
   constructor() {
     super();

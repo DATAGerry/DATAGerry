@@ -17,14 +17,14 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { ConfigEdit } from '../config.edit';
+import { ConfigEditBaseComponent } from '../config.edit';
 
 @Component({
   selector: 'cmdb-date-field-edit',
   templateUrl: './date-field-edit.component.html',
   styleUrls: ['./date-field-edit.component.scss']
 })
-export class DateFieldEditComponent extends ConfigEdit {
+export class DateFieldEditComponent extends ConfigEditBaseComponent {
 
   @Input() groupList: any;
   @Input() userList: any;

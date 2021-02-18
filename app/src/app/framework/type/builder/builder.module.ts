@@ -41,20 +41,6 @@ import { AddCategoryModalComponent } from '../../category/components/modals/add-
 import { CategoryModule } from '../../category/category.module';
 
 @NgModule({
-  entryComponents: [
-    SectionFieldEditComponent,
-    TextFieldEditComponent,
-    TextareaEditComponent,
-    RefFieldEditComponent,
-    DummyFieldEditComponent,
-    ChoiceFieldEditComponent,
-    CheckFieldEditComponent,
-    DateFieldEditComponent,
-    PreviewModalComponent,
-    DiagnosticModalComponent,
-    AddCategoryModalComponent,
-    RenderElementComponent,
-  ],
   declarations: [
     BuilderComponent,
     ConfigEditComponent,

@@ -46,7 +46,7 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
   /**
    * Table component.
    */
-  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<CmdbLog>;
+  @ViewChild(TableComponent) objectsTableComponent: TableComponent<CmdbLog>;
 
   @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
 

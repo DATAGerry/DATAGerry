@@ -18,7 +18,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
-import { ConfigEdit } from '../config.edit';
+import { ConfigEditBaseComponent } from '../config.edit';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { CmdbType } from '../../../../models/cmdb-type';
@@ -28,7 +28,7 @@ import { CmdbType } from '../../../../models/cmdb-type';
   templateUrl: './ref-field-edit.component.html',
   styleUrls: ['./ref-field-edit.component.scss']
 })
-export class RefFieldEditComponent extends ConfigEdit implements OnInit {
+export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
   public typeList: CmdbType[];
