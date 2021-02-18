@@ -47,7 +47,7 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
     { label: 'Object Template', content: 'OBJECT', description: 'Template for single objects' }
   ];
 
-  @ViewChild('typeparam', { static: false })
+  @ViewChild('typeparam')
   public typeParamComponent: DocapiSettingsBuilderTypeStepBaseComponent;
   public typeParamPreData: any;
 

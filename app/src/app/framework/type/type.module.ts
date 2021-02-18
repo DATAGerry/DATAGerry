@@ -46,7 +46,6 @@ import { TableModule } from '../../layout/table/table.module';
 import { TypeTableActionsComponent } from './components/type-table-actions/type-table-actions.component';
 
 @NgModule({
-  entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
   declarations: [
     TypeAddComponent,
     TypeBasicStepComponent,

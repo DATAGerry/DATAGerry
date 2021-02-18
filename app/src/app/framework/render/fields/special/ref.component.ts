@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { RenderField } from '../components.fields';
+import { RenderFieldComponent } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import { HttpBackend, HttpResponse } from '@angular/common/http';
@@ -34,7 +34,7 @@ import { CmdbMode } from '../../../modes.enum';
   templateUrl: './ref.component.html',
   styleUrls: ['./ref.component.scss']
 })
-export class RefComponent extends RenderField implements OnInit, OnDestroy {
+export class RefComponent extends RenderFieldComponent implements OnInit, OnDestroy {
 
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();

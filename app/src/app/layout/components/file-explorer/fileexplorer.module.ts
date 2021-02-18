@@ -28,12 +28,6 @@ import { ObjectService} from '../../../framework/services/object.service';
 import { MetadataInfoComponent } from './modal/metadata-info/metadata-info.component';
 
 @NgModule({
-    entryComponents: [
-      NewFolderDialogComponent,
-      RenameDialogComponent,
-      MetadataInfoComponent,
-      MoveDialogComponent
-    ],
     declarations: [
 
     ],

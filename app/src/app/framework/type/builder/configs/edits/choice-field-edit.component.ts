@@ -17,14 +17,14 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { ConfigEdit } from '../config.edit';
+import { ConfigEditBaseComponent } from '../config.edit';
 
 @Component({
   selector: 'cmdb-choice-field-edit',
   templateUrl: './choice-field-edit.component.html',
   styleUrls: ['./choice-field-edit.component.scss']
 })
-export class ChoiceFieldEditComponent extends ConfigEdit implements OnInit {
+export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
   @Input() groupList: any;
   @Input() userList: any;

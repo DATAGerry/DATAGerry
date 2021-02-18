@@ -32,7 +32,7 @@ import * as $ from 'jquery';
 export class SearchBarTagComponent implements OnDestroy {
 
   // Elements
-  @ViewChild('dropdownTrigger', { static: false }) dropdownTrigger: ElementRef;
+  @ViewChild('dropdownTrigger') dropdownTrigger: ElementRef;
 
   // Events
   @Input() public tag: SearchBarTag;

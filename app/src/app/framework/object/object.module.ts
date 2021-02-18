@@ -62,18 +62,15 @@ import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objec
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
 import { ObjectReferencesTableComponent } from './components/object-references/object-references-table/object-references-table.component';
 import { ObjectLinksTableComponent } from './components/object-links-table/object-links-table.component';
+// tslint:disable-next-line:max-line-length
 import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
+// tslint:disable-next-line:max-line-length
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
 import { ObjectReferencesComponent } from './components/object-references/object-references.component';
 import { ObjectReferencesByTypeComponent } from './components/object-references/object-references-by-type/object-references-by-type.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
-  entryComponents: [
-    ObjectLinkAddModalComponent,
-    ObjectDeleteModalComponent,
-    ObjectLinkDeleteModalComponent,
-    ObjectsDeleteModalComponent
-  ],
   declarations: [
     ObjectViewComponent,
     ObjectHeaderComponent,
@@ -126,7 +123,8 @@ import { ObjectReferencesByTypeComponent } from './components/object-references/
     ArchwizardModule,
     RenderModule,
     UsersModule,
-    TableModule
+    TableModule,
+    JwPaginationModule
   ],
   exports: [
     ObjectViewRenderComponent,

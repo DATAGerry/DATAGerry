@@ -34,8 +34,8 @@ DIR_RPM_BUILD = ${DIR_BUILD}/rpm
 DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_DOCKER_BUILD = ${DIR_BUILD}/docker
 DIR_WEB_SOURCE = app
-DIR_WEB_BUILD = app/dist/DATAGERRYApp
-DIR_WEB_TARGET = cmdb/interface/net_app/DATAGERRYApp
+DIR_WEB_BUILD = app/dist/datagerry-app
+DIR_WEB_TARGET = cmdb/interface/net_app/datagerry-app
 
 # set default goal
 .DEFAULT_GOAL := all
@@ -100,7 +100,7 @@ bin: requirements buildvars docs webapp
 		--hidden-import reportlab.graphics.barcode.usps4s \
 		--hidden-import reportlab.graphics.barcode.ecc200datamatrix \
 		--add-data cmdb/interface/docs/static:cmdb/interface/docs/static \
-		--add-data cmdb/interface/net_app/DATAGERRYApp:cmdb/interface/net_app/DATAGERRYApp \
+		--add-data cmdb/interface/net_app/datagerry-app:cmdb/interface/net_app/datagerry-app \
 		cmdb/__main__.py
 
 

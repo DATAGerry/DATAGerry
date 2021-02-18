@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "DATAGERRYApp": {
+    "datagerry-app": {
       "root": "",
       "sourceRoot": "src",
       "projectType": "application",
@@ -17,7 +17,11 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/DATAGERRYApp",
+            "aot": true,
+            "allowedCommonJsDependencies": [
+              "lodash", "qrcode", "file-saver", "chartjs-plugin-datalabels", "jquery", "chart.js", "zxcvbn"
+            ],
+            "outputPath": "dist/datagerry-app",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
@@ -27,7 +31,7 @@
               { "glob": "**/*", "input": "./node_modules/tinymce/icons/", "output": "/assets/tinymce/icons/" },
               { "glob": "**/*", "input": "./node_modules/tinymce/skins/", "output": "/assets/tinymce/skins/" },
               { "glob": "**/*", "input": "./node_modules/tinymce/themes/", "output": "/assets/tinymce/themes/" },
-              { "glob": "**/*", "input": "./node_modules/tinymce/plugins/", "output": "/assets/tinymce/plugins/" },
+              { "glob": "**/*", "input": "./node_modules/tinymce/plugins/", "output": "/assets/tinymce/plugins/" }
             ],
             "styles": [
               "src/styles.scss"
@@ -37,8 +41,7 @@
               "./node_modules/bootstrap/dist/js/bootstrap.bundle.js",
               "./node_modules/jszip/dist/jszip.js",
               "./node_modules/tinymce/tinymce.min.js"
-            ],
-            "es5BrowserSupport": true
+            ]
           },
           "configurations": {
             "production": {
@@ -62,6 +65,10 @@
                   "type": "initial",
                   "maximumWarning": "2mb",
                   "maximumError": "8mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
                 }
               ]
             }
@@ -70,18 +77,18 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "DATAGERRYApp:build"
+            "browserTarget": "datagerry-app:build"
           },
           "configurations": {
             "production": {
-              "browserTarget": "DATAGERRYApp:build:production"
+              "browserTarget": "datagerry-app:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "DATAGERRYApp:build"
+            "browserTarget": "datagerry-app:build"
           }
         },
         "test": {
@@ -115,7 +122,7 @@
         }
       }
     },
-    "DATAGERRYApp-e2e": {
+    "datagerry-app-e2e": {
       "root": "e2e/",
       "projectType": "application",
       "prefix": "",
@@ -124,11 +131,11 @@
           "builder": "@angular-devkit/build-angular:protractor",
           "options": {
             "protractorConfig": "e2e/protractor.conf.js",
-            "devServerTarget": "DATAGERRYApp:serve"
+            "devServerTarget": "datagerry-app:serve"
           },
           "configurations": {
             "production": {
-              "devServerTarget": "DATAGERRYApp:serve:production"
+              "devServerTarget": "datagerry-app:serve:production"
             }
           }
         },
@@ -144,5 +151,5 @@
       }
     }
   },
-  "defaultProject": "DATAGERRYApp"
+  "defaultProject": "datagerry-app"
 }

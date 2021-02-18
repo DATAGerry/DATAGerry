@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Input } from '@angular/core';
+import { Component, Input} from '@angular/core';
 import { AbstractControl, FormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 import { ToastService } from '../../../layout/toast/toast.service';
@@ -26,7 +26,10 @@ export interface ComponentsFields {
   data: Input;
 }
 
-export class RenderField {
+@Component({
+  template: ''
+})
+export class RenderFieldComponent {
   private innerData: any;
   public innerValue: any;
   public MODES = CmdbMode;

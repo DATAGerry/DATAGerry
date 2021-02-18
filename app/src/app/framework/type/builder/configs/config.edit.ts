@@ -15,9 +15,13 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import {Input} from '@angular/core';
 
-export class ConfigEdit {
+import {Component, Input} from '@angular/core';
+
+@Component({
+  template: ''
+})
+export class ConfigEditBaseComponent {
   private innerData: any;
   private innerSections: any[];
   private editable: false;
