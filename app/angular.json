@@ -19,13 +19,6 @@
           "options": {
             "aot": true,
             "allowedCommonJsDependencies": [
-              "lodash",
-              "qrcode",
-              "file-saver",
-              "chartjs-plugin-datalabels",
-              "jquery",
-              "chart.js",
-              "zxcvbn"
             ],
             "outputPath": "dist/datagerry-app",
             "index": "src/index.html",
@@ -33,31 +26,6 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
             "assets": [
-              {
-                "glob": "**/*",
-                "input": "./src/assets",
-                "output": "/assets/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/tinymce/icons/",
-                "output": "/assets/tinymce/icons/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/tinymce/skins/",
-                "output": "/assets/tinymce/skins/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/tinymce/themes/",
-                "output": "/assets/tinymce/themes/"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/tinymce/plugins/",
-                "output": "/assets/tinymce/plugins/"
-              }
             ],
             "styles": [
               "src/styles.scss"
@@ -177,8 +145,5 @@
       }
     }
   },
-  "defaultProject": "datagerry-app",
-  "cli": {
-    "analytics": false
-  }
+  "defaultProject": "datagerry-app"
 }
