@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,11 +12,12 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
 from datetime import datetime
+from dateutil.parser import parse
 from typing import List
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
@@ -276,7 +277,7 @@ class TypeModel(CmdbDAO):
         self.version: str = version or TypeModel.DEFAULT_VERSION
         self.active: bool = active
         self.author_id: int = author_id
-        self.creation_time: datetime = creation_time or datetime.utcnow()
+        self.creation_time: datetime = creation_time or datetime.now()
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
         self.acl: AccessControlList = acl
@@ -285,12 +286,15 @@ class TypeModel(CmdbDAO):
     @classmethod
     def from_data(cls, data: dict) -> "TypeModel":
         """Create a instance of TypeModel from database values"""
+        creation_time = data.get('creation_time', None)
+        if creation_time and isinstance(creation_time, str):
+            creation_time = parse(creation_time, fuzzy=True)
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
             active=data.get('active', True),
             author_id=data.get('author_id'),
-            creation_time=data.get('creation_time', None),
+            creation_time=creation_time,
             label=data.get('label', None),
             version=data.get('version', None),
             description=data.get('description', None),
