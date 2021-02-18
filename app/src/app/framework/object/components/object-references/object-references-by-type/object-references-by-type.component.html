@@ -1,5 +1,5 @@
 <cmdb-table [items]="refererObjects" [columns]="columns" [page]="page" [sort]="sort" [id]="'object-referer-list-table'"
-            [stateEnabled]="false" [emptyMessage]="'This object is not referenced!'" [searchEnabled]="false"
+            [stateEnabled]="false" [emptyMessage]="'This object is not referenced by this Type!'" [searchEnabled]="false"
             [totalItems]="totalReferer" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
             [customButtons]="[exportButtonTemplate]"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
