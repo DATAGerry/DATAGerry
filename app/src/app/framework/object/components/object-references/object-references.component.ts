@@ -39,12 +39,24 @@ interface TypeRef {
 
 export class ObjectReferencesComponent implements OnChanges {
 
+  /**
+   * The public id of the current object
+   */
   @Input() publicID: number;
 
+  /**
+   * The total number of references to this object
+   */
   totalReferences: number = 0;
 
+  /**
+   * Serves as event emitter for the references by type tabs
+   */
   clickSubject: Subject<number> = new Subject<number>();
 
+  /**
+   * List of referenced Types
+   */
   referencedTypes: Array<TypeRef> = [];
 
   constructor(public objectService: ObjectService) { }
@@ -68,20 +80,35 @@ export class ObjectReferencesComponent implements OnChanges {
       });
   }
 
+  /**
+   * Hides the selected type from the tab list
+   * @param type
+   */
   onSelect(type) {
     type.hidden = !type.hidden;
   }
 
+  /**
+   * Resets the hidden Tabs
+   */
   onReset() {
     this.referencedTypes.forEach((type) => {
       type.hidden = false;
     });
   }
 
+  /**
+   * Sends event to the clicked Tab to enable Lazy loading
+   * @param event
+   */
   onClick(event) {
     this.clickSubject.next(event);
   }
 
+  /**
+   * Sorts References by Type
+   * @param event
+   */
   sortReferencesByType(event: Array<RenderResult>) {
     this.referencedTypes = [];
     let objectList: Array < RenderResult > = Array.from(event);
@@ -97,6 +124,9 @@ export class ObjectReferencesComponent implements OnChanges {
     }
   }
 
+  /**
+   * Sorts the referenced types by occurence or alphabetical if occurences are the same
+   */
   sortRefTabs() {
     this.referencedTypes = this.referencedTypes.sort((a, b) => {
       if (a.occurences > b.occurences) {
