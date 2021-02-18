@@ -49,6 +49,22 @@ export class SearchService<T = SearchResultList> implements ApiService {
     );
   }
 
+  public getSearch(query: any, params?: HttpParams): Observable<T> {
+    const httpOptions = httpObservePostOptions;
+    params = params.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    if (params) {
+      httpOptions.params = params;
+    }
+    return this.api.callGet<T>(`${ this.servicePrefix }/`, httpOptions).pipe(
+      map((apiResponse) => {
+        if (apiResponse.statusCode === 204) {
+          return [];
+        }
+        return apiResponse.body;
+      })
+    );
+  }
+
   public postSearch(query: any, params?: HttpParams): Observable<T> {
     const httpOptions = httpObservePostOptions;
     params = params.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));

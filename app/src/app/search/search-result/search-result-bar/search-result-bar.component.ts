@@ -28,6 +28,7 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   @Output() refreshSearch = new EventEmitter<ReSearchParameters>();
   @Input() queryParameters: any;
   @Input() searchResultList: SearchResultList;
+  @Input() referenceResultList: SearchResultList;
   @Input() filterResultList: any[];
 
   /**
