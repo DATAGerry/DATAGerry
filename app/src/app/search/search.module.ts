@@ -30,9 +30,16 @@ import { RenderModule } from '../framework/render/render.module';
 import { SearchResultMatchComponent } from './search-result/search-result-match.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchResultBarComponent } from './search-result/search-result-bar/search-result-bar.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
-  declarations: [SearchComponent, SearchResultComponent, SearchResultPreviewComponent, SearchResultMatchComponent, SearchResultBarComponent],
+  declarations: [
+    SearchComponent,
+    SearchResultComponent,
+    SearchResultPreviewComponent,
+    SearchResultMatchComponent,
+    SearchResultBarComponent
+  ],
   imports: [
     CommonModule,
     SearchRoutingModule,
@@ -40,7 +47,8 @@ import { SearchResultBarComponent } from './search-result/search-result-bar/sear
     LayoutModule,
     ReactiveFormsModule,
     RenderModule,
-    NgSelectModule
+    NgSelectModule,
+    JwPaginationModule
   ],
   providers: []
 })
