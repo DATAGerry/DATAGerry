@@ -41,7 +41,7 @@
     <div class="card">
       <div class="card-header">Category-List</div>
       <div class="card-body">
-        <cmdb-table [id]="'category-list-table'" [items]="categories" [columns]="tableColumns"
+        <cmdb-table [id]="id" [items]="categories" [columns]="tableColumns" [stateEnabled]="true"
                     [sort]="sort" [totalItems]="totalResults" [pageSize]="apiParameters.limit"
                     [page]="apiParameters.page" [emptyMessage]="'There are no categories for this list yet!'"
                     [sortable]="true" [searchEnabled]="false" [pageSizeEnabled]="true"

@@ -23,12 +23,16 @@ import { ExportdJobSettingsAddComponent } from './exportd-job-settings-add/expor
 import { ExportdJobSettingsEditComponent } from './exportd-job-settings-edit/exportd-job-settings-edit.component';
 import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
+import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
     path: '',
     data: {
-      breadcrumb: 'List'
+      breadcrumb: 'List',
+    },
+    resolve: {
+      userSetting: UserSettingsResolver
     },
     component: ExportdJobSettingsListComponent
   },

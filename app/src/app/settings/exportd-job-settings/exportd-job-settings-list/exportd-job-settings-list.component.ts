@@ -18,10 +18,10 @@
 
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import { ExportdJobService } from '../../services/exportd-job.service';
 import { ExportdJob } from '../../models/exportd-job';
-import { Router } from '@angular/router';
+import {ActivatedRoute, Data, Router} from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ExecuteState, ExportdType } from '../../models/modes_job.enum';
@@ -29,8 +29,15 @@ import { GeneralModalComponent } from '../../../layout/helpers/modals/general-mo
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { takeUntil } from 'rxjs/operators';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
+import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../layout/table/table.types';
 import { PermissionService } from '../../../auth/services/permission.service';
+import {UserSetting} from '../../../management/user-settings/models/user-setting';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../management/user-settings/services/user-settings.service';
+import {CmdbType} from '../../../framework/models/cmdb-type';
+import {UserSettingsDBService} from '../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -38,6 +45,12 @@ import { PermissionService } from '../../../auth/services/permission.service';
   styleUrls: ['./exportd-job-settings-list.component.scss']
 })
 export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
+
+  /**
+   * HTML ID of the table.
+   * Used for user settings and table-states
+   */
+  public readonly id: string = 'exportd-jobs-table';
 
   /**
    * Component un-subscriber.
@@ -139,6 +152,14 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
    */
   public loading: boolean = false;
 
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
   public modes = ExecuteState;
   public typeMode = ExportdType;
   private modalRef: NgbModalRef;
@@ -150,8 +171,27 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     ' or Pull. Push Jobs are a push to an external system, which runs in a background process, while a Pull job is triggered\n' +
     ' by an external system via REST. The client directly gets the result within that REST call.';
 
-  constructor(private taskService: ExportdJobService, private router: Router,
+  constructor(private taskService: ExportdJobService, private router: Router, private route: ActivatedRoute,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
               private toast: ToastService, private modalService: NgbModal, private permissionService: PermissionService) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      console.log(data);
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   public ngOnInit(): void {
@@ -265,7 +305,16 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
         cellClasses: ['actions-buttons']
       } as Column);
     }
+    this.initTable();
     this.loadsTasksFromAPI();
+  }
+
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.page = this.tableState.page;
+      this.limit = this.tableState.pageSize;
+    }
   }
 
   private loadsTasksFromAPI() {
@@ -334,6 +383,41 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
    */
   public onSortChange(sort: Sort): void {
     this.sort = sort;
+    this.loadsTasksFromAPI();
+  }
+
+  /**
+   * On table State change.
+   * Update state.
+   */
+  public onStateChange(state: TableState): void {
+    this.tableStateSubject.next(state);
+  }
+
+  /**
+   * On table state reset.
+   * Reset State.
+   */
+  public onStateReset(): void {
+    this.limit = this.initLimit;
+    this.page = this.initPage;
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.loadsTasksFromAPI();
+  }
+
+  /**
+   * On State Select.
+   * Updates table settings according to the given table state
+   * @param state
+   */
+  public onStateSelect(state: TableState) {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
     this.loadsTasksFromAPI();
   }
 

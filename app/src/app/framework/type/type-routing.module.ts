@@ -22,6 +22,7 @@ import { TypeAddComponent } from './type-add/type-add.component';
 import { TypeEditComponent } from './type-edit/type-edit.component';
 import { TypeDeleteComponent } from './type-delete/type-delete.component';
 import { TypeComponent } from './type.component';
+import {UserSettingsResolver} from "../../management/user-settings/resolvers/user-settings-resolver.service";
 
 const routes: Routes = [
   {
@@ -30,6 +31,9 @@ const routes: Routes = [
     data: {
       breadcrumb: '',
       right: 'base.framework.type.view'
+    },
+    resolve: {
+      userSetting: UserSettingsResolver
     },
     component: TypeComponent
   },

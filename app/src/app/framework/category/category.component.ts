@@ -21,12 +21,15 @@ import { BehaviorSubject, forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute, Data, Router} from '@angular/router';
 import { SidebarService } from '../../layout/services/sidebar.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
+import {UserSetting} from "../../management/user-settings/models/user-setting";
+import {convertResourceURL, UserSettingsService} from "../../management/user-settings/services/user-settings.service";
+import {UserSettingsDBService} from "../../management/user-settings/services/user-settings-db.service";
 
 @Component({
   selector: 'cmdb-category',
@@ -34,6 +37,13 @@ import { Column, Sort, SortDirection } from '../../layout/table/table.types';
   styleUrls: ['./category.component.scss']
 })
 export class CategoryComponent implements OnInit, OnDestroy {
+
+  /**
+   * HTML ID of the table.
+   * Used for user settings and table-states
+   */
+  public readonly id: string = 'category-list-table';
+
 
   /**
    * Global unsubscriber for http calls to the rest backend.
@@ -73,10 +83,36 @@ export class CategoryComponent implements OnInit, OnDestroy {
    */
   public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
-  constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService) {
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+  constructor(private categoryService: CategoryService, private route: ActivatedRoute, private sidebarService: SidebarService,
+              private router: Router, private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
     this.categories = [];
     this.displayMode = this.displayModeSubject.asObservable();
     this.displayModeSubject.next(this.route.snapshot.data.mode);
+    this.route.data.pipe(takeUntil(this.unSubscribe)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   private tableColumnBuilder(): void {
@@ -120,6 +156,22 @@ export class CategoryComponent implements OnInit, OnDestroy {
     } as unknown as Column;
 
     this.tableColumns = [publicColumn, labelColumn, nameColumn, parentColumn];
+    this.initTable();
+  }
+
+  /**
+   * If a table state is available configures the
+   * table according to the data specified in the table state
+   * @private
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.apiParameters.sort = this.sort.name;
+      this.apiParameters.order = this.sort.order;
+      this.apiParameters.page = this.tableState.page;
+      this.apiParameters.limit = this.tableState.pageSize;
+    }
   }
 
   /**
