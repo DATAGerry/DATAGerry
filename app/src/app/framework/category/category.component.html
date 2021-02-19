@@ -45,9 +45,8 @@
                     [sort]="sort" [totalItems]="totalResults" [pageSize]="apiParameters.limit"
                     [page]="apiParameters.page" [emptyMessage]="'There are no categories for this list yet!'"
                     [sortable]="true" [searchEnabled]="false" [pageSizeEnabled]="true"
-                    (sortChange)="onSortChange($event)"
-                    (pageSizeChange)="onPageSizeChange($event)"
-                    (pageChange)="onPageChange($event)">
+                    (sortChange)="onSortChange($event)" (stateReset)="onStateReset()" (stateSelect)="onStateSelect($event)"
+                    (pageSizeChange)="onPageSizeChange($event)" (pageChange)="onPageChange($event)">
         </cmdb-table>
       </div>
     </div>

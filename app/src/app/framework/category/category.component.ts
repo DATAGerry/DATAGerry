@@ -225,6 +225,34 @@ export class CategoryComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * On table state reset.
+   * Resets the table state
+   */
+  public onStateReset(): void {
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.apiParameters.sort = this.sort.name;
+    this.apiParameters.order = this.sort.order;
+    this.apiParameters.limit = 10;
+    this.apiParameters.page = 1;
+  }
+
+  /**
+   * On Table state select.
+   * Sets the current table state to the selected table state
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.apiParameters.page = this.tableState.page;
+    this.apiParameters.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    for (const col of this.tableColumns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+    this.loadCategories();
+  }
+
+  /**
    * On table page change.
    * Reload all objects.
    *
