@@ -16,7 +16,7 @@
 from enum import Enum
 
 from cmdb.framework.utils import PublicID
-from cmdb.interface.api_parameters import ApiParameters, Parameter
+from cmdb.interface.api_parameters import APIParameters, Parameter
 
 
 class GroupDeleteMode(Enum):
@@ -25,7 +25,7 @@ class GroupDeleteMode(Enum):
     DELETE = 'DELETE'
 
 
-class GroupDeletionParameters(ApiParameters):
+class GroupDeletionParameters(APIParameters):
 
     def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: PublicID = None, **kwargs):
         """

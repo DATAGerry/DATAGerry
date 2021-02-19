@@ -1,4 +1,21 @@
+# DATAGERRY - OpenSource Enterprise CMDB
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Affero General Public License as
+# published by the Free Software Foundation, either version 3 of the
+# License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Affero General Public License for more details.
+#
+# You should have received a copy of the GNU Affero General Public License
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 from enum import Enum
+from json import loads
 from typing import NewType, List, Union
 
 Parameter = NewType('Parameter', str)
@@ -10,26 +27,35 @@ class SortOrder(Enum):
     DESCENDING = -1
 
 
-class ApiParameters:
+class APIParameters:
     """Rest API Parameter superclass"""
 
-    def __init__(self, query_string: Parameter = None, **optional):
+    def __init__(self, query_string: Parameter = None, projection: dict = None, **optional):
         self.query_string: Parameter = query_string or Parameter('')
+        self.projection: dict = projection
         self.optional = optional
 
     @classmethod
-    def from_http(cls, query_string: str, **optional) -> "ApiParameters":
-        raise NotImplementedError
+    def from_http(cls, query_string: str, **optional) -> "APIParameters":
+        if 'projection' in optional:
+            optional['projection'] = loads(optional['projection'])
+        return cls(Parameter(query_string), **optional)
 
     @classmethod
-    def to_dict(cls, *args, **kwargs) -> dict:
-        raise NotImplementedError
+    def to_dict(cls, parameters: "APIParameters") -> dict:
+        """Get the object as a dict"""
+        params: dict = {
+            'query_string': parameters.query_string
+        }
+        if parameters.projection:
+            params.update({'projection': parameters.projection})
+        return params
 
     def __repr__(self):
-        return f'Parameters: Query({self.query_string}) | Optional({self.optional})'
+        return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'
 
 
-class CollectionParameters(ApiParameters):
+class CollectionParameters(APIParameters):
     """Rest API class for parameters passed by a http request on a collection route"""
 
     def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
@@ -69,19 +95,23 @@ class CollectionParameters(ApiParameters):
         Returns:
             CollectionParameters instance
         """
-        from json import loads
         if 'filter' in optional:
             optional['filter'] = loads(optional['filter'])
+        if 'projection' in optional:
+            optional['projection'] = loads(optional['projection'])
         return cls(Parameter(query_string), **optional)
 
     @classmethod
     def to_dict(cls, parameters: "CollectionParameters") -> dict:
         """Get the object as a dict"""
-        return {
+        params: dict = {
             'limit': parameters.limit,
             'sort': parameters.sort,
             'order': parameters.order,
             'page': parameters.page,
             'filter': parameters.filter,
-            'optional': parameters.optional
+            'optional': parameters.optional,
         }
+        if parameters.projection:
+            params.update({'projection': parameters.projection})
+        return params

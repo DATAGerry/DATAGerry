@@ -33,11 +33,13 @@ import { SearchResultBarComponent } from './search-result/search-result-bar/sear
 import { JwPaginationModule } from 'jw-angular-pagination';
 
 @NgModule({
-  declarations: [SearchComponent,
+  declarations: [
+    SearchComponent,
     SearchResultComponent,
     SearchResultPreviewComponent,
     SearchResultMatchComponent,
-    SearchResultBarComponent],
+    SearchResultBarComponent
+  ],
   imports: [
     CommonModule,
     SearchRoutingModule,
@@ -46,7 +48,7 @@ import { JwPaginationModule } from 'jw-angular-pagination';
     ReactiveFormsModule,
     RenderModule,
     NgSelectModule,
-    JwPaginationModule,
+    JwPaginationModule
   ],
   providers: []
 })

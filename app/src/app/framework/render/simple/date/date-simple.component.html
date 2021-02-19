@@ -1,7 +1,1 @@
-<div *ngIf="data.value?.$date; else simpleDate">
-  <span>{{data.value?.$date | date:"dd/MM/yyyy"}}</span>
-</div>
-
-<ng-template #simpleDate>
-  <span>{{data.value | date:"dd/MM/yyyy"}}</span>
-</ng-template>
+<span>{{data.value}}</span>

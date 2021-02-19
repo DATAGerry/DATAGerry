@@ -1,0 +1,21 @@
+.scrollable .nav-tabs {
+  overflow-x: auto;
+  overflow-y:hidden;
+  flex-wrap: nowrap;
+  scrollbar-width: thin;
+
+  &::-webkit-scrollbar {
+    height: 5px;
+  }
+}
+
+.limit-width {
+  max-width: 80vw;
+  padding: 0;
+  margin-bottom: 5px;
+  display: block;
+}
+
+.scrollable .nav-tabs .nav-link {
+  white-space: nowrap;
+}
