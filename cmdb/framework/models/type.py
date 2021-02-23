@@ -344,6 +344,16 @@ class TypeModel(CmdbDAO):
     def has_summaries(self):
         return self.render_meta.summary.has_fields()
 
+    def get_nested_summaries(self):
+        return next((x['summaries'] for x in self.get_fields() if x['type'] == 'ref' and 'summaries' in x), [])
+
+    def get_nested_summary_fields(self, nested_summaries):
+        _fields = next((x['fields'] for x in nested_summaries if x['type_id'] == self.public_id), [])
+        complete_field_list = []
+        for field_name in _fields:
+            complete_field_list.append(self.get_field(field_name))
+        return TypeSummary(fields=complete_field_list).fields
+
     def get_summary(self):
         complete_field_list = []
         for field_name in self.render_meta.summary.fields:

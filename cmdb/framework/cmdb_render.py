@@ -257,9 +257,12 @@ class CmdbRender:
                 reference['type_label'] = ref_type.label
                 reference['icon'] = ref_type.get_icon()
 
+                _nested_summaries = self.type_instance.get_nested_summaries()
+                _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
+                _summary_fields = _nested_summary_fields if _nested_summary_fields else ref_type.get_summary().fields
+
                 summaries = []
-                summary_fields = ref_type.get_summary().fields
-                for field in summary_fields:
+                for field in _summary_fields:
                     summary_value = str([x for x in ref_object.fields if x['name'] == field['name']][0]['value'])
                     if summary_value:
                         summaries.append({"value": summary_value, "type": field.get('type')})
