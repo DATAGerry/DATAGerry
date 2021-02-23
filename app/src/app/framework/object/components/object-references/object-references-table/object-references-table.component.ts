@@ -17,24 +17,36 @@
 */
 
 import {Component, Input, OnDestroy, OnInit,  TemplateRef, ViewChild} from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import { ObjectService } from '../../../../services/object.service';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
-import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { DatePipe } from '@angular/common';
 import { SupportedExporterExtension } from '../../../../../export/export-objects/model/supported-exporter-extension';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../../export/export.service';
+import {ActivatedRoute, Data, Router} from '@angular/router';
+import {UserSetting} from '../../../../../management/user-settings/models/user-setting';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../../../management/user-settings/services/user-settings.service';
+import {UserSettingsDBService} from '../../../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-object-references-table',
   templateUrl: './object-references-table.component.html',
   styleUrls: ['./object-references-table.component.scss']
 })
-export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
+export class ObjectReferencesTableComponent implements OnDestroy {
+
+  /**
+   * The Id of the table
+   */
+  public readonly id: string = 'object-referers-table';
 
   /**
    * Table Template: active column.
@@ -72,6 +84,8 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
    */
   @Input('publicID') public set PublicID(id: number) {
     this.publicID = id;
+    this.setupTableColumns();
+    this.initTable();
     this.loadObjectsFromAPI();
   }
 
@@ -119,15 +133,54 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
    */
   public formatList: Array<SupportedExporterExtension> = [];
 
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
 
   constructor(private objectService: ObjectService, private datePipe: DatePipe,
-              private fileSaverService: FileSaverService, private fileService: FileService) {
+              private fileSaverService: FileSaverService, private fileService: FileService,
+              private route: ActivatedRoute, private router: Router,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        if (!userSettingPayloads) {
+          this.tableStates = [];
+          this.tableStateSubject.next(undefined);
+
+          const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+          const resource: string = convertResourceURL(this.router.url.toString());
+          const payloads = data.userSetting.payloads;
+          payloads.push(statePayload);
+          const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
+          this.indexDB.addSetting(userSetting);
+        } else {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
   }
 
-  public ngOnInit(): void {
+  public setupTableColumns(): void {
     this.columns = [
       {
         display: 'Active',
@@ -183,6 +236,17 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
+  }
+
+  /**
    * Load/reload objects from the api.
    * @private
    */
@@ -201,6 +265,26 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
         this.totalReferer = apiResponse.total;
         this.loading = false;
       });
+  }
+
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.loadObjectsFromAPI();
+  }
+
+  public onStateReset(): void {
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.limit = this.initLimit;
+    this.page = this.initPage;
+    this.loadObjectsFromAPI();
   }
 
 
@@ -279,5 +363,4 @@ export class ObjectReferencesTableComponent implements OnInit, OnDestroy {
     this.subscriber.next();
     this.subscriber.complete();
   }
-
 }

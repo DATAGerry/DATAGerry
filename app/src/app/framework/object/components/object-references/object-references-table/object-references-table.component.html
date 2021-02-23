@@ -1,9 +1,10 @@
-<cmdb-table [items]="refererObjects" [columns]="columns" [page]="page" [sort]="sort" [id]="'object-referer-list-table'"
-            [stateEnabled]="false" [emptyMessage]="'This object is not referenced!'" [searchEnabled]="false"
+<cmdb-table [items]="refererObjects" [columns]="columns" [page]="page" [sort]="sort" [id]="id"
+            [stateEnabled]="true" [emptyMessage]="'This object is not referenced!'" [searchEnabled]="false"
             [totalItems]="totalReferer" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
-            [customButtons]="[exportButtonTemplate]"
+            [customButtons]="[exportButtonTemplate]" [tableState]="tableState"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)">
+            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
+            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()">
 </cmdb-table>
 
 <!-- Table templates -->
