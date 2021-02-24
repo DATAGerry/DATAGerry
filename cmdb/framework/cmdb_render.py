@@ -35,7 +35,7 @@ import logging
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection, TypeReference
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import UserModel, UserManager
 from dateutil.parser import parse
@@ -238,11 +238,10 @@ class CmdbRender:
         return field_map
 
     def __merge_references(self, current_field):
-        reference = {
-            'summaries': [],
-            'type_label': None,
-            'icon': None
-        }
+
+        # Initialise TypeReference
+        reference = TypeReference(label='', line='')
+
         if current_field['value']:
             try:
                 ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
@@ -250,27 +249,36 @@ class CmdbRender:
             except AccessDeniedError as err:
                 return err.message
             except ObjectManagerGetError:
-                return reference
+                return TypeReference.to_json(reference)
 
             try:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
-                reference['type_label'] = ref_type.label
-                reference['icon'] = ref_type.get_icon()
+                reference.label = ref_type.label
+                reference.icon = ref_type.get_icon()
 
                 _nested_summaries = self.type_instance.get_nested_summaries()
                 _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 _summary_fields = _nested_summary_fields if _nested_summary_fields else ref_type.get_summary().fields
 
                 summaries = []
+                summary_values = []
                 for field in _summary_fields:
                     summary_value = str([x for x in ref_object.fields if x['name'] == field['name']][0]['value'])
                     if summary_value:
                         summaries.append({"value": summary_value, "type": field.get('type')})
-                reference['summaries'] = summaries
-            except ObjectManagerGetError:
-                return reference
+                        summary_values.append(summary_value)
+                reference.summaries = summaries
 
-        return reference
+                try:
+                    # fill the summary line with summaries value data
+                    reference.line = 'test | dfadfk {}'.format(*summary_values)
+                except ValueError:
+                    pass
+
+            except ObjectManagerGetError:
+                return TypeReference.to_json(reference)
+
+        return TypeReference.to_json(reference)
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list

@@ -9,7 +9,7 @@
           <div class="form-control text-left overflow-auto" readonly>
             <ng-container *ngIf="data.reference; else noRef;">
               <ng-container *ngIf="!protect">
-                <i class="{{data.reference?.icon}}"></i> {{data.reference?.type_label}} #{{data.value}}
+                <i class="{{data.reference?.icon}}"></i> {{data.reference?.label}} #{{data.value}}
                 <span *ngFor="let sum of data.reference?.summaries; let last = last; let first = first">
                 <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                   <span *ngIf="first"> - </span>{{sum.value}}

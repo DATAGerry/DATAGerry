@@ -31,8 +31,23 @@ import { CmdbType } from '../../../../models/cmdb-type';
 export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
   @Input() groupList: any;
   @Input() userList: any;
+
+  /**
+   * Type list for reference selection
+   */
   public typeList: CmdbType[];
+  public filteredTypeList: CmdbType[] = [];
+
+  /**
+   * Nested summaries
+   */
+  public summaries: any[] = [];
+
+  /**
+   * Object list for default reference value
+   */
   public objectList: RenderResult[] = [];
+  public filteredObjectList: RenderResult[] = [];
 
   constructor(private typeService: TypeService, private objectService: ObjectService) {
     super();
@@ -41,6 +56,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((res: CmdbType[]) => {
       this.typeList = res;
+      this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
     });
 
     if (this.data.value !== null && this.data.value !== undefined && this.data.value !== '') {
@@ -54,16 +70,27 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         this.data.ref_types = [this.data.ref_types];
       }
     }
+
+    if (this.data.summaries === undefined || !Array.isArray(this.data.summaries)) {
+      this.summaries.push({
+        name: `summary-${(this.summaries.length + 1)}`,
+        label: `Summary ${(this.summaries.length + 1)}`
+      });
+      this.data.summaries = this.summaries;
+    }
+    this.summaries = this.data.summaries;
   }
 
   public onChange() {
     const {ref_types} = this.data;
     if (ref_types && ref_types.length === 0) {
       this.objectList = [];
+      this. filteredTypeList = [];
       this.data.value = '';
     } else {
       this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
+        this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
       });
     }
   }
@@ -71,5 +98,21 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public changeDefault(value: any) {
     this.data.default = parseInt(value, 10);
     return this.data.default;
+  }
+
+  public addSummary() {
+    this.summaries.push({
+      name: `summary-${(this.summaries.length + 1)}`,
+      label: `Summary ${(this.summaries.length + 1)}`
+    });
+  }
+
+  public delSummary(value: any) {
+    if (this.summaries.length > 1) {
+      const index = this.summaries.indexOf(value, 0);
+      if (index > -1) {
+        this.summaries.splice(index, 1);
+      }
+    }
   }
 }

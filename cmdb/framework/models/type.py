@@ -21,7 +21,7 @@ from dateutil.parser import parse
 from typing import List
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
+from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError, TypeReferenceLineFillError
 from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
 from cmdb.utils.error import CMDBError
@@ -54,32 +54,70 @@ class TypeSummary:
         }
 
 
-class TypeSection:
-    __slots__ = 'type', 'name', 'label', 'fields'
+class TypeReference:
+    __slots__ = 'label', 'summaries', 'line', 'icon'
 
-    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
-        self.type = type
-        self.name = name
-        self.label = label or self.name.title()
-        self.fields = fields or []
+    def __init__(self, label: str, line: str, icon: str = None, summaries: list = None):
+        self.label = label or ''
+        self.summaries = summaries or []
+        self.line = line or ''
+        self.icon = icon
 
     @classmethod
-    def from_data(cls, data: dict) -> "TypeSection":
+    def from_data(cls, data: dict) -> "TypeReference":
         return cls(
-            type=data.get('type'),
-            name=data.get('name'),
+            line=data.get('line'),
             label=data.get('label', None),
-            fields=data.get('fields', None)
+            summaries=data.get('summaries', None),
+            icon=data.get('icon', None)
         )
 
     @classmethod
-    def to_json(cls, instance: "TypeSection") -> dict:
+    def to_json(cls, instance: "TypeReference") -> dict:
         return {
-            'type': instance.type,
-            'name': instance.name,
+            'line': instance.line,
             'label': instance.label,
-            'fields': instance.fields
+            'summaries': instance.summaries,
+            'icon': instance.icon,
         }
+
+    def has_icon(self):
+        """
+        check if reference has a icon
+        """
+        if self.icon:
+            return True
+        return False
+
+    def line_requires_fields(self):
+        """
+        the type of arguments passed to it and formats it according to the format codes defined in the string
+        checks if the line requires field informations.
+        Examples:
+            example {} -> True
+            example -> False
+        Returns:
+            bool
+        """
+        import re
+        if re.search('{.*?}', self.line):
+            return True
+        return False
+
+    def has_summaries(self):
+        """
+        check if type references has summaries definitions
+        """
+        if len(self.summaries) > 0:
+            return True
+        return False
+
+    def fill_line(self, inputs):
+        """fills the line brackets with data"""
+        try:
+            self.line = self.line.format(*inputs)
+        except Exception as e:
+            raise TypeReferenceLineFillError(inputs, e)
 
 
 class TypeExternalLink:
@@ -149,6 +187,34 @@ class TypeExternalLink:
             self.href = self.href.format(*inputs)
         except Exception as e:
             raise ExternalFillError(inputs, e)
+
+
+class TypeSection:
+    __slots__ = 'type', 'name', 'label', 'fields'
+
+    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
+        self.type = type
+        self.name = name
+        self.label = label or self.name.title()
+        self.fields = fields or []
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeSection":
+        return cls(
+            type=data.get('type'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            fields=data.get('fields', None)
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeSection") -> dict:
+        return {
+            'type': instance.type,
+            'name': instance.name,
+            'label': instance.label,
+            'fields': instance.fields
+        }
 
 
 class TypeRenderMeta:

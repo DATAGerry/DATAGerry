@@ -20,6 +20,12 @@ import { Component, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../../fields/components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
+import { TypeReference } from '../../../models/cmdb-type-reference';
+
+type TypeReferenceTemplate = {
+  reference: TypeReference,
+  value: any
+};
 
 @Component({
   selector: 'cmdb-ref-simple',
@@ -28,22 +34,26 @@ import { RenderResult } from '../../../models/cmdb-render';
 })
 export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
 
-  public refData: any = undefined;
+  public refData: TypeReferenceTemplate = {
+    reference: new TypeReference(),
+    value: null
+  };
 
   constructor(private objectService: ObjectService) {
     super();
   }
 
   public ngOnInit() {
+
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
           this.refData = {
-            reference: {
+            reference: new TypeReference({
               icon: res.type_information.icon,
-              type_label: res.type_information.type_label,
+              label: res.type_information.type_label,
               summaries: res.summaries
-            },
+            }),
             value: this.data.value,
           };
         });

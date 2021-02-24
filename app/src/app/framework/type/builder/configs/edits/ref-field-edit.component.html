@@ -38,6 +38,45 @@
 </div>
 
 <div class="form-group">
+  <label>Summaries:</label>
+  <table class="table table-bordered">
+    <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Type</th>
+      <th scope="col">Summary line</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let summaries of data.summaries; let i = index">
+      <th scope="row">{{i + 1}}</th>
+      <td>
+        <ng-select [items]="filteredTypeList"
+                   bindLabel="label"
+                   bindValue="public_id"
+                   [multiple] = false
+                   [(ngModel)]="data.summaries[i].type_id">
+        </ng-select>
+      </td>
+      <td>
+        <input type="text" class="form-control" value="">
+      </td>
+      <td>
+        <button type="button" class="btn btn-outline-primary" [disabled]="summaries.length == 1" (click)="delSummary(data.summaries[i])">
+          <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
+        </button>
+      </td>
+    </tr>
+    <tr>
+      <td colspan="4">
+        <button type="button" class="btn btn-outline-secondary" (click)="addSummary()">+ Add option</button>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="form-group">
   <label>Default value:</label>
   <select [(ngModel)]="data.value" class="form-control">
     <option></option>
