@@ -44,31 +44,38 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Default page size
    */
   private readonly defaultLimit: number = 10;
+  private readonly defaultLimitRef: number = 10;
 
   /**
    * Results skipped for pagination.
    * Will be something like: skip = limit * (page-1).
    */
   private skip: number = 0;
+  private skipRef: number = 0;
 
   /**
    * Used page size.
    * Max number of displayed results.
    */
   public limit: number = this.defaultLimit;
+  public limitRef: number = this.defaultLimitRef;
 
   /**
    * Current page number.
    */
   public currentPage: number = 1;
+  public currentPageRef: number = 1;
 
   /**
    * Max number of size for pagination truncate.
    */
   public maxNumberOfSites: number[];
+  public maxNumberOfSitesRef: number[];
 
 
   @ViewChild('paginationComponent') pagination: JwPaginationComponent;
+  @ViewChild('paginationComponentRef') paginationRef: JwPaginationComponent;
+  private initSearchRef: boolean = true;
   private initSearch: boolean = true;
   private initFilter: boolean = true;
 
@@ -83,6 +90,11 @@ export class SearchComponent implements OnInit, OnDestroy {
   public searchResultList: SearchResultList;
   public publicIdResult;
   public filterResultList: any[];
+
+  /**
+   * List of reference results
+   */
+  public referenceResultList: SearchResultList;
 
   /**
    * Query parameters.
@@ -120,15 +132,86 @@ export class SearchComponent implements OnInit, OnDestroy {
       if (params.has('resolve')) {
         this.resolve.next(JSON.parse(params.get('resolve')));
       }
+      this.initSearchRef = true;
       this.initSearch = true;
       this.initFilter = true;
       this.onSearch();
     });
 
-    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe(() => {
-      this.initSearch = true;
-      this.onSearch();
+    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change) => {
+      this.referencesSearch(change);
     });
+  }
+
+  /**
+   * Trigger the resolve search api call
+   */
+
+  public referencesSearch(change: boolean = false) {
+    if (change && this.searchResultList) {
+      this.spinner.show('app', 'Searching...');
+      let params = new HttpParams();
+      params = params.set('limit', this.limitRef.toString());
+      params = params.set('skip', this.skipRef.toString());
+
+      const typIDs: number[] = [];
+      const objIDs: number [] = [];
+      for (const obj of this.searchResultList.results) {
+        typIDs.push(obj.result.type_information.type_id);
+        objIDs.push(obj.result.object_information.object_id);
+      }
+
+      if (this.publicIdResult) {
+        typIDs.push(this.publicIdResult.result.type_information.type_id);
+        objIDs.push(this.publicIdResult.result.object_information.object_id);
+      }
+
+      const query = [
+        {
+          $lookup: {
+            from: 'framework.types',
+            localField: 'type_id',
+            foreignField: 'public_id',
+            as: 'type'
+          }
+        },
+        {
+          $unwind: {
+            path: '$type'
+          }
+        },
+        {
+          $match: {
+            $and: [
+              {'type.fields.type': 'ref'},
+              { $or: [
+                {'type.fields.ref_types': {$in : typIDs }}]
+              }
+            ]
+          }
+        },
+        {
+          $match: {
+            'fields.value': {$in : objIDs }
+          }
+        }
+      ];
+      params = params.set('resolve', this.resolve.value.toString());
+      params = params.set('query', JSON.stringify(query));
+
+      this.searchService.getSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber))
+        .subscribe((results: SearchResultList) => {
+            this.referenceResultList = results;
+            if (this.initSearchRef && this.referenceResultList) {
+              this.maxNumberOfSitesRef = Array.from({length: (this.referenceResultList.total_results)}, (v, k) => k + 1);
+              this.initSearchRef = false;
+            }
+            if (!this.referenceResultList || this.referenceResultList.total_results === 0) {
+              this.resolve.next(false);
+            }
+          }, (error) => console.log(error),
+          () => this.spinner.hide('app'));
+    }
   }
 
   /**
@@ -140,9 +223,6 @@ export class SearchComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
-    if (this.resolve.value) {
-      params = params.set('resolve', this.resolve.value.toString());
-    }
     this.searchService.postSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber)).subscribe((results: SearchResultList) => {
         this.searchResultList = results;
         this.filterResultList = this.initFilter && results !== null ? results.groups : this.filterResultList;
@@ -151,7 +231,11 @@ export class SearchComponent implements OnInit, OnDestroy {
           this.initSearch = false;
           this.initFilter = false;
         }
-    });
+    }, (error => console.log(error)),
+      () => {
+        this.initSearchRef = true;
+        this.resolve.next(true);
+      });
     let localParameters = JSON.parse(this.queryParameters);
     if (localParameters.length === 1) {
       localParameters[0].searchForm = 'publicID';
@@ -170,6 +254,18 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Pagination page was changed.
    * @param event: Data from the change event.
    */
+  public onChangePageRef(event): void {
+    if (this.currentPageRef !== this.paginationRef.pager.currentPage) {
+      this.currentPageRef = this.paginationRef.pager.currentPage;
+      this.skipRef = ((this.currentPageRef === 0 ? 1 : this.currentPageRef) - 1) * this.limitRef;
+      this.referencesSearch(true);
+    }
+  }
+
+  /**
+   * Pagination page was changed.
+   * @param event: Data from the change event.
+   */
   public onChangePage(event): void {
     if (this.currentPage !== this.pagination.pager.currentPage) {
       this.currentPage = this.pagination.pager.currentPage;
@@ -181,6 +277,7 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   public reSearch(value: any) {
     this.queryParameters = JSON.stringify(value.query);
+    this.initSearchRef = true;
     this.initSearch = true;
     this.initFilter = value.rebuild;
     this.onSearch();
