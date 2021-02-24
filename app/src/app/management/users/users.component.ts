@@ -29,10 +29,10 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
 import { GroupService } from '../services/group.service';
 import { Group } from '../models/group';
-import {ActivatedRoute, Data, Router} from "@angular/router";
-import {UserSetting} from "../user-settings/models/user-setting";
-import {convertResourceURL, UserSettingsService} from "../user-settings/services/user-settings.service";
-import {UserSettingsDBService} from "../user-settings/services/user-settings-db.service";
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../user-settings/models/user-setting';
+import { convertResourceURL, UserSettingsService } from '../user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-users',
@@ -230,6 +230,8 @@ export class UsersComponent implements OnInit, OnDestroy {
   private initTable() {
     if (this.tableState) {
       this.sort = this.tableState.sort;
+      this.params.sort = this.sort.name;
+      this.params.order = this.sort.order;
       this.params.page = this.tableState.page;
       this.params.limit = this.tableState.pageSize;
     }
@@ -289,7 +291,6 @@ export class UsersComponent implements OnInit, OnDestroy {
    * @param state
    */
   public onStateSelect(state: TableState) {
-    this.tableStateSubject.next(state);
     this.params.page = this.tableState.page;
     this.params.limit = this.tableState.pageSize;
     this.sort = this.tableState.sort;
