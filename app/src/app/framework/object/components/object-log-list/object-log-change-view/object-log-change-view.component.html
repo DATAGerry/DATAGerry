@@ -12,17 +12,19 @@
       <li *ngFor="let change of changes?.old; let i = index">
         <b>{{change?.name}}</b><br />
         <ng-template [ngIf]="change?.value && change?.value.$date" [ngIfElse]="templateUsualOld">
-            {{change?.value.$date | date:"dd/MM/yyyy"}}
+          {{change?.value.$date | date:"dd/MM/yyyy"}}
         </ng-template>
         <ng-template #templateUsualOld>
-            {{change?.value}} 
+          {{change?.value}}
         </ng-template>
-        <i class="fas fa-arrow-right"></i> 
-        <ng-template [ngIf]="changes?.new[i].value && changes?.new[i].value.$date" [ngIfElse]="templateUsualNew">
-            {{changes?.new[i]?.value.$date | date:"dd/MM/yyyy"}}
-        </ng-template>
-        <ng-template #templateUsualNew>
-            {{changes?.new[i]?.value}}
+        <i class="fas fa-arrow-right"></i>
+        <ng-template *ngFor="let newchanges of changes?.new";>
+          <ng-template [ngIf]="newchanges?.value && newchanges?.value.$date" [ngIfElse]="templateUsualNew">
+            {{newchanges?.value.$date | date:"dd/MM/yyyy"}}
+          </ng-template>
+          <ng-template #templateUsualNew>
+            {{newchanges?.value}}
+          </ng-template>
         </ng-template>
       </li>
     </ul>
