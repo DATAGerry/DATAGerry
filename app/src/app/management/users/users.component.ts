@@ -20,15 +20,19 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { User } from '../models/user';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { UserService } from '../services/user.service';
-import { ReplaySubject } from 'rxjs';
+import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
 import { DatePipe } from '@angular/common';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
 import { GroupService } from '../services/group.service';
 import { Group } from '../models/group';
+import {ActivatedRoute, Data, Router} from "@angular/router";
+import {UserSetting} from "../user-settings/models/user-setting";
+import {convertResourceURL, UserSettingsService} from "../user-settings/services/user-settings.service";
+import {UserSettingsDBService} from "../user-settings/services/user-settings-db.service";
 
 @Component({
   selector: 'cmdb-users',
@@ -36,6 +40,11 @@ import { Group } from '../models/group';
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit, OnDestroy {
+
+  /**
+   * Id for the user Table
+   */
+  private readonly id: string = 'user-list-table';
 
   /**
    * Component un-subscriber.
@@ -110,8 +119,34 @@ export class UsersComponent implements OnInit, OnDestroy {
   public columns: Array<Column> = [];
   public totalUsers: number;
 
-  constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
 
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+  constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal,
+              private router: Router, private route: ActivatedRoute,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   public getGroupByID(publicID: number): Group {
@@ -188,7 +223,16 @@ export class UsersComponent implements OnInit, OnDestroy {
         cellClasses: ['actions-buttons']
       }
     ] as Array<Column>;
+    this.initTable();
     this.loadUsersFromApi();
+  }
+
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.params.page = this.tableState.page;
+      this.params.limit = this.tableState.pageSize;
+    }
   }
 
   private loadUsersFromApi(): void {
@@ -216,6 +260,48 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.params.page = page;
     this.loadUsersFromApi();
   }
+
+  /**
+   * On table State change.
+   * Update state.
+   */
+  public onStateChange(state: TableState): void {
+    this.tableStateSubject.next(state);
+  }
+
+  /**
+   * On table state reset.
+   * Reset State.
+   */
+  public onStateReset(): void {
+    this.params.page = this.tableState.page;
+    this.params.limit = this.tableState.pageSize;
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.params.sort = this.sort.name;
+    this.params.order = this.sort.order;
+    this.tableStateSubject.next(undefined);
+    this.loadUsersFromApi();
+  }
+
+  /**
+   * On State Select.
+   * Updates table settings according to the given table state
+   * @param state
+   */
+  public onStateSelect(state: TableState) {
+    this.tableStateSubject.next(state);
+    this.params.page = this.tableState.page;
+    this.params.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.params.sort = this.sort.name;
+    this.params.order = this.sort.order;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+    this.tableStateSubject.next(state);
+    this.loadUsersFromApi();
+  }
+
 
   /**
    * On table page size change.

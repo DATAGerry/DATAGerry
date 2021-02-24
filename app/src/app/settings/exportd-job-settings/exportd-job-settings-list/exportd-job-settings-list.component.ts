@@ -402,6 +402,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     this.limit = this.initLimit;
     this.page = this.initPage;
     this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.tableStateSubject.next(undefined);
     this.loadsTasksFromAPI();
   }
 
@@ -418,6 +419,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     for (const col of this.columns) {
       col.hidden = !this.tableState.visibleColumns.includes(col.name);
     }
+    this.tableStateSubject.next(state);
     this.loadsTasksFromAPI();
   }
 
