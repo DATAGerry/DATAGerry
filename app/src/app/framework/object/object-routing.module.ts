@@ -86,6 +86,10 @@ const routes: Routes = [
       breadcrumb: 'Object Type List',
       right: 'base.framework.object.view'
     },
+    resolve: {
+      type: TypeResolver,
+      userSetting: UserSettingsResolver
+    },
     component: ObjectsByTypeComponent,
   },
   {
