@@ -20,7 +20,7 @@ Object/Type render
 from typing import List, Union
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
@@ -240,7 +240,7 @@ class CmdbRender:
     def __merge_references(self, current_field):
 
         # Initialise TypeReference
-        reference = TypeReference(label='', line='')
+        reference = TypeReference(type_id=0, label='', line='')
 
         if current_field['value']:
             try:
@@ -253,12 +253,17 @@ class CmdbRender:
 
             try:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
+                reference.type_id = ref_type.get_public_id()
                 reference.label = ref_type.label
                 reference.icon = ref_type.get_icon()
 
+                _summary_fields = []
                 _nested_summaries = self.type_instance.get_nested_summaries()
                 _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
-                _summary_fields = _nested_summary_fields if _nested_summary_fields else ref_type.get_summary().fields
+                _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
+
+                _summary_fields = _nested_summary_fields \
+                    if (_nested_summary_line or _nested_summary_fields) else ref_type.get_summary().fields
 
                 summaries = []
                 summary_values = []
@@ -271,8 +276,10 @@ class CmdbRender:
 
                 try:
                     # fill the summary line with summaries value data
-                    reference.line = 'test | dfadfk {}'.format(*summary_values)
-                except ValueError:
+                    if _nested_summary_line:
+                        reference.line = _nested_summary_line
+                        reference.fill_line(summary_values)
+                except TypeReferenceLineFillError:
                     pass
 
             except ObjectManagerGetError:
@@ -288,15 +295,18 @@ class CmdbRender:
             render_result.summaries = summary_list
             render_result.summary_line = f'{self.type_instance.get_label()} #{self.object_instance.public_id}  '
             return render_result
+
         summary_list = self.type_instance.get_summary().fields
         render_result.summaries = summary_list
         first = True
+
         for line in summary_list:
             if first:
                 summary_line += f'{line["value"]}'
                 first = False
             else:
                 summary_line += f' | {line["value"]}'
+
         render_result.summary_line = summary_line
         return render_result
 

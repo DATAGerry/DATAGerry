@@ -56,43 +56,47 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public ngOnInit(): void {
     this.typeService.getTypeList().subscribe((res: CmdbType[]) => {
       this.typeList = res;
-      this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
-    });
+    }, (err) => console.log(err)
+    , () => this.prepareSummaries());
 
     if (this.data.value !== null && this.data.value !== undefined && this.data.value !== '') {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
       });
     }
+  }
 
+  private prepareSummaries() {
     if (this.data.ref_types) {
       if (!Array.isArray(this.data.ref_types)) {
         this.data.ref_types = [this.data.ref_types];
       }
+      this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
+      this.data.summaries = this.data.summaries ? this.data.summaries : this.summaries;
+      this.summaries = this.data.summaries;
     }
-
-    if (this.data.summaries === undefined || !Array.isArray(this.data.summaries)) {
-      this.summaries.push({
-        name: `summary-${(this.summaries.length + 1)}`,
-        label: `Summary ${(this.summaries.length + 1)}`
-      });
-      this.data.summaries = this.summaries;
-    }
-    this.summaries = this.data.summaries;
   }
 
   public onChange() {
     const {ref_types} = this.data;
     if (ref_types && ref_types.length === 0) {
       this.objectList = [];
-      this. filteredTypeList = [];
+      this.filteredTypeList = [];
       this.data.value = '';
     } else {
       this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
-        this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
+        this.prepareSummaries();
       });
     }
+  }
+
+  public summaryFieldFilter(id: number) {
+    return id ? this.typeList.find(s => s.public_id === id).fields : [];
+  }
+
+  public changeSummaryOption(type: CmdbType) {
+    this.summaries.find(s => s.type_id === type.public_id).label = type.label;
   }
 
   public changeDefault(value: any) {
@@ -101,14 +105,19 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   public addSummary() {
-    this.summaries.push({
-      name: `summary-${(this.summaries.length + 1)}`,
-      label: `Summary ${(this.summaries.length + 1)}`
-    });
+    if (this.filteredTypeList) {
+      this.summaries.push({
+        type_id: null,
+        line: null,
+        label: null,
+        fields: [],
+        icon: null,
+      });
+    }
   }
 
   public delSummary(value: any) {
-    if (this.summaries.length > 1) {
+    if (this.summaries.length > 0) {
       const index = this.summaries.indexOf(value, 0);
       if (index > -1) {
         this.summaries.splice(index, 1);

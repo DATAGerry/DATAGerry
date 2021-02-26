@@ -55,9 +55,10 @@ class TypeSummary:
 
 
 class TypeReference:
-    __slots__ = 'label', 'summaries', 'line', 'icon'
+    __slots__ = 'type_id', 'label', 'summaries', 'line', 'icon'
 
-    def __init__(self, label: str, line: str, icon: str = None, summaries: list = None):
+    def __init__(self, type_id: int, label: str, line: str, icon: str = None, summaries: list = None):
+        self.type_id = type_id
         self.label = label or ''
         self.summaries = summaries or []
         self.line = line or ''
@@ -66,6 +67,7 @@ class TypeReference:
     @classmethod
     def from_data(cls, data: dict) -> "TypeReference":
         return cls(
+            type_id=data.get('type_id'),
             line=data.get('line'),
             label=data.get('label', None),
             summaries=data.get('summaries', None),
@@ -75,6 +77,7 @@ class TypeReference:
     @classmethod
     def to_json(cls, instance: "TypeReference") -> dict:
         return {
+            'type_id': instance.type_id,
             'line': instance.line,
             'label': instance.label,
             'summaries': instance.summaries,
@@ -419,6 +422,9 @@ class TypeModel(CmdbDAO):
         for field_name in _fields:
             complete_field_list.append(self.get_field(field_name))
         return TypeSummary(fields=complete_field_list).fields
+
+    def get_nested_summary_line(self, nested_summaries):
+        return next((x['line'] for x in nested_summaries if x['type_id'] == self.public_id), None)
 
     def get_summary(self):
         complete_field_list = []

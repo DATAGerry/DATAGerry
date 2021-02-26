@@ -50,6 +50,7 @@ export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
           this.refData = {
             reference: new TypeReference({
+              type_id: res.type_information.type_id,
               icon: res.type_information.icon,
               label: res.type_information.type_label,
               summaries: res.summaries
