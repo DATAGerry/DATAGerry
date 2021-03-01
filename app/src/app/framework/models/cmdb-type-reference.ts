@@ -23,6 +23,7 @@ export class TypeReference {
   public summaries: any[];
   public line: string;
   public icon: any;
+  public prefix: boolean = false;
 
   public constructor(init?: Partial<TypeReference>) {
     Object.assign(this, init);

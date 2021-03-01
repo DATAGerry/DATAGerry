@@ -14,7 +14,9 @@
   </ng-container>
 
   <ng-template #refLine>
-    <i class="{{refData?.reference?.icon}}"></i> {{refData?.reference?.label}} #
+    <ng-container *ngIf="refData?.reference?.prefix">
+      <i class="{{refData?.reference?.icon}}"></i> {{refData?.reference?.label}} #
+    </ng-container>
     <span>{{refData?.reference?.line}}</span>
   </ng-template>
 

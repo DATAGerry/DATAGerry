@@ -253,14 +253,16 @@ class CmdbRender:
 
             try:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
-                reference.type_id = ref_type.get_public_id()
-                reference.label = ref_type.label
-                reference.icon = ref_type.get_icon()
 
                 _summary_fields = []
                 _nested_summaries = self.type_instance.get_nested_summaries()
                 _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
+
+                reference.type_id = ref_type.get_public_id()
+                reference.label = ref_type.label
+                reference.icon = ref_type.get_icon()
+                reference.prefix = ref_type.has_nested_prefix(_nested_summaries)
 
                 _summary_fields = _nested_summary_fields \
                     if (_nested_summary_line or _nested_summary_fields) else ref_type.get_summary().fields
@@ -269,17 +271,18 @@ class CmdbRender:
                 summary_values = []
                 for field in _summary_fields:
                     summary_value = str([x for x in ref_object.fields if x['name'] == field['name']][0]['value'])
-                    if summary_value:
-                        summaries.append({"value": summary_value, "type": field.get('type')})
-                        summary_values.append(summary_value)
+                    summaries.append({"value": summary_value, "type": field.get('type')})
+                    summary_values.append(summary_value)
                 reference.summaries = summaries
 
                 try:
                     # fill the summary line with summaries value data
+                    reference.line = _nested_summary_line
+                    if not reference.line_requires_fields():
+                        reference.summaries = []
                     if _nested_summary_line:
-                        reference.line = _nested_summary_line
                         reference.fill_line(summary_values)
-                except TypeReferenceLineFillError:
+                except (TypeReferenceLineFillError, Exception):
                     pass
 
             except ObjectManagerGetError:

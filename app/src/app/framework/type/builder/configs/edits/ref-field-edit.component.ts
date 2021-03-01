@@ -26,7 +26,7 @@ import { CmdbType } from '../../../../models/cmdb-type';
 @Component({
   selector: 'cmdb-ref-field-edit',
   templateUrl: './ref-field-edit.component.html',
-  styleUrls: ['./ref-field-edit.component.scss']
+  styleUrls: ['./ref-field-edit.component.scss'],
 })
 export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
   @Input() groupList: any;
@@ -96,7 +96,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   public changeSummaryOption(type: CmdbType) {
-    this.summaries.find(s => s.type_id === type.public_id).label = type.label;
+    const nestedSummary = this.summaries.find(s => s.type_id === type.public_id);
+    nestedSummary.label = type.label;
+    nestedSummary.icon = type.render_meta.icon;
   }
 
   public changeDefault(value: any) {
@@ -112,6 +114,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         label: null,
         fields: [],
         icon: null,
+        prefix: false,
       });
     }
   }

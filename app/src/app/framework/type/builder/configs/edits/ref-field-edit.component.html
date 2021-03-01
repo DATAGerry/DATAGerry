@@ -44,6 +44,7 @@
     <tr>
       <th scope="col">#</th>
       <th scope="col">Type</th>
+      <th scope="col">Label</th>
       <th scope="col">Summary line</th>
       <th scope="col">Fields</th>
       <th scope="col"></th>
@@ -56,10 +57,21 @@
         <ng-select [items]="filteredTypeList"
                    bindLabel="label"
                    bindValue="public_id"
+                   [closeOnSelect]="false"
                    (change)="changeSummaryOption($event)"
                    [multiple] = false
                    [(ngModel)]="summary.type_id">
         </ng-select>
+      </td>
+      <td>
+        <ng-template #previewContent>
+          <b>Show type icon and label</b><i class="{{summary?.icon}}"></i> {{summary?.label}} #
+        </ng-template>
+        <div class="d-flex justify-content-center">
+          <input type="checkbox" value="{{summary.prefix}}"
+                 [ngbTooltip]="previewContent"
+                 [(ngModel)]="summary.prefix">
+        </div>
       </td>
       <td>
         <input type="text" class="form-control" value="{{summary.line}}" [(ngModel)]="summary.line">
@@ -69,7 +81,9 @@
       <td>
         <ng-select [items]="summaryFieldFilter(summary.type_id)" [multiple]="true"
                    bindLabel="label"
-                   bindValue="name" placeholder="Select fields"
+                   bindValue="name"
+                   [closeOnSelect]="false"
+                   placeholder="Select fields"
                    [(ngModel)]="summary.fields">
         </ng-select>
       </td>

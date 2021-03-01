@@ -33,7 +33,7 @@ import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.comp
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
-import {NgbDatepickerModule, NgbModalModule} from '@ng-bootstrap/ng-bootstrap';
+import {NgbDatepickerModule, NgbModalModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
 import { RenderElementComponent } from '../../render/render-element/render-element.component';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
@@ -65,7 +65,8 @@ import { CategoryModule } from '../../category/category.module';
     FontAwesomeModule,
     NgbDatepickerModule,
     ReactiveFormsModule,
-    CategoryModule
+    CategoryModule,
+    NgbTooltipModule
   ],
   exports: [
     BuilderComponent

@@ -55,14 +55,16 @@ class TypeSummary:
 
 
 class TypeReference:
-    __slots__ = 'type_id', 'label', 'summaries', 'line', 'icon'
+    __slots__ = 'type_id', 'label', 'summaries', 'line', 'prefix', 'icon'
 
-    def __init__(self, type_id: int, label: str, line: str, icon: str = None, summaries: list = None):
+    def __init__(self, type_id: int, label: str, line: str = None,
+                 prefix: bool = False, icon = None, summaries: list = None):
         self.type_id = type_id
         self.label = label or ''
         self.summaries = summaries or []
-        self.line = line or ''
+        self.line = line
         self.icon = icon
+        self.prefix = prefix
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeReference":
@@ -71,7 +73,8 @@ class TypeReference:
             line=data.get('line'),
             label=data.get('label', None),
             summaries=data.get('summaries', None),
-            icon=data.get('icon', None)
+            icon=data.get('prefix', False),
+            prefix=data.get('icon', None)
         )
 
     @classmethod
@@ -82,13 +85,22 @@ class TypeReference:
             'label': instance.label,
             'summaries': instance.summaries,
             'icon': instance.icon,
+            'prefix': instance.prefix
         }
+
+    def has_prefix(self):
+        """
+        check if reference has a prefix
+        """
+        if self.prefix:
+            return True
+        return False
 
     def has_icon(self):
         """
         check if reference has a icon
         """
-        if self.icon:
+        if self.prefix:
             return True
         return False
 
@@ -415,6 +427,9 @@ class TypeModel(CmdbDAO):
 
     def get_nested_summaries(self):
         return next((x['summaries'] for x in self.get_fields() if x['type'] == 'ref' and 'summaries' in x), [])
+
+    def has_nested_prefix(self, nested_summaries):
+        return next((x['prefix'] for x in nested_summaries if x['type_id'] == self.public_id), False)
 
     def get_nested_summary_fields(self, nested_summaries):
         _fields = next((x['fields'] for x in nested_summaries if x['type_id'] == self.public_id), [])
