@@ -12,6 +12,7 @@ click==7.1.2
 cryptography==3.3.2
 docutils==0.16
 et-xmlfile==1.0.1
+flake8==3.8.4
 Flask==1.1.2
 Flask-Cors==3.0.9
 gunicorn==20.0.4
@@ -34,8 +35,10 @@ Pillow==7.2.0
 pluggy==0.13.1
 py==1.10.0
 pyasn1==0.4.8
+pycodestyle==2.6.0
 pycparser==2.20
 pycryptodome==3.9.8
+pyflakes==2.2.0
 Pygments==2.7.1
 pyinstaller==4.0
 pyinstaller-hooks-contrib==2020.8
