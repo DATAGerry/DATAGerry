@@ -65,7 +65,7 @@ jobs:
           name: pylint-report
           path: pylint-report_python-${{ matrix.python-version }}.txt
       - name: Lint with flake8
-        run: flake8 --config=$CONFIG_FILE --tee --output-file=flake8-report_python-${{ matrix.python-version }}.txt ./cmdb
+        run: flake8 --exit-zero --config=$CONFIG_FILE --tee --output-file=flake8-report_python-${{ matrix.python-version }}.txt ./cmdb
         env:
           CONFIG_FILE: .flake8
       - name: Archive flake8 results
