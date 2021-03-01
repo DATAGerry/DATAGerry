@@ -55,7 +55,7 @@ jobs:
           pip install pylint
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
       - name: Lint with pylint
-        run: pylint --rcfile=$CONFIG_FILE --fail-under=$FAIL_THRESHOLD ./cmdb | tee pylint-report.txt
+        run: pylint --rcfile=$CONFIG_FILE --fail-under=$FAIL_THRESHOLD ./cmdb | tee pylint-report_python-${{ matrix.python-version }}.txt
         env:
           FAIL_THRESHOLD: 5.0
           CONFIG_FILE: .pylintrc
@@ -63,7 +63,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: pylint-report
-          path: pylint-report.txt
+          path: pylint-report_python-${{ matrix.python-version }}.txt
 
   build:
     needs: [ test, lint ]
