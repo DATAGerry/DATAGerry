@@ -62,7 +62,7 @@ jobs:
       - name: Archive pylint results
         uses: actions/upload-artifact@v2
         with:
-          name: pylint-report
+          name: pylint-reports
           path: pylint-report_python-${{ matrix.python-version }}.txt
       - name: Lint with flake8
         run: flake8 --exit-zero --config=$CONFIG_FILE --tee --output-file=flake8-report_python-${{ matrix.python-version }}.txt ./cmdb
@@ -71,7 +71,7 @@ jobs:
       - name: Archive flake8 results
         uses: actions/upload-artifact@v2
         with:
-          name: flake8-report
+          name: flake8-reports
           path: flake8-report_python-${{ matrix.python-version }}.txt
 
   build:
