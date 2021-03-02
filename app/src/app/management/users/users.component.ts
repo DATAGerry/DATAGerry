@@ -44,7 +44,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   /**
    * Id for the user Table
    */
-  private readonly id: string = 'user-list-table';
+  public readonly id: string = 'user-list-table';
 
   /**
    * Component un-subscriber.

@@ -35,6 +35,7 @@ import {
   UserSettingsService
 } from '../../../../../management/user-settings/services/user-settings.service';
 import {UserSettingsDBService} from '../../../../../management/user-settings/services/user-settings-db.service';
+import {CmdbType} from "../../../../models/cmdb-type";
 
 @Component({
   selector: 'cmdb-object-references-table',
@@ -151,27 +152,15 @@ export class ObjectReferencesTableComponent implements OnDestroy {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
           .find(payloads => payloads.id === this.id);
-        if (!userSettingPayloads) {
-          this.tableStates = [];
-          this.tableStateSubject.next(undefined);
-
-          const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
-          const resource: string = convertResourceURL(this.router.url.toString());
-          const payloads = data.userSetting.payloads;
-          payloads.push(statePayload);
-          const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
-          this.indexDB.addSetting(userSetting);
-        } else {
-          this.tableStates = userSettingPayloads.tableStates;
-          this.tableStateSubject.next(userSettingPayloads.currentState);
-        }
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
       } else {
         this.tableStates = [];
         this.tableStateSubject.next(undefined);
 
         const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
         const resource: string = convertResourceURL(this.router.url.toString());
-        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
         this.indexDB.addSetting(userSetting);
       }
     });

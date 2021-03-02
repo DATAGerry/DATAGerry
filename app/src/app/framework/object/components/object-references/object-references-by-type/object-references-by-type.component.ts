@@ -162,32 +162,24 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
-    if (data.userSetting) {
-      const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
-        .find(payloads => payloads.id === this.id);
-      if (!userSettingPayloads) {
-        this.tableStates = [];
-        this.tableStateSubject.next(undefined);
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        if (!userSettingPayloads) {
+          const payloads = (data.userSetting as UserSetting<TableStatePayload>).payloads;
+          const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+          payloads.push(statePayload);
+          const resource: string = convertResourceURL(this.router.url.toString());
+          const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
+          this.indexDB.updateSetting(userSetting);
 
-        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
-        const resource: string = convertResourceURL(this.router.url.toString());
-        const payloads = data.userSetting.payloads;
-        payloads.push(statePayload);
-        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
-        this.indexDB.addSetting(userSetting);
-      } else {
-        this.tableStates = userSettingPayloads.tableStates;
-        this.tableStateSubject.next(userSettingPayloads.currentState);
+          this.tableStates = statePayload.tableStates;
+          this.tableStateSubject.next(statePayload.currentState);
+        } else {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
       }
-    } else {
-      this.tableStates = [];
-      this.tableStateSubject.next(undefined);
-
-      const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
-      const resource: string = convertResourceURL(this.router.url.toString());
-      const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
-      this.indexDB.addSetting(userSetting);
-    }
   });
 
     this.columns = [
