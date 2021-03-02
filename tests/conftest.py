@@ -1,6 +1,7 @@
 import pytest
 
 from cmdb.database.connection import MongoConnector
+from cmdb.database.errors.database_errors import DatabaseNotExists
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.security.key.generator import KeyGenerator
@@ -68,7 +69,10 @@ def rest_api(database_manager, admin_auth_token):
 
 @pytest.fixture(scope="session", autouse=True)
 def preset_database(database_manager, database_name):
-    database_manager.drop_database(database_name)
+    try:
+        database_manager.drop_database(database_name)
+    except DatabaseNotExists:
+        pass
     from cmdb.user_management import __FIXED_GROUPS__
     from datetime import datetime
 
