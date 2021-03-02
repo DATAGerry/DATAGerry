@@ -33,7 +33,7 @@
     "@ng-bootstrap/ng-bootstrap": "^5.1.4",
     "@ng-select/ng-select": "^4.0.4",
     "@tinymce/tinymce-angular": "^4.1.0",
-    "@types/chart.js": "^2.9.4",
+    "@types/chart.js": "^2.9.31",
     "angular-archwizard": "^6.1.0",
     "angularx-qrcode": "^10.0.12",
     "bootstrap": "^4.6.0",
