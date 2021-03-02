@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """Mapping module. The connection classes of data to the respective memory areas (e.g. fields) are created here."""
-from collections import Iterable
+from collections.abc import Iterable
 from typing import List, Iterator, Any
 
 

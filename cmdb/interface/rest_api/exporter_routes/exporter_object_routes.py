@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from flask import abort, jsonify
+from flask import abort, jsonify, current_app
 
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.exporter.config.config_type import ExporterConfig
@@ -49,7 +49,8 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
 
         exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
         exporter = BaseExportWriter(exporter_class, _config)
-        exporter.from_database(user=request_user, permission=AccessControlPermission.READ)
+        exporter.from_database(database_manager=current_app.database_manager, user=request_user,
+                               permission=AccessControlPermission.READ)
     except TypeNotFoundError as e:
         return abort(400, e.message)
     except ModuleNotFoundError as e:
