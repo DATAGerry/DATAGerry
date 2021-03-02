@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
-from typing import Type
 
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
@@ -54,7 +53,7 @@ class APIBlueprint(Blueprint):
 
                             token = parse_authorization_header(request.headers['Authorization'])
                             try:
-                                decrypted_token = TokenValidator().decode_token(token)
+                                decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
                             except ValidationError as err:
                                 return abort(401)
                             try:

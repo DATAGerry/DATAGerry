@@ -2,6 +2,14 @@ import pytest
 
 from cmdb.database.connection import MongoConnector
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.interface.rest_api import create_rest_api
+from cmdb.security.key.generator import KeyGenerator
+from cmdb.security.security import SecurityManager
+from cmdb.security.token.generator import TokenGenerator
+from cmdb.user_management import UserModel
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.user_manager import UserManager
+from tests.fixtures.flask_test_client import RestAPITestClient
 
 
 def pytest_addoption(parser):
@@ -38,3 +46,51 @@ def connector(mongodb_parameters):
 def database_manager(mongodb_parameters):
     host, port, database = mongodb_parameters
     return DatabaseManagerMongo(host, port, database)
+
+
+@pytest.fixture(scope="session")
+def admin_auth_token(database_manager):
+    tg = TokenGenerator(database_manager)
+    token: bytes = tg.generate_token(payload={'user': {
+        'public_id': 1
+    }})
+    return token.decode('UTF-8')
+
+
+@pytest.fixture(scope="session")
+def rest_api(database_manager, admin_auth_token):
+    api = create_rest_api(database_manager, None)
+    api.test_client_class = RestAPITestClient
+
+    with api.test_client(auth=admin_auth_token) as client:
+        yield client
+
+
+@pytest.fixture(scope="session", autouse=True)
+def preset_database(database_manager, database_name):
+    database_manager.drop_database(database_name)
+    from cmdb.user_management import __FIXED_GROUPS__
+    from datetime import datetime
+
+    kg = KeyGenerator(database_manager=database_manager)
+    kg.generate_rsa_keypair()
+    kg.generate_symmetric_aes_key()
+
+    group_manager = GroupManager(database_manager=database_manager)
+    user_manager = UserManager(database_manager=database_manager)
+    security_manager = SecurityManager(database_manager=database_manager)
+
+    for group in __FIXED_GROUPS__:
+        group_manager.insert(group)
+
+    admin_name = 'admin'
+    admin_pass = 'admin'
+    admin_user = UserModel(
+        public_id=1,
+        user_name=admin_name,
+        active=True,
+        group_id=__FIXED_GROUPS__[0].public_id,
+        registration_time=datetime.now(),
+        password=security_manager.generate_hmac(admin_pass),
+    )
+    user_manager.insert(admin_user)
