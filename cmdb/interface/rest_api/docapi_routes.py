@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,32 +12,31 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 import json
 
-from flask import abort, request, jsonify, current_app, Response
+from flask import abort, request, current_app, Response
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.utils.error import CMDBError
-from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.docapi.docapi_base import DocApiManager
-from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate, DocapiTemplateType
+from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManagerGetError, \
     DocapiTemplateManagerInsertError, DocapiTemplateManagerUpdateError, DocapiTemplateManagerDeleteError, \
     DocapiTemplateManager
 from cmdb.user_management import UserModel
 
 with current_app.app_context():
-    docapi_tpl_manager = current_app.docapi_tpl_manager
-    object_manager = current_app.object_manager
+    docapi_tpl_manager = DocapiTemplateManager(current_app.database_manager, current_app.event_queue)
+    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
 
 LOGGER = logging.getLogger(__name__)
 

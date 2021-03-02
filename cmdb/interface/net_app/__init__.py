@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,34 +12,24 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Init module for static routes
 """
-import logging
 from flask_cors import CORS
 
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
-from cmdb.utils.system_config import SystemConfigReader
 
-LOGGER = logging.getLogger(__name__)
-
-system_config_reader = SystemConfigReader()
+from cmdb.interface.net_app.app_routes import app_pages, redirect_index
 
 
-def create_app(event_queue):
-    # Create managers
-    from cmdb.database.managers import DatabaseManagerMongo
-    app_database = DatabaseManagerMongo(
-        **system_config_reader.get_all_values_from_section('Database')
-    )
-
-    app = BaseCmdbApp(__name__, app_database)
+def create_app():
+    app = BaseCmdbApp(__name__)
     CORS(app)
+
     import cmdb
-    from cmdb.interface.net_app.app_routes import app_pages, redirect_index
 
     if cmdb.__MODE__ == 'DEBUG':
         config = app_config['development']

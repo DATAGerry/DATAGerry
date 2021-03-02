@@ -20,9 +20,10 @@ from werkzeug.exceptions import abort
 from flask import current_app, request
 
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
 from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
-from cmdb.framework.managers.log_manager import LogManagerGetError, LogManagerDeleteError, CmdbLogManager
+from cmdb.framework.managers.log_manager import CmdbLogManager
 from cmdb.manager.errors import ManagerIterationError, ManagerGetError, ManagerDeleteError
 from cmdb.interface.route_utils import make_response, insert_request_user
 
@@ -38,8 +39,8 @@ log_blueprint = APIBlueprint('log', __name__)
 
 with current_app.app_context():
     database_manager = current_app.database_manager
-    object_manager = current_app.object_manager
-    log_manager = current_app.log_manager
+    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    log_manager = CmdbLogManager(current_app.database_manager)
 
 
 # CRUD routes

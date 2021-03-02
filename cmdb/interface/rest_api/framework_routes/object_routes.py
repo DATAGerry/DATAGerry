@@ -29,7 +29,7 @@ from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError
+from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.framework.managers.type_manager import TypeManager
@@ -42,22 +42,19 @@ from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management import UserModel, UserManager
+from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
-    object_manager = current_app.object_manager
-    log_manager = current_app.log_manager
-    user_manager = current_app.user_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    log_manager = CmdbLogManager(current_app.database_manager)
+    user_manager = UserManager(current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
+
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -416,7 +413,6 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             params.filter.update({'$match': {}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {}})
-
 
     try:
         referenced_object: CmdbObject = manager.get(public_id, user=request_user,

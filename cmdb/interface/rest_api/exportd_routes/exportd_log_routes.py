@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,17 +12,18 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
+from flask import abort, current_app, jsonify, request
+
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.managers.log_manager import LogManagerDeleteError
-from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdLog, ExportdMetaLog
-
-from flask import abort, current_app, jsonify, request
-
+from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdMetaLog
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse
@@ -37,8 +38,8 @@ LOGGER = logging.getLogger(__name__)
 exportd_log_blueprint = RootBlueprint('exportd_log_rest', __name__, url_prefix='/exportdlog')
 
 with current_app.app_context():
-    exportd_manager = current_app.exportd_manager
-    log_manager = current_app.exportd_log_manager
+    exportd_manager = ExportdJobManagement(current_app.database_manager, current_app.event_queue)
+    log_manager = ExportdLogManager(current_app.database_manager)
 
 
 @exportd_blueprint.route('/logs', methods=['GET', 'HEAD'])

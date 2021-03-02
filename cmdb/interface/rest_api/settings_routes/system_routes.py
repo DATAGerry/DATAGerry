@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import logging
 import sys
 import time
 
@@ -28,11 +27,6 @@ from cmdb.user_management import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader
 
-LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 
