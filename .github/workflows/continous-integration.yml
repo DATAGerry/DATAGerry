@@ -31,10 +31,22 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install pytest
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+          pip install pytest pytest-html coverage pytest-cov
       - name: Test with pytest
-        run: pytest
+        run: pytest tests --html=pytest_report_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}.html --self-contained-html
+      - name: Archive pytest reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-reports
+          path: pytest_report_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}.html
+      - name: Coverage pytest
+        run: pytest tests --cov=cmdb --cov-config=.coveragerc --cov-report=html:cov-html_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}
+      - name: Archive pytest coverage reports
+        uses: actions/upload-artifact@v2
+        with:
+          name: pytest-coverate-reports
+          path: cov-html_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}
 
   lint:
     runs-on: ubuntu-latest
@@ -74,8 +86,39 @@ jobs:
           name: flake8-reports
           path: flake8-report_python-${{ matrix.python-version }}.txt
 
+  coverage:
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [ 3.6, 3.7, 3.8, 3.9, pypy3 ]
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install coverage
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Coverage source
+        run: |
+          coverage run -m cmdb
+          coverage report -m
+          coverage html -d coverage-report_python-${{ matrix.python-version }}
+      - name: Archive coverage results
+        uses: actions/upload-artifact@v2
+        with:
+          name: coverage-reports
+          path: coverage-report_python-${{ matrix.python-version }}
+
   build:
-    needs: [ test, lint ]
+    needs: [ coverage, lint ]
     runs-on: ubuntu-latest
     container: nethinks/datagerry_ci
     steps:
