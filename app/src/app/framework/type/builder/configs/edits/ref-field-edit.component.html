@@ -57,7 +57,9 @@
         <ng-select [items]="filteredTypeList"
                    bindLabel="label"
                    bindValue="public_id"
+                   loadingText='Loading...'
                    [closeOnSelect]="false"
+                   [loading]="typeLoading"
                    (change)="changeSummaryOption($event)"
                    [multiple] = false
                    [(ngModel)]="summary.type_id">

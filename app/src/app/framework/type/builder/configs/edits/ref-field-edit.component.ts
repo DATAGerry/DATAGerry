@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,30 +13,73 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { CmdbType } from '../../../../models/cmdb-type';
+import { CollectionParameters } from '../../../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { ReplaySubject } from 'rxjs';
+import { ToastService } from '../../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-ref-field-edit',
   templateUrl: './ref-field-edit.component.html',
   styleUrls: ['./ref-field-edit.component.scss'],
 })
-export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
+export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
+
+  constructor(private typeService: TypeService, private objectService: ObjectService, private toast: ToastService) {
+    super();
+  }
   @Input() groupList: any;
   @Input() userList: any;
 
   /**
+   * Global un-subscriber for http calls to the rest backend.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
    * Type list for reference selection
    */
-  public typeList: CmdbType[];
+  public typesAPIResponse: APIGetMultiResponse<CmdbType>;
+  public typeList: Array<CmdbType>;
   public filteredTypeList: CmdbType[] = [];
+  public totalTypes: number = 0;
+
+  /**
+   * Total number of Types pages.
+   */
+  public totalTypesPages: number = 0;
+
+  /**
+   * loading indicator?
+   */
+  public typeLoading: boolean = false;
+
+  /**
+   * Begin with first page.
+   */
+  public readonly initPage: number = 1;
+  public page: number = this.initPage;
+
+  /**
+   * Filter query from the table search input.
+   */
+  public filter: string;
+
+  /**
+   * Default sort filter.
+   */
+  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
   /**
    * Nested summaries
@@ -49,15 +92,23 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public objectList: RenderResult[] = [];
   public filteredObjectList: RenderResult[] = [];
 
-  constructor(private typeService: TypeService, private objectService: ObjectService) {
-    super();
-  }
+  /**
+   * Types params
+   */
+  public typesParams: CollectionParameters = {
+    filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+  };
 
   public ngOnInit(): void {
-    this.typeService.getTypeList().subscribe((res: CmdbType[]) => {
-      this.typeList = res;
-    }, (err) => console.log(err)
-    , () => this.prepareSummaries());
+    this.typeLoading = true;
+    this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
+      (apiResponse: APIGetMultiResponse<CmdbType>) => {
+        this.typeList = apiResponse.results as Array<CmdbType>;
+        this.totalTypes = apiResponse.total;
+        this.prepareSummaries();
+        this.typeLoading = false;
+      },
+      (err) => this.toast.error(err)).add(() => this.typeLoading = false);
 
     if (this.data.value !== null && this.data.value !== undefined && this.data.value !== '') {
       this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
@@ -66,6 +117,10 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     }
   }
 
+  /**
+   * Structure of the Summaries depending on the selected types
+   * @private
+   */
   private prepareSummaries() {
     if (this.data.ref_types) {
       if (!Array.isArray(this.data.ref_types)) {
@@ -127,4 +182,13 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
       }
     }
   }
+
+  /**
+   * Destroy subscriptions after closed.
+   */
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
 }

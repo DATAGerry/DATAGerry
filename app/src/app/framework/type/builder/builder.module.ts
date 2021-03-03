@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 import { BuilderComponent } from './builder.component';
 import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ConfigEditComponent } from './configs/config-edit.component';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
@@ -33,11 +33,9 @@ import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.comp
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
-import {NgbDatepickerModule, NgbModalModule, NgbTooltipModule} from '@ng-bootstrap/ng-bootstrap';
-import { RenderElementComponent } from '../../render/render-element/render-element.component';
+import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
-import { AddCategoryModalComponent } from '../../category/components/modals/add-category-modal/add-category-modal.component';
 import { CategoryModule } from '../../category/category.module';
 
 @NgModule({
