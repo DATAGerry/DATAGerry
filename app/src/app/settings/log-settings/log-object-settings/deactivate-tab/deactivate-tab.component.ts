@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,28 +13,28 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { DatePipe } from '@angular/common';
 import { TableComponent } from '../../../../layout/table/table.component';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject} from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import {ActivatedRoute, Data, Router} from "@angular/router";
-import {UserSetting} from "../../../../management/user-settings/models/user-setting";
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../../../management/user-settings/models/user-setting';
 import {
   convertResourceURL,
   UserSettingsService
-} from "../../../../management/user-settings/services/user-settings.service";
-import {FileSaverService} from "ngx-filesaver";
-import {FileService} from "../../../../export/export.service";
-import {UserSettingsDBService} from "../../../../management/user-settings/services/user-settings-db.service";
+} from '../../../../management/user-settings/services/user-settings.service';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from '../../../../export/export.service';
+import { UserSettingsDBService } from '../../../../management/user-settings/services/user-settings-db.service';
 
 
 @Component({
