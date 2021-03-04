@@ -6,11 +6,10 @@ from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.security.security import SecurityManager
-from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
-from tests.fixtures.flask_test_client import RestAPITestClient
+from tests.utils.flask_test_client import RestAPITestClient
 
 
 def pytest_addoption(parser):
@@ -50,20 +49,21 @@ def database_manager(mongodb_parameters):
 
 
 @pytest.fixture(scope="session")
-def admin_auth_token(database_manager):
-    tg = TokenGenerator(database_manager)
-    token: bytes = tg.generate_token(payload={'user': {
-        'public_id': 1
-    }})
-    return token.decode('UTF-8')
+def admin_user():
+    return UserModel(
+        public_id=1,
+        user_name='admin',
+        active=True,
+        group_id=1
+    )
 
 
 @pytest.fixture(scope="session")
-def rest_api(database_manager, admin_auth_token):
+def rest_api(database_manager, admin_user):
     api = create_rest_api(database_manager, None)
     api.test_client_class = RestAPITestClient
 
-    with api.test_client(auth=admin_auth_token) as client:
+    with api.test_client(database_manager=database_manager, default_auth_user=admin_user) as client:
         yield client
 
 

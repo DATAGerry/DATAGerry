@@ -36,6 +36,10 @@ def create_rest_api(database_manager, event_queue):
         config = app_config['development']
         config.APPLICATION_ROOT = '/rest/'
         app.config.from_object(config)
+    elif cmdb.__MODE__ == 'TESTING':
+        config = app_config['testing']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
     else:
         config = app_config['production']
         config.APPLICATION_ROOT = '/rest/'
