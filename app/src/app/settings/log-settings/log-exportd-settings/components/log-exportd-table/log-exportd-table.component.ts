@@ -17,9 +17,9 @@
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { forkJoin, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { NgbActiveModal, NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../../layout/table/table.types';
 import { ExportdJobLogService } from '../../../../services/exportd-job-log.service';
 import { ToastService } from '../../../../../layout/toast/toast.service';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
@@ -28,6 +28,17 @@ import { ExecuteState } from '../../../../models/modes_job.enum';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { TableComponent } from '../../../../../layout/table/table.component';
 import { RenderResult } from '../../../../../framework/models/cmdb-render';
+import { DatePipe } from '@angular/common';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from '../../../../../export/export.service';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../../../management/user-settings/services/user-settings.service';
+import { UserSetting } from '../../../../../management/user-settings/models/user-setting';
+import { UserSettingsDBService } from '../../../../../management/user-settings/services/user-settings-db.service';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-modal-content',
@@ -56,21 +67,31 @@ export class DeleteLogJobModalComponent {
   }
 }
 
+export class ExportdLogsSync {
+  query: Array<any> | any;
+  id: string;
+}
+
 @Component({
   selector: 'cmdb-log-exportd-table',
   templateUrl: './log-exportd-table.component.html',
   styleUrls: ['./log-exportd-table.component.scss']
 })
-export class LogExportdTableComponent implements OnInit, OnDestroy {
+export class LogExportdTableComponent implements OnDestroy {
 
   /**
    * Generic export parameter.
    */
   public query: Array<any>;
+  public id: string;
 
   @Input('query')
-  public set Query(query: Array<any> | any) {
-    this.query = query;
+  public set Query(query: ExportdLogsSync) {
+    this.query = query.query;
+    this.id = query.id;
+    this.initTableStates();
+    this.prepareColumns();
+    this.initTable();
     this.loadLogsFromAPI();
   }
 
@@ -179,10 +200,75 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
    */
   @Output() totalLogsChange: EventEmitter<number> = new EventEmitter<number>();
 
-  constructor(private jobLogService: ExportdJobLogService, private toast: ToastService, private modalService: NgbModal) {
+  /**
+   * Table state settings for saving table state data into the user settings.
+   */
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
   }
 
-  public ngOnInit(): void {
+  constructor(private jobLogService: ExportdJobLogService, private toast: ToastService,
+              private modalService: NgbModal, private datePipe: DatePipe,
+              private fileSaverService: FileSaverService, private fileService: FileService,
+              private route: ActivatedRoute, private router: Router,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+  }
+
+  /**
+   * Table state settings for saving table state data into the user settings.
+   */
+  private initTableStates() {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        if (!userSettingPayloads) {
+          const payloads = (data.userSetting as UserSetting<TableStatePayload>).payloads;
+          const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+          payloads.push(statePayload);
+          const resource: string = convertResourceURL(this.router.url.toString());
+          const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
+          this.indexDB.updateSetting(userSetting);
+
+          this.tableStates = statePayload.tableStates;
+          this.tableStateSubject.next(statePayload.currentState);
+        } else {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
+  }
+
+  /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
+  }
+
+  /**
+   * Creates the necessary table columns
+   * @private
+   */
+  private prepareColumns() {
     this.columns = [
       {
         display: 'Public ID',
@@ -256,7 +342,6 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
         cellClasses: ['actions-buttons']
       }
     ] as Array<Column>;
-    this.loadLogsFromAPI();
   }
 
   /**
@@ -323,6 +408,27 @@ export class LogExportdTableComponent implements OnInit, OnDestroy {
       this.totalLogsChange.emit(this.totalLogs);
       this.loading = false;
     });
+  }
+
+
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.loadLogsFromAPI();
+  }
+
+  public onStateReset(): void {
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.limit = this.initLimit;
+    this.page = this.initPage;
+    this.loadLogsFromAPI();
   }
 
   /**

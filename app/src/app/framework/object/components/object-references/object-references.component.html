@@ -41,7 +41,7 @@
     <cmdb-object-references-table [publicID]="publicID"></cmdb-object-references-table>
   </div>
   <div class="tab-pane fade" *ngFor="let item of referencedTypes" id="{{item.typeName}}">
-    <cmdb-object-references-by-type [initSubject]="clickSubject" [publicID]="publicID" [typeID]="item.typeID"></cmdb-object-references-by-type>
+    <cmdb-object-references-by-type [initSubject]="clickSubject" [publicID]="publicID" [typeID]="item.typeID" [id]="'object-referer-table-by-type-' + item.typeName"></cmdb-object-references-by-type>
   </div>
 </div>
 

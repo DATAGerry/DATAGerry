@@ -99,6 +99,7 @@ const routes: Routes = [
       right: 'base.framework.object.view'
     },
     resolve: {
+      userSetting: UserSettingsResolver,
       object: ObjectViewResolver,
     },
     component: ObjectViewComponent

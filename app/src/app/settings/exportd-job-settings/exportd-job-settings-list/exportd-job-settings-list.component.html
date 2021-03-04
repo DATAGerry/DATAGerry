@@ -6,11 +6,12 @@
 <cmdb-info-box [message]="messageBlock"
                icon="fas fa-sync-alt"
                doc="/docs/admin_guide/exportd.html"></cmdb-info-box>
-<cmdb-table [items]="tasks" [columns]="columns" [page]="page" [sort]="sort" [id]="'exportd-jobs-table'"
-            [stateEnabled]="false" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]"
-            [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit"
-            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)"></cmdb-table>
+<cmdb-table [items]="tasks" [columns]="columns" [page]="page" [sort]="sort" [id]="id" [tableStates]="tableStates"
+            [stateEnabled]="true" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]" [tableState]="tableState"
+            [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit" [toggleable]="false"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" (stateChange)="onStateChange($event)"
+            (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)" (stateSelect)="onStateSelect($event)"
+            (stateReset)="onStateReset()"></cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">

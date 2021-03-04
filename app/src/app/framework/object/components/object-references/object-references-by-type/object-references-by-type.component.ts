@@ -25,8 +25,8 @@ import {
   ViewChild
 } from '@angular/core';
 import {  RenderResult } from '../../../../models/cmdb-render';
-import { ReplaySubject, Subject } from 'rxjs';
-import { Column, Sort, SortDirection } from '../../../../../layout/table/table.types';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../../layout/table/table.types';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { SupportedExporterExtension } from '../../../../../export/export-objects/model/supported-exporter-extension';
 import { ObjectService } from '../../../../services/object.service';
@@ -35,6 +35,13 @@ import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../../export/export.service';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../../../../management/user-settings/models/user-setting';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-object-references-by-type',
@@ -84,6 +91,11 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
   @Input() initSubject: Subject<number>;
 
   /**
+   * The Id used for the table
+   */
+  @Input() id: string;
+
+  /**
    * Table columns definition.
    */
   public columns: Array<Column>;
@@ -127,15 +139,49 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
    */
   public formatList: Array<SupportedExporterExtension> = [];
 
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+
 
   constructor(private objectService: ObjectService, private datePipe: DatePipe,
-              private fileSaverService: FileSaverService, private fileService: FileService) {
+              private fileSaverService: FileSaverService, private fileService: FileService,
+              private route: ActivatedRoute, private router: Router,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>
+              ) {
     this.fileService.callFileFormatRoute().subscribe(data => {
       this.formatList = data;
     });
   }
 
   public ngOnInit(): void {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        if (!userSettingPayloads) {
+          const payloads = (data.userSetting as UserSetting<TableStatePayload>).payloads;
+          const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+          payloads.push(statePayload);
+          const resource: string = convertResourceURL(this.router.url.toString());
+          const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, payloads);
+          this.indexDB.updateSetting(userSetting);
+
+          this.tableStates = statePayload.tableStates;
+          this.tableStateSubject.next(statePayload.currentState);
+        } else {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
+      }
+  });
+
     this.columns = [
       {
         display: 'Active',
@@ -190,10 +236,23 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
     ] as Array<Column>;
     const subscription = this.initSubject.subscribe((event) => {
       if (event === this.typeID) {
+        this.initTable();
         this.loadObjectsFromAPI();
         subscription.unsubscribe();
       }
     });
+
+  }
+
+  /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
   }
 
   /**
@@ -248,6 +307,27 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
    */
   public onPageSizeChange(limit: number): void {
     this.limit = limit;
+    this.loadObjectsFromAPI();
+  }
+
+
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.loadObjectsFromAPI();
+  }
+
+  public onStateReset(): void {
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.limit = this.initLimit;
+    this.page = this.initPage;
     this.loadObjectsFromAPI();
   }
 

@@ -6,12 +6,12 @@
 <cmdb-info-box [message]="INFO_MESSAGE"
                icon="fas fa-cube"
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
-<cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="'type-list-table'"
-            [stateEnabled]="false" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
+<cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="id" [tableState]="tableState"
+            [stateEnabled]="true" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
             [totalItems]="totalTypes" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)"></cmdb-table>
+            (searchChange)="onSearchChange($event)" (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"></cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">

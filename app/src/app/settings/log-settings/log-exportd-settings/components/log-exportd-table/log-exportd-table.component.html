@@ -1,9 +1,11 @@
-<cmdb-table [items]="logs" [columns]="columns" [page]="page" [sort]="sort" [id]="'exportd-logs-table'"
-            [stateEnabled]="false" [emptyMessage]="'No logs were found!'" [customButtons]="[deleteButton]"
+<cmdb-table [items]="logs" [columns]="columns" [page]="page" [sort]="sort" [id]="id"
+            [stateEnabled]="true" [emptyMessage]="'This object is not referenced!'" [searchEnabled]="false"
             [totalItems]="totalLogs" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
+            [customButtons]="[deleteButton]" [tableState]="tableState"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)"></cmdb-table>
+            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()">
+</cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">

@@ -18,6 +18,11 @@
 
 import { Component, EventEmitter, Output } from '@angular/core';
 
+export class ExportdLogsSync {
+  query: Array<any> | any;
+  id: string;
+}
+
 @Component({
   selector: 'cmdb-exportdjob-activate-tab',
   templateUrl: './activate-exportd-tab.component.html',
@@ -30,10 +35,13 @@ export class ActivateExportdTabComponent {
    */
   @Output() totalLogsChange: EventEmitter<number> = new EventEmitter<number>();
 
-  public query = [
-    { $match: { action: { $ne: 3 } } },
-    { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
-    { $match: { jobs: { $ne: { $size: 0 } } } },
-    { $project: { job: 0 } }];
+  public query: ExportdLogsSync = {
+    query: [
+      { $match: { action: { $ne: 3 } } },
+      { $lookup: { from: 'exportd.jobs', localField: 'job_id', foreignField: 'public_id', as: 'job' } },
+      { $match: { jobs: { $ne: { $size: 0 } } } },
+      { $project: { job: 0 } }],
+    id: 'exportd-logs-table-active'
+  };
 
 }

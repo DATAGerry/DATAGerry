@@ -23,6 +23,7 @@ import { CategoryAddComponent } from './category-add/category-add.component';
 import { CategoryEditComponent } from './category-edit/category-edit.component';
 import { CmdbMode } from '../modes.enum';
 import { CategoryViewComponent } from './category-view/category-view.component';
+import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
@@ -32,6 +33,9 @@ const routes: Routes = [
       breadcrumb: 'List',
       right: 'base.framework.category.view',
       mode: CmdbMode.View
+    },
+    resolve: {
+      userSetting: UserSettingsResolver
     },
     component: CategoryComponent
   },

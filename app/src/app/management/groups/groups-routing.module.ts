@@ -26,6 +26,7 @@ import { RightsResolver } from '../resolvers/rights-resolver.service';
 import { GroupDeleteComponent } from './group-delete/group-delete.component';
 import { PermissionGuard } from '../../auth/guards/permission.guard';
 import { GroupAclComponent } from './group-acl/group-acl.component';
+import { UserSettingsResolver } from '../user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
@@ -34,6 +35,9 @@ const routes: Routes = [
     data: {
       breadcrumb: 'List',
       right: 'base.user-management.group.view'
+    },
+    resolve: {
+      userSetting: UserSettingsResolver
     },
     component: GroupsComponent
   },
