@@ -28,7 +28,7 @@ import { TableComponent } from '../../../../layout/table/table.component';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ActivatedRoute, Data, Router } from '@angular/router';
-import { UserSetting} from '../../../../management/user-settings/models/user-setting';
+import { UserSetting } from '../../../../management/user-settings/models/user-setting';
 import {
   convertResourceURL,
   UserSettingsService
@@ -132,6 +132,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.resetCollectionParameters();
     this.setColumns();
+    this.initTable();
     this.loadDeleted();
   }
 
@@ -143,6 +144,17 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         this.deleteLogList = apiResponse.results;
         this.total = apiResponse.total;
     });
+  }
+
+  /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
   }
 
   private resetCollectionParameters(): void {

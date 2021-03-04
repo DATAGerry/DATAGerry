@@ -134,6 +134,7 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.resetCollectionParameters();
     this.setColumns();
+    this.initTable();
     this.loadExists();
   }
 
@@ -145,6 +146,17 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
         this.activeLogs = apiResponse.results;
         this.total = apiResponse.total;
     });
+  }
+
+  /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
   }
 
   private resetCollectionParameters(): void {
