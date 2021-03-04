@@ -76,6 +76,14 @@ class ExternalFillError(CMDBError):
         self.message = 'Href link do not fit with inputs: {}, error: {}'.format(inputs, error)
 
 
+class TypeReferenceLineFillError(CMDBError):
+    """Error if summary line of TypeReferences could not filled with input data"""
+
+    def __init__(self, inputs, error):
+        super().__init__()
+        self.message = 'Type reference summary line do not fit with inputs: {}, error: {}'.format(inputs, error)
+
+
 class FieldInitError(CMDBError):
     """Error if field could not be initialized"""
 

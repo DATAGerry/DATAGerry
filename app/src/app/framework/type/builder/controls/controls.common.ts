@@ -35,8 +35,8 @@ export interface ControlsContent {
   groups: number[];
   users: number[];
   value: any;
-  optional: any;
-
+  optional?: any;
+  summaries?: any;
 }
 
 export interface StructureContent {

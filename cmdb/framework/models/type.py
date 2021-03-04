@@ -21,7 +21,7 @@ from dateutil.parser import parse
 from typing import List
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError
+from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError, TypeReferenceLineFillError
 from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
 from cmdb.utils.error import CMDBError
@@ -54,32 +54,85 @@ class TypeSummary:
         }
 
 
-class TypeSection:
-    __slots__ = 'type', 'name', 'label', 'fields'
+class TypeReference:
+    __slots__ = 'type_id', 'label', 'summaries', 'line', 'prefix', 'icon'
 
-    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
-        self.type = type
-        self.name = name
-        self.label = label or self.name.title()
-        self.fields = fields or []
+    def __init__(self, type_id: int, label: str, line: str = None,
+                 prefix: bool = False, icon = None, summaries: list = None):
+        self.type_id = type_id
+        self.label = label or ''
+        self.summaries = summaries or []
+        self.line = line
+        self.icon = icon
+        self.prefix = prefix
 
     @classmethod
-    def from_data(cls, data: dict) -> "TypeSection":
+    def from_data(cls, data: dict) -> "TypeReference":
         return cls(
-            type=data.get('type'),
-            name=data.get('name'),
+            type_id=data.get('type_id'),
+            line=data.get('line'),
             label=data.get('label', None),
-            fields=data.get('fields', None)
+            summaries=data.get('summaries', None),
+            icon=data.get('prefix', False),
+            prefix=data.get('icon', None)
         )
 
     @classmethod
-    def to_json(cls, instance: "TypeSection") -> dict:
+    def to_json(cls, instance: "TypeReference") -> dict:
         return {
-            'type': instance.type,
-            'name': instance.name,
+            'type_id': instance.type_id,
+            'line': instance.line,
             'label': instance.label,
-            'fields': instance.fields
+            'summaries': instance.summaries,
+            'icon': instance.icon,
+            'prefix': instance.prefix
         }
+
+    def has_prefix(self):
+        """
+        check if reference has a prefix
+        """
+        if self.prefix:
+            return True
+        return False
+
+    def has_icon(self):
+        """
+        check if reference has a icon
+        """
+        if self.prefix:
+            return True
+        return False
+
+    def line_requires_fields(self):
+        """
+        the type of arguments passed to it and formats it according to the format codes defined in the string
+        checks if the line requires field informations.
+        Examples:
+            example {} -> True
+            example -> False
+        Returns:
+            bool
+        """
+        import re
+        if re.search('{.*?}', self.line):
+            return True
+        return False
+
+    def has_summaries(self):
+        """
+        check if type references has summaries definitions
+        """
+        if len(self.summaries) > 0:
+            return True
+        return False
+
+    def fill_line(self, inputs):
+        """fills the line brackets with data"""
+        try:
+            self.line = self.line.format(*inputs)
+        except Exception as e:
+            raise TypeReferenceLineFillError(inputs, e)
 
 
 class TypeExternalLink:
@@ -149,6 +202,34 @@ class TypeExternalLink:
             self.href = self.href.format(*inputs)
         except Exception as e:
             raise ExternalFillError(inputs, e)
+
+
+class TypeSection:
+    __slots__ = 'type', 'name', 'label', 'fields'
+
+    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
+        self.type = type
+        self.name = name
+        self.label = label or self.name.title()
+        self.fields = fields or []
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeSection":
+        return cls(
+            type=data.get('type'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            fields=data.get('fields', None)
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeSection") -> dict:
+        return {
+            'type': instance.type,
+            'name': instance.name,
+            'label': instance.label,
+            'fields': instance.fields
+        }
 
 
 class TypeRenderMeta:
@@ -343,6 +424,22 @@ class TypeModel(CmdbDAO):
 
     def has_summaries(self):
         return self.render_meta.summary.has_fields()
+
+    def get_nested_summaries(self):
+        return next((x['summaries'] for x in self.get_fields() if x['type'] == 'ref' and 'summaries' in x), [])
+
+    def has_nested_prefix(self, nested_summaries):
+        return next((x['prefix'] for x in nested_summaries if x['type_id'] == self.public_id), False)
+
+    def get_nested_summary_fields(self, nested_summaries):
+        _fields = next((x['fields'] for x in nested_summaries if x['type_id'] == self.public_id), [])
+        complete_field_list = []
+        for field_name in _fields:
+            complete_field_list.append(self.get_field(field_name))
+        return TypeSummary(fields=complete_field_list).fields
+
+    def get_nested_summary_line(self, nested_summaries):
+        return next((x['line'] for x in nested_summaries if x['type_id'] == self.public_id), None)
 
     def get_summary(self):
         complete_field_list = []

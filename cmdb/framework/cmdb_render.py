@@ -20,7 +20,7 @@ Object/Type render
 from typing import List, Union
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
@@ -35,7 +35,7 @@ import logging
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection, TypeReference
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import UserModel, UserManager
 from dateutil.parser import parse
@@ -238,11 +238,10 @@ class CmdbRender:
         return field_map
 
     def __merge_references(self, current_field):
-        reference = {
-            'summaries': [],
-            'type_label': None,
-            'icon': None
-        }
+
+        # Initialise TypeReference
+        reference = TypeReference(type_id=0, label='', line='')
+
         if current_field['value']:
             try:
                 ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
@@ -250,24 +249,46 @@ class CmdbRender:
             except AccessDeniedError as err:
                 return err.message
             except ObjectManagerGetError:
-                return reference
+                return TypeReference.to_json(reference)
 
             try:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
-                reference['type_label'] = ref_type.label
-                reference['icon'] = ref_type.get_icon()
+
+                _summary_fields = []
+                _nested_summaries = self.type_instance.get_nested_summaries()
+                _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
+                _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
+
+                reference.type_id = ref_type.get_public_id()
+                reference.label = ref_type.label
+                reference.icon = ref_type.get_icon()
+                reference.prefix = ref_type.has_nested_prefix(_nested_summaries)
+
+                _summary_fields = _nested_summary_fields \
+                    if (_nested_summary_line or _nested_summary_fields) else ref_type.get_summary().fields
 
                 summaries = []
-                summary_fields = ref_type.get_summary().fields
-                for field in summary_fields:
+                summary_values = []
+                for field in _summary_fields:
                     summary_value = str([x for x in ref_object.fields if x['name'] == field['name']][0]['value'])
-                    if summary_value:
-                        summaries.append({"value": summary_value, "type": field.get('type')})
-                reference['summaries'] = summaries
-            except ObjectManagerGetError:
-                return reference
+                    summaries.append({"value": summary_value, "type": field.get('type')})
+                    summary_values.append(summary_value)
+                reference.summaries = summaries
 
-        return reference
+                try:
+                    # fill the summary line with summaries value data
+                    reference.line = _nested_summary_line
+                    if not reference.line_requires_fields():
+                        reference.summaries = []
+                    if _nested_summary_line:
+                        reference.fill_line(summary_values)
+                except (TypeReferenceLineFillError, Exception):
+                    pass
+
+            except ObjectManagerGetError:
+                return TypeReference.to_json(reference)
+
+        return TypeReference.to_json(reference)
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
@@ -277,15 +298,18 @@ class CmdbRender:
             render_result.summaries = summary_list
             render_result.summary_line = f'{self.type_instance.get_label()} #{self.object_instance.public_id}  '
             return render_result
+
         summary_list = self.type_instance.get_summary().fields
         render_result.summaries = summary_list
         first = True
+
         for line in summary_list:
             if first:
                 summary_line += f'{line["value"]}'
                 first = False
             else:
                 summary_line += f' | {line["value"]}'
+
         render_result.summary_line = summary_line
         return render_result
 

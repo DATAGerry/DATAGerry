@@ -51,8 +51,7 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
   public ngOnInit(): void {
 
     this.data.default = parseInt(this.data.default, 10);
-    if (this.mode === CmdbMode.View) {
-    } else if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
+    if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
       if (this.data.ref_types) {
         if (this.data.ref_types) {
           if (!Array.isArray(this.data.ref_types)) {
