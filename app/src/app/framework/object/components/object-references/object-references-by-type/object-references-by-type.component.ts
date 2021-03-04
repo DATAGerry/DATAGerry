@@ -25,8 +25,8 @@ import {
   ViewChild
 } from '@angular/core';
 import {  RenderResult } from '../../../../models/cmdb-render';
-import {BehaviorSubject, ReplaySubject, Subject} from 'rxjs';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../../../layout/table/table.types';
+import { BehaviorSubject, ReplaySubject, Subject } from 'rxjs';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../../layout/table/table.types';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { SupportedExporterExtension } from '../../../../../export/export-objects/model/supported-exporter-extension';
 import { ObjectService } from '../../../../services/object.service';
@@ -35,13 +35,13 @@ import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../../../../../export/export.service';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import {ActivatedRoute, Data, Router} from "@angular/router";
-import {UserSetting} from "../../../../../management/user-settings/models/user-setting";
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../../../../management/user-settings/models/user-setting';
 import {
   convertResourceURL,
   UserSettingsService
-} from "../../../../../management/user-settings/services/user-settings.service";
-import {UserSettingsDBService} from "../../../../../management/user-settings/services/user-settings-db.service";
+} from '../../../../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-object-references-by-type',
@@ -78,7 +78,7 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
   /**
    * ID of the referenced object.
    */
-  @Input() publicID: number = undefined;
+  @Input() publicID: number;
 
   /**
    * ID of the type for which the results will be filtered

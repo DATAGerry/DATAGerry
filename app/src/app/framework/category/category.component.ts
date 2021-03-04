@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -21,15 +21,15 @@ import { BehaviorSubject, forkJoin, Observable, ReplaySubject } from 'rxjs';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
 import { CategoryService } from '../services/category.service';
 import { CmdbMode } from '../modes.enum';
-import {ActivatedRoute, Data, Router} from '@angular/router';
+import { ActivatedRoute, Data, Router } from '@angular/router';
 import { SidebarService } from '../../layout/services/sidebar.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
-import {UserSetting} from "../../management/user-settings/models/user-setting";
-import {convertResourceURL, UserSettingsService} from "../../management/user-settings/services/user-settings.service";
-import {UserSettingsDBService} from "../../management/user-settings/services/user-settings-db.service";
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../layout/table/table.types';
+import { UserSetting } from '../../management/user-settings/models/user-setting';
+import { convertResourceURL, UserSettingsService } from '../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-category',
