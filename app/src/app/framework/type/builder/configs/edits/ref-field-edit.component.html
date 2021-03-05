@@ -67,7 +67,8 @@
       </td>
       <td>
         <ng-template #previewContent>
-          <b>Show type icon and label</b><i class="{{summary?.icon}}"></i> {{summary?.label}} #
+          <b>Show type icon and label</b><br>
+          <i class="{{summary?.icon}}"></i> {{summary?.label}} #{{summary?.type_id}}
         </ng-template>
         <div class="d-flex justify-content-center">
           <input type="checkbox" value="{{summary.prefix}}"

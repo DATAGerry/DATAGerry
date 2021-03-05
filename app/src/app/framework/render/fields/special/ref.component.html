@@ -23,7 +23,7 @@
                 </ng-container>
                 <ng-template #refLine>
                   <ng-container *ngIf="data?.reference?.prefix">
-                    <i class="{{data?.reference?.icon}}"></i> {{data?.reference?.label}} #
+                    <i class="{{data?.reference?.icon}}"></i> {{data?.reference?.label}} #{{data?.reference?.type_id}}
                   </ng-container>
                   <span>{{data?.reference?.line}}</span>
                 </ng-template>
