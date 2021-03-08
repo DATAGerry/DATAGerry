@@ -67,7 +67,7 @@
     "@types/jasminewd2": "^2.0.8",
     "@types/jquery": "^3.3.31",
     "@types/node": "^12.0.12",
-    "codelyzer": "^5.2.0",
+    "codelyzer": "^6.0.1",
     "jasmine-core": "~3.5.0",
     "jasmine-spec-reporter": "~5.0.0",
     "karma": "~5.0.0",
