@@ -23,7 +23,7 @@
         </div>
         <ng-container *ngIf="searchResultList.total_results > 0">
           <cmdb-search-result *ngFor="let result of searchResultList.results" [searchResult]="result">
-            <hr />
+            <hr/>
           </cmdb-search-result>
         </ng-container>
       </div>
@@ -38,18 +38,26 @@
       </div>
       <ng-container *ngIf="referenceResultList.total_results > 0">
         <cmdb-search-result *ngFor="let result of referenceResultList.results" [searchResult]="result">
-          <hr />
+          <hr/>
         </cmdb-search-result>
       </ng-container>
     </div>
   </div>
   <div class="col-md-12">
     <div class="row">
-      <div [ngClass]="resolve.value ? 'col-md-6' : 'col-md-12'">
-        <jw-pagination #paginationComponent [pageSize]="limit" [items]="maxNumberOfSites"
-                       (changePage)="onChangePage($event)"></jw-pagination>
+      <div class="col-2">
+        <form [formGroup]="resultSizeForm" class="form-inline">
+          <label class="mr-1">Show:</label>
+          <select formControlName="size" class="custom-select custom-select-sm" title="table-page-size-changer">
+            <option [ngValue]="size.value" *ngFor="let size of defaultResultSizeList">{{size.label}}</option>
+          </select>
+        </form>
       </div>
-      <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-6' : 'd-none'"
+      <div [ngClass]="resolve.value ? 'col-md-5' : 'col-md-10'">
+        <table-pagination [pageSize]="limit" [totalItems]="searchResultList?.total_results"
+                          (pageChange)="onChangePage($event)"></table-pagination>
+      </div>
+      <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-5' : 'd-none'"
            class="bg-light border-left border-info">
         <jw-pagination #paginationComponentRef [pageSize]="limitRef" [items]="maxNumberOfSitesRef"
                        (changePage)="onChangePageRef($event)"></jw-pagination>

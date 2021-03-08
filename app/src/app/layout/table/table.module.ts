@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -42,9 +42,10 @@ import { TableStateComponent } from './components/table-states/table-state.compo
     TablePaginationComponent, TableFootDirective, TableHeadDirective, TableDirective,
     TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent,
     TableRowDirective, TableColumnToggleComponent, TableLoadingComponent, TableStateComponent],
-  exports: [
-    TableComponent
-  ],
+    exports: [
+        TableComponent,
+        TablePaginationComponent
+    ],
   imports: [
     CommonModule,
     FormsModule,

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
@@ -26,6 +26,7 @@ import { HttpParams } from '@angular/common/http';
 import { JwPaginationComponent } from 'jw-angular-pagination';
 import { takeUntil } from 'rxjs/operators';
 import { ProgressSpinnerService } from '../layout/progress/progress-spinner.service';
+import { PageLengthEntry } from '../layout/table/components/table-page-size/table-page-size.component';
 
 @Component({
   templateUrl: './search.component.html',
@@ -73,7 +74,6 @@ export class SearchComponent implements OnInit, OnDestroy {
   public maxNumberOfSitesRef: number[];
 
 
-  @ViewChild('paginationComponent') pagination: JwPaginationComponent;
   @ViewChild('paginationComponentRef') paginationRef: JwPaginationComponent;
   private initSearchRef: boolean = true;
   private initSearch: boolean = true;
@@ -112,6 +112,27 @@ export class SearchComponent implements OnInit, OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
+   * A preset of default page sizes.
+   * @private
+   */
+  public readonly defaultResultSizeList: Array<PageLengthEntry> =
+    [
+      { label: '10', value: 10 },
+      { label: '25', value: 25 },
+      { label: '50', value: 50 },
+      { label: '100', value: 100 },
+      { label: '200', value: 200 },
+      { label: '500', value: 500 }
+    ];
+
+  /**
+   * Page size select form group.
+   */
+  public resultSizeForm: FormGroup = new FormGroup({
+    size: new FormControl(this.limit),
+  });
+
+  /**
    * Constructor of SearchComponent
    *
    * @param route Current activated route.
@@ -132,6 +153,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       if (params.has('resolve')) {
         this.resolve.next(JSON.parse(params.get('resolve')));
       }
+      if (params.has('limit')) {
+        this.limit = (+JSON.parse(params.get('limit')));
+      }
       this.initSearchRef = true;
       this.initSearch = true;
       this.initFilter = true;
@@ -141,12 +165,23 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change) => {
       this.referencesSearch(change);
     });
+    this.resultLength.valueChanges.pipe(takeUntil(this.subscriber))
+      .subscribe((size: number) => {
+        this.limit = size;
+        this.onSearch();
+      });
+  }
+
+  /**
+   * Get the form control of the size selection.
+   */
+  public get resultLength(): FormControl {
+    return this.resultSizeForm.get('size') as FormControl;
   }
 
   /**
    * Trigger the resolve search api call
    */
-
   public referencesSearch(change: boolean = false) {
     if (change && this.searchResultList) {
       this.spinner.show('app', 'Searching...');
@@ -183,16 +218,17 @@ export class SearchComponent implements OnInit, OnDestroy {
         {
           $match: {
             $and: [
-              {'type.fields.type': 'ref'},
-              { $or: [
-                {'type.fields.ref_types': {$in : typIDs }}]
+              { 'type.fields.type': 'ref' },
+              {
+                $or: [
+                  { 'type.fields.ref_types': { $in: typIDs } }]
               }
             ]
           }
         },
         {
           $match: {
-            'fields.value': {$in : objIDs }
+            'fields.value': { $in: objIDs }
           }
         }
       ];
@@ -202,10 +238,8 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.searchService.getSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber))
         .subscribe((results: SearchResultList) => {
             this.referenceResultList = results;
-            if (this.initSearchRef && this.referenceResultList) {
-              this.maxNumberOfSitesRef = Array.from({length: (this.referenceResultList.total_results)}, (v, k) => k + 1);
-              this.initSearchRef = false;
-            }
+            this.maxNumberOfSitesRef = Array.from({ length: (this.referenceResultList.total_results) }, (v, k) => k + 1);
+
             if (!this.referenceResultList || this.referenceResultList.total_results === 0) {
               this.resolve.next(false);
             }
@@ -227,11 +261,11 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.searchResultList = results;
         this.filterResultList = this.initFilter && results !== null ? results.groups : this.filterResultList;
         if (this.initSearch) {
-          this.maxNumberOfSites = Array.from({length: (this.searchResultList.total_results)}, (v, k) => k + 1);
+          this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
           this.initSearch = false;
           this.initFilter = false;
         }
-    }, (error => console.log(error)),
+      }, (error => console.log(error)),
       () => {
         this.initSearchRef = true;
         this.resolve.next(true);
@@ -267,11 +301,9 @@ export class SearchComponent implements OnInit, OnDestroy {
    * @param event: Data from the change event.
    */
   public onChangePage(event): void {
-    if (this.currentPage !== this.pagination.pager.currentPage) {
-      this.currentPage = this.pagination.pager.currentPage;
-      this.skip = (this.currentPage - 1) * this.limit;
-      this.onSearch();
-    }
+    this.currentPage = event;
+    this.skip = (this.currentPage - 1) * this.limit;
+    this.onSearch();
 
   }
 
