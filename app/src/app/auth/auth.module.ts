@@ -24,9 +24,10 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { InlineSVGModule } from 'ng-inline-svg';
 import { PermissionLinkDirective } from './directives/permission-link.directive';
 import { PermissionGuard } from './guards/permission.guard';
+import { SessionTimeoutNotificationModalComponent } from './modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
 
 @NgModule({
-  declarations: [LoginComponent, PermissionLinkDirective],
+  declarations: [LoginComponent, PermissionLinkDirective, SessionTimeoutNotificationModalComponent],
   exports: [
     PermissionLinkDirective
   ],

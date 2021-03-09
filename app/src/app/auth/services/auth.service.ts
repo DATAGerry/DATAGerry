@@ -139,8 +139,8 @@ export class AuthService<T = any> implements ApiService {
     this.indexDB.clear('user-settings').subscribe();
     localStorage.removeItem('current-user');
     localStorage.removeItem('access-token');
-    this.currentUserSubject = new BehaviorSubject<User>(null);
-    this.currentUserTokenSubject = new BehaviorSubject<Token>(null);
+    this.currentUserSubject = new BehaviorSubject<User>(undefined);
+    this.currentUserTokenSubject = new BehaviorSubject<Token>(undefined);
     this.permissionService.clearUserRightStorage();
 
     // Close Intro-Modal if open
@@ -150,6 +150,7 @@ export class AuthService<T = any> implements ApiService {
     if (this.stepByStepModal !== undefined) {
       this.stepByStepModal.close();
     }
+    this.router.navigate(['/auth']);
   }
 
 
