@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
@@ -121,8 +121,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       { label: '25', value: 25 },
       { label: '50', value: 50 },
       { label: '100', value: 100 },
-      { label: '200', value: 200 },
-      { label: '500', value: 500 }
+      { label: '200', value: 200 }
     ];
 
   /**
@@ -134,13 +133,9 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   /**
    * Constructor of SearchComponent
-   *
-   * @param route Current activated route.
-   * @param searchService API Search service.
-   * @param spinner
    */
   constructor(private route: ActivatedRoute, private searchService: SearchService,
-              private spinner: ProgressSpinnerService) {
+              private spinner: ProgressSpinnerService, private router: Router) {
     this.searchInputForm = new FormGroup({
       input: new FormControl('', Validators.required)
     });
@@ -155,6 +150,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       }
       if (params.has('limit')) {
         this.limit = (+JSON.parse(params.get('limit')));
+        this.resultSizeForm.get('size').setValue(this.limit);
       }
       this.initSearchRef = true;
       this.initSearch = true;
@@ -165,9 +161,17 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change) => {
       this.referencesSearch(change);
     });
+
     this.resultLength.valueChanges.pipe(takeUntil(this.subscriber))
       .subscribe((size: number) => {
         this.limit = size;
+        this.router.navigate(
+          [],
+          {
+            relativeTo: this.route,
+            queryParams: { limit: this.limit },
+            queryParamsHandling: 'merge'
+          });
         this.onSearch();
       });
   }
@@ -182,6 +186,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   /**
    * Trigger the resolve search api call
    */
+
   public referencesSearch(change: boolean = false) {
     if (change && this.searchResultList) {
       this.spinner.show('app', 'Searching...');
@@ -238,8 +243,10 @@ export class SearchComponent implements OnInit, OnDestroy {
       this.searchService.getSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber))
         .subscribe((results: SearchResultList) => {
             this.referenceResultList = results;
-            this.maxNumberOfSitesRef = Array.from({ length: (this.referenceResultList.total_results) }, (v, k) => k + 1);
-
+            if (this.initSearchRef && this.referenceResultList) {
+              this.maxNumberOfSitesRef = Array.from({ length: (this.referenceResultList.total_results) }, (v, k) => k + 1);
+              this.initSearchRef = false;
+            }
             if (!this.referenceResultList || this.referenceResultList.total_results === 0) {
               this.resolve.next(false);
             }
