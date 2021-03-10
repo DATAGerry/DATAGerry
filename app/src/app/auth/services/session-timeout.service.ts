@@ -168,17 +168,8 @@ export class SessionTimeoutService implements OnDestroy {
     this.notificationModalRef.componentInstance.remainingTime$ = this.sessionTimeoutRemaining;
     this.notificationModalRef.result.then(
       (result) => {
-        if (result.password) {
-          const username = this.authService.currentUserValue.user_name;
-          this.authService.login(username, result.password).pipe(takeUntil(this.subscriber)).subscribe(
-            () => {
-              this.toast.success('Session renewed!');
-            },
-            () => {
-              this.toast.error('Something went wrong during authentication. Maybe the password was wrong.')
-              this.displayLogoutWarning();
-            }
-          );
+        if (result.renewed) {
+          this.toast.success('Session renewed!');
         } else {
           this.displayLogoutWarning();
         }

@@ -21,6 +21,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'cmdb-session-timeout-notification-modal',
@@ -50,7 +51,12 @@ export class SessionTimeoutNotificationModalComponent implements OnInit, OnDestr
    */
   public form: FormGroup;
 
-  constructor(public activeModal: NgbActiveModal) {
+  /**
+   * Error
+   */
+  public error: string;
+
+  constructor(public activeModal: NgbActiveModal, private authService: AuthService) {
     this.form = new FormGroup({
       password: new FormControl('', Validators.required)
     });
@@ -68,7 +74,15 @@ export class SessionTimeoutNotificationModalComponent implements OnInit, OnDestr
    */
   public onRenew(): void {
     if (this.form.valid) {
-      this.activeModal.close({ password: this.password });
+      const username = this.authService.currentUserValue.user_name;
+      this.authService.login(username, this.password).pipe(takeUntil(this.subscriber)).subscribe(
+        () => {
+          this.activeModal.close({renewed: true});
+        },
+        () => {
+          this.error = 'Could not authenticate, given password was wrong.';
+        }
+      );
     }
   }
 
