@@ -21,6 +21,7 @@ import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api
@@ -45,13 +46,16 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
     def _run(self):
         # get queue for sending events
         event_queue = self._event_manager.get_send_queue()
+        database_manager = DatabaseManagerMongo(
+            **SystemConfigReader().get_all_values_from_section('Database')
+        )
 
         # get WSGI app
         app = DispatcherMiddleware(
-            app=create_app(event_queue),
+            app=create_app(),
             mounts={
-                '/docs': create_docs_server(event_queue),
-                '/rest': create_rest_api(event_queue)
+                '/docs': create_docs_server(),
+                '/rest': create_rest_api(database_manager, event_queue)
             }
         )
 

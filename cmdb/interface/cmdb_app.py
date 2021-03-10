@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,46 +12,23 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from queue import Queue
 from flask import Flask
-import logging
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.managers.log_manager import CmdbLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.media_library.media_file_manager import MediaFileManagement
-from cmdb.user_management import UserManager
-from cmdb.security.security import SecurityManager
-
-LOGGER = logging.getLogger(__name__)
 
 
 class BaseCmdbApp(Flask):
 
     def __init__(self, import_name: str,
-                 database_manager: DatabaseManagerMongo,
-                 docapi_tpl_manager: DocapiTemplateManager = None,
-                 exportd_manager: ExportdJobManagement = None,
-                 exportd_log_manager: ExportdLogManager = None,
-                 object_manager: CmdbObjectManager = None,
-                 media_file_manager: MediaFileManagement = None,
-                 log_manager: CmdbLogManager = None,
-                 user_manager: UserManager = None,
-                 security_manager: SecurityManager = None):
+                 database_manager: DatabaseManagerMongo = None,
+                 event_queue: Queue = None):
         self.database_manager: DatabaseManagerMongo = database_manager
-        self.docapi_tpl_manager: DocapiTemplateManager = docapi_tpl_manager
-        self.object_manager: CmdbObjectManager = object_manager
-        self.exportd_manager: ExportdJobManagement = exportd_manager
-        self.exportd_log_manager: ExportdLogManager = exportd_log_manager
-        self.media_file_manager: MediaFileManagement = media_file_manager
-        self.log_manager: CmdbLogManager = log_manager
-        self.user_manager: UserManager = user_manager
-        self.security_manager: SecurityManager = security_manager
+        self.event_queue: Queue = event_queue
         self.temp_folder: str = '/tmp/'
+
         super(BaseCmdbApp, self).__init__(import_name)
 
     def register_multi_blueprint(self, blueprint, multi_prefix: [str], **options):

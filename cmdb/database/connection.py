@@ -89,8 +89,11 @@ class MongoConnector(Connector[MongoClient]):
     PyMongo (MongoDB) implementation from connector
     """
 
-    def __init__(self, host: str, port: int, database_name: str, client_options: dict):
-        client = MongoClient(host=host, port=int(port), connect=False, **client_options)
+    def __init__(self, host: str, port: int, database_name: str, client_options: dict = None):
+        if client_options:
+            client = MongoClient(host=host, port=int(port), connect=False, **client_options)
+        else:
+            client = MongoClient(host=host, port=int(port), connect=False)
         self.database: Database = client.get_database(database_name)
         super(MongoConnector, self).__init__(client, host, port)
 

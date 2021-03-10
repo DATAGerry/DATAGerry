@@ -108,7 +108,7 @@ def user_has_right(required_right: str) -> bool:
 
     token = parse_authorization_header(request.headers['Authorization'])
     try:
-        decrypted_token = TokenValidator().decode_token(token)
+        decrypted_token = TokenValidator(database_manager=current_app.database_manager).decode_token(token)
     except ValidationError as err:
         return abort(401)
     try:
@@ -137,7 +137,8 @@ def insert_request_user(func):
 
         token = parse_authorization_header(request.headers['Authorization'])
         try:
-            decrypted_token = TokenValidator().decode_token(token)
+            with current_app.app_context():
+                decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
         except ValidationError as err:
             return abort(401)
         try:
@@ -235,9 +236,10 @@ def parse_authorization_header(header):
 
     if auth_type == b"bearer":
         try:
-            tv = TokenValidator()
-            decoded_token = tv.decode_token(auth_info)
-            tv.validate_token(decoded_token)
+            with current_app.app_context():
+                tv = TokenValidator(current_app.database_manager)
+                decoded_token = tv.decode_token(auth_info)
+                tv.validate_token(decoded_token)
             return auth_info
         except Exception:
             return None

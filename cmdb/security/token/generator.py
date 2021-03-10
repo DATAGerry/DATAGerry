@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,12 +12,12 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 from datetime import datetime, timedelta
 
-from authlib.jose import jwt, JWT
+from authlib.jose import jwt
 
 from cmdb import __title__
 from cmdb.database.managers import DatabaseManagerMongo
@@ -25,7 +25,6 @@ from cmdb.security.auth import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
 from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_config import SystemConfigReader
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,14 +38,11 @@ class TokenGenerator:
     }
 
     def __init__(self, database_manager: DatabaseManagerMongo = None):
-        self.key_holder = KeyHolder()
+        self.key_holder = KeyHolder(database_manager)
         self.header = {
             'alg': 'RS512'
         }
-        self.database_manager = database_manager or DatabaseManagerMongo(
-            **SystemConfigReader().get_all_values_from_section('Database')
-        )
-
+        self.database_manager = database_manager
         self.auth_module = AuthModule(SystemSettingsReader(self.database_manager).get_all_values_from_section(
             'auth', default=AuthModule.__DEFAULT_SETTINGS__))
 

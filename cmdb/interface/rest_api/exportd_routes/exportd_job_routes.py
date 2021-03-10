@@ -22,8 +22,9 @@ from datetime import datetime
 
 from flask import abort, request, jsonify, current_app
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
-    ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+    ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError, ExportdJobManagement
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog, \
+    ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
 from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
 from cmdb.framework.results import IterationResult
@@ -35,12 +36,11 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
-
 from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
-    exportd_manager = current_app.exportd_manager
-    log_manager = current_app.exportd_log_manager
+    exportd_manager = ExportdJobManagement(current_app.database_manager, current_app.event_queue)
+    log_manager = ExportdLogManager(current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 exportd_job_blueprint = RootBlueprint('exportd_job_blueprint', __name__, url_prefix='/exportdjob')

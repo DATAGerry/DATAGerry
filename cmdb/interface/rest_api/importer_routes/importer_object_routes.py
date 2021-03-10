@@ -23,7 +23,7 @@ from werkzeug.utils import secure_filename
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError
+from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
@@ -40,19 +40,14 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
-from cmdb.user_management import UserModel
+from cmdb.user_management import UserModel, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
 with current_app.app_context():
-    user_manager = current_app.user_manager
-    object_manager: CmdbObjectManager = current_app.object_manager
-    log_manager = current_app.log_manager
+    user_manager = UserManager(current_app.database_manager)
+    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    log_manager = CmdbLogManager(current_app.database_manager)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 

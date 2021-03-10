@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,23 +12,21 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 import logging
 
 from flask import abort, jsonify, current_app
+
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
+from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
-    exportd_manager = current_app.exportd_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+    exportd_manager = ExportdJobManagement(current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 external_system = RootBlueprint('external_system', __name__, url_prefix='/externalsystem')
@@ -47,10 +45,10 @@ def get_external_system_params(class_external_system):
     try:
         external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
         list_of_parameters = external_system_class.parameters
+    except CMDBError as e:
+        return abort(404, jsonify(message='Not Found', error=str(e)))
     except Exception as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
     return make_response(list_of_parameters)
 
 
@@ -60,8 +58,8 @@ def get_external_system_variables(class_external_system):
     try:
         external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
         list_of_parameters = external_system_class.variables
+    except CMDBError as e:
+        return abort(404, jsonify(message='Not Found', error=str(e)))
     except Exception as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
     return make_response(list_of_parameters)

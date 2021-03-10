@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,22 +12,11 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-import logging
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from flask import current_app
 from cmdb.interface.blueprint import RootBlueprint
 
-with current_app.app_context():
-    object_manager = current_app.object_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-LOGGER = logging.getLogger(__name__)
 importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
 
 with current_app.app_context():

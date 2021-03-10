@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 from datetime import datetime
@@ -118,6 +118,15 @@ def insert_type(data: dict):
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
     data.setdefault('creation_time', datetime.utcnow())
+    possible_id = data.get('public_id', None)
+    if possible_id:
+        try:
+            type_manager.get(public_id=possible_id)
+        except ManagerGetError:
+            pass
+        else:
+            return abort(400, f'Type with PublicID {possible_id} already exists.')
+
     try:
         result_id: PublicID = type_manager.insert(data)
         raw_doc = type_manager.get(public_id=result_id)

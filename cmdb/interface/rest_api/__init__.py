@@ -17,87 +17,27 @@
 """
 Init module for rest routes
 """
-import logging
 
-from cmdb.framework.managers.log_manager import CmdbLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.media_library.media_file_manager import MediaFileManagement
-from cmdb.user_management import UserManager
-from cmdb.security.security import SecurityManager
+from flask_cors import CORS
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-LOGGER = logging.getLogger(__name__)
+from cmdb.interface.cmdb_app import BaseCmdbApp
+from cmdb.interface.config import app_config
 
 
-def create_rest_api(event_queue):
-    from cmdb.interface.config import app_config
-    from cmdb.utils.system_config import SystemConfigReader
-    system_config_reader = SystemConfigReader()
-
-    # Create managers
-    from cmdb.database.managers import DatabaseManagerMongo
-    app_database = DatabaseManagerMongo(
-        **system_config_reader.get_all_values_from_section('Database')
-    )
-    object_manager = CmdbObjectManager(
-        database_manager=app_database,
-        event_queue=event_queue
-    )
-
-    log_manager = CmdbLogManager(
-        database_manager=app_database
-    )
-
-    security_manager = SecurityManager(
-        database_manager=app_database
-    )
-
-    user_manager = UserManager(
-        database_manager=app_database
-    )
-
-    exportd_job_manager = ExportdJobManagement(
-        database_manager=app_database,
-        event_queue=event_queue
-    )
-
-    exportd_log_manager = ExportdLogManager(
-        database_manager=app_database
-    )
-
-    media_file_manager = MediaFileManagement(
-        database_manager=app_database
-    )
-
-    docapi_tpl_manager = DocapiTemplateManager(
-        database_manager=app_database
-    )
-
-    # Create APP
-    from cmdb.interface.cmdb_app import BaseCmdbApp
-
-    app = BaseCmdbApp(__name__, database_manager=app_database, docapi_tpl_manager=docapi_tpl_manager,
-                      media_file_manager=media_file_manager, exportd_manager=exportd_job_manager,
-                      exportd_log_manager=exportd_log_manager, object_manager=object_manager,
-                      log_manager=log_manager, user_manager=user_manager,
-                      security_manager=security_manager)
-
+def create_rest_api(database_manager, event_queue):
+    app = BaseCmdbApp(__name__, database_manager=database_manager, event_queue=event_queue)
     app.url_map.strict_slashes = True
 
     # Import App Extensions
-    from flask_cors import CORS
     CORS(app, expose_headers=['X-API-Version', 'X-Total-Count'])
 
     import cmdb
     if cmdb.__MODE__ == 'DEBUG':
         config = app_config['development']
+        config.APPLICATION_ROOT = '/rest/'
+        app.config.from_object(config)
+    elif cmdb.__MODE__ == 'TESTING':
+        config = app_config['testing']
         config.APPLICATION_ROOT = '/rest/'
         app.config.from_object(config)
     else:

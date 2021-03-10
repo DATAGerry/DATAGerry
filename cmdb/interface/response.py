@@ -26,7 +26,7 @@ from cmdb.interface import DEFAULT_MIME_TYPE
 from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
 
-from cmdb.interface.pagination import APIPagination, APIPager
+from cmdb.interface.api_pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
 
 

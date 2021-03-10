@@ -27,8 +27,8 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 
-from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.object_manager import ObjectManager
 
 
 try:
@@ -37,12 +37,6 @@ except ImportError:
     CMDBError = Exception
 
 from cmdb.utils.helpers import load_class
-from cmdb.utils.system_config import SystemConfigReader
-
-database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
-object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-    **SystemConfigReader().get_all_values_from_section('Database')
-))
 
 
 class SupportedExporterExtension:
@@ -90,10 +84,10 @@ class BaseExportWriter:
         self.export_config = export_config
         self.data: List[RenderResult] = []
 
-    def from_database(self, user: UserModel, permission: AccessControlPermission):
+    def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
         """Get all objects from the collection"""
-        from cmdb.framework.managers.object_manager import ObjectManager
         manager = ObjectManager(database_manager=database_manager)
+        dep_object_manager = CmdbObjectManager(database_manager=database_manager)
 
         try:
             _params = self.export_config.parameters
@@ -104,7 +98,7 @@ class BaseExportWriter:
                                                         user=user, permission=permission).results
 
             self.data = RenderList(object_list=_result, request_user=user,
-                                   object_manager=object_manager, ref_render=True).render_result_list(raw=False)
+                                   object_manager=dep_object_manager, ref_render=True).render_result_list(raw=False)
 
         except CMDBError as e:
             return abort(400, e)
