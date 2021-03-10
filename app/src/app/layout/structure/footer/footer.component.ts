@@ -16,9 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, isDevMode, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConnectionService } from '../../../connect/connection.service';
-import { AuthService } from '../../../auth/services/auth.service';
 import { SessionTimeoutService } from '../../../auth/services/session-timeout.service';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -34,53 +33,22 @@ export class FooterComponent implements OnInit, OnDestroy {
 
   public today: number = Date.now();
   public docUrl: string = 'localhost';
-  public userTokenExpire: number = 0;
   public timeout: string = '';
-  private timer: any;
 
-  public constructor(private connectionService: ConnectionService, private authService: AuthService,
-                     private timeoutService: SessionTimeoutService) {
+  public constructor(private connectionService: ConnectionService, private timeoutService: SessionTimeoutService) {
     this.docUrl = `${ connectionService.currentConnection }/docs`;
   }
 
-  public static convertToDate(secs) {
-    const secsInt = parseInt(secs, 10);
-    const days = Math.floor(secsInt / 86400) % 7;
-    const hours = Math.floor(secsInt / 3600) % 24;
-    const minutes = Math.floor(secsInt / 60) % 60;
-    const seconds = secsInt % 60;
-    return [days, hours, minutes, seconds]
-      .map(v => v < 10 ? '0' + v : v)
-      .filter((v, i) => v !== '00' || i > 0)
-      .join(':');
-  }
 
   public ngOnInit(): void {
-    this.userTokenExpire = this.authService.currentUserTokenValue.expire;
-    this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
-    this.interval();
-  }
-
-  public interval() {
-    this.timer = setInterval(() => {
-      this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
-    }, 1000);
-  }
-
-  public calcRestTime(countDownDate) {
-    const now = Math.floor(Date.now() / 1000);
-    const distance = countDownDate - now;
-
-    if (distance < 0) {
-      return 'EXPIRED';
-    }
-    return distance;
+    this.timeoutService.sessionTimeoutRemaining.asObservable().pipe(takeUntil(this.subscriber)).subscribe((timeout: string) => {
+      this.timeout = timeout;
+    });
   }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
-    clearInterval(this.timer);
   }
 
 }

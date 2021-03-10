@@ -23,40 +23,91 @@ import { takeUntil } from 'rxjs/operators';
 import { Token } from '../models/token';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SessionTimeoutNotificationModalComponent } from '../modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
+import { ToastService } from '../../layout/toast/toast.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class SessionTimeoutService implements OnDestroy {
 
+  /**
+   * In which ms interval should the session be checked.
+   * Default is every 1 second.
+   */
   static readonly TIME_CHECK_INTERVAL: number = 1000;
-  static readonly NOTIFICATION_THRESHOLD: number = 60 * 15;
 
+  /**
+   * Which time distance should the notification modal appear.
+   * Default is 15 minutes before the timeout.
+   */
+  static readonly NOTIFICATION_THRESHOLD: number = 1000 * 60 * 15;
+
+  /**
+   * Component un-subscriber.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Notification modal reference.
+   * @private
+   */
   private notificationModalRef: NgbModalRef;
+
+  /**
+   * Trigger if the notification modal was already triggered.
+   * @private
+   */
   private notified: boolean = false;
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  private timer$: Observable<number>;
+  /**
+   * Interval trigger.
+   * @private
+   */
+  private intervalTimer$: Observable<number> = interval(SessionTimeoutService.TIME_CHECK_INTERVAL);
+
+  /**
+   * Interval subscription.
+   * @private
+   */
   private timerSubscription = new Subscription();
 
+  /**
+   * Timeout time emitter.
+   */
   public sessionTimeout: Subject<number>;
+
+  /**
+   * Same as timeout emitter but human readable.
+   */
   public sessionTimeoutRemaining: Subject<string>;
 
+  /**
+   * POSIX timestamp * 1000 of the token lifetime rest.
+   * @private
+   */
   private tokenExpire: number;
 
-  constructor(private authService: AuthService, private modal: NgbModal) {
-    this.authService.currentUserToken.pipe(takeUntil(this.subscriber)).subscribe((token: Token) => {
+  constructor(private authService: AuthService, private modal: NgbModal, private toast: ToastService) {
+    this.sessionTimeout = new Subject<number>();
+    this.sessionTimeoutRemaining = new Subject<string>();
+    this.authService.currentUserToken.subscribe((token: Token) => {
       if (token) {
-        this.tokenExpire = token.expire;
+        this.tokenExpire = token.expire * 1000;
         this.startTimer();
       } else {
         this.stopTimer();
       }
     });
+
   }
 
-  public static convertToDate(secs) {
-    const secsInt = parseInt(secs, 10);
+  /**
+   * Converts a posix timestamp in ms to a countdown format
+   * @param msecs
+   */
+  public static convertToCountdown(msecs) {
+    const secsInt = Math.floor(parseInt(msecs, 10) / 1000);
     const days = Math.floor(secsInt / 86400) % 7;
     const hours = Math.floor(secsInt / 3600) % 24;
     const minutes = Math.floor(secsInt / 60) % 60;
@@ -67,11 +118,14 @@ export class SessionTimeoutService implements OnDestroy {
       .join(':');
   }
 
+  /**
+   * Remaining token lifetime.
+   */
   public get remaining(): number {
     if (!this.tokenExpire) {
       return 0;
     }
-    const currentTime: number = Math.floor(Date.now() / 1000);
+    const currentTime: number = Date.now();
     const distance = this.tokenExpire - currentTime;
 
     if (distance > 0) {
@@ -80,21 +134,23 @@ export class SessionTimeoutService implements OnDestroy {
     return 0;
   }
 
+  /**
+   * Starts the timer.
+   * @private
+   */
   private startTimer(): void {
     if (this.timerSubscription) {
       this.stopTimer();
     }
+    if (!this.intervalTimer$) {
+      this.intervalTimer$ = interval(SessionTimeoutService.TIME_CHECK_INTERVAL);
+    }
     this.notified = false;
-    this.sessionTimeout = new Subject<number>();
-    this.sessionTimeoutRemaining = new Subject<string>();
-    this.timer$ = interval(SessionTimeoutService.TIME_CHECK_INTERVAL);
-    this.timerSubscription = this.timer$.subscribe((t: number) => {
+    this.timerSubscription = this.intervalTimer$.subscribe((t: number) => {
       this.sessionTimeout.next(this.remaining);
-      this.sessionTimeoutRemaining.next(SessionTimeoutService.convertToDate(this.remaining));
+      this.sessionTimeoutRemaining.next(SessionTimeoutService.convertToCountdown(this.remaining));
       if (this.remaining <= 0) {
-        this.sessionTimeout.complete();
-        this.sessionTimeoutRemaining.complete();
-        this.stopTimer();
+        this.cleanUpTimer();
         this.authService.logout();
       } else if ((this.remaining <= SessionTimeoutService.NOTIFICATION_THRESHOLD) && !this.notified) {
         this.notified = true;
@@ -103,26 +159,68 @@ export class SessionTimeoutService implements OnDestroy {
     });
   }
 
+  /**
+   * Shows the notification modal and renews the session if password was passed.
+   * @private
+   */
   private notifyPossibleTimeout() {
     this.notificationModalRef = this.modal.open(SessionTimeoutNotificationModalComponent);
     this.notificationModalRef.componentInstance.remainingTime$ = this.sessionTimeoutRemaining;
-    this.notificationModalRef.result.then((result) => {
-    });
+    this.notificationModalRef.result.then(
+      (result) => {
+        if (result.password) {
+          const username = this.authService.currentUserValue.user_name;
+          this.authService.login(username, result.password).pipe(takeUntil(this.subscriber)).subscribe(
+            () => {
+              this.toast.success('Session renewed!');
+            },
+            () => {
+              this.toast.error('Something went wrong during authentication. Maybe the password was wrong.')
+              this.displayLogoutWarning();
+            }
+          );
+        } else {
+          this.displayLogoutWarning();
+        }
+      },
+      () => {
+        this.displayLogoutWarning();
+      }
+    );
   }
 
+  /**
+   * Display a warning toast with rest time before logout.
+   * @private
+   */
+  private displayLogoutWarning(): void {
+    const logoutTime: Date = new Date(this.tokenExpire);
+    this.toast.warning(`You will be logged out at ${ logoutTime }`);
+  }
+
+  /**
+   * Stops the timer subscription.
+   * @private
+   */
   private stopTimer(): void {
     this.timerSubscription.unsubscribe();
   }
 
-  public resetTimer(): void {
-    this.startTimer();
-  }
-
-  public ngOnDestroy(): void {
+  /**
+   * Kills all timers.
+   * @private
+   */
+  private cleanUpTimer(): void {
+    this.sessionTimeout.complete();
+    this.sessionTimeoutRemaining.complete();
     this.stopTimer();
     if (this.notificationModalRef) {
       this.notificationModalRef.close();
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.cleanUpTimer();
     this.subscriber.next();
     this.subscriber.complete();
   }

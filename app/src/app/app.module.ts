@@ -37,6 +37,7 @@ import { ProgressModule } from './layout/progress/progress.module';
 import { AppLoadingService } from './services/app-loading.service';
 import { ProgressBarService } from './layout/progress/progress-bar.service';
 import { ProgressSpinnerService } from './layout/progress/progress-spinner.service';
+import { SessionTimeoutService } from './auth/services/session-timeout.service';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { ProgressSpinnerService } from './layout/progress/progress-spinner.servi
     PreviousRouteService,
     DatePipe,
     AppLoadingService,
+    SessionTimeoutService,
     ProgressBarService,
     ProgressSpinnerService,
     RequestCacheService,

@@ -35,7 +35,7 @@ import { SessionTimeoutService } from '../auth/services/session-timeout.service'
     MainRoutingModule,
     DashboardModule,
   ],
-  providers: [UserSettingsDBService, UserSettingsService, SessionTimeoutService]
+  providers: [UserSettingsDBService, UserSettingsService]
 })
 export class MainModule {
 
