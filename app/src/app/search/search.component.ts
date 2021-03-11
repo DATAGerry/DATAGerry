@@ -16,14 +16,13 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { takeUntil } from 'rxjs/operators';
 import { ProgressSpinnerService } from '../layout/progress/progress-spinner.service';
 import { PageLengthEntry } from '../layout/table/components/table-page-size/table-page-size.component';
@@ -71,8 +70,6 @@ export class SearchComponent implements OnInit, OnDestroy {
   public maxNumberOfSites: number[];
   public maxNumberOfSitesRef: number[];
 
-
-  @ViewChild('paginationComponentRef') paginationRef: JwPaginationComponent;
   private initSearchRef: boolean = true;
   private initSearch: boolean = true;
   private initFilter: boolean = true;

@@ -30,7 +30,6 @@ import { RenderModule } from '../framework/render/render.module';
 import { SearchResultMatchComponent } from './search-result/search-result-match.component';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchResultBarComponent } from './search-result/search-result-bar/search-result-bar.component';
-import { JwPaginationModule } from 'jw-angular-pagination';
 import { TableModule } from '../layout/table/table.module';
 
 @NgModule({
@@ -49,7 +48,6 @@ import { TableModule } from '../layout/table/table.module';
         ReactiveFormsModule,
         RenderModule,
         NgSelectModule,
-        JwPaginationModule,
         TableModule
     ],
   providers: []
