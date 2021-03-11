@@ -147,6 +147,9 @@ export class SearchComponent implements OnInit, OnDestroy {
         this.limit = (+JSON.parse(params.get('limit')));
         this.resultSizeForm.get('size').setValue(this.limit);
       }
+      if (params.has('page')) {
+        this.currentPage = (+JSON.parse(params.get('page')));
+      }
       this.initSearchRef = true;
       this.initSearch = true;
       this.initFilter = true;
@@ -302,6 +305,13 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onChangePage(event): void {
     this.currentPage = event;
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: { page: this.currentPage },
+        queryParamsHandling: 'merge'
+      });
     this.skip = (this.currentPage - 1) * this.limit;
     this.onSearch();
 
