@@ -19,7 +19,7 @@
       </div>
       <div class="col-md-12" *ngIf="searchResultList">
         <div *ngIf="searchResultList.total_results == 0" class="alert alert-warning" role="alert">
-          Unfortunately we didn't found any objects for your request.
+          Unfortunately, we could not find any results with your search query.
         </div>
         <ng-container *ngIf="searchResultList.total_results > 0">
           <cmdb-search-result *ngFor="let result of searchResultList.results" [searchResult]="result">
@@ -53,14 +53,14 @@
           </select>
         </form>
       </div>
-      <div [ngClass]="resolve.value ? 'col-md-5' : 'col-md-10'">
+      <div [ngClass]="resolve.value ? 'col-md-4' : 'col-md-10'">
         <table-pagination [pageSize]="limit" [totalItems]="searchResultList?.total_results"
                           (pageChange)="onChangePage($event)"></table-pagination>
       </div>
-      <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-5' : 'd-none'"
+      <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-6' : 'd-none'"
            class="bg-light border-left border-info">
-        <jw-pagination #paginationComponentRef [pageSize]="limitRef" [items]="maxNumberOfSitesRef"
-                       (changePage)="onChangePageRef($event)"></jw-pagination>
+        <table-pagination [pageSize]="limit" [totalItems]="referenceResultList?.total_results"
+                          (pageChange)="onChangePageRef($event)"></table-pagination>
       </div>
     </div>
   </div>

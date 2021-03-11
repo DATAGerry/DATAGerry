@@ -45,7 +45,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Default page size
    */
   private readonly defaultLimit: number = 10;
-  private readonly defaultLimitRef: number = 10;
 
   /**
    * Results skipped for pagination.
@@ -59,7 +58,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Max number of displayed results.
    */
   public limit: number = this.defaultLimit;
-  public limitRef: number = this.defaultLimitRef;
 
   /**
    * Current page number.
@@ -191,7 +189,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     if (change && this.searchResultList) {
       this.spinner.show('app', 'Searching...');
       let params = new HttpParams();
-      params = params.set('limit', this.limitRef.toString());
+      params = params.set('limit', this.limit.toString());
       params = params.set('skip', this.skipRef.toString());
 
       const typIDs: number[] = [];
@@ -296,11 +294,9 @@ export class SearchComponent implements OnInit, OnDestroy {
    * @param event: Data from the change event.
    */
   public onChangePageRef(event): void {
-    if (this.currentPageRef !== this.paginationRef.pager.currentPage) {
-      this.currentPageRef = this.paginationRef.pager.currentPage;
-      this.skipRef = ((this.currentPageRef === 0 ? 1 : this.currentPageRef) - 1) * this.limitRef;
-      this.referencesSearch(true);
-    }
+    this.currentPageRef = event;
+    this.skipRef = ((this.currentPageRef === 0 ? 1 : this.currentPageRef) - 1) * this.limit;
+    this.referencesSearch(true);
   }
 
   /**

@@ -13,9 +13,12 @@
       </h5>
       <div class="summary"><strong>Summary:</strong> {{searchResult.result.summary_line}}</div>
       <div class="matched"><strong>Matched fields:</strong>
-        <div *ngIf="searchResult.matches">
+        <div *ngIf="searchResult.matches; else no_display">
           <cmdb-search-result-match *ngFor="let match of searchResult.matches" [matchedField]="match"></cmdb-search-result-match>
         </div>
+        <ng-template #no_display>
+          <span class="d-block">No displayable content.</span>
+        </ng-template>
       </div>
     </div>
     <div class="preview col-md-2">
