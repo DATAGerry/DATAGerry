@@ -258,6 +258,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onSearch(): void {
     this.publicIdResult = undefined;
+    this.skip = (this.currentPage - 1) * this.limit;
     this.spinner.show('app', 'Searching...');
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
@@ -305,16 +306,19 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onChangePage(event): void {
     this.currentPage = event;
+    this.setPageParam(this.currentPage);
+    this.onSearch();
+
+  }
+
+  private setPageParam(page): void {
     this.router.navigate(
       [],
       {
         relativeTo: this.route,
-        queryParams: { page: this.currentPage },
+        queryParams: { page },
         queryParamsHandling: 'merge'
       });
-    this.skip = (this.currentPage - 1) * this.limit;
-    this.onSearch();
-
   }
 
   public reSearch(value: any) {

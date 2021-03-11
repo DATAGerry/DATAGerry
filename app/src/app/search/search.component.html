@@ -54,7 +54,7 @@
         </form>
       </div>
       <div [ngClass]="resolve.value ? 'col-md-4' : 'col-md-10'">
-        <table-pagination [pageSize]="limit" [totalItems]="searchResultList?.total_results"
+        <table-pagination [currentPage]="currentPage" [pageSize]="limit" [totalItems]="searchResultList?.total_results"
                           (pageChange)="onChangePage($event)"></table-pagination>
       </div>
       <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-6' : 'd-none'"
