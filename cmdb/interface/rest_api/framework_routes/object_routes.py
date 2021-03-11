@@ -59,6 +59,7 @@ LOGGER = logging.getLogger(__name__)
 objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 
+
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
@@ -114,7 +115,7 @@ def get_object(public_id, request_user: UserModel):
         return abort(403, err.message)
 
     try:
-        type_instance = object_manager.get_type(object_instance.get_type_id())
+        type_instance = TypeManager(database_manager=current_app.database_manager).get(object_instance.get_type_id())
     except ObjectManagerGetError as err:
         LOGGER.error(err.message)
         return abort(404, err.message)

@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
@@ -153,8 +154,11 @@ def import_objects(request_user: UserModel):
     # Check if type exists
     try:
         type_manager = TypeManager(database_manager=current_app.database_manager)
+        type_ = type_manager.get(importer_config_request.get('type_id'))
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
         verify_import_access(user=request_user,
-                             _type=type_manager.get(importer_config_request.get('type_id')),
+                             _type=type_,
                              _manager=type_manager)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
@@ -217,7 +221,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)

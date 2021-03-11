@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,11 +20,13 @@ import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CategoryService } from '../../../framework/services/category.service';
-import { Subscription } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -32,14 +34,35 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
   styleUrls: ['./sidebar.component.scss'],
 })
 export class SidebarComponent implements OnInit, OnDestroy {
-  // Category data
+
+  /**
+   * Global un-subscriber for http calls to the rest backend.
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Category data
+   */
   public categoryTree: CmdbCategoryTree;
   private categoryTreeSubscription: Subscription;
-  // Type data
+
+  /**
+   * Types params
+   */
+  public typesParams: CollectionParameters = {
+    filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+  };
+
+  /**
+   * Type data
+   */
   public typeList: CmdbType[] = [];
   public unCategorizedTypes: CmdbType[] = [];
   private unCategorizedTypesSubscription: Subscription;
-  // Filter
+
+  /**
+   * Filter
+   */
   public filterTerm: FormControl = new FormControl('');
   private filterTermSubscription: Subscription;
 
@@ -60,7 +83,10 @@ export class SidebarComponent implements OnInit, OnDestroy {
           this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
         });
 
-      this.typeService.getTypeList().subscribe((types: CmdbType[]) => this.typeList = types);
+      this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.typeList = apiResponse.results as Array<CmdbType>;
+        });
     });
   }
 

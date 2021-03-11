@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,20 +18,20 @@
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { TypeService } from '../services/type.service';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject} from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { PermissionService } from '../../auth/services/permission.service';
-import {ActivatedRoute, Data, Router} from "@angular/router";
-import {UserSetting} from "../../management/user-settings/models/user-setting";
-import {convertResourceURL, UserSettingsService} from "../../management/user-settings/services/user-settings.service";
-import {UserSettingsDBService} from "../../management/user-settings/services/user-settings-db.service";
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../management/user-settings/models/user-setting';
+import { convertResourceURL, UserSettingsService } from '../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-type',

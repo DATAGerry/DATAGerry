@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -56,9 +56,18 @@ def get_types(params: CollectionParameters):
         ManagerGetError: If the collection could not be found.
 
     """
+    import json
     type_manager = TypeManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
-
+    view = json.loads(params.optional.get('native', 'true'))
+    if view:
+        if isinstance(params.filter, dict):
+            if params.filter.keys():
+                params.filter.update({'active': view})
+            else:
+                params.filter = {'$match': {'active': view}}
+        if isinstance(params.filter, list):
+            params.filter.append({'$match': {'active': view}})
     try:
         iteration_result: IterationResult[TypeModel] = type_manager.iterate(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
