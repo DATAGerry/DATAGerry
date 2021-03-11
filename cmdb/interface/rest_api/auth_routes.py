@@ -119,7 +119,7 @@ def post_login():
     finally:
         # If login success generate user instance with token
         if user_instance:
-            tg = TokenGenerator()
+            tg = TokenGenerator(database_manager=current_app.database_manager)
             token: bytes = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()
             }})
