@@ -36,8 +36,7 @@ from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import WrongInputFormatError, \
     ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerDeleteError, ObjectManagerInitError
-from cmdb.framework import ObjectLinkModel
+    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerInitError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Query, Pipeline
@@ -249,6 +248,7 @@ class CmdbObjectManager(CmdbManagerBase):
         Returns:
             Public ID of the new object in database
         """
+        new_object = None
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
@@ -259,6 +259,9 @@ class CmdbObjectManager(CmdbManagerBase):
             new_object = data
 
         type_ = self._type_manager.get(new_object.type_id)
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
+
         verify_access(type_, user, permission)
 
         try:
@@ -289,6 +292,8 @@ class CmdbObjectManager(CmdbManagerBase):
             update_object.editor_id = user.public_id
 
         type_ = self._type_manager.get(update_object.type_id)
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
         verify_access(type_, user, permission)
 
         ack = self._update(
@@ -360,6 +365,8 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
         type_id = self.get_object(public_id=public_id).type_id
         type_ = self._type_manager.get(type_id)
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be removed because type `{type_.name}` is deactivated.')
         verify_access(type_, user, permission)
         try:
             if self._event_queue:

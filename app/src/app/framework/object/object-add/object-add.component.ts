@@ -28,7 +28,6 @@ import { UserService } from '../../../management/services/user.service';
 import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CategoryService } from '../../services/category.service';
-import { CmdbCategory } from '../../models/cmdb-category';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { AccessControlPermission } from '../../../acl/acl.types';
 import { ToastService } from '../../../layout/toast/toast.service';
@@ -41,7 +40,7 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class ObjectAddComponent implements OnInit, OnDestroy {
 
-  public typeList: CmdbType[];
+  public typeList: CmdbType[] = [];
   public typeIDForm: FormGroup;
   private typeIDSubject: BehaviorSubject<number>;
   public typeID: Observable<number>;
@@ -50,9 +49,13 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   public objectInstance: CmdbObject;
   public renderForm: FormGroup;
   public fieldsGroups: FormGroup;
+
   @Output() parentSubmit = new EventEmitter<any>();
   @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
 
+  /**
+   * Global un-subscriber for http calls to the rest backend.
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private router: Router, private typeService: TypeService, private categoryService: CategoryService,
