@@ -17,7 +17,7 @@
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
           <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
                                           [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
-            <input type="text" name="{{data.name}}" class="form-control" placeholder="yyyy-mm-dd"
+            <input type="text" name="{{data.name}}" class="form-control" placeholder="dd/mm/yyyy"
                    [formControlName]="data.name"
                    ngbDatepicker #d="ngbDatepicker"
                    [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),

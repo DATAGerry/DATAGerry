@@ -129,6 +129,10 @@
                [routerLink]="['/settings/auth']">
               <i class="fas fa-lock"></i> Authentication
             </a>
+            <a class="dropdown-item" *permissionLink="'base.system.edit'"
+               [routerLink]="['/settings/date']">
+              <i class="fas fa-calendar-alt"></i> Date Properties
+            </a>
             <a class="dropdown-item" *permissionLink="'base.system.reload'"
                [routerLink]="['/settings/system/properties']">
               <i class="fas fa-database"></i> Database Properties

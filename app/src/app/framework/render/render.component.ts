@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -94,27 +94,19 @@ export class RenderComponent {
     if (this.renderResult !== undefined) {
       return this.renderResult.fields.find(field => field.name === name);
     } else {
-      const fields: any = this.typeInstance.fields.find(field => field.name === name);
-      switch (fields.type) {
-        case 'date': {
-          if (fields.value instanceof Object) {
-            const temp = fields.value;
-            fields.default = temp.year + '-' + temp.month + '-' + temp.day;
-            fields.value = fields.default;
-          }
-          break;
-        }
+      const field: any = this.typeInstance.fields.find(f => f.name === name);
+      switch (field.type) {
         case 'ref': {
-          fields.default = parseInt(fields.default, 10);
-          fields.value = fields.default;
+          field.default = parseInt(field.default, 10);
+          field.value = field.default;
           break;
         }
         default: {
-          fields.default = fields.value;
+          field.default = field.value;
           break;
         }
       }
-      return fields;
+      return field;
     }
   }
 

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,23 +16,22 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import { NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { Injectable } from '@angular/core';
 
+/**
+ * This Service handles how the date is represented in scripts i.e. ngModel.
+ */
 @Injectable()
 export class NgbStringAdapter extends NgbDateAdapter<Date> {
-
-  parse(value: string): NgbDateStruct {
-    return null;
-  }
 
   fromModel(date: any): NgbDateStruct {
     if (typeof date === 'string') {
       const newDate =  new Date(date);
       return newDate ? {
-        year: newDate.getFullYear(),
+        day: newDate.getDate(),
         month: newDate.getMonth() + 1,
-        day: newDate.getDate()
+        year: newDate.getFullYear(),
       } : null;
     } else if (date != null) {
       date = new Date(date.$date);
