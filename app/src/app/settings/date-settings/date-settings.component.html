@@ -7,8 +7,11 @@
         <label class="col-sm-3 col-form-label" for="date-format">Current Format:</label>
         <div class="col-sm-9">
           <div class="input-group">
-            <input class="form-control" type="text" id="date-format" formControlName="format"
-                   [value]="format">
+            <input class="form-control" type="text" id="date-format" formControlName="format" [value]="format"
+                   [ngClass]="{ 'is-valid': getController('format').valid
+                   && (getController('format').dirty || getController('format').touched),
+                   'is-invalid': getController('format').invalid
+                   && (getController('format').dirty || getController('format').touched)}">
           </div>
         </div>
       </div>
@@ -29,9 +32,6 @@
             <ng-select id="time-zone"
                        [items]="tzNames"
                        formControlName="timezone">
-              <ng-template ng-header-tmp let-item="item">
-                {{utcToDeviceString(item)}}
-              </ng-template>
               <ng-template ng-label-tmp let-item="item">
                 {{utcToDeviceString(item)}}
               </ng-template>

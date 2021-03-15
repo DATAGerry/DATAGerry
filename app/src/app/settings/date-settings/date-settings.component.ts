@@ -19,7 +19,7 @@
 import * as moment from 'moment';
 import 'moment-timezone';
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-date-settings',
@@ -62,10 +62,16 @@ export class DateSettingsComponent implements OnInit {
       timezone: new FormControl(moment.tz.guess(true)),
     });
     this.regionalForm.valueChanges.subscribe(() => {
-      console.log('test');
       this.updateFormatView();
     });
     this.updateFormatView();
+  }
+
+  /**
+   * return controller from formGroup by name
+   */
+  public getController(name: string): AbstractControl {
+    return this.regionalForm.get(name);
   }
 
   /**
@@ -82,10 +88,17 @@ export class DateSettingsComponent implements OnInit {
     return this.regionalForm.get('timezone').value;
   }
 
+  /**
+   * Update example view for date format with selected settings
+   */
   public updateFormatView(): void {
     this.displayTzF = moment.tz(moment(), this.timezone).format(this.format);
   }
 
+  /**
+   * Display Time Difference to Time Zone – UTC
+   * @param timezone
+   */
   public utcToDeviceString(timezone: string): string {
     const utc = moment.tz(moment(), timezone).format('( UTC Z )');
     return timezone + ' ' + utc;
