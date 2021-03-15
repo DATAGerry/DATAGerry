@@ -107,11 +107,11 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Iterate over the type collection
    * @param params Instance of CollectionParameters
-   * @param native Filter types by activation status. Default: Inactive types are not fetched
+   * @param active Filter types by activation status. Default: Inactive types are not fetched
    */
   public getTypes(
     params: CollectionParameters = {filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1},
-    native: boolean = false):
+    active: boolean = false):
     Observable<APIGetMultiResponse<T>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
@@ -123,7 +123,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     httpParams = httpParams.set('sort', params.sort);
     httpParams = httpParams.set('order', params.order.toString());
     httpParams = httpParams.set('page', params.page.toString());
-    httpParams = httpParams.set('native', JSON.stringify(native));
+    httpParams = httpParams.set('active', JSON.stringify(active));
     options.params = httpParams;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
