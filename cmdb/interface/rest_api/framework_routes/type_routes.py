@@ -20,6 +20,7 @@ from datetime import datetime
 from flask import abort, request, current_app
 
 from cmdb.framework.models.type import TypeModel
+from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
@@ -36,8 +37,8 @@ types_blueprint = APIBlueprint('types', __name__)
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
-@types_blueprint.parse_collection_parameters()
-def get_types(params: CollectionParameters):
+@types_blueprint.parse_parameters(TypeIterationParameters)
+def get_types(params: TypeIterationParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
@@ -56,17 +57,16 @@ def get_types(params: CollectionParameters):
         ManagerGetError: If the collection could not be found.
 
     """
-    import json
     type_manager = TypeManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
-    view = json.loads(params.optional.get('native', 'true'))
+    view = params.active
     if view:
         if isinstance(params.filter, dict):
             if params.filter.keys():
                 params.filter.update({'active': view})
             else:
-                params.filter = {'$match': {'active': view}}
-        if isinstance(params.filter, list):
+                params.filter = [{'$match': {'active': view}}, {'$match': params.filter}]
+        elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': view}})
     try:
         iteration_result: IterationResult[TypeModel] = type_manager.iterate(
