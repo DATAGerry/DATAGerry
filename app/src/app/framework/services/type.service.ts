@@ -291,6 +291,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $project: { category: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    options.params = options.params.set('active', false.toString());
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
