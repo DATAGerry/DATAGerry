@@ -16,12 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
 import { Component, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { CustomDateParserFormatter, NgbStringAdapter } from './date-formatter-adapter';
+import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../settings/date-settings/date-settings.service';
+
 
 @Component({
   selector: 'cmdb-date',

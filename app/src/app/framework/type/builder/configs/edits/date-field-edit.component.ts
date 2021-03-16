@@ -19,7 +19,8 @@
 import { Component, Input } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../render/fields/date/date-formatter-adapter';
+import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings.service';
+
 
 @Component({
   selector: 'cmdb-date-field-edit',

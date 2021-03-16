@@ -18,15 +18,25 @@
 
 import * as moment from 'moment';
 import 'moment-timezone';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { DateSettingsService } from '../services/date-settings.service';
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+import { ToastService } from '../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-date-settings',
   templateUrl: './date-settings.component.html',
   styleUrls: ['./date-settings.component.scss']
 })
-export class DateSettingsComponent implements OnInit {
+export class DateSettingsComponent implements OnInit, OnDestroy {
+
+  /**
+   * Un-subscriber for `DateSettingsComponent`.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
    * All time zones of MomentTimezone
@@ -56,11 +66,18 @@ export class DateSettingsComponent implements OnInit {
    */
   public regionalForm: FormGroup;
 
-  ngOnInit(): void {
+  constructor(private dateSettingsService: DateSettingsService, private toast: ToastService) {
     this.regionalForm = new FormGroup({
-      format: new FormControl('YYYY-MM-DD', Validators.required),
+      date_format: new FormControl('YYYY-MM-DD', Validators.required),
       timezone: new FormControl(moment.tz.guess(true)),
     });
+  }
+
+  ngOnInit(): void {
+    this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
+      this.regionalForm.patchValue(dateSettings);
+    });
+
     this.regionalForm.valueChanges.subscribe(() => {
       this.updateFormatView();
     });
@@ -78,7 +95,7 @@ export class DateSettingsComponent implements OnInit {
    * return current format value from formGroup
    */
   public get format(): string {
-    return this.regionalForm.get('format').value;
+    return this.regionalForm.get('date_format').value;
   }
 
   /**
@@ -102,5 +119,19 @@ export class DateSettingsComponent implements OnInit {
   public utcToDeviceString(timezone: string): string {
     const utc = moment.tz(moment(), timezone).format('( UTC Z )');
     return timezone + ' ' + utc;
+  }
+
+  public onSave(): void {
+    if (this.regionalForm.valid) {
+      this.dateSettingsService.postDateSettings(this.regionalForm.getRawValue())
+        .pipe(takeUntil(this.subscriber)).subscribe(() => {
+          this.toast.success('Date Settings config was updated!');
+      });
+    }
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }
