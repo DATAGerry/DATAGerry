@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,37 +13,34 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
+import { AfterContentInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { BuilderComponent } from '../../builder/builder.component';
 import { CmdbMode } from '../../../modes.enum';
+import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { ReplaySubject } from 'rxjs';
 
 @Component({
   selector: 'cmdb-type-fields-step',
   templateUrl: './type-fields-step.component.html',
   styleUrls: ['./type-fields-step.component.scss']
 })
-export class TypeFieldsStepComponent implements AfterContentInit {
+export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
 
-  @ViewChild(BuilderComponent, {static: false})
-  public typeBuilder: BuilderComponent;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() public mode: number = CmdbMode.View;
-  @Input()
-  set preData(data: any) {
-    if ((data !== undefined) && (this.typeBuilder !== undefined)) {
-      this.typeBuilder.builderConfig = data;
-    }
+  public constructor() {
+    super();
   }
 
-  public constructor(private cdr: ChangeDetectorRef) {
-
+  public ngOnInit(): void {
   }
 
-  public ngAfterContentInit(): void {
-    this.cdr.detectChanges();
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

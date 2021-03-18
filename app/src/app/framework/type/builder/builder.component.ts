@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,31 +13,34 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Controller} from './controls/controls.common';
-import {DndDropEvent, DropEffect} from 'ngx-drag-drop';
-import {SectionControl} from './controls/section.control';
-import {UserService} from '../../../management/services/user.service';
-import {Group} from '../../../management/models/group';
-import {User} from '../../../management/models/user';
-import {TextControl} from './controls/text/text.control';
-import {PasswordControl} from './controls/text/password.control';
-import {TextAreaControl} from './controls/textarea/textarea.control';
-import {ReferenceControl} from './controls/specials/ref.control';
-import {RadioControl} from './controls/choice/radio.control';
-import {SelectControl} from './controls/choice/select.control';
-import {CheckboxControl} from './controls/choice/checkbox.control';
-import {GroupService} from '../../../management/services/group.service';
-import {CmdbMode} from '../../modes.enum';
-import {FormGroup} from '@angular/forms';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
-import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Controller } from './controls/controls.common';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { SectionControl } from './controls/section.control';
+import { UserService } from '../../../management/services/user.service';
+import { Group } from '../../../management/models/group';
+import { User } from '../../../management/models/user';
+import { TextControl } from './controls/text/text.control';
+import { PasswordControl } from './controls/text/password.control';
+import { TextAreaControl } from './controls/textarea/textarea.control';
+import { ReferenceControl } from './controls/specials/ref.control';
+import { RadioControl } from './controls/choice/radio.control';
+import { SelectControl } from './controls/choice/select.control';
+import { CheckboxControl } from './controls/choice/checkbox.control';
+import { GroupService } from '../../../management/services/group.service';
+import { CmdbMode } from '../../modes.enum';
+import { FormGroup } from '@angular/forms';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { DateControl } from './controls/date-time/date.control';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { RefSectionControl } from './controls/ref-section.common';
+import { ReplaySubject } from 'rxjs';
+import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 
 declare var $: any;
 
@@ -46,33 +49,42 @@ declare var $: any;
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss']
 })
-export class BuilderComponent implements OnInit, OnDestroy{
+export class BuilderComponent implements OnInit, OnDestroy {
 
-  public sections: any[];
-  public userList: User[] = [];
-  public groupList: Group[] = [];
-  public canEdit: boolean = false;
-  private modalRef: NgbModalRef;
-  @Input() mode = CmdbMode.View;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() set builderConfig(data) {
-    if (data !== undefined) {
-      const preSectionList: any[] = [];
-      for (const section of data.render_meta.sections) {
-        preSectionList.push(section);
-        const fieldBufferList = [];
-        for (const field of section.fields) {
-          fieldBufferList.push(data.fields.find(f => f.name === field));
-        }
-        preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
+  public form: FormGroup;
+
+  @Input() public mode = CmdbMode.View;
+  @Input() public groups: Array<Group> = [];
+  @Input() public users: Array<User> = [];
+
+  public typeInstance: CmdbType;
+  public sections: Array<any> = [];
+
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    this.typeInstance = instance;
+    /*const preSectionList: any[] = [];
+    for (const section of this.typeInstance.render_meta.sections) {
+      preSectionList.push(section);
+      const fieldBufferList = [];
+      for (const field of section.fields) {
+        fieldBufferList.push(this.typeInstance.fields.find(f => f.name === field));
       }
-      this.sections = preSectionList;
+      preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
     }
+    this.sections = preSectionList;*/
+
   }
 
+  public canEdit: boolean = false;
+
   public structureControls = [
-    new Controller('section', SectionControl)
+    new Controller('section', SectionControl),
+    new Controller('ref-section', RefSectionControl)
   ];
+
   public basicControls = [
     new Controller('text', TextControl),
     new Controller('password', PasswordControl),
@@ -82,52 +94,67 @@ export class BuilderComponent implements OnInit, OnDestroy{
     new Controller('select', SelectControl),
     new Controller('date', DateControl)
   ];
+
   public specialControls = [
     new Controller('ref', ReferenceControl)
   ];
 
-  public builderFormGroup: FormGroup;
 
-  public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
-    this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
-      this.groupList = apiGroupResponse.results as Array<Group>;
-    });
-    this.userService.getUsers().subscribe((apiUserResponse: APIGetMultiResponse<User>) => {
-      this.userList = apiUserResponse.results as Array<User>;
-    });
+  public constructor() {
+    this.form = new FormGroup({});
+    this.typeInstance = new CmdbType();
   }
 
   public ngOnInit(): void {
-    this.sections = [];
-    this.builderFormGroup = new FormGroup({});
+
   }
+
   public ngOnDestroy(): void {
-    if (this.modalRef) {
-      this.modalRef.close();
-    }
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
-  public onDrop(event: DndDropEvent, list: any[]) {
-    if (list && (event.dropEffect === 'copy')) {
-      this.canEdit = true;
-    }
-
-    if (list
-      && (event.dropEffect === 'copy'
-        || event.dropEffect === 'move')) {
+  public onSectionDrop(event: DndDropEvent): void {
+    const sections = this.typeInstance.render_meta.sections;
+    if (sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
       let index = event.index;
 
       if (typeof index === 'undefined') {
 
-        index = list.length;
+        index = sections.length;
       }
-      for (const el of list) {
+      for (const el of sections) {
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
-      list.splice(index, 0, event.data);
+      sections.splice(index, 0, event.data);
     }
+  }
+
+  public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+    if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+      let index = event.index;
+      if (typeof index === 'undefined') {
+        index = section.fields.length;
+      }
+      section.fields.splice(index, 0, event.data.name);
+      let typeIndex = this.typeInstance.fields.map(f => f.name).indexOf(event.data.name);
+      if (typeof typeIndex === 'undefined') {
+        typeIndex = this.typeInstance.fields.length;
+      }
+      this.typeInstance.fields.splice(index, 0, event.data.name);
+    }
+  }
+
+  public onFieldDragged(item: any, section: CmdbTypeSection) {
+    const index = section.fields.indexOf(item);
+    section.fields.splice(index, 1);
+  }
+
+
+  public getFieldBySectionID(name: string): any {
+    return this.typeInstance.fields.find(f => f.name === name);
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
@@ -143,16 +170,6 @@ export class BuilderComponent implements OnInit, OnDestroy{
     if (index !== -1) {
       list.splice(index, 1);
     }
-  }
-
-  public openPreview() {
-    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
-    previewModal.componentInstance.sections = this.sections;
-  }
-
-  public openDiagnostic() {
-    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
-    diagnosticModal.componentInstance.data = this.sections;
   }
 
   public matchedType(value: string) {

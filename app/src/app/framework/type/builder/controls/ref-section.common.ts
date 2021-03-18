@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,25 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
+import { ControlsCommon, randomName } from './controls.common';
+import { SectionContent } from './section.control';
 
-@Component({
-  selector: 'cmdb-type-validation-step',
-  templateUrl: './type-validation-step.component.html',
-  styleUrls: ['./type-validation-step.component.scss']
-})
-export class TypeValidationStepComponent implements OnInit {
 
-  @Input() public typeInstance: CmdbType = null;
+export class RefSectionControl implements ControlsCommon {
 
-  constructor() { }
+  name = 'ref-section';
+  label = 'Reference';
+  icon = 'fas fa-layer-group';
+  dndType: string = 'sections';
 
-  public ngOnInit(): void {
+  content() {
+    const section = new SectionContent();
+    section.name = randomName(this.name);
+    section.label = this.label;
+    return section;
   }
 
 }

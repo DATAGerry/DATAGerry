@@ -1,5 +1,26 @@
-import { Component, Input, OnInit } from '@angular/core';
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { ReplaySubject } from 'rxjs';
+import { CmdbType } from '../../../models/cmdb-type';
 
 
 @Component({
@@ -7,7 +28,9 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
   templateUrl: './type-meta-step.component.html',
   styleUrls: ['./type-meta-step.component.scss']
 })
-export class TypeMetaStepComponent implements OnInit {
+export class TypeMetaStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   public summaryForm: FormGroup;
   public externalsForm: FormGroup;
@@ -16,17 +39,16 @@ export class TypeMetaStepComponent implements OnInit {
   private currentFields: any[] = [];
   private currentSummaries: any[] = [];
 
-  @Input()
-  set preData(data: any) {
-    if (data !== undefined) {
-      if (data.render_meta !== undefined) {
-        this.summaryForm.patchValue(data.render_meta.summary);
-        this.externalLinks = data.render_meta.externals;
-      }
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    if (instance) {
+      this.summaryForm.patchValue(instance.render_meta.summary);
+      this.externalLinks = instance.render_meta.externals;
     }
   }
 
   constructor() {
+    super();
     this.summaryForm = new FormGroup({
       fields: new FormControl('', Validators.required)
     });
@@ -38,6 +60,11 @@ export class TypeMetaStepComponent implements OnInit {
       href: new FormControl('', [Validators.required]),
       fields: new FormControl('')
     });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   public get external_name() {
@@ -52,8 +79,8 @@ export class TypeMetaStepComponent implements OnInit {
   public set fields(value: any[]) {
     let preFields = value;
     if (value != null) {
-      preFields = JSON.parse(JSON.stringify( value ));
-      preFields.push({label: 'Object ID', name: 'object_id'});
+      preFields = JSON.parse(JSON.stringify(value));
+      preFields.push({ label: 'Object ID', name: 'object_id' });
     }
     this.currentFields = preFields;
     this.currentSummaries = value;
@@ -94,7 +121,7 @@ export class TypeMetaStepComponent implements OnInit {
   public listNameValidator(list: any[]) {
     return (control: AbstractControl): { [key: string]: any } | null => {
       const nameInList = list.find(el => el.name === control.value);
-      return nameInList ? {nameAlreadyTaken: {value: control.value}} : null;
+      return nameInList ? { nameAlreadyTaken: { value: control.value } } : null;
     };
   }
 
@@ -103,8 +130,8 @@ export class TypeMetaStepComponent implements OnInit {
     this.externalsForm.get('name').valueChanges.subscribe(val => {
       if (this.externalsForm.get('name').value !== null) {
         this.externalsForm.get('label').setValue(val.charAt(0).toUpperCase() + val.toString().slice(1));
-        this.externalsForm.get('label').markAsDirty({onlySelf: true});
-        this.externalsForm.get('label').markAsTouched({onlySelf: true});
+        this.externalsForm.get('label').markAsDirty({ onlySelf: true });
+        this.externalsForm.get('label').markAsTouched({ onlySelf: true });
       }
     });
 
@@ -143,7 +170,7 @@ export class TypeMetaStepComponent implements OnInit {
       sumFields.filter((item) => {
         this.summaries.map(field => field.name).includes(item) ? validList.push(item) : console.log(item);
       });
-      this.summaryForm.patchValue({fields: validList});
+      this.summaryForm.patchValue({ fields: validList });
     }
   }
 

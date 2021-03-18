@@ -15,7 +15,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon icon="{{control.typeController.icon}}"></fa-icon> {{ control.typeController.label }}
+                  <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -39,7 +39,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon icon="{{control.typeController.icon}}"></fa-icon> {{ control.typeController.label }}
+                  <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -63,7 +63,7 @@
                      [dndDraggable]="control.typeController.content()"
                      class="list-group-item list-group-item-action">
                 <span>
-                  <fa-icon [icon]="['fas', control.typeController.icon]"></fa-icon> {{ control.typeController.label }}
+                  <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                 </span>
                   <button type="button" class="btn btn-primary btn-sm float-right">
                     <fa-icon icon="bars"></fa-icon>
@@ -75,27 +75,17 @@
           </div>
         </div>
       </div>
-      <div id="builder-controls-action" class="btn-group btn-group-sm mt-2 justify-content-md-center" role="group"
-           aria-label="Controls helper buttons">
-        <button id="builder-controls-action-preview" type="button" class="btn btn-secondary" (click)="openPreview()">
-          Preview
-        </button>
-        <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
-                (click)="openDiagnostic()">
-          Diagnostic
-        </button>
-      </div>
     </div>
   </div>
   <div id="form-container" class="col-9">
-    <div id="form-content" data-content="Drop section here" [ngClass]="{'empty': sections.length == 0 }"
-         [dndDropzone]="['sections']" (dndDrop)="onDrop($event, sections)">
+    <div id="form-content" data-content="Drop section here" [ngClass]="{'empty': typeInstance.render_meta.sections.length == 0 }"
+         [dndDropzone]="['sections']" (dndDrop)="onSectionDrop($event)">
       <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
            dndPlaceholderRef>
         Drop section here
       </div>
-      <section *ngFor="let section of sections; let x = index" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
-               (dndMoved)="onDragged(section, sections, 'move')">
+      <section *ngFor="let section of typeInstance.render_meta.sections; let x = index" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
+               (dndMoved)="onDragged(section, typeInstance.render_meta.sections, 'move')">
         <div class="card">
           <div class="card-header">
             <fa-icon [icon]="['far', 'object-group']"></fa-icon> {{section.label}}
@@ -107,28 +97,28 @@
               <button class="btn btn-link mr-1" type="button" dndHandle>
                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
               </button>
-              <button class="btn btn-link" type="button" (click)="remove(section, sections)">
+              <button class="btn btn-link" type="button" (click)="remove(section, typeInstance.render_meta.sections)">
                 <fa-icon [icon]="['far', 'window-close']"></fa-icon>
               </button>
             </span>
           </div>
           <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit [canEdit]="canEdit" [groupList]="groupList" [userList]="userList"
+              <cmdb-config-edit [canEdit]="canEdit"
                                 [sections]="sections"
                                 [data]="section"></cmdb-config-edit>
             </div>
           </div>
           <div class="card-body" [dndDropzone]="['inputs']"
-               (dndDrop)="onDrop($event, section.fields)">
+               (dndDrop)="onFieldDrop($event, section)">
             <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
                  dndPlaceholderRef>
               Drop field here
             </div>
-            <div *ngFor="let field of section.fields; let y = index" dndEffectAllowed="move" dndType="inputs"
-                          [dndDraggable]="field"
-                          (dndMoved)="onDragged(field, section.fields, 'move')">
-
+            <ng-container *ngFor="let section_field of section.fields; let y = index" >
+              <div *ngIf="getFieldBySectionID(section_field) as field" dndEffectAllowed="move" dndType="inputs"
+                            [dndDraggable]="field"
+                            (dndMoved)="onFieldDragged(field, section)">
               <div class="fields card">
                 <div class="card-header">
                   <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
@@ -146,12 +136,13 @@
                   </span>
                 </div>
                 <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                  <cmdb-config-edit [canEdit]="canEdit" [groupList]="groupList" [userList]="userList"
+                  <cmdb-config-edit [canEdit]="canEdit"
                                     [sections]="sections"
                                     [data]="field"></cmdb-config-edit>
                 </div>
               </div>
-            </div>
+              </div>
+            </ng-container>
           </div>
         </div>
       </section>

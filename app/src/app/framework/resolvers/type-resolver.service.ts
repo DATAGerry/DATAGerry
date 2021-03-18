@@ -41,6 +41,7 @@ export class TypeResolver implements Resolve<CmdbType> {
   public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<CmdbType> | Promise<CmdbType> | CmdbType {
     const typeID: number = +route.paramMap.get('typeID');
+    console.log(typeID);
     return this.typeService.getType(typeID);
   }
 }
