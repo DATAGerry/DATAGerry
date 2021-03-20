@@ -24,7 +24,7 @@ iniconfig==1.1.1
 isort==5.5.3
 itsdangerous==1.1.0
 jdcal==1.4.1
-Jinja2==2.11.2
+Jinja2==2.11.3
 lazy-object-proxy==1.4.3
 ldap3==2.8.1
 MarkupSafe==1.1.1
