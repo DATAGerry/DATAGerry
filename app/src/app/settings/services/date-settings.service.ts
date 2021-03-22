@@ -30,7 +30,9 @@ export class DateSettingsService<T = any> implements ApiService {
 
   public readonly servicePrefix: string = 'date';
 
-  constructor(private api: ApiCallService) { }
+  constructor(private api: ApiCallService) {
+    console.log('test');
+  }
 
   public getDateSettings(): Observable<T> {
     return this.api.callGet<T>(`${this.servicePrefix}/`).pipe(

@@ -20,7 +20,8 @@ import { Component, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../settings/date-settings/date-settings.service';
+import { NgbStringAdapter, CustomDateParserFormatter} from '../../../../settings/date-settings/date-settings-formatter.service';
+
 
 
 @Component({
@@ -50,6 +51,10 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
       return new Date(currentDate.$date);
     }
     return currentDate;
+  }
+
+  public resetDate() {
+    this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
   }
 
   public copyToClipboard() {

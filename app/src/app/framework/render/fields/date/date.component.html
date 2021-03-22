@@ -21,13 +21,18 @@
                    [formControlName]="data.name"
                    ngbDatepicker #d="ngbDatepicker"
                    [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                   'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+                   'is-invalid': controller.invalid && (controller.dirty || controller.touched)}" readonly/>
             <div class="input-group-append input-group-sm">
               <span class="input-group-text" (click)="d.toggle()">
                 <fa-icon icon="calendar-alt"></fa-icon>
               </span>
             </div>
             <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
+            <div class="input-group-append input-group-sm">
+              <span class="input-group-text text-danger" (click)="resetDate()">
+                  <i class="far fa-window-close"></i>
+                </span>
+            </div>
         </ng-container>
         <div *ngSwitchDefault>
           <cmdb-mode-error></cmdb-mode-error>

@@ -19,7 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings.service';
+import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
 
 
 @Component({
