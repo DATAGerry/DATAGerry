@@ -240,12 +240,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private onNewestPageChange(event) {
+  public onNewestPageChange(event) {
     this.newestPage = event;
     this.loadNewestObjects();
   }
 
-  private  onLatestPageChange(event) {
+  public  onLatestPageChange(event) {
     this.latestPage = event;
     this.loadLatestObjects();
   }
