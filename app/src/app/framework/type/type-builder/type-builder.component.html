@@ -1,24 +1,44 @@
 <div id="type-builder" class="row">
   <div class="col-md-9">
-    <aw-wizard [navBarLayout]="'small'">
-      <aw-wizard-step stepId="1" stepTitle="Basic information">
-        <cmdb-type-basic-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-basic-step>
+    <aw-wizard [navBarLayout]="'large-empty-symbols'">
+      <aw-wizard-step [stepId]="'1'" stepTitle="Basic information">
+        <ng-template awWizardStepSymbol><i class="fas fa-info"></i></ng-template>
+        <hr/>
+        <cmdb-type-basic-step [mode]="mode" [typeInstance]="typeInstance"
+                              (validateChange)="basicValid = $event"></cmdb-type-basic-step>
+        <hr/>
         <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
       </aw-wizard-step>
-      <aw-wizard-step stepId="2" stepTitle="Content">
+      <aw-wizard-step [stepId]="'2'" stepTitle="Content">
+        <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+        <hr/>
         <cmdb-type-fields-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-fields-step>
+        <hr/>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
         <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
       </aw-wizard-step>
-      <aw-wizard-step stepId="3" stepTitle="Meta">
+      <aw-wizard-step [stepId]="'3'" stepTitle="Preview">
+        <ng-template awWizardStepSymbol><i class="fas fa-eye"></i></ng-template>
+        <hr/>
+        <cmdb-type-preview-step [typeInstance]="typeInstance"></cmdb-type-preview-step>
+        <hr/>
+        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
+      </aw-wizard-step>
+      <aw-wizard-step [stepId]="'4'" stepTitle="Meta">
+        <ng-template awWizardStepSymbol><i class="fas fa-hashtag"></i></ng-template>
+        <hr/>
         <cmdb-type-meta-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-meta-step>
+        <hr/>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
         <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
       </aw-wizard-step>
-      <aw-wizard-step stepTitle="ACL">
-        <cmdb-type-acl-step [acl]="typeInstance?.acl" [groups]="groups"></cmdb-type-acl-step>
+      <aw-wizard-step [stepId]="'5'" stepTitle="ACL">
+        <ng-template awWizardStepSymbol><i class="fas fa-users"></i></ng-template>
+        <hr/>
+        <cmdb-type-acl-step [typeInstance]="typeInstance" [groups]="groups"></cmdb-type-acl-step>
+        <hr/>
         <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-        <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
       </aw-wizard-step>
     </aw-wizard>
   </div>
@@ -29,19 +49,24 @@
       </div>
       <ul class="list-group list-group-flush">
         <li class="list-group-item">
-          <cmdb-type-builder-step-status [step]="'Basic information'"></cmdb-type-builder-step-status>
+          <cmdb-type-builder-step-status [step]="'Basic information'"
+                                         [status]="basicValid"></cmdb-type-builder-step-status>
         </li>
         <li class="list-group-item">
-          <cmdb-type-builder-step-status [step]="'Type content'"></cmdb-type-builder-step-status>
+          <cmdb-type-builder-step-status [step]="'Type content'"
+                                         [status]="contentValid"></cmdb-type-builder-step-status>
         </li>
         <li class="list-group-item">
-          <cmdb-type-builder-step-status [step]="'Meta data'"></cmdb-type-builder-step-status>
+          <cmdb-type-builder-step-status [step]="'Meta data'" [status]="metaValid"></cmdb-type-builder-step-status>
         </li>
         <li class="list-group-item">
-          <cmdb-type-builder-step-status [step]="'Access'" [status]="false"></cmdb-type-builder-step-status>
+          <cmdb-type-builder-step-status [step]="'Access'" [status]="accessValid"></cmdb-type-builder-step-status>
         </li>
       </ul>
     </div>
+    <button type="button" class="btn btn-block btn-success mt-2"
+            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
+    </button>
     <pre>
   <code>
     {{typeInstance | json}}

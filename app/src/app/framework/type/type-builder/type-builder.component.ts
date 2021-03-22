@@ -23,10 +23,14 @@ import { UserService } from '../../../management/services/user.service';
 import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { CmdbCategory } from '../../models/cmdb-category';
 import { Group } from '../../../management/models/group';
 import { ReplaySubject } from 'rxjs';
 import { User } from '../../../management/models/user';
+import { GroupService } from '../../../management/services/group.service';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { AccessControlList } from '../../../acl/acl.types';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -42,13 +46,16 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   @Input() public mode: CmdbMode = CmdbMode.Create;
   @Input() public stepIndex: number = 0;
 
-
   public groups: Array<Group> = [];
   public users: Array<User> = [];
-  public categories: Array<CmdbCategory> = [];
 
-  public constructor(private router: Router, private typeService: TypeService,
-                     private toast: ToastService, private userService: UserService){
+  public basicValid: boolean = true;
+  public contentValid: boolean = true;
+  public metaValid: boolean = true;
+  public accessValid: boolean = true;
+
+  public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
+                     private userService: UserService, private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -57,10 +64,24 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       this.typeInstance.version = '1.0.0';
       this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
       this.typeInstance.render_meta = {
+        icon: undefined,
         sections: [],
-        externals: []
+        externals: [],
+        summary: undefined
       };
+      this.typeInstance.acl = new AccessControlList(false);
     }
+    const groupsCallParameters: CollectionParameters = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1
+    };
+    this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((response: APIGetMultiResponse) => {
+        this.groups = [... response.results as Array<Group>];
+      });
   }
 
   public ngOnDestroy(): void {
@@ -69,40 +90,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   }
 
   /*
-   public exitBasicStep() {
-    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
-    const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
-      'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
-    this.assignToType({ icon: defaultIcon }, 'render_meta');
-    this.assignToType(this.basicStep.basicForm.value);
-  }
 
-   public exitFieldStep() {
-    let fieldBuffer = [];
-    let sectionBuffer = [];
-    const sectionOrigin = this.fieldStep.typeBuilder.sections;
-    for (const section of sectionOrigin) {
-      const sectionGlobe = Object.assign({}, section);
-      fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
-      const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
-      delete sectionGlobe.fields;
-
-      sectionGlobe.fields = Array.from(sectionFieldNames);
-
-      sectionBuffer = sectionBuffer.concat(sectionGlobe);
-    }
-    this.assignToType({ fields: fieldBuffer });
-    this.assignToType({ sections: sectionBuffer }, 'render_meta');
-  }
-
-   public exitMetaStep() {
-    this.assignToType({ summary: this.metaStep.summaryForm.getRawValue() }, 'render_meta');
-    this.assignToType({ externals: this.metaStep.externalLinks }, 'render_meta');
-  }
-
-   public exitAccessStep() {
-    this.assignToType({ acl: this.aclStep.form.getRawValue() });
-  }
 
    public saveType() {
     if (this.mode === CmdbMode.Create) {
@@ -160,15 +148,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
   }
 
-   public assignToType(data: any, optional: any = null) {
-    if (optional !== null) {
-      if (this.typeInstance[optional] === undefined) {
-        this.typeInstance[optional] = {};
-      }
-      Object.assign(this.typeInstance[optional], data);
-    } else {
-      Object.assign(this.typeInstance, data);
-    }
-  }*/
+ */
 
 }

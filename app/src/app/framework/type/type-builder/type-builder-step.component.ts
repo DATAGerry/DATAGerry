@@ -64,7 +64,7 @@ export class TypeBuilderStepComponent {
   @Input() public users: Array<User> = [];
   @Input() public categories: Array<CmdbCategory> = [];
 
-  @Input() public validate: boolean = true;
+  @Input() public valid: boolean = true;
   @Output() public validateChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public constructor() {

@@ -23,6 +23,7 @@ import { takeUntil } from 'rxjs/operators';
 import { Group } from '../../../../management/models/group';
 import { AccessControlList } from '../../../../acl/acl.types';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-acl-step',
@@ -33,18 +34,19 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public acl: AccessControlList;
   private wasEmpty: boolean = true;
 
-  @Input('acl')
-  public set ACL(access: AccessControlList) {
-    if (access) {
-      this.acl = access;
-      this.form.patchValue(this.acl);
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    this.typeInstance = instance;
+    if (this.typeInstance.acl) {
+      this.form.patchValue(this.typeInstance.acl);
     }
+
   }
 
   @Input() public groups: Array<Group> = [];
+
   @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -59,7 +61,6 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
       })
     });
   }
-
 
 
   public get activatedStatus(): boolean {
@@ -80,7 +81,7 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
   }
 
   public ngOnInit(): void {
-    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe((status) => {
+    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       if (!this.form.get('activated').value) {
         this.isEmpty.emit(true);
         this.validStatus.emit(true);
@@ -88,6 +89,9 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
         this.isEmpty.emit(this.wasEmpty);
         this.validStatus.emit(this.form.valid);
       }
+    });
+    this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.typeInstance.acl = this.form.getRawValue() as AccessControlList;
     });
   }
 

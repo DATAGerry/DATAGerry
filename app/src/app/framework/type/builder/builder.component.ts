@@ -139,11 +139,14 @@ export class BuilderComponent implements OnInit, OnDestroy {
         index = section.fields.length;
       }
       section.fields.splice(index, 0, event.data.name);
+
+    }
+    if (section && event.dropEffect === 'copy') {
       let typeIndex = this.typeInstance.fields.map(f => f.name).indexOf(event.data.name);
       if (typeof typeIndex === 'undefined') {
         typeIndex = this.typeInstance.fields.length;
       }
-      this.typeInstance.fields.splice(index, 0, event.data.name);
+      this.typeInstance.fields.splice(typeIndex, 0, event.data);
     }
   }
 
@@ -170,6 +173,14 @@ export class BuilderComponent implements OnInit, OnDestroy {
     if (index !== -1) {
       list.splice(index, 1);
     }
+  }
+
+  public removeField(item: any) {
+    const indexFieldSection: number = this.typeInstance.render_meta.sections.indexOf(item.name);
+    console.log(indexFieldSection);
+    const indexField: number = this.typeInstance.fields.indexOf(item);
+    this.typeInstance.render_meta.sections.splice(indexFieldSection, 1);
+    this.typeInstance.fields.splice(indexField, 1);
   }
 
   public matchedType(value: string) {

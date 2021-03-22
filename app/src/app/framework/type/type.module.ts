@@ -48,6 +48,7 @@ import {
   TypeBuilderStepValidStatusComponent
 } from './type-builder/type-builder-step.component';
 import { IconPickerModule } from 'ngx-icon-picker';
+import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-preview-step.component';
 
 @NgModule({
   declarations: [
@@ -66,7 +67,8 @@ import { IconPickerModule } from 'ngx-icon-picker';
     GroupsAclTabsComponent,
     TypeTableActionsComponent,
     TypeBuilderStepComponent,
-    TypeBuilderStepValidStatusComponent
+    TypeBuilderStepValidStatusComponent,
+    TypePreviewStepComponent
   ],
   imports: [
     CommonModule,

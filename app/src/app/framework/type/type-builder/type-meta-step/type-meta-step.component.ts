@@ -16,45 +16,79 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component, DoCheck,
+  Input, IterableDiffer, IterableDiffers,
+  OnDestroy,
+  OnInit,
+} from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../../models/cmdb-type';
+import { takeUntil } from 'rxjs/operators';
 
+function occurrences(s, subString): number {
+  s += '';
+  subString += '';
+  if (subString.length <= 0) {
+    return (s.length + 1);
+  }
+
+  let n = 0;
+  let pos = 0;
+
+  while (true) {
+    pos = s.indexOf(subString, pos);
+    if (pos >= 0) {
+      ++n;
+      pos += 1;
+    } else {
+      break;
+    }
+  }
+  return n;
+}
 
 @Component({
   selector: 'cmdb-type-meta-step',
   templateUrl: './type-meta-step.component.html',
-  styleUrls: ['./type-meta-step.component.scss']
+  styleUrls: ['./type-meta-step.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class TypeMetaStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
+export class TypeMetaStepComponent extends TypeBuilderStepComponent implements DoCheck, OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   public summaryForm: FormGroup;
   public externalsForm: FormGroup;
-  public externalLinks = [];
-  public hrefInterpolCounter;
-  private currentFields: any[] = [];
-  private currentSummaries: any[] = [];
+
+  public hasInter: boolean = false;
+
+  public fields: Array<any> = [];
+  private iterableDiffer: IterableDiffer<any>;
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     if (instance) {
-      this.summaryForm.patchValue(instance.render_meta.summary);
-      this.externalLinks = instance.render_meta.externals;
+      this.typeInstance = instance;
+      // this.summaryForm.patchValue(instance.render_meta.summary); // TODO: Fields -> Name
+      this.fields = this.typeInstance.fields;
+      this.externalsForm.get('name').setValidators(this.listNameValidator());
     }
   }
 
-  constructor() {
+  constructor(private iterableDiffers: IterableDiffers) {
     super();
+    this.iterableDiffer = iterableDiffers.find([]).create(null);
+
     this.summaryForm = new FormGroup({
       fields: new FormControl('', Validators.required)
     });
 
     this.externalsForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.listNameValidator(this.externalLinks)]),
+      name: new FormControl('', [Validators.required]),
       label: new FormControl('', Validators.required),
       icon: new FormControl(''),
       href: new FormControl('', [Validators.required]),
@@ -75,59 +109,16 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements O
     return this.externalsForm.get('label');
   }
 
-  @Input()
-  public set fields(value: any[]) {
-    let preFields = value;
-    if (value != null) {
-      preFields = JSON.parse(JSON.stringify(value));
-      preFields.push({ label: 'Object ID', name: 'object_id' });
-    }
-    this.currentFields = preFields;
-    this.currentSummaries = value;
-    this.checkSummaryFields();
-    this.checkExternalLinks();
-  }
-
-  public get fields(): any[] {
-    return this.currentFields;
-  }
-
-  public get summaries(): any[] {
-    return this.currentSummaries;
-  }
-
-  private static occurrences(s, subString): number {
-    s += '';
-    subString += '';
-    if (subString.length <= 0) {
-      return (s.length + 1);
-    }
-
-    let n = 0;
-    let pos = 0;
-
-    while (true) {
-      pos = s.indexOf(subString, pos);
-      if (pos >= 0) {
-        ++n;
-        pos += 1;
-      } else {
-        break;
-      }
-    }
-    return n;
-  }
-
-  public listNameValidator(list: any[]) {
+  public listNameValidator() {
     return (control: AbstractControl): { [key: string]: any } | null => {
-      const nameInList = list.find(el => el.name === control.value);
+      const nameInList = this.typeInstance.render_meta.externals.find(el => el.name === control.value);
       return nameInList ? { nameAlreadyTaken: { value: control.value } } : null;
     };
   }
 
   public ngOnInit(): void {
 
-    this.externalsForm.get('name').valueChanges.subscribe(val => {
+    this.externalsForm.get('name').valueChanges.pipe(takeUntil(this.subscriber)).subscribe(val => {
       if (this.externalsForm.get('name').value !== null) {
         this.externalsForm.get('label').setValue(val.charAt(0).toUpperCase() + val.toString().slice(1));
         this.externalsForm.get('label').markAsDirty({ onlySelf: true });
@@ -135,59 +126,37 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements O
       }
     });
 
-    this.externalsForm.get('href').valueChanges.subscribe((href: string) => {
-      this.hrefInterpolCounter = Array(TypeMetaStepComponent.occurrences(href, '{}')).fill(0).map((x, i) => i);
+    this.externalsForm.get('href').valueChanges.pipe(takeUntil(this.subscriber)).subscribe((href: string) => {
+      this.hasInter = occurrences(href, '{}') > 0;
     });
   }
 
   public addExternal() {
-    this.externalLinks.push(this.externalsForm.value);
+    this.typeInstance.render_meta.externals.push(this.externalsForm.value);
     this.externalsForm.reset();
     this.externalsForm.get('icon').setValue('fas fa-external-link-alt');
   }
 
   public editExternal(data) {
-    const rawExternalData = this.externalLinks[this.externalLinks.indexOf(data)];
+    const rawExternalData = this.typeInstance.render_meta.externals[this.typeInstance.render_meta.externals.indexOf(data)];
     this.externalsForm.reset();
     this.deleteExternal(data);
     this.externalsForm.patchValue(rawExternalData);
   }
 
   public deleteExternal(data) {
-    const index: number = this.externalLinks.indexOf(data);
+    const index: number = this.typeInstance.render_meta.externals.indexOf(data);
     if (index !== -1) {
-      this.externalLinks.splice(index, 1);
-    }
-    this.externalsForm.get('name').clearValidators();
-    this.externalsForm.get('name').setValidators(this.listNameValidator(this.externalLinks));
-  }
-
-  private checkSummaryFields() {
-    // checking if summary-fields have removing fields
-    const sumFields: any[] = this.summaryForm.get('fields').value;
-    if (sumFields.length > 0) {
-      const validList = [];
-      sumFields.filter((item) => {
-        this.summaries.map(field => field.name).includes(item) ? validList.push(item) : console.log(item);
-      });
-      this.summaryForm.patchValue({ fields: validList });
+      this.typeInstance.render_meta.externals.splice(index, 1);
     }
   }
 
-  private checkExternalLinks() {
-    // checking if external links have removing fields
-    const extLinks: any[] = this.externalLinks;
-    if (extLinks.length > 0) {
-      let validList = [];
-      extLinks.filter((item) => {
-        if (item.fields.length > 0) {
-          item.fields.filter((value) => {
-            this.fields.map(field => field.name).includes(value) ? validList.push(value) : console.log(value);
-          });
-          item.fields = validList;
-          validList = [];
-        }
-      });
+  public ngDoCheck(): void {
+    const changes = this.iterableDiffer.diff(this.typeInstance.fields);
+    if (changes) {
+      this.fields = [...this.typeInstance.fields];
     }
   }
+
+
 }

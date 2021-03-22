@@ -1,0 +1,13 @@
+<div class="card" *ngIf="typeInstance.render_meta.sections.length > 0; else noPreview">
+  <div class="card-header">
+    Preview
+  </div>
+  <div class="card-body renderForm">
+    <cmdb-render [mode]="mode" [typeInstance]="typeInstance" [renderForm]="previewForm"></cmdb-render>
+  </div>
+</div>
+<ng-template #noPreview>
+  <div class="alert alert-warning" role="alert">
+    It was not possible to create a preview.
+  </div>
+</ng-template>

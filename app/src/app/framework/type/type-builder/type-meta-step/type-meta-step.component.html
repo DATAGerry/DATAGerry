@@ -9,8 +9,12 @@
               autocomplete="off">
           <div class="form-group">
             <label>Fields</label>
-            <ng-select [items]="summaries" [multiple]="true" [searchable]="false" bindLabel="label"
+            <ng-select [items]="fields" [multiple]="true" [searchable]="false" bindLabel="label"
                        bindValue="name" placeholder="Select fields" formControlName="fields">
+              <ng-template ng-option-tmp let-item="item">
+                <div><span>Field: </span>{{item.label}}</div>
+                <small><b>Name:</b> {{item.name}} | <b>Type:</b> {{item.type}}</small>
+              </ng-template>
             </ng-select>
           </div>
         </form>
@@ -66,7 +70,7 @@
             </small>
           </div>
           <div class="form-group">
-            <div class="form-group" *ngIf="hrefInterpolCounter">
+            <div class="form-group" *ngIf="hasInter">
               <label>Field of interpolation</label>
               <ng-select
                 [items]="fields"
@@ -85,7 +89,7 @@
       </div>
     </div>
     <div id="external-link-accordion" class="list-group">
-      <button *ngFor="let external of externalLinks" type="button" class="list-group-item list-group-item-action">
+      <button *ngFor="let external of typeInstance.render_meta.externals" type="button" class="list-group-item list-group-item-action">
         <div class="d-flex w-100 justify-content-between">
           <h5 class="mb-1">{{external.label}}</h5>
           <small class="summary-buttons">
@@ -93,7 +97,7 @@
             <span class="badge badge-primary badge-pill" (click)="deleteExternal(external)">DELETE</span>
           </small>
         </div>
-        <small class="mb-1">Link structure: {{external.link}}</small>
+        <small class="mb-1">Link structure: {{external.href}}</small>
       </button>
     </div>
   </div>

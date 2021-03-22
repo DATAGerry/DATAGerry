@@ -51,7 +51,7 @@ export class CmdbType implements CmdbDao {
   public author_id: number;
   public version: string;
   public creation_time: any;
-  public render_meta: CmdbTypeMeta | any;
+  public render_meta: CmdbTypeMeta;
   public fields: Array<any> = [];
   public acl?: AccessControlList;
 

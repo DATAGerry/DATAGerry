@@ -22,6 +22,7 @@ import { checkTypeExistsValidator, TypeService } from '../../../services/type.se
 import { CmdbMode } from '../../../modes.enum';
 import { ReplaySubject } from 'rxjs';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -51,7 +52,9 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
     } else if (this.mode === CmdbMode.Edit) {
       this.form.markAllAsTouched();
     }
-    this.form.valueChanges.subscribe((changes: any) => {
+    this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe((changes: any) => {
+      this.validateChange.emit(this.form.valid);
+      this.valid = this.form.valid;
       this.assign(changes);
     });
   }
@@ -62,6 +65,10 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
     this.typeInstance.description = changes.description;
     this.typeInstance.active = changes.active;
     this.typeInstance.render_meta.icon = changes.icon;
+  }
+
+  public get icon(): FormControl {
+    return this.form.get('icon') as FormControl;
   }
 
   public get name(): FormControl {
@@ -80,33 +87,5 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
     this.subscriber.next();
     this.subscriber.complete();
   }
-
-  /*
-  public addCategoryModal() {
-    const newCategory = new CmdbCategory();
-    this.modalRef = this.modalService.open(AddCategoryModalComponent, { scrollable: true });
-    this.modalRef.result.then((result: FormGroup) => {
-      if (result) {
-        let categoryID = null;
-        newCategory.name = result.get('name').value;
-        newCategory.label = result.get('label').value;
-        this.categoryService.postCategory(newCategory).pipe(takeUntil(this.subscriber)).subscribe((raw: CmdbCategory) => {
-            this.basicCategoryForm.get('category_id').setValue(raw.public_id);
-            categoryID = raw.public_id;
-          }, () => {
-          },
-          () => {
-            this.categoryService.getCategories(this.categoryQuery).pipe(takeUntil(this.subscriber))
-            .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
-              this.categories = apiResponse.results as Array<CmdbCategory>;
-            });
-            this.sidebarService.loadCategoryTree();
-            this.toast.success('Category # ' + categoryID + ' was created');
-          });
-      }
-    }, (reason) => {
-      console.log(reason);
-    });
-  }*/
 
 }
