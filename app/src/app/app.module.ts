@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -38,6 +38,7 @@ import { AppLoadingService } from './services/app-loading.service';
 import { ProgressBarService } from './layout/progress/progress-bar.service';
 import { ProgressSpinnerService } from './layout/progress/progress-spinner.service';
 import { SessionTimeoutService } from './auth/services/session-timeout.service';
+import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
 
 @NgModule({
   declarations: [
@@ -57,6 +58,7 @@ import { SessionTimeoutService } from './auth/services/session-timeout.service';
   providers: [
     PreviousRouteService,
     DatePipe,
+    DateFormatterPipe,
     AppLoadingService,
     SessionTimeoutService,
     ProgressBarService,

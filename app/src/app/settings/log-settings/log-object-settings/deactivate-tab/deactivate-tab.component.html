@@ -19,7 +19,7 @@
     </cmdb-table>
 
     <ng-template #dateTemplate let-data="data">
-      {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
+      {{data.$date | dateFormatter}}
     </ng-template>
     <ng-template #actionTemplate let-data="data">
       <cmdb-log-object-table-actions [publicID]="data" (deleteEmitter)="deleteEmitter.emit(data);"></cmdb-log-object-table-actions>

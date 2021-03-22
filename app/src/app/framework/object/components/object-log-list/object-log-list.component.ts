@@ -17,7 +17,6 @@
 */
 
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { CmdbLog } from '../../../models/cmdb-log';
 import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
@@ -132,11 +131,10 @@ export class ObjectLogListComponent implements OnInit {
         sortable: true,
         cssClasses: ['text-center'],
         style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
+        template: this.dateTemplate,
         searchable: false,
         render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
+          return data;
         }
       } as Column
     );

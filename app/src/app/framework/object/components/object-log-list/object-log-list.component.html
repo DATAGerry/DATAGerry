@@ -8,7 +8,7 @@
 </cmdb-table>
 
 <ng-template #dateTemplate let-data="data">
-  {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
+  {{data | dateFormatter}}
 </ng-template>
 <ng-template #linkTemplate let-data="data">
   <a routerLink="/framework/object/log/{{data}}">View</a>

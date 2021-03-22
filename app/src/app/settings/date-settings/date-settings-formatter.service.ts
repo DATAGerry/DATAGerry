@@ -20,6 +20,7 @@ import * as moment from 'moment';
 import 'moment-timezone';
 import { NgbDateAdapter, NgbDateParserFormatter, NgbDateStruct } from '@ng-bootstrap/ng-bootstrap';
 import { Injectable } from '@angular/core';
+import { DateSettingsService } from '../services/date-settings.service';
 
 /**
  * This Service handles how the date is represented in scripts i.e. ngModel.
@@ -67,6 +68,10 @@ export class NgbStringAdapter extends NgbDateAdapter<Date> {
 @Injectable()
 export class CustomDateParserFormatter extends NgbDateParserFormatter {
 
+  constructor(private dateSettingsService: DateSettingsService) {
+    super();
+  }
+
   parse(value: string): NgbDateStruct | null {
     return null;
   }
@@ -79,7 +84,8 @@ export class CustomDateParserFormatter extends NgbDateParserFormatter {
    * @param date
    */
   format(date: NgbDateStruct | null): string {
-    return date ? moment.tz(moment(new Date(Date.UTC(date.year, date.month - 1, date.day))), 'Europe/Berlin')
-      .format('YYYY-MM-DDThh:mm:ss' + '( UTC Z )') : null;
+    const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
+    return date ? moment.tz(moment(new Date(Date.UTC(date.year, date.month - 1, date.day))), timezone)
+      .format(date_format) : null;
   }
 }

@@ -59,6 +59,7 @@ import { AuthModule } from '../../auth/auth.module';
 import { TableModule } from '../../layout/table/table.module';
 import { UsersModule } from '../../management/users/users.module';
 import { LogSettingsModule } from '../log-settings/log-settings.module';
+import { RenderModule } from '../../framework/render/render.module';
 
 @NgModule({
   declarations: [
@@ -91,7 +92,8 @@ import { LogSettingsModule } from '../log-settings/log-settings.module';
         AuthModule,
         TableModule,
         UsersModule,
-        LogSettingsModule
+        LogSettingsModule,
+        RenderModule
     ]
 })
 export class ExportdJobSettingsModule {

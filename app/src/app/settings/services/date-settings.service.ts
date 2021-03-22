@@ -29,14 +29,27 @@ import { ApiCallService, ApiService, httpObserveOptions } from '../../services/a
 export class DateSettingsService<T = any> implements ApiService {
 
   public readonly servicePrefix: string = 'date';
+  /**
+   * The current date settings.
+   */
+  public currentDateSettings$: any;
 
   constructor(private api: ApiCallService) {
-    console.log('test');
+    this.getDateSettings().subscribe(() => {});
+  }
+
+  public get currentDateSettings() {
+    return this.currentDateSettings$;
+  }
+
+  public set currentDateSettings(value: any) {
+    this.currentDateSettings$ = value;
   }
 
   public getDateSettings(): Observable<T> {
     return this.api.callGet<T>(`${this.servicePrefix}/`).pipe(
       map((apiResponse) => {
+        this.currentDateSettings = apiResponse.body;
         return apiResponse.body;
       })
     );
@@ -47,6 +60,7 @@ export class DateSettingsService<T = any> implements ApiService {
     options.params = new HttpParams();
     return this.api.callPost<T>(`${ this.servicePrefix }/`, data, options).pipe(
       map((apiResponse) => {
+        this.currentDateSettings = apiResponse.body;
         return apiResponse.body;
       })
     );
