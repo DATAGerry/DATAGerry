@@ -34,6 +34,8 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  @Input() public groups: Array<Group> = [];
+
   private wasEmpty: boolean = true;
 
   @Input('typeInstance')
@@ -45,9 +47,6 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
 
   }
 
-  @Input() public groups: Array<Group> = [];
-
-  @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
   @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public form: FormGroup;
@@ -84,10 +83,10 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
     this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       if (!this.form.get('activated').value) {
         this.isEmpty.emit(true);
-        this.validStatus.emit(true);
+        this.validateChange.emit(true);
       } else {
         this.isEmpty.emit(this.wasEmpty);
-        this.validStatus.emit(this.form.valid);
+        this.validateChange.emit(this.form.valid);
       }
     });
     this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {

@@ -97,7 +97,7 @@
               <button class="btn btn-link mr-1" type="button" dndHandle>
                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
               </button>
-              <button class="btn btn-link" type="button" (click)="remove(section, typeInstance.render_meta.sections)">
+              <button class="btn btn-link" type="button" (click)="removeSection(section)">
                 <fa-icon [icon]="['far', 'window-close']"></fa-icon>
               </button>
             </span>
@@ -130,7 +130,7 @@
                     <button class="btn btn-link mr-1" type="button" dndHandle>
                       <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                     </button>
-                    <button class="btn btn-link" type="button" (click)="removeField(field)">
+                    <button class="btn btn-link" type="button" (click)="removeField(field, section)">
                       <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                     </button>
                   </span>

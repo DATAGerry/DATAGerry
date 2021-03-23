@@ -16,11 +16,10 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
-import { UserService } from '../../../management/services/user.service';
 import { Group } from '../../../management/models/group';
 import { User } from '../../../management/models/user';
 import { TextControl } from './controls/text/text.control';
@@ -30,14 +29,9 @@ import { ReferenceControl } from './controls/specials/ref.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
-import { GroupService } from '../../../management/services/group.service';
 import { CmdbMode } from '../../modes.enum';
 import { FormGroup } from '@angular/forms';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
-import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { DateControl } from './controls/date-time/date.control';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { RefSectionControl } from './controls/ref-section.common';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
@@ -49,7 +43,7 @@ declare var $: any;
   templateUrl: './builder.component.html',
   styleUrls: ['./builder.component.scss']
 })
-export class BuilderComponent implements OnInit, OnDestroy {
+export class BuilderComponent implements OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
@@ -59,23 +53,14 @@ export class BuilderComponent implements OnInit, OnDestroy {
   @Input() public groups: Array<Group> = [];
   @Input() public users: Array<User> = [];
 
-  public typeInstance: CmdbType;
+
   public sections: Array<any> = [];
+
+  public typeInstance: CmdbType;
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     this.typeInstance = instance;
-    /*const preSectionList: any[] = [];
-    for (const section of this.typeInstance.render_meta.sections) {
-      preSectionList.push(section);
-      const fieldBufferList = [];
-      for (const field of section.fields) {
-        fieldBufferList.push(this.typeInstance.fields.find(f => f.name === field));
-      }
-      preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
-    }
-    this.sections = preSectionList;*/
-
   }
 
   public canEdit: boolean = false;
@@ -105,9 +90,6 @@ export class BuilderComponent implements OnInit, OnDestroy {
     this.typeInstance = new CmdbType();
   }
 
-  public ngOnInit(): void {
-
-  }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
@@ -129,6 +111,7 @@ export class BuilderComponent implements OnInit, OnDestroy {
         collapseCard.collapse('hide');
       }
       sections.splice(index, 0, event.data);
+      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
   }
 
@@ -139,14 +122,11 @@ export class BuilderComponent implements OnInit, OnDestroy {
         index = section.fields.length;
       }
       section.fields.splice(index, 0, event.data.name);
-
+      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
     if (section && event.dropEffect === 'copy') {
-      let typeIndex = this.typeInstance.fields.map(f => f.name).indexOf(event.data.name);
-      if (typeof typeIndex === 'undefined') {
-        typeIndex = this.typeInstance.fields.length;
-      }
-      this.typeInstance.fields.splice(typeIndex, 0, event.data);
+      this.typeInstance.fields.push(event.data);
+      this.typeInstance.fields = [...this.typeInstance.fields];
     }
   }
 
@@ -168,19 +148,34 @@ export class BuilderComponent implements OnInit, OnDestroy {
     }
   }
 
-  public remove(item: any, list: any[]) {
-    const index: number = list.indexOf(item);
+  public removeSection(item: CmdbTypeSection) {
+    const index: number = this.typeInstance.render_meta.sections.indexOf(item);
     if (index !== -1) {
-      list.splice(index, 1);
+      const fields: Array<string> = this.typeInstance.render_meta.sections[index].fields;
+      for (const field of fields) {
+        const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field);
+        if (index !== -1) {
+          this.typeInstance.fields.splice(fieldIdx, 1);
+        }
+      }
+      this.typeInstance.fields = [...this.typeInstance.fields];
+
+      this.typeInstance.render_meta.sections.splice(index, 1);
+      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+
     }
+
   }
 
-  public removeField(item: any) {
-    const indexFieldSection: number = this.typeInstance.render_meta.sections.indexOf(item.name);
-    console.log(indexFieldSection);
+  public removeField(item: any, section: CmdbTypeSection) {
     const indexField: number = this.typeInstance.fields.indexOf(item);
-    this.typeInstance.render_meta.sections.splice(indexFieldSection, 1);
+
     this.typeInstance.fields.splice(indexField, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
+
+    const sectionFieldIndex = section.fields.indexOf(item.name);
+    section.fields.splice(sectionFieldIndex, 1);
+    this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
   }
 
   public matchedType(value: string) {
@@ -203,4 +198,5 @@ export class BuilderComponent implements OnInit, OnDestroy {
         return 'font';
     }
   }
+
 }

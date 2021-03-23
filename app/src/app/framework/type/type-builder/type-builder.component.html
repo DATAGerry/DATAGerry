@@ -7,38 +7,51 @@
         <cmdb-type-basic-step [mode]="mode" [typeInstance]="typeInstance"
                               (validateChange)="basicValid = $event"></cmdb-type-basic-step>
         <hr/>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
       <aw-wizard-step [stepId]="'2'" stepTitle="Content">
         <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
         <hr/>
-        <cmdb-type-fields-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-fields-step>
+        <cmdb-type-fields-step [mode]="mode" [typeInstance]="typeInstance" [types]="types"
+                               (validateChange)="contentValid = $event"></cmdb-type-fields-step>
         <hr/>
-        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
       <aw-wizard-step [stepId]="'3'" stepTitle="Preview">
         <ng-template awWizardStepSymbol><i class="fas fa-eye"></i></ng-template>
         <hr/>
         <cmdb-type-preview-step [typeInstance]="typeInstance"></cmdb-type-preview-step>
         <hr/>
-        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
       <aw-wizard-step [stepId]="'4'" stepTitle="Meta">
         <ng-template awWizardStepSymbol><i class="fas fa-hashtag"></i></ng-template>
         <hr/>
         <cmdb-type-meta-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-meta-step>
         <hr/>
-        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step</button>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
       <aw-wizard-step [stepId]="'5'" stepTitle="ACL">
         <ng-template awWizardStepSymbol><i class="fas fa-users"></i></ng-template>
         <hr/>
-        <cmdb-type-acl-step [typeInstance]="typeInstance" [groups]="groups"></cmdb-type-acl-step>
+        <cmdb-type-acl-step [typeInstance]="typeInstance" [groups]="groups" (validateChange)="accessValid = $event"></cmdb-type-acl-step>
         <hr/>
-        <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+        <button class="btn btn-primary prev" type="button" awPreviousStep>
+          <i class="fas fa-angle-double-left"></i> Previous Step
+        </button>
       </aw-wizard-step>
     </aw-wizard>
   </div>
@@ -64,7 +77,7 @@
         </li>
       </ul>
     </div>
-    <button type="button" class="btn btn-block btn-success mt-2"
+    <button type="button" class="btn btn-block btn-success mt-2" (click)="saveType()"
             [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
     </button>
     <pre>

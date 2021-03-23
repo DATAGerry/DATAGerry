@@ -16,15 +16,19 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
 import { CmdbMode } from '../../../modes.enum';
 import { ReplaySubject } from 'rxjs';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { takeUntil } from 'rxjs/operators';
+import { CmdbType } from '../../../models/cmdb-type';
 
 
+/**
+ * Type builder step for basic type information.
+ */
 @Component({
   selector: 'cmdb-type-basic-step',
   templateUrl: './type-basic-step.component.html',
@@ -34,6 +38,20 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public form: FormGroup;
+
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    if (instance) {
+      this.typeInstance = instance;
+      this.form.patchValue({
+        name: this.typeInstance.name,
+        label: this.typeInstance.label,
+        description: this.typeInstance.description,
+        active: this.typeInstance.active,
+        icon: this.typeInstance.render_meta.icon
+      });
+    }
+  }
 
   constructor(private typeService: TypeService) {
     super();
@@ -53,9 +71,11 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
       this.form.markAllAsTouched();
     }
     this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe((changes: any) => {
+      this.assign(changes);
+    });
+    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.validateChange.emit(this.form.valid);
       this.valid = this.form.valid;
-      this.assign(changes);
     });
   }
 

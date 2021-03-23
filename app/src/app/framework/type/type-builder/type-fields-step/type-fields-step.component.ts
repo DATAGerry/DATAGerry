@@ -16,31 +16,65 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component, DoCheck,
+  Input,
+  KeyValueDiffer, KeyValueDiffers,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { BuilderComponent } from '../../builder/builder.component';
 import { CmdbMode } from '../../../modes.enum';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-fields-step',
   templateUrl: './type-fields-step.component.html',
   styleUrls: ['./type-fields-step.component.scss']
 })
-export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
+export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements OnInit, DoCheck, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  private typeInstanceDiffer: KeyValueDiffer<string, any>;
 
-  public constructor() {
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    if (instance) {
+      this.typeInstance = instance;
+      this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
+    }
+  }
+
+  public constructor(private differs: KeyValueDiffers) {
     super();
   }
 
   public ngOnInit(): void {
+    this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
   }
+
+  public ngDoCheck(): void {
+    const changes = this.typeInstanceDiffer.diff(this.typeInstance);
+    if (changes) {
+      const hasFields: boolean = this.typeInstance.fields.length > 0;
+      const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
+      this.valid = hasFields && hasSections;
+      this.validateChange.emit(this.valid);
+    }
+  }
+
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
   }
+
+
 
 }

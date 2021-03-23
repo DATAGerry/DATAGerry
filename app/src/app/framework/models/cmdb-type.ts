@@ -19,6 +19,15 @@
 import { CmdbDao } from './cmdb-dao';
 import { AccessControlList } from '../../acl/acl.types';
 
+export interface CmdbTypeListEntry {
+  name: string;
+  label: string;
+  public_id: number;
+  render_meta: CmdbTypeMeta;
+}
+
+export class CmdbTypeList extends Array<CmdbTypeListEntry> {}
+
 export interface CmdbTypeSection {
   type: string;
   name: string;
@@ -26,7 +35,7 @@ export interface CmdbTypeSection {
   fields: Array<any>;
 }
 
-export interface CmdbTypeExternalLink{
+export interface CmdbTypeExternalLink {
   name: string;
   href: string;
   label: string;
@@ -38,7 +47,11 @@ export interface CmdbTypeMeta {
   icon: string;
   sections: Array<CmdbTypeSection>;
   externals: Array<CmdbTypeExternalLink>;
-  summary: any;
+  summary: CmdbTypeSummary;
+}
+
+export interface CmdbTypeSummary {
+  fields: Array<string>;
 }
 
 export class CmdbType implements CmdbDao {
