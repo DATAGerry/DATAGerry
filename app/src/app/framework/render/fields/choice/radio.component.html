@@ -7,8 +7,8 @@
       <ng-container *ngSwitchCase="mode == MODES.View">
         <div class="custom-control custom-radio" *ngFor="let option of data.options">
           <input type="radio" [formControlName]="data.name" name="{{data.name}}" id="{{option.name}}"
-                 value="{{option.name}}" class="custom-control-input"/><label class="custom-control-label"
-                                                                              for="{{option.name}}"> {{option.label}}</label>
+                 value="{{option.name}}" class="custom-control-input"/>
+          <label class="custom-control-label" for="{{option.name}}"> {{option.label}}</label>
         </div>
       </ng-container>
       <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
@@ -20,10 +20,12 @@
             </div>
             <div class="col-sm-4">
               <div class="custom-control custom-radio" *ngFor="let option of data.options">
-                <input type="radio" [formControlName]="data.name" name="{{data.name}}" [attr.id]="option.name"
-                       value="{{option.name}}" class="custom-control-input" [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/><label
-                class="custom-control-label" for="{{option.name}}"> {{option.label}}</label>
+                <input type="radio" [formControlName]="data.name" name="{{data.name}}"
+                       [attr.id]="data.name + option.name"
+                       value="{{option.name}}" class="custom-control-input"
+                       [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+                <label class="custom-control-label" [attr.for]="data.name + option.name"> {{option.label}}</label>
               </div>
             </div>
             <div class="col-sm">
