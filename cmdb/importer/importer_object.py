@@ -83,7 +83,8 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
-                entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
+                if 'checkbox' == field_exists['type']:
+                    entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
                 entry_field['value'] = ImproveObject.improve_date(entry_field['value'])
                 working_object.get('fields').append(entry_field)
         return working_object
