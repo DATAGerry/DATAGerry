@@ -1,0 +1,36 @@
+<div class="form-group">
+  <label>Name: <span class="required">*</span></label>
+  <input [(ngModel)]="data.name" type="text" class="form-control" value="{{data.name}}" name-guideline required>
+  <small class="form-text text-muted">Use a unique field-name</small>
+</div>
+<div class="form-group">
+  <label>Label: <span class="required">*</span></label>
+  <input [(ngModel)]="data.label" type="text" class="form-control" required>
+  <small class="form-text text-muted">a static display name</small>
+</div>
+<div class="form-group">
+  <label>Reference type: <span class="required">*</span></label>
+  <ng-select [items]="types" [searchable]="true" bindLabel="label" [(ngModel)]="data.reference.type_id"
+             (change)="onTypeChange($event)"
+             bindValue="public_id" placeholder="Select Reference type" required>
+    <ng-template ng-option-tmp let-item="item">
+      <div><span>Type: </span>{{item.label}}</div>
+      <small><b>PublicID:</b> {{item.public_id}} | <b>Name:</b> {{item.name}}</small>
+    </ng-template>
+  </ng-select>
+</div>
+<div class="form-group" *ngIf="typeSections.length > 0">
+  <label>Section: <span class="required">*</span></label>
+  <ng-select [items]="typeSections" [searchable]="true" bindLabel="label"
+             [(ngModel)]="data.reference.section_name" (change)="onSectionChange($event)"
+             bindValue="name" placeholder="Select a section" required>
+  </ng-select>
+</div>
+<div class="form-group" *ngIf="selectedSection">
+  <label>Limit section output:</label>
+  <ng-select [items]="selectedSection.fields" [multiple]="true" [searchable]="true"
+             [(ngModel)]="data.reference.selected_fields" placeholder="Limit to fields">
+  </ng-select>
+  <small class="text-muted">Leave empty for all fields.</small>
+</div>
+

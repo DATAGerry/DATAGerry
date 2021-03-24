@@ -78,17 +78,20 @@
     </div>
   </div>
   <div id="form-container" class="col-9">
-    <div id="form-content" data-content="Drop section here" [ngClass]="{'empty': typeInstance.render_meta.sections.length == 0 }"
+    <div id="form-content" data-content="Drop section here"
+         [ngClass]="{'empty': typeInstance.render_meta.sections.length == 0 }"
          [dndDropzone]="['sections']" (dndDrop)="onSectionDrop($event)">
       <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
            dndPlaceholderRef>
         Drop section here
       </div>
-      <section *ngFor="let section of typeInstance.render_meta.sections; let x = index" dndEffectAllowed="copyMove" dndType="sections" [dndDraggable]="section"
+      <section *ngFor="let section of typeInstance.render_meta.sections; let x = index" dndEffectAllowed="copyMove"
+               dndType="sections" [dndDraggable]="section"
                (dndMoved)="onDragged(section, typeInstance.render_meta.sections, 'move')">
         <div class="card">
           <div class="card-header">
-            <fa-icon [icon]="['far', 'object-group']"></fa-icon> {{section.label}}
+            <fa-icon [icon]="['far', 'object-group']"></fa-icon>
+            {{section.label}}
             <span class="float-right">
               <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                       [attr.data-target]="'#section-' + x + section.name">
@@ -106,23 +109,24 @@
             <div class="card-body">
               <cmdb-config-edit [canEdit]="canEdit"
                                 [sections]="sections"
-                                [data]="section"></cmdb-config-edit>
+                                [data]="section" [types]="types"></cmdb-config-edit>
             </div>
           </div>
-          <div class="card-body" [dndDropzone]="['inputs']"
+          <div *ngIf="section.type === 'section'" class="card-body" [dndDropzone]="['inputs']"
                (dndDrop)="onFieldDrop($event, section)">
             <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
                  dndPlaceholderRef>
               Drop field here
             </div>
-            <ng-container *ngFor="let section_field of section.fields; let y = index" >
+            <ng-container *ngFor="let section_field of section.fields; let y = index">
               <div *ngIf="getFieldBySectionID(section_field) as field" dndEffectAllowed="move" dndType="inputs"
-                            [dndDraggable]="field"
-                            (dndMoved)="onFieldDragged(field, section)">
-              <div class="fields card">
-                <div class="card-header">
-                  <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
-                  <span class="float-right">
+                   [dndDraggable]="field"
+                   (dndMoved)="onFieldDragged(field, section)">
+                <div class="fields card">
+                  <div class="card-header">
+                    <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon>
+                    {{field.label}}
+                    <span class="float-right">
                     <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                             [attr.data-target]="'#field-'+ x + y + field.name">
                       <fa-icon [icon]="['far', 'edit']"></fa-icon>
@@ -134,13 +138,13 @@
                       <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                     </button>
                   </span>
+                  </div>
+                  <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
+                    <cmdb-config-edit [canEdit]="canEdit"
+                                      [sections]="sections"
+                                      [data]="field"></cmdb-config-edit>
+                  </div>
                 </div>
-                <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                  <cmdb-config-edit [canEdit]="canEdit"
-                                    [sections]="sections"
-                                    [data]="field"></cmdb-config-edit>
-                </div>
-              </div>
               </div>
             </ng-container>
           </div>

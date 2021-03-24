@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { CmdbType, CmdbTypeList } from '../../models/cmdb-type';
+import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
 import { CmdbMode } from '../../modes.enum';
@@ -79,7 +79,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   /**
    * List of possible types.
    */
-  public types: CmdbTypeList = [];
+  public types: Array<CmdbType> = [];
 
   /**
    * Basic step valid
@@ -147,7 +147,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     };
     this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
       .subscribe((response: APIGetMultiResponse) => {
-        this.types = response.results as CmdbTypeList;
+        this.types = response.results as Array<CmdbType>;
       });
   }
 

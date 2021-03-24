@@ -42,7 +42,6 @@ export interface ControlsContent {
 export interface StructureContent {
   name: string;
   label: string;
-  position: number;
   type: string;
 }
 

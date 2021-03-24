@@ -19,7 +19,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbMode } from '../../modes.enum';
-import { CmdbType, CmdbTypeList } from '../../models/cmdb-type';
+import { CmdbType } from '../../models/cmdb-type';
 import { Group } from '../../../management/models/group';
 import { User } from '../../../management/models/user';
 import { CmdbCategory } from '../../models/cmdb-category';
@@ -103,7 +103,7 @@ export class TypeBuilderStepComponent {
   /**
    * List of possible types
    */
-  @Input() public types: CmdbTypeList = [];
+  @Input() public types: Array<CmdbType> = [];
 
   /**
    * Is the step valid

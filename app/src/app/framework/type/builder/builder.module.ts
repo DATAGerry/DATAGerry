@@ -37,6 +37,8 @@ import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-boots
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
 import { CategoryModule } from '../../category/category.module';
+import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-edit.component';
+import { LayoutModule } from '../../../layout/layout.module';
 
 @NgModule({
   declarations: [
@@ -52,6 +54,7 @@ import { CategoryModule } from '../../category/category.module';
     PreviewModalComponent,
     DiagnosticModalComponent,
     DateFieldEditComponent,
+    SectionRefFieldEditComponent,
   ],
   imports: [
     CommonModule,
@@ -64,7 +67,8 @@ import { CategoryModule } from '../../category/category.module';
     NgbDatepickerModule,
     ReactiveFormsModule,
     CategoryModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    LayoutModule
   ],
   exports: [
     BuilderComponent

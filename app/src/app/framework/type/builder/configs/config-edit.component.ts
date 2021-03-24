@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import {
@@ -26,9 +26,7 @@ import {
   ViewContainerRef
 } from '@angular/core';
 import { configComponents } from './configs.list';
-import { Group } from '../../../../management/models/group';
-import { User } from '../../../../management/models/user';
-import { CmdbMode } from '../../../modes.enum';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -40,6 +38,9 @@ export class ConfigEditComponent implements OnInit {
   @Input() data: any;
   @Input() sections: any[];
   @Input() canEdit: boolean = false;
+
+  @Input() public types: Array<CmdbType> = [];
+
   @ViewChild('fieldConfig', { read: ViewContainerRef, static: true }) container;
   private component: any;
   private componentRef: ComponentRef<any>;
@@ -56,5 +57,6 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.canEdit = this.canEdit;
+    this.componentRef.instance.types = this.types;
   }
 }

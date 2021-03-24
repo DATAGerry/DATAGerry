@@ -52,7 +52,7 @@ export class BuilderComponent implements OnDestroy {
   @Input() public mode = CmdbMode.View;
   @Input() public groups: Array<Group> = [];
   @Input() public users: Array<User> = [];
-
+  @Input() public types: Array<CmdbType> = [];
 
   public sections: Array<any> = [];
 
@@ -151,15 +151,16 @@ export class BuilderComponent implements OnDestroy {
   public removeSection(item: CmdbTypeSection) {
     const index: number = this.typeInstance.render_meta.sections.indexOf(item);
     if (index !== -1) {
-      const fields: Array<string> = this.typeInstance.render_meta.sections[index].fields;
-      for (const field of fields) {
-        const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field);
-        if (index !== -1) {
-          this.typeInstance.fields.splice(fieldIdx, 1);
+      if (item.type === 'section') {
+        const fields: Array<string> = this.typeInstance.render_meta.sections[index].fields;
+        for (const field of fields) {
+          const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field);
+          if (index !== -1) {
+            this.typeInstance.fields.splice(fieldIdx, 1);
+          }
         }
+        this.typeInstance.fields = [...this.typeInstance.fields];
       }
-      this.typeInstance.fields = [...this.typeInstance.fields];
-
       this.typeInstance.render_meta.sections.splice(index, 1);
       this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
 

@@ -16,8 +16,20 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ControlsCommon, randomName } from './controls.common';
-import { SectionContent } from './section.control';
+import { ControlsCommon, randomName, StructureContent } from './controls.common';
+
+export class RefSectionContent implements StructureContent {
+
+  label: string;
+  name: string;
+  type: string = 'ref-section';
+  reference: {
+    type_id: number;
+    section_name: string;
+    selected_fields?: any;
+  };
+
+}
 
 
 export class RefSectionControl implements ControlsCommon {
@@ -28,9 +40,14 @@ export class RefSectionControl implements ControlsCommon {
   dndType: string = 'sections';
 
   content() {
-    const section = new SectionContent();
+    const section = new RefSectionContent();
     section.name = randomName(this.name);
     section.label = this.label;
+    section.reference = {
+      type_id: undefined,
+      section_name: undefined,
+      selected_fields: undefined
+    };
     return section;
   }
 
