@@ -58,7 +58,7 @@ class TypeReference:
     __slots__ = 'type_id', 'label', 'summaries', 'line', 'prefix', 'icon'
 
     def __init__(self, type_id: int, label: str, line: str = None,
-                 prefix: bool = False, icon = None, summaries: list = None):
+                 prefix: bool = False, icon=None, summaries: list = None):
         self.type_id = type_id
         self.label = label or ''
         self.summaries = summaries or []
@@ -205,16 +205,39 @@ class TypeExternalLink:
 
 
 class TypeSection:
-    __slots__ = 'type', 'name', 'label', 'fields'
+    __slots__ = 'type', 'name', 'label'
 
-    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
+    def __init__(self, type: str, name: str, label: str = None):
         self.type = type
         self.name = name
         self.label = label or self.name.title()
-        self.fields = fields or []
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeSection":
+        return cls(
+            type=data.get('type'),
+            name=data.get('name'),
+            label=data.get('label', None),
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeSection") -> dict:
+        return {
+            'type': instance.type,
+            'name': instance.name,
+            'label': instance.label
+        }
+
+
+class TypeFieldSection(TypeSection):
+    __slots__ = 'fields'
+
+    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
+        self.fields = fields or []
+        super(TypeFieldSection, self).__init__(type=type, name=name, label=label)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeFieldSection":
         return cls(
             type=data.get('type'),
             name=data.get('name'),
@@ -223,7 +246,7 @@ class TypeSection:
         )
 
     @classmethod
-    def to_json(cls, instance: "TypeSection") -> dict:
+    def to_json(cls, instance: "TypeFieldSection") -> dict:
         return {
             'type': instance.type,
             'name': instance.name,
@@ -232,12 +255,39 @@ class TypeSection:
         }
 
 
+class TypeReferenceSection(TypeFieldSection):
+    __slots__ = 'reference'
+
+    def __init__(self, type: str, name: str, label: str = None, reference: dict = None):
+        self.reference = reference or {}
+        super(TypeReferenceSection, self).__init__(type=type, name=name, label=label)
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeReferenceSection":
+        return cls(
+            type=data.get('type'),
+            name=data.get('name'),
+            label=data.get('label', None),
+            reference=data.get('reference', None)
+        )
+
+    @classmethod
+    def to_json(cls, instance: "TypeReferenceSection") -> dict:
+        return {
+            'type': instance.type,
+            'name': instance.name,
+            'label': instance.label,
+            'reference': instance.reference
+        }
+
+
 class TypeRenderMeta:
     """Class of the type models `render_meta` field"""
 
     __slots__ = 'icon', 'sections', 'externals', 'summary'
 
-    def __init__(self, icon: str = None, sections: List[TypeSection] = None, externals: List[TypeExternalLink] = None,
+    def __init__(self, icon: str = None, sections: List[TypeSection] = None,
+                 externals: List[TypeExternalLink] = None,
                  summary: TypeSummary = None):
         self.icon: str = icon
         self.sections: List[TypeSection] = sections or []
@@ -246,9 +296,19 @@ class TypeRenderMeta:
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeRenderMeta":
+        sections: List[TypeSection] = []
+        for section in data.get('sections', []):
+            section_type = section.get('type', 'section')
+            if section_type == 'section':
+                sections.append(TypeFieldSection.from_data(section))
+            elif section_type == 'ref-section':
+                sections.append(TypeReferenceSection.from_data(section))
+            else:
+                sections.append(TypeFieldSection.from_data(section))
+
         return cls(
             icon=data.get('icon', None),
-            sections=[TypeSection.from_data(section) for section in data.get('sections', [])],
+            sections=sections,
             externals=[TypeExternalLink.from_data(external) for external in
                        data.get('externals', None) or data.get('external', [])],
             summary=TypeSummary.from_data(data.get('summary', {}))
@@ -258,7 +318,7 @@ class TypeRenderMeta:
     def to_json(cls, instance: "TypeRenderMeta") -> dict:
         return {
             'icon': instance.icon,
-            'sections': [TypeSection.to_json(section) for section in instance.sections],
+            'sections': [section.to_json(section) for section in instance.sections],
             'externals': [TypeExternalLink.to_json(external) for external in instance.externals],
             'summary': TypeSummary.to_json(instance.summary)
         }
@@ -447,7 +507,7 @@ class TypeModel(CmdbDAO):
             complete_field_list.append(self.get_field(field_name))
         return TypeSummary(fields=complete_field_list)
 
-    def get_sections(self) -> List[TypeSection]:
+    def get_sections(self) -> List[TypeFieldSection]:
         return self.render_meta.sections
 
     def get_section(self, name):

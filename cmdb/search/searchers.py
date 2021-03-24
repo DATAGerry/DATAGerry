@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 import logging
@@ -266,7 +266,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             raw_search_result_list_entry = raw_search_result_list[0]
             # parse result list
             pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
-            rendered_result_list = RenderList(pre_rendered_result_list, request_user,
+            rendered_result_list = RenderList(pre_rendered_result_list, request_user, database_manager=self.manager.dbm,
                                               object_manager=self.manager).render_result_list()
 
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)

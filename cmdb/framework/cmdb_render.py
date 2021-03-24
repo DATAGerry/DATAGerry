@@ -17,25 +17,24 @@
 """
 Object/Type render
 """
+
+import logging
 from typing import List, Union
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.wraps import timing
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
 
-import logging
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeSection, TypeReference
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference
 from cmdb.framework.special.dt_html_parser import DtHtmlParser
 from cmdb.user_management.user_manager import UserModel, UserManager
 from dateutil.parser import parse
@@ -146,7 +145,7 @@ class CmdbRender:
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
         except CMDBError as err:
-            raise RenderError(f'Error while generating a CMDBResult: {err.message}')
+            raise RenderError(f'Error while generating a CMDBResult: {err}')
         return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
@@ -181,7 +180,7 @@ class CmdbRender:
             author_name = self._render_username_by_id(self.type_instance.author_id)
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
-            LOGGER.error(err.message)
+            LOGGER.error(err)
         try:
             self.type_instance.render_meta.icon
         except KeyError:
@@ -207,7 +206,7 @@ class CmdbRender:
 
     def __set_sections(self, render_result: RenderResult) -> RenderResult:
         try:
-            render_result.sections = [TypeSection.to_json(section) for section in
+            render_result.sections = [section.to_json(section) for section in
                                       self.type_instance.render_meta.sections]
         except (IndexError, ValueError):
             render_result.sections = []
@@ -368,17 +367,14 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, dt_render=False, ref_render=False,
+    def __init__(self, object_list: List[CmdbObject], request_user: UserModel,  database_manager: DatabaseManagerMongo, dt_render=False, ref_render=False,
                  object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
         self.dt_render = dt_render
         self.ref_render = ref_render
-        from cmdb.utils.system_config import SystemConfigReader
-        database_manager = DatabaseManagerMongo(
-            **SystemConfigReader().get_all_values_from_section('Database')
-        )
-        self.object_manager = object_manager or CmdbObjectManager(database_manager=database_manager)
+        self.object_manager = object_manager
+        self.type_manager = TypeManager(database_manager=database_manager)
         self.user_manager = UserManager(database_manager=database_manager)
 
     @timing('RenderList')

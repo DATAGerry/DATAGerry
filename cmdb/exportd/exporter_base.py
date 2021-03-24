@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
@@ -26,7 +26,7 @@ from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
-from cmdb.framework.cmdb_render import CmdbRender, RenderList
+from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
 
@@ -142,6 +142,7 @@ class ExportVariable:
             output = ''
         return output
 
+
 class ExportSource:
 
     def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):
@@ -178,7 +179,8 @@ class ExportSource:
                 query.append({'type_id': source["type_id"], 'active': {'$eq': True}})
 
         current_objects = self.__obm.get_objects_by(sort="public_id", **{'$or': query})
-        result = (RenderList(current_objects, None).render_result_list())
+        result = (RenderList(current_objects, None, database_manager=self.__obm.dbm,
+                             object_manager=self.__obm).render_result_list())
         return result
 
 

@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
 import logging
@@ -82,6 +82,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
             rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
@@ -168,7 +169,8 @@ def get_objects_by_type(public_id, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     resp = make_response(rendered_list)
     return resp
 
@@ -202,7 +204,7 @@ def get_dt_objects_by_type(type_id, request_user: UserModel):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
+    rendered_list = RenderList(object_list, request_user, database_manager=current_app.database_manager, dt_render=True).render_result_list()
 
     table_response = {
         'data': rendered_list,
@@ -281,7 +283,7 @@ def get_dt_filter_objects_by_type(type_id, request_user: UserModel):
     except CMDBError:
         return abort(400)
 
-    rendered_list = RenderList(object_list, request_user, dt_render=dt_render).render_result_list()
+    rendered_list = RenderList(object_list, request_user, database_manager=current_app.database_manager, dt_render=dt_render).render_result_list()
 
     table_response = {
         'data': rendered_list,
@@ -305,7 +307,8 @@ def get_objects_by_types(type_ids, request_user: UserModel):
         query = {'$and': [in_types, is_active]}
 
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
+        rendered_list = RenderList(all_objects_list, request_user,
+                                   database_manager=current_app.database_manager).render_result_list()
 
     except CMDBError:
         return abort(400)
@@ -325,7 +328,8 @@ def get_objects_by_public_id(public_ids, request_user: UserModel):
         filter_state = {'public_id': public_ids}
         query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
+        rendered_list = RenderList(all_objects_list, request_user,
+                                   database_manager=current_app.database_manager).render_result_list()
 
     except CMDBError:
         return abort(400)
@@ -439,6 +443,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
             rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
@@ -466,7 +471,8 @@ def get_objects_by_user(public_id: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -491,7 +497,7 @@ def get_new_objects_since(timestamp: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -517,7 +523,7 @@ def get_changed_objects_since(timestamp: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user, database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -925,7 +931,7 @@ def get_newest(request_user: UserModel):
                                                         user=request_user,
                                                         permission=AccessControlPermission.READ
                                                         )
-    rendered_list = RenderList(newest_objects_list, request_user).render_result_list()
+    rendered_list = RenderList(newest_objects_list, request_user, database_manager=current_app.database_manager).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)
@@ -951,7 +957,7 @@ def get_latest(request_user: UserModel):
                                                       user=request_user,
                                                       permission=AccessControlPermission.READ
                                                       )
-    rendered_list = RenderList(last_objects_list, request_user).render_result_list()
+    rendered_list = RenderList(last_objects_list, request_user, database_manager=current_app.database_manager).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)
