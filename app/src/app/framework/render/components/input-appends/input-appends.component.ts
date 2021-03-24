@@ -31,7 +31,7 @@ export class InputAppendsComponent extends RenderFieldComponent {
   }
 
   public changeValueToDefault() {
-    this.controller.setValue(this.data.default);
+    this.controller.setValue(this.data.default ? this.data.default : null);
     this.controller.markAsDirty({onlySelf: true});
     this.controller.markAsTouched({onlySelf: true});
     this.parentFormGroup.markAsTouched({onlySelf: true});
