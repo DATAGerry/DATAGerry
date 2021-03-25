@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
@@ -50,6 +50,13 @@ export class ConfigEditBaseComponent {
     return this.innerSections;
   }
 
+  public fields: Array<any> = [];
+
+  @Input('fields')
+  public set Fields(f: Array<any>) {
+    this.fields = f;
+  }
+
   @Input('canEdit')
   public set canEdit(value: any) {
     this.editable = value;
@@ -70,7 +77,7 @@ export class ConfigEditBaseComponent {
   }
 
   private checkNameUniqueness() {
-    const {type, name} = this.data;
+    const { type, name } = this.data;
     switch (type) {
       case 'section':
         return this.sections.filter(el => el.name === name).length <= 1;

@@ -96,6 +96,21 @@ export class BuilderComponent implements OnDestroy {
     this.subscriber.complete();
   }
 
+  private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
+    this.typeInstance.fields.push({
+      type: 'ref-section-field',
+      name: `${refSection.name}-field`,
+      label: refSection.label
+    });
+    this.typeInstance.fields = [...this.typeInstance.fields];
+  }
+
+  private removeRefSectionSelectionField(refSection: CmdbTypeSection): void {
+    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${refSection.name}-field`);
+    this.typeInstance.fields.splice(index, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
+  }
+
   public onSectionDrop(event: DndDropEvent): void {
     const sections = this.typeInstance.render_meta.sections;
     if (sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
@@ -112,6 +127,9 @@ export class BuilderComponent implements OnDestroy {
       }
       sections.splice(index, 0, event.data);
       this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+      if (event.data.type === 'ref-section') {
+        this.addRefSectionSelectionField(event.data as CmdbTypeSection);
+      }
     }
   }
 
@@ -160,10 +178,11 @@ export class BuilderComponent implements OnDestroy {
           }
         }
         this.typeInstance.fields = [...this.typeInstance.fields];
+      } else if (item.type === 'ref-section') {
+        this.removeRefSectionSelectionField(item);
       }
       this.typeInstance.render_meta.sections.splice(index, 1);
       this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
-
     }
 
   }

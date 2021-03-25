@@ -25,6 +25,7 @@ from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager import ManagerGetError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.wraps import timing
@@ -34,9 +35,10 @@ from cmdb.utils.error import CMDBError
 from datetime import datetime
 
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference
-from cmdb.framework.special.dt_html_parser import DtHtmlParser
-from cmdb.user_management.user_manager import UserModel, UserManager
+from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference, \
+    TypeReferenceSection
+from cmdb.user_management.user_manager import UserModel
+from cmdb.user_management.managers.user_manager import UserManager
 from dateutil.parser import parse
 
 LOGGER = logging.getLogger(__name__)
@@ -72,26 +74,18 @@ class CmdbRender:
 
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
-                 render_user: UserModel, user_list: List[UserModel] = None,
-                 object_manager: CmdbObjectManager = None, dt_render=False, ref_render=False):
+                 render_user: UserModel,
+                 object_manager: CmdbObjectManager = None, ref_render=False):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
-        self.user_list: List[UserModel] = user_list
         self.render_user: UserModel = render_user
-        self.object_manager = object_manager
-        self.dt_render = dt_render
-        self.ref_render = ref_render
 
-    def _render_username_by_id(self, user_id: int, default=AUTHOR_ANONYMOUS_NAME) -> str:
-        user: UserModel = None
-        try:
-            user = next(_ for _ in self.user_list if _.public_id == user_id)
-        except Exception:
-            user = None
-        if user:
-            return user.get_display_name()
-        else:
-            return default
+        self.object_manager = object_manager
+        if self.object_manager:  # TODO: Refactor to pass database-manager in init
+            self.type_manager = TypeManager(self.object_manager.dbm)
+            self.user_manager = UserManager(self.object_manager.dbm)
+
+        self.ref_render = ref_render
 
     @property
     def object_instance(self) -> CmdbObject:
@@ -140,30 +134,32 @@ class CmdbRender:
         try:
             render_result = self.__generate_object_information(render_result)
             render_result = self.__generate_type_information(render_result)
-            render_result = self.__set_fields(render_result)
             render_result = self.__set_sections(render_result)
+            render_result = self.__set_fields(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
         except CMDBError as err:
-            raise RenderError(f'Error while generating a CMDBResult: {err}')
+            import traceback
+            traceback.print_exc()
+            raise RenderError(f'Error while generating a CMDBResult: {str(err)}')
         return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self._render_username_by_id(self.object_instance.author_id)
+            author_name = self.user_manager.get(self.object_instance.author_id).get_display_name()
         except CMDBError:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
-                editor_name = self._render_username_by_id(self.object_instance.editor_id)
+                editor_name = self.user_manager.get(self.object_instance.editor_id).get_display_name()
             except CMDBError:
                 editor_name = None
         else:
             editor_name = None
 
         render_result.object_information = {
-            'object_id': self.object_instance.get_public_id(),
+            'object_id': self.object_instance.public_id,
             'creation_time': self.object_instance.creation_time,
             'last_edit_time': self.object_instance.last_edit_time,
             'author_id': self.object_instance.author_id,
@@ -177,16 +173,15 @@ class CmdbRender:
 
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self._render_username_by_id(self.type_instance.author_id)
+            author_name = self.user_manager.get(self.type_instance.author_id).get_display_name()
         except CMDBError as err:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
-            LOGGER.error(err)
         try:
             self.type_instance.render_meta.icon
         except KeyError:
             self.type_instance.render_meta.icon = ''
         render_result.type_information = {
-            'type_id': self.type_instance.get_public_id(),
+            'type_id': self.type_instance.public_id,
             'type_name': self.type_instance.name,
             'type_label': self.type_instance.label,
             'creation_time': self.type_instance.creation_time,
@@ -212,28 +207,54 @@ class CmdbRender:
             render_result.sections = []
         return render_result
 
-    def __merge_fields_value(self) -> list:
+    def __merge_field_content_section(self, field: dict, object_: CmdbObject):
+        curr_field = [x for x in object_.fields if x['name'] == field['name']][0]
+        if curr_field['name'] == field['name'] and field.get('value'):
+            field['default'] = field['value']
+        field['value'] = curr_field['value']
+        # handle dates that are stored as strings
+        if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
+            field['value'] = parse(field['value'], fuzzy=True)
+
+        if self.ref_render and field['type'] == 'ref' and field['value']:
+            field['reference'] = self.__merge_references(field)
+        return field
+
+    def __merge_fields_value(self) -> List[dict]:
         field_map = []
-        html_parser = DtHtmlParser(self.object_manager)
-        for field in self.type_instance.fields:
-            html_parser.current_field = field
-            try:
-                curr_field = [x for x in self.object_instance.fields if x['name'] == field['name']][0]
-                if curr_field['name'] == field['name'] and field.get('value'):
-                    field['default'] = field['value']
-                field['value'] = curr_field['value']
-                # handle dates that are stored as strings
-                if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
-                    field['value'] = parse(field['value'], fuzzy=True)
+        for section in self.type_instance.render_meta.sections:
+            if type(section) is TypeFieldSection and isinstance(section, TypeFieldSection):
+                for section_field in section.fields:
+                    field = {}
+                    try:
+                        type_field = self.type_instance.get_field(section_field)
 
-                if self.ref_render and field['type'] == 'ref' and field['value']:
-                    field['reference'] = self.__merge_references(field)
-
-                if self.dt_render:
-                    field['value'] = html_parser.field_to_html(field['type'])
-            except (ValueError, IndexError) as e:
-                field['value'] = None
-            field_map.append(field)
+                        field = self.__merge_field_content_section(type_field, self.object_instance)
+                    except FileNotFoundError:
+                        LOGGER.error(f'Could not find field: {section_field}')
+                        continue
+                    except (ValueError, IndexError) as e:
+                        LOGGER.error(f'Could not merge field: {str(e)}')
+                        field['value'] = None
+                    field_map.append(field)
+            elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
+                reference_id: int = self.object_instance.get_value(f'{section.name}-field')
+                reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
+                ref_section = ref_type.get_section(section.reference.section_name)
+                if not ref_section:
+                    continue
+                if not section.reference.selected_fields or len(section.reference.selected_fields) == 0:
+                    selected_ref_fields = ref_section.fields
+                else:
+                    selected_ref_fields = [f for f in ref_section.fields if f in section.reference.selected_fields]
+                for ref_section_field_name in selected_ref_fields:
+                    ref_section_field = ref_type.get_field(ref_section_field_name)
+                    try:
+                        field = self.__merge_field_content_section(ref_section_field, reference_object)
+                    except (FileNotFoundError, ValueError, IndexError):
+                        continue
+                    field_map.append(field)
         return field_map
 
     def __merge_references(self, current_field):
@@ -292,24 +313,29 @@ class CmdbRender:
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
         summary_list = []
-        summary_line = ""
+        summary_line = ''
+        default_line = f'{self.type_instance.label} #{self.object_instance.public_id}'
         if not self.type_instance.has_summaries():
             render_result.summaries = summary_list
-            render_result.summary_line = f'{self.type_instance.get_label()} #{self.object_instance.public_id}  '
+            render_result.summary_line = default_line
             return render_result
+        try:
+            summary_list = self.type_instance.get_summary().fields
+            render_result.summaries = summary_list
+            first = True
 
-        summary_list = self.type_instance.get_summary().fields
-        render_result.summaries = summary_list
-        first = True
+            for line in summary_list:
+                if first:
+                    summary_line += f'{line["value"]}'
+                    first = False
+                else:
+                    summary_line += f' | {line["value"]}'
 
-        for line in summary_list:
-            if first:
-                summary_line += f'{line["value"]}'
-                first = False
-            else:
-                summary_line += f' | {line["value"]}'
-
-        render_result.summary_line = summary_line
+            render_result.summary_line = summary_line
+        except Exception:
+            summary_line = default_line
+        finally:
+            render_result.summary_line = summary_line
         return render_result
 
     def __set_external(self, render_result: RenderResult) -> RenderResult:
@@ -367,11 +393,10 @@ class CmdbRender:
 
 class RenderList:
 
-    def __init__(self, object_list: List[CmdbObject], request_user: UserModel,  database_manager: DatabaseManagerMongo, dt_render=False, ref_render=False,
-                 object_manager: CmdbObjectManager = None):
+    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
+                 ref_render=False, object_manager: CmdbObjectManager = None):
         self.object_list: List[CmdbObject] = object_list
         self.request_user = request_user
-        self.dt_render = dt_render
         self.ref_render = ref_render
         self.object_manager = object_manager
         self.type_manager = TypeManager(database_manager=database_manager)
@@ -379,15 +404,14 @@ class RenderList:
 
     @timing('RenderList')
     def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
-        complete_user_list: List[UserModel] = self.user_manager.get_users()
 
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
                 type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
-                render_user=self.request_user, user_list=complete_user_list,
-                object_manager=self.object_manager, dt_render=self.dt_render, ref_render=self.ref_render)
+                render_user=self.request_user,
+                object_manager=self.object_manager, ref_render=self.ref_render)
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:

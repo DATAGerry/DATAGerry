@@ -36,7 +36,8 @@ import { CmdbType } from '../../../models/cmdb-type';
 export class ConfigEditComponent implements OnInit {
 
   @Input() data: any;
-  @Input() sections: any[];
+  @Input() public fields: Array<any> = [];
+  @Input() public sections: Array<any> = [];
   @Input() canEdit: boolean = false;
 
   @Input() public types: Array<CmdbType> = [];
@@ -56,6 +57,7 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.sections = this.sections;
+    this.componentRef.instance.fields = this.fields;
     this.componentRef.instance.canEdit = this.canEdit;
     this.componentRef.instance.types = this.types;
   }

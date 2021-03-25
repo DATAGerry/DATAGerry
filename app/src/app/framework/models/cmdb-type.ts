@@ -26,13 +26,19 @@ export interface CmdbTypeListEntry {
   render_meta: CmdbTypeMeta;
 }
 
-export class CmdbTypeList extends Array<CmdbTypeListEntry> {}
+export class CmdbTypeList extends Array<CmdbTypeListEntry> {
+}
 
 export interface CmdbTypeSection {
   type: string;
   name: string;
   label: string;
-  fields: Array<any>;
+  fields?: Array<any>;
+  reference?: {
+    type_id: number;
+    section_name: string;
+    selected_fields?: Array<string>;
+  };
 }
 
 export interface CmdbTypeExternalLink {

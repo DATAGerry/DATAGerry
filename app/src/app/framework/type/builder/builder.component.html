@@ -107,9 +107,10 @@
           </div>
           <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit [canEdit]="canEdit"
-                                [sections]="sections"
-                                [data]="section" [types]="types"></cmdb-config-edit>
+              <cmdb-config-edit
+                [canEdit]="canEdit" [sections]="sections" [fields]="typeInstance.fields" [data]="section"
+                [types]="types">
+              </cmdb-config-edit>
             </div>
           </div>
           <div *ngIf="section.type === 'section'" class="card-body" [dndDropzone]="['inputs']"

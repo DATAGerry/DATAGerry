@@ -204,8 +204,7 @@ def import_objects(request_user: UserModel):
             current_object = object_manager.get_object(message.public_id)
             current_object_render_result = CmdbRender(object_instance=current_object,
                                                       type_instance=current_type_instance,
-                                                      render_user=request_user,
-                                                      user_list=user_manager.get_users()).result()
+                                                      render_user=request_user).result()
 
             # insert object create log
             log_params = {

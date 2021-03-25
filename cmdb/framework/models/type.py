@@ -255,20 +255,48 @@ class TypeFieldSection(TypeSection):
         }
 
 
+class TypeReferenceSectionEntry:
+    __slots__ = 'type_id', 'section_name', 'selected_fields'
+
+    def __init__(self, type_id: int, section_name: str, selected_fields: List[str] = None):
+        self.type_id: int = type_id
+        self.section_name: str = section_name
+        self.selected_fields: List[str] = selected_fields or []
+
+    @classmethod
+    def from_data(cls, data: dict) -> "TypeReferenceSectionEntry":
+        return cls(
+            type_id=data.get('type_id'),
+            section_name=data.get('section_name'),
+            selected_fields=data.get('selected_fields', None))
+
+    @classmethod
+    def to_json(cls, instance: "TypeReferenceSectionEntry") -> dict:
+        return {
+            'type_id': instance.type_id,
+            'section_name': instance.section_name,
+            'selected_fields': instance.selected_fields
+        }
+
+
 class TypeReferenceSection(TypeFieldSection):
     __slots__ = 'reference'
 
-    def __init__(self, type: str, name: str, label: str = None, reference: dict = None):
-        self.reference = reference or {}
+    def __init__(self, type: str, name: str, label: str = None, reference: TypeReferenceSectionEntry = None):
+        self.reference: reference = reference or {}
         super(TypeReferenceSection, self).__init__(type=type, name=name, label=label)
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeReferenceSection":
+        reference = data.get('reference', None)
+        if reference:
+            reference = TypeReferenceSectionEntry.from_data(reference)
+
         return cls(
             type=data.get('type'),
             name=data.get('name'),
             label=data.get('label', None),
-            reference=data.get('reference', None)
+            reference=reference
         )
 
     @classmethod
@@ -277,7 +305,7 @@ class TypeReferenceSection(TypeFieldSection):
             'type': instance.type,
             'name': instance.name,
             'label': instance.label,
-            'reference': instance.reference
+            'reference': TypeReferenceSectionEntry.to_json(instance.reference)
         }
 
 
@@ -371,7 +399,9 @@ class TypeModel(CmdbDAO):
             'default': DEFAULT_VERSION
         },
         'description': {
-            'type': 'string'
+            'type': 'string',
+            'nullable': True,
+            'empty': True
         },
         'render_meta': {
             'type': 'dict',
@@ -507,7 +537,7 @@ class TypeModel(CmdbDAO):
             complete_field_list.append(self.get_field(field_name))
         return TypeSummary(fields=complete_field_list)
 
-    def get_sections(self) -> List[TypeFieldSection]:
+    def get_sections(self) -> List[TypeSection]:
         return self.render_meta.sections
 
     def get_section(self, name):

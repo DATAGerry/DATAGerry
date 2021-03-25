@@ -46,7 +46,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    * Reset a selected section.
    * @param type
    */
-  public onTypeChange(type: CmdbType) {
+  public onTypeChange(type: CmdbType): void {
     if (this.data.reference.section_name) {
       this.data.reference.section_name = undefined;
       this.data.reference.selected_fields = undefined;
@@ -59,7 +59,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    * Get all sections from a type.
    * @param typeID
    */
-  public getSectionsFromType(typeID: number) {
+  public getSectionsFromType(typeID: number): Array<CmdbTypeSection> {
     return this.types.find(t => t.public_id === typeID).render_meta.sections;
   }
 
@@ -67,9 +67,18 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    * When section selection changed.
    * @param section
    */
-  public onSectionChange(section: CmdbTypeSection){
+  public onSectionChange(section: CmdbTypeSection): void {
     this.selectedSection = section;
     this.data.reference.selected_fields = undefined;
+  }
+
+  /**
+   * Change the field when the reference changes
+   * @param name
+   */
+  public onNameChange(name: string) {
+    const field = this.fields.find(x => x.name === `${this.data.name}-field`);
+    field.name = `${name}-field`;
   }
 
 }
