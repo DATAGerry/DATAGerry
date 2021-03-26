@@ -33,7 +33,7 @@ export class DateFormatterPipe implements PipeTransform {
    */
   transform(data: any): any {
     const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
-    const date = moment.utc(data);
+    const date = moment.utc(data, date_format, true);
     return date.isValid() ? moment.tz(date, timezone).format(date_format) : data;
   }
 

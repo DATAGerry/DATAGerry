@@ -25,7 +25,7 @@
       {{data}}
     </ng-template>
     <ng-template #changeTemplate let-item="item">
-      <cmdb-object-log-change-view [action]="item.action" [changes]="item.changes"></cmdb-object-log-change-view>
+      <cmdb-object-log-change-view [mode]="item.action" [changes]="item.changes"></cmdb-object-log-change-view>
     </ng-template>
     <ng-template #userTemplate let-item="item">
       <cmdb-object-log-user [userID]="item.user_id" [userName]="item.user_name"></cmdb-object-log-user>

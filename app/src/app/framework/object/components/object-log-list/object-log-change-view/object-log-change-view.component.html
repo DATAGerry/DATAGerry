@@ -1,33 +1,19 @@
-<div [ngSwitch]="action">
-  <div *ngSwitchCase="modes.ACTIVE_CHANGE">
+<div [ngSwitch]="mode">
+  <div *ngSwitchCase="MODES.ACTIVE_CHANGE" class="d-flex justify-content-between align-items-center">
     <cmdb-active-badge [activeStatus]="changes['old']"></cmdb-active-badge>
     <i class="fas fa-arrow-right"></i>
     <cmdb-active-badge [activeStatus]="changes['new']"></cmdb-active-badge>
   </div>
-  <div *ngSwitchCase="modes.CREATE">
+  <div *ngSwitchCase="MODES.CREATE">
     -
   </div>
-  <div *ngSwitchCase="modes.EDIT">
-    <ul class="list-unstyled">
-      <li *ngFor="let change of changes?.old; let i = index">
-        <b>{{change?.name}}</b><br />
-        <ng-template [ngIf]="change?.value && change?.value.$date" [ngIfElse]="templateUsualOld">
-          {{change?.value | dateFormatter}}
-        </ng-template>
-        <ng-template #templateUsualOld>
-          {{change?.value | dateFormatter}}
-        </ng-template>
-        <i class="fas fa-arrow-right"></i>
-        <ng-template *ngFor="let newchanges of changes?.new";>
-          <ng-template [ngIf]="newchanges?.value && newchanges?.value.$date" [ngIfElse]="templateUsualNew">
-            {{newchanges?.value | dateFormatter}}
-          </ng-template>
-          <ng-template #templateUsualNew>
-            {{newchanges?.value | dateFormatter}}
-          </ng-template>
-        </ng-template>
-      </li>
-    </ul>
+  <div class="container-fluid" *ngSwitchCase="MODES.EDIT">
+    <div class="row" *ngFor="let change of changes?.old; let i = index">
+      <div class="col-12 col-xl-3"><strong>{{change?.name}}:</strong></div>
+      <div class="col-12 col-xl-4"><span>{{change.value | dateFormatter}}</span></div>
+      <div class="col-12 col-xl-1"><i class="fas fa-arrow-right p-3"></i></div>
+      <div class="col-12 col-xl-4"><span>{{changes?.new[i].value | dateFormatter}}</span></div>
+    </div>
   </div>
   <div *ngSwitchDefault>
     Unknown action

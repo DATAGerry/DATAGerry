@@ -16,7 +16,6 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as moment from 'moment';
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
@@ -186,7 +185,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       searchable: false,
       cssClasses: ['text-center'],
       template: this.dateTemplate,
-      render(data: any, item?: any, column?: Column, index?: number) {
+      render(data: any) {
         if (!data) {
           return 'No modifications so far.';
         }

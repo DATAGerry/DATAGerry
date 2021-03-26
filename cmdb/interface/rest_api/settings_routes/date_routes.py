@@ -34,7 +34,6 @@ with current_app.app_context():
 
 
 @date_blueprint.route('/', methods=['GET'])
-@date_blueprint.protect(auth=True, right='base.system.edit')
 def get_date_settings():
     date_settings = system_settings_reader.get_all_values_from_section('date',
                                                                        default=DateSettingsDAO.__DEFAULT_SETTINGS__)

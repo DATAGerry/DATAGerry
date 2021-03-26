@@ -20,8 +20,7 @@ import { Component, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
-import { NgbStringAdapter, CustomDateParserFormatter} from '../../../../settings/date-settings/date-settings-formatter.service';
-
+import { NgbStringAdapter, CustomDateParserFormatter } from '../../../../settings/date-settings/date-settings-formatter.service';
 
 
 @Component({

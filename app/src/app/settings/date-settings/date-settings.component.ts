@@ -78,7 +78,7 @@ export class DateSettingsComponent implements OnInit, OnDestroy {
       this.regionalForm.patchValue(dateSettings);
     });
 
-    this.regionalForm.valueChanges.subscribe(() => {
+    this.regionalForm.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.updateFormatView();
     });
     this.updateFormatView();

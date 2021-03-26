@@ -133,9 +133,6 @@ export class ObjectLogListComponent implements OnInit {
         style: { 'white-space': 'nowrap' },
         template: this.dateTemplate,
         searchable: false,
-        render(data: any) {
-          return data;
-        }
       } as Column
     );
 
@@ -168,8 +165,6 @@ export class ObjectLogListComponent implements OnInit {
       searchable: false,
       fixed: true,
       template: this.changeTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
     } as unknown as Column);
 
     columns.push({
