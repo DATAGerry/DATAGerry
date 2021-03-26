@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -74,9 +74,9 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 import { TableModule } from './table/table.module';
 import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
-import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 import { BlockComponent } from './components/block/block.component';
 import { JwPaginationModule } from 'jw-angular-pagination';
+import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
 
 @NgModule({
   declarations: [
@@ -87,7 +87,6 @@ import { JwPaginationModule } from 'jw-angular-pagination';
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    GeneralModalComponent,
     IntroComponent,
     TypeLabelComponent,
     FooterComponent,
@@ -119,8 +118,8 @@ import { JwPaginationModule } from 'jw-angular-pagination';
     TableSortEventDirective,
     AttachmentsListModalComponent,
     QrCodeComponent,
-    FeedbackFormComponent,
-    BlockComponent
+    BlockComponent,
+    FeedbackModalComponent
   ],
   exports: [
     FileExplorerComponent,

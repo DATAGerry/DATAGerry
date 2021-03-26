@@ -49,6 +49,7 @@ import { ImportTypeCompleteComponent } from './import-types/import-type-complete
 import { ImportCompleteComponent } from './import-objects/import-complete/import-complete.component';
 import { TableModule } from '../layout/table/table.module';
 import { FailedImportTableComponent } from './import-objects/import-complete/failed-import-table/failed-import-table.component';
+import { AuthModule } from '../auth/auth.module';
 
 
 @NgModule({
@@ -72,22 +73,23 @@ import { FailedImportTableComponent } from './import-objects/import-complete/fai
     ImportCompleteComponent,
     FailedImportTableComponent,
   ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    ImportRoutingModule,
-    DndModule,
-    ArchwizardModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    TypeModule,
-    FontAwesomeModule,
-    RenderModule,
-    NgbTooltipModule,
-    FormsModule,
-    CategoryModule,
-    TableModule
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        ImportRoutingModule,
+        DndModule,
+        ArchwizardModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        TypeModule,
+        FontAwesomeModule,
+        RenderModule,
+        NgbTooltipModule,
+        FormsModule,
+        CategoryModule,
+        TableModule,
+        AuthModule
+    ]
 })
 export class ImportModule {
 }

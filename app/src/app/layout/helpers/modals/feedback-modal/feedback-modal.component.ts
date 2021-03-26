@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,22 +17,23 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SystemService } from '../../../settings/system/system.service';
+import { SystemService } from '../../../../settings/system/system.service';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-  selector: 'cmdb-feedback-form',
-  templateUrl: './feedback-form.component.html',
-  styleUrls: ['./feedback-form.component.scss']
+  selector: 'cmdb-feedback-modal',
+  templateUrl: './feedback-modal.component.html',
+  styleUrls: ['./feedback-modal.component.scss']
 })
-export class FeedbackFormComponent implements OnInit, OnDestroy {
+export class FeedbackModalComponent implements OnInit, OnDestroy {
 
   public feedbackForm: FormGroup;
   public formListener: Subscription;
   public feedbackUrl: string = 'https://datagerry.com/feedback-v1/0/0/0/0/0/unknown/';
 
-  constructor(private systemService: SystemService) {
+  constructor(private systemService: SystemService, public activeModal: NgbActiveModal) {
     this.feedbackForm = new FormGroup({
       happiness: new FormControl(0),
       usability: new FormControl(0),
