@@ -53,7 +53,7 @@
                 </a>
               </div>
             </li>
-
+            
             <!-- toolbox -->
             <li class="nav-item dropdown nav-item-toolbox mr-2">
               <a class="nav-link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -114,6 +114,10 @@
                 <a class="dropdown-item" *permissionLink="'base.system.edit'"
                    [routerLink]="['/settings/auth']">
                   <i class="fas fa-lock"></i> Authentication
+                </a>
+                <a class="dropdown-item" *permissionLink="'base.system.edit'"
+                   [routerLink]="['/settings/regional-settings']">
+                  <i class="fas fa-calendar-alt"></i> Regional Settings
                 </a>
                 <a class="dropdown-item" *permissionLink="'base.system.reload'"
                    [routerLink]="['/settings/system/properties']">

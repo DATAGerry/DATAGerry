@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,11 +20,10 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { User } from '../models/user';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { UserService } from '../services/user.service';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
-import { DatePipe } from '@angular/common';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../layout/table/table.types';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from './modals/users-passwd-modal/users-passwd-modal.component';
 import { GroupService } from '../services/group.service';
@@ -76,6 +75,11 @@ export class UsersComponent implements OnInit, OnDestroy {
    * Table Template: User actions column.
    */
   @ViewChild('actionsTemplate', { static: true }) public actionsTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: User date column.
+   */
+  @ViewChild('dateTemplate', { static: true }) public dateTemplate: TemplateRef<any>;
 
   /**
    * Password modal
@@ -196,10 +200,7 @@ export class UsersComponent implements OnInit, OnDestroy {
         data: 'registration_time',
         sortable: true,
         searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
+        template: this.dateTemplate,
       },
       {
         display: 'Group',

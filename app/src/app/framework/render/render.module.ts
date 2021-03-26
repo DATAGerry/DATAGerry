@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -51,6 +51,7 @@ import { InputAppendsComponent } from './components/input-appends/input-appends.
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
 import { RenderFieldComponent } from './fields/components.fields';
 import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
+import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
 
 
 @NgModule({
@@ -82,11 +83,13 @@ import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
     InputAppendsComponent,
     ObjectBulkInputAppendsComponent,
     RenderFieldComponent,
-    ConfigEditBaseComponent
+    ConfigEditBaseComponent,
+    DateFormatterPipe
   ],
   exports: [
     RenderElementComponent,
-    RenderComponent
+    RenderComponent,
+    DateFormatterPipe
   ],
     imports: [
         CommonModule,

@@ -252,12 +252,8 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         sortable: true,
         cssClasses: ['text-center'],
         style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
+        template: this.dateTemplate,
         searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
       } as Column
     );
 

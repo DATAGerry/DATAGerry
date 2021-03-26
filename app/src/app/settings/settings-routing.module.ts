@@ -20,6 +20,8 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
+import {ProviderResolver} from "../auth/resolvers/provider-resolver.service";
+import {DateSettingsComponent} from "./date-settings/date-settings.component";
 
 const routes: Routes = [
   {
@@ -59,7 +61,8 @@ const routes: Routes = [
       breadcrumb: 'DocAPI'
     },
     loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
-  },{
+  },
+  {
     path: 'auth',
     canActivateChild: [PermissionGuard],
     data: {
@@ -67,6 +70,14 @@ const routes: Routes = [
     },
     loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
   },
+  {
+    path: 'regional-settings',
+    data: {
+      breadcrumb: 'Regional Settings',
+      right: 'base.system.edit'
+    },
+    component: DateSettingsComponent
+  }
 ];
 
 @NgModule({

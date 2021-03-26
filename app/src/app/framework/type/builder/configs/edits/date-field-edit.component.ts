@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,17 +18,23 @@
 
 import { Component, Input } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
+import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
+import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
+
 
 @Component({
   selector: 'cmdb-date-field-edit',
   templateUrl: './date-field-edit.component.html',
-  styleUrls: ['./date-field-edit.component.scss']
+  styleUrls: ['./date-field-edit.component.scss'],
+  providers: [
+    {provide: NgbDateAdapter, useClass: NgbStringAdapter},
+    {provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter}
+  ]
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent {
 
   @Input() groupList: any;
   @Input() userList: any;
-  public format: string;
 
   constructor() {
     super();

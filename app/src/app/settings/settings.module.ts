@@ -22,16 +22,22 @@ import { CommonModule } from '@angular/common';
 import { SettingsRoutingModule } from './settings-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { SettingsComponent } from './settings.component';
-import { AuthModule } from '../auth/auth.module';
+import { DateSettingsComponent } from './date-settings/date-settings.component';
+import {FormsModule, ReactiveFormsModule} from "@angular/forms";
+import {NgSelectModule} from "@ng-select/ng-select";
 
 @NgModule({
   declarations: [
     SettingsComponent,
+    DateSettingsComponent,
   ],
   imports: [
     CommonModule,
     LayoutModule,
-    SettingsRoutingModule
+    SettingsRoutingModule,
+    FormsModule,
+    NgSelectModule,
+    ReactiveFormsModule
   ]
 })
 export class SettingsModule {

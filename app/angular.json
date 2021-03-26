@@ -19,7 +19,14 @@
           "options": {
             "aot": true,
             "allowedCommonJsDependencies": [
-              "lodash", "qrcode", "file-saver", "chartjs-plugin-datalabels", "jquery", "chart.js", "zxcvbn"
+              "lodash",
+              "qrcode",
+              "file-saver",
+              "chartjs-plugin-datalabels",
+              "jquery",
+              "chart.js",
+              "zxcvbn",
+              "moment-timezone"
             ],
             "outputPath": "dist/datagerry-app",
             "index": "src/index.html",

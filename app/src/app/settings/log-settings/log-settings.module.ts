@@ -42,6 +42,7 @@ import {
   LogExportdTableComponent
 } from './log-exportd-settings/components/log-exportd-table/log-exportd-table.component';
 import { UsersModule } from '../../management/users/users.module';
+import { RenderModule } from '../../framework/render/render.module';
 
 @NgModule({
   declarations: [
@@ -60,18 +61,19 @@ import { UsersModule } from '../../management/users/users.module';
   exports: [
     LogExportdTableComponent
   ],
-  imports: [
-    CommonModule,
-    LayoutModule,
-    LogSettingsRoutingModule,
-    NgbTooltipModule,
-    NgbProgressbarModule,
-    FontAwesomeModule,
-    AuthModule,
-    TableModule,
-    ObjectModule,
-    UsersModule
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        LogSettingsRoutingModule,
+        NgbTooltipModule,
+        NgbProgressbarModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule,
+        ObjectModule,
+        UsersModule,
+        RenderModule
+    ]
 })
 export class LogSettingsModule {
 }

@@ -19,7 +19,7 @@
       </td>
       <td>{{item.filename}}</td>
       <td>{{item.size | fileSize}}</td>
-      <td>{{item.upload_date.$date | date: "dd/MM/yyyy - HH:mm:ss"}}</td>
+      <td>{{item.upload_date.$date | dateFormatter}}</td>
       <td><p class="thumbnail">{{item.metadata?.mime_type}}</p></td>
       <td>
         <div class="text-center">

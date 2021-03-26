@@ -30,16 +30,16 @@
         type="text"
         class="form-control"
         [readonly]="true"
-        placeholder="yyyy-mm-dd"
+        placeholder="dd/mm/yyyy"
         [(ngModel)]="data.value"
-        ngbDatepicker #d="ngbDatepicker"/>
+        ngbDatepicker #d="ngbDatepicker" readonly/>
       <div class="input-group-append">
-      <button class="input-group-text" (click)="d.toggle()">
-        <fa-icon icon="calendar-alt"></fa-icon>
-      </button>
-      <button class="input-group-text text-danger" (click)="resetDate()">
-        <i class="far fa-window-close"></i>
-      </button>
+        <button class="input-group-text" (click)="d.toggle()">
+          <fa-icon icon="calendar-alt"></fa-icon>
+        </button>
+        <button class="input-group-text text-danger" (click)="resetDate()">
+          <i class="far fa-window-close"></i>
+        </button>
       </div>
     </div>
   </div>

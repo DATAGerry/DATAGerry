@@ -28,6 +28,8 @@
   <cmdb-type-table-actions [publicID]="item.public_id"></cmdb-type-table-actions>
 </ng-template>
 
+<ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>
+
 <ng-template #cleanTemplate let-item="item">
   <cmdb-clean-button [type]="item"></cmdb-clean-button>
 </ng-template>
