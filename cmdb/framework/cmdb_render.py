@@ -25,7 +25,6 @@ from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.manager import ManagerGetError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.wraps import timing
@@ -134,8 +133,8 @@ class CmdbRender:
         try:
             render_result = self.__generate_object_information(render_result)
             render_result = self.__generate_type_information(render_result)
-            render_result = self.__set_sections(render_result)
             render_result = self.__set_fields(render_result)
+            render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
         except CMDBError as err:
@@ -238,10 +237,19 @@ class CmdbRender:
                         field['value'] = None
                     field_map.append(field)
             elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
-                reference_id: int = self.object_instance.get_value(f'{section.name}-field')
+                ref_field_name: str = f'{section.name}-field'
+                ref_field = self.type_instance.get_field(ref_field_name)
+                reference_id: int = self.object_instance.get_value(ref_field_name)
+                ref_field['value'] = reference_id
                 reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
                 ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
                 ref_section = ref_type.get_section(section.reference.section_name)
+                ref_field['references'] = {
+                    'type_id': ref_type.public_id,
+                    'type_name': ref_type.name,
+                    'type_label': ref_type.label,
+                    'fields': []
+                }
                 if not ref_section:
                     continue
                 if not section.reference.selected_fields or len(section.reference.selected_fields) == 0:
@@ -254,7 +262,8 @@ class CmdbRender:
                         field = self.__merge_field_content_section(ref_section_field, reference_object)
                     except (FileNotFoundError, ValueError, IndexError):
                         continue
-                    field_map.append(field)
+                    ref_field['references']['fields'].append(field)
+                field_map.append(ref_field)
         return field_map
 
     def __merge_references(self, current_field):
