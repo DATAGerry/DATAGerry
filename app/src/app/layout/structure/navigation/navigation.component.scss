@@ -99,6 +99,90 @@ $navbar-dropdown-header-background: theme-color('primary');
     }
   }
 
+  .nav-user {
+    padding: 0 20px 15px 57px !important;
+    text-align: left !important;
+    position: relative;
+    min-height: 70px;
+    min-width: 180px;
+
+    .account-user-avatar {
+      position: absolute;
+      top: 4px;
+      left: 15px;
+    }
+
+    .account-user-name {
+      display: block;
+      font-weight: 600;
+    }
+
+    .account-position {
+      display: block;
+      font-size: 12px;
+      margin-top: -3px;
+    }
+
+    .account-user-avatar img {
+      height: 32px;
+      width: 32px;
+    }
+  }
+
+  .navbar-right-menu li {
+    max-height: 70px;
+  }
+
+  .navbar-right-menu {
+    .nav-link {
+      min-width: 32px;
+      display: block;
+      text-align: center;
+      margin: 15px 0 15px 0;
+      position: relative;
+    }
+
+    .nav-link i {
+      font-size: 22px;
+      vertical-align: middle;
+    }
+
+    .dropdown-icon-item {
+      display: block;
+      line-height: 56px;
+      text-align: center;
+      padding: 15px 10px 9px;
+      border: 1px solid transparent;
+      color: #6c757d;
+    }
+
+    .dropdown-icon-item i,
+    .dropdown-icon-item fa-icon {
+      font-size: 22px;
+      line-height: 24px;
+    }
+
+    .dropdown-icon-item span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 14px;
+      line-height: initial;
+    }
+
+    .dropdown-lg {
+      width: 320px;
+    }
+  }
+
+  .navbar-nav {
+    flex-direction: initial !important;
+  }
+
+  .nav-item-toolbox .col:empty {
+    display: none;
+  }
 }
 
 
@@ -106,6 +190,30 @@ $navbar-dropdown-header-background: theme-color('primary');
   #navbar-cmdb {
     .container-content {
       border-bottom: 1px solid darken(white, 40%);
+    }
+    .dropdown-lg {
+      width: 220px!important;
+    }
+  }
+}
+
+@media(max-width: 1200px) {
+  #navbar-cmdb {
+    .nav-user {
+      padding: 0 !important;
+      text-align: left !important;
+      .account-user-name,
+      .account-position {
+        display: none!important;
+      }
+      .account-user-avatar {
+        top: 8px!important;
+        left: 3px!important;
+      }
+      .account-user-avatar img {
+        height: 22px!important;
+        width: 22px!important;
+      }
     }
   }
 }

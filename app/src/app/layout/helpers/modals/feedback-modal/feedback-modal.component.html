@@ -1,0 +1,150 @@
+
+<div class="modal-content">
+  <div class="modal-header">
+    <h4 class="modal-title">
+      <i class="far fa-smile"></i> <span class="mx-3">Feedback</span>
+    </h4>
+    <button type="button" class="close" (click)="activeModal.close(true)" aria-hidden="true">×</button>
+  </div>
+  <div class="modal-body no-gutters p-0">
+    <form [formGroup]="feedbackForm" novalidate>
+      <div class="form-group" id="feedback-form">
+        <div class="container p-0">
+          <div class="row m-0">
+            <div class="col-lg-auto col-xl-6 p-3 bg-light border-right border-info">
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-happiness">Happiness</label>
+                  <div class="slidercontainer">
+                    <input formControlName="happiness" type="range" min="-2" max="2" value="0" step="1"
+                           class="slider" id="feedback-form-happiness" list="feedback-form-steplist">
+                    <div class="ticks">
+                      <span class="tick">--</span>
+                      <span class="tick">-</span>
+                      <span class="tick">0</span>
+                      <span class="tick">+</span>
+                      <span class="tick">++</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-usability">Usability</label>
+                  <div class="slidercontainer">
+                    <input formControlName="usability" type="range" min="-2" max="2" value="0" step="1"
+                           class="slider" id="feedback-form-usability" list="feedback-form-steplist">
+                    <div class="ticks">
+                      <span class="tick">--</span>
+                      <span class="tick">-</span>
+                      <span class="tick">0</span>
+                      <span class="tick">+</span>
+                      <span class="tick">++</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-functionality">Functionality</label>
+                  <div class="slidercontainer">
+                    <input formControlName="functionality" type="range" min="-2" max="2" value="0" step="1"
+                           class="slider" id="feedback-form-functionality" list="feedback-form-steplist">
+                    <div class="ticks">
+                      <span class="tick">--</span>
+                      <span class="tick">-</span>
+                      <span class="tick">0</span>
+                      <span class="tick">+</span>
+                      <span class="tick">++</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-performance">Performance</label>
+                  <div class="slidercontainer">
+                    <input formControlName="performance" type="range" min="-2" max="2" value="0" step="1"
+                           class="slider" id="feedback-form-performance" list="feedback-form-steplist">
+                    <div class="ticks">
+                      <span class="tick">--</span>
+                      <span class="tick">-</span>
+                      <span class="tick">0</span>
+                      <span class="tick">+</span>
+                      <span class="tick">++</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-stability">Stability</label>
+                  <div class="slidercontainer">
+                    <input formControlName="stability" type="range" min="-2" max="2" value="0" step="1"
+                           class="slider" id="feedback-form-stability" list="feedback-form-steplist">
+                    <div class="ticks">
+                      <span class="tick">--</span>
+                      <span class="tick">-</span>
+                      <span class="tick">0</span>
+                      <span class="tick">+</span>
+                      <span class="tick">++</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <datalist id="feedback-form-steplist">
+                <option>-2</option>
+                <option>-1</option>
+                <option>0</option>
+                <option>1</option>
+                <option>2</option>
+              </datalist>
+              <div class="row">
+                <div class="col-12">
+                  <label for="feedback-form-version-dg">Version</label>
+                  <input id='feedback-form-version-dg' type="text" class="form-control" [value]="feedbackForm.get('version').value"
+                         readonly/>
+                </div>
+              </div>
+            </div>
+            <div class="col-lg-auto col-xl-6">
+              <div class="row">
+                <div class="col-7 head-space">
+                  <p class="michael">Hi!</p>
+                  <p class="michael">I am DATAGERRY! It would be my, and my teams, pleasure
+                    to
+                    discuss the product vision with every DATAGERRY user</p>
+                </div>
+                <div class="col-5 d-flex">
+                  <img src="../../../../../assets/img/squirrel.png" alt="product-owner-image"
+                       class="my-auto mr-0 ml-auto d-block">
+                </div>
+              </div>
+              <div class="row head-space">
+                <div class="col-12">
+                  <label for="feedback-form-email">E-Mail</label>
+                  <input [formControl]="emailController" type="email" id="feedback-form-email" class="form-control form-control-sm"
+                         [ngClass]="{ 'is-valid': emailController.valid && (emailController.dirty || emailController.touched),
+                                  'is-invalid': emailController.invalid && (emailController.dirty || emailController.touched)}">
+                  <div *ngIf="emailController.invalid && (emailController.dirty || emailController.touched)"
+                       class="invalid-feedback">
+                    You may have entered an invalid email address.
+                  </div>
+                </div>
+              </div>
+              <div class="row head-space">
+                <div class="col-12 d-flex" id="feedback-form-qr">
+                  <div class="mx-auto my-auto text-center">
+                    <cmdb-qrcode [urlContent]="feedbackUrl"></cmdb-qrcode>
+                    <small class="form-text text-muted">Submit by Scanning QR</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
