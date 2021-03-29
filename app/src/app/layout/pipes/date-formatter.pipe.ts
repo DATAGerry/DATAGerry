@@ -32,9 +32,12 @@ export class DateFormatterPipe implements PipeTransform {
    * Converts input date string representation of the date according to the selected pattern
    */
   transform(data: any): any {
-    const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
-    const date = moment.utc(data, date_format, true);
-    return date.isValid() ? moment.tz(date, timezone).format(date_format) : data;
+    if (isNaN(data) && !isNaN(Date.parse(data))) {
+      const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
+      const date = moment.utc(data);
+      return date.isValid() ? moment.tz(date, timezone).format(date_format) : data;
+    }
+    return data;
   }
 
 }
