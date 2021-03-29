@@ -97,6 +97,8 @@ export class BuilderComponent implements OnDestroy {
   }
 
   private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
+    refSection.fields = [];
+    refSection.fields.push(`${refSection.name}-field`);
     this.typeInstance.fields.push({
       type: 'ref-section-field',
       name: `${refSection.name}-field`,

@@ -28,7 +28,7 @@ export class RefSectionContent implements StructureContent {
     section_name: string;
     selected_fields?: any;
   };
-
+  fields?: Array<string>;
 }
 
 

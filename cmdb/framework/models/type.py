@@ -279,11 +279,13 @@ class TypeReferenceSectionEntry:
         }
 
 
-class TypeReferenceSection(TypeFieldSection):
-    __slots__ = 'reference'
+class TypeReferenceSection(TypeSection):
+    __slots__ = 'reference', 'fields'
 
-    def __init__(self, type: str, name: str, label: str = None, reference: TypeReferenceSectionEntry = None):
+    def __init__(self, type: str, name: str, label: str = None, reference: TypeReferenceSectionEntry = None,
+                 fields: list = None):
         self.reference: reference = reference or {}
+        self.fields = fields or []
         super(TypeReferenceSection, self).__init__(type=type, name=name, label=label)
 
     @classmethod
@@ -291,12 +293,12 @@ class TypeReferenceSection(TypeFieldSection):
         reference = data.get('reference', None)
         if reference:
             reference = TypeReferenceSectionEntry.from_data(reference)
-
         return cls(
             type=data.get('type'),
             name=data.get('name'),
             label=data.get('label', None),
-            reference=reference
+            reference=reference,
+            fields=data.get('fields', None)
         )
 
     @classmethod
@@ -305,7 +307,8 @@ class TypeReferenceSection(TypeFieldSection):
             'type': instance.type,
             'name': instance.name,
             'label': instance.label,
-            'reference': TypeReferenceSectionEntry.to_json(instance.reference)
+            'reference': TypeReferenceSectionEntry.to_json(instance.reference),
+            'fields': instance.fields,
         }
 
 
@@ -333,6 +336,7 @@ class TypeRenderMeta:
                 sections.append(TypeReferenceSection.from_data(section))
             else:
                 sections.append(TypeFieldSection.from_data(section))
+
 
         return cls(
             icon=data.get('icon', None),

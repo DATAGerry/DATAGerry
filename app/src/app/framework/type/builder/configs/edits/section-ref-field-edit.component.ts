@@ -77,7 +77,10 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    * @param name
    */
   public onNameChange(name: string) {
-    const field = this.fields.find(x => x.name === `${this.data.name}-field`);
+    const oldName = this.data.name;
+    const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
+    const field = this.fields.find(x => x.name === `${oldName}-field`);
+    this.data.fields[fieldIdx] = `${name}-field`;
     field.name = `${name}-field`;
   }
 

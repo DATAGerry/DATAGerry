@@ -66,7 +66,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     view = params.optional.get('view', 'native')
     if _fetch_only_active_objs():
         if isinstance(params.filter, dict):
-            params.filter.update({'$match': {'active': {"$eq": True}}})
+            filter_ = params.filter
+            params.filter = [{'$match': filter_}]
+            params.filter.append({'$match': {'active': {"$eq": True}}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
 
@@ -451,6 +453,7 @@ def insert_object(request_user: UserModel):
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
         current_object = object_manager.get_object(new_object_id)
         current_object_render_result = CmdbRender(object_instance=current_object,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
@@ -607,6 +610,7 @@ def delete_object(public_id: int, request_user: UserModel):
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
@@ -670,6 +674,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
             try:
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                          object_manager=object_manager,
                                                           type_instance=current_type_instance,
                                                           render_user=request_user).result()
             except ObjectManagerGetError as err:
@@ -759,6 +764,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         current_type_instance = object_manager.get_type(founded_object.get_type_id())
         current_object_render_result = CmdbRender(object_instance=founded_object,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:

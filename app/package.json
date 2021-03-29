@@ -6,7 +6,6 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "aot": "ng build --aot=true --verbose=true",
     "build": "ng build --progress=true --verbose=true",
     "prod": "ng build --prod=true",
     "test": "ng test",
@@ -31,7 +30,7 @@
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@ng-bootstrap/ng-bootstrap": "^5.1.4",
-    "@ng-select/ng-select": "^4.0.4",
+    "@ng-select/ng-select": "^5.1.0",
     "@tinymce/tinymce-angular": "^4.1.0",
     "@types/chart.js": "^2.9.31",
     "angular-archwizard": "^6.1.0",

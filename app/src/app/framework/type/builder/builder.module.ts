@@ -41,6 +41,20 @@ import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-
 import { LayoutModule } from '../../../layout/layout.module';
 
 @NgModule({
+  imports: [
+    CommonModule,
+    DndModule,
+    FormsModule,
+    RenderModule,
+    NgbModalModule,
+    NgSelectModule,
+    FontAwesomeModule,
+    NgbDatepickerModule,
+    ReactiveFormsModule,
+    CategoryModule,
+    NgbTooltipModule,
+    LayoutModule
+  ],
   declarations: [
     BuilderComponent,
     ConfigEditComponent,
@@ -55,20 +69,6 @@ import { LayoutModule } from '../../../layout/layout.module';
     DiagnosticModalComponent,
     DateFieldEditComponent,
     SectionRefFieldEditComponent,
-  ],
-  imports: [
-    CommonModule,
-    DndModule,
-    FormsModule,
-    RenderModule,
-    NgbModalModule,
-    NgSelectModule,
-    FontAwesomeModule,
-    NgbDatepickerModule,
-    ReactiveFormsModule,
-    CategoryModule,
-    NgbTooltipModule,
-    LayoutModule
   ],
   exports: [
     BuilderComponent

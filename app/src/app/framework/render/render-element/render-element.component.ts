@@ -54,8 +54,9 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         const factory = this.resolver.resolveComponentFactory(this.component);
         this.componentRef = this.containerField.createComponent(factory);
         this.componentRef.instance.parentFormGroup = this.parentFormGroup;
-        this.componentRef.instance.mode = this.mode;
         this.componentRef.instance.data = this.data;
+        this.componentRef.instance.mode = this.mode;
+        this.componentRef.instance.section = this.section;
         this.componentRef.instance.toast = this.toast;
         const fieldControl = new FormControl('');
         const validators = [];

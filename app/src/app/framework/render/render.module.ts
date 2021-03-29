@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -51,9 +51,23 @@ import { InputAppendsComponent } from './components/input-appends/input-appends.
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
 import { RenderFieldComponent } from './fields/components.fields';
 import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
+import { RefSectionComponent } from './fields/section/ref-section.component';
+import { FieldSectionComponent } from './sections/field-section/field-section.component';
+import { BaseSectionComponent } from './sections/base-section/base-section.component';
+import { ReferenceSectionComponent } from './sections/reference-section/reference-section.component';
+import { SectionsFactoryComponent } from './sections/sections-factory/sections-factory.component';
 
 
 @NgModule({
+  imports: [
+    CommonModule,
+    NgbModule,
+    NgSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    FontAwesomeModule,
+  ],
   declarations: [
     RenderComponent,
     RenderElementComponent,
@@ -82,21 +96,17 @@ import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
     InputAppendsComponent,
     ObjectBulkInputAppendsComponent,
     RenderFieldComponent,
-    ConfigEditBaseComponent
+    ConfigEditBaseComponent,
+    RefSectionComponent,
+    FieldSectionComponent,
+    BaseSectionComponent,
+    ReferenceSectionComponent,
+    SectionsFactoryComponent
   ],
   exports: [
     RenderElementComponent,
     RenderComponent
-  ],
-    imports: [
-        CommonModule,
-        NgbModule,
-        NgSelectModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        FontAwesomeModule,
-    ]
+  ]
 })
 export class RenderModule {
 }
