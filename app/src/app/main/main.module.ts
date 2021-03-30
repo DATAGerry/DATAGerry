@@ -24,7 +24,7 @@ import { NgxIndexedDBModule } from 'ngx-indexed-db';
 import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
 import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
 import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
-import { SessionTimeoutService } from '../auth/services/session-timeout.service';
+import { DateSettingsService } from '../settings/services/date-settings.service';
 
 @NgModule({
   declarations: [],
@@ -35,11 +35,11 @@ import { SessionTimeoutService } from '../auth/services/session-timeout.service'
     MainRoutingModule,
     DashboardModule,
   ],
-  providers: [UserSettingsDBService, UserSettingsService]
+  providers: [UserSettingsDBService, UserSettingsService, DateSettingsService]
 })
 export class MainModule {
 
-  constructor() {
+  constructor(private dateSettingsService: DateSettingsService) {
 
   }
 }

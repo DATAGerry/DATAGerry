@@ -16,8 +16,6 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as moment from 'moment';
-
 import { Component, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../../fields/components.fields';
 
@@ -36,9 +34,7 @@ export class DateSimpleComponent extends RenderFieldComponent implements OnInit 
     const dateValue = this.data ? this.data.value : this.data.value;
     if (dateValue) {
       if (dateValue.$date) {
-        this.data.value = moment(new Date(dateValue.$date)).format('DD/MM/YYYY');
-      } else {
-        this.data.value = moment(new Date(dateValue)).format('DD/MM/YYYY');
+        this.data.value = dateValue.$date;
       }
     } else {
       this.data.value = 'no date set';

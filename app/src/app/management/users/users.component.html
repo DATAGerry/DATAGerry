@@ -23,6 +23,10 @@
                               [groupLoadingStack]="groupLoadingStack"></cmdb-user-table-group-cell>
 </ng-template>
 
+<ng-template #dateTemplate let-item="item">
+  {{item | dateFormatter}}
+</ng-template>
+
 <ng-template #actionsTemplate let-item="item">
   <cmdb-user-table-actions [user]="item" (passWordAction)="onPasswordChange($event)"></cmdb-user-table-actions>
 </ng-template>

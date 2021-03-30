@@ -56,6 +56,7 @@ import { FieldSectionComponent } from './sections/field-section/field-section.co
 import { BaseSectionComponent } from './sections/base-section/base-section.component';
 import { ReferenceSectionComponent } from './sections/reference-section/reference-section.component';
 import { SectionsFactoryComponent } from './sections/sections-factory/sections-factory.component';
+import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
 
 
 @NgModule({
@@ -101,11 +102,13 @@ import { SectionsFactoryComponent } from './sections/sections-factory/sections-f
     FieldSectionComponent,
     BaseSectionComponent,
     ReferenceSectionComponent,
-    SectionsFactoryComponent
+    SectionsFactoryComponent,
+    DateFormatterPipe
   ],
   exports: [
     RenderElementComponent,
-    RenderComponent
+    RenderComponent,
+    DateFormatterPipe
   ]
 })
 export class RenderModule {

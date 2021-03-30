@@ -16,7 +16,6 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as moment from 'moment';
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
@@ -45,9 +44,25 @@ import { CmdbType } from '../framework/models/cmdb-type';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
+  /**
+   * Table Template: Dashboard active column.
+   */
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard user column.
+   */
   @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard action column.
+   */
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard date column.
+   */
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
   /**
    * Global unsubscriber for http calls to the rest backend.
@@ -159,9 +174,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       sortable: false,
       searchable: false,
       cssClasses: ['text-center'],
-      render(data: any, item?: any, column?: Column, index?: number) {
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
-      }
+      template: this.dateTemplate,
     } as Column;
 
     const lastModColumn = {
@@ -171,11 +184,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       sortable: false,
       searchable: false,
       cssClasses: ['text-center'],
-      render(data: any, item?: any, column?: Column, index?: number) {
+      template: this.dateTemplate,
+      render(data: any) {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
+        return data;
       }
     } as Column;
 

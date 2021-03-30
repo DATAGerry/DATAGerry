@@ -73,3 +73,5 @@
               [emptyMessage]="'No modified objects!'" [pageSizeEnabled]="false" (pageChange)="onLatestPageChange($event)">
   </cmdb-table>
 </ng-container>
+
+<ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>

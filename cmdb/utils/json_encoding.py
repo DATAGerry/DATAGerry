@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 from cmdb.search.search_result import SearchResult, SearchResultMap
 from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.settings.date.date_settings import DateSettingsDAO
 
 try:
     import uuid
@@ -70,6 +71,8 @@ def default(obj):
     if isinstance(obj, AuthSettingsDAO) or isinstance(obj, AuthenticationProvider):
         return obj.__dict__
     if isinstance(obj, AuthProviderConfig):
+        return obj.__dict__
+    if isinstance(obj, DateSettingsDAO):
         return obj.__dict__
     if isinstance(obj, bytes):
         return obj.decode("utf-8")

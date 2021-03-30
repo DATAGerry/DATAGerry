@@ -63,6 +63,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint, objects_blueprint
     from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
+    from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
     from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
 
     from cmdb.interface.rest_api.user_management_routes.user_routes import users_blueprint
@@ -91,6 +92,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
 
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
+    app.register_multi_blueprint(date_blueprint, multi_prefix=['/date'])
     app.register_blueprint(object_blueprint)
     app.register_multi_blueprint(objects_blueprint, multi_prefix=['/objects'])
     app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
