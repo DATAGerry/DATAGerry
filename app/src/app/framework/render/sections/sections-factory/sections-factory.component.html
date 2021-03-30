@@ -1,8 +1,10 @@
-<fieldset *ngFor="let section of sections">
-  <legend>{{section?.label}}</legend>
-  <div class="object-renderInstance" *ngFor="let field of section?.fields">
-    <cmdb-render-element [mode]="mode" [parentFormGroup]="form" [data]="getFieldByName(field)"
-                         [changeForm]="changeForm" [section]="section"
-                         [value]="getValueByName(field)"></cmdb-render-element>
-  </div>
-</fieldset>
+<ng-container *ngFor="let section of sections">
+  <ng-container [ngSwitch]="section.type">
+    <cmdb-reference-section *ngSwitchCase="'ref-section'" [mode]="mode" [form]="form" [changeForm]="changeForm"
+                            [section]="section" [fields]="fields" [values]="values"
+    ></cmdb-reference-section>
+    <cmdb-field-section *ngSwitchDefault [mode]="mode" [form]="form" [changeForm]="changeForm"
+                        [section]="section" [fields]="fields" [values]="values"
+    ></cmdb-field-section>
+  </ng-container>
+</ng-container>

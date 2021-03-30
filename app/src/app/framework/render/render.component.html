@@ -1,6 +1,5 @@
 <div id="renderModeWrapper"
      *ngIf="renderResult; then renderResultTemplate else mergeBlockTemplate"></div>
-
 <ng-template #renderResultTemplate>
   <cmdb-sections-factory
     [mode]="mode" [form]="renderForm" [changeForm]="changeForm"
@@ -10,6 +9,6 @@
 <ng-template #mergeBlockTemplate>
   <cmdb-sections-factory
     [mode]="mode" [form]="renderForm" [changeForm]="changeForm"
-    [sections]="typeInstance?.render_meta?.sections" [fields]="typeInstance?.fields" [values]="objectInstance.fields">
+    [sections]="typeInstance?.render_meta?.sections" [fields]="typeInstance?.fields" [values]="objectInstance?.fields">
   </cmdb-sections-factory>
 </ng-template>

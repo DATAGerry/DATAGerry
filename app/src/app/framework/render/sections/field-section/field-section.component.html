@@ -1,1 +1,8 @@
-<p>field-section works!</p>
+<fieldset>
+  <legend>{{section?.label}}</legend>
+  <div class="object-renderInstance" *ngFor="let field of section?.fields">
+    <cmdb-render-element [mode]="mode" [parentFormGroup]="form" [data]="getFieldByName(field)"
+                         [changeForm]="changeForm" [section]="section"
+                         [value]="getValueByName(field)"></cmdb-render-element>
+  </div>
+</fieldset>

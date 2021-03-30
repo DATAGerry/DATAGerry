@@ -67,8 +67,8 @@ export class RenderFieldComponent {
   }
 
   @Input('value')
-  public set value(valueList: any) {
-    this.innerValue = valueList;
+  public set value(value: any) {
+    this.innerValue = value;
   }
 
   public get value(): any {
