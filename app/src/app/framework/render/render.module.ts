@@ -50,7 +50,6 @@ import { NumberComponent } from './fields/math/number.component';
 import { InputAppendsComponent } from './components/input-appends/input-appends.component';
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
 import { RenderFieldComponent } from './fields/components.fields';
-import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
 import { RefSectionComponent } from './fields/section/ref-section.component';
 import { FieldSectionComponent } from './sections/field-section/field-section.component';
 import { BaseSectionComponent } from './sections/base-section/base-section.component';
@@ -97,7 +96,6 @@ import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
     InputAppendsComponent,
     ObjectBulkInputAppendsComponent,
     RenderFieldComponent,
-    ConfigEditBaseComponent,
     RefSectionComponent,
     FieldSectionComponent,
     BaseSectionComponent,

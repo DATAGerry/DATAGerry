@@ -28,7 +28,7 @@ import { FormGroup } from '@angular/forms';
 })
 export class TypePreviewStepComponent extends TypeBuilderStepComponent {
 
-  public mode: CmdbMode = CmdbMode.Edit;
+  public mode: CmdbMode = CmdbMode.View;
   public previewForm: FormGroup = new FormGroup({});
 
   constructor() {

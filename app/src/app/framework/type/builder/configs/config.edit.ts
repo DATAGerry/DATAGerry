@@ -19,12 +19,8 @@
 import { Component, Input } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 
-@Component({
-  template: ''
-})
 export class ConfigEditBaseComponent {
-  private innerData: any;
-  private innerSections: any[];
+
   private editable: false;
 
   @Input() public types: Array<CmdbType> = [];
@@ -32,22 +28,17 @@ export class ConfigEditBaseComponent {
   public constructor() {
   }
 
+  public data: any;
   @Input('data')
-  public set data(value: any) {
-    this.innerData = value;
+  public set Data(d: any) {
+    this.data = d;
   }
 
-  public get data(): any {
-    return this.innerData;
-  }
 
+  public sections: Array<any>;
   @Input('sections')
-  public set sections(value: any) {
-    this.innerSections = value;
-  }
-
-  public get sections(): any {
-    return this.innerSections;
+  public set Sections(s: Array<any>) {
+    this.sections = s;
   }
 
   public fields: Array<any> = [];

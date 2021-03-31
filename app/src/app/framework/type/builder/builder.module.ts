@@ -23,7 +23,6 @@ import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ConfigEditComponent } from './configs/config-edit.component';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
 import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
@@ -57,7 +56,6 @@ import { LayoutModule } from '../../../layout/layout.module';
   ],
   declarations: [
     BuilderComponent,
-    ConfigEditComponent,
     TextFieldEditComponent,
     DummyFieldEditComponent,
     SectionFieldEditComponent,

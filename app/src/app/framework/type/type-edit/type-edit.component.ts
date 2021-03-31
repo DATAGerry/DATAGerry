@@ -40,7 +40,6 @@ export class TypeEditComponent {
       this.stepIndex = params.stepIndex;
     });
     this.typeInstance = this.route.snapshot.data.type as CmdbType;
-    console.log(this.typeInstance);
   }
 
 }

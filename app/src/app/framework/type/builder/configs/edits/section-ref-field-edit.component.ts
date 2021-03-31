@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { CmdbType, CmdbTypeSection } from '../../../../models/cmdb-type';
 
@@ -36,6 +36,13 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    * Selected section
    */
   public selectedSection: CmdbTypeSection;
+
+
+  @Input('data')
+  public set Data(value: any) {
+    console.log(value);
+    this.data = value;
+  }
 
   constructor() {
     super();

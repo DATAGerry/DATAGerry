@@ -80,5 +80,11 @@
     <button type="button" class="btn btn-block btn-success mt-2" (click)="saveType()"
             [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
     </button>
+    <pre>
+    <code>
+      {{typeInstance | json}}
+    </code>
+  </pre>
   </div>
+
 </div>

@@ -8,7 +8,7 @@
   <input [(ngModel)]="data.label" type="text" class="form-control" required>
   <small class="form-text text-muted">a static display name</small>
 </div>
-<div class="form-group">
+<div class="form-group" *ngIf="data?.reference">
   <label>Reference type: <span class="required">*</span></label>
   <ng-select [items]="types" [searchable]="true" bindLabel="label" [(ngModel)]="data.reference.type_id"
              (change)="onTypeChange($event)"
