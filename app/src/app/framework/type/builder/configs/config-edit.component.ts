@@ -59,6 +59,5 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.fields = this.fields;
     this.componentRef.instance.canEdit = this.canEdit;
-    this.componentRef.instance.types = this.types;
   }
 }

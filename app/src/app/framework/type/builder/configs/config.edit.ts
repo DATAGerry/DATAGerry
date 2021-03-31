@@ -19,6 +19,9 @@
 import { Component, Input } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 
+@Component({
+  template: ``
+})
 export class ConfigEditBaseComponent {
 
   private editable: false;

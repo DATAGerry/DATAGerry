@@ -107,9 +107,8 @@
           </div>
           <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit
-                [canEdit]="canEdit" [sections]="sections" [fields]="typeInstance.fields" [data]="section"
-                [types]="types">
+              <cmdb-config-edit [types]="types"
+                [canEdit]="canEdit" [sections]="sections" [fields]="typeInstance.fields" [data]="section">
               </cmdb-config-edit>
             </div>
           </div>
@@ -141,7 +140,7 @@
                   </span>
                   </div>
                   <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                    <cmdb-config-edit [canEdit]="canEdit"
+                    <cmdb-config-edit [canEdit]="canEdit" [types]="types"
                                       [sections]="sections"
                                       [data]="field"></cmdb-config-edit>
                   </div>

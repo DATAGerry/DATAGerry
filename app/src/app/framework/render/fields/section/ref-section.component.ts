@@ -76,9 +76,11 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
   }
 
   private triggerAPICall(): void {
-    if (this.maxPage && (this.currentPage <= this.maxPage)) {
-      this.loadObjectsFromApi();
-      this.currentPage += 1;
+    if (this.section && this.section?.reference) {
+      if (this.maxPage && (this.currentPage <= this.maxPage)) {
+        this.loadObjectsFromApi();
+        this.currentPage += 1;
+      }
     }
   }
 

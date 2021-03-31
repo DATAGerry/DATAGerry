@@ -38,6 +38,8 @@ import { DateFieldEditComponent } from './configs/edits/date-field-edit.componen
 import { CategoryModule } from '../../category/category.module';
 import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-edit.component';
 import { LayoutModule } from '../../../layout/layout.module';
+import { ConfigEditBaseComponent } from './configs/config.edit';
+import { ConfigEditComponent } from './configs/config-edit.component';
 
 @NgModule({
   imports: [
@@ -55,6 +57,8 @@ import { LayoutModule } from '../../../layout/layout.module';
     LayoutModule
   ],
   declarations: [
+    ConfigEditBaseComponent,
+    ConfigEditComponent,
     BuilderComponent,
     TextFieldEditComponent,
     DummyFieldEditComponent,

@@ -8,11 +8,14 @@
   <input [(ngModel)]="data.label" type="text" class="form-control" required>
   <small class="form-text text-muted">a static display name</small>
 </div>
-<div class="form-group" *ngIf="data?.reference">
+<div class="form-group">
   <label>Reference type: <span class="required">*</span></label>
   <ng-select [items]="types" [searchable]="true" bindLabel="label" [(ngModel)]="data.reference.type_id"
-             (change)="onTypeChange($event)"
+             (change)="onTypeChange($event)" [virtualScroll]="true" (scrollToEnd)="onScrollToEnd()"
              bindValue="public_id" placeholder="Select Reference type" required>
+    <ng-template ng-header-tmp>
+      <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
+    </ng-template>
     <ng-template ng-option-tmp let-item="item">
       <div><span>Type: </span>{{item.label}}</div>
       <small><b>PublicID:</b> {{item.public_id}} | <b>Name:</b> {{item.name}}</small>
@@ -33,4 +36,3 @@
   </ng-select>
   <small class="text-muted">Leave empty for all fields.</small>
 </div>
-

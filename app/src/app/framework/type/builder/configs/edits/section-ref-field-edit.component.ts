@@ -16,16 +16,29 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { CmdbType, CmdbTypeSection } from '../../../../models/cmdb-type';
+import { CollectionParameters } from '../../../../../services/models/api-parameter';
+import { TypeService } from '../../../../services/type.service';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
+import { RenderResult } from '../../../../models/cmdb-render';
+import { ReplaySubject } from 'rxjs';
+import { CmdbMode } from '../../../../modes.enum';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
   templateUrl: './section-ref-field-edit.component.html',
   styleUrls: ['./section-ref-field-edit.component.scss']
 })
-export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
+export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
+
+  /**
+   * Component un subscriber.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
    * Sections from the selected type.
@@ -37,15 +50,84 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    */
   public selectedSection: CmdbTypeSection;
 
+  /**
+   * Types load right now?
+   */
+  public loading: boolean = false;
+
+  /**
+   * Total number of types.
+   */
+  public totalTypes: number = 0;
+
+  /**
+   * Current loading page
+   * @private
+   */
+  private currentPage: number = 1;
+
+  /**
+   * Max loading pages.
+   * @private
+   */
+  private maxPage: number = 1;
+
 
   @Input('data')
-  public set Data(value: any) {
-    console.log(value);
+  public set Data(value: CmdbTypeSection) {
+    if (value?.reference?.type_id) {
+      this.loadPresetType(value.reference.type_id);
+    }
     this.data = value;
   }
 
-  constructor() {
+  constructor(private typeService: TypeService) {
     super();
+  }
+
+  /**
+   * Generate the type call parameters
+   * @param page
+   * @private
+   */
+  static getApiParameters(page: number = 1): CollectionParameters {
+    return {
+      filter: undefined, limit: 10, sort: 'public_id',
+      order: 1, page
+    } as CollectionParameters;
+  }
+
+  public ngOnInit(): void {
+    this.triggerAPICall();
+  }
+
+  private loadPresetType(publicID: number): void {
+    this.loading = true;
+    this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: CmdbType) => {
+        this.types = [...this.types, ...[apiResponse as CmdbType]];
+      }).add(() => this.loading = false);
+  }
+
+  private triggerAPICall(): void {
+    if (this.maxPage && (this.currentPage <= this.maxPage)) {
+      this.loadTypesFromApi();
+      this.currentPage += 1;
+    }
+  }
+
+  private loadTypesFromApi(): void {
+    this.loading = true;
+    this.typeService.getTypes(SectionRefFieldEditComponent.getApiParameters(this.currentPage)).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+        this.types = [...this.types, ...apiResponse.results as Array<CmdbType>];
+        this.totalTypes = apiResponse.total;
+        this.maxPage = apiResponse.pager.total_pages;
+      }).add(() => this.loading = false);
+  }
+
+  public onScrollToEnd(): void {
+    this.triggerAPICall();
   }
 
   /**
@@ -85,10 +167,18 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent {
    */
   public onNameChange(name: string) {
     const oldName = this.data.name;
-    const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
-    const field = this.fields.find(x => x.name === `${oldName}-field`);
-    this.data.fields[fieldIdx] = `${name}-field`;
-    field.name = `${name}-field`;
+    const fieldIdx = this.data.fields.indexOf(`${ oldName }-field`);
+    const field = this.fields.find(x => x.name === `${ oldName }-field`);
+    this.data.fields[fieldIdx] = `${ name }-field`;
+    field.name = `${ name }-field`;
+  }
+
+  /**
+   * Destroy component.
+   */
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

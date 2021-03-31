@@ -16,11 +16,11 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy } from '@angular/core';
 import { BaseSectionComponent } from '../base-section/base-section.component';
 import { TypeService } from '../../../services/type.service';
 import { CmdbMode } from '../../../modes.enum';
-import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbType, CmdbTypeSection } from '../../../models/cmdb-type';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -29,26 +29,34 @@ import { takeUntil } from 'rxjs/operators';
   templateUrl: './reference-section.component.html',
   styleUrls: ['./reference-section.component.scss']
 })
-export class ReferenceSectionComponent extends BaseSectionComponent implements OnInit, OnDestroy {
+export class ReferenceSectionComponent extends BaseSectionComponent implements OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public referencedType: CmdbType;
+
+  @Input('section')
+  public set Section(section: CmdbTypeSection) {
+    this.section = section;
+    if (this.section?.reference?.type_id) {
+      this.loadRefType();
+    }
+  }
 
   constructor(private typeService: TypeService) {
     super();
   }
 
-  public ngOnInit(): void {
+  public loadRefType(): void {
     if (this.mode === CmdbMode.View) {
       this.typeService.getType(this.section.reference.type_id).pipe(takeUntil(this.subscriber))
-        .subscribe((apiResponse: CmdbType) => {
-          this.referencedType = apiResponse;
-        });
+         .subscribe((apiResponse: CmdbType) => {
+           this.referencedType = apiResponse;
+         });
     }
   }
 
   public get referenceField(): any {
-    return this.fields.find(f => f.name === `${this.section.name}-field`);
+    return this.fields.find(f => f.name === `${ this.section.name }-field`);
   }
 
   public getFieldByName(name: string) {
