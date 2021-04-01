@@ -44,7 +44,15 @@ export class BaseSectionComponent {
   @Input() public changeForm: FormGroup;
 
   @Input() public fields: Array<any> = [];
-  @Input() public values: Array<any> = [];
+
+  public values: Array<any> = [];
+
+  @Input('values')
+  public set Values(val: Array<any>) {
+    if (val) {
+      this.values = val;
+    }
+  }
 
   @Input() public mode: CmdbMode = CmdbMode.View;
   @Input() public section: CmdbTypeSection;
@@ -71,7 +79,7 @@ export class BaseSectionComponent {
   public getValueByName(name: string) {
     const fieldFound = this.values.find(field => field.name === name);
     if (fieldFound === undefined) {
-      return {};
+      return undefined;
     }
     return fieldFound.value;
   }
