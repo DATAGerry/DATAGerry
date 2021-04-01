@@ -12,7 +12,7 @@
   <label>Reference type: <span class="required">*</span></label>
   <ng-select [items]="types" [searchable]="true" bindLabel="label" [(ngModel)]="data.reference.type_id"
              (change)="onTypeChange($event)" [virtualScroll]="true" (scrollToEnd)="onScrollToEnd()"
-             bindValue="public_id" placeholder="Select Reference type" required>
+             bindValue="public_id" placeholder="Select Reference type" [disabled]="selectDisabled" required>
     <ng-template ng-header-tmp>
       <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
     </ng-template>

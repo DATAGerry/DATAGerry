@@ -27,6 +27,7 @@ import {
 } from '@angular/core';
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -35,6 +36,7 @@ import { CmdbType } from '../../../models/cmdb-type';
 })
 export class ConfigEditComponent implements OnInit {
 
+  @Input() public mode: CmdbMode = CmdbMode.Create;
   @Input() data: any;
   @Input() public fields: Array<any> = [];
   @Input() public sections: Array<any> = [];
@@ -55,6 +57,7 @@ export class ConfigEditComponent implements OnInit {
 
     const factory = this.resolver.resolveComponentFactory(this.component);
     this.componentRef = this.container.createComponent(factory);
+    this.componentRef.instance.mode = this.mode;
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.fields = this.fields;

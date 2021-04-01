@@ -221,7 +221,7 @@ class CmdbRender:
 
     def __merge_fields_value(self) -> List[dict]:
         field_map = []
-        for section in self.type_instance.render_meta.sections:
+        for idx, section in enumerate(self.type_instance.render_meta.sections):
             if type(section) is TypeFieldSection and isinstance(section, TypeFieldSection):
                 for section_field in section.fields:
                     field = {}
@@ -254,6 +254,8 @@ class CmdbRender:
                     continue
                 if not section.reference.selected_fields or len(section.reference.selected_fields) == 0:
                     selected_ref_fields = ref_section.fields
+                    section.reference.selected_fields = selected_ref_fields
+                    self.type_instance.render_meta.sections[idx] = section
                 else:
                     selected_ref_fields = [f for f in ref_section.fields if f in section.reference.selected_fields]
                 for ref_section_field_name in selected_ref_fields:

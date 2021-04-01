@@ -18,11 +18,14 @@
 
 import { Component, Input } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
   template: ``
 })
 export class ConfigEditBaseComponent {
+
+  @Input() public mode: CmdbMode = CmdbMode.Create;
 
   private editable: false;
 
@@ -32,6 +35,7 @@ export class ConfigEditBaseComponent {
   }
 
   public data: any;
+
   @Input('data')
   public set Data(d: any) {
     this.data = d;
@@ -39,6 +43,7 @@ export class ConfigEditBaseComponent {
 
 
   public sections: Array<any>;
+
   @Input('sections')
   public set Sections(s: Array<any>) {
     this.sections = s;

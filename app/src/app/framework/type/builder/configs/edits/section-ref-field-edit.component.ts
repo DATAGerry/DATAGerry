@@ -72,6 +72,10 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   private maxPage: number = 1;
 
+  /**
+   * Type switch active.
+   */
+  public selectDisabled: boolean = false;
 
   @Input('data')
   public set Data(value: CmdbTypeSection) {
@@ -99,6 +103,9 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
   public ngOnInit(): void {
     this.triggerAPICall();
+    if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Bulk) {
+      this.selectDisabled = true;
+    }
   }
 
   private loadPresetType(publicID: number): void {
