@@ -75,9 +75,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
       this.typeInstance = instance;
       this.fields = this.typeInstance.fields;
 
-      this.summaryForm.patchValue(this.fields.filter((e) => {
-        return instance.render_meta.summary.fields.indexOf(e.name) !== -1;
-      }));
+      this.summaryForm.patchValue(this.typeInstance.render_meta.summary);
       this.externalsForm.get('name').setValidators(this.listNameValidator());
     }
   }
@@ -87,7 +85,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     this.iterableDiffer = iterableDiffers.find([]).create(null);
 
     this.summaryForm = new FormGroup({
-      fields: new FormControl([], Validators.required)
+      fields: new FormControl('', Validators.required)
     });
 
     this.externalsForm = new FormGroup({
@@ -120,9 +118,6 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   }
 
   public ngOnInit(): void {
-    this.summaryFields.valueChanges.pipe(takeUntil(this.subscriber)).subscribe((changes: Array<string>) => {
-      this.typeInstance.render_meta.summary.fields = [...changes];
-    });
 
     this.externalsForm.get('name').valueChanges.pipe(takeUntil(this.subscriber)).subscribe(val => {
       if (this.externalsForm.get('name').value !== null) {
@@ -164,10 +159,14 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   public ngDoCheck(): void {
     const changes = this.iterableDiffer.diff(this.typeInstance.fields);
     if (changes) {
+      const summaries = this.summaryFields.value;
       this.fields = [...this.typeInstance.fields];
-      this.summaryFields.setValue(this.summaryFields.value.filter(val => !this.fields.map(x => x.name).includes(val)));
+      this.summaryFields.patchValue(summaries);
+      // this.summaryFields.setValue(this.summaryFields.value.filter(val => !this.fields.map(x => x.name).includes(val)));
     }
   }
 
-
+  public onSummaryChange(fields: Array<any>) {
+    this.typeInstance.render_meta.summary.fields = fields.map(f => f.name);
+  }
 }
