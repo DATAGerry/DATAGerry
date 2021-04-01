@@ -1,0 +1,6 @@
+<span *ngIf="data && data.value; else noRef">
+  #{{data.value}}: {{data.references.type_label}}
+</span>
+<ng-template #noRef>
+  <span>No reference set</span>
+</ng-template>
