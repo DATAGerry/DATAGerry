@@ -29,7 +29,7 @@
     "@fortawesome/free-brands-svg-icons": "^5.15.1",
     "@fortawesome/free-regular-svg-icons": "^5.15.1",
     "@fortawesome/free-solid-svg-icons": "^5.15.1",
-    "@ng-bootstrap/ng-bootstrap": "^5.1.4",
+    "@ng-bootstrap/ng-bootstrap": "^8.0.4",
     "@ng-select/ng-select": "^5.1.0",
     "@tinymce/tinymce-angular": "^4.1.0",
     "@types/chart.js": "^2.9.31",
