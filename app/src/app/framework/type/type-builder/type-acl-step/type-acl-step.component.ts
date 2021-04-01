@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -22,33 +22,37 @@ import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Group } from '../../../../management/models/group';
 import { AccessControlList } from '../../../../acl/acl.types';
+import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-acl-step',
   templateUrl: './type-acl-step.component.html',
   styleUrls: ['./type-acl-step.component.scss']
 })
-export class TypeAclStepComponent implements OnInit, OnDestroy {
+export class TypeAclStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public acl: AccessControlList;
-  private wasEmpty: boolean = true;
-
-  @Input('acl')
-  public set ACL(access: AccessControlList) {
-    if (access) {
-      this.acl = access;
-      this.form.patchValue(this.acl);
-    }
-  }
 
   @Input() public groups: Array<Group> = [];
-  @Output() public validStatus: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  private wasEmpty: boolean = true;
+
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    this.typeInstance = instance;
+    if (this.typeInstance.acl) {
+      this.form.patchValue(this.typeInstance.acl);
+    }
+
+  }
+
   @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   public form: FormGroup;
 
   constructor() {
+    super();
     this.form = new FormGroup({
       activated: new FormControl(false),
       groups: new FormGroup({
@@ -56,7 +60,6 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
       })
     });
   }
-
 
 
   public get activatedStatus(): boolean {
@@ -77,14 +80,17 @@ export class TypeAclStepComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe((status) => {
+    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
       if (!this.form.get('activated').value) {
         this.isEmpty.emit(true);
-        this.validStatus.emit(true);
+        this.validateChange.emit(true);
       } else {
         this.isEmpty.emit(this.wasEmpty);
-        this.validStatus.emit(this.form.valid);
+        this.validateChange.emit(this.form.valid);
       }
+    });
+    this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
+      this.typeInstance.acl = this.form.getRawValue() as AccessControlList;
     });
   }
 

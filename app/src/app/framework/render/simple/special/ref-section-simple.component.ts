@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,24 +13,25 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
+
+import { Component, OnInit } from '@angular/core';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
-  selector: 'cmdb-type-validation-step',
-  templateUrl: './type-validation-step.component.html',
-  styleUrls: ['./type-validation-step.component.scss']
+  selector: 'cmdb-ref-section-simple',
+  templateUrl: './ref-section-simple.component.html',
+  styleUrls: ['./ref-section-simple.component.scss']
 })
-export class TypeValidationStepComponent implements OnInit {
+export class RefSectionSimpleComponent extends RenderFieldComponent implements OnInit {
 
-  @Input() public typeInstance: CmdbType = null;
+  constructor() {
+    super();
+  }
 
-  constructor() { }
-
-  public ngOnInit(): void {
+  ngOnInit(): void {
   }
 
 }

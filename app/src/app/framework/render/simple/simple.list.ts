@@ -23,6 +23,7 @@ import { RadioSimpleComponent } from './choice/radio-simple.component';
 import { SelectSimpleComponent } from './choice/select-simple.component';
 import { RefSimpleComponent } from './special/ref-simple.component';
 import { DateSimpleComponent } from './date/date-simple.component';
+import { RefSectionSimpleComponent } from './special/ref-section-simple.component';
 
 export const simpleComponents: { [type: string]: any } = {
   text: TextSimpleComponent,
@@ -37,5 +38,6 @@ export const simpleComponents: { [type: string]: any } = {
   select: SelectSimpleComponent,
   ref: RefSimpleComponent,
   date: DateSimpleComponent,
-  debug: TextSimpleComponent
+  debug: TextSimpleComponent,
+  'ref-section-field': RefSectionSimpleComponent
 };

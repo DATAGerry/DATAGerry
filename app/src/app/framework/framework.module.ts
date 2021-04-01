@@ -25,17 +25,18 @@ import { ObjectService } from './services/object.service';
 import { FrameworkComponent } from './framework.component';
 
 @NgModule({
-  declarations: [
-    FrameworkComponent,
-  ],
   imports: [
     CommonModule,
     LayoutModule,
     FrameworkRoutingModule
+  ],
+  declarations: [
+    FrameworkComponent,
   ],
   providers: [
     TypeService,
     ObjectService
   ]
 })
-export class FrameworkModule { }
+export class FrameworkModule {
+}

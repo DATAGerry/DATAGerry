@@ -23,7 +23,6 @@ import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { ConfigEditComponent } from './configs/config-edit.component';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
 import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
@@ -37,22 +36,12 @@ import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-boots
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
 import { CategoryModule } from '../../category/category.module';
+import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-edit.component';
+import { LayoutModule } from '../../../layout/layout.module';
+import { ConfigEditBaseComponent } from './configs/config.edit';
+import { ConfigEditComponent } from './configs/config-edit.component';
 
 @NgModule({
-  declarations: [
-    BuilderComponent,
-    ConfigEditComponent,
-    TextFieldEditComponent,
-    DummyFieldEditComponent,
-    SectionFieldEditComponent,
-    TextareaEditComponent,
-    RefFieldEditComponent,
-    ChoiceFieldEditComponent,
-    CheckFieldEditComponent,
-    PreviewModalComponent,
-    DiagnosticModalComponent,
-    DateFieldEditComponent,
-  ],
   imports: [
     CommonModule,
     DndModule,
@@ -64,7 +53,24 @@ import { CategoryModule } from '../../category/category.module';
     NgbDatepickerModule,
     ReactiveFormsModule,
     CategoryModule,
-    NgbTooltipModule
+    NgbTooltipModule,
+    LayoutModule
+  ],
+  declarations: [
+    ConfigEditBaseComponent,
+    ConfigEditComponent,
+    BuilderComponent,
+    TextFieldEditComponent,
+    DummyFieldEditComponent,
+    SectionFieldEditComponent,
+    TextareaEditComponent,
+    RefFieldEditComponent,
+    ChoiceFieldEditComponent,
+    CheckFieldEditComponent,
+    PreviewModalComponent,
+    DiagnosticModalComponent,
+    DateFieldEditComponent,
+    SectionRefFieldEditComponent,
   ],
   exports: [
     BuilderComponent

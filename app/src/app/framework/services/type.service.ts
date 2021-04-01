@@ -119,6 +119,10 @@ export class TypeService<T = CmdbType> implements ApiService {
       const filter = JSON.stringify(params.filter);
       httpParams = httpParams.set('filter', filter);
     }
+    if (params.projection !== undefined) {
+      const projection = JSON.stringify(params.projection);
+      httpParams = httpParams.set('projection', projection);
+    }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);
     httpParams = httpParams.set('order', params.order.toString());

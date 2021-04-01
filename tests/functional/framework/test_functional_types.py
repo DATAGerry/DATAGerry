@@ -5,7 +5,7 @@ from datetime import datetime
 from http import HTTPStatus
 
 from cmdb.framework import TypeModel
-from cmdb.framework.models.type import TypeRenderMeta, TypeSection, TypeSummary
+from cmdb.framework.models.type import TypeRenderMeta, TypeFieldSection, TypeSummary
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
 from tests.utils.flask_test_client import RestAPITestSuite
@@ -18,7 +18,7 @@ def example_type():
         active=True, version=None, description='Test type',
         render_meta=TypeRenderMeta(
             sections=[
-                TypeSection(type='section', name='test-section', label='TEST', fields=['test-field'])
+                TypeFieldSection(type='section', name='test-section', label='TEST', fields=['test-field'])
             ],
             summary=TypeSummary(fields=['test-field'])
         ),

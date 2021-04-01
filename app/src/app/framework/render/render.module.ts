@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -50,11 +50,24 @@ import { NumberComponent } from './fields/math/number.component';
 import { InputAppendsComponent } from './components/input-appends/input-appends.component';
 import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-appends/object-bulk-input-appends.component';
 import { RenderFieldComponent } from './fields/components.fields';
-import { ConfigEditBaseComponent } from '../type/builder/configs/config.edit';
+import { RefSectionComponent } from './fields/section/ref-section.component';
+import { FieldSectionComponent } from './sections/field-section/field-section.component';
+import { BaseSectionComponent } from './sections/base-section/base-section.component';
+import { ReferenceSectionComponent } from './sections/reference-section/reference-section.component';
+import { SectionsFactoryComponent } from './sections/sections-factory/sections-factory.component';
 import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
-
+import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.component';
 
 @NgModule({
+  imports: [
+    CommonModule,
+    NgbModule,
+    NgSelectModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterModule,
+    FontAwesomeModule,
+  ],
   declarations: [
     RenderComponent,
     RenderElementComponent,
@@ -83,23 +96,19 @@ import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
     InputAppendsComponent,
     ObjectBulkInputAppendsComponent,
     RenderFieldComponent,
-    ConfigEditBaseComponent,
-    DateFormatterPipe
+    RefSectionComponent,
+    FieldSectionComponent,
+    BaseSectionComponent,
+    ReferenceSectionComponent,
+    SectionsFactoryComponent,
+    DateFormatterPipe,
+    RefSectionSimpleComponent
   ],
   exports: [
     RenderElementComponent,
     RenderComponent,
     DateFormatterPipe
-  ],
-    imports: [
-        CommonModule,
-        NgbModule,
-        NgSelectModule,
-        FormsModule,
-        ReactiveFormsModule,
-        RouterModule,
-        FontAwesomeModule,
-    ]
+  ]
 })
 export class RenderModule {
 }

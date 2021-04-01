@@ -1,0 +1,23 @@
+$ref-label-top: -2em;
+$ref-label-right: 0;
+$ref-label-margin: -1px;
+$ref-label-border: 1px solid #ddd;
+$ref-label-padding: 3px 15px 3px 15px;
+$ref-label-bg-color: #ffffff;
+
+fieldset {
+  padding-top: 1em;
+  position: relative;
+
+  .object-reference-label {
+    position: absolute;
+
+    top: $ref-label-top;
+    right: $ref-label-right;
+    margin-right: $ref-label-margin;
+
+    border: $ref-label-border;
+    padding: $ref-label-padding;
+    background-color: $ref-label-bg-color;
+  }
+}

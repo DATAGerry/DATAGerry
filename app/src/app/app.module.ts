@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { BrowserModule } from '@angular/platform-browser';
@@ -24,7 +24,7 @@ import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { PreviousRouteService } from './services/previous-route.service';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ToastModule } from './layout/toast/toast.module';
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
@@ -45,6 +45,7 @@ import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
     AppComponent,
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -52,8 +53,11 @@ import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
     AuthModule,
     LayoutModule,
     ToastModule,
-    AppRoutingModule,
-    ProgressModule
+    ProgressModule,
+    AppRoutingModule
+  ],
+  exports: [
+    BrowserModule
   ],
   providers: [
     PreviousRouteService,

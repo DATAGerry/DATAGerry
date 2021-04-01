@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,12 +13,52 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { CmdbDao } from './cmdb-dao';
 import { AccessControlList } from '../../acl/acl.types';
 
+export interface CmdbTypeListEntry {
+  name: string;
+  label: string;
+  public_id: number;
+  render_meta: CmdbTypeMeta;
+}
+
+export class CmdbTypeList extends Array<CmdbTypeListEntry> {
+}
+
+export interface CmdbTypeSection {
+  type: string;
+  name: string;
+  label: string;
+  fields?: Array<any>;
+  reference?: {
+    type_id: number;
+    section_name: string;
+    selected_fields?: Array<string>;
+  };
+}
+
+export interface CmdbTypeExternalLink {
+  name: string;
+  href: string;
+  label: string;
+  icon: string;
+  fields: Array<any>;
+}
+
+export interface CmdbTypeMeta {
+  icon: string;
+  sections: Array<CmdbTypeSection>;
+  externals: Array<CmdbTypeExternalLink>;
+  summary: CmdbTypeSummary;
+}
+
+export interface CmdbTypeSummary {
+  fields: Array<string>;
+}
 
 export class CmdbType implements CmdbDao {
 
@@ -30,8 +70,8 @@ export class CmdbType implements CmdbDao {
   public author_id: number;
   public version: string;
   public creation_time: any;
-  public render_meta: any;
-  public fields: any[];
+  public render_meta: CmdbTypeMeta;
+  public fields: Array<any> = [];
   public acl?: AccessControlList;
 
   public has_references(): boolean {

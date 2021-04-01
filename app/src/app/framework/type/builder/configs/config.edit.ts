@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,38 +13,47 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input} from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
 
 @Component({
-  template: ''
+  template: ``
 })
 export class ConfigEditBaseComponent {
-  private innerData: any;
-  private innerSections: any[];
+
+  @Input() public mode: CmdbMode = CmdbMode.Create;
+
   private editable: false;
+
+  @Input() public types: Array<CmdbType> = [];
 
   public constructor() {
   }
 
+  public data: any;
+
   @Input('data')
-  public set data(value: any) {
-    this.innerData = value;
+  public set Data(d: any) {
+    this.data = d;
   }
 
-  public get data(): any {
-    return this.innerData;
-  }
+
+  public sections: Array<any>;
 
   @Input('sections')
-  public set sections(value: any) {
-    this.innerSections = value;
+  public set Sections(s: Array<any>) {
+    this.sections = s;
   }
 
-  public get sections(): any {
-    return this.innerSections;
+  public fields: Array<any> = [];
+
+  @Input('fields')
+  public set Fields(f: Array<any>) {
+    this.fields = f;
   }
 
   @Input('canEdit')
@@ -67,7 +76,7 @@ export class ConfigEditBaseComponent {
   }
 
   private checkNameUniqueness() {
-    const {type, name} = this.data;
+    const { type, name } = this.data;
     switch (type) {
       case 'section':
         return this.sections.filter(el => el.name === name).length <= 1;
