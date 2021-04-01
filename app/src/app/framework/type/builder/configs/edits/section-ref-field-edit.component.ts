@@ -103,9 +103,6 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
   public ngOnInit(): void {
     this.triggerAPICall();
-    if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Bulk) {
-      this.selectDisabled = true;
-    }
   }
 
   private loadPresetType(publicID: number): void {

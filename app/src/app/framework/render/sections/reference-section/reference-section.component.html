@@ -6,6 +6,12 @@
                            [changeForm]="changeForm" [section]="section"
                            [value]="getValueByName(field)"></cmdb-render-element>
     </div>
+    <div *ngIf="referencedType && referenceField" class="object-reference-label">
+      <small class="text-muted">from
+        <a [routerLink]="['/', 'framework', 'object', 'type', referencedType.public_id]">{{referencedType.label}}</a>
+        #<a [routerLink]="['/', 'framework', 'object', 'view', referenceField.value]">{{referenceField.value}}</a>
+      </small>
+    </div>
   </ng-container>
   <ng-container *ngSwitchDefault>
     <div class="object-renderInstance">
@@ -13,10 +19,5 @@
                            [changeForm]="changeForm" [section]="section"></cmdb-render-element>
     </div>
   </ng-container>
-  <div *ngIf="referencedType && referenceField" class="object-reference-label">
-    <small class="text-muted">from
-      <a [routerLink]="['/', 'framework', 'object', 'type', referencedType.public_id]">{{referencedType.label}}</a>
-      #<a [routerLink]="['/', 'framework', 'object', 'view', referenceField.value]">{{referenceField.value}}</a>
-    </small>
-  </div>
+
 </fieldset>
