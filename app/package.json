@@ -46,7 +46,7 @@
     "moment-timezone": "^0.5.33",
     "ng-inline-svg": "^11.0.2",
     "ngx-drag-drop": "^2.0.0",
-    "ngx-filesaver": "^8.1.0",
+    "ngx-filesaver": "^11.0.0",
     "ngx-icon-picker": "^1.4.0",
     "ngx-indexed-db": "^6.1.2",
     "node-sass": "^4.14.1",
