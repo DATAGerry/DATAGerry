@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,14 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { DocapiSettingsListComponent } from './docapi-settings-list/docapi-settings-list.component';
-import { DocapiSettingsAddComponent } from './docapi-settings-add/docapi-settings-add.component';
-import { DocapiSettingsEditComponent } from './docapi-settings-edit/docapi-settings-edit.component';
+import { DocapiListComponent } from './docapi-list/docapi-list.component';
+import { DocapiAddComponent } from './docapi-add/docapi-add.component';
+import { DocapiEditComponent } from './docapi-edit/docapi-edit.component';
 
 const routes: Routes = [
   {
@@ -29,21 +29,21 @@ const routes: Routes = [
     data: {
       breadcrumb: 'List'
     },
-    component: DocapiSettingsListComponent
+    component: DocapiListComponent
   },
   {
     path: 'add',
     data: {
       breadcrumb: 'Add'
     },
-    component: DocapiSettingsAddComponent
+    component: DocapiAddComponent
   },
   {
     path: 'edit/:publicId',
     data: {
       breadcrumb: 'Edit'
     },
-    component: DocapiSettingsEditComponent
+    component: DocapiEditComponent
   }
 ];
 
@@ -52,4 +52,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class DocapiSettingsRoutingModule { }
+export class DocapiRoutingModule { }

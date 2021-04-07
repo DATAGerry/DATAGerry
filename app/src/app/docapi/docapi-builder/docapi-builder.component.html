@@ -3,7 +3,7 @@
     <ng-template awWizardStepSymbol><i class="fas fa-cogs"></i></ng-template>
     <cmdb-docapi-settings-builder-settings-step [preData]="docInstance"
                                                 [mode]="mode"></cmdb-docapi-settings-builder-settings-step>
-    <button class="btn btn-primary prev" type="button" [routerLink]="['/settings/docapi']">Cancel</button>
+    <button class="btn btn-primary prev" type="button" [routerLink]="['/docapi']">Cancel</button>
     <button class="btn btn-primary next" type="button" awNextStep [disabled]="!settingsStep.settingsForm.valid">Next
     </button>
   </aw-wizard-step>

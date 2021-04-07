@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,17 +18,17 @@
 
 import { Component, OnInit, Input, ViewChild, EventEmitter, Output } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../framework/modes.enum';
 import {
-  DocapiSettingsBuilderTypeStepBaseComponent
-} from './docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+  DocapiBuilderTypeStepBaseComponent
+} from './docapi-builder-type-step-base/docapi-builder-type-step-base.component';
+import { CmdbMode } from '../../../framework/modes.enum';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step',
-  templateUrl: './docapi-settings-builder-type-step.component.html',
-  styleUrls: ['./docapi-settings-builder-type-step.component.scss']
+  templateUrl: './docapi-builder-type-step.component.html',
+  styleUrls: ['./docapi-builder-type-step.component.scss']
 })
-export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
+export class DocapiBuilderTypeStepComponent implements OnInit {
 
   @Input()
   set preData(data: any) {
@@ -48,7 +48,7 @@ export class DocapiSettingsBuilderTypeStepComponent implements OnInit {
   ];
 
   @ViewChild('typeparam')
-  public typeParamComponent: DocapiSettingsBuilderTypeStepBaseComponent;
+  public typeParamComponent: DocapiBuilderTypeStepBaseComponent;
   public typeParamPreData: any;
 
   public typeValid: boolean = false;
