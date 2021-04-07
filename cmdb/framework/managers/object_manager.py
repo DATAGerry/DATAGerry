@@ -27,6 +27,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError
 from cmdb.search import Query, Pipeline
+from cmdb.search.query.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
@@ -174,32 +175,22 @@ class ObjectManager(ManagerBase):
             query.append(filter)
         elif isinstance(filter, list):
             query += filter
-        query.append({
-            '$lookup': {
-                'from': 'framework.types',
-                'localField': 'type_id',
-                'foreignField': 'public_id',
-                'as': 'type'
-            }
-        })
-        query.append({
-            '$unwind': {
-                'path': '$type'
-            }
-        })
-        query.append({
-            '$match': {
+
+        query.append(Builder.lookup_(_from='framework.types', _local='type_id', _foreign='public_id', _as='type'))
+        query.append(Builder.unwind_({'path': '$type'}))
+
+        field_ref_query = {
                 'type.fields.type': 'ref',
                 '$or': [
                     {'type.fields.ref_types': Regex(f'.*{object_.type_id}.*', 'i')},
                     {'type.fields.ref_types': object_.type_id}
                 ]
-            }
-        })
-        query.append({
-            '$match': {
-                'fields.value': object_.public_id
-            }
-        })
+        }
+        section_ref_query = {
+                'type.render_meta.sections.type': 'ref-section',
+                'type.render_meta.sections.reference.type_id': object_.type_id
+        }
+        query.append(Builder.match_(Builder.or_([field_ref_query, section_ref_query])))
+        query.append(Builder.match_({'fields.value': object_.public_id}))
         return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
                             user=user, permission=permission)
