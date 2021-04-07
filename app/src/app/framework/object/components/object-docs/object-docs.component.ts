@@ -19,7 +19,7 @@
 import { Component, OnChanges, Input, SimpleChanges } from '@angular/core';
 
 import { RenderResult } from '../../../models/cmdb-render';
-import { DocTemplate } from '../../../models/cmdb-doctemplate';
+import { DocTemplate } from '../../../../docapi/models/cmdb-doctemplate';
 import { DocapiService } from '../../../../docapi/docapi.service';
 import { FileSaverService } from 'ngx-filesaver';
 

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,26 +11,21 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
-import { CmdbMode } from '../../../framework/modes.enum';
-
-@Component({
-  selector: 'cmdb-docapi-settings-add',
-  templateUrl: './docapi-settings-add.component.html',
-  styleUrls: ['./docapi-settings-add.component.scss']
-})
-export class DocapiSettingsAddComponent implements OnInit {
-
-  public mode: CmdbMode = CmdbMode.Create;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
+export class DocTemplate {
+  // tslint:disable:variable-name
+  public public_id: number;
+  public name: string;
+  public label: string;
+  public author_id: number;
+  public active: boolean;
+  public description: string;
+  public template_data: string;
+  public template_style: string;
+  public template_type: string;
+  public template_parameters: object;
+  // tslint:enable:variable-name
 }

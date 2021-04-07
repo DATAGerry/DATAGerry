@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,19 +17,19 @@
 */
 
 import { Component, OnInit, Input } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../framework/modes.enum';
-import { TemplateHelperService } from '../../../services/template-helper.service';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { CmdbMode } from '../../../framework/modes.enum';
+import { TemplateHelperService } from '../../../settings/services/template-helper.service';
 
 
 declare var tinymce;
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-content-step',
-  templateUrl: './docapi-settings-builder-content-step.component.html',
-  styleUrls: ['./docapi-settings-builder-content-step.component.scss']
+  templateUrl: './docapi-builder-content-step.component.html',
+  styleUrls: ['./docapi-builder-content-step.component.scss']
 })
-export class DocapiSettingsBuilderContentStepComponent implements OnInit {
+export class DocapiBuilderContentStepComponent implements OnInit {
 
   @Input()
   set preData(data: any) {

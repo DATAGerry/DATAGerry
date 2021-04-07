@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,21 +18,21 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbType } from '../../../../../framework/models/cmdb-type';
-import { TypeService } from '../../../../../framework/services/type.service';
 import {
-  DocapiSettingsBuilderTypeStepBaseComponent
-} from '../docapi-settings-builder-type-step-base/docapi-settings-builder-type-step-base.component';
+  DocapiBuilderTypeStepBaseComponent
+} from '../docapi-builder-type-step/docapi-builder-type-step-base/docapi-builder-type-step-base.component';
+import { CmdbType } from '../../../framework/models/cmdb-type';
+import { TypeService } from '../../../framework/services/type.service';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step-objectlist',
-  templateUrl: './docapi-settings-builder-type-step-objectlist.component.html',
-  styleUrls: ['./docapi-settings-builder-type-step-objectlist.component.scss']
+  templateUrl: './docapi-builder-type-step-objectlist.component.html',
+  styleUrls: ['./docapi-builder-type-step-objectlist.component.scss']
 })
-export class DocapiSettingsBuilderTypeStepObjectlistComponent
-  extends DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
+export class DocapiBuilderTypeStepObjectlistComponent
+  extends DocapiBuilderTypeStepBaseComponent implements OnInit {
 
-  public objectTypeList: CmdbType[] = [];
+  public objectTypeList: Array<CmdbType> = [];
 
   constructor(private typeService: TypeService) {
     super();

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,28 +13,29 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnInit, OnDestroy, ViewChild, TemplateRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { ReplaySubject } from 'rxjs';
-import { ToastService } from '../../../layout/toast/toast.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
-import { DocapiService } from '../../../docapi/docapi.service';
-import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
-import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
-import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap/modal/modal-ref';
+import { DocTemplate } from '../models/cmdb-doctemplate';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import { DocapiService } from '../docapi.service';
+import { ToastService } from '../../layout/toast/toast.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 
 @Component({
   selector: 'cmdb-docapi-settings-list',
-  templateUrl: './docapi-settings-list.component.html',
-  styleUrls: ['./docapi-settings-list.component.scss']
+  templateUrl: './docapi-list.component.html',
+  styleUrls: ['./docapi-list.component.scss']
 })
-export class DocapiSettingsListComponent implements OnInit, OnDestroy {
+export class DocapiListComponent implements OnInit, OnDestroy {
 
   public subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public messageBlock: string = 'DocAPI is an interface for generating PDF documents out of CMDB data. A user can design a\n' +

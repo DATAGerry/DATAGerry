@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,49 +16,46 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input, ViewChild } from '@angular/core';
+import { Component, Input, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
-import { ToastService } from '../../../layout/toast/toast.service';
-import { CmdbMode } from '../../../framework/modes.enum';
-import { DocTemplate } from '../../../framework/models/cmdb-doctemplate';
-import { DocapiService } from '../../../docapi/docapi.service';
+import { ToastService } from '../../layout/toast/toast.service';
+import { CmdbMode } from '../../framework/modes.enum';
+import { DocapiService } from '../docapi.service';
 import {
-  DocapiSettingsBuilderSettingsStepComponent
-} from './docapi-settings-builder-settings-step/docapi-settings-builder-settings-step.component';
-import { DocapiSettingsBuilderTypeStepComponent } from './docapi-settings-builder-type-step/docapi-settings-builder-type-step.component';
-import { DocapiSettingsBuilderStyleStepComponent } from './docapi-settings-builder-style-step/docapi-settings-builder-style-step.component';
+  DocapiBuilderSettingsStepComponent
+} from './docapi-builder-settings-step/docapi-builder-settings-step.component';
+import { DocapiBuilderTypeStepComponent } from './docapi-builder-type-step/docapi-builder-type-step.component';
+import { DocapiBuilderStyleStepComponent } from './docapi-builder-style-step/docapi-builder-style-step.component';
 import {
-  DocapiSettingsBuilderContentStepComponent
-} from './docapi-settings-builder-content-step/docapi-settings-builder-content-step.component';
+  DocapiBuilderContentStepComponent
+} from './docapi-builder-content-step/docapi-builder-content-step.component';
+import { DocTemplate } from '../models/cmdb-doctemplate';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder',
-  templateUrl: './docapi-settings-builder.component.html',
-  styleUrls: ['./docapi-settings-builder.component.scss']
+  templateUrl: './docapi-builder.component.html',
+  styleUrls: ['./docapi-builder.component.scss']
 })
-export class DocapiSettingsBuilderComponent implements OnInit {
+export class DocapiBuilderComponent {
 
   @Input() public mode: number = CmdbMode.Create;
   @Input() public docInstance?: DocTemplate;
 
-  @ViewChild(DocapiSettingsBuilderSettingsStepComponent, { static: true })
-  public settingsStep: DocapiSettingsBuilderSettingsStepComponent;
+  @ViewChild(DocapiBuilderSettingsStepComponent, { static: true })
+  public settingsStep: DocapiBuilderSettingsStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderTypeStepComponent, { static: true })
-  public typeStep: DocapiSettingsBuilderTypeStepComponent;
+  @ViewChild(DocapiBuilderTypeStepComponent, { static: true })
+  public typeStep: DocapiBuilderTypeStepComponent;
   public typeStepFormValid: boolean = false;
   public typeParam: any = undefined;
 
-  @ViewChild(DocapiSettingsBuilderContentStepComponent, { static: true })
-  public contentStep: DocapiSettingsBuilderContentStepComponent;
+  @ViewChild(DocapiBuilderContentStepComponent, { static: true })
+  public contentStep: DocapiBuilderContentStepComponent;
 
-  @ViewChild(DocapiSettingsBuilderStyleStepComponent, { static: true })
-  public styleStep: DocapiSettingsBuilderStyleStepComponent;
+  @ViewChild(DocapiBuilderStyleStepComponent, { static: true })
+  public styleStep: DocapiBuilderStyleStepComponent;
 
   constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) {
-  }
-
-  ngOnInit() {
   }
 
   public saveDoc() {

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../../framework/modes.enum';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { FormGroup } from '@angular/forms';
+import { CmdbMode } from '../../../../framework/modes.enum';
 
 @Component({
   selector: 'cmdb-docapi-settings-builder-type-step-base',
-  templateUrl: './docapi-settings-builder-type-step-base.component.html',
-  styleUrls: ['./docapi-settings-builder-type-step-base.component.scss']
+  templateUrl: './docapi-builder-type-step-base.component.html',
+  styleUrls: ['./docapi-builder-type-step-base.component.scss']
 })
-export class DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
+export class DocapiBuilderTypeStepBaseComponent {
 
   @Input()
   set preData(data: any) {
@@ -43,9 +43,6 @@ export class DocapiSettingsBuilderTypeStepBaseComponent implements OnInit {
 
   constructor() {
     this.formValidationEmitter = new EventEmitter<boolean>();
-  }
-
-  ngOnInit() {
   }
 
 }

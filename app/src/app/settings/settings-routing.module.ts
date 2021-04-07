@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,8 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
-import {ProviderResolver} from "../auth/resolvers/provider-resolver.service";
-import {DateSettingsComponent} from "./date-settings/date-settings.component";
+import { DateSettingsComponent } from './date-settings/date-settings.component';
 
 const routes: Routes = [
   {
@@ -54,13 +53,6 @@ const routes: Routes = [
       breadcrumb: 'Exportd Job'
     },
     loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
-  },
-  {
-    path: 'docapi',
-    data: {
-      breadcrumb: 'DocAPI'
-    },
-    loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
   },
   {
     path: 'auth',

@@ -88,6 +88,13 @@ const routes: Routes = [
     loadChildren: () => import('../management/management.module').then(m => m.ManagementModule),
   },
   {
+    path: 'docapi',
+    data: {
+      breadcrumb: 'DocAPI'
+    },
+    loadChildren: () => import('../docapi/docapi.module').then(m => m.DocapiModule)
+  },
+  {
     path: 'settings',
     data: {
       breadcrumb: 'Settings'
