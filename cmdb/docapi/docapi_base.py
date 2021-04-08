@@ -29,7 +29,7 @@ class DocApiManager:
         cmdb_object = self.__obm.get_object(object_id)
         type_instance = self.__obm.get_type(cmdb_object.get_type_id())
         cmdb_render_object = CmdbRender(object_instance=cmdb_object, type_instance=type_instance,
-                                        render_user=None)
+                                        render_user=None, object_manager=self.__obm)
         generator = ObjectDocumentGenerator(template, self.__obm, cmdb_render_object.result(), PdfDocumentType())
 
         return generator.generate_doc()
