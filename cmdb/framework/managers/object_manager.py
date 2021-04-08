@@ -57,7 +57,12 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
             The `FrameworkQueryBuilder` query pipeline with the parameter contents.
         """
         self.clear()
-        self.query = Pipeline([])
+        type_loading_preset = [
+            self.lookup_(_from='framework.types', _local='type_id', _foreign='public_id', _as='type'),
+            self.unwind_({'path': '$type'}),
+            self.match_({'type': {'$ne': None}}),
+        ]
+        self.query = Pipeline(type_loading_preset)
 
         if isinstance(filter, dict):
             self.query.append(self.match_(filter))
