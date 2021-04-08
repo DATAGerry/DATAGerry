@@ -49,7 +49,7 @@ class ObjectTemplateData(AbstractTemplateData):
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None)
+                                                    render_user=None, object_manager=self.__object_manager)
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 else:
                     data["fields"][field_name] = field["value"]
