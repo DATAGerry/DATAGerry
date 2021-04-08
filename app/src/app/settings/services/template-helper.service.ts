@@ -96,7 +96,7 @@ export class TemplateHelperService implements OnDestroy {
                 if (refField) {
                   referenceFields.push(({
                     label: refField.label,
-                    templatedata: (changedPrefix ? '{{fields' + changedPrefix + '[\'references\'][\'fields\'][\'' + refField.name + '\']}}' : '{{fields[\'' + refField.name + '\']}}')
+                    templatedata: (changedPrefix ? '{{fields' + changedPrefix + '[\'fields\'][\'' + refField.name + '\']}}' : '{{fields[\'' + refField.name + '\']}}')
                   }) as TemplateHelpdataElement);
                 }
               }

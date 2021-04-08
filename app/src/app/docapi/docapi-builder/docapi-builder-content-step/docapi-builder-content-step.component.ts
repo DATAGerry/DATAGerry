@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { TemplateHelperService } from '../../../settings/services/template-helper.service';
@@ -29,7 +29,7 @@ declare var tinymce;
   templateUrl: './docapi-builder-content-step.component.html',
   styleUrls: ['./docapi-builder-content-step.component.scss']
 })
-export class DocapiBuilderContentStepComponent implements OnInit {
+export class DocapiBuilderContentStepComponent {
 
   @Input()
   set preData(data: any) {
@@ -232,9 +232,6 @@ export class DocapiBuilderContentStepComponent implements OnInit {
       }
     };
     return item;
-  }
-
-  ngOnInit() {
   }
 
 }
