@@ -69,6 +69,7 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
 import { ObjectReferencesComponent } from './components/object-references/object-references.component';
 import { ObjectReferencesByTypeComponent } from './components/object-references/object-references-by-type/object-references-by-type.component';
 import { JwPaginationModule } from 'jw-angular-pagination';
+import { ObjectComponent } from './object.component';
 
 @NgModule({
   declarations: [
@@ -107,7 +108,8 @@ import { JwPaginationModule } from 'jw-angular-pagination';
     ObjectLinksTableActionCellComponent,
     ObjectReferencesTableComponent,
     ObjectReferencesComponent,
-    ObjectReferencesByTypeComponent
+    ObjectReferencesByTypeComponent,
+    ObjectComponent
   ],
   imports: [
     CommonModule,

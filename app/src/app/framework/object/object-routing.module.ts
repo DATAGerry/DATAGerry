@@ -28,6 +28,7 @@ import { TypeResolver } from '../resolvers/type-resolver.service';
 import { ObjectsByTypeComponent } from './objects-by-type/objects-by-type.component';
 import { ObjectViewResolver } from '../resolvers/object-view-resolver.service';
 import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
+import { ObjectComponent } from './object.component';
 
 
 const routes: Routes = [
@@ -35,10 +36,10 @@ const routes: Routes = [
     path: '',
     pathMatch: 'full',
     data: {
-      breadcrumb: 'Add New Object',
-      right: 'base.framework.type.view'
+      breadcrumb: 'Object List',
+      right: 'base.framework.object.view'
     },
-    component: ObjectAddComponent
+    component: ObjectComponent
   },
   {
     path: 'add',
@@ -52,7 +53,7 @@ const routes: Routes = [
     path: 'add/:publicID',
     data: {
       breadcrumb: 'Add',
-      right: 'base.framework.object.view'
+      right: 'base.framework.object.add'
     },
     component: ObjectAddComponent
   },
