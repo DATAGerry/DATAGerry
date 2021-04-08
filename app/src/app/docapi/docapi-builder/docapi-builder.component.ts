@@ -75,7 +75,7 @@ export class DocapiBuilderComponent {
       let newId = null;
       this.docapiService.postDocTemplate(this.docInstance).subscribe(publicIdResp => {
           newId = publicIdResp;
-          this.router.navigate(['settings/docapi/'], { queryParams: { docAddSuccess: newId } });
+          this.router.navigate(['/docapi/'], { queryParams: { docAddSuccess: newId } });
         },
         (error) => {
           console.error(error);
@@ -83,7 +83,7 @@ export class DocapiBuilderComponent {
     } else if (this.mode === CmdbMode.Edit) {
       this.docapiService.putDocTemplate(this.docInstance).subscribe((updateResp: DocTemplate) => {
           this.toast.success(`DocAPI document successfully edited: ${ updateResp.public_id }`);
-          this.router.navigate(['/settings/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
+          this.router.navigate(['/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
         },
         (error) => {
           console.error(error);

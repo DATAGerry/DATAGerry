@@ -218,7 +218,6 @@ export class DocapiBuilderContentStepComponent implements OnInit {
               barcodeElementAttr['barheight'] = '3cm';
             }
             const barcodeElement = editor.dom.create('pdf:barcode', barcodeElementAttr);
-            //edit barcode: remove existing and set cur
             if (preData['content']) {
               let selectionNext = editor.selection.getNode().nextSibling;
               editor.dom.remove(selection);
@@ -226,7 +225,6 @@ export class DocapiBuilderContentStepComponent implements OnInit {
                 editor.selection.setCursorLocation(selectionNext);
               }
             }
-            //insert new barcode
             editor.insertContent(barcodeElement.outerHTML);
             dialogApi.close();
           }
