@@ -110,7 +110,7 @@ import { ObjectReferencesTypeColumnComponent } from './components/object-referen
     ObjectReferencesTableComponent,
     ObjectReferencesComponent,
     ObjectReferencesByTypeComponent,
-    ObjectComponent
+    ObjectComponent,
     ObjectReferencesTypeColumnComponent
   ],
   imports: [
