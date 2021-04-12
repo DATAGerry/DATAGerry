@@ -226,14 +226,12 @@ class CmdbRender:
                 for section_field in section.fields:
                     field = {}
                     try:
-                        type_field = self.type_instance.get_field(section_field)
+                        field = self.type_instance.get_field(section_field)
 
-                        field = self.__merge_field_content_section(type_field, self.object_instance)
+                        field = self.__merge_field_content_section(field, self.object_instance)
                     except FileNotFoundError:
-                        LOGGER.error(f'Could not find field: {section_field}')
-                        continue
+                        field['value'] = None
                     except (ValueError, IndexError) as e:
-                        LOGGER.error(f'Could not merge field: {str(e)}')
                         field['value'] = None
                     field_map.append(field)
             elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
