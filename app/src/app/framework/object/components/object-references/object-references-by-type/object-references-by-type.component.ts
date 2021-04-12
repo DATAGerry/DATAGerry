@@ -66,7 +66,12 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
-   * Table Template: Link action column.
+   * Table Template: reference column.
+   */
+  @ViewChild('referenceType', { static: true }) referenceType: TemplateRef<any>;
+
+  /**
+   * Table Template: export button column.
    */
   @ViewChild('exportButtonTemplate', { static: true }) exportButtonTemplate: TemplateRef<any>;
 
@@ -197,6 +202,13 @@ export class ObjectReferencesByTypeComponent implements OnInit, OnDestroy {
         name: 'public_id',
         data: 'object_information.object_id',
         sortable: true
+      },
+      {
+        display: 'Reference Type',
+        name: 'reference_type',
+        sortable: false,
+        searchable: false,
+        template: this.referenceType
       },
       {
         display: 'Type',

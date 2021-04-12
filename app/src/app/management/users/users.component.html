@@ -23,8 +23,8 @@
                               [groupLoadingStack]="groupLoadingStack"></cmdb-user-table-group-cell>
 </ng-template>
 
-<ng-template #dateTemplate let-item="item">
-  {{item | dateFormatter}}
+<ng-template #dateTemplate let-data="data">
+  {{data | dateFormatter}}
 </ng-template>
 
 <ng-template #actionsTemplate let-item="item">

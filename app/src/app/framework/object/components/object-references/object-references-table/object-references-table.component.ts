@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit,  TemplateRef, ViewChild} from '@angular/core';
+import {Component, Input, OnDestroy, TemplateRef, ViewChild} from '@angular/core';
 import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import { ObjectService } from '../../../../services/object.service';
 import { RenderResult } from '../../../../models/cmdb-render';
@@ -35,7 +35,6 @@ import {
   UserSettingsService
 } from '../../../../../management/user-settings/services/user-settings.service';
 import {UserSettingsDBService} from '../../../../../management/user-settings/services/user-settings-db.service';
-import {CmdbType} from "../../../../models/cmdb-type";
 
 @Component({
   selector: 'cmdb-object-references-table',
@@ -65,7 +64,13 @@ export class ObjectReferencesTableComponent implements OnDestroy {
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
   /**
-   * Table Template: Link action column.
+   * Table Template: reference column.
+   */
+  @ViewChild('referenceType', { static: true }) referenceType: TemplateRef<any>;
+
+
+  /**
+   * Table Template: export button column.
    */
   @ViewChild('exportButtonTemplate', { static: true }) exportButtonTemplate: TemplateRef<any>;
 
@@ -185,6 +190,13 @@ export class ObjectReferencesTableComponent implements OnDestroy {
         name: 'public_id',
         data: 'object_information.object_id',
         sortable: true
+      },
+      {
+        display: 'Reference Type',
+        name: 'reference_type',
+        sortable: false,
+        searchable: false,
+        template: this.referenceType
       },
       {
         display: 'Type',

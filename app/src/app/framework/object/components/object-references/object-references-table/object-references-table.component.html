@@ -9,7 +9,13 @@
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">
-  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+  <div class="text-center">
+    <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+  </div>
+</ng-template>
+
+<ng-template #referenceType let-item="item">
+  <cmdb-object-references-type-column [objectID]="publicID" [object]="item"></cmdb-object-references-type-column>
 </ng-template>
 
 <ng-template #typeNameTemplate let-item="item">
