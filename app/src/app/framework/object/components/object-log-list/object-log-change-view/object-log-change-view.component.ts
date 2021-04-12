@@ -39,11 +39,13 @@ export class ObjectLogChangeViewComponent {
    */
   @Input()
   public set changes(value: any) {
-    const before = value.old;
-    const after = value.new;
-    value.old = before.sort((a, b) => (a.name > b.name) ? 1 : -1);
-    value.new = after.sort((a, b) => (a.name > b.name) ? 1 : -1);
-    this.sortedChanges = value;
+    if (!Array.isArray(value)) {
+      const before = value.old;
+      const after = value.new;
+      value.old = before.sort((a, b) => (a.name > b.name) ? 1 : -1);
+      value.new = after.sort((a, b) => (a.name > b.name) ? 1 : -1);
+      this.sortedChanges = value;
+    }
   }
 
   public get changes(): any {
