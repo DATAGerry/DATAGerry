@@ -18,8 +18,8 @@ import logging
 
 from cmdb.framework.cmdb_render import CmdbRender
 
-
 LOGGER = logging.getLogger(__name__)
+
 
 class AbstractTemplateData:
 
@@ -51,6 +51,10 @@ class ObjectTemplateData(AbstractTemplateData):
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
                                                     render_user=None, object_manager=self.__object_manager)
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
+                elif field['type'] == 'ref-section-field':
+                    data['fields'][field_name] = {'fields': {}}
+                    for section_ref_field in field['references']['fields']:
+                        data['fields'][field_name]['fields'][section_ref_field['name']] = section_ref_field['value']
                 else:
                     data["fields"][field_name] = field["value"]
             except Exception as err:
