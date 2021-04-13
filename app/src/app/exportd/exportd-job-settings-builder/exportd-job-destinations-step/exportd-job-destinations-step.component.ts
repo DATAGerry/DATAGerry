@@ -17,9 +17,9 @@
 */
 
 import { Component, Input, OnInit} from '@angular/core';
-import { CmdbMode } from '../../../../framework/modes.enum';
+import { CmdbMode } from '../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ExternalSystemService } from '../../../services/external-system.service';
+import { ExternalSystemService } from '../../../settings/services/external-system.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 
 

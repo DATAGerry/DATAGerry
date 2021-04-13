@@ -7,8 +7,9 @@
                icon="fas fa-sync-alt"
                doc="/docs/admin_guide/exportd.html"></cmdb-info-box>
 <cmdb-table [items]="tasks" [columns]="columns" [page]="page" [sort]="sort" [id]="id" [tableStates]="tableStates"
-            [stateEnabled]="true" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]" [tableState]="tableState"
-            [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading" [pageSize]="limit" [toggleable]="false"
+            [stateEnabled]="true" [emptyMessage]="'No tasks were found!'" [customButtons]="[addButton]"
+            [tableState]="tableState" [totalItems]="totalTasks" [selectEnabled]="false" [loading]="loading"
+            [pageSize]="limit" [toggleable]="true"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)" (stateChange)="onStateChange($event)"
             (searchChange)="onSearchChange($event)" (sortChange)="onSortChange($event)" (stateSelect)="onStateSelect($event)"
             (stateReset)="onStateReset()"></cmdb-table>
@@ -71,11 +72,11 @@
 <ng-template #actionTemplate let-data="data">
   <div class="d-flex justify-content-center">
     <a *permissionLink="['base.exportd.job.edit']"
-       [routerLink]="['/settings/exportdjob/edit/', data]">
+       [routerLink]="['/exportd/edit/', data]">
       <fa-icon [icon]="['far', 'edit']"></fa-icon>
     </a>
     <a *permissionLink="['base.exportd.job.edit']"
-       [routerLink]="['/settings/exportdjob/copy/', data]"
+       [routerLink]="['/exportd/copy/', data]"
        [queryParams]="{copy: data}">
       <fa-icon [icon]="['far', 'copy']"></fa-icon>
     </a>
@@ -86,7 +87,7 @@
 </ng-template>
 
 <ng-template #logTemplate let-data="data">
-  <a class="ml-1 text-cmdb-primary" [routerLink]="['/settings/exportdjob/log/', data]">
+  <a class="ml-1 text-cmdb-primary" [routerLink]="['/exportd/log/', data]">
     <fa-icon [icon]="['far', 'arrow-alt-circle-right']"></fa-icon>
   </a>
 </ng-template>
@@ -95,7 +96,7 @@
   <button type="button"
           *permissionLink="['base.exportd.job.add']"
           class="btn btn-success btn-sm"
-          [routerLink]="['/settings/exportdjob/add']">
+          [routerLink]="['/exportd/add']">
     <i class="fas fa-plus"></i> Add
   </button>
 </ng-template>

@@ -18,17 +18,17 @@
 
 
 import { Component, Input, OnInit, ViewChild} from '@angular/core';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { CmdbMode } from '../../../framework/modes.enum';
+import { CmdbType } from '../../framework/models/cmdb-type';
+import { CmdbMode } from '../../framework/modes.enum';
 import { ExportdJobBasicStepComponent } from './exportd-job-basic-step/exportd-job-basic-step.component';
 import { ExportdJobSourcesStepComponent } from './exportd-job-sources-step/exportd-job-sources-step.component';
 import { ExportdJobDestinationsStepComponent } from './exportd-job-destinations-step/exportd-job-destinations-step.component';
 import { ExportdJobVariablesStepComponent } from './exportd-job-variables-step/exportd-job-variables-step.component';
 import { ExportdJobSchedulingStepComponent } from './exportd-job-scheduling-step/exportd-job-scheduling-step.component';
-import { ExportdJob } from '../../models/exportd-job';
-import { ExportdJobService } from '../../services/exportd-job.service';
+import { ExportdJob } from '../../settings/models/exportd-job';
+import { ExportdJobService } from '../exportd-job.service';
 import { Router } from '@angular/router';
-import { ToastService } from '../../../layout/toast/toast.service';
+import { ToastService } from '../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-task-settings-builder',
@@ -81,7 +81,7 @@ export class ExportdJobSettingsBuilderComponent implements OnInit {
       let newID = null;
       this.taskService.postTask(this.taskInstance).subscribe(publicIDResp => {
           newID = publicIDResp;
-          this.router.navigate(['/settings/exportdjob/'], {queryParams: {typeAddSuccess: newID}});
+          this.router.navigate(['/exportd/'], {queryParams: {typeAddSuccess: newID}});
         },
         (error) => {
           console.error(error);
@@ -89,7 +89,7 @@ export class ExportdJobSettingsBuilderComponent implements OnInit {
     } else if (this.mode === CmdbMode.Edit) {
       this.taskService.putTask(this.taskInstance).subscribe((updateResp: ExportdJob) => {
           this.toast.success(`Exportd Job was successfully edited: Exportd Job ID: ${updateResp.public_id}`);
-          this.router.navigate(['/settings/exportdjob/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
+          this.router.navigate(['/exportd/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
         },
         (error) => {
           console.log(error);

@@ -21,9 +21,10 @@ import { Routes, RouterModule } from '@angular/router';
 import { ExportdJobSettingsListComponent } from './exportd-job-settings-list/exportd-job-settings-list.component';
 import { ExportdJobSettingsAddComponent } from './exportd-job-settings-add/exportd-job-settings-add.component';
 import { ExportdJobSettingsEditComponent } from './exportd-job-settings-edit/exportd-job-settings-edit.component';
-import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
 import { ExportdJobSettingsCopyComponent } from './exportd-job-settings-copy/exportd-job-settings-copy.component';
-import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
+import { ExportdJobLogsComponent } from './exportd-job-logs/exportd-job-logs.component';
+import { PermissionGuard } from '../auth/guards/permission.guard';
+import { UserSettingsResolver } from '../management/user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
@@ -31,6 +32,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'List',
     },
+    canActivate: [PermissionGuard],
     resolve: {
       userSetting: UserSettingsResolver
     },
@@ -41,6 +43,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Add'
     },
+    canActivate: [PermissionGuard],
     component: ExportdJobSettingsAddComponent
   },
   {
@@ -48,6 +51,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Edit'
     },
+    canActivate: [PermissionGuard],
     component: ExportdJobSettingsEditComponent
   },
   {
@@ -55,6 +59,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Copy'
     },
+    canActivate: [PermissionGuard],
     component: ExportdJobSettingsCopyComponent
   },
   {
@@ -62,6 +67,7 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Log'
     },
+    canActivate: [PermissionGuard],
     component: ExportdJobLogsComponent
   }
 ];
@@ -70,5 +76,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ExportdJobSettingsRoutingModule {
-}
+export class ExportdRoutingModule { }

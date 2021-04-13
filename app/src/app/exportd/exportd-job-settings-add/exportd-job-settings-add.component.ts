@@ -18,7 +18,7 @@
 
 
 import { Component, OnInit } from '@angular/core';
-import { CmdbMode } from '../../../framework/modes.enum';
+import { CmdbMode } from '../../framework/modes.enum';
 
 @Component({
   selector: 'cmdb-task-settings-add',

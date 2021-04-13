@@ -18,10 +18,10 @@
 
 
 import { Component, Injectable, Input, OnInit} from '@angular/core';
-import { CmdbMode } from '../../../../framework/modes.enum';
+import { CmdbMode } from '../../../framework/modes.enum';
 import { AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
-import { checkJobExistsValidator, ExportdJobService} from '../../../services/exportd-job.service';
-import { ExportdType} from '../../../models/modes_job.enum';
+import { checkJobExistsValidator, ExportdJobService} from '../../exportd-job.service';
+import { ExportdType} from '../../../settings/models/modes_job.enum';
 
 @Component({
   selector: 'cmdb-task-basic-step',

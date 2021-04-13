@@ -17,9 +17,9 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { CmdbMode } from '../../../../framework/modes.enum';
+import { CmdbMode } from '../../../framework/modes.enum';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ExportdJob } from '../../../models/exportd-job';
+import { ExportdJob } from '../../../settings/models/exportd-job';
 
 @Component({
   selector: 'cmdb-task-scheduling-step',

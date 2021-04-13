@@ -18,26 +18,25 @@
 
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
-import { ExportdJobService } from '../../services/exportd-job.service';
-import { ExportdJob } from '../../models/exportd-job';
-import {ActivatedRoute, Data, Router} from '@angular/router';
-import { ToastService } from '../../../layout/toast/toast.service';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ExportdJobService } from '../exportd-job.service';
+import { ExportdJob } from '../../settings/models/exportd-job';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { ToastService } from '../../layout/toast/toast.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { ExecuteState, ExportdType } from '../../models/modes_job.enum';
-import { GeneralModalComponent } from '../../../layout/helpers/modals/general-modal/general-modal.component';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { ExecuteState, ExportdType } from '../../settings/models/modes_job.enum';
+import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
+import { APIGetMultiResponse } from '../../services/models/api-response';
 import { takeUntil } from 'rxjs/operators';
-import { CollectionParameters } from '../../../services/models/api-parameter';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../layout/table/table.types';
-import { PermissionService } from '../../../auth/services/permission.service';
-import {UserSetting} from '../../../management/user-settings/models/user-setting';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../layout/table/table.types';
+import { PermissionService } from '../../auth/services/permission.service';
+import { UserSetting } from '../../management/user-settings/models/user-setting';
 import {
   convertResourceURL,
   UserSettingsService
-} from '../../../management/user-settings/services/user-settings.service';
-import {CmdbType} from '../../../framework/models/cmdb-type';
-import {UserSettingsDBService} from '../../../management/user-settings/services/user-settings-db.service';
+} from '../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-task-settings-list',
@@ -160,6 +159,11 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     return this.tableStateSubject.getValue() as TableState;
   }
 
+  /**
+   * Columns at the beginning of the loading.
+   */
+  public initialVisibleColumns: Array<string> = [];
+
   public modes = ExecuteState;
   public typeMode = ExportdType;
   private modalRef: NgbModalRef;
@@ -176,7 +180,6 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
               private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
               private toast: ToastService, private modalService: NgbModal, private permissionService: PermissionService) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
-      console.log(data);
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
           .find(payloads => payloads.id === this.id);
@@ -195,7 +198,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.columns = [
+    const columns = [
       {
         display: 'Active',
         name: 'active',
@@ -271,7 +274,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     ] as Array<Column>;
     const jobRunRight = 'base.exportd.job.run';
     if (this.permissionService.hasRight(jobRunRight) || this.permissionService.hasExtendedRight(jobRunRight)) {
-      this.columns.push({
+      columns.push({
         display: 'Execute Job',
         name: 'exportd_type',
         data: 'exportd_type',
@@ -282,7 +285,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     }
     const editRight = 'base.exportd.job.edit';
     if (this.permissionService.hasRight(editRight) || this.permissionService.hasExtendedRight(editRight)) {
-      this.columns.push({
+      columns.push({
         display: 'Logs',
         name: 'public_id',
         data: 'public_id',
@@ -293,7 +296,7 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
     }
     const logRight = 'base.exportd.log.view';
     if (this.permissionService.hasRight(logRight) || this.permissionService.hasExtendedRight(logRight)) {
-      this.columns.push({
+      columns.push({
         display: 'Actions',
         name: 'actions',
         data: 'public_id',
@@ -305,6 +308,8 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
         cellClasses: ['actions-buttons']
       } as Column);
     }
+    this.initialVisibleColumns = columns.filter(c => !c.hidden).map(c => c.name);
+    this.columns = [... columns];
     this.initTable();
     this.loadsTasksFromAPI();
   }

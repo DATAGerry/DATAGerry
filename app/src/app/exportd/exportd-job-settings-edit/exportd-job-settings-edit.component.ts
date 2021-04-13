@@ -18,12 +18,12 @@
 
 
 import {Component, Input, OnInit} from '@angular/core';
-import { CmdbMode } from '../../../framework/modes.enum';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { TypeService } from '../../../framework/services/type.service';
+import { CmdbMode } from '../../framework/modes.enum';
+import { CmdbType } from '../../framework/models/cmdb-type';
+import { TypeService } from '../../framework/services/type.service';
 import { ActivatedRoute } from '@angular/router';
-import { ExportdJob } from '../../models/exportd-job';
-import { ExportdJobService } from '../../services/exportd-job.service';
+import { ExportdJob } from '../../settings/models/exportd-job';
+import { ExportdJobService } from '../exportd-job.service';
 
 @Component({
   selector: 'cmdb-task-settings-edit',

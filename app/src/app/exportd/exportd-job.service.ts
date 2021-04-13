@@ -22,16 +22,16 @@ import {
   ApiService,
   HttpInterceptorHandler,
   httpObserveOptions, resp
-} from '../../services/api-call.service';
-import { ExportdJob } from '../models/exportd-job';
+} from '../services/api-call.service';
+import { ExportdJob } from '../settings/models/exportd-job';
 import { Observable, timer} from 'rxjs';
 import { FormControl } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { HttpBackend, HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { BasicAuthInterceptor } from '../../auth/interceptors/basic-auth.interceptor';
-import { AuthService } from '../../auth/services/auth.service';
-import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetMultiResponse } from '../../services/models/api-response';
+import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
+import { AuthService } from '../auth/services/auth.service';
+import { CollectionParameters } from '../services/models/api-parameter';
+import { APIGetMultiResponse } from '../services/models/api-response';
 
 export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob>, time: number = 500) => {
   return (control: FormControl) => {

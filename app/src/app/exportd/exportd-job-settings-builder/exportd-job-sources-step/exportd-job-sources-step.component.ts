@@ -18,9 +18,9 @@
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbMode } from '../../../../framework/modes.enum';
-import { CmdbType } from '../../../../framework/models/cmdb-type';
-import { TypeService } from '../../../../framework/services/type.service';
+import { CmdbMode } from '../../../framework/modes.enum';
+import { CmdbType } from '../../../framework/models/cmdb-type';
+import { TypeService } from '../../../framework/services/type.service';
 import { Subscription } from 'rxjs';
 
 

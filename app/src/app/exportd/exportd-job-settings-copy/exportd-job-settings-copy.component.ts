@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { ExportdJob } from '../../models/exportd-job';
-import { CmdbMode } from '../../../framework/modes.enum';
-import { TypeService } from '../../../framework/services/type.service';
-import { ExportdJobService } from '../../services/exportd-job.service';
+import { CmdbType } from '../../framework/models/cmdb-type';
+import { ExportdJob } from '../../settings/models/exportd-job';
+import { CmdbMode } from '../../framework/modes.enum';
+import { TypeService } from '../../framework/services/type.service';
+import { ExportdJobService } from '../exportd-job.service';
 import { ActivatedRoute } from '@angular/router';
-import { UserService } from '../../../management/services/user.service';
+import { UserService } from '../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-exportd-job-settings-copy',

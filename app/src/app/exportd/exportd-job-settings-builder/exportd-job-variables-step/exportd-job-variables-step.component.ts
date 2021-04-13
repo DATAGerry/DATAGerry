@@ -27,14 +27,14 @@ import {
   PipeTransform,
   Renderer2
 } from '@angular/core';
-import { CmdbMode } from '../../../../framework/modes.enum';
+import { CmdbMode } from '../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
-import { CmdbType } from '../../../../framework/models/cmdb-type';
-import { TypeService } from '../../../../framework/services/type.service';
+import { CmdbType } from '../../../framework/models/cmdb-type';
+import { TypeService } from '../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
-import { ExternalSystemService } from '../../../services/external-system.service';
+import { ExternalSystemService } from '../../../settings/services/external-system.service';
 import { DndDropEvent } from 'ngx-drag-drop';
-import { TemplateHelperService } from '../../../services/template-helper.service';
+import { TemplateHelperService } from '../../../settings/services/template-helper.service';
 
 
 @Directive({
