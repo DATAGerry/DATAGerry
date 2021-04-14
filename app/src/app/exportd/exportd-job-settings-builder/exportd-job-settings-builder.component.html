@@ -1,45 +1,71 @@
 <aw-wizard [navBarLayout]="'large-empty-symbols'">
   <aw-wizard-step stepId="1" stepTitle="Basic informations">
     <ng-template awWizardStepSymbol><i class="fas fa-file-code"></i></ng-template>
-    <cmdb-task-basic-step [preData]="taskInstance" [mode]="mode"></cmdb-task-basic-step>
-    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!basicStep.basicForm.valid">Next Step
+    <hr />
+    <cmdb-task-basic-step [preData]="task" [mode]="mode"></cmdb-task-basic-step>
+    <hr />
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!basicStep.basicForm.valid">
+      Next Step <i class="fas fa-angle-double-right"></i>
     </button>
   </aw-wizard-step>
   <aw-wizard-step stepId="2" stepTitle="Sources">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-task-sources-step [preData]="taskInstance" [mode]="mode"></cmdb-task-sources-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
-    <button class="btn btn-primary next" type="button"
-            [disabled]="!sourcesStep.sourcesForm.valid" awNextStep>Go to next step
+    <hr />
+    <cmdb-task-sources-step [types]="types" [totalTypes]="totalTypes" [preData]="task" [mode]="mode" (typeCallEmitter)="onLoadTypes()"></cmdb-task-sources-step>
+    <hr />
+    <button class="btn btn-primary prev" type="button" awPreviousStep>
+      <i class="fas fa-angle-double-left"></i> Previous Step
+    </button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!sourcesStep.sourcesForm.valid">
+      Next Step <i class="fas fa-angle-double-right"></i>
     </button>
   </aw-wizard-step>
   <aw-wizard-step stepId="3" stepTitle="Destinations">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-task-destinations-step [preData]="taskInstance" [mode]="mode"></cmdb-task-destinations-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button"
-            [disabled]="!destinationStep.destinationForm.valid" awNextStep>Go to next step
+    <hr />
+    <cmdb-task-destinations-step [preData]="task" [mode]="mode"></cmdb-task-destinations-step>
+    <hr />
+    <button class="btn btn-primary prev" type="button" awPreviousStep>
+      <i class="fas fa-angle-double-left"></i> Previous Step
+    </button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!destinationStep.destinationForm.valid">
+      Next Step <i class="fas fa-angle-double-right"></i>
     </button>
   </aw-wizard-step>
   <aw-wizard-step stepId="4" stepTitle="Variables">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
-    <cmdb-task-variables-step [preData]="taskInstance" [sources]="sourcesStep.sourcesForm.get('sources').value" [destinationStep]="destinationStep" [mode]="mode"></cmdb-task-variables-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button"
-            [disabled]="!variablesStep.variableForm.valid" awNextStep>Go to next step</button>
+    <hr />
+    <cmdb-task-variables-step [types]="types" [totalTypes]="totalTypes" [preData]="task"
+                              [sources]="sourcesStep.sourcesForm.get('sources').value" [destinationStep]="destinationStep"
+                              [mode]="mode" (typeCallEmitter)="onLoadTypes()"></cmdb-task-variables-step>
+    <hr />
+    <button class="btn btn-primary prev" type="button" awPreviousStep>
+      <i class="fas fa-angle-double-left"></i> Previous Step
+    </button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!variablesStep.variableForm.valid">
+      Next Step <i class="fas fa-angle-double-right"></i>
+    </button>
   </aw-wizard-step>
   <aw-wizard-step stepId="4" stepTitle="Scheduling">
     <ng-template awWizardStepSymbol><i class="fas fa-history"></i></ng-template>
-    <cmdb-task-scheduling-step  [preData]="taskInstance" [mode]="mode"></cmdb-task-scheduling-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button"
-            [disabled]="!schedulingStep.eventForm.valid"
-            awNextStep>Go to next step</button>
+    <hr />
+    <cmdb-task-scheduling-step [preData]="task" [mode]="mode"></cmdb-task-scheduling-step>
+    <hr />
+    <button class="btn btn-primary prev" type="button" awPreviousStep>
+      <i class="fas fa-angle-double-left"></i> Previous Step
+    </button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!schedulingStep.eventForm.valid">
+      Next Step <i class="fas fa-angle-double-right"></i>
+    </button>
   </aw-wizard-step>
   <aw-wizard-step stepId="5" stepTitle="Complete">
     <ng-template awWizardStepSymbol><i class="fas fa-save"></i></ng-template>
+    <hr />
     <cmdb-task-complete-step [basicStep]="basicStep"></cmdb-task-complete-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
+    <hr />
+    <button class="btn btn-primary prev" type="button" awPreviousStep>
+      <i class="fas fa-angle-double-left"></i> Previous Step
+    </button>
     <button class="btn btn-success next" type="button" (click)="saveTask()">Save</button>
   </aw-wizard-step>
 </aw-wizard>

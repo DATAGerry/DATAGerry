@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,17 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ExternalSystemService } from '../../../settings/services/external-system.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -28,7 +31,9 @@ import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
   templateUrl: './exportd-job-destinations-step.component.html',
   styleUrls: ['./exportd-job-destinations-step.component.scss']
 })
-export class ExportdJobDestinationsStepComponent implements OnInit {
+export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   @Input()
   set preData(data: any) {
@@ -50,7 +55,7 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
         this.destinationForm.patchValue(data);
         // Create parameter
         let i = 0;
-        while ( i < forArray.controls.length) {
+        while (i < forArray.controls.length) {
           for (let c = 0; c < data.destination[i].parameter.length; c++) {
             const control = forArray.controls[i].get('parameter') as FormArray;
             let required: boolean = false;
@@ -80,23 +85,31 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
   public destinationForm: FormGroup;
   readonly DESTINATION = 'destination';
 
-  constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService) {}
+  constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService) {
+    super();
+  }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.destinationForm = this.formBuilder.group({
       destination: this.formBuilder.array([this.createDestination()])
     });
 
-    this.externalService.getExternSystemList().subscribe(data => {
-      this.externalSystemList = data;
-    }, error => {},
+    this.externalService.getExternSystemList().pipe(takeUntil(this.subscriber)).subscribe(data => {
+        this.externalSystemList = data;
+      }, error => {
+      },
       () => {
         for (const className of this.externalSystemList) {
-          this.externalService.getExternSystemParams(className).subscribe(params => {
-            this.externalSystems.push({name: className, parameter : params});
+          this.externalService.getExternSystemParams(className).pipe(takeUntil(this.subscriber)).subscribe(params => {
+            this.externalSystems.push({ name: className, parameter: params });
           });
         }
       });
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   private createDestination(): FormGroup {
@@ -149,9 +162,9 @@ export class ExportdJobDestinationsStepComponent implements OnInit {
   public onDraggedSystem(item: DndDropEvent, control: any, index, effect: DropEffect) {
     control.get('className').setValue(item.data.name);
     let externalSystemParams = [];
-    this.externalService.getExternSystemParams(item.data.name).subscribe(params => {
-      externalSystemParams = params as [];
-    }, error => console.log(error),
+    this.externalService.getExternSystemParams(item.data.name).pipe(takeUntil(this.subscriber)).subscribe(params => {
+        externalSystemParams = params as [];
+      }, error => console.log(error),
       () => {
         const controlArray = this.getDestinationAsFormArray().at(index).get('parameter') as FormArray;
         controlArray.clear();

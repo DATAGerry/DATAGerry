@@ -16,21 +16,23 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ExportdJobBasicStepComponent } from '../exportd-job-basic-step/exportd-job-basic-step.component';
-import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { CmdbType } from '../../framework/models/cmdb-type';
+import { CmdbMode } from '../../framework/modes.enum';
 
 @Component({
-  selector: 'cmdb-task-complete-step',
-  templateUrl: './exportd-job-complete-step.component.html',
-  styleUrls: ['./exportd-job-complete-step.component.scss']
+  selector: 'cmdb-exportd-job-base-step',
+  template: '',
 })
-export class ExportdJobCompleteStepComponent extends ExportdJobBaseStepComponent {
+export class ExportdJobBaseStepComponent {
 
-  @Input() public basicStep: ExportdJobBasicStepComponent = null;
+  public modes = CmdbMode;
+  @Input() public mode: number = CmdbMode.Create;
+  @Input() public types: Array<CmdbType> = [];
+  @Input() public totalTypes: number = 0;
+  @Output() public typeCallEmitter: EventEmitter<void> = new EventEmitter<void>();
 
   constructor() {
-    super();
   }
 
 }

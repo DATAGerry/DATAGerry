@@ -118,17 +118,20 @@
                       <tr *ngFor="let templ of variable['controls'].templates['controls']; let iy=index" formArrayName="{{iy}}">
                         <td>{{iy + 1}}</td>
                         <td>
-                          <select formControlName="type" class="form-control"
-                                  [ngClass]="{ 'is-valid': templ.get('type').valid
-                                   && (templ.get('type').dirty
-                                   || templ.get('type').touched), 'is-invalid': templ.get('type').invalid
-                                   && (templ.get('type').dirty || templ.get('type').touched)}"
-                                  (ngModelChange)="onOptionSelected(s, iy, $event)"
-                                  required>
-                            <option *ngFor="let order of typeList; let i = index" [value]="order.public_id">
-                              {{order.label}} #{{order.public_id}}
-                            </option>
-                          </select>
+                          <ng-select formControlName="type" [clearable]="false"
+                            [items]="types" class="custom-select" (ngModelChange)="onOptionSelected(s, iy, $event)"
+                            bindLabel="label" bindValue="public_id" [virtualScroll]="true" (scrollToEnd)="typeCallEmitter.emit()"
+                            [ngClass]="{ 'is-valid': templ.get('type').valid && (templ.get('type').dirty || templ.get('type').touched),
+                            'is-invalid': templ.get('type').invalid && (templ.get('type').dirty || templ.get('type').touched)}"
+                            required>
+                            <ng-template ng-header-tmp>
+                              <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
+                            </ng-template>
+                            <ng-template ng-option-tmp let-item="item">
+                              <div><span>{{item.label}}</span></div>
+                              <small><b>PublicID:</b> {{item.public_id}} | <b>Name:</b> {{item.name}}</small>
+                            </ng-template>
+                          </ng-select>
                         </td>
                         <td>
                           <div class="input-group">

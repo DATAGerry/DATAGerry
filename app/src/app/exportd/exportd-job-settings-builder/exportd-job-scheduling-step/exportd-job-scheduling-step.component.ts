@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,40 +13,41 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ExportdJob } from '../../../settings/models/exportd-job';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
 
 @Component({
   selector: 'cmdb-task-scheduling-step',
   templateUrl: './exportd-job-scheduling-step.component.html',
   styleUrls: ['./exportd-job-scheduling-step.component.scss']
 })
-export class ExportdJobSchedulingStepComponent implements OnInit {
+export class ExportdJobSchedulingStepComponent extends ExportdJobBaseStepComponent implements OnInit {
 
   @Input()
   set preData(data: ExportdJob) {
-    if (data !== undefined && data.scheduling !== undefined ) {
+    if (data !== undefined && data.scheduling !== undefined) {
       this.eventForm.patchValue(data.scheduling.event);
       this.taskType = data.exportd_type;
     }
   }
 
-  @Input() public mode: CmdbMode;
   public eventForm: FormGroup;
-  public taskType: any;
+  public taskType: string;
 
   constructor(private formBuilder: FormBuilder) {
+    super();
     this.eventForm = this.formBuilder.group({
       active: new FormControl(false, Validators.required),
     });
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     if (this.mode === CmdbMode.Edit) {
       this.eventForm.markAllAsTouched();
     }

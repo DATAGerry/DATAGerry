@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,11 +13,11 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-import { Component, Input, OnInit, ViewChild} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { CmdbMode } from '../../framework/modes.enum';
 import { ExportdJobBasicStepComponent } from './exportd-job-basic-step/exportd-job-basic-step.component';
@@ -29,71 +29,107 @@ import { ExportdJob } from '../../settings/models/exportd-job';
 import { ExportdJobService } from '../exportd-job.service';
 import { Router } from '@angular/router';
 import { ToastService } from '../../layout/toast/toast.service';
+import { TypeService } from '../../framework/services/type.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { CollectionParameters } from '../../services/models/api-parameter';
 
 @Component({
   selector: 'cmdb-task-settings-builder',
   templateUrl: './exportd-job-settings-builder.component.html',
   styleUrls: ['./exportd-job-settings-builder.component.scss']
 })
-export class ExportdJobSettingsBuilderComponent implements OnInit {
+export class ExportdJobSettingsBuilderComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  public types: Array<CmdbType> = [];
+  public typeParams: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 };
+  public apiTypeResponse: APIGetMultiResponse<CmdbType>;
+  public totalTypes: number = 0;
+  private currentPage: number;
 
   @Input() public mode: number = CmdbMode.Create;
-  @Input() public typeInstance?: CmdbType;
-  @Input() public taskInstance?: ExportdJob;
+  @Input() public task?: ExportdJob;
 
-  @ViewChild(ExportdJobBasicStepComponent, {static: true})
+  @ViewChild(ExportdJobBasicStepComponent, { static: true })
   public basicStep: ExportdJobBasicStepComponent;
 
-  @ViewChild(ExportdJobSourcesStepComponent, {static: true})
+  @ViewChild(ExportdJobSourcesStepComponent, { static: true })
   public sourcesStep: ExportdJobSourcesStepComponent;
 
-  @ViewChild(ExportdJobDestinationsStepComponent, {static: true})
+  @ViewChild(ExportdJobDestinationsStepComponent, { static: true })
   public destinationStep: ExportdJobDestinationsStepComponent;
 
-  @ViewChild(ExportdJobVariablesStepComponent, {static: true})
+  @ViewChild(ExportdJobVariablesStepComponent, { static: true })
   public variablesStep: ExportdJobVariablesStepComponent;
 
-  @ViewChild(ExportdJobSchedulingStepComponent, {static: true})
+  @ViewChild(ExportdJobSchedulingStepComponent, { static: true })
   public schedulingStep: ExportdJobSchedulingStepComponent;
 
-  constructor(private taskService: ExportdJobService, private router: Router, private toast: ToastService) { }
-
-  ngOnInit() {
+  constructor(private taskService: ExportdJobService, private router: Router,
+              private typeService: TypeService, private toast: ToastService) {
   }
 
-  public saveTask() {
+  public ngOnInit(): void {
+    this.onLoadTypes();
+  }
 
-    if (this.mode === CmdbMode.Create) {
-      this.taskInstance = new ExportdJob();
+  public onLoadTypes(): void {
+    if (!this.currentPage) {
+      this.typeService.getTypes(this.typeParams).pipe(takeUntil(this.subscriber)).subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.apiTypeResponse = apiResponse;
+          this.currentPage = 1;
+          this.totalTypes = this.apiTypeResponse.total;
+          this.types = [...this.types, ...apiResponse.results as Array<CmdbType>];
+        });
+    } else if (this.currentPage <= this.apiTypeResponse.pager.total_pages) {
+      this.currentPage += 1;
+      this.typeParams.page = this.currentPage;
+      this.typeService.getTypes(this.typeParams).pipe(takeUntil(this.subscriber)).subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.types = [...this.types, ...apiResponse.results as Array<CmdbType>];
+        });
     }
-    this.taskInstance.name = this.basicStep.basicForm.get('name').value;
-    this.taskInstance.label = this.basicStep.basicForm.get('label').value;
-    this.taskInstance.active = this.basicStep.basicForm.get('active').value;
-    this.taskInstance.exportd_type = this.basicStep.basicForm.get('exportd_type').value;
-    this.taskInstance.description = this.basicStep.basicForm.get('description').value;
+  }
 
-    this.taskInstance.destination = this.destinationStep.destinationForm.get('destination').value;
-    this.taskInstance.sources = this.sourcesStep.sourcesForm.get('sources').value;
-    this.taskInstance.variables = this.variablesStep.variableForm.get('variables').value;
-    this.taskInstance.scheduling = { event: this.schedulingStep.eventForm.value };
+  public saveTask(): void {
+    if (this.mode === CmdbMode.Create) {
+      this.task = new ExportdJob();
+    }
+    this.task.name = this.basicStep.basicForm.get('name').value;
+    this.task.label = this.basicStep.basicForm.get('label').value;
+    this.task.active = this.basicStep.basicForm.get('active').value;
+    this.task.exportd_type = this.basicStep.basicForm.get('exportd_type').value;
+    this.task.description = this.basicStep.basicForm.get('description').value;
+
+    this.task.destination = this.destinationStep.destinationForm.get('destination').value;
+    this.task.sources = this.sourcesStep.sourcesForm.get('sources').value;
+    this.task.variables = this.variablesStep.variableForm.get('variables').value;
+    this.task.scheduling = { event: this.schedulingStep.eventForm.value };
 
     if (this.mode === CmdbMode.Create) {
-      let newID = null;
-      this.taskService.postTask(this.taskInstance).subscribe(publicIDResp => {
-          newID = publicIDResp;
-          this.router.navigate(['/exportd/'], {queryParams: {typeAddSuccess: newID}});
+      this.taskService.postTask(this.task).pipe(takeUntil(this.subscriber)).subscribe((job: ExportdJob) => {
+          this.router.navigate(['/exportd/'], { queryParams: { typeAddSuccess: job.public_id } });
         },
         (error) => {
-          console.error(error);
+          this.toast.error(error.message);
         });
     } else if (this.mode === CmdbMode.Edit) {
-      this.taskService.putTask(this.taskInstance).subscribe((updateResp: ExportdJob) => {
-          this.toast.success(`Exportd Job was successfully edited: Exportd Job ID: ${updateResp.public_id}`);
-          this.router.navigate(['/exportd/'], {queryParams: {typeEditSuccess: updateResp.public_id}});
+      this.taskService.putTask(this.task).pipe(takeUntil(this.subscriber)).subscribe((job: ExportdJob) => {
+          this.toast.success(`Exportd Job was successfully edited: Exportd Job ID: ${ job.public_id }`);
+          this.router.navigate(['/exportd/'], { queryParams: { typeEditSuccess: job.public_id } });
         },
         (error) => {
-          console.log(error);
+          this.toast.error(error.message);
         });
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

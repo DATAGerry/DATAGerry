@@ -48,6 +48,7 @@ import { TableModule } from '../layout/table/table.module';
 import { UsersModule } from '../management/users/users.module';
 import { LogSettingsModule } from '../settings/log-settings/log-settings.module';
 import { RenderModule } from '../framework/render/render.module';
+import { ExportdJobBaseStepComponent } from './exportd-job-settings-builder/exportd-job-base-step.component';
 
 
 @NgModule({
@@ -65,7 +66,8 @@ import { RenderModule } from '../framework/render/render.module';
     ExportdJobLogsComponent,
     FilterPipe,
     ExportdJobSettingsCopyComponent,
-    DropDownDirectionDirective
+    DropDownDirectionDirective,
+    ExportdJobBaseStepComponent
   ],
   imports: [
     CommonModule,

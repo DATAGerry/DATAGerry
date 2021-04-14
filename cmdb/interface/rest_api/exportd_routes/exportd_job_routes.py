@@ -165,8 +165,7 @@ def add_job(request_user: UserModel):
     except LogManagerInsertError as err:
         LOGGER.error(err)
 
-    resp = make_response(ack)
-    return resp
+    return make_response(ExportdJob.to_json(job_instance))
 
 
 @exportd_job_blueprint.route('/', methods=['PUT'])

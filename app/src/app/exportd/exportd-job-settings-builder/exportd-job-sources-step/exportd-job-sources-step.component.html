@@ -24,17 +24,21 @@
                 <div class="form-group">
                   <label for="ng-select-valid">Type: <span class="required">*</span></label>
                   <ng-select
-                    [items]="typeList"
-                    id="ng-select-valid"
-                    class="custom-select"
-                    bindLabel="label"
-                    bindValue="public_id"
+                    [items]="types" id="ng-select-valid" class="custom-select"
+                    bindLabel="label" bindValue="public_id" [virtualScroll]="true" (scrollToEnd)="typeCallEmitter.emit()"
                     [ngClass]="{ 'is-valid': source.get('type_id').valid
                     && (source.get('type_id').dirty || source.get('type_id').touched),
                     'is-invalid': source.get('type_id').invalid
                     && (source.get('type_id').dirty || source.get('type_id').touched)}"
                     formControlName="type_id"
                     required>
+                    <ng-template ng-header-tmp>
+                      <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
+                    </ng-template>
+                    <ng-template ng-option-tmp let-item="item">
+                      <div><span>{{item.label}}</span></div>
+                      <small><b>PublicID:</b> {{item.public_id}} | <b>Name:</b> {{item.name}}</small>
+                    </ng-template>
                   </ng-select>
                 </div>
 

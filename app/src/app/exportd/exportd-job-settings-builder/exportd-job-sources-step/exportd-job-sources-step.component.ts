@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
@@ -22,6 +22,7 @@ import { CmdbMode } from '../../../framework/modes.enum';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
 import { Subscription } from 'rxjs';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
 
 
 @Component({
@@ -29,9 +30,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './exportd-job-sources-step.component.html',
   styleUrls: ['./exportd-job-sources-step.component.scss']
 })
-export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
-
-  private typeSubscription: Subscription;
+export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent implements OnInit {
 
   @Input()
   set preData(data: any) {
@@ -66,22 +65,18 @@ export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
     }
   }
 
-  @Input() public mode: CmdbMode;
-  public typeList: CmdbType[];
   public operators: any[] = ['!=', '=='];
   public sourcesForm: FormGroup;
   readonly SOURCES = 'sources';
 
-  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {
-    this.typeSubscription = new Subscription();
-    this.typeList = [];
+  constructor(private formBuilder: FormBuilder) {
+    super();
   }
 
   public ngOnInit(): void {
     this.sourcesForm = this.formBuilder.group({
       sources: this.formBuilder.array([this.createSource()])
     });
-    this.typeSubscription = this.typeService.getTypeList().subscribe((value: CmdbType[]) => this.typeList = value);
 
     if (this.mode === CmdbMode.Create) {
       this.delCondition(0, 0);
@@ -90,7 +85,7 @@ export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
 
   public getFields(publicID: any) {
     try {
-      return this.typeList.find(id => id.public_id === publicID).fields;
+      return this.types.find(id => id.public_id === publicID).fields;
     } catch (e) {
       return [];
     }
@@ -135,7 +130,4 @@ export class ExportdJobSourcesStepComponent implements OnInit, OnDestroy {
     control.removeAt(index);
   }
 
-  public ngOnDestroy(): void {
-    this.typeSubscription.unsubscribe();
-  }
 }

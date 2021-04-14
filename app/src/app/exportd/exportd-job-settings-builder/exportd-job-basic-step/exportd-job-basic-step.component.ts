@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,22 +13,27 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-import { Component, Injectable, Input, OnInit} from '@angular/core';
+import { Component, Injectable, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
-import { AbstractControl, FormControl, FormGroup, Validators} from '@angular/forms';
-import { checkJobExistsValidator, ExportdJobService} from '../../exportd-job.service';
-import { ExportdType} from '../../../settings/models/modes_job.enum';
+import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { checkJobExistsValidator, ExportdJobService } from '../../exportd-job.service';
+import { ExportdType } from '../../../settings/models/modes_job.enum';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-task-basic-step',
   templateUrl: './exportd-job-basic-step.component.html',
   styleUrls: ['./exportd-job-basic-step.component.scss']
 })
-export class ExportdJobBasicStepComponent implements OnInit {
+export class ExportdJobBasicStepComponent extends ExportdJobBaseStepComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   @Input()
   set preData(data: any) {
@@ -37,15 +42,14 @@ export class ExportdJobBasicStepComponent implements OnInit {
     }
   }
 
-  @Input() public mode: CmdbMode;
-  public modes = CmdbMode;
   public basicForm: FormGroup;
-  public readonly typeSelect: any[] = [
-    {label: 'PUSH', content: ExportdType.PUSH, description: 'Run job directly.'},
-    {label: 'PULL', content: ExportdType.PULL, description: 'Get the output of a job directly via REST.'}
-    ];
+  public readonly typeSelect: Array<any> = [
+    { label: 'PUSH', content: ExportdType.PUSH, description: 'Run job directly.' },
+    { label: 'PULL', content: ExportdType.PULL, description: 'Get the output of a job directly via REST.' }
+  ];
 
   constructor(private exportdService: ExportdJobService) {
+    super();
     this.basicForm = new FormGroup({
       name: new FormControl('', Validators.required),
       label: new FormControl('', Validators.required),
@@ -66,15 +70,20 @@ export class ExportdJobBasicStepComponent implements OnInit {
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
       this.basicForm.get('name').setAsyncValidators(checkJobExistsValidator(this.exportdService));
-      this.basicForm.get('label').valueChanges.subscribe(value => {
+      this.basicForm.get('label').valueChanges.pipe(takeUntil(this.subscriber)).subscribe(value => {
         this.basicForm.get('name').setValue(value.replace(/ /g, '-').toLowerCase());
-        const newValue = this.basicForm.get('name').value;
-        this.basicForm.get('name').setValue(newValue.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
+        this.basicForm.get('name').setValue(this.basicForm.get('name').value.replace(/[^a-z0-9 \-]/gi, '').toLowerCase());
         this.basicForm.get('name').markAsDirty({ onlySelf: true });
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
     } else if (CmdbMode.Edit) {
+      this.basicForm.get('name').disable();
       this.basicForm.markAllAsTouched();
     }
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

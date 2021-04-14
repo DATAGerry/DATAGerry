@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import {
@@ -21,7 +21,7 @@ import {
   Directive,
   ElementRef,
   HostListener,
-  Input,
+  Input, OnDestroy,
   OnInit,
   Pipe,
   PipeTransform,
@@ -35,6 +35,9 @@ import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations
 import { ExternalSystemService } from '../../../settings/services/external-system.service';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { TemplateHelperService } from '../../../settings/services/template-helper.service';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Directive({
@@ -44,7 +47,8 @@ import { TemplateHelperService } from '../../../settings/services/template-helpe
 export class DropDownDirectionDirective {
 
 
-  constructor(private el: ElementRef, private renderer: Renderer2) {}
+  constructor(private el: ElementRef, private renderer: Renderer2) {
+  }
 
   // listens to the mouseenter event on the element this directive is called
   @HostListener('mouseenter', ['$event.target'])
@@ -104,18 +108,21 @@ export class FilterPipe implements PipeTransform {
   }
 }
 
+// @ts-ignore
 @Component({
   selector: 'cmdb-task-variables-step',
   templateUrl: './exportd-job-variables-step.component.html',
   styleUrls: ['./exportd-job-variables-step.component.scss']
 })
-export class ExportdJobVariablesStepComponent implements OnInit {
-  index = 1;
+export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  public index: number = 1;
+
   @Input()
   set preData(data: any) {
     if (data !== undefined) {
       if (data.variables) {
-        // Create variables
         this.variableForm = this.formBuilder.group({
           variables: new FormArray([])
         });
@@ -131,7 +138,6 @@ export class ExportdJobVariablesStepComponent implements OnInit {
           i++;
         }
 
-        // Create templates
         i = 0;
         while (i < forArray.controls.length) {
           data.variables[i].templates.forEach((item, index) => {
@@ -149,8 +155,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   private destinationForm: ExportdJobDestinationsStepComponent;
-  @Input() public mode: CmdbMode;
-  public typeList: CmdbType[] = [];
+
   public variableForm: FormGroup;
   public variableHelper: any[];
   public dragVariableName: string = '';
@@ -160,7 +165,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   public typesInSources: any[] = [];
 
   private sourceTypes: any[];
-  // receives data from the sources step
+
   @Input() set sources(value: any[]) {
     this.sourceTypes = value;
   }
@@ -169,9 +174,11 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     return this.sourceTypes;
   }
 
-  constructor(private formBuilder: FormBuilder, private typeService: TypeService,
-              private externalService: ExternalSystemService, private templateHelperService: TemplateHelperService) {
+  constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService,
+              private templateHelperService: TemplateHelperService) {
+    super();
   }
+
   @Input() set destinationStep(value: ExportdJobDestinationsStepComponent) {
     this.destinationForm = value;
   }
@@ -180,13 +187,9 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     return this.destinationForm;
   }
 
-  ngOnInit() {
+  public ngOnInit(): void {
     this.variableForm = this.formBuilder.group({
       variables: this.formBuilder.array([this.createVariable()])
-    });
-
-    this.typeService.getTypeList().subscribe(resp => {
-      this.typeList = resp;
     });
   }
 
@@ -234,7 +237,7 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   public getVariableHelp(value: string) {
-    this.externalService.getExternSystemVariables(value).subscribe(item => {
+    this.externalService.getExternSystemVariables(value).pipe(takeUntil(this.subscriber)).subscribe(item => {
       this.variableHelper = item;
     });
   }
@@ -249,24 +252,38 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     this.dragVariableName = name;
   }
 
+  /**
+   * gets template helper data of the given object and inserts it at the specified index of this.templatehelperdata
+   * @param superindex
+   * @param index
+   * @param value
+   */
   public onOptionSelected(superindex, index, value) {
-    // gets template helper data of the given object and inserts it at the specified index of this.templatehelperdata
     this.templateHelperService.getObjectTemplateHelperData(value).then(helperData => {
       this.templateHelperData[superindex][index] = helperData;
     });
   }
 
+  /**
+   * used to determine whether the an array exists in the superindex and returns it or an empty array
+   * @param superindex
+   * @param index
+   */
   public getTemplateHelperData(superindex, index) {
-    // used to determine whether the an array exists in the superindex and returns it or an empty array
-    // built due to frontend breaking if the html tries to get it directly
     if (!this.templateHelperData[superindex]) {
       this.templateHelperData[superindex] = [];
     }
     return this.templateHelperData[superindex][index];
   }
 
+  /**
+   * sets the text of the specified input field and validates the field in the form
+   * @param superindex
+   * @param index
+   * @param value
+   * @param variable
+   */
   public setTemplateValue(superindex, index, value, variable) {
-    // sets the text of the specified input field and validates the field in the form
     const element = (document.getElementById('input' + superindex + index) as HTMLInputElement);
     element.value = element.value + value;
     variable.patchValue({
@@ -274,8 +291,13 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     });
   }
 
+  /**
+   * sets the text of the specified input field and validates the field in the form
+   * @param index
+   * @param value
+   * @param variable
+   */
   public setDefaultValue(index, value, variable) {
-    // sets the text of the specified input field and validates the field in the form
     const element = (document.getElementById('variableDefault' + index) as HTMLInputElement);
     element.value = element.value + value;
     variable.patchValue({
@@ -284,16 +306,14 @@ export class ExportdJobVariablesStepComponent implements OnInit {
   }
 
   public filterTypes() {
-    // gets all type IDs from the data received form sources
     const typeArray = [];
-    this.sources.forEach( source => {
+    this.sources.forEach(source => {
       if (!typeArray.includes(source.type_id)) {
         typeArray.push(source.type_id);
       }
     });
-    // filters all duplicates and gets the respective template helper data of the given types
     this.typesInSources = [];
-    this.typeList.forEach( item => {
+    this.types.forEach(item => {
       if (typeArray.includes(item.public_id) && !this.typesInSources.includes(item)) {
         this.typesInSources.push(item);
         this.templateHelperService.getObjectTemplateHelperData(item.public_id).then(helperData => {
@@ -303,8 +323,11 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     });
   }
 
+  /**
+   * used to determine wether the field calling it is the first in the list where the Public ID is located
+   * @param field
+   */
   public isID(field) {
-    // used to determine wether the field calling it is the first in the list where the Public ID is located
     if (field === 0) {
       return 'fas fa-list-ol';
     } else {
@@ -312,4 +335,8 @@ export class ExportdJobVariablesStepComponent implements OnInit {
     }
   }
 
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
 }
