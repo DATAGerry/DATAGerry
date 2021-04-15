@@ -267,7 +267,9 @@ def get_run_job_manual(public_id, request_user: UserModel):
 @right_required('base.exportd.job.run')
 def get_job_output_by_id(public_id, request_user: UserModel):
     try:
+        print("test")
         job = exportd_manager.get_job_by_args(public_id=public_id, exportd_type='PULL')
+        print(job)
         resp = worker(job, request_user)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
