@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Event Management
@@ -23,6 +23,8 @@ import queue
 import multiprocessing
 import threading
 import pika
+from pika.exceptions import AMQPConnectionError
+
 from cmdb.event_management.event import Event
 from cmdb.utils.system_config import SystemConfigReader
 
@@ -300,7 +302,7 @@ class EventReceiverAmqp(threading.Thread):
 
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue_handler, no_ack=True)
-        except pika.exceptions.AMQPConnectionError:
+        except AMQPConnectionError:
             LOGGER.error("{}: EventReceiverAmqp connection error".format(self.__process_id))
             self.__flag_shutdown.set()
 
@@ -314,6 +316,6 @@ class EventReceiverAmqp(threading.Thread):
                 self.__connection.add_timeout(2, self.__check_shutdown_flag)
                 self.__channel.start_consuming()
             # handle AMQP connection errors
-            except pika.exceptions.AMQPConnectionError:
+            except AMQPConnectionError:
                 LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()
