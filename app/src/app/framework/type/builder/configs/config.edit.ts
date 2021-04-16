@@ -25,6 +25,7 @@ import { CmdbMode } from '../../../modes.enum';
 })
 export class ConfigEditBaseComponent {
 
+  public MODES = CmdbMode;
   @Input() public mode: CmdbMode = CmdbMode.Create;
 
   private editable: false;

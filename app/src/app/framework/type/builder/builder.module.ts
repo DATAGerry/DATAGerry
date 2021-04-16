@@ -40,6 +40,7 @@ import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-
 import { LayoutModule } from '../../../layout/layout.module';
 import { ConfigEditBaseComponent } from './configs/config.edit';
 import { ConfigEditComponent } from './configs/config-edit.component';
+import { TypeModule } from '../type.module';
 
 @NgModule({
   imports: [

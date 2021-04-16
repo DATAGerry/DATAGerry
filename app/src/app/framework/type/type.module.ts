@@ -68,7 +68,7 @@ import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-
     TypeTableActionsComponent,
     TypeBuilderStepComponent,
     TypeBuilderStepValidStatusComponent,
-    TypePreviewStepComponent
+    TypePreviewStepComponent,
   ],
   imports: [
     CommonModule,

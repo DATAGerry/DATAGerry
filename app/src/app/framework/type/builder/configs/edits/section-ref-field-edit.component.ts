@@ -16,14 +16,13 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { CmdbType, CmdbTypeSection } from '../../../../models/cmdb-type';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
 import { TypeService } from '../../../../services/type.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
-import { RenderResult } from '../../../../models/cmdb-render';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
 
@@ -62,9 +61,8 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
   /**
    * Current loading page
-   * @private
    */
-  private currentPage: number = 1;
+  public currentPage: number = 1;
 
   /**
    * Max loading pages.
@@ -76,14 +74,6 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    * Type switch active.
    */
   public selectDisabled: boolean = false;
-
-  @Input('data')
-  public set Data(value: CmdbTypeSection) {
-    if (value?.reference?.type_id) {
-      this.loadPresetType(value.reference.type_id);
-    }
-    this.data = value;
-  }
 
   constructor(private typeService: TypeService) {
     super();
@@ -102,6 +92,11 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   }
 
   public ngOnInit(): void {
+    if (this.mode === CmdbMode.Edit) {
+      if (this.data?.reference?.type_id) {
+        this.loadPresetType(this.data.reference.type_id);
+      }
+    }
     this.triggerAPICall();
   }
 
@@ -110,10 +105,12 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: CmdbType) => {
         this.types = [...this.types, ...[apiResponse as CmdbType]];
+        this.typeSections = this.getSectionsFromType(apiResponse.public_id);
+        this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
       }).add(() => this.loading = false);
   }
 
-  private triggerAPICall(): void {
+  public triggerAPICall(): void {
     if (this.maxPage && (this.currentPage <= this.maxPage)) {
       this.loadTypesFromApi();
       this.currentPage += 1;
@@ -130,22 +127,28 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
       }).add(() => this.loading = false);
   }
 
-  public onScrollToEnd(): void {
-    this.triggerAPICall();
-  }
-
   /**
    * When the selected type change.
    * Reset a selected section.
    * @param type
    */
   public onTypeChange(type: CmdbType): void {
-    if (this.data.reference.section_name) {
-      this.data.reference.section_name = undefined;
-      this.data.reference.selected_fields = undefined;
-      this.selectedSection = undefined;
+    if (type) {
+      this.data.reference.type_id = type.public_id;
+      this.typeSections = this.getSectionsFromType(type.public_id);
+    } else {
+      this.data.reference.type_id = undefined;
+      this.typeSections = [];
     }
-    this.typeSections = this.getSectionsFromType(type.public_id);
+    if (this.data.reference.section_name) {
+      this.unsetReferenceSubData();
+    }
+  }
+
+  private unsetReferenceSubData(): void {
+    this.data.reference.section_name = undefined;
+    this.data.reference.selected_fields = undefined;
+    this.selectedSection = undefined;
   }
 
   /**

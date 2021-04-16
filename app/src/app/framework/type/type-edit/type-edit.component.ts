@@ -30,14 +30,24 @@ import { Right } from '../../../management/models/right';
 })
 export class TypeEditComponent {
 
+  /**
+   * Type instance.
+   */
   public typeInstance: CmdbType;
+
+  /**
+   * Render mode.
+   */
   public mode: number = CmdbMode.Edit;
 
-  public stepIndex: number = 0;
+  /**
+   * Start wizard index.
+   */
+  public stepIndex: number = 1;
 
   constructor(private typeService: TypeService, private route: ActivatedRoute) {
     this.route.queryParams.subscribe(params => {
-      this.stepIndex = params.stepIndex;
+      this.stepIndex = params.stepIndex || 0;
     });
     this.typeInstance = this.route.snapshot.data.type as CmdbType;
   }
