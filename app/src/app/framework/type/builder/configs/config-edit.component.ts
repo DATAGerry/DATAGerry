@@ -36,12 +36,14 @@ import { CmdbMode } from '../../../modes.enum';
 })
 export class ConfigEditComponent implements OnInit {
 
+  public modes: typeof CmdbMode = CmdbMode;
   @Input() public mode: CmdbMode = CmdbMode.Create;
-  @Input() data: any;
-  @Input() public fields: Array<any> = [];
-  @Input() public sections: Array<any> = [];
+  @Input() public data: any;
+
   @Input() canEdit: boolean = false;
 
+  @Input() public fields: Array<any> = [];
+  @Input() public sections: Array<any> = [];
   @Input() public types: Array<CmdbType> = [];
 
   @ViewChild('fieldConfig', { read: ViewContainerRef, static: true }) container;

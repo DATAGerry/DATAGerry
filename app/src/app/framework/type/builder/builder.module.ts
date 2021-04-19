@@ -30,8 +30,6 @@ import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.component';
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
-import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
-import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
@@ -40,7 +38,6 @@ import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-
 import { LayoutModule } from '../../../layout/layout.module';
 import { ConfigEditBaseComponent } from './configs/config.edit';
 import { ConfigEditComponent } from './configs/config-edit.component';
-import { TypeModule } from '../type.module';
 
 @NgModule({
   imports: [
@@ -68,8 +65,6 @@ import { TypeModule } from '../type.module';
     RefFieldEditComponent,
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
-    PreviewModalComponent,
-    DiagnosticModalComponent,
     DateFieldEditComponent,
     SectionRefFieldEditComponent,
   ],
