@@ -10,24 +10,7 @@
         </div>
       </div>
     </div>
-    <div class="col-2 border-left">
-      <div class="d-flex justify-content-start">
-        <div class="icon"><i class="fas fa-puzzle-piece"></i></div>
-        <div class="name">
-          <strong class="text-uppercase">Resolve</strong>
-          <div class="custom-control custom-checkbox">
-            <input (change)="onResolveChange($event)" type="checkbox" class="custom-control-input"
-                   id="search-result-bar-follow-objects-button"
-                   [checked]="resolve.value"
-                   [disabled]="!referenceResultList?.total_results">
-            <label for="search-result-bar-follow-objects-button" class="custom-control-label">
-              References {{referenceResultList?.total_results}}
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-6 border-left d-flex justify-content-start">
+    <div class="col-8 border-left d-flex justify-content-start">
       <div class="d-flex">
         <div class="icon"><i class="fas fa-filter mr-1"></i></div>
         <div class="name"><strong class="text-uppercase">Filter</strong>

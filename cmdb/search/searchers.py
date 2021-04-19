@@ -30,6 +30,7 @@ from cmdb.search.search_result import SearchResult
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
+from cmdb.framework.utils import PublicID
 
 LOGGER = logging.getLogger(__name__)
 
@@ -53,7 +54,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
                                                                                  permission=permission))]
         self.add_pipe(pipe_match)
         self.add_pipe({'$group': {"_id": {'active': '$active'}, 'count': {'$sum': 1}}})
@@ -82,10 +83,12 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
+# Load reference fields in runtime
+
 class SearchPipelineBuilder(PipelineBuilder):
 
     def __init__(self, pipeline: Pipeline = None):
-        """Init constructor
+        """Init constructor : Load reference fields in runtime
         Args:
             pipeline: preset a for defined pipeline
         """
@@ -123,26 +126,6 @@ class SearchPipelineBuilder(PipelineBuilder):
                     regex_pipes.append(px)
 
         return regex_pipes
-
-    def build_resolve_reference_pipeline(self, query: Query, active: bool = False,
-                                         user: UserModel = None, permission: AccessControlPermission = None,
-                                         *args, **kwargs):
-        """Build a resolve reference pipeline query"""
-        __pipeline = Pipeline([])
-        if isinstance(query, dict):
-            __pipeline.append(filter)
-        elif isinstance(query, list):
-            __pipeline += query
-
-        # get only active objects
-        if active:
-            __pipeline = [*__pipeline, *[{'$match': {'active': {"$eq": True}}}]]
-
-        # permission builds
-        if user and permission:
-            __pipeline = [*__pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
-                                                                           permission=permission))]
-        return __pipeline
 
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
@@ -191,7 +174,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
                                                                                  permission=permission))]
         return self.pipeline
 
@@ -218,14 +201,12 @@ class SearcherFramework(Search[CmdbObjectManager]):
         Returns:
             SearchResult with generic list of RenderResults
         """
+
         # Insert skip and limit
         plb = SearchPipelineBuilder(pipeline)
 
         # define search output
         stages: dict = {}
-
-        # build resolve reference pipeline
-        # plb.build_resolve_reference_pipeline(pipeline=pipeline, user=request_user, permission=permission, **kwargs)
 
         stages.update({'metadata': [SearchPipelineBuilder.count_('total')]})
         stages.update({'data': [
@@ -252,7 +233,6 @@ class SearcherFramework(Search[CmdbObjectManager]):
         }
         stages.update(group_stage)
         plb.add_pipe(SearchPipelineBuilder.facet_(stages))
-
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
 

@@ -21,7 +21,7 @@ from flask import current_app, request, abort
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
-from cmdb.search import Search, Query
+from cmdb.search import Search
 from cmdb.search.params import SearchParam
 from cmdb.search.query import Pipeline
 from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
@@ -84,14 +84,10 @@ def search_framework(request_user: UserModel):
     try:
         searcher = SearcherFramework(manager=object_manager)
         builder = SearchPipelineBuilder()
-        if request.method == 'GET' and resolve_object_references:
-            query: Pipeline = builder.build_resolve_reference_pipeline(query=Query(search_parameters),
-                                                                       active=only_active, user=request_user,
-                                                                       permission=AccessControlPermission.READ)
-        else:
-            query: Pipeline = builder.build(search_parameters, object_manager,
-                                            user=request_user,
-                                            permission=AccessControlPermission.READ, active_flag=only_active)
+
+        query: Pipeline = builder.build(search_parameters, object_manager,
+                                        user=request_user,
+                                        permission=AccessControlPermission.READ, active_flag=only_active)
 
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
                                     resolve=resolve_object_references, permission=AccessControlPermission.READ,
