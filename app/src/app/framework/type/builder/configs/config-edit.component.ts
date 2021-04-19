@@ -40,8 +40,6 @@ export class ConfigEditComponent implements OnInit {
   @Input() public mode: CmdbMode = CmdbMode.Create;
   @Input() public data: any;
 
-  @Input() canEdit: boolean = false;
-
   @Input() public fields: Array<any> = [];
   @Input() public sections: Array<any> = [];
   @Input() public types: Array<CmdbType> = [];
@@ -63,6 +61,5 @@ export class ConfigEditComponent implements OnInit {
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.fields = this.fields;
-    this.componentRef.instance.canEdit = this.canEdit;
   }
 }

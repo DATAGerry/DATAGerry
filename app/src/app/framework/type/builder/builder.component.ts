@@ -63,8 +63,6 @@ export class BuilderComponent implements OnDestroy {
     this.typeInstance = instance;
   }
 
-  public canEdit: boolean = false;
-
   public structureControls = [
     new Controller('section', SectionControl),
     new Controller('ref-section', RefSectionControl)
