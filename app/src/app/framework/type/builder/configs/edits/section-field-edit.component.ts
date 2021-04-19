@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
+import { Component } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 
 @Component({
@@ -24,15 +24,10 @@ import { ConfigEditBaseComponent } from '../config.edit';
   templateUrl: './section-field-edit.component.html',
   styleUrls: ['./section-field-edit.component.scss']
 })
-export class SectionFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
-  @Input() groupList: any;
-  @Input() userList: any;
+export class SectionFieldEditComponent extends ConfigEditBaseComponent {
 
   public constructor() {
     super();
-  }
-
-  public ngOnInit(): void {
   }
 
 }

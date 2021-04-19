@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { RenderResult } from '../../../../models/cmdb-render';
@@ -39,8 +39,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   constructor(private typeService: TypeService, private objectService: ObjectService, private toast: ToastService) {
     super();
   }
-  @Input() groupList: any;
-  @Input() userList: any;
 
   /**
    * Global un-subscriber for http calls to the rest backend.

@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
@@ -33,13 +33,13 @@ import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../sett
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent {
 
-  @Input() groupList: any;
-  @Input() userList: any;
-
   constructor() {
     super();
   }
 
+  /**
+   * Resets the date to null.
+   */
   public resetDate() {
     this.data.value = null;
   }

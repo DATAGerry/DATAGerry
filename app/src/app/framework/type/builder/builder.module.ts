@@ -24,7 +24,6 @@ import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
-import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
 import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
@@ -59,7 +58,6 @@ import { ConfigEditComponent } from './configs/config-edit.component';
     ConfigEditComponent,
     BuilderComponent,
     TextFieldEditComponent,
-    DummyFieldEditComponent,
     SectionFieldEditComponent,
     TextareaEditComponent,
     RefFieldEditComponent,

@@ -18,7 +18,6 @@
 
 
 import { TextFieldEditComponent } from './edits/text-field-edit.component';
-import { DummyFieldEditComponent } from './edits/dummy-field-edit.component';
 import { SectionFieldEditComponent } from './edits/section-field-edit.component';
 import { TextareaEditComponent } from './edits/textarea-edit.component';
 import { RefFieldEditComponent } from './edits/ref-field-edit.component';
@@ -40,6 +39,5 @@ export const configComponents: { [type: string]: any } = {
   radio: ChoiceFieldEditComponent,
   select: ChoiceFieldEditComponent,
   date: DateFieldEditComponent,
-  debug: DummyFieldEditComponent,
   'ref-section': SectionRefFieldEditComponent,
 };
