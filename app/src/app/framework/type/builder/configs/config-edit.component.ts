@@ -19,24 +19,33 @@
 import {
   Component,
   ComponentFactoryResolver,
-  ComponentRef,
-  Input,
-  OnInit,
+  ComponentRef, EventEmitter,
+  Input, OnDestroy,
+  OnInit, Output,
   ViewChild,
   ViewContainerRef
 } from '@angular/core';
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
+import { FormGroup } from '@angular/forms';
+import { ConfigEditBaseComponent } from './config.edit';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-config-edit',
   templateUrl: './config-edit.component.html',
   styleUrls: ['./config-edit.component.scss']
 })
-export class ConfigEditComponent implements OnInit {
+export class ConfigEditComponent implements OnInit, OnDestroy {
 
   public modes: typeof CmdbMode = CmdbMode;
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  public form: FormGroup;
+
   @Input() public mode: CmdbMode = CmdbMode.Create;
   @Input() public data: any;
 
@@ -44,22 +53,35 @@ export class ConfigEditComponent implements OnInit {
   @Input() public sections: Array<any> = [];
   @Input() public types: Array<CmdbType> = [];
 
-  @ViewChild('fieldConfig', { read: ViewContainerRef, static: true }) container;
+  @Output() public nameChange: EventEmitter<{ prev: string | undefined; curr: string | undefined }>;
+
+  @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
+
   private component: any;
   private componentRef: ComponentRef<any>;
 
   constructor(private resolver: ComponentFactoryResolver) {
+    this.form = new FormGroup({});
+    this.nameChange = new EventEmitter<{ prev: string | undefined; curr: string | undefined }>();
   }
 
   public ngOnInit(): void {
     this.container.clear();
     this.component = configComponents[this.data.type];
 
-    const factory = this.resolver.resolveComponentFactory(this.component);
+    const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.mode = this.mode;
+    this.componentRef.instance.form = this.form;
     this.componentRef.instance.data = this.data;
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.fields = this.fields;
+    this.componentRef.instance.nameChange.pipe(takeUntil(this.subscriber))
+      .subscribe((changes: { prev: string | undefined; curr: string | undefined }) => this.nameChange.emit(changes));
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

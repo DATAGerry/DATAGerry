@@ -28,6 +28,7 @@ import { APIGetMultiResponse } from '../../../../../services/models/api-response
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../../../layout/toast/toast.service';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-ref-field-edit',
@@ -41,10 +42,12 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   /**
-   * Global un-subscriber for http calls to the rest backend.
+   * Component un-subscriber.
+   * @protected
    */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  nameControl: FormControl;
   /**
    * Type list for reference selection
    */
@@ -131,7 +134,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   public onChange() {
-    const {ref_types} = this.data;
+    const { ref_types } = this.data;
     if (ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.filteredTypeList = [];
@@ -188,5 +191,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     this.subscriber.next();
     this.subscriber.complete();
   }
+
 
 }

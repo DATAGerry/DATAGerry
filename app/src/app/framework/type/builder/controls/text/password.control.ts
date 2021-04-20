@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class PasswordContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
 
   public constructor() {
     this.type = 'password';
@@ -40,14 +36,14 @@ class PasswordContent implements ControlsContent {
 
 }
 
-export class PasswordControl implements ControlsCommon {
+export class PasswordControl extends ControlsCommon {
 
-  name = 'password';
-  label = 'Password';
-  icon = 'fas fa-lock';
-  dndType: string = 'inputs';
+  public name: string = 'password';
+  public label: string = 'Password';
+  public icon: string = 'fas fa-lock';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): PasswordContent {
     return new PasswordContent();
   }
 

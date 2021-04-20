@@ -16,38 +16,76 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
 import { Group } from '../../../../management/models/group';
 import { User } from '../../../../management/models/user';
+import { FormControl, FormGroup } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { nameConvention } from '../../../../layout/directives/name.directive';
 
 @Component({
   template: ``
 })
-export class ConfigEditBaseComponent {
+export abstract class ConfigEditBaseComponent {
+
+
+  protected abstract subscriber: ReplaySubject<void>;
 
   /**
    * Cmdb modes for template usage.
    */
   public MODES = CmdbMode;
-
-  /**
-   *
-   */
   @Input() public mode: CmdbMode = CmdbMode.Create;
-  @Input() public data: any;
 
+
+  @Input() public form: FormGroup;
+  public abstract nameControl: FormControl;
+  @Output() protected nameChange: EventEmitter<{ prev: string | undefined; curr: string | undefined }>;
+
+  @Input() public data: any;
+  @Input() public sections: Array<any>;
+  @Input() public fields: Array<any> = [];
 
   @Input() public types: Array<CmdbType> = [];
   @Input() public groups: Array<Group> = [];
   @Input() public users: Array<User> = [];
 
-  @Input() public sections: Array<any>;
-  @Input() public fields: Array<any> = [];
 
+  protected constructor() {
+    this.form = new FormGroup({});
+    this.nameChange = new EventEmitter<{ prev: string | undefined; curr: string | undefined }>();
+  }
 
-  public constructor() {
+  protected disableControlOnEdit(control: FormControl): void {
+    if (this.mode === CmdbMode.Edit) {
+      control.disable({ onlySelf: false, emitEvent: false });
+    }
+  }
+
+  protected validateNameLabelControl(nameControl: FormControl, labelControl: FormControl, subscriber: ReplaySubject<void>): void {
+    this.disableControlOnEdit(nameControl);
+    if (this.mode === CmdbMode.Create) {
+      labelControl.valueChanges.pipe(takeUntil(subscriber)).subscribe((changes: string) => {
+        if (!nameControl.touched) {
+          nameControl.setValue(nameConvention(changes), { emitEvent: true });
+        }
+      });
+    }
+  }
+
+  protected patchData(data: any, form: FormGroup): void {
+    form.patchValue(data);
+  }
+
+  protected assignFormChanges(subscriber: ReplaySubject<void>): void {
+    this.form.valueChanges.pipe(takeUntil(subscriber)).subscribe(() => {
+      const formData = this.form.getRawValue();
+      this.nameChange.emit({prev: this.data?.name, curr: formData?.name});
+      Object.assign(this.data, formData);
+    });
   }
 
   public calculateName(value) {

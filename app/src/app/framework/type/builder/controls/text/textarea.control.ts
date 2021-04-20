@@ -18,37 +18,33 @@
 
 import { ControlsCommon, ControlsContent, randomName } from '../controls.common';
 
-class TelContent implements ControlsContent {
+class TextAreaContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
 
   public constructor() {
-    this.type = 'tel';
+    this.type = 'textarea';
     this.name = randomName(this.type);
-    this.label = 'Phone Field';
+    this.label = 'Textarea Field';
   }
 
 }
 
-export class TelControl implements ControlsCommon {
+export class TextAreaControl implements ControlsCommon {
 
-  name = 'phone';
-  label = 'Phone';
-  icon = 'fas fa-phone';
-  dndType: string = 'inputs';
+  public name: string = 'textarea';
+  public label: string = 'Textarea';
+  public icon: string = 'fas fa-align-left';
+  public dndType: string = 'inputs';
 
-  content() {
-    return new TelContent();
+  public content(): TextAreaContent {
+    return new TextAreaContent();
   }
 
 }

@@ -13,13 +13,15 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
+import { ReplaySubject } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 
 @Component({
@@ -33,6 +35,14 @@ import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../sett
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent {
 
+  /**
+   * Component un-subscriber.
+   * @protected
+   */
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+
+  nameControl: FormControl;
   constructor() {
     super();
   }

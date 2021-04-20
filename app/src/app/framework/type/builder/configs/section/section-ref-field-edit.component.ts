@@ -25,19 +25,21 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
-  templateUrl: './section-ref-field-edit.component.html',
-  styleUrls: ['./section-ref-field-edit.component.scss']
+  templateUrl: './section-ref-field-edit.component.html'
 })
 export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
   /**
-   * Component un subscriber.
-   * @private
+   * Component un-subscriber.
+   * @protected
    */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  nameControl: FormControl;
 
   /**
    * Sections from the selected type.
@@ -187,5 +189,6 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.subscriber.next();
     this.subscriber.complete();
   }
+
 
 }

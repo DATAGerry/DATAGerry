@@ -18,6 +18,8 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
+import { ReplaySubject } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-check-field-edit',
@@ -25,6 +27,15 @@ import { ConfigEditBaseComponent } from '../config.edit';
   styleUrls: ['./check-field-edit.component.scss']
 })
 export class CheckFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
+
+  /**
+   * Component un-subscriber.
+   * @protected
+   */
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+
+  nameControl: FormControl;
 
   /**
    * Select able checkbox options.

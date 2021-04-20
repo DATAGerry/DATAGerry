@@ -18,6 +18,8 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
+import { ReplaySubject } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-textarea-edit',
@@ -26,9 +28,18 @@ import { ConfigEditBaseComponent } from '../config.edit';
 })
 export class TextareaEditComponent extends ConfigEditBaseComponent {
 
+  /**
+   * Component un-subscriber.
+   * @protected
+   */
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  nameControl: FormControl;
+
   public constructor() {
     super();
   }
+
 
 
 }

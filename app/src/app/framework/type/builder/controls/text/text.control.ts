@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class TextContent implements ControlsContent {
 
-  access: boolean;
-  helperText: string;
-  name: string;
-  optional: any;
-  placeholder: string;
-  required: boolean;
-  type: string;
-  value: any;
-  label: string;
-  groups: number[];
-  users: number[];
+  public type: string;
+  public name: string;
+  public label: string;
+  public value: any;
+  public helperText: string;
+  public placeholder: string;
+  public required: boolean;
 
   public constructor() {
     this.type = 'text';
@@ -40,14 +36,14 @@ class TextContent implements ControlsContent {
 
 }
 
-export class TextControl implements ControlsCommon {
+export class TextControl extends ControlsCommon {
 
-  name = 'text';
-  label = 'Text';
-  icon = 'fas fa-font';
-  dndType: string = 'inputs';
+  public name: string  = 'text';
+  public label: string  = 'Text';
+  public icon: string  = 'fas fa-font';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): TextContent {
     return new TextContent();
   }
 

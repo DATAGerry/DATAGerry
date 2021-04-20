@@ -22,33 +22,37 @@ export class RefSectionContent implements StructureContent {
 
   label: string;
   name: string;
-  type: string = 'ref-section';
+  type: string;
   reference: {
     type_id: number;
     section_name: string;
     selected_fields?: any;
   };
   fields?: Array<string>;
-}
 
-
-export class RefSectionControl implements ControlsCommon {
-
-  name = 'ref-section';
-  label = 'Reference';
-  icon = 'fas fa-layer-group';
-  dndType: string = 'sections';
-
-  content() {
-    const section = new RefSectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    section.reference = {
+  public constructor(){
+    this.type = 'ref-section';
+    this.name = randomName(this.type);
+    this.label = 'Reference';
+    this.reference = {
       type_id: undefined,
       section_name: undefined,
       selected_fields: undefined
     };
-    return section;
+  }
+
+}
+
+
+export class RefSectionControl extends ControlsCommon {
+
+  public name: string  = 'ref-section';
+  public label: string  = 'Reference';
+  public icon: string  = 'fas fa-layer-group';
+  public dndType: string = 'sections';
+
+  public content(): RefSectionContent {
+    return new RefSectionContent();
   }
 
 }

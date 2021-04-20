@@ -22,27 +22,26 @@ export class SectionContent implements StructureContent {
 
   label: string;
   name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
+  fields: Array<any> = [];
   type: string = 'section';
+
+  constructor() {
+    this.type = 'section';
+    this.name = randomName(this.type);
+    this.label = 'Section';
+  }
 
 }
 
-export class SectionControl implements ControlsCommon {
+export class SectionControl extends ControlsCommon {
 
   name = 'section';
   label = 'Section';
   icon = 'fas fa-object-group';
   dndType: string = 'sections';
 
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  public content(): SectionContent {
+    return new SectionContent();
   }
 
 }

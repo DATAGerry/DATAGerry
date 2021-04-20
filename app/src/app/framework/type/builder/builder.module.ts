@@ -24,7 +24,7 @@ import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
-import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
+import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
 import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.component';
@@ -33,9 +33,8 @@ import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-boots
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
 import { CategoryModule } from '../../category/category.module';
-import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-edit.component';
+import { SectionRefFieldEditComponent } from './configs/section/section-ref-field-edit.component';
 import { LayoutModule } from '../../../layout/layout.module';
-import { ConfigEditBaseComponent } from './configs/config.edit';
 import { ConfigEditComponent } from './configs/config-edit.component';
 
 @NgModule({
@@ -54,7 +53,6 @@ import { ConfigEditComponent } from './configs/config-edit.component';
     LayoutModule
   ],
   declarations: [
-    ConfigEditBaseComponent,
     ConfigEditComponent,
     BuilderComponent,
     TextFieldEditComponent,

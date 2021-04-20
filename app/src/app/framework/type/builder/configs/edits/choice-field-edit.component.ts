@@ -18,6 +18,8 @@
 
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
+import { ReplaySubject } from 'rxjs';
+import { FormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-choice-field-edit',
@@ -25,6 +27,14 @@ import { ConfigEditBaseComponent } from '../config.edit';
   styleUrls: ['./choice-field-edit.component.scss']
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
+  public nameControl: FormControl;
+
+  /**
+   * Component un-subscriber.
+   * @protected
+   */
+  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
 
   /**
    * Add able options for choice selection

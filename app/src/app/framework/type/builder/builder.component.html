@@ -1,6 +1,6 @@
 <div class="row">
   <div id="builder-controls" class="col-3">
-    <div id="controlWrapper">
+    <div id="controlWrapper" ui-block [blocked]="!valid">
       <div class="accordion" id="controlsPanel">
         <div class="card">
           <div class="card-header">
@@ -78,12 +78,12 @@
     </div>
   </div>
   <div id="form-container" class="col-9">
-    <div id="form-content" data-content="Drop section here"
+    <div id="form-content" data-content="Drop structure controls here"
          [ngClass]="{'empty': typeInstance.render_meta.sections.length == 0 }"
          [dndDropzone]="['sections']" (dndDrop)="onSectionDrop($event)">
       <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
            dndPlaceholderRef>
-        Drop section here
+        Drop control here
       </div>
       <section *ngFor="let section of typeInstance.render_meta.sections; let x = index" dndEffectAllowed="copyMove"
                dndType="sections" [dndDraggable]="section"
@@ -114,6 +114,8 @@
           </div>
           <div *ngIf="section.type === 'section'" class="card-body" [dndDropzone]="['inputs']"
                (dndDrop)="onFieldDrop($event, section)">
+            <p>Fields:</p>
+            <div *ngIf="section.fields.length == 0" class="empty-section" data-content="Drop controls here"></div>
             <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
                  dndPlaceholderRef>
               Drop field here
@@ -141,7 +143,7 @@
                   </div>
                   <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
                     <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections"
-                                      [data]="field"></cmdb-config-edit>
+                                      [data]="field" (nameChange)="onFieldNameChange(section, $event)"></cmdb-config-edit>
                   </div>
                 </div>
               </div>

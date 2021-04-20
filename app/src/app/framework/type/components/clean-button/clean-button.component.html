@@ -1,12 +1,12 @@
-<button *ngIf="loading; else statusButton" class="btn btn-secondary" type="button">
+<button *ngIf="loading; else statusButton" class="btn btn-secondary btn-sm" type="button">
   <span class="spinner-border spinner-border-sm"></span>
   Checking...
 </button>
 <ng-template #statusButton>
-  <button *ngIf="clean" [disabled]="clean" class="btn btn-success" type="button">
+  <button *ngIf="clean" [disabled]="clean" class="btn btn-success btn-sm" type="button">
     <i class="fas fa-check-circle"></i> Clean
   </button>
-  <button *ngIf="!clean" (click)="openModal()" class="btn btn-danger" type="button">
+  <button *ngIf="!clean" (click)="openModal()" class="btn btn-danger btn-sm" type="button">
     <i class="fas fa-exclamation-circle"></i> Unclean
   </button>
 </ng-template>

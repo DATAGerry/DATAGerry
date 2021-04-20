@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class ReferenceContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
   typeID: number | number[];
 
   public constructor() {
@@ -41,14 +37,14 @@ class ReferenceContent implements ControlsContent {
 
 }
 
-export class ReferenceControl implements ControlsCommon {
+export class ReferenceControl extends ControlsCommon {
 
-  name = 'ref';
-  label = 'Reference';
-  icon = 'fas fa-retweet';
-  dndType: string = 'inputs';
+  public name: string = 'ref';
+  public label: string  = 'Reference';
+  public icon: string  = 'fas fa-retweet';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): ReferenceContent {
     return new ReferenceContent();
   }
 
