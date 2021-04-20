@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -46,13 +46,6 @@ const routes: Routes = [
       breadcrumb: 'Logs'
     },
     loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
-  },
-  {
-    path: 'exportdjob',
-    data: {
-      breadcrumb: 'Exportd Job'
-    },
-    loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
   },
   {
     path: 'auth',
