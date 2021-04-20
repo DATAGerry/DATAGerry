@@ -80,8 +80,6 @@ class SearchResult(Generic[R]):
         Returns:
             list of fields where the regex matched
         """
-        import re
-
         matched_fields = []
         fields = result.fields
         if not possible_regex_list:
