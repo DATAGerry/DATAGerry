@@ -52,6 +52,9 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
         pipe_and = self.and_([regex, {'active': {"$eq": True}} if active_flag else {}])
         pipe_match = self.match_(pipe_and)
 
+        # load reference fields in runtime.
+        self.pipeline = SearchReferencesPipelineBuilder().build()
+
         # permission builds
         if user and permission:
             self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
@@ -83,12 +86,60 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
-# Load reference fields in runtime
+class SearchReferencesPipelineBuilder(PipelineBuilder):
+    def __init__(self, pipeline: Pipeline = None):
+        """
+        Init constructor load reference fields in runtime.
+        The search should interpret reference section like normal field contents.
+        This means that fields should already be loaded into the object during runtime.
+        Args:
+            pipeline: preset a for defined pipeline
+        """
+        super(SearchReferencesPipelineBuilder, self).__init__(pipeline=pipeline)
+
+    def build(self, *args, **kwargs) -> Pipeline:
+        # Load reference fields in runtime
+        self.add_pipe(self.lookup_('framework.objects', 'fields.value', 'public_id', 'data'))
+        self.add_pipe(
+            self.project_({
+                '_id': 1, 'public_id': 1, 'type_id': 1, 'active': 1, 'author_id': 1, 'creation_time': 1, 'version': 1,
+                'last_edit_time': 1, 'fields': 1, 'relatesTo': '$data.public_id',
+                'simple': {
+                    '$reduce': {
+                        'input': "$data.fields",
+                        'initialValue': [],
+                        'in': {'$setUnion': ["$$value", "$$this"]}
+                    }
+                }
+            })
+        )
+        self.add_pipe(
+            self.group_('$_id', {
+                'public_id': {'$first': '$public_id'},
+                'type_id': {'$first': '$type_id'},
+                'active': {'$first': '$active'},
+                'author_id': {'$first': '$author_id'},
+                'creation_time': {'$first': '$creation_time'},
+                'last_edit_time': {'$first': '$last_edit_time'},
+                'version': {'$first': 'version'},
+                'fields': {'$first': '$fields'},
+                'simple': {'$first': '$simple'},
+                'relatesTo': {'$first': '$relatesTo'}
+            })
+        )
+        self.add_pipe(
+            self.project_({
+                '_id': 1, 'public_id': 1, 'type_id': 1, 'active': 1, 'author_id': 1, 'creation_time': 1, 'version': 1,
+                'last_edit_time': 1, 'fields': {'$setUnion': ['$fields', '$simple']}, 'relatesTo': 1,
+            })
+        )
+        return self.pipeline
+
 
 class SearchPipelineBuilder(PipelineBuilder):
 
     def __init__(self, pipeline: Pipeline = None):
-        """Init constructor : Load reference fields in runtime
+        """Init constructor
         Args:
             pipeline: preset a for defined pipeline
         """
@@ -134,6 +185,9 @@ class SearchPipelineBuilder(PipelineBuilder):
         """Build a pipeline query out of frontend params"""
         # clear pipeline
         self.clear()
+
+        # load reference fields in runtime.
+        self.pipeline = SearchReferencesPipelineBuilder().build()
 
         # fetch only active objects
         if active_flag:
