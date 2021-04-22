@@ -43,7 +43,6 @@ export abstract class ConfigEditBaseComponent {
 
   @Input() public form: FormGroup;
   public abstract nameControl: FormControl;
-  @Output() protected nameChange: EventEmitter<{ prev: string | undefined; curr: string | undefined }>;
 
   @Input() public data: any;
   @Input() public sections: Array<any>;
@@ -56,13 +55,16 @@ export abstract class ConfigEditBaseComponent {
 
   protected constructor() {
     this.form = new FormGroup({});
-    this.nameChange = new EventEmitter<{ prev: string | undefined; curr: string | undefined }>();
   }
 
   protected disableControlOnEdit(control: FormControl): void {
     if (this.mode === CmdbMode.Edit) {
       control.disable({ onlySelf: false, emitEvent: false });
     }
+  }
+
+  public onInputChange(change: any, idx: string): void {
+    this.data[idx] = change;
   }
 
   protected validateNameLabelControl(nameControl: FormControl, labelControl: FormControl, subscriber: ReplaySubject<void>): void {
@@ -78,14 +80,9 @@ export abstract class ConfigEditBaseComponent {
 
   protected patchData(data: any, form: FormGroup): void {
     form.patchValue(data);
-  }
-
-  protected assignFormChanges(subscriber: ReplaySubject<void>): void {
-    this.form.valueChanges.pipe(takeUntil(subscriber)).subscribe(() => {
-      const formData = this.form.getRawValue();
-      this.nameChange.emit({prev: this.data?.name, curr: formData?.name});
-      Object.assign(this.data, formData);
-    });
+    if (this.mode === CmdbMode.Edit) {
+      this.form.markAllAsTouched();
+    }
   }
 
   public calculateName(value) {

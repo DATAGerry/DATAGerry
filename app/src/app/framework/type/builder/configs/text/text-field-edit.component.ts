@@ -20,6 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { FormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
+import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
 @Component({
   selector: 'cmdb-text-field-edit',
@@ -38,7 +39,7 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
   public nameControl: FormControl = new FormControl('', Validators.required);
   public labelControl: FormControl = new FormControl('', Validators.required);
   public descriptionControl: FormControl = new FormControl(undefined);
-  public regexControl: FormControl = new FormControl(undefined);
+  public regexControl: FormControl = new FormControl(undefined, ValidRegexValidator);
   public placeholderControl: FormControl = new FormControl(undefined);
   public valueControl: FormControl = new FormControl(undefined);
   public helperTextControl: FormControl = new FormControl(undefined);
@@ -59,13 +60,11 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
-    this.assignFormChanges(this.subscriber);
   }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
   }
-
 
 }

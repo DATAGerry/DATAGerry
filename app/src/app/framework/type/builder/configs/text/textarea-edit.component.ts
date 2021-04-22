@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,21 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
 import { FormControl, Validators } from '@angular/forms';
+import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
 @Component({
-  selector: 'cmdb-section-field-edit',
-  templateUrl: './section-field-edit.component.html'
+  selector: 'cmdb-textarea-edit',
+  templateUrl: './textarea-edit.component.html',
+  styleUrls: ['./textarea-edit.component.scss']
 })
-export class SectionFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
+export class TextareaEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
   /**
    * Component un-subscriber.
@@ -33,19 +35,31 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  public requiredControl: FormControl = new FormControl(false);
   public nameControl: FormControl = new FormControl('', Validators.required);
   public labelControl: FormControl = new FormControl('', Validators.required);
+  public descriptionControl: FormControl = new FormControl(undefined);
+  public rowsControl: FormControl = new FormControl(5);
+  public placeholderControl: FormControl = new FormControl(undefined);
+  public valueControl: FormControl = new FormControl(undefined);
+  public helperTextControl: FormControl = new FormControl(undefined);
 
   public constructor() {
     super();
   }
 
   public ngOnInit(): void {
+    this.form.addControl('required', this.requiredControl);
     this.form.addControl('name', this.nameControl);
     this.form.addControl('label', this.labelControl);
+    this.form.addControl('description', this.descriptionControl);
+    this.form.addControl('rows', this.rowsControl);
+    this.form.addControl('placeholder', this.placeholderControl);
+    this.form.addControl('value', this.valueControl);
+    this.form.addControl('helperText', this.helperTextControl);
 
     this.disableControlOnEdit(this.nameControl);
-    // this.patchData(this.data, this.form);
+    this.patchData(this.data, this.form);
   }
 
   public ngOnDestroy(): void {

@@ -142,8 +142,8 @@
                   </span>
                   </div>
                   <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                    <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections"
-                                      [data]="field" (nameChange)="onFieldNameChange(section, $event)"></cmdb-config-edit>
+                    <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections" [data]="field">
+                    </cmdb-config-edit>
                   </div>
                 </div>
               </div>

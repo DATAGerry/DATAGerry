@@ -200,13 +200,10 @@ export class BuilderComponent implements OnInit, OnDestroy {
     this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
   }
 
-  public onFieldNameChange(
-    section: CmdbTypeSection, name: { prev: string | undefined; curr: string | undefined }): void {
-    const fieldSectionIndex: number = section.fields.indexOf(name.prev);
-    // tslint:disable-next-line:no-bitwise
-    if (~fieldSectionIndex) {
-      section.fields[fieldSectionIndex] = name.curr;
-    }
+  public replaceAt(array, index, value) {
+    const ret = array.slice(0);
+    ret[index] = value;
+    return ret;
   }
 
   public matchedType(value: string) {

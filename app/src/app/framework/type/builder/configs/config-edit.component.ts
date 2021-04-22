@@ -31,7 +31,6 @@ import { CmdbMode } from '../../../modes.enum';
 import { FormGroup } from '@angular/forms';
 import { ConfigEditBaseComponent } from './config.edit';
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -53,8 +52,6 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
   @Input() public sections: Array<any> = [];
   @Input() public types: Array<CmdbType> = [];
 
-  @Output() public nameChange: EventEmitter<{ prev: string | undefined; curr: string | undefined }>;
-
   @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
 
   private component: any;
@@ -62,7 +59,6 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
 
   constructor(private resolver: ComponentFactoryResolver) {
     this.form = new FormGroup({});
-    this.nameChange = new EventEmitter<{ prev: string | undefined; curr: string | undefined }>();
   }
 
   public ngOnInit(): void {
@@ -72,12 +68,10 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
     const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
     this.componentRef = this.container.createComponent(factory);
     this.componentRef.instance.mode = this.mode;
-    this.componentRef.instance.form = this.form;
     this.componentRef.instance.data = this.data;
+    this.componentRef.instance.form = this.form;
     this.componentRef.instance.sections = this.sections;
     this.componentRef.instance.fields = this.fields;
-    this.componentRef.instance.nameChange.pipe(takeUntil(this.subscriber))
-      .subscribe((changes: { prev: string | undefined; curr: string | undefined }) => this.nameChange.emit(changes));
   }
 
   public ngOnDestroy(): void {

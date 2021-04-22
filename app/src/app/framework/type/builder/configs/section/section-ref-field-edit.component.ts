@@ -39,7 +39,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  nameControl: FormControl;
+  public nameControl: FormControl;
 
   /**
    * Sections from the selected type.

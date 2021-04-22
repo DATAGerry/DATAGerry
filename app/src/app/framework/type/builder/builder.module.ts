@@ -23,9 +23,9 @@ import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
+import { TextFieldEditComponent } from './configs/text/text-field-edit.component';
 import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
-import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
+import { TextareaEditComponent } from './configs/text/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.component';
 import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
@@ -42,12 +42,12 @@ import { ConfigEditComponent } from './configs/config-edit.component';
     CommonModule,
     DndModule,
     FormsModule,
+    ReactiveFormsModule,
     RenderModule,
     NgbModalModule,
     NgSelectModule,
     FontAwesomeModule,
     NgbDatepickerModule,
-    ReactiveFormsModule,
     CategoryModule,
     NgbTooltipModule,
     LayoutModule

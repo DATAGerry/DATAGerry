@@ -16,30 +16,16 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnInit } from '@angular/core';
-import { ConfigEditBaseComponent } from '../config.edit';
-import { ReplaySubject } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { AbstractControl, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-@Component({
-  selector: 'cmdb-textarea-edit',
-  templateUrl: './textarea-edit.component.html',
-  styleUrls: ['./textarea-edit.component.scss']
-})
-export class TextareaEditComponent extends ConfigEditBaseComponent {
-
-  /**
-   * Component un-subscriber.
-   * @protected
-   */
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
-  nameControl: FormControl;
-
-  public constructor() {
-    super();
+export const ValidRegexValidator: ValidatorFn = (control: AbstractControl | FormControl): ValidationErrors | null => {
+  let regexInValid;
+  try {
+    // tslint:disable-next-line:no-unused-expression
+    new RegExp(control.value);
+    regexInValid = false;
+  } catch (e) {
+    regexInValid = true;
   }
-
-
-
-}
+  return regexInValid ? { regexInValid: { value: control.value } } : null;
+};
