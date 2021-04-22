@@ -170,7 +170,9 @@ class ExportSource:
                 else:
                     operator = operator
 
-                condition.append({'fields': {"$elemMatch": {"name": con["name"], "value": operator}}})
+                condition.append({'fields': {"$elemMatch": {
+                    "name": con["name"],
+                    "value": {"$regex": operator, "$options": "si"}}}})
                 condition.append({'type_id': source["type_id"]})
                 condition.append({'active': {'$eq': True}})
                 query.append({"$and": condition})
