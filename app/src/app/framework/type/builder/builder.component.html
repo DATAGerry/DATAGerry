@@ -79,15 +79,15 @@
   </div>
   <div id="form-container" class="col-9">
     <div id="form-content" data-content="Drop structure controls here"
-         [ngClass]="{'empty': typeInstance.render_meta.sections.length == 0 }"
+         [ngClass]="{'empty': sections.length == 0 }"
          [dndDropzone]="['sections']" (dndDrop)="onSectionDrop($event)">
       <div style="border: 1px green solid; border-radius: 5px; padding: 15px;"
            dndPlaceholderRef>
         Drop control here
       </div>
-      <section *ngFor="let section of typeInstance.render_meta.sections; let x = index" dndEffectAllowed="copyMove"
+      <section *ngFor="let section of sections; let x = index" dndEffectAllowed="copyMove"
                dndType="sections" [dndDraggable]="section"
-               (dndMoved)="onDragged(section, typeInstance.render_meta.sections, 'move')">
+               (dndMoved)="onDragged(section, sections, 'move')">
         <div class="card">
           <div class="card-header">
             <fa-icon [icon]="['far', 'object-group']"></fa-icon>
@@ -119,8 +119,8 @@
                        dndPlaceholderRef>
                     Drop field here
                   </div>
-                  <ng-container *ngFor="let section_field of section.fields; let y = index">
-                    <div *ngIf="getFieldBySectionID(section_field) as field" dndEffectAllowed="move" dndType="inputs"
+                  <ng-container *ngFor="let field of section.fields; let y = index">
+                    <div dndEffectAllowed="move" dndType="inputs"
                          [dndDraggable]="field"
                          (dndMoved)="onFieldDragged(field, section)">
                       <div class="fields card">

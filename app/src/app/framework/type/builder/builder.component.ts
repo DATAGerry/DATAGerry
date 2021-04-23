@@ -61,6 +61,18 @@ export class BuilderComponent implements OnInit, OnDestroy {
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     this.typeInstance = instance;
+    if (instance !== undefined) {
+      const preSectionList: any[] = [];
+      for (const section of instance.render_meta.sections) {
+        preSectionList.push(section);
+        const fieldBufferList = [];
+        for (const field of section.fields) {
+          fieldBufferList.push(instance.fields.find(f => f.name === field));
+        }
+        preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
+      }
+      this.sections = preSectionList;
+    }
   }
 
   public structureControls = [
@@ -114,21 +126,20 @@ export class BuilderComponent implements OnInit, OnDestroy {
   }
 
   public onSectionDrop(event: DndDropEvent): void {
-    const sections = this.typeInstance.render_meta.sections;
-    if (sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+    if (this.sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
       let index = event.index;
 
       if (typeof index === 'undefined') {
 
-        index = sections.length;
+        index = this.sections.length;
       }
-      for (const el of sections) {
+      for (const el of this.sections) {
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
-      sections.splice(index, 0, event.data);
-      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+      this.sections.splice(index, 0, event.data);
+      this.typeInstance.render_meta.sections = [...this.sections];
       if (event.data.type === 'ref-section') {
         this.addRefSectionSelectionField(event.data as CmdbTypeSection);
       }
@@ -136,28 +147,26 @@ export class BuilderComponent implements OnInit, OnDestroy {
   }
 
   public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+    const fieldData = event.data;
     if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+
       let index = event.index;
       if (typeof index === 'undefined') {
         index = section.fields.length;
       }
-      section.fields.splice(index, 0, event.data.name);
-      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
-    }
-    if (section && event.dropEffect === 'copy') {
-      this.typeInstance.fields.push(event.data);
+      section.fields.splice(index, 0, fieldData);
+      this.typeInstance.render_meta.sections = [...this.sections];
+      this.typeInstance.fields.push(fieldData);
       this.typeInstance.fields = [...this.typeInstance.fields];
     }
   }
 
   public onFieldDragged(item: any, section: CmdbTypeSection) {
-    const index = section.fields.indexOf(item);
-    section.fields.splice(index, 1);
-  }
-
-
-  public getFieldBySectionID(name: string): any {
-    return this.typeInstance.fields.find(f => f.name === name);
+    const sectionIndex = section.fields.indexOf(item);
+    section.fields.splice(sectionIndex, 1);
+    const fieldIndex = this.typeInstance.fields.indexOf(item);
+    this.typeInstance.fields.splice(fieldIndex, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {

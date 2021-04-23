@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { CmdbType } from '../../models/cmdb-type';
+import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
 import { CmdbMode } from '../../modes.enum';
@@ -161,9 +161,22 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   }
 
   public saveType() {
+    const saveTypeInstance: CmdbType = Object.assign({}, this.typeInstance) as CmdbType;
+
+    const sections: Array<CmdbTypeSection> = [];
+    for (const section of saveTypeInstance.render_meta.sections) {
+      const fields = [];
+      for (const field of section.fields) {
+        fields.push(field.name);
+      }
+      section.fields = fields;
+      sections.push(section);
+    }
+    saveTypeInstance.render_meta.sections = sections;
+
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
-      this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
+      this.typeService.postType(saveTypeInstance).subscribe((typeIDResp: CmdbType) => {
           newTypeID = +typeIDResp.public_id;
           this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
           this.toast.success(`Type was successfully created: TypeID: ${ newTypeID }`);
@@ -172,7 +185,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
           this.toast.error(`${ error }`);
         });
     } else if (this.mode === CmdbMode.Edit) {
-      this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
+      this.typeService.putType(saveTypeInstance).subscribe((updateResp: CmdbType) => {
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
