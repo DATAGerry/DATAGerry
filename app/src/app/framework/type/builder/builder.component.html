@@ -107,7 +107,7 @@
           </div>
           <div class="collapse show" id="section-{{x}}{{section.name}}">
             <div class="card-body">
-              <cmdb-config-edit [types]="types" [mode]="mode" [sections]="sections" [fields]="typeInstance.fields"
+              <cmdb-config-edit [types]="types" [mode]="isNewSection(section) ? MODES.Create : mode" [sections]="sections" [fields]="typeInstance.fields"
                                 [data]="section">
               </cmdb-config-edit>
               <ng-container *ngIf="section.type === 'section'">
@@ -141,7 +141,7 @@
                   </span>
                         </div>
                         <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                          <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections" [data]="field">
+                          <cmdb-config-edit [mode]="isNewField(field) ? MODES.Create : mode" [types]="types" [sections]="sections" [data]="field">
                           </cmdb-config-edit>
                         </div>
                       </div>

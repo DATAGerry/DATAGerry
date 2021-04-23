@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
@@ -43,9 +43,11 @@ declare var $: any;
   styleUrls: ['./builder.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BuilderComponent implements OnInit, OnDestroy {
+export class BuilderComponent implements OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  public MODES: typeof CmdbMode = CmdbMode;
 
   @Input() public mode = CmdbMode.View;
   @Input() public groups: Array<Group> = [];
@@ -54,6 +56,9 @@ export class BuilderComponent implements OnInit, OnDestroy {
 
   public sections: Array<any> = [];
   public typeInstance: CmdbType;
+
+  public newSections: Array<CmdbTypeSection> = [];
+  public newFields: Array<CmdbTypeSection> = [];
 
   @Input() public valid: boolean = true;
   @Output() public validChange: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -99,9 +104,14 @@ export class BuilderComponent implements OnInit, OnDestroy {
     this.typeInstance = new CmdbType();
   }
 
-  public ngOnInit(): void {
-
+  public isNewSection(section: CmdbTypeSection): boolean {
+    return this.newSections.indexOf(section) > -1;
   }
+
+  public isNewField(field: any): boolean {
+    return this.newFields.indexOf(field) > -1;
+  }
+
 
   public ngOnDestroy(): void {
     this.subscriber.next();
@@ -129,14 +139,15 @@ export class BuilderComponent implements OnInit, OnDestroy {
     if (this.sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
       let index = event.index;
-
       if (typeof index === 'undefined') {
-
         index = this.sections.length;
       }
       for (const el of this.sections) {
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
+      }
+      if (event.dropEffect === 'copy') {
+        this.newSections.push(event.data);
       }
       this.sections.splice(index, 0, event.data);
       this.typeInstance.render_meta.sections = [...this.sections];
@@ -153,6 +164,10 @@ export class BuilderComponent implements OnInit, OnDestroy {
       let index = event.index;
       if (typeof index === 'undefined') {
         index = section.fields.length;
+      }
+
+      if (event.dropEffect === 'copy') {
+        this.newFields.push(fieldData);
       }
       section.fields.splice(index, 0, fieldData);
       this.typeInstance.render_meta.sections = [...this.sections];
@@ -192,6 +207,7 @@ export class BuilderComponent implements OnInit, OnDestroy {
       } else if (item.type === 'ref-section') {
         this.removeRefSectionSelectionField(item);
       }
+      this.sections.splice(index, 1);
       this.typeInstance.render_meta.sections.splice(index, 1);
       this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
