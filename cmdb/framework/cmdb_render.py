@@ -220,6 +220,11 @@ class CmdbRender:
         return field
 
     def __merge_fields_value(self) -> List[dict]:
+        """
+        Checks all fields for references.
+        Fields with references are extended by the property 'references'.
+        All reference values are stored in the new property.
+        """
         field_map = []
         for idx, section in enumerate(self.type_instance.render_meta.sections):
             if type(section) is TypeFieldSection and isinstance(section, TypeFieldSection):
@@ -227,13 +232,36 @@ class CmdbRender:
                     field = {}
                     try:
                         field = self.type_instance.get_field(section_field)
-
                         field = self.__merge_field_content_section(field, self.object_instance)
-                    except FileNotFoundError:
+
+                        if field['type'] == 'ref':
+                            ref_field_name: str = field['name']
+                            field = self.type_instance.get_field(ref_field_name)
+                            reference_id: int = self.object_instance.get_value(ref_field_name)
+                            field['value'] = reference_id
+                            reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                            ref_type: TypeModel = self.type_manager.get(reference_object.get_type_id())
+                            field['references'] = {
+                                'type_id': ref_type.public_id,
+                                'type_name': ref_type.name,
+                                'type_label': ref_type.label,
+                                'fields': []
+                            }
+                            for ref_section_field_name in ref_type.get_fields():
+                                ref_section_field = ref_type.get_field(ref_section_field_name['name'])
+                                try:
+                                    ref_field = self.__merge_field_content_section(ref_section_field, reference_object)
+                                except (FileNotFoundError, ValueError, IndexError):
+                                    continue
+                                field['references']['fields'].append(ref_field)
+
+                    except (ValueError, IndexError, FileNotFoundError):
                         field['value'] = None
-                    except (ValueError, IndexError) as e:
-                        field['value'] = None
+                    except ObjectManagerGetError:
+                        continue
+
                     field_map.append(field)
+
             elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
                 ref_field_name: str = f'{section.name}-field'
                 ref_field = self.type_instance.get_field(ref_field_name)
@@ -260,7 +288,7 @@ class CmdbRender:
                     ref_section_field = ref_type.get_field(ref_section_field_name)
                     try:
                         field = self.__merge_field_content_section(ref_section_field, reference_object)
-                    except (FileNotFoundError, ValueError, IndexError):
+                    except (FileNotFoundError, ValueError, IndexError, ObjectManagerGetError):
                         continue
                     ref_field['references']['fields'].append(field)
                 field_map.append(ref_field)
