@@ -28,7 +28,7 @@ import { APIGetMultiResponse } from '../../../../../services/models/api-response
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../../../layout/toast/toast.service';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-ref-field-edit',
@@ -47,7 +47,16 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  nameControl: FormControl;
+  /**
+   * Name form control.
+   */
+  public nameControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Label form control.
+   */
+  public labelControl: FormControl = new FormControl('', Validators.required);
+
   /**
    * Type list for reference selection
    */
@@ -56,13 +65,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public filteredTypeList: CmdbType[] = [];
   public totalTypes: number = 0;
 
-  /**
-   * Total number of Types pages.
-   */
-  public totalTypesPages: number = 0;
 
   /**
-   * loading indicator?
+   * Type loading indicator.
    */
   public typeLoading: boolean = false;
 

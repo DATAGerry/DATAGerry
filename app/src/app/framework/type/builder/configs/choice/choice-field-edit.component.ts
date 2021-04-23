@@ -19,21 +19,55 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
+import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
 @Component({
   selector: 'cmdb-choice-field-edit',
-  templateUrl: './choice-field-edit.component.html',
-  styleUrls: ['./choice-field-edit.component.scss']
+  templateUrl: './choice-field-edit.component.html'
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
-  public nameControl: FormControl;
 
   /**
    * Component un-subscriber.
    * @protected
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Required form control.
+   */
+  public requiredControl: FormControl = new FormControl(false);
+
+  /**
+   * Name form control.
+   */
+  public nameControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Label form control.
+   */
+  public labelControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Description form control.
+   */
+  public descriptionControl: FormControl = new FormControl('');
+
+  /**
+   * Helper form control.
+   */
+  public helperTextControl: FormControl = new FormControl('');
+
+  /**
+   * Options form control.
+   */
+  public optionsControl: FormControl = new FormControl([]);
+
+  /**
+   * Helper form control.
+   */
+  public valueControl: FormControl = new FormControl();
 
 
   /**
@@ -46,6 +80,7 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
   }
 
   public ngOnInit(): void {
+    this.options = [];
     if (this.data.options === undefined || !Array.isArray(this.data.options)) {
       this.options.push({
         name: `option-${ (this.options.length + 1) }`,
@@ -53,7 +88,16 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
       });
       this.data.options = this.options;
     }
-    this.options = this.data.options;
+
+    this.form.addControl('required', this.requiredControl);
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+    this.form.addControl('description', this.descriptionControl);
+    this.form.addControl('helperText', this.helperTextControl);
+    this.form.addControl('value', this.valueControl);
+
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
   }
 
   /**

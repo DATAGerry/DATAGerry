@@ -43,6 +43,7 @@ export abstract class ConfigEditBaseComponent {
 
   @Input() public form: FormGroup;
   public abstract nameControl: FormControl;
+  public abstract labelControl: FormControl;
 
   @Input() public data: any;
   @Input() public sections: Array<any>;

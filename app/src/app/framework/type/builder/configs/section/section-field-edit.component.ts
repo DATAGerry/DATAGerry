@@ -33,7 +33,14 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  /**
+   * Name form control.
+   */
   public nameControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Label form control.
+   */
   public labelControl: FormControl = new FormControl('', Validators.required);
 
   public constructor() {
@@ -45,7 +52,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     this.form.addControl('label', this.labelControl);
 
     this.disableControlOnEdit(this.nameControl);
-    // this.patchData(this.data, this.form);
+    this.patchData(this.data, this.form);
   }
 
   public ngOnDestroy(): void {

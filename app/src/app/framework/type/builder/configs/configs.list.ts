@@ -20,10 +20,10 @@
 import { TextFieldEditComponent } from './text/text-field-edit.component';
 import { SectionFieldEditComponent } from './section/section-field-edit.component';
 import { TextareaEditComponent } from './text/textarea-edit.component';
-import { RefFieldEditComponent } from './edits/ref-field-edit.component';
-import { ChoiceFieldEditComponent } from './edits/choice-field-edit.component';
-import { CheckFieldEditComponent } from './edits/check-field-edit.component';
-import { DateFieldEditComponent } from './edits/date-field-edit.component';
+import { RefFieldEditComponent } from './special/ref-field-edit.component';
+import { ChoiceFieldEditComponent } from './choice/choice-field-edit.component';
+import { CheckFieldEditComponent } from './choice/check-field-edit.component';
+import { DateFieldEditComponent } from './date-time/date-field-edit.component';
 import { SectionRefFieldEditComponent } from './section/section-ref-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {

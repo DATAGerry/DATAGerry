@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -39,7 +39,15 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public nameControl: FormControl;
+  /**
+   * Name form control.
+   */
+  public nameControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Label form control.
+   */
+  public labelControl: FormControl = new FormControl('', Validators.required);
 
   /**
    * Sections from the selected type.
@@ -99,6 +107,12 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
         this.loadPresetType(this.data.reference.type_id);
       }
     }
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
+
     this.triggerAPICall();
   }
 
@@ -166,8 +180,17 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    * @param section
    */
   public onSectionChange(section: CmdbTypeSection): void {
+    if (!section) {
+      this.data.reference.section_name = undefined;
+    } else {
+      this.data.reference.section_name = section.name;
+    }
     this.selectedSection = section;
     this.data.reference.selected_fields = undefined;
+  }
+
+  public onSectionFieldsChange(fields: Array<string>): void {
+    this.data.reference.selected_fields = fields;
   }
 
   /**

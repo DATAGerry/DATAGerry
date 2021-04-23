@@ -16,24 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
 import { ReplaySubject } from 'rxjs';
-import { FormControl } from '@angular/forms';
-
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-date-field-edit',
   templateUrl: './date-field-edit.component.html',
-  styleUrls: ['./date-field-edit.component.scss'],
   providers: [
     {provide: NgbDateAdapter, useClass: NgbStringAdapter},
     {provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter}
   ]
 })
-export class DateFieldEditComponent extends ConfigEditBaseComponent {
+export class DateFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
   /**
    * Component un-subscriber.
@@ -42,16 +40,42 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent {
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
 
-  nameControl: FormControl;
+  public requiredControl: FormControl = new FormControl(false);
+  public nameControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: FormControl = new FormControl('', Validators.required);
+  public descriptionControl: FormControl = new FormControl(undefined);
+  public valueControl: FormControl = new FormControl(undefined);
+  public helperTextControl: FormControl = new FormControl(undefined);
+
   constructor() {
     super();
   }
+
+  public ngOnInit(): void {
+    this.form.addControl('required', this.requiredControl);
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+    this.form.addControl('description', this.descriptionControl);
+    this.form.addControl('value', this.valueControl);
+    this.form.addControl('helperText', this.helperTextControl);
+
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
 
   /**
    * Resets the date to null.
    */
   public resetDate() {
+    this.valueControl.setValue(undefined);
     this.data.value = null;
   }
+
 
 }

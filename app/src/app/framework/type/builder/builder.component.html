@@ -110,25 +110,24 @@
               <cmdb-config-edit [types]="types" [mode]="mode" [sections]="sections" [fields]="typeInstance.fields"
                                 [data]="section">
               </cmdb-config-edit>
-            </div>
-          </div>
-          <div *ngIf="section.type === 'section'" class="card-body" [dndDropzone]="['inputs']"
-               (dndDrop)="onFieldDrop($event, section)">
-            <p>Fields:</p>
-            <div *ngIf="section.fields.length == 0" class="empty-section" data-content="Drop controls here"></div>
-            <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
-                 dndPlaceholderRef>
-              Drop field here
-            </div>
-            <ng-container *ngFor="let section_field of section.fields; let y = index">
-              <div *ngIf="getFieldBySectionID(section_field) as field" dndEffectAllowed="move" dndType="inputs"
-                   [dndDraggable]="field"
-                   (dndMoved)="onFieldDragged(field, section)">
-                <div class="fields card">
-                  <div class="card-header">
-                    <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon>
-                    {{field.label}}
-                    <span class="float-right">
+              <ng-container *ngIf="section.type === 'section'">
+                <p>Fields:</p>
+                <div  [dndDropzone]="['inputs']"
+                      (dndDrop)="onFieldDrop($event, section)">
+                  <div *ngIf="section.fields.length == 0" class="empty-section" data-content="Drop controls here"></div>
+                  <div style="border: 1px red solid; border-radius: 5px; padding: 15px;"
+                       dndPlaceholderRef>
+                    Drop field here
+                  </div>
+                  <ng-container *ngFor="let section_field of section.fields; let y = index">
+                    <div *ngIf="getFieldBySectionID(section_field) as field" dndEffectAllowed="move" dndType="inputs"
+                         [dndDraggable]="field"
+                         (dndMoved)="onFieldDragged(field, section)">
+                      <div class="fields card">
+                        <div class="card-header">
+                          <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon>
+                          {{field.label}}
+                          <span class="float-right">
                     <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
                             [attr.data-target]="'#field-'+ x + y + field.name">
                       <fa-icon [icon]="['far', 'edit']"></fa-icon>
@@ -140,14 +139,17 @@
                       <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                     </button>
                   </span>
-                  </div>
-                  <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
-                    <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections" [data]="field">
-                    </cmdb-config-edit>
-                  </div>
+                        </div>
+                        <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
+                          <cmdb-config-edit [mode]="mode" [types]="types" [sections]="sections" [data]="field">
+                          </cmdb-config-edit>
+                        </div>
+                      </div>
+                    </div>
+                  </ng-container>
                 </div>
-              </div>
-            </ng-container>
+              </ng-container>
+            </div>
           </div>
         </div>
       </section>

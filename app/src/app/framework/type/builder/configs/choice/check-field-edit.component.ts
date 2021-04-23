@@ -19,12 +19,11 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
-import { FormControl } from '@angular/forms';
+import { FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-check-field-edit',
-  templateUrl: './check-field-edit.component.html',
-  styleUrls: ['./check-field-edit.component.scss']
+  templateUrl: './check-field-edit.component.html'
 })
 export class CheckFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
@@ -35,23 +34,48 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
 
-  nameControl: FormControl;
+  /**
+   * Name form control.
+   */
+  public nameControl: FormControl = new FormControl('', Validators.required);
 
   /**
-   * Select able checkbox options.
+   * Label form control.
    */
-  public options = [];
+  public labelControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Description form control.
+   */
+  public descriptionControl: FormControl = new FormControl('');
+
+  /**
+   * Value form control.
+   */
+  public valueControl: FormControl = new FormControl(false);
+
+  /**
+   * Helper form control.
+   */
+  public helperTextControl: FormControl = new FormControl('');
 
   constructor() {
     super();
-    this.options.push({
-      name: 'option-1',
-      label: 'Option 1'
-    });
   }
 
   public ngOnInit(): void {
-    this.data.options = this.options;
+    this.data.options = [{
+      name: 'option-1',
+      label: 'Option 1'
+    }];
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+    this.form.addControl('description', this.descriptionControl);
+    this.form.addControl('value', this.valueControl);
+    this.form.addControl('helperText', this.helperTextControl);
+
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
   }
 
 }
