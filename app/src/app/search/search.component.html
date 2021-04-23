@@ -1,12 +1,10 @@
 <cmdb-search-result-bar [queryParameters]="queryParameters"
                         [searchResultList]="searchResultList"
-                        [referenceResultList]="referenceResultList"
                         [filterResultList]="filterResultList"
-                        [resolve]="resolve"
                         (refreshSearch)="reSearch($event)"></cmdb-search-result-bar>
 <hr/>
 <div id="search-results" class="row">
-  <div [ngClass]="resolve.value ? 'col-md-6' : 'col-md-12'" id="searchResultTab">
+  <div [ngClass]="'col-md-12'" id="searchResultTab">
     <div class="row">
       <div class="col-md-12" *ngIf="publicIdResult">
         <div *ngIf="publicIdResult" class="mb-2">
@@ -29,20 +27,6 @@
       </div>
     </div>
   </div>
-  <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-6' : 'd-none'"
-       class="bg-light border-left border-info"
-       id="referenceTab">
-    <div class="col-md-12" *ngIf="referenceResultList">
-      <div *ngIf="referenceResultList.total_results == 0" class="alert alert-warning" role="alert">
-        Unfortunately we didn't found any reference objects for your request.
-      </div>
-      <ng-container *ngIf="referenceResultList.total_results > 0">
-        <cmdb-search-result *ngFor="let result of referenceResultList.results" [searchResult]="result">
-          <hr/>
-        </cmdb-search-result>
-      </ng-container>
-    </div>
-  </div>
   <div class="col-md-12">
     <div class="row">
       <div class="col-2">
@@ -53,14 +37,9 @@
           </select>
         </form>
       </div>
-      <div [ngClass]="resolve.value ? 'col-md-4' : 'col-md-10'">
+      <div class="col-md-10">
         <table-pagination [currentPage]="currentPage" [pageSize]="limit" [totalItems]="searchResultList?.total_results"
                           (pageChange)="onChangePage($event)"></table-pagination>
-      </div>
-      <div [ngClass]="resolve.value && referenceResultList  ? 'col-md-6' : 'd-none'"
-           class="bg-light border-left border-info">
-        <table-pagination [pageSize]="limit" [totalItems]="referenceResultList?.total_results"
-                          (pageChange)="onChangePageRef($event)"></table-pagination>
       </div>
     </div>
   </div>

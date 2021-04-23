@@ -40,9 +40,6 @@ class ExportdJobManagement(CmdbManagerBase):
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
 
-    def search(self):
-        pass
-
     def get_job(self, public_id: int) -> ExportdJob:
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)

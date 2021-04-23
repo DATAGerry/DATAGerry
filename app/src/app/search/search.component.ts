@@ -20,7 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
 import { takeUntil } from 'rxjs/operators';
@@ -50,7 +50,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Will be something like: skip = limit * (page-1).
    */
   private skip: number = 0;
-  private skipRef: number = 0;
 
   /**
    * Used page size.
@@ -62,15 +61,11 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Current page number.
    */
   public currentPage: number = 1;
-  public currentPageRef: number = 1;
 
   /**
    * Max number of size for pagination truncate.
    */
   public maxNumberOfSites: number[];
-  public maxNumberOfSitesRef: number[];
-
-  private initSearchRef: boolean = true;
   private initSearch: boolean = true;
   private initFilter: boolean = true;
 
@@ -87,19 +82,9 @@ export class SearchComponent implements OnInit, OnDestroy {
   public filterResultList: any[];
 
   /**
-   * List of reference results
-   */
-  public referenceResultList: SearchResultList;
-
-  /**
    * Query parameters.
    */
   public queryParameters: any = [];
-
-  /**
-   * Resolve flag.
-   */
-  public resolve: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
 
   /**
    * Component un-subscriber.
@@ -140,9 +125,6 @@ export class SearchComponent implements OnInit, OnDestroy {
 
     this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
       this.queryParameters = params.get('query');
-      if (params.has('resolve')) {
-        this.resolve.next(JSON.parse(params.get('resolve')));
-      }
       if (params.has('limit')) {
         this.limit = (+JSON.parse(params.get('limit')));
         this.resultSizeForm.get('size').setValue(this.limit);
@@ -150,14 +132,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       if (params.has('page')) {
         this.currentPage = (+JSON.parse(params.get('page')));
       }
-      this.initSearchRef = true;
       this.initSearch = true;
       this.initFilter = true;
       this.onSearch();
-    });
-
-    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe((change) => {
-      this.referencesSearch(change);
     });
 
     this.resultLength.valueChanges.pipe(takeUntil(this.subscriber))
@@ -169,7 +146,7 @@ export class SearchComponent implements OnInit, OnDestroy {
             relativeTo: this.route,
             queryParams: { limit: this.limit },
             queryParamsHandling: 'merge'
-          });
+          }).then();
         this.onSearch();
       });
   }
@@ -179,78 +156,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public get resultLength(): FormControl {
     return this.resultSizeForm.get('size') as FormControl;
-  }
-
-  /**
-   * Trigger the resolve search api call
-   */
-
-  public referencesSearch(change: boolean = false) {
-    if (change && this.searchResultList) {
-      this.spinner.show('app', 'Searching...');
-      let params = new HttpParams();
-      params = params.set('limit', this.limit.toString());
-      params = params.set('skip', this.skipRef.toString());
-
-      const typIDs: number[] = [];
-      const objIDs: number [] = [];
-      for (const obj of this.searchResultList.results) {
-        typIDs.push(obj.result.type_information.type_id);
-        objIDs.push(obj.result.object_information.object_id);
-      }
-
-      if (this.publicIdResult) {
-        typIDs.push(this.publicIdResult.result.type_information.type_id);
-        objIDs.push(this.publicIdResult.result.object_information.object_id);
-      }
-
-      const query = [
-        {
-          $lookup: {
-            from: 'framework.types',
-            localField: 'type_id',
-            foreignField: 'public_id',
-            as: 'type'
-          }
-        },
-        {
-          $unwind: {
-            path: '$type'
-          }
-        },
-        {
-          $match: {
-            $and: [
-              { 'type.fields.type': 'ref' },
-              {
-                $or: [
-                  { 'type.fields.ref_types': { $in: typIDs } }]
-              }
-            ]
-          }
-        },
-        {
-          $match: {
-            'fields.value': { $in: objIDs }
-          }
-        }
-      ];
-      params = params.set('resolve', this.resolve.value.toString());
-      params = params.set('query', JSON.stringify(query));
-
-      this.searchService.getSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber))
-        .subscribe((results: SearchResultList) => {
-            this.referenceResultList = results;
-            if (this.initSearchRef && this.referenceResultList) {
-              this.maxNumberOfSitesRef = Array.from({ length: (this.referenceResultList.total_results) }, (v, k) => k + 1);
-              this.initSearchRef = false;
-            }
-            if (!this.referenceResultList || this.referenceResultList.total_results === 0) {
-              this.resolve.next(false);
-            }
-          }, (error) => console.log(error),
-          () => this.spinner.hide('app'));
-    }
   }
 
   /**
@@ -271,10 +176,6 @@ export class SearchComponent implements OnInit, OnDestroy {
           this.initSearch = false;
           this.initFilter = false;
         }
-      }, (error => console.log(error)),
-      () => {
-        this.initSearchRef = true;
-        this.resolve.next(true);
       });
     let localParameters = JSON.parse(this.queryParameters);
     if (localParameters.length === 1) {
@@ -288,16 +189,6 @@ export class SearchComponent implements OnInit, OnDestroy {
     } else {
       this.spinner.hide('app');
     }
-  }
-
-  /**
-   * Pagination page was changed.
-   * @param event: Data from the change event.
-   */
-  public onChangePageRef(event): void {
-    this.currentPageRef = event;
-    this.skipRef = ((this.currentPageRef === 0 ? 1 : this.currentPageRef) - 1) * this.limit;
-    this.referencesSearch(true);
   }
 
   /**
@@ -318,12 +209,11 @@ export class SearchComponent implements OnInit, OnDestroy {
         relativeTo: this.route,
         queryParams: { page },
         queryParamsHandling: 'merge'
-      });
+      }).then();
   }
 
   public reSearch(value: any) {
     this.queryParameters = JSON.stringify(value.query);
-    this.initSearchRef = true;
     this.initSearch = true;
     this.initFilter = value.rebuild;
     this.onSearch();

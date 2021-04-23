@@ -16,15 +16,21 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { Component, Input, OnInit } from '@angular/core';
+import { ExportdJobBasicStepComponent } from '../exportd-job-basic-step/exportd-job-basic-step.component';
+import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
 
 @Component({
-  selector: 'cmdb-search-bar-tag-settings-form',
-  templateUrl: './search-bar-tag-settings-form.component.html',
-  styleUrls: ['./search-bar-tag-settings-form.component.scss']
+  selector: 'cmdb-task-complete-step',
+  templateUrl: './exportd-job-complete-step.component.html',
+  styleUrls: ['./exportd-job-complete-step.component.scss']
 })
-export class SearchBarTagSettingsFormComponent {
+export class ExportdJobCompleteStepComponent extends ExportdJobBaseStepComponent {
 
-  @Input() settingsControl: FormGroup;
+  @Input() public basicStep: ExportdJobBasicStepComponent = null;
+
+  constructor() {
+    super();
+  }
+
 }

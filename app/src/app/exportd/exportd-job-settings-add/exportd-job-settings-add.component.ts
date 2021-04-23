@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2019 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,25 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <https://www.gnu.org/licenses/>.
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+
+import { Component, OnInit } from '@angular/core';
+import { CmdbMode } from '../../framework/modes.enum';
 
 @Component({
-  selector: 'cmdb-search-bar-tag-settings-form',
-  templateUrl: './search-bar-tag-settings-form.component.html',
-  styleUrls: ['./search-bar-tag-settings-form.component.scss']
+  selector: 'cmdb-task-settings-add',
+  templateUrl: './exportd-job-settings-add.component.html',
+  styleUrls: ['./exportd-job-settings-add.component.scss']
 })
-export class SearchBarTagSettingsFormComponent {
+export class ExportdJobSettingsAddComponent implements OnInit {
 
-  @Input() settingsControl: FormGroup;
+  public mode: CmdbMode = CmdbMode.Create;
+
+  constructor() { }
+
+  ngOnInit() {
+  }
+
 }

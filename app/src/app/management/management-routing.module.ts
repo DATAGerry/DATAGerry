@@ -20,7 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { ManagementComponent } from './management.component';
-import {UserSettingsResolver} from "./user-settings/resolvers/user-settings-resolver.service";
+import { UserSettingsResolver } from './user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {

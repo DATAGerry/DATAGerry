@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import logging
+from builtins import print
 from typing import TypeVar, Generic, List
 
 from bson import Regex
@@ -82,18 +84,37 @@ class SearchResult(Generic[R]):
         fields = result.fields
         if not possible_regex_list:
             return None
-        for regex_ in possible_regex_list:
-            try:
-                runtime_regex = Regex(regex_, 'imsx').try_compile()
-            except Exception:
-                runtime_regex = regex_
-            for field in fields:
+
+        def inner_match_fields(_fields, _matched_fields, _reference=None):
+            """
+            Get list of matched fields inside the reference fields
+            Args:
+                _fields: list of referenced fields
+                _matched_fields: list of text regex from the pipeline builder
+                _reference: reference object to which the reference field refers
+            Returns:
+                list of fields where the regex matched
+            """
+            for regex_ in possible_regex_list:
                 try:
-                    res = runtime_regex.findall(str(field.get('value')))
-                    if len(res) > 0:
-                        matched_fields.append(field)
+                    runtime_regex = Regex(regex_, 'ims').try_compile()
                 except Exception:
-                    continue
+                    runtime_regex = regex_
+                for field in _fields:
+                    try:
+                        res = runtime_regex.findall(str(field.get('value')))
+                        if len(res) > 0:
+                            inner_value = _reference if _reference else field
+                            # removing duplicated from list
+                            if inner_value not in _matched_fields:
+                                _matched_fields.append(inner_value)
+                        if field['type'] == 'ref' or field['type'] == 'ref-section-field':
+                            inner_match_fields(field['references']['fields'], _matched_fields, field)
+                    except Exception:
+                        continue
+
+        inner_match_fields(fields, matched_fields)
+
         if len(matched_fields) > 0:
             return matched_fields
         return None
