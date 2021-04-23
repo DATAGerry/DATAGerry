@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,9 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 """
 Module of basic importers
 """
+
+import datetime
 import logging
 from typing import Optional
 
@@ -29,7 +32,6 @@ from cmdb.importer.importer_response import BaseImporterResponse, ImporterObject
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import UserModel
-from cmdb.security.acl.permission import AccessControlPermission
 
 LOGGER = logging.getLogger(__name__)
 
@@ -155,7 +157,9 @@ class ObjectImporter(BaseImporter):
 
             # Insert data
             try:
-                self.object_manager.get_object(current_public_id)
+                existing = self.object_manager.get_object(current_public_id)
+                current_import_object['creation_time'] = existing.creation_time
+                current_import_object['last_edit_time'] = datetime.datetime.utcnow()
             except ObjectManagerGetError:
                 try:
                     self.object_manager.insert_object(current_import_object)
