@@ -697,6 +697,7 @@ class ExternalSystemExecuteScript(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -760,6 +761,7 @@ class ExternalSystemGenericRestCall(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -803,6 +805,7 @@ class ExternalSystemGenericPullJson(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
