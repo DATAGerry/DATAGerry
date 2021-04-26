@@ -185,7 +185,7 @@ class ExportdJob(JobManagementBase):
         """
         return self.variables
 
-    def get_scheduling(self) -> {}:
+    def get_scheduling(self) -> dict:
         """
         Get scheduling of the job
         Returns:
