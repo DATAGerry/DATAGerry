@@ -255,10 +255,8 @@ class CmdbRender:
                                     continue
                                 field['reference']['summaries'].append(ref_field)
 
-                    except (ValueError, IndexError, FileNotFoundError):
+                    except (ValueError, IndexError, FileNotFoundError, ObjectManagerGetError):
                         field['value'] = None
-                    except ObjectManagerGetError:
-                        continue
 
                     field_map.append(field)
 
