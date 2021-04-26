@@ -38,12 +38,23 @@ export class ExportdJobSchedulingStepComponent extends ExportdJobBaseStepCompone
   }
 
   public eventForm: FormGroup;
+
+  /**
+   * Type of execution (PULL or PUSH)
+   */
   public taskType: string;
+
+  /**
+   * Information on the exception rule
+   */
+  public info: string = 'Excludes jobs that have been executed manually ' +
+    'and jobs that are executed automatically after they have been created.';
 
   constructor(private formBuilder: FormBuilder) {
     super();
     this.eventForm = this.formBuilder.group({
       active: new FormControl(false, Validators.required),
+      subset: new FormControl(false, Validators.required),
     });
   }
 

@@ -1,20 +1,38 @@
 <form [formGroup]="eventForm">
   <fieldset class="form-group card-body" [disabled]="taskType == 'PULL'">
     <div class="row">
-      <legend class="col-form-label col-sm-2 pt-0">Run Event based:</legend>
+      <legend class="col-form-label col-sm-2 pt-0">Execution settings:</legend>
       <div class="col-sm-10">
-        <div class="form-check">
-          <div class="custom-control custom-checkbox">
-            <input id="checkBased2" name="checkBased2" type="checkbox" class="custom-control-input"
-                   formControlName="active">
-            <label class="custom-control-label" for="checkBased2"></label>
+        <div class="row">
+          <div class="form-check">
+            <div class="custom-control custom-checkbox">
+              <input id="checkBased2" name="checkBased2" type="checkbox" class="custom-control-input"
+                     formControlName="active">
+              <label class="custom-control-label" for="checkBased2">
+                <ng-container *ngIf="taskType != 'PULL'; else newDeb">
+                  <span class="form-text text-muted">Run Exportd Job on Event (e.g. on object update)</span>
+                </ng-container>
+                <ng-template #newDeb>
+                  <span class="form-text text-muted">PULL Exportd Job cannot be executed on event base</span>
+                </ng-template>
+              </label>
+            </div>
           </div>
-          <ng-container *ngIf="taskType != 'PULL'; else newDeb">
-            <span class="form-text text-muted">Run Exportd Job on Event (e.g. on object update)</span>
-          </ng-container>
-          <ng-template #newDeb>
-            <span class="form-text text-muted">PULL Exportd Job cannot be executed on event base</span>
-          </ng-template>
+        </div>
+        <div class="row">
+          <div class="form-check">
+            <div class="custom-control custom-checkbox">
+              <input id="subset" name="subset" type="checkbox" class="custom-control-input"
+                     formControlName="subset">
+              <label class="custom-control-label" for="subset">
+                <span class="form-text text-muted">
+                  Transfer subset (Transfer only the objects that have been changed)
+                  <i class="fas fa-info-circle" [ngbTooltip]="tipContent"></i>
+                  <ng-template #tipContent><b>Exclusion</b><br>{{info}}</ng-template>
+                </span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </div>
