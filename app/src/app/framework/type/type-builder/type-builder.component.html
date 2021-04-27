@@ -1,6 +1,6 @@
 <div id="type-builder" class="row">
   <div class="col-md-9">
-    <aw-wizard [defaultStepIndex]="stepIndex" [navBarLayout]="'large-empty-symbols'">
+    <aw-wizard [defaultStepIndex]="stepIndex" [navBarLayout]="'large-empty-symbols'" [awNavigationMode] navigateBackward="allow" navigateForward="allow">
       <aw-wizard-step [stepId]="'1'" stepTitle="Basic information">
         <ng-template awWizardStepSymbol><i class="fas fa-info"></i></ng-template>
         <hr/>

@@ -267,7 +267,10 @@ class CmdbRender:
                 ref_field = self.type_instance.get_field(ref_field_name)
                 reference_id: int = self.object_instance.get_value(ref_field_name)
                 ref_field['value'] = reference_id
-                reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                try:
+                    reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                except ObjectManagerGetError:
+                    reference_object = None
                 ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
                 ref_section = ref_type.get_section(section.reference.section_name)
                 ref_field['references'] = {
@@ -286,11 +289,12 @@ class CmdbRender:
                     selected_ref_fields = [f for f in ref_section.fields if f in section.reference.selected_fields]
                 for ref_section_field_name in selected_ref_fields:
                     ref_section_field = ref_type.get_field(ref_section_field_name)
-                    try:
-                        field = self.__merge_field_content_section(ref_section_field, reference_object)
-                    except (FileNotFoundError, ValueError, IndexError, ObjectManagerGetError):
-                        continue
-                    ref_field['references']['fields'].append(field)
+                    if reference_object:
+                        try:
+                            ref_section_field = self.__merge_field_content_section(ref_section_field, reference_object)
+                        except (FileNotFoundError, ValueError, IndexError, ObjectManagerGetError):
+                            continue
+                    ref_field['references']['fields'].append(ref_section_field)
                 field_map.append(ref_field)
         return field_map
 
