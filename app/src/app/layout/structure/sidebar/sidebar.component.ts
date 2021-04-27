@@ -27,6 +27,7 @@ import { SidebarService } from '../../services/sidebar.service';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
+import {AccessControlPermission} from "../../../acl/acl.types";
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -78,10 +79,11 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.sidebarService.loadCategoryTree();
     this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
       this.categoryTree = categoryTree;
-      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes().subscribe(
-        (apiResponse: APIGetMultiResponse<CmdbType>) => {
-          this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-        });
+      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ,
+        false).subscribe(
+          (apiResponse: APIGetMultiResponse<CmdbType>) => {
+            this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+          });
 
       this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
         (apiResponse: APIGetMultiResponse<CmdbType>) => {
