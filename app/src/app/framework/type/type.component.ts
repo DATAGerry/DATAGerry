@@ -101,6 +101,11 @@ export class TypeComponent implements OnInit, OnDestroy {
   @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
   /**
+   * Table Template: user column.
+   */
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+
+  /**
    * Table columns definition.
    */
   public columns: Array<Column>;
@@ -201,9 +206,33 @@ export class TypeComponent implements OnInit, OnDestroy {
         template: this.typeNameTemplate,
       },
       {
+        display: 'Author',
+        name: 'author_id',
+        data: 'author_id',
+        searchable: true,
+        sortable: true,
+        template: this.userTemplate
+      },
+      {
         display: 'Creation Time',
         name: 'creation_time',
         data: 'creation_time',
+        sortable: true,
+        searchable: false,
+        template: this.dateTemplate,
+      },
+      {
+        display: 'Last editor',
+        name: 'editor_id',
+        data: 'editor_id',
+        sortable: false,
+        searchable: false,
+        template: this.userTemplate
+      },
+      {
+        display: 'Modification Time',
+        name: 'last_edit_time',
+        data: 'last_edit_time',
         sortable: true,
         searchable: false,
         template: this.dateTemplate,
