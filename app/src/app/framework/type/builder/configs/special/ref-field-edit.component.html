@@ -11,8 +11,8 @@
                </div>
             </span>
       </div>
-      <input [(ngModel)]="data.name" [ngModelOptions]="{standalone: true}" type="text" class="form-control" value="{{data.name}}" lowercase name-guideline
-      [disabled]="disabled">
+      <input [(ngModel)]="data.name" [ngModelOptions]="{standalone: true}" type="text" class="form-control" value="{{data.name}}"
+             (ngModelChange)="onNameChange($event)" [disabled]="mode == MODES.Edit">
     </div>
     <small class="form-text text-muted float-left">Use a unique field name</small>
     <div class="clearfix"></div>

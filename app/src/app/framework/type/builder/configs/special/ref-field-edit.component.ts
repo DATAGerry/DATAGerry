@@ -29,6 +29,7 @@ import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../../../layout/toast/toast.service';
 import { FormControl, Validators } from '@angular/forms';
+import { nameConvention } from '../../../../../layout/directives/name.directive';
 
 @Component({
   selector: 'cmdb-ref-field-edit',
@@ -96,9 +97,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    * Object list for default reference value
    */
   public objectList: RenderResult[] = [];
-  public filteredObjectList: RenderResult[] = [];
-
-  @Input() public disabled: boolean = false;
 
   /**
    * Types params
@@ -189,6 +187,14 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         this.summaries.splice(index, 1);
       }
     }
+  }
+
+  /**
+   * Name converter on ng model change.
+   * @param name
+   */
+  public onNameChange(name: string){
+    this.data.name = nameConvention(name);
   }
 
   /**
