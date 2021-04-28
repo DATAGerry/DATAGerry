@@ -16,7 +16,7 @@
 
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
@@ -133,7 +133,7 @@ class ExportdJobManagement(CmdbManagerBase):
             update_object = data
         else:
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
-        update_object.last_execute_date = datetime.utcnow()
+        update_object.last_execute_date = datetime.now(timezone.utc)
         ack = self._update(
             collection=ExportdJob.COLLECTION,
             public_id=update_object.get_public_id(),

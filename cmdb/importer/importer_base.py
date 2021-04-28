@@ -12,13 +12,13 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 Module of basic importers
 """
 
-import datetime
+from datetime import datetime, timezone
 import logging
 from typing import Optional
 
@@ -159,7 +159,7 @@ class ObjectImporter(BaseImporter):
             try:
                 existing = self.object_manager.get_object(current_public_id)
                 current_import_object['creation_time'] = existing.creation_time
-                current_import_object['last_edit_time'] = datetime.datetime.utcnow()
+                current_import_object['last_edit_time'] = datetime.now(timezone.utc)
             except ObjectManagerGetError:
                 try:
                     self.object_manager.insert_object(current_import_object)

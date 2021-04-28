@@ -25,7 +25,7 @@ import json
 
 from cmdb.database.utils import object_hook
 from bson import json_util
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 from queue import Queue
 
@@ -289,7 +289,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_object = data
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
-        update_object.last_edit_time = datetime.utcnow()
+        update_object.last_edit_time = datetime.now(timezone.utc)
         if user:
             update_object.editor_id = user.public_id
 

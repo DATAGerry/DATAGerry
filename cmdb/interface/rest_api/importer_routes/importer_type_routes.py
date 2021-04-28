@@ -17,6 +17,7 @@
 import json
 import logging
 
+from datetime import datetime, timezone
 from flask import current_app, request, abort
 
 from cmdb.framework import TypeModel
@@ -39,7 +40,6 @@ with current_app.app_context():
 @login_required
 def add_type():
     from bson import json_util
-    from datetime import datetime
 
     type_manager = TypeManager(database_manager=current_app.database_manager)
 
@@ -49,7 +49,7 @@ def add_type():
     for new_type_data in new_type_list:
         try:
             new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
-            new_type_data['creation_time'] = datetime.utcnow()
+            new_type_data['creation_time'] = datetime.now(timezone.utc)
         except TypeError as e:
             LOGGER.warning(e)
             return abort(400)

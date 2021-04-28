@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from datetime import datetime
+
+
+from datetime import datetime, timezone
 from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
@@ -98,7 +100,7 @@ class ObjectLinkManager(ManagerBase):
         if isinstance(link, ObjectLinkModel):
             link = ObjectLinkModel.to_json(link)
         if 'creation_time' not in link:
-            link['creation_time'] = datetime.now()
+            link['creation_time'] = datetime.now(timezone.utc)
         if user and permission:
             self.object_manager.get_object(public_id=link['primary'], user=user, permission=permission)
             self.object_manager.get_object(public_id=link['secondary'], user=user, permission=permission)

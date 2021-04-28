@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import abort, request, current_app
 
@@ -126,7 +126,7 @@ def insert_type(data: dict):
         InsertSingleResponse: Insert response with the new type and its public_id.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    data.setdefault('creation_time', datetime.utcnow())
+    data.setdefault('creation_time', datetime.now(timezone.utc))
     possible_id = data.get('public_id', None)
     if possible_id:
         try:
