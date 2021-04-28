@@ -13,8 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 from json import dumps
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from math import ceil
 from typing import List
@@ -83,7 +85,7 @@ class BaseAPIResponse:
         self.url = url or ''
         self.model: Model = model or ''
         self.body = body or True
-        self.time: str = datetime.now().isoformat()
+        self.time: str = datetime.now(timezone.utc).isoformat()
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
         """

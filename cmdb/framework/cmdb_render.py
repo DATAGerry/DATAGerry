@@ -31,7 +31,7 @@ from cmdb.utils.wraps import timing
 
 from cmdb.utils.error import CMDBError
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference, \
@@ -46,7 +46,7 @@ LOGGER = logging.getLogger(__name__)
 class RenderVisualization:
 
     def __init__(self):
-        self.current_render_time = datetime.now()
+        self.current_render_time = datetime.now(timezone.utc)
         self.object_information: dict = {}
         self.type_information: dict = {}
 

@@ -17,7 +17,7 @@
 import logging
 import re
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from ldap3 import Server, Connection
@@ -177,7 +177,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 new_user_data['user_name'] = user_name
                 new_user_data['active'] = True
                 new_user_data['group_id'] = int(user_group_id)
-                new_user_data['registration_time'] = datetime.now()
+                new_user_data['registration_time'] = datetime.now(timezone.utc)
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
 
             except Exception as e:

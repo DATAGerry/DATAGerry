@@ -22,7 +22,7 @@ import sched
 
 from cmdb.event_management.event import Event
 from threading import Thread
-from datetime import datetime
+from datetime import datetime, timezone
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
@@ -142,7 +142,7 @@ class ExportdThread(Thread):
         try:
             # update job for UI
             self.job.state = ExecuteState.RUNNING.name
-            self.job.last_execute_date = datetime.utcnow()
+            self.job.last_execute_date = datetime.now(timezone.utc)
 
             # get current user
             cur_user = self.user_manager.get(self.user_id)

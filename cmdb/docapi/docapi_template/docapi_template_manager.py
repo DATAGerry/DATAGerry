@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
@@ -132,7 +132,7 @@ class DocapiTemplateManager(CmdbManagerBase):
             update_object = data
         else:
             raise DocapiTemplateManagerUpdateError(f'Could not update template with ID: {data.get_public_id()}')
-        update_object.last_execute_date = datetime.utcnow()
+        update_object.last_execute_date = datetime.now(timezone.utc)
         ack = self._update(
             collection=DocapiTemplate.COLLECTION,
             public_id=update_object.get_public_id(),

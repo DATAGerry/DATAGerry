@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
@@ -30,7 +30,7 @@ class ObjectLinkModel(CmdbDAO):
             raise ValueError(f'Same link IDs: {primary}/{secondary}')
         self.primary: int = primary
         self.secondary: int = secondary
-        self.creation_time: datetime = creation_time or datetime.now()
+        self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
         super(ObjectLinkModel, self).__init__(public_id=public_id)
 
     def get_primary(self) -> int:
