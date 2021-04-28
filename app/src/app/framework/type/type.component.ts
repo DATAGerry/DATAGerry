@@ -225,8 +225,8 @@ export class TypeComponent implements OnInit, OnDestroy {
         display: 'Last editor',
         name: 'editor_id',
         data: 'editor_id',
-        sortable: false,
-        searchable: false,
+        sortable: true,
+        searchable: true,
         template: this.userTemplate
       },
       {

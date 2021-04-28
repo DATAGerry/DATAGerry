@@ -163,6 +163,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
+      this.typeInstance.editor_id = undefined;
       this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
           newTypeID = +typeIDResp.public_id;
           this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
@@ -183,6 +184,4 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
     this.sidebarService.loadCategoryTree();
   }
-
-
 }

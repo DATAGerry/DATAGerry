@@ -16,7 +16,7 @@
 
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 from dateutil.parser import parse
 from typing import List
 
@@ -457,7 +457,7 @@ class TypeModel(CmdbDAO):
         self.version: str = version or TypeModel.DEFAULT_VERSION
         self.active: bool = active
         self.author_id: int = author_id
-        self.creation_time: datetime = creation_time or datetime.now()
+        self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
         self.editor_id: int = editor_id
         self.last_edit_time: datetime = last_edit_time
         self.render_meta: TypeRenderMeta = render_meta
@@ -482,7 +482,7 @@ class TypeModel(CmdbDAO):
             active=data.get('active', True),
             author_id=data.get('author_id'),
             creation_time=creation_time,
-            editor_id=data.get('editor_id'),
+            editor_id=data.get('editor_id', None),
             last_edit_time=last_edit_time,
             label=data.get('label', None),
             version=data.get('version', None),
