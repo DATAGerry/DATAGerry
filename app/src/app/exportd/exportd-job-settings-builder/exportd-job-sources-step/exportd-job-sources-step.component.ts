@@ -21,8 +21,9 @@ import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@ang
 import { CmdbMode } from '../../../framework/modes.enum';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subscription } from 'rxjs';
 import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
+import { takeUntil } from 'rxjs/operators';
 
 
 @Component({
@@ -30,7 +31,9 @@ import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component'
   templateUrl: './exportd-job-sources-step.component.html',
   styleUrls: ['./exportd-job-sources-step.component.scss']
 })
-export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent implements OnInit {
+export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent implements OnInit, OnDestroy {
+
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   @Input()
   set preData(data: any) {
@@ -69,7 +72,7 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
   public sourcesForm: FormGroup;
   readonly SOURCES = 'sources';
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {
     super();
   }
 
@@ -81,6 +84,18 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
     if (this.mode === CmdbMode.Create) {
       this.delCondition(0, 0);
     }
+  }
+
+  /**
+   * Load types to display
+   * @param publicID
+   */
+  public loadDisplayType(publicID: number): Observable<CmdbType> {
+    const foundType = this.types.find(f => f.public_id === publicID);
+    if (foundType) {
+      return new BehaviorSubject<CmdbType>(foundType).asObservable();
+    }
+    return this.typeService.getType(publicID).pipe(takeUntil(this.subscriber));
   }
 
   public getFields(publicID: any) {
@@ -128,6 +143,11 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
   public delCondition(index, event): void {
     const control = this.getSourceAsFormArray().at(event).get('condition') as FormArray;
     control.removeAt(index);
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

@@ -36,7 +36,7 @@ import { ExternalSystemService } from '../../../settings/services/external-syste
 import { DndDropEvent } from 'ngx-drag-drop';
 import { TemplateHelperService } from '../../../settings/services/template-helper.service';
 import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 
@@ -175,7 +175,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
   }
 
   constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService,
-              private templateHelperService: TemplateHelperService) {
+              private templateHelperService: TemplateHelperService, private typeService: TypeService) {
     super();
   }
 
@@ -333,6 +333,18 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
     } else {
       return 'fas fa-code';
     }
+  }
+
+  /**
+   * Load types to display
+   * @param publicID
+   */
+  public loadDisplayType(publicID: number): Observable<CmdbType> {
+    const foundType = this.types.find(f => f.public_id === publicID);
+    if (foundType) {
+      return new BehaviorSubject<CmdbType>(foundType).asObservable();
+    }
+    return this.typeService.getType(publicID).pipe(takeUntil(this.subscriber));
   }
 
   public ngOnDestroy(): void {
