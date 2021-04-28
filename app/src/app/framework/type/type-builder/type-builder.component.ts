@@ -167,10 +167,10 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     for (const section of saveTypeInstance.render_meta.sections) {
       const fields = [];
       for (const field of section.fields) {
-        if (section.type === 'ref-section') {
-          fields.push(field);
-        } else {
+        if (typeof field === 'object' && field !== null) {
           fields.push(field.name);
+        } else {
+          fields.push(field);
         }
       }
       section.fields = fields;

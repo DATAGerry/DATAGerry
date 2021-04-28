@@ -18,8 +18,8 @@
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
-import { ReplaySubject } from 'rxjs';
-import { FormControl, FormGroup } from '@angular/forms';
+import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
@@ -46,6 +46,29 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
+   * Ng selected item changed.
+   */
+  @Output() public selectedChange: EventEmitter<T> = new EventEmitter<T>();
+
+  /**
+   * New value was set.
+   */
+  @Output() public valueChange: EventEmitter<any> = new EventEmitter<any>();
+
+  /**
+   * Type control.
+   */
+  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+
+  @Input('typeControl')
+  public set TypeControl(control: FormControl) {
+    this.typeControl = control;
+    this.typeControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(changes => {
+      this.valueChange.emit(changes);
+    });
+  }
+
+  /**
    * Reactive form group.
    */
   public formGroup: FormGroup;
@@ -53,24 +76,10 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   @Input('formGroup')
   public set FormGroup(group: FormGroup) {
     this.formGroup = group;
-    this.subscribeChanges(this.formGroup);
+    if (!this.formGroup.contains('type_id')) {
+      this.formGroup.addControl('type_id', this.typeControl);
+    }
   }
-
-  /**
-   * Reactive form set.
-   */
-  public value: any;
-
-  @Input('value')
-  public set Value(value: any) {
-    this.value = value;
-    this.formGroup.get('type').patchValue(this.value);
-  }
-
-  /**
-   * Reactive form control name
-   */
-  @Input() public formControlName: string = 'type';
 
   /**
    * Virtual scroll enabled
@@ -111,16 +120,6 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
    * Auto load types inside component.
    */
   @Input() public autoLoad: boolean = true;
-
-  /**
-   * Ng selected item changed.
-   */
-  @Output() public selectedChange: EventEmitter<T> = new EventEmitter<T>();
-
-  /**
-   * New value was set.
-   */
-  @Output() public valueChange: EventEmitter<any> = new EventEmitter<any>();
 
   /**
    * Emit new loading indicator.
@@ -165,6 +164,18 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   }
 
   /**
+   * Load types to display
+   * @param publicID
+   */
+  public loadDisplayType(publicID: number): Observable<CmdbType> {
+    const foundType = this.types.find(f => f.public_id === publicID);
+    if (foundType) {
+      return new BehaviorSubject<CmdbType>(foundType).asObservable();
+    }
+    return this.typeService.getType(publicID).pipe(takeUntil(this.subscriber));
+  }
+
+  /**
    * Autoload on component init.
    * Triggers the autoload if no types were passed and preload is true.
    * Subscribes to the event emitters.
@@ -173,25 +184,8 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
     if (this.types.length === 0 && this.preload) {
       this.triggerAPICall();
     }
-    this.subscribeChanges(this.formGroup);
-  }
 
-  /**
-   * Subscribes to form changes.
-   * @param group
-   */
-  public subscribeChanges(group: FormGroup): void {
-    group.get(this.formControlName).valueChanges.pipe(takeUntil(this.subscriber)).subscribe((change: number) => {
-      this.value = change;
-      this.valueChange.emit(change);
-      if (this.ngSelect.selectedItems.length > 0) {
-        this.selectedChange.emit(this.ngSelect.selectedItems[0].value as T);
-      } else {
-        this.selectedChange.emit(undefined);
-      }
-    });
   }
-
 
   /**
    * Increase the current page until max page and call loading the types.

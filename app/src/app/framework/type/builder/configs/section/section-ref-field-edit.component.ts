@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -48,6 +48,30 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    * Label form control.
    */
   public labelControl: FormControl = new FormControl('', Validators.required);
+
+  /**
+   * Type form control.
+   */
+  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+
+  /**
+   * Type form control.
+   */
+  public sectionNameControl: FormControl = new FormControl(undefined, Validators.required);
+
+  /**
+   * Type form control.
+   */
+  public selectedFieldsControl: FormControl = new FormControl([], Validators.required);
+
+  /**
+   * Reference form control.
+   */
+  public referenceGroup: FormGroup = new FormGroup({
+    type_id: this.typeControl,
+    section_name: this.sectionNameControl,
+    selected_fields: this.selectedFieldsControl
+  });
 
   /**
    * Sections from the selected type.
@@ -102,13 +126,15 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   }
 
   public ngOnInit(): void {
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+    this.form.addControl('reference', this.referenceGroup);
+
     if (this.mode === CmdbMode.Edit) {
       if (this.data?.reference?.type_id) {
         this.loadPresetType(this.data.reference.type_id);
       }
     }
-    this.form.addControl('name', this.nameControl);
-    this.form.addControl('label', this.labelControl);
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
@@ -120,8 +146,8 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.loading = true;
     this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: CmdbType) => {
-        this.types = [...this.types, ...[apiResponse as CmdbType]];
-        this.typeSections = this.getSectionsFromType(apiResponse.public_id);
+        // this.types = [...this.types, ...[apiResponse as CmdbType]];
+        this.typeSections = apiResponse.render_meta.sections;
         this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
       }).add(() => this.loading = false);
   }
@@ -146,24 +172,24 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   /**
    * When the selected type change.
    * Reset a selected section.
-   * @param type
+   * @param publicID
    */
-  public onTypeChange(type: CmdbType): void {
-    if (type) {
-      this.data.reference.type_id = type.public_id;
-      this.typeSections = this.getSectionsFromType(type.public_id);
+  public onTypeChange(publicID: number): void {
+    if (publicID) {
+      this.data.reference.type_id = publicID;
+      this.typeSections = this.getSectionsFromType(publicID);
     } else {
       this.data.reference.type_id = undefined;
       this.typeSections = [];
     }
-    if (this.data.reference.section_name) {
-      this.unsetReferenceSubData();
-    }
+    this.unsetReferenceSubData();
   }
 
   private unsetReferenceSubData(): void {
     this.data.reference.section_name = undefined;
+    this.sectionNameControl.setValue(undefined);
     this.data.reference.selected_fields = undefined;
+    this.selectedFieldsControl.setValue(undefined);
     this.selectedSection = undefined;
   }
 
