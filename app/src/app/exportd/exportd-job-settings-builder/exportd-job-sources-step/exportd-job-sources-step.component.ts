@@ -90,11 +90,7 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
    * Load types to display
    * @param publicID
    */
-  public loadDisplayType(publicID: number): Observable<CmdbType> {
-    const foundType = this.types.find(f => f.public_id === publicID);
-    if (foundType) {
-      return new BehaviorSubject<CmdbType>(foundType).asObservable();
-    }
+  public loadDisplayType(publicID: number) {
     return this.typeService.getType(publicID).pipe(takeUntil(this.subscriber));
   }
 

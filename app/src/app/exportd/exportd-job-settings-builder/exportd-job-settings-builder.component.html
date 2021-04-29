@@ -11,7 +11,7 @@
   <aw-wizard-step stepId="2" stepTitle="Sources">
     <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
     <hr />
-    <cmdb-task-sources-step [types]="types" [totalTypes]="totalTypes" [preData]="task" [mode]="mode" (typeCallEmitter)="onLoadTypes()"></cmdb-task-sources-step>
+    <cmdb-task-sources-step [types]="types" [totalTypes]="totalTypes" [preData]="task" [mode]="mode"></cmdb-task-sources-step>
     <hr />
     <button class="btn btn-primary prev" type="button" awPreviousStep>
       <i class="fas fa-angle-double-left"></i> Previous Step
@@ -37,7 +37,7 @@
     <hr />
     <cmdb-task-variables-step [types]="types" [totalTypes]="totalTypes" [preData]="task"
                               [sources]="sourcesStep.sourcesForm.get('sources').value" [destinationStep]="destinationStep"
-                              [mode]="mode" (typeCallEmitter)="onLoadTypes()"></cmdb-task-variables-step>
+                              [mode]="mode"></cmdb-task-variables-step>
     <hr />
     <button class="btn btn-primary prev" type="button" awPreviousStep>
       <i class="fas fa-angle-double-left"></i> Previous Step

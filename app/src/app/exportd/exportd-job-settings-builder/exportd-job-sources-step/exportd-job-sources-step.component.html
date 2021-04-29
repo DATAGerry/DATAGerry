@@ -35,9 +35,6 @@
                     <ng-template ng-header-tmp>
                       <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
                     </ng-template>
-                    <ng-template ng-label-tmp>
-                      {{(loadDisplayType(source.get('type_id').value) | async)?.label}}
-                    </ng-template>
                     <ng-template ng-option-tmp let-item="item">
                       <div><span>{{item.label}}</span></div>
                       <small><b>PublicID:</b> {{item.public_id}} | <b>Name:</b> {{item.name}}</small>
