@@ -69,11 +69,11 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
       }
     }
 
-    if (this.controller.value !== '' && this.data.value) {
+    if (this.data.reference.object_id !== '' && this.data.reference) {
       if (typeof this.data.reference === 'string' || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
         this.protect = true;
       } else {
-        this.objectService.getObject(this.controller.value, false).pipe(takeUntil(this.unsubscribe))
+        this.objectService.getObject(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
           .subscribe((refObject: RenderResult) => {
               this.refObject = refObject;
             },
