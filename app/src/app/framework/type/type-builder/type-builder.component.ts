@@ -163,6 +163,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   public saveType() {
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
+      this.typeInstance.editor_id = undefined;
       this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
           newTypeID = +typeIDResp.public_id;
           this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
@@ -172,6 +173,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
           this.toast.error(`${ error }`);
         });
     } else if (this.mode === CmdbMode.Edit) {
+      this.typeInstance.editor_id = this.userService.getCurrentUser().public_id;
       this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
@@ -182,6 +184,4 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
     this.sidebarService.loadCategoryTree();
   }
-
-
 }

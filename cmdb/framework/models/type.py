@@ -388,6 +388,11 @@ class TypeModel(CmdbDAO):
             'type': 'integer',
             'required': True
         },
+        'editor_id': {
+            'type': 'integer',
+            'nullable': True,
+            'required': False
+        },
         'active': {
             'type': 'boolean',
             'required': False,
@@ -444,7 +449,8 @@ class TypeModel(CmdbDAO):
                 'creation_time', 'render_meta', 'fields', 'acl'
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
-                 creation_time: datetime = None, active: bool = True, fields: list = None, version: str = None,
+                 creation_time: datetime = None, last_edit_time: datetime = None, editor_id: int = None,
+                 active: bool = True, fields: list = None, version: str = None,
                  label: str = None, description: str = None, acl: AccessControlList = None):
         self.name: str = name
         self.label: str = label or self.name.title()
@@ -453,6 +459,8 @@ class TypeModel(CmdbDAO):
         self.active: bool = active
         self.author_id: int = author_id
         self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
+        self.editor_id: int = editor_id
+        self.last_edit_time: datetime = last_edit_time
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
         self.acl: AccessControlList = acl
@@ -464,12 +472,19 @@ class TypeModel(CmdbDAO):
         creation_time = data.get('creation_time', None)
         if creation_time and isinstance(creation_time, str):
             creation_time = parse(creation_time, fuzzy=True)
+
+        last_edit_time = data.get('last_edit_time', None)
+        if last_edit_time and isinstance(last_edit_time, str):
+            last_edit_time = parse(last_edit_time, fuzzy=True)
+
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
             active=data.get('active', True),
             author_id=data.get('author_id'),
             creation_time=creation_time,
+            editor_id=data.get('editor_id', None),
+            last_edit_time=last_edit_time,
             label=data.get('label', None),
             version=data.get('version', None),
             description=data.get('description', None),
@@ -487,6 +502,8 @@ class TypeModel(CmdbDAO):
             'active': instance.active,
             'author_id': instance.author_id,
             'creation_time': instance.creation_time,
+            'editor_id': instance.editor_id,
+            'last_edit_time': instance.last_edit_time,
             'label': instance.label,
             'version': instance.version,
             'description': instance.description,

@@ -49,6 +49,7 @@ import {
 } from './type-builder/type-builder-step.component';
 import { IconPickerModule } from 'ngx-icon-picker';
 import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-preview-step.component';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
   declarations: [
@@ -70,23 +71,24 @@ import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-
     TypeBuilderStepValidStatusComponent,
     TypePreviewStepComponent
   ],
-  imports: [
-    CommonModule,
-    TypeRoutingModule,
-    LayoutModule,
-    ReactiveFormsModule,
-    ArchwizardModule,
-    QRCodeModule,
-    NgSelectModule,
-    RenderModule,
-    BuilderModule,
-    FormsModule,
-    NgbModule,
-    FontAwesomeModule,
-    AuthModule,
-    TableModule,
-    IconPickerModule
-  ]
+    imports: [
+        CommonModule,
+        TypeRoutingModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        ArchwizardModule,
+        QRCodeModule,
+        NgSelectModule,
+        RenderModule,
+        BuilderModule,
+        FormsModule,
+        NgbModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule,
+        IconPickerModule,
+        UsersModule
+    ]
 })
 export class TypeModule {
 }
