@@ -390,6 +390,7 @@ class TypeModel(CmdbDAO):
         },
         'editor_id': {
             'type': 'integer',
+            'nullable': True,
             'required': False
         },
         'active': {
