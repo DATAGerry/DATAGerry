@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class SelectContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
 
   public constructor() {
     this.type = 'select';
@@ -40,14 +36,14 @@ class SelectContent implements ControlsContent {
 
 }
 
-export class SelectControl implements ControlsCommon {
+export class SelectControl extends ControlsCommon {
 
-  name = 'select';
-  label = 'Select';
-  icon = 'fas fa-list';
-  dndType: string = 'inputs';
+  public name: string = 'select';
+  public label: string = 'Select';
+  public icon: string = 'fas fa-list';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): SelectContent {
     return new SelectContent();
   }
 

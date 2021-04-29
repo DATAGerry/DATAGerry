@@ -1,6 +1,6 @@
 <div id="type-builder" class="row">
   <div class="col-md-9">
-    <aw-wizard [navBarLayout]="'large-empty-symbols'">
+    <aw-wizard [defaultStepIndex]="stepIndex" [navBarLayout]="'large-empty-symbols'" [awNavigationMode] navigateBackward="allow" navigateForward="allow">
       <aw-wizard-step [stepId]="'1'" stepTitle="Basic information">
         <ng-template awWizardStepSymbol><i class="fas fa-info"></i></ng-template>
         <hr/>
@@ -33,7 +33,7 @@
         <button class="btn btn-primary next" type="button" awNextStep>Next Step
           <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>-->
-      <aw-wizard-step [stepId]="'4'" stepTitle="Meta">
+      <aw-wizard-step [stepId]="'3'" stepTitle="Meta">
         <ng-template awWizardStepSymbol><i class="fas fa-hashtag"></i></ng-template>
         <hr/>
         <cmdb-type-meta-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-meta-step>
@@ -44,7 +44,7 @@
         <button class="btn btn-primary next" type="button" awNextStep>Next Step
           <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
-      <aw-wizard-step [stepId]="'5'" stepTitle="ACL">
+      <aw-wizard-step [stepId]="'4'" stepTitle="ACL">
         <ng-template awWizardStepSymbol><i class="fas fa-users"></i></ng-template>
         <hr/>
         <cmdb-type-acl-step [typeInstance]="typeInstance" [groups]="groups" (validateChange)="accessValid = $event"></cmdb-type-acl-step>
@@ -81,5 +81,4 @@
             [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
     </button>
   </div>
-
 </div>

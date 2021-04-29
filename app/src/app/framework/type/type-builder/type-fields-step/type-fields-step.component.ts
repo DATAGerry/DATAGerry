@@ -43,6 +43,8 @@ export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   private typeInstanceDiffer: KeyValueDiffer<string, any>;
 
+  public builderValid: boolean = true;
+
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     if (instance) {
@@ -59,14 +61,24 @@ export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements
     this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
   }
 
+  public get status(): boolean{
+    const hasFields: boolean = this.typeInstance.fields.length > 0;
+    const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
+    return hasFields && hasSections && this.builderValid;
+  }
+
   public ngDoCheck(): void {
     const changes = this.typeInstanceDiffer.diff(this.typeInstance);
     if (changes) {
-      const hasFields: boolean = this.typeInstance.fields.length > 0;
-      const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
-      this.valid = hasFields && hasSections;
+      this.valid = this.status;
       this.validateChange.emit(this.valid);
     }
+  }
+
+  public onBuilderValidChange(status: boolean): void{
+    this.builderValid = status;
+    this.valid = this.status;
+    this.validateChange.emit(this.valid);
   }
 
 

@@ -23,22 +23,18 @@ import { DndModule } from 'ngx-drag-drop';
 import { RenderModule } from '../../render/render.module';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { TextFieldEditComponent } from './configs/edits/text-field-edit.component';
-import { DummyFieldEditComponent } from './configs/edits/dummy-field-edit.component';
-import { SectionFieldEditComponent } from './configs/edits/section-field-edit.component';
-import { TextareaEditComponent } from './configs/edits/textarea-edit.component';
-import { RefFieldEditComponent } from './configs/edits/ref-field-edit.component';
-import { ChoiceFieldEditComponent } from './configs/edits/choice-field-edit.component';
-import { CheckFieldEditComponent } from './configs/edits/check-field-edit.component';
-import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
-import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { TextFieldEditComponent } from './configs/text/text-field-edit.component';
+import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
+import { TextareaEditComponent } from './configs/text/textarea-edit.component';
+import { RefFieldEditComponent } from './configs/special/ref-field-edit.component';
+import { ChoiceFieldEditComponent } from './configs/choice/choice-field-edit.component';
+import { CheckFieldEditComponent } from './configs/choice/check-field-edit.component';
 import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { DateFieldEditComponent } from './configs/edits/date-field-edit.component';
+import { DateFieldEditComponent } from './configs/date-time/date-field-edit.component';
 import { CategoryModule } from '../../category/category.module';
-import { SectionRefFieldEditComponent } from './configs/edits/section-ref-field-edit.component';
+import { SectionRefFieldEditComponent } from './configs/section/section-ref-field-edit.component';
 import { LayoutModule } from '../../../layout/layout.module';
-import { ConfigEditBaseComponent } from './configs/config.edit';
 import { ConfigEditComponent } from './configs/config-edit.component';
 
 @NgModule({
@@ -46,29 +42,25 @@ import { ConfigEditComponent } from './configs/config-edit.component';
     CommonModule,
     DndModule,
     FormsModule,
+    ReactiveFormsModule,
     RenderModule,
     NgbModalModule,
     NgSelectModule,
     FontAwesomeModule,
     NgbDatepickerModule,
-    ReactiveFormsModule,
     CategoryModule,
     NgbTooltipModule,
     LayoutModule
   ],
   declarations: [
-    ConfigEditBaseComponent,
     ConfigEditComponent,
     BuilderComponent,
     TextFieldEditComponent,
-    DummyFieldEditComponent,
     SectionFieldEditComponent,
     TextareaEditComponent,
     RefFieldEditComponent,
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
-    PreviewModalComponent,
-    DiagnosticModalComponent,
     DateFieldEditComponent,
     SectionRefFieldEditComponent,
   ],

@@ -77,6 +77,7 @@ import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { BlockComponent } from './components/block/block.component';
 import { JwPaginationModule } from 'jw-angular-pagination';
 import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
+import { TypeSelectComponent } from './components/type-select/type-select.component';
 
 @NgModule({
   declarations: [
@@ -119,7 +120,8 @@ import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback
     AttachmentsListModalComponent,
     QrCodeComponent,
     BlockComponent,
-    FeedbackModalComponent
+    FeedbackModalComponent,
+    TypeSelectComponent
   ],
   exports: [
     FileExplorerComponent,
@@ -142,7 +144,8 @@ import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback
     FileExtensionPipe,
     InfoBoxComponent,
     QrCodeComponent,
-    BlockComponent
+    BlockComponent,
+    TypeSelectComponent
   ],
   imports: [
     CommonModule,

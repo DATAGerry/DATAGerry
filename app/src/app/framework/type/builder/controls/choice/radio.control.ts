@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class RadioContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
 
   public constructor() {
     this.type = 'radio';
@@ -40,14 +36,14 @@ class RadioContent implements ControlsContent {
 
 }
 
-export class RadioControl implements ControlsCommon {
+export class RadioControl extends ControlsCommon {
 
-  name = 'radio';
-  label = 'Radio';
-  icon = 'fas fa-check-circle';
-  dndType: string = 'inputs';
+  public name: string = 'radio';
+  public label: string = 'Radio';
+  public icon: string = 'fas fa-check-circle';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): RadioContent {
     return new RadioContent();
   }
 

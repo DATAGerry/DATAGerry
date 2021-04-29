@@ -16,57 +16,78 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
+import { Group } from '../../../../management/models/group';
+import { User } from '../../../../management/models/user';
+import { FormControl, FormGroup } from '@angular/forms';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { nameConvention } from '../../../../layout/directives/name.directive';
 
 @Component({
   template: ``
 })
-export class ConfigEditBaseComponent {
+export abstract class ConfigEditBaseComponent {
 
+
+  protected abstract subscriber: ReplaySubject<void>;
+
+  /**
+   * Cmdb modes for template usage.
+   */
+  public MODES = CmdbMode;
   @Input() public mode: CmdbMode = CmdbMode.Create;
 
-  private editable: false;
+
+  @Input() public form: FormGroup;
+  public abstract nameControl: FormControl;
+  public abstract labelControl: FormControl;
+
+  @Input() public data: any;
+  @Input() public sections: Array<any>;
+  @Input() public fields: Array<any> = [];
 
   @Input() public types: Array<CmdbType> = [];
+  @Input() public groups: Array<Group> = [];
+  @Input() public users: Array<User> = [];
 
-  public constructor() {
+
+  protected constructor() {
+    this.form = new FormGroup({});
   }
 
-  public data: any;
-
-  @Input('data')
-  public set Data(d: any) {
-    this.data = d;
+  protected disableControlOnEdit(control: FormControl): void {
+    if (this.mode === CmdbMode.Edit) {
+      control.disable({ onlySelf: false, emitEvent: false });
+    }
   }
 
-
-  public sections: Array<any>;
-
-  @Input('sections')
-  public set Sections(s: Array<any>) {
-    this.sections = s;
+  public onInputChange(change: any, idx: string): void {
+    this.data[idx] = change;
   }
 
-  public fields: Array<any> = [];
-
-  @Input('fields')
-  public set Fields(f: Array<any>) {
-    this.fields = f;
+  protected validateNameLabelControl(nameControl: FormControl, labelControl: FormControl, subscriber: ReplaySubject<void>): void {
+    this.disableControlOnEdit(nameControl);
+    if (this.mode === CmdbMode.Create) {
+      labelControl.valueChanges.pipe(takeUntil(subscriber)).subscribe((changes: string) => {
+        if (!nameControl.touched) {
+          nameControl.setValue(nameConvention(changes), { emitEvent: true });
+        }
+      });
+    }
   }
 
-  @Input('canEdit')
-  public set canEdit(value: any) {
-    this.editable = value;
-  }
-
-  public get canEdit(): any {
-    return this.editable;
+  protected patchData(data: any, form: FormGroup): void {
+    form.patchValue(data);
+    if (this.mode === CmdbMode.Edit) {
+      this.form.markAllAsTouched();
+    }
   }
 
   public calculateName(value) {
-    if (this.canEdit) {
+    if (this.mode !== CmdbMode.Edit) {
       this.data.name = value.replace(/ /g, '-').toLowerCase();
       this.data.name = this.data.name.replace(/[^a-z0-9 \-]/gi, '').toLowerCase();
     }

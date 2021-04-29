@@ -172,7 +172,7 @@ def get_objects_by_type(public_id, request_user: UserModel):
         return make_response(object_list, 204)
 
     rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
+                               database_manager=current_app.database_manager, object_manager=object_manager).render_result_list()
     resp = make_response(rendered_list)
     return resp
 

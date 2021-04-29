@@ -5,15 +5,15 @@
   <div class="col-sm-9">
     <ng-container [ngSwitch]="true">
       <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-        <ng-select #select [items]="objects" [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+        <ng-select #selection [items]="objects" [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
             'is-invalid': controller.invalid && (controller.dirty || controller.touched)}" [loading]="loading"
-                   [virtualScroll]="true" (scrollToEnd)="onScrollToEnd()"
+                   [virtualScroll]="true" (scrollToEnd)="onScrollToEnd()" bindLabel="object_information.object_id"
                    [formControlName]="data.name" bindValue="object_information.object_id">
           <ng-template ng-header-tmp>
             <small class="form-text text-muted">Loaded {{objects.length}} of {{totalObjects}}</small>
           </ng-template>
-          <ng-template ng-label-tmp let-item="item">
-            <small>ID: {{item?.object_information?.object_id}}</small>
+          <ng-template ng-label-tmp>
+            ID: {{(loadDisplayObject(controller.value) | async)?.object_information?.object_id}}
           </ng-template>
           <ng-template ng-option-tmp let-item="item">
             <div><span>Public ID: </span>{{item?.object_information?.object_id}}</div>

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,6 +18,14 @@
 
 import { Directive, HostListener } from '@angular/core';
 
+/**
+ * Converts a string to the name convention.
+ * @param input string which will be converted.
+ */
+export function nameConvention(input: string): string {
+  return input.toLowerCase().replace(/ /g, '-');
+}
+
 @Directive({
   // tslint:disable-next-line: directive-selector
   selector: '[name-guideline]'
@@ -30,7 +38,7 @@ export class NameDirective {
    * @param $event HTML input value - which includes the name-guideline as directive
    */
   @HostListener('input', ['$event']) onInputChange($event) {
-    $event.target.value = $event.target.value.toLowerCase().replace(/ /g, '-');
+    $event.target.value = nameConvention($event.target.value);
   }
 
 }

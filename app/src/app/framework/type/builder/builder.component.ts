@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
@@ -24,13 +24,12 @@ import { Group } from '../../../management/models/group';
 import { User } from '../../../management/models/user';
 import { TextControl } from './controls/text/text.control';
 import { PasswordControl } from './controls/text/password.control';
-import { TextAreaControl } from './controls/textarea/textarea.control';
+import { TextAreaControl } from './controls/text/textarea.control';
 import { ReferenceControl } from './controls/specials/ref.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
 import { CmdbMode } from '../../modes.enum';
-import { FormGroup } from '@angular/forms';
 import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
 import { ReplaySubject } from 'rxjs';
@@ -41,13 +40,14 @@ declare var $: any;
 @Component({
   selector: 'cmdb-builder',
   templateUrl: './builder.component.html',
-  styleUrls: ['./builder.component.scss']
+  styleUrls: ['./builder.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class BuilderComponent implements OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public form: FormGroup;
+  public MODES: typeof CmdbMode = CmdbMode;
 
   @Input() public mode = CmdbMode.View;
   @Input() public groups: Array<Group> = [];
@@ -55,39 +55,61 @@ export class BuilderComponent implements OnDestroy {
   @Input() public types: Array<CmdbType> = [];
 
   public sections: Array<any> = [];
-
   public typeInstance: CmdbType;
+
+  public newSections: Array<CmdbTypeSection> = [];
+  public newFields: Array<CmdbTypeSection> = [];
+
+  @Input() public valid: boolean = true;
+  @Output() public validChange: EventEmitter<boolean> = new EventEmitter<boolean>();
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     this.typeInstance = instance;
+    if (instance !== undefined) {
+      const preSectionList: any[] = [];
+      for (const section of instance.render_meta.sections) {
+        preSectionList.push(section);
+        const fieldBufferList = [];
+        for (const field of section.fields) {
+          fieldBufferList.push(instance.fields.find(f => f.name === field));
+        }
+        preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
+      }
+      this.sections = preSectionList;
+    }
   }
 
-  public canEdit: boolean = false;
-
   public structureControls = [
-    new Controller('section', SectionControl),
-    new Controller('ref-section', RefSectionControl)
+    new Controller('section', new SectionControl()),
+    new Controller('ref-section', new RefSectionControl())
   ];
 
   public basicControls = [
-    new Controller('text', TextControl),
-    new Controller('password', PasswordControl),
-    new Controller('textarea', TextAreaControl),
-    new Controller('checkbox', CheckboxControl),
-    new Controller('radio', RadioControl),
-    new Controller('select', SelectControl),
-    new Controller('date', DateControl)
+    new Controller('text', new TextControl()),
+    new Controller('password', new PasswordControl()),
+    new Controller('textarea', new TextAreaControl()),
+    new Controller('checkbox', new CheckboxControl()),
+    new Controller('radio', new RadioControl()),
+    new Controller('select', new SelectControl()),
+    new Controller('date', new DateControl())
   ];
 
   public specialControls = [
-    new Controller('ref', ReferenceControl)
+    new Controller('ref', new ReferenceControl())
   ];
 
 
   public constructor() {
-    this.form = new FormGroup({});
     this.typeInstance = new CmdbType();
+  }
+
+  public isNewSection(section: CmdbTypeSection): boolean {
+    return this.newSections.indexOf(section) > -1;
+  }
+
+  public isNewField(field: any): boolean {
+    return this.newFields.indexOf(field) > -1;
   }
 
 
@@ -98,37 +120,37 @@ export class BuilderComponent implements OnDestroy {
 
   private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
     refSection.fields = [];
-    refSection.fields.push(`${refSection.name}-field`);
+    refSection.fields.push(`${ refSection.name }-field`);
     this.typeInstance.fields.push({
       type: 'ref-section-field',
-      name: `${refSection.name}-field`,
+      name: `${ refSection.name }-field`,
       label: refSection.label
     });
     this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   private removeRefSectionSelectionField(refSection: CmdbTypeSection): void {
-    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${refSection.name}-field`);
+    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${ refSection.name }-field`);
     this.typeInstance.fields.splice(index, 1);
     this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   public onSectionDrop(event: DndDropEvent): void {
-    const sections = this.typeInstance.render_meta.sections;
-    if (sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+    if (this.sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
       let index = event.index;
-
       if (typeof index === 'undefined') {
-
-        index = sections.length;
+        index = this.sections.length;
       }
-      for (const el of sections) {
+      for (const el of this.sections) {
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
-      sections.splice(index, 0, event.data);
-      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+      if (event.dropEffect === 'copy') {
+        this.newSections.push(event.data);
+      }
+      this.sections.splice(index, 0, event.data);
+      this.typeInstance.render_meta.sections = [...this.sections];
       if (event.data.type === 'ref-section') {
         this.addRefSectionSelectionField(event.data as CmdbTypeSection);
       }
@@ -136,28 +158,30 @@ export class BuilderComponent implements OnDestroy {
   }
 
   public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+    const fieldData = event.data;
     if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+
       let index = event.index;
       if (typeof index === 'undefined') {
         index = section.fields.length;
       }
-      section.fields.splice(index, 0, event.data.name);
-      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
-    }
-    if (section && event.dropEffect === 'copy') {
-      this.typeInstance.fields.push(event.data);
+
+      if (event.dropEffect === 'copy') {
+        this.newFields.push(fieldData);
+      }
+      section.fields.splice(index, 0, fieldData);
+      this.typeInstance.render_meta.sections = [...this.sections];
+      this.typeInstance.fields.push(fieldData);
       this.typeInstance.fields = [...this.typeInstance.fields];
     }
   }
 
   public onFieldDragged(item: any, section: CmdbTypeSection) {
-    const index = section.fields.indexOf(item);
-    section.fields.splice(index, 1);
-  }
-
-
-  public getFieldBySectionID(name: string): any {
-    return this.typeInstance.fields.find(f => f.name === name);
+    const sectionIndex = section.fields.indexOf(item);
+    section.fields.splice(sectionIndex, 1);
+    const fieldIndex = this.typeInstance.fields.indexOf(item);
+    this.typeInstance.fields.splice(fieldIndex, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
@@ -183,6 +207,7 @@ export class BuilderComponent implements OnDestroy {
       } else if (item.type === 'ref-section') {
         this.removeRefSectionSelectionField(item);
       }
+      this.sections.splice(index, 1);
       this.typeInstance.render_meta.sections.splice(index, 1);
       this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
@@ -198,6 +223,12 @@ export class BuilderComponent implements OnDestroy {
     const sectionFieldIndex = section.fields.indexOf(item.name);
     section.fields.splice(sectionFieldIndex, 1);
     this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+  }
+
+  public replaceAt(array, index, value) {
+    const ret = array.slice(0);
+    ret[index] = value;
+    return ret;
   }
 
   public matchedType(value: string) {

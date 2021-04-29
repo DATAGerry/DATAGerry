@@ -69,7 +69,7 @@ import { UsersModule } from '../../management/users/users.module';
     TypeTableActionsComponent,
     TypeBuilderStepComponent,
     TypeBuilderStepValidStatusComponent,
-    TypePreviewStepComponent
+    TypePreviewStepComponent,
   ],
     imports: [
         CommonModule,

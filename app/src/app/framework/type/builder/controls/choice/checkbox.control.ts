@@ -20,17 +20,13 @@ import { ControlsCommon, ControlsContent, randomName } from '../controls.common'
 
 class CheckboxContent implements ControlsContent {
 
-  access: boolean;
   helperText: string;
   name: string;
-  optional: any;
   placeholder: string;
   required: boolean;
   type: string;
   value: any;
   label: string;
-  groups: number[];
-  users: number[];
 
   public constructor() {
     this.type = 'checkbox';
@@ -40,14 +36,14 @@ class CheckboxContent implements ControlsContent {
 
 }
 
-export class CheckboxControl implements ControlsCommon {
+export class CheckboxControl extends ControlsCommon {
 
-  name = 'checkbox';
-  label = 'Checkbox';
-  icon = 'fas fa-check-square';
-  dndType: string = 'inputs';
+  public name: string = 'checkbox';
+  public label: string = 'Checkbox';
+  public icon: string = 'fas fa-check-square';
+  public dndType: string = 'inputs';
 
-  content() {
+  public content(): CheckboxContent {
     return new CheckboxContent();
   }
 

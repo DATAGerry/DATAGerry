@@ -73,7 +73,18 @@ export class ExportdJobSettingsBuilderComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.onLoadTypes();
+    const typesCallParameters: CollectionParameters = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1
+    };
+    this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((response: APIGetMultiResponse) => {
+        this.types = response.results as Array<CmdbType>;
+      });
+    // this.onLoadTypes();
   }
 
   public onLoadTypes(): void {
