@@ -163,7 +163,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onSearch(): void {
     this.publicIdResult = undefined;
-    this.skip = (this.currentPage - 1) * this.limit;
     this.spinner.show('app', 'Searching...');
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
@@ -197,6 +196,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onChangePage(event): void {
     this.currentPage = event;
+    this.skip = (this.currentPage - 1) * this.limit;
     this.setPageParam(this.currentPage);
     this.onSearch();
 
