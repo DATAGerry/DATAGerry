@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from authlib.jose import jwt
 
@@ -48,13 +48,13 @@ class TokenGenerator:
 
     def get_expire_time(self) -> datetime:
         expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))
-        return datetime.now() + timedelta(minutes=expire_time)
+        return datetime.now(timezone.utc) + timedelta(minutes=expire_time)
 
     def generate_token(self, payload: dict, optional_claims: dict = None) -> bytes:
         optional_claims = optional_claims or {}
 
         token_claims = {
-            'iat': int(datetime.now().timestamp()),
+            'iat': int(datetime.now(timezone.utc).timestamp()),
             'exp': int(self.get_expire_time().timestamp())
         }
         payload_claims = {

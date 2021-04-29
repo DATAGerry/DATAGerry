@@ -15,6 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from datetime import datetime, timezone
+
 from enum import Enum
 
 from cmdb.database.errors.database_errors import DatabaseNotExists
@@ -156,14 +158,12 @@ class SetupRoutine:
         # setting the initial user to admin/admin as default
         admin_name = 'admin'
         admin_pass = 'admin'
-
-        import datetime
         admin_user = UserModel(
             public_id=1,
             user_name=admin_name,
             active=True,
             group_id=__FIXED_GROUPS__[0].get_public_id(),
-            registration_time=datetime.datetime.now(),
+            registration_time=datetime.now(timezone.utc),
             password=scm.generate_hmac(admin_pass),
         )
         user_manager.insert(admin_user)

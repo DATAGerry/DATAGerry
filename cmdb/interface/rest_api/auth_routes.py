@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from flask import request, current_app, abort
@@ -123,7 +123,7 @@ def post_login():
             token: bytes = tg.generate_token(payload={'user': {
                 'public_id': user_instance.get_public_id()
             }})
-            token_issued_at = int(datetime.now().timestamp())
+            token_issued_at = int(datetime.now(timezone.utc).timestamp())
             token_expire = int(tg.get_expire_time().timestamp())
 
             login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)

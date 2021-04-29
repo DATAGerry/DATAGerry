@@ -28,7 +28,6 @@ import {
 } from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
-import { BehaviorSubject } from 'rxjs';
 
 export interface ReSearchParameters {
   rebuild: boolean;
@@ -48,11 +47,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   @Input() searchResultList: SearchResultList;
   @Input() referenceResultList: SearchResultList;
   @Input() filterResultList: any[];
-
-  /**
-   * Flag from resolve object references.
-   */
-  @Input() public resolve: BehaviorSubject<boolean>;
 
   // Filterers results
   public preSelectedFilterList: any[] = [];
@@ -99,13 +93,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
         ];
       }
     });
-  }
-
-  /**
-   * Toggles the references flag when the checkbox was changed.
-   */
-  public onResolveChange(change): void {
-    this.resolve.next(change.target.checked);
   }
 
   public rollbackQueryParametersIfNeeded(): void {
@@ -159,9 +146,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     const baseUrl = parsedUrl.origin;
     const selBox = document.createElement('textarea');
     selBox.value = `${ baseUrl }/search?query=${ this.queryParameters }`;
-    if (this.resolve.value) {
-      selBox.value = selBox.value + `&resolve=${ this.resolve.value }`;
-    }
     this.generateDataForClipboard(selBox);
   }
 

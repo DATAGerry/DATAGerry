@@ -108,7 +108,9 @@ class SearchResult(Generic[R]):
                             # removing duplicated from list
                             if inner_value not in _matched_fields:
                                 _matched_fields.append(inner_value)
-                        if field['type'] == 'ref' or field['type'] == 'ref-section-field':
+                        if field['type'] == 'ref':
+                            inner_match_fields(field['reference']['summaries'], _matched_fields, field)
+                        if field['type'] == 'ref-section-field':
                             inner_match_fields(field['references']['fields'], _matched_fields, field)
                     except Exception:
                         continue

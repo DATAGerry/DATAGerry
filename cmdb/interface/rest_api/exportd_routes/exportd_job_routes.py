@@ -18,7 +18,7 @@
 import logging
 import json
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import abort, request, jsonify, current_app
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -136,7 +136,7 @@ def add_job(request_user: UserModel):
     try:
         new_job_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         new_job_data['public_id'] = exportd_manager.get_new_id(ExportdJob.COLLECTION)
-        new_job_data['last_execute_date'] = datetime.utcnow()
+        new_job_data['last_execute_date'] = datetime.now(timezone.utc)
         new_job_data['author_id'] = request_user.get_public_id()
         new_job_data['author_name'] = request_user.get_display_name()
         new_job_data['state'] = ExecuteState.SUCCESSFUL.name

@@ -252,8 +252,11 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Get all uncategorized types
+   * @param aclRequirements
+   * @param active filter types by activation status. Default: Active types are fetched
    */
-  public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[]):
+  public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[],
+                               active: boolean = true):
     Observable<APIGetMultiResponse<T>> {
     const pipeline = [
       { $match: this.getAclFilter(aclRequirements) },
@@ -262,6 +265,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $project: { categories: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    options.params = options.params.set('active', JSON.stringify(active));
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body as APIGetMultiResponse<T>;

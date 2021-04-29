@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from cmdb.framework.cmdb_base import CmdbManagerBase
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
@@ -69,7 +69,7 @@ class ExportdLogManager(CmdbManagerBase):
         log_init['action'] = action.value
         log_init['action_name'] = action.name
         log_init['log_type'] = log_type
-        log_init['log_time'] = datetime.utcnow()
+        log_init['log_time'] = datetime.now(timezone.utc)
 
         log_data = {**log_init, **kwargs}
 
