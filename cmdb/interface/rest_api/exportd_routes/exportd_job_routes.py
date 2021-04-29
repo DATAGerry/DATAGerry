@@ -18,9 +18,10 @@
 import logging
 import json
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import abort, request, jsonify, current_app
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
     ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError, ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog, \
@@ -39,6 +40,7 @@ from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
+    object_manager = CmdbObjectManager(current_app.database_manager)
     exportd_manager = ExportdJobManagement(current_app.database_manager, current_app.event_queue)
     log_manager = ExportdLogManager(current_app.database_manager)
 
@@ -134,7 +136,7 @@ def add_job(request_user: UserModel):
     try:
         new_job_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         new_job_data['public_id'] = exportd_manager.get_new_id(ExportdJob.COLLECTION)
-        new_job_data['last_execute_date'] = datetime.utcnow()
+        new_job_data['last_execute_date'] = datetime.now(timezone.utc)
         new_job_data['author_id'] = request_user.get_public_id()
         new_job_data['author_name'] = request_user.get_display_name()
         new_job_data['state'] = ExecuteState.SUCCESSFUL.name
@@ -292,9 +294,15 @@ def worker(job: ExportdJob, request_user: UserModel):
     from flask import make_response as make_res
     from cmdb.exportd.exporter_base import ExportdManagerBase
     from cmdb.event_management.event import Event
+
     try:
-        event = Event("cmdb.exportd.pull")
-        content = ExportdManagerBase(job).execute(event, request_user.public_id, request_user.get_display_name(), False)
+        event = Event("cmdb.exportd.run_manual", {"id": job.get_public_id(),
+                                                  "user_id": request_user.get_public_id(),
+                                                  "event": 'manuel'})
+
+        content = ExportdManagerBase(job, object_manager, log_manager, event).execute(request_user.public_id,
+                                                                                      request_user.get_display_name(),
+                                                                                      False)
         response = make_res(content.data, content.status)
         response.headers['Content-Type'] = '%s; charset=%s' % (content.mimetype, content.charset)
         return response

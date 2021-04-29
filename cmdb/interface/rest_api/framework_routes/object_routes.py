@@ -20,7 +20,7 @@ from typing import List
 
 import pytz
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import abort, jsonify, request, current_app
 
@@ -421,7 +421,6 @@ def get_changed_objects_since(timestamp: int, request_user: UserModel):
 @right_required('base.framework.object.add')
 def insert_object(request_user: UserModel):
     from bson import json_util
-    from datetime import datetime
     add_data_dump = json.dumps(request.json)
 
     try:
@@ -430,7 +429,7 @@ def insert_object(request_user: UserModel):
             new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
         if not 'active' in new_object_data:
             new_object_data['active'] = True
-        new_object_data['creation_time'] = datetime.utcnow()
+        new_object_data['creation_time'] = datetime.now(timezone.utc)
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
     except TypeError as e:
@@ -549,7 +548,7 @@ def update_object(public_id: int, request_user: UserModel):
             return abort(400)
 
         # update edit time
-        put_data['last_edit_time'] = datetime.utcnow()
+        put_data['last_edit_time'] = datetime.now(timezone.utc)
 
         try:
             update_object_instance = CmdbObject(**put_data)

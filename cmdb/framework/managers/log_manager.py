@@ -16,7 +16,7 @@
 
 
 from typing import Union, List
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
 from cmdb.database.managers import DatabaseManagerMongo
@@ -176,7 +176,7 @@ class CmdbLogManager(ManagerBase):
         log_init['action'] = action.value
         log_init['action_name'] = action.name
         log_init['log_type'] = log_type
-        log_init['log_time'] = datetime.utcnow()
+        log_init['log_time'] = datetime.now(timezone.utc)
 
         log_data = {**log_init, **kwargs}
 

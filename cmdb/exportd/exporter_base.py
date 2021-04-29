@@ -16,14 +16,13 @@
 
 import logging
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import RenderList
@@ -35,23 +34,16 @@ LOGGER = logging.getLogger(__name__)
 
 class ExportdManagerBase(ExportdJobManagement):
 
-    def __init__(self, job: ExportdJob):
+    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager,
+                 log_manager: ExportdLogManager, event: Event):
         self.job = job
-        self.exportvars = self.__get_exportvars()
+        self.event = event
+        self.variables = self.__get_exportvars()
         self.destinations = self.__get__destinations()
-
-        scr = SystemConfigReader()
-        database_manager = DatabaseManagerMongo(
-            **scr.get_all_values_from_section('Database')
-        )
-        self.__object_manager = CmdbObjectManager(
-            database_manager=database_manager
-        )
-        self.log_manager = ExportdLogManager(
-            database_manager=database_manager)
-
+        self.object_manager = object_manager
+        self.log_manager = log_manager
         self.sources = self.__get_sources()
-        super(ExportdManagerBase, self).__init__(database_manager)
+        super(ExportdManagerBase, self).__init__(object_manager.dbm)
 
     def __get_exportvars(self):
         exportvars = {}
@@ -62,7 +54,7 @@ class ExportdManagerBase(ExportdJobManagement):
 
     def __get_sources(self):
         sources = []
-        sources.append(ExportSource(self.job, object_manager=self.__object_manager))
+        sources.append(ExportSource(self.job, object_manager=self.object_manager, event=self.event))
         return sources
 
     def __get__destinations(self):
@@ -75,13 +67,14 @@ class ExportdManagerBase(ExportdJobManagement):
             export_destination = ExportDestination(
                 "cmdb.exportd.externals.external_systems.{}".format(destination["className"]),
                 destination_params,
-                self.exportvars
+                self.variables,
+                self.event
             )
             destinations.append(export_destination)
 
         return destinations
 
-    def execute(self, event, user_id: int, user_name: str, log_flag: bool = True) -> ExportdHeader:
+    def execute(self, user_id: int, user_name: str, log_flag: bool = True) -> ExportdHeader:
         # get cmdb objects from all sources
         cmdb_objects = set()
         exportd_header = ExportdHeader()
@@ -95,7 +88,7 @@ class ExportdManagerBase(ExportdJobManagement):
 
             for cmdb_object in cmdb_objects:
                 # setup objectdata for use in ExportVariable templates
-                template_data = ObjectTemplateData(self.__object_manager, cmdb_object).get_template_data()
+                template_data = ObjectTemplateData(self.object_manager, cmdb_object).get_template_data()
                 external_system.add_object(cmdb_object, template_data)
             exportd_header = external_system.finish_export()
 
@@ -106,7 +99,7 @@ class ExportdManagerBase(ExportdJobManagement):
                         'state': True,
                         'user_id': user_id,
                         'user_name': user_name,
-                        'event': event.get_type(),
+                        'event': self.event.get_type(),
                         'message': external_system.msg_string,
                     }
                     self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
@@ -117,10 +110,10 @@ class ExportdManagerBase(ExportdJobManagement):
 
 class ExportVariable:
 
-    def __init__(self, name, value_tpl_default, value_tpl_types={}):
+    def __init__(self, name, value_tpl_default, value_tpl_types: dict = None):
         self.__name = name
         self.__value_tpl_default = value_tpl_default
-        self.__value_tpl_types = value_tpl_types
+        self.__value_tpl_types = value_tpl_types or {}
 
     def get_value(self, cmdb_object, template_data):
         # get value template
@@ -145,8 +138,9 @@ class ExportVariable:
 
 class ExportSource:
 
-    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager = None):
+    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager, event: Event):
         self.__job = job
+        self.event = event
         self.__obm = object_manager
         self.__objects = self.__fetch_objects()
 
@@ -155,42 +149,51 @@ class ExportSource:
 
     def __fetch_objects(self):
         query = []
-        for source in self.__job.get_sources():
-            condition = []
-            for con in source["condition"]:
-                if con["operator"] == "!=":
-                    operator = {"$ne": con["value"]}
-                else:
-                    operator = con["value"]
+        result = []
+        condition = []
+        subset: bool = self.__job.scheduling['event'].get('subset', False)
 
-                if operator in ['True', 'true']:
-                    operator = True
-                elif operator in ['False', 'false']:
-                    operator = False
-                else:
-                    operator = operator
+        if subset and self.event.get_param('event') in ['delete']:
+            from cmdb.framework.cmdb_render import RenderResult
+            deleted = RenderResult()
+            deleted.object_information['object_id'] = self.event.get_param('id')
+            deleted.type_information['type_id'] = self.event.get_param('type_id')
+            result.append(deleted)
 
-                condition.append({'fields': {"$elemMatch": {"name": con["name"], "value": operator}}})
-                condition.append({'type_id': source["type_id"]})
-                condition.append({'active': {'$eq': True}})
-                query.append({"$and": condition})
+        else:
+            if subset and self.event.get_param('event') in ['insert', 'update']:
+                condition.append({'public_id': self.event.get_param('id')})
 
-            if not source["condition"]:
-                query.append({'type_id': source["type_id"], 'active': {'$eq': True}})
+            for source in self.__job.get_sources():
+                temp = []
+                for con in source["condition"]:
+                    operator = con["operator"]
+                    value = con["value"]
 
-        current_objects = self.__obm.get_objects_by(sort="public_id", **{'$or': query})
-        result = (RenderList(current_objects, None, database_manager=self.__obm.dbm,
-                             object_manager=self.__obm).render_result_list())
+                    regex = {"$ne": con["value"]} if operator == "!=" else {"$regex": value, "$options": "si"}
+                    regex = True if value in ['True', 'true'] else False if value in ['False', 'false'] else regex
+
+                    temp.append({'fields': {"$elemMatch": {"name": con["name"], "value": regex}}})
+                    temp.append({'type_id': source["type_id"]})
+                    temp.append({'active': {'$eq': True}})
+                    query.append({"$and": [*condition, *temp]})
+
+                if not source["condition"]:
+                    query.append({'type_id': source["type_id"], 'active': {'$eq': True}})
+
+            current_objects = self.__obm.get_objects_by(sort="public_id", **{'$or': query})
+            result = (RenderList(current_objects, None, database_manager=self.__obm.dbm,
+                                 object_manager=self.__obm).render_result_list())
         return result
 
 
 class ExportDestination:
 
-    def __init__(self, class_external_system, destination_parms, export_vars):
+    def __init__(self, class_external_system, destination_parms, export_vars, event=None):
         self.__destination_parms = destination_parms
         self.__export_vars = export_vars
         external_system_class = load_class(class_external_system)
-        self.__external_system = external_system_class(self.__destination_parms, self.__export_vars)
+        self.__external_system = external_system_class(self.__destination_parms, self.__export_vars, event)
 
     def get_external_system(self):
         return self.__external_system
@@ -200,7 +203,7 @@ class ExternalSystem:
     parameters = {}
     variables = {}
 
-    def __init__(self, destination_parms, export_vars):
+    def __init__(self, destination_parms, export_vars, event: Event = None):
         # Set default if value is empty
         for key, val in destination_parms.items():
             if not bool(str(val).strip()):
@@ -210,6 +213,7 @@ class ExternalSystem:
             if not destination_parms.get(item['name']):
                 destination_parms.update({item['name']: item['default']})
 
+        self.event = event
         self._destination_parms = destination_parms
         self._export_vars = export_vars
         self.msg_string = ""

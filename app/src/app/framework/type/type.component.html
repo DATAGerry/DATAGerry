@@ -20,6 +20,10 @@
   </div>
 </ng-template>
 
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact *ngIf="data" [userID]="data"></cmdb-user-compact>
+</ng-template>
+
 <ng-template #typeNameTemplate let-item="item">
   <cmdb-type-label [faIcon]="item.render_meta?.icon" [description]="item?.description"
                    [title]="item.label ? item.label : item.name"

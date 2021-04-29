@@ -16,7 +16,7 @@
 
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import abort, current_app, request
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
@@ -125,7 +125,7 @@ def insert_category(data: dict):
         InsertSingleResponse: Insert response with the new category and its public_id.
     """
     category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
-    data.setdefault('creation_time', datetime.utcnow())
+    data.setdefault('creation_time', datetime.now(timezone.utc))
     try:
         result_id: PublicID = category_manager.insert(data)
         raw_doc = category_manager.get(public_id=result_id)

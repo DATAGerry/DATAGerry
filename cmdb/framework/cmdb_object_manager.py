@@ -25,8 +25,9 @@ import json
 
 from cmdb.database.utils import object_hook
 from bson import json_util
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
+from queue import Queue
 
 from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
@@ -50,27 +51,27 @@ from cmdb.utils.wraps import deprecated
 LOGGER = logging.getLogger(__name__)
 
 
-def has_access_control(type: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
+def has_access_control(model: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
     """Check if a user has access to object/objects for a given permission"""
-    acl: AccessControlList = type.acl
+    acl: AccessControlList = model.acl
     if acl and acl.activated:
         return acl.verify_access(user.group_id, permission)
     return True
 
 
-def verify_access(type: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
+def verify_access(model: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
     """Validate if a user has access to objects of this type."""
     if not user or not permission:
         return
 
-    verify = has_access_control(type, user, permission)
+    verify = has_access_control(model, user, permission)
     if not verify:
         raise AccessDeniedError('Protected by ACL permission!')
 
 
 class CmdbObjectManager(CmdbManagerBase):
 
-    def __init__(self, database_manager=None, event_queue=None):
+    def __init__(self, database_manager=None, event_queue: Queue = None):
         self._event_queue = event_queue
         self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
@@ -272,7 +273,8 @@ class CmdbObjectManager(CmdbManagerBase):
             if self._event_queue:
                 event = Event("cmdb.core.object.added", {"id": new_object.get_public_id(),
                                                          "type_id": new_object.get_type_id(),
-                                                         "user_id": new_object.author_id})
+                                                         "user_id": new_object.author_id,
+                                                         "event": 'insert'})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
@@ -287,7 +289,7 @@ class CmdbObjectManager(CmdbManagerBase):
             update_object = data
         else:
             raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
-        update_object.last_edit_time = datetime.utcnow()
+        update_object.last_edit_time = datetime.now(timezone.utc)
         if user:
             update_object.editor_id = user.public_id
 
@@ -301,11 +303,12 @@ class CmdbObjectManager(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.__dict__
         )
-        # create cmdb.core.object.updated event
+
         if self._event_queue and user:
             event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
                                                        "type_id": update_object.get_type_id(),
-                                                       "user_id": user.get_public_id()})
+                                                       "user_id": user.get_public_id(),
+                                                       'event': 'update'})
             self._event_queue.put(event)
         return ack.acknowledged
 
@@ -373,7 +376,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 event = Event("cmdb.core.object.deleted",
                               {"id": public_id,
                                "type_id": self.get_object(public_id).get_type_id(),
-                               "user_id": user.get_public_id()})
+                               "user_id": user.get_public_id(),
+                               "event": 'delete'})
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
@@ -384,7 +388,8 @@ class CmdbObjectManager(CmdbManagerBase):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
-                                                        "user_id": user.get_public_id()})
+                                                        "user_id": user.get_public_id(),
+                                                        "event": 'delete'})
             self._event_queue.put(event)
         return ack
 
