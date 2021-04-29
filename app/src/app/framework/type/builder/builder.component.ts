@@ -216,12 +216,15 @@ export class BuilderComponent implements OnDestroy {
 
   public removeField(item: any, section: CmdbTypeSection) {
     const indexField: number = this.typeInstance.fields.indexOf(item);
+    if (indexField > -1) {
+      this.typeInstance.fields.splice(indexField, 1);
+      this.typeInstance.fields = [...this.typeInstance.fields];
+    }
 
-    this.typeInstance.fields.splice(indexField, 1);
-    this.typeInstance.fields = [...this.typeInstance.fields];
-
-    const sectionFieldIndex = section.fields.indexOf(item.name);
-    section.fields.splice(sectionFieldIndex, 1);
+    const sectionFieldIndex = section.fields.indexOf(item);
+    if (sectionFieldIndex > -1) {
+      section.fields.splice(sectionFieldIndex, 1);
+    }
     this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
   }
 
