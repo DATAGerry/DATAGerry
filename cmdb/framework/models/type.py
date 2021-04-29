@@ -55,12 +55,13 @@ class TypeSummary:
 
 
 class TypeReference:
-    __slots__ = 'type_id', 'label', 'summaries', 'line', 'prefix', 'icon'
+    __slots__ = 'type_id', 'object_id', 'type_label', 'summaries', 'line', 'prefix', 'icon'
 
-    def __init__(self, type_id: int, label: str, line: str = None,
+    def __init__(self, type_id: int, object_id: int, type_label: str, line: str = None,
                  prefix: bool = False, icon=None, summaries: list = None):
         self.type_id = type_id
-        self.label = label or ''
+        self.object_id = object_id
+        self.type_label = type_label or ''
         self.summaries = summaries or []
         self.line = line
         self.icon = icon
@@ -70,8 +71,9 @@ class TypeReference:
     def from_data(cls, data: dict) -> "TypeReference":
         return cls(
             type_id=data.get('type_id'),
+            object_id=data.get('object_id'),
             line=data.get('line'),
-            label=data.get('label', None),
+            type_label=data.get('type_label', None),
             summaries=data.get('summaries', None),
             icon=data.get('prefix', False),
             prefix=data.get('icon', None)
@@ -81,8 +83,9 @@ class TypeReference:
     def to_json(cls, instance: "TypeReference") -> dict:
         return {
             'type_id': instance.type_id,
+            'object_id': instance.object_id,
             'line': instance.line,
-            'label': instance.label,
+            'type_label': instance.type_label,
             'summaries': instance.summaries,
             'icon': instance.icon,
             'prefix': instance.prefix
