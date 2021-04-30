@@ -7,7 +7,7 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <div class="form-control text-left overflow-auto" readonly>
-            <ng-container *ngIf="data.reference; else noRef;">
+            <ng-container *ngIf="data.reference && data.reference?.object_id !== 0; else noRef;">
               <ng-container *ngIf="!protect">
                 <ng-container *ngIf="!data?.reference.line; else refLine">
                   <i class="{{data.reference?.icon}}"></i> {{data.reference?.type_label}} #{{data.reference?.object_id}}
@@ -33,7 +33,9 @@
             <ng-template #noRef> No reference set</ng-template>
           </div>
           <div class="input-group-append" *ngIf="data.reference && !protect">
-            <span class="input-group-text" (click)="showReferencePreview()">
+            <span class="input-group-text"
+                    [class.ref-disabled]="!data.reference?.object_id"
+                    (click)="showReferencePreview()">
               <fa-icon icon="file-powerpoint"></fa-icon>
             </span>
             <span class="input-group-text">
