@@ -16,7 +16,6 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as moment from 'moment';
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ApiCallService } from '../services/api-call.service';
@@ -28,7 +27,6 @@ import { GroupService } from '../management/services/group.service';
 import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
 import { APIGetMultiResponse } from '../services/models/api-response';
-import { SpecialService } from '../framework/services/special.service';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { takeUntil } from 'rxjs/operators';
@@ -46,9 +44,25 @@ import { CmdbType } from '../framework/models/cmdb-type';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
+  /**
+   * Table Template: Dashboard active column.
+   */
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard user column.
+   */
   @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard action column.
+   */
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: Dashboard date column.
+   */
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
   /**
    * Global unsubscriber for http calls to the rest backend.
@@ -77,19 +91,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public itemsGroup: number [] = [];
   public colorsGroup: any [] = [];
 
-  public newestObjects: Array<RenderResult>;
-  public newestTableColumns: Array<Column>;
-  public newestObjectsCount: number;
+  public newestObjects: Array<RenderResult> = [];
+  public newestTableColumns: Array<Column> = [];
+  public newestObjectsCount: number = 0;
+  public readonly newestInnitPage: number = 1;
+  public newestPage: number = this.newestInnitPage;
+  public newestLoading: boolean = false;
 
-  public latestObjects: Array<RenderResult>;
-  public latestTableColumns: Array<Column>;
-  public latestObjectsCount: number;
+  public latestObjects: Array<RenderResult> = [];
+  public latestTableColumns: Array<Column> = [];
+  public latestObjectsCount: number = 0;
+  public readonly latestInnitPage: number = 1;
+  public latestPage: number = this.latestInnitPage;
+  public latestLoading: boolean = false;
 
   constructor(private api: ApiCallService, private typeService: TypeService,
               private objectService: ObjectService, private categoryService: CategoryService,
               private toastService: ToastService, private sidebarService: SidebarService,
-              private userService: UserService, private groupService: GroupService,
-              private specialService: SpecialService<RenderResult>) {
+              private userService: UserService, private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -155,9 +174,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       sortable: false,
       searchable: false,
       cssClasses: ['text-center'],
-      render(data: any, item?: any, column?: Column, index?: number) {
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
-      }
+      template: this.dateTemplate,
     } as Column;
 
     const lastModColumn = {
@@ -167,11 +184,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
       sortable: false,
       searchable: false,
       cssClasses: ['text-center'],
-      render(data: any, item?: any, column?: Column, index?: number) {
+      template: this.dateTemplate,
+      render(data: any) {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
+        return data;
       }
     } as Column;
 
@@ -221,18 +239,38 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  public onNewestPageChange(event) {
+    this.newestPage = event;
+    this.loadNewestObjects();
+  }
+
+  public  onLatestPageChange(event) {
+    this.latestPage = event;
+    this.loadLatestObjects();
+  }
+
   private loadNewestObjects(): void {
-    this.objectService.getNewestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.newestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.newestPage, limit: 10, order: -1};
+    this.objectService.getNewestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.newestObjects = apiResponse.results as Array<RenderResult>;
-      this.newestObjectsCount = apiResponse.results.length;
-    });
+      this.newestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.newestLoading = false;
+      } );
   }
 
   private loadLatestObjects(): void {
-    this.objectService.getLatestObjects().pipe(takeUntil(this.unSubscribe)).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+    this.latestLoading = true;
+    const apiParameters: CollectionParameters = {page: this.latestPage, limit: 10, order: -1};
+    this.objectService.getLatestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
       this.latestObjects = apiResponse.results as Array<RenderResult>;
-      this.latestObjectsCount = apiResponse.results.length;
-    });
+      this.latestObjectsCount = apiResponse.total;
+    }, () => {}, () => {
+        this.latestLoading = false;
+      } );
   }
 
   private generateObjectChar() {

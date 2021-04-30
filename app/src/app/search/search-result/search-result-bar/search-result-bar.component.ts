@@ -1,3 +1,21 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import {
   Component,
   EventEmitter,
@@ -10,7 +28,6 @@ import {
 } from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
-import { BehaviorSubject } from 'rxjs';
 
 export interface ReSearchParameters {
   rebuild: boolean;
@@ -28,12 +45,8 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   @Output() refreshSearch = new EventEmitter<ReSearchParameters>();
   @Input() queryParameters: any;
   @Input() searchResultList: SearchResultList;
+  @Input() referenceResultList: SearchResultList;
   @Input() filterResultList: any[];
-
-  /**
-   * Flag from resolve object references.
-   */
-  @Input() public resolve: BehaviorSubject<boolean>;
 
   // Filterers results
   public preSelectedFilterList: any[] = [];
@@ -80,13 +93,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
         ];
       }
     });
-  }
-
-  /**
-   * Toggles the references flag when the checkbox was changed.
-   */
-  public onResolveChange(change): void {
-    this.resolve.next(change.target.checked);
   }
 
   public rollbackQueryParametersIfNeeded(): void {
@@ -140,9 +146,6 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
     const baseUrl = parsedUrl.origin;
     const selBox = document.createElement('textarea');
     selBox.value = `${ baseUrl }/search?query=${ this.queryParameters }`;
-    if (this.resolve.value) {
-      selBox.value = selBox.value + `&resolve=${ this.resolve.value }`;
-    }
     this.generateDataForClipboard(selBox);
   }
 

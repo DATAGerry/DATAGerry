@@ -17,21 +17,21 @@
 */
 
 import { Component } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   selector: 'cmdb-input-appends',
   templateUrl: './input-appends.component.html',
   styleUrls: ['./input-appends.component.scss']
 })
-export class InputAppendsComponent  extends RenderField {
+export class InputAppendsComponent extends RenderFieldComponent {
 
   constructor() {
     super();
   }
 
   public changeValueToDefault() {
-    this.controller.setValue(this.data.default);
+    this.controller.setValue(this.data.default ? this.data.default : null);
     this.controller.markAsDirty({onlySelf: true});
     this.controller.markAsTouched({onlySelf: true});
     this.parentFormGroup.markAsTouched({onlySelf: true});

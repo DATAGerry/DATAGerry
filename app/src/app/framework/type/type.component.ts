@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,16 +18,20 @@
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { TypeService } from '../services/type.service';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { FileSaverService } from 'ngx-filesaver';
 import { DatePipe } from '@angular/common';
 import { FileService } from '../../export/export.service';
-import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../layout/table/table.types';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { PermissionService } from '../../auth/services/permission.service';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../management/user-settings/models/user-setting';
+import { convertResourceURL, UserSettingsService } from '../../management/user-settings/services/user-settings.service';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-type',
@@ -35,6 +39,12 @@ import { PermissionService } from '../../auth/services/permission.service';
   styleUrls: ['./type.component.scss']
 })
 export class TypeComponent implements OnInit, OnDestroy {
+
+  /**
+   * HTML ID of the table.
+   * Used for user settings and table-states
+   */
+  public readonly id: string = 'type-list-table';
 
   /**
    * Global un-subscriber for http calls to the rest backend.
@@ -86,6 +96,16 @@ export class TypeComponent implements OnInit, OnDestroy {
   @ViewChild('cleanTemplate', { static: true }) cleanTemplate: TemplateRef<any>;
 
   /**
+   * Table Template: Type date column.
+   */
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
+
+  /**
+   * Table Template: user column.
+   */
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+
+  /**
    * Table columns definition.
    */
   public columns: Array<Column>;
@@ -123,10 +143,36 @@ export class TypeComponent implements OnInit, OnDestroy {
    */
   public loading: boolean = false;
 
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
 
-  constructor(private typeService: TypeService, private fileService: FileService,
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+
+  constructor(private typeService: TypeService, private fileService: FileService, private route: ActivatedRoute,
               private permissionService: PermissionService, private fileSaverService: FileSaverService,
-              private datePipe: DatePipe) {
+              private datePipe: DatePipe, private router: Router,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   /**
@@ -160,15 +206,36 @@ export class TypeComponent implements OnInit, OnDestroy {
         template: this.typeNameTemplate,
       },
       {
+        display: 'Author',
+        name: 'author_id',
+        data: 'author_id',
+        searchable: true,
+        sortable: true,
+        template: this.userTemplate
+      },
+      {
         display: 'Creation Time',
         name: 'creation_time',
         data: 'creation_time',
         sortable: true,
         searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
+        template: this.dateTemplate,
+      },
+      {
+        display: 'Last editor',
+        name: 'editor_id',
+        data: 'editor_id',
+        sortable: true,
+        searchable: true,
+        template: this.userTemplate
+      },
+      {
+        display: 'Modification Time',
+        name: 'last_edit_time',
+        data: 'last_edit_time',
+        sortable: true,
+        searchable: false,
+        template: this.dateTemplate,
       },
       {
         display: 'Actions',
@@ -199,7 +266,21 @@ export class TypeComponent implements OnInit, OnDestroy {
     if (this.permissionService.hasRight(exportRight) || this.permissionService.hasExtendedRight(exportRight)) {
       this.selectEnabled = true;
     }
+    this.initTable();
     this.loadTypesFromAPI();
+  }
+
+  /**
+   * If a table state is available configures the
+   * table according to the data specified in the table state
+   * @private
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.page = this.tableState.page;
+      this.limit = this.tableState.pageSize;
+    }
   }
 
   /**
@@ -271,6 +352,12 @@ export class TypeComponent implements OnInit, OnDestroy {
     this.loadTypesFromAPI();
   }
 
+  onStateReset(): void {
+    this.limit = this.initLimit;
+    this.page = this.initPage;
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+  }
+
   /**
    * On table selection change.
    * Map selected items by the object id
@@ -318,6 +405,22 @@ export class TypeComponent implements OnInit, OnDestroy {
     }
     this.loadTypesFromAPI();
   }
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+    this.loadTypesFromAPI();
+  }
+
 
   /**
    * Download the selected export file

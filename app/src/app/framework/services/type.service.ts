@@ -21,7 +21,6 @@ import { CmdbType } from '../models/cmdb-type';
 import {
   ApiCallService,
   ApiService,
-  httpObserveOptions,
   HttpProtocolHelper,
   resp
 } from '../../services/api-call.service';
@@ -108,24 +107,27 @@ export class TypeService<T = CmdbType> implements ApiService {
   /**
    * Iterate over the type collection
    * @param params Instance of CollectionParameters
+   * @param active Filter types by activation status. Default: Inactive types are not fetched
    */
-  public getTypes(params: CollectionParameters = {
-    filter: undefined,
-    limit: 10,
-    sort: 'public_id',
-    order: 1,
-    page: 1
-  }): Observable<APIGetMultiResponse<T>> {
+  public getTypes(
+    params: CollectionParameters = {filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1},
+    active: boolean = false):
+    Observable<APIGetMultiResponse<T>> {
     const options = this.options;
     let httpParams: HttpParams = new HttpParams();
     if (params.filter !== undefined) {
       const filter = JSON.stringify(params.filter);
       httpParams = httpParams.set('filter', filter);
     }
+    if (params.projection !== undefined) {
+      const projection = JSON.stringify(params.projection);
+      httpParams = httpParams.set('projection', projection);
+    }
     httpParams = httpParams.set('limit', params.limit.toString());
     httpParams = httpParams.set('sort', params.sort);
     httpParams = httpParams.set('order', params.order.toString());
     httpParams = httpParams.set('page', params.page.toString());
+    httpParams = httpParams.set('active', JSON.stringify(active));
     options.params = httpParams;
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
@@ -250,8 +252,11 @@ export class TypeService<T = CmdbType> implements ApiService {
 
   /**
    * Get all uncategorized types
+   * @param aclRequirements
+   * @param active filter types by activation status. Default: Active types are fetched
    */
-  public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[]):
+  public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[],
+                               active: boolean = true):
     Observable<APIGetMultiResponse<T>> {
     const pipeline = [
       { $match: this.getAclFilter(aclRequirements) },
@@ -260,6 +265,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $project: { categories: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    options.params = options.params.set('active', JSON.stringify(active));
     return this.api.callGet<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body as APIGetMultiResponse<T>;
@@ -293,6 +299,7 @@ export class TypeService<T = CmdbType> implements ApiService {
       { $project: { category: 0 } }
     ];
     const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(pipeline), 0);
+    options.params = options.params.set('active', false.toString());
     return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;

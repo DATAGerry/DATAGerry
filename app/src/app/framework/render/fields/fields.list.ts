@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { TextComponent } from './text/text.component';
@@ -29,6 +29,7 @@ import { DummyComponent } from './dummy/dummy.component';
 import { RefComponent } from './special/ref.component';
 import { DateComponent } from './date/date.component';
 import { NumberComponent } from './math/number.component';
+import { RefSectionComponent } from './section/ref-section.component';
 
 
 export const fieldComponents: { [type: string]: any } = {
@@ -44,5 +45,6 @@ export const fieldComponents: { [type: string]: any } = {
   select: SelectComponent,
   ref: RefComponent,
   date: DateComponent,
-  debug: DummyComponent
+  debug: DummyComponent,
+  'ref-section-field': RefSectionComponent
 };

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,36 +13,35 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { ControlsCommon, StructureContent, randomName } from './controls.common';
 
-class SectionContent implements StructureContent {
+export class SectionContent implements StructureContent {
 
   label: string;
   name: string;
-  position: number;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  fields: [] = [];
+  fields: Array<any> = [];
   type: string = 'section';
+
+  constructor() {
+    this.type = 'section';
+    this.name = randomName(this.type);
+    this.label = 'Section';
+  }
 
 }
 
-export class SectionControl implements ControlsCommon {
+export class SectionControl extends ControlsCommon {
 
   name = 'section';
   label = 'Section';
-  icon = 'object-group';
+  icon = 'fas fa-object-group';
   dndType: string = 'sections';
 
-  content() {
-    const section = new SectionContent();
-    section.name = randomName(this.name);
-    section.label = this.label;
-    return section;
+  public content(): SectionContent {
+    return new SectionContent();
   }
 
 }

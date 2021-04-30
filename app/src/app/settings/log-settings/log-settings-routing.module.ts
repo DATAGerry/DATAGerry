@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ import { Routes, RouterModule } from '@angular/router';
 import { LogObjectSettingsComponent } from './log-object-settings/log-object-settings.component';
 import { LogExportdSettingsComponent } from './log-exportd-settings/log-exportd-settings.component';
 import { LogSettingsComponent } from './log-settings.component';
+import { UserSettingsResolver } from '../../management/user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
@@ -35,12 +36,18 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Objects'
     },
+    resolve: {
+      userSetting: UserSettingsResolver,
+    },
     component: LogObjectSettingsComponent
   },
   {
     path: 'exportdjobs',
     data: {
       breadcrumb: 'Exportd Jobs'
+    },
+    resolve: {
+      userSetting: UserSettingsResolver,
     },
     component: LogExportdSettingsComponent
   }

@@ -35,7 +35,15 @@ class ProductionConfig(Config):
     ENV = 'production'
 
 
+class TestingConfig(Config):
+    """Configurations for Production."""
+    DEBUG = True
+    TESTING = True
+    ENV = 'testing'
+
+
 app_config = {
     'development': DevelopmentConfig,
     'production': ProductionConfig,
+    'testing': TestingConfig
 }

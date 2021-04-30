@@ -1,0 +1,9 @@
+[run]
+branch = True
+source = cmdb
+omit =
+    tests/*
+
+[report]
+ignore_errors = True
+fail_under = 0

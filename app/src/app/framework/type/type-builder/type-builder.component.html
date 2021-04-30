@@ -1,29 +1,84 @@
-<aw-wizard>
-  <aw-wizard-step (stepExit)="exitBasicStep()" stepId="1" stepTitle="Basic informations">
-    <cmdb-type-basic-step [preData]="typeInstance" [mode]="mode"></cmdb-type-basic-step>
-    <button class="btn btn-primary next" type="button" awNextStep
-            [disabled]="!basicStep.basicForm.valid">Next Step
+<div id="type-builder" class="row">
+  <div class="col-md-9">
+    <aw-wizard [defaultStepIndex]="stepIndex" [navBarLayout]="'large-empty-symbols'" [awNavigationMode] navigateBackward="allow" navigateForward="allow">
+      <aw-wizard-step [stepId]="'1'" stepTitle="Basic information">
+        <ng-template awWizardStepSymbol><i class="fas fa-info"></i></ng-template>
+        <hr/>
+        <cmdb-type-basic-step [mode]="mode" [typeInstance]="typeInstance"
+                              (validateChange)="basicValid = $event"></cmdb-type-basic-step>
+        <hr/>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
+      </aw-wizard-step>
+      <aw-wizard-step [stepId]="'2'" stepTitle="Content">
+        <ng-template awWizardStepSymbol><i class="fas fa-clipboard-check"></i></ng-template>
+        <hr/>
+        <cmdb-type-fields-step [mode]="mode" [typeInstance]="typeInstance" [types]="types"
+                               (validateChange)="contentValid = $event"></cmdb-type-fields-step>
+        <hr/>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
+      </aw-wizard-step>
+      <!--<aw-wizard-step [stepId]="'3'" stepTitle="Preview">
+        <ng-template awWizardStepSymbol><i class="fas fa-eye"></i></ng-template>
+        <hr/>
+        <cmdb-type-preview-step [typeInstance]="typeInstance"></cmdb-type-preview-step>
+        <hr/>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
+      </aw-wizard-step>-->
+      <aw-wizard-step [stepId]="'3'" stepTitle="Meta">
+        <ng-template awWizardStepSymbol><i class="fas fa-hashtag"></i></ng-template>
+        <hr/>
+        <cmdb-type-meta-step [mode]="mode" [typeInstance]="typeInstance"></cmdb-type-meta-step>
+        <hr/>
+        <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
+          Previous Step
+        </button>
+        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+          <i class="fas fa-angle-double-right"></i></button>
+      </aw-wizard-step>
+      <aw-wizard-step [stepId]="'4'" stepTitle="ACL">
+        <ng-template awWizardStepSymbol><i class="fas fa-users"></i></ng-template>
+        <hr/>
+        <cmdb-type-acl-step [typeInstance]="typeInstance" [groups]="groups" (validateChange)="accessValid = $event"></cmdb-type-acl-step>
+        <hr/>
+        <button class="btn btn-primary prev" type="button" awPreviousStep>
+          <i class="fas fa-angle-double-left"></i> Previous Step
+        </button>
+      </aw-wizard-step>
+    </aw-wizard>
+  </div>
+  <div class="col-md-3">
+    <div class="card">
+      <div class="card-header">
+        Validation
+      </div>
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">
+          <cmdb-type-builder-step-status [step]="'Basic information'"
+                                         [status]="basicValid"></cmdb-type-builder-step-status>
+        </li>
+        <li class="list-group-item">
+          <cmdb-type-builder-step-status [step]="'Type content'"
+                                         [status]="contentValid"></cmdb-type-builder-step-status>
+        </li>
+        <li class="list-group-item">
+          <cmdb-type-builder-step-status [step]="'Meta data'" [status]="metaValid"></cmdb-type-builder-step-status>
+        </li>
+        <li class="list-group-item">
+          <cmdb-type-builder-step-status [step]="'Access'" [status]="accessValid"></cmdb-type-builder-step-status>
+        </li>
+      </ul>
+    </div>
+    <button type="button" class="btn btn-block btn-success mt-2" (click)="saveType()"
+            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
     </button>
-  </aw-wizard-step>
-  <aw-wizard-step (stepExit)="exitFieldStep()" stepId="2" stepTitle="Field definitions">
-    <cmdb-type-fields-step [mode]="mode" [preData]="typeInstance"></cmdb-type-fields-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Go to previous step</button>
-    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
-  </aw-wizard-step>
-  <aw-wizard-step (stepExit)="exitMetaStep()" stepId="3" stepTitle="Meta data">
-    <cmdb-type-meta-step [preData]="typeInstance" [fields]="typeInstance?.fields"></cmdb-type-meta-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button" awNextStep>Go to next step</button>
-  </aw-wizard-step>
-  <aw-wizard-step (stepExit)="exitAccessStep()" stepId="4" stepTitle="ACL">
-    <cmdb-type-acl-step [acl]="typeInstance?.acl" [groups]="groups"
-                        (validStatus)="aclStepValid = $event" (isEmpty)="aclEmpty = $event"></cmdb-type-acl-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!aclEmpty || !aclStepValid">Go to next step</button>
-  </aw-wizard-step>
-  <aw-wizard-step stepId="5" stepTitle="Validation">
-    <cmdb-type-validation-step [typeInstance]="typeInstance"></cmdb-type-validation-step>
-    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous Step</button>
-    <button class="btn btn-success next" type="button" (click)="saveType()">Save</button>
-  </aw-wizard-step>
-</aw-wizard>
+  </div>
+</div>

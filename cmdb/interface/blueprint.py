@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
-from typing import Type
 
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
 
 from cmdb.manager import ManagerGetError
-from cmdb.interface.api_parameters import CollectionParameters, ApiParameters
+from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
@@ -54,7 +53,7 @@ class APIBlueprint(Blueprint):
 
                             token = parse_authorization_header(request.headers['Authorization'])
                             try:
-                                decrypted_token = TokenValidator().decode_token(token)
+                                decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
                             except ValidationError as err:
                                 return abort(401)
                             try:
@@ -104,7 +103,7 @@ class APIBlueprint(Blueprint):
         return _validate
 
     @classmethod
-    def parse_parameters(cls, parameters_class: Type[ApiParameters], **optional):
+    def parse_parameters(cls, parameters_class, **optional):
         """
         Parse generic parameters from http to a class
         Args:
@@ -112,7 +111,7 @@ class APIBlueprint(Blueprint):
             **optional: Dynamic route parameters
 
         Returns:
-            ApiParameters: Wrapper class
+            APIParameters: Wrapper class
         """
 
         def _parse(f):

@@ -17,13 +17,13 @@
 */
 
 import { Component } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   templateUrl: './select-simple.component.html',
   styleUrls: ['./select-simple.component.scss']
 })
-export class SelectSimpleComponent extends RenderField {
+export class SelectSimpleComponent extends RenderFieldComponent {
 
   constructor() {
     super();

@@ -34,7 +34,7 @@ mkdir -p ${DIR_ETC}/datagerry
 cp files/cmdb.conf ${DIR_ETC}/datagerry
 cp files/datagerry ${DIR_BIN}
 cp files/datagerry.service ${DIR_SYSTEMD}
-cp files/datagerry.conf${DIR_TMPFILES}
+cp files/datagerry.conf ${DIR_TMPFILES}
 
 # enable systemd service
 systemctl daemon-reload

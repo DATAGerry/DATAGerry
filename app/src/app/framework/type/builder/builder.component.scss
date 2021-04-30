@@ -1,16 +1,16 @@
 @import "~src/scss/variables";
 
-#builder-controls{
+#builder-controls {
   position: relative;
 }
 
-#controlWrapper{
+#controlWrapper {
   position: sticky;
   top: calc(15px + #{$navbar-height})
 }
 
-#controlsPanel{
-  button{
+#controlsPanel {
+  button {
     line-height: 0.1;
   }
 }
@@ -23,6 +23,25 @@
     &:first-child {
       margin-top: 0;
     }
+
+    .empty-section {
+      position: relative;
+      height: 200px;
+      border: 3px dashed theme-color("info");
+
+      &:after {
+        content: attr(data-content);
+        position: absolute;
+        text-align: center;
+        top: 50%;
+        left: 0;
+        width: 100%;
+        margin-top: -1em;
+        text-transform: uppercase;
+        font-size: .8em;
+      }
+    }
+
   }
 
   .fields {
@@ -35,7 +54,9 @@
     position: relative;
 
     &.empty {
-      border: 1px dashed theme-color("primary");
+      height: 100%;
+      border: 3px dashed theme-color("info");
+
       &:after {
         content: attr(data-content);
         position: absolute;
@@ -44,6 +65,8 @@
         left: 0;
         width: 100%;
         margin-top: -1em;
+        text-transform: uppercase;
+        font-size: .8em;
       }
     }
 

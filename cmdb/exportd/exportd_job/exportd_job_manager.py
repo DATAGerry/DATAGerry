@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 
 import logging
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
@@ -33,15 +33,11 @@ LOGGER = logging.getLogger(__name__)
 class ExportdJobManagement(CmdbManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
-        self.dbm = database_manager
         self._event_queue = event_queue
         super().__init__(database_manager)
 
     def get_new_id(self, collection: str) -> int:
         return self.dbm.get_next_public_id(collection)
-
-    def search(self):
-        pass
 
     def get_job(self, public_id: int) -> ExportdJob:
         try:
@@ -111,9 +107,11 @@ class ExportdJobManagement(CmdbManagerBase):
                 data=new_object.to_database()
             )
             if self._event_queue:
+                state = new_object.scheduling["event"]["active"] and new_object.get_active()
                 event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
-                                                     "active": new_object.scheduling["event"]["active"] and new_object.get_active(),
-                                                     "user_id": new_object.get_author_id()})
+                                                     "active": state,
+                                                     "user_id": new_object.get_author_id(),
+                                                     "event": 'automatic'})
                 self._event_queue.put(event)
         except CMDBError as e:
             raise ExportdJobManagerInsertError(e)
@@ -135,16 +133,18 @@ class ExportdJobManagement(CmdbManagerBase):
             update_object = data
         else:
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
-        update_object.last_execute_date = datetime.utcnow()
+        update_object.last_execute_date = datetime.now(timezone.utc)
         ack = self._update(
             collection=ExportdJob.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
         if self._event_queue and event_start:
+            state = update_object.scheduling["event"]["active"] and update_object.get_active()
             event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
-                                                   "active": update_object.scheduling["event"]["active"] and update_object.get_active(),
-                                                   "user_id": request_user.get_public_id()})
+                                                   "active": state,
+                                                   "user_id": request_user.get_public_id(),
+                                                   "event": 'automatic'})
             self._event_queue.put(event)
         return ack.acknowledged
 
@@ -153,7 +153,8 @@ class ExportdJobManagement(CmdbManagerBase):
             ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
             if self._event_queue:
                 event = Event("cmdb.exportd.deleted", {"id": public_id, "active": False,
-                                                       "user_id": request_user.get_public_id()})
+                                                       "user_id": request_user.get_public_id(),
+                                                       "event": 'automatic'})
                 self._event_queue.put(event)
             return ack
         except Exception:
@@ -162,7 +163,8 @@ class ExportdJobManagement(CmdbManagerBase):
     def run_job_manual(self, public_id: int, request_user: UserModel) -> bool:
         if self._event_queue:
             event = Event("cmdb.exportd.run_manual", {"id": public_id,
-                                                      "user_id": request_user.get_public_id()})
+                                                      "user_id": request_user.get_public_id(),
+                                                      "event": 'manuel'})
             self._event_queue.put(event)
         return True
 

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,37 +13,80 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AfterContentInit, ChangeDetectorRef, Component, Input, ViewChild } from '@angular/core';
+import {
+  AfterContentInit,
+  ChangeDetectorRef,
+  Component, DoCheck,
+  Input,
+  KeyValueDiffer, KeyValueDiffers,
+  OnDestroy,
+  OnInit,
+  ViewChild
+} from '@angular/core';
 import { BuilderComponent } from '../../builder/builder.component';
 import { CmdbMode } from '../../../modes.enum';
+import { TypeBuilderStepComponent } from '../type-builder-step.component';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
   selector: 'cmdb-type-fields-step',
   templateUrl: './type-fields-step.component.html',
   styleUrls: ['./type-fields-step.component.scss']
 })
-export class TypeFieldsStepComponent implements AfterContentInit {
+export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements OnInit, DoCheck, OnDestroy {
 
-  @ViewChild(BuilderComponent, {static: false})
-  public typeBuilder: BuilderComponent;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  private typeInstanceDiffer: KeyValueDiffer<string, any>;
 
-  @Input() public mode: number = CmdbMode.View;
-  @Input()
-  set preData(data: any) {
-    if ((data !== undefined) && (this.typeBuilder !== undefined)) {
-      this.typeBuilder.builderConfig = data;
+  public builderValid: boolean = true;
+
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    if (instance) {
+      this.typeInstance = instance;
+      this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
     }
   }
 
-  public constructor(private cdr: ChangeDetectorRef) {
-
+  public constructor(private differs: KeyValueDiffers) {
+    super();
   }
 
-  public ngAfterContentInit(): void {
-    this.cdr.detectChanges();
+  public ngOnInit(): void {
+    this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
   }
+
+  public get status(): boolean{
+    const hasFields: boolean = this.typeInstance.fields.length > 0;
+    const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
+    return hasFields && hasSections && this.builderValid;
+  }
+
+  public ngDoCheck(): void {
+    const changes = this.typeInstanceDiffer.diff(this.typeInstance);
+    if (changes) {
+      this.valid = this.status;
+      this.validateChange.emit(this.valid);
+    }
+  }
+
+  public onBuilderValidChange(status: boolean): void{
+    this.builderValid = status;
+    this.valid = this.status;
+    this.validateChange.emit(this.valid);
+  }
+
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
+
 
 }

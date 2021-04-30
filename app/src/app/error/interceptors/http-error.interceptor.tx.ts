@@ -66,7 +66,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
           this.router.navigate(['/connect']);
         } else if (statusCode === this.UNAUTHORIZED) {
           this.authService.logout();
-          this.router.navigate(['/auth']);
         } else {
           this.router.navigate(['/error/', statusCode]);
         }

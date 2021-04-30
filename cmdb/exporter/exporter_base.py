@@ -193,19 +193,26 @@ class JsonExportType(BaseExporterFormat):
         """
 
         # init values
-        header = ['public_id', 'active', 'type_label']
-        columns = [] if not data else [x for x in data[0].fields]
+        meta = False
         view = 'native'
+
+        if args:
+            meta = args[0].get("metadata", False)
+            view = args[0].get('view', 'native')
+
+        header = ['public_id', 'active', 'type_label']
         output = []
 
-        # Export only the shown fields chosen by the user
-        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
-            _meta = json.loads(args[0].get("metadata", ""))
-            view = args[0].get('view', 'native')
-            header = _meta['header']
-            columns = [x for x in columns if x['name'] in _meta['columns']]
-
         for obj in data:
+            # init columns
+            columns = obj.fields
+
+            # Export only the shown fields chosen by the user
+            if meta and view == ExporterConfigType.render.name:
+                _meta = json.loads(meta)
+                header = _meta['header']
+                columns = [x for x in columns if x['name'] in _meta['columns']]
+
             # init output element
             output_element = {}
             for head in header:

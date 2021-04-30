@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,13 +12,16 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
+from datetime import datetime, timezone
 from flask import current_app, request, abort
 
 from cmdb.framework import TypeModel
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, make_response
 from cmdb.interface.blueprint import NestedBlueprint
@@ -30,14 +33,13 @@ importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type'
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
-    object_manager = current_app.object_manager
+    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
 
 
 @importer_type_blueprint.route('/create/', methods=['POST'])
 @login_required
 def add_type():
     from bson import json_util
-    from datetime import datetime
 
     type_manager = TypeManager(database_manager=current_app.database_manager)
 
@@ -47,7 +49,7 @@ def add_type():
     for new_type_data in new_type_list:
         try:
             new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
-            new_type_data['creation_time'] = datetime.utcnow()
+            new_type_data['creation_time'] = datetime.now(timezone.utc)
         except TypeError as e:
             LOGGER.warning(e)
             return abort(400)

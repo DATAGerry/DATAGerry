@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,9 +17,10 @@
 import logging
 
 from cmdb.framework.cmdb_render import CmdbRender
-
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
 
 LOGGER = logging.getLogger(__name__)
+
 
 class AbstractTemplateData:
 
@@ -49,10 +50,16 @@ class ObjectTemplateData(AbstractTemplateData):
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
                     cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None)
+                                                    render_user=None, object_manager=self.__object_manager)
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
+                elif field['type'] == 'ref-section-field':
+                    data['fields'][field_name] = {'fields': {}}
+                    for section_ref_field in field['references']['fields']:
+                        data['fields'][field_name]['fields'][section_ref_field['name']] = section_ref_field['value']
                 else:
                     data["fields"][field_name] = field["value"]
+            except ObjectManagerGetError:
+                continue
             except Exception as err:
                 LOGGER.error(err)
         return data

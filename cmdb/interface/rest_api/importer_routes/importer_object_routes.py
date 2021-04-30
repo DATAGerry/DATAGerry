@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
 import json
 import logging
 
@@ -23,7 +24,7 @@ from werkzeug.utils import secure_filename
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError
+from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
@@ -40,19 +41,14 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
-from cmdb.user_management import UserModel
+from cmdb.user_management import UserModel, UserManager
 
 LOGGER = logging.getLogger(__name__)
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
 with current_app.app_context():
-    user_manager = current_app.user_manager
-    object_manager: CmdbObjectManager = current_app.object_manager
-    log_manager = current_app.log_manager
+    user_manager = UserManager(current_app.database_manager)
+    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    log_manager = CmdbLogManager(current_app.database_manager)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
@@ -153,8 +149,11 @@ def import_objects(request_user: UserModel):
     # Check if type exists
     try:
         type_manager = TypeManager(database_manager=current_app.database_manager)
+        type_ = type_manager.get(importer_config_request.get('type_id'))
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
         verify_import_access(user=request_user,
-                             _type=type_manager.get(importer_config_request.get('type_id')),
+                             _type=type_,
                              _manager=type_manager)
     except ObjectManagerGetError as err:
         return abort(404, err.message)
@@ -206,7 +205,7 @@ def import_objects(request_user: UserModel):
             current_object_render_result = CmdbRender(object_instance=current_object,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      user_list=user_manager.get_users()).result()
+                                                      object_manager=object_manager).result()
 
             # insert object create log
             log_params = {
@@ -217,7 +216,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)

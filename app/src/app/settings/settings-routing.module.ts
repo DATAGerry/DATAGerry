@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,13 +13,14 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SettingsComponent } from './settings.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
+import { DateSettingsComponent } from './date-settings/date-settings.component';
 
 const routes: Routes = [
   {
@@ -47,19 +48,6 @@ const routes: Routes = [
     loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
   },
   {
-    path: 'exportdjob',
-    data: {
-      breadcrumb: 'Exportd Job'
-    },
-    loadChildren: () => import('./exportd-job-settings/exportd-job-settings.module').then(m => m.ExportdJobSettingsModule)
-  },
-  {
-    path: 'docapi',
-    data: {
-      breadcrumb: 'DocAPI'
-    },
-    loadChildren: () => import('./docapi-settings/docapi-settings.module').then(m => m.DocapiSettingsModule)
-  },{
     path: 'auth',
     canActivateChild: [PermissionGuard],
     data: {
@@ -67,6 +55,14 @@ const routes: Routes = [
     },
     loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
   },
+  {
+    path: 'regional-settings',
+    data: {
+      breadcrumb: 'Regional Settings',
+      right: 'base.system.edit'
+    },
+    component: DateSettingsComponent
+  }
 ];
 
 @NgModule({

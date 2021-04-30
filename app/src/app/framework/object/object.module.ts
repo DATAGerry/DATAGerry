@@ -60,18 +60,19 @@ import { QRCodeModule } from 'angularx-qrcode';
 import { ObjectDeleteModalComponent } from './modals/object-delete-modal/object-delete-modal.component';
 import { ObjectsDeleteModalComponent } from './modals/objects-delete-modal/objects-delete-modal.component';
 import { ObjectTableHeadComponent } from './components/object-table-head/object-table-head.component';
-import { ObjectReferencesTableComponent } from './components/object-references-table/object-references-table.component';
+import { ObjectReferencesTableComponent } from './components/object-references/object-references-table/object-references-table.component';
 import { ObjectLinksTableComponent } from './components/object-links-table/object-links-table.component';
+// tslint:disable-next-line:max-line-length
 import { ObjectLinksTablePartnerCellComponent } from './components/object-links-table/object-links-table-partner-cell/object-links-table-partner-cell.component';
+// tslint:disable-next-line:max-line-length
 import { ObjectLinksTableActionCellComponent } from './components/object-links-table/object-links-table-action-cell/object-links-table-action-cell.component';
+import { ObjectReferencesComponent } from './components/object-references/object-references.component';
+import { ObjectReferencesByTypeComponent } from './components/object-references/object-references-by-type/object-references-by-type.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
+import { ObjectComponent } from './object.component';
+import { ObjectReferencesTypeColumnComponent } from './components/object-references/object-references-type-column/object-references-type-column.component';
 
 @NgModule({
-  entryComponents: [
-    ObjectLinkAddModalComponent,
-    ObjectDeleteModalComponent,
-    ObjectLinkDeleteModalComponent,
-    ObjectsDeleteModalComponent
-  ],
   declarations: [
     ObjectViewComponent,
     ObjectHeaderComponent,
@@ -106,7 +107,11 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
     ObjectLinksTableComponent,
     ObjectLinksTablePartnerCellComponent,
     ObjectLinksTableActionCellComponent,
-    ObjectReferencesTableComponent
+    ObjectReferencesTableComponent,
+    ObjectReferencesComponent,
+    ObjectReferencesByTypeComponent,
+    ObjectComponent,
+    ObjectReferencesTypeColumnComponent
   ],
   imports: [
     CommonModule,
@@ -122,7 +127,8 @@ import { ObjectLinksTableActionCellComponent } from './components/object-links-t
     ArchwizardModule,
     RenderModule,
     UsersModule,
-    TableModule
+    TableModule,
+    JwPaginationModule
   ],
   exports: [
     ObjectViewRenderComponent,

@@ -1,3 +1,24 @@
 docs/* linguist-documentation
 cmdb/interface/docs/static/* linguist-documentation
 cmdb/interface/net_app/_static/* linguist-vendored
+app/package.json linguist-vendored
+app/package-lock.json linguist-vendored
+
+# Source files
+# ============
+*.pxd    text diff=python
+*.py     text diff=python
+*.py3    text diff=python
+*.pyw    text diff=python
+*.pyx    text diff=python
+*.pyz    text diff=python
+
+# Binary files
+# ============
+*.db     binary
+*.p      binary
+*.pkl    binary
+*.pickle binary
+*.pyc    binary
+*.pyd    binary
+*.pyo    binary

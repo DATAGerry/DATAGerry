@@ -1,0 +1,34 @@
+<aw-wizard [navBarLayout]="'large-empty-symbols'">
+  <aw-wizard-step stepId="1" stepTitle="Template Settings">
+    <ng-template awWizardStepSymbol><i class="fas fa-cogs"></i></ng-template>
+    <cmdb-docapi-settings-builder-settings-step [preData]="docInstance"
+                                                [mode]="mode"></cmdb-docapi-settings-builder-settings-step>
+    <button class="btn btn-primary prev" type="button" [routerLink]="['/docapi']">Cancel</button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="!settingsStep.settingsForm.valid">Next
+    </button>
+  </aw-wizard-step>
+  <aw-wizard-step stepId="2" stepTitle="Template Type" (stepExit)="typeParam = typeStep.typeParamComponent.typeParamForm.value">
+    <ng-template awWizardStepSymbol><i class="fas fa-cogs"></i></ng-template>
+    <cmdb-docapi-settings-builder-type-step [preData]="docInstance" [mode]="mode"
+                                            (formValidEmitter)="typeStepFormValid = $event"></cmdb-docapi-settings-builder-type-step>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
+    <button class="btn btn-primary next" type="button" awNextStep [disabled]="typeStepFormValid">Next
+    </button>
+  </aw-wizard-step>
+  <aw-wizard-step stepId="3" stepTitle="Template Content">
+    <ng-template awWizardStepSymbol><i class="fas fa-file-image"></i></ng-template>
+    <cmdb-docapi-settings-builder-content-step [preData]="docInstance"
+                                               [typeParam]="typeParam"
+                                               [mode]="mode"></cmdb-docapi-settings-builder-content-step>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
+    <button class="btn btn-success next" type="button" awNextStep [disabled]="!contentStep.contentForm.valid">Next
+    </button>
+  </aw-wizard-step>
+  <aw-wizard-step stepId="4" stepTitle="Template Custom Style">
+    <ng-template awWizardStepSymbol><i class="fas fa-file-image"></i></ng-template>
+    <cmdb-docapi-settings-builder-style-step [preData]="docInstance"
+                                             [mode]="mode"></cmdb-docapi-settings-builder-style-step>
+    <button class="btn btn-primary prev" type="button" awPreviousStep>Previous</button>
+    <button class="btn btn-success next" type="button" (click)="saveDoc()">Save</button>
+  </aw-wizard-step>
+</aw-wizard>

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,12 +13,14 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, isDevMode, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConnectionService } from '../../../connect/connection.service';
-import { AuthService } from '../../../auth/services/auth.service';
+import { SessionTimeoutService } from '../../../auth/services/session-timeout.service';
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'cmdb-footer',
@@ -27,52 +29,26 @@ import { AuthService } from '../../../auth/services/auth.service';
 })
 export class FooterComponent implements OnInit, OnDestroy {
 
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
   public today: number = Date.now();
   public docUrl: string = 'localhost';
-  public userTokenExpire: number = 0;
   public timeout: string = '';
-  private timer: any;
 
-  public constructor(private connectionService: ConnectionService, private authService: AuthService) {
+  public constructor(private connectionService: ConnectionService, private timeoutService: SessionTimeoutService) {
     this.docUrl = `${ connectionService.currentConnection }/docs`;
   }
 
-  public static convertToDate(secs) {
-    const secsInt = parseInt(secs, 10);
-    const days = Math.floor(secsInt / 86400) % 7;
-    const hours = Math.floor(secsInt / 3600) % 24;
-    const minutes = Math.floor(secsInt / 60) % 60;
-    const seconds = secsInt % 60;
-    return [days, hours, minutes, seconds]
-      .map(v => v < 10 ? '0' + v : v)
-      .filter((v, i) => v !== '00' || i > 0)
-      .join(':');
-  }
 
   public ngOnInit(): void {
-    this.userTokenExpire = this.authService.currentUserTokenValue.expire;
-    this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
-    this.interval();
-  }
-
-  public interval() {
-    this.timer = setInterval(() => {
-      this.timeout = FooterComponent.convertToDate(this.calcRestTime(this.userTokenExpire));
-    }, 1000);
-  }
-
-  public calcRestTime(countDownDate) {
-    const now = Math.floor(Date.now() / 1000);
-    const distance = countDownDate - now;
-
-    if (distance < 0) {
-      return 'EXPIRED';
-    }
-    return distance;
+    this.timeoutService.sessionTimeoutRemaining.asObservable().pipe(takeUntil(this.subscriber)).subscribe((timeout: string) => {
+      this.timeout = timeout;
+    });
   }
 
   public ngOnDestroy(): void {
-    clearInterval(this.timer);
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
 }

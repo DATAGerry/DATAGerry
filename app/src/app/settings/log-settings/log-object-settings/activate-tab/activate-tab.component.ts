@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,28 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
-import { Column, Sort, SortDirection } from '../../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { DatePipe } from '@angular/common';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { TableComponent } from '../../../../layout/table/table.component';
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { UserSetting } from '../../../../management/user-settings/models/user-setting';
+import {
+  convertResourceURL,
+  UserSettingsService
+} from '../../../../management/user-settings/services/user-settings.service';
+import { FileSaverService } from 'ngx-filesaver';
+import { FileService } from '../../../../export/export.service';
+import { UserSettingsDBService } from '../../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-activate-tab',
@@ -46,7 +55,7 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
   /**
    * Table component.
    */
-  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<CmdbLog>;
+  @ViewChild(TableComponent) objectsTableComponent: TableComponent<CmdbLog>;
 
   @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
 
@@ -86,12 +95,46 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
 
   public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1};
 
-  constructor(private logService: LogService) {
+  /**
+   * The Id used for the table
+   */
+  public id: string = 'object-log-list-table';
+
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+  constructor(private logService: LogService, private datePipe: DatePipe,
+              private fileSaverService: FileSaverService, private fileService: FileService,
+              private route: ActivatedRoute, private router: Router,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   public ngOnInit(): void {
     this.resetCollectionParameters();
     this.setColumns();
+    this.initTable();
     this.loadExists();
   }
 
@@ -103,6 +146,17 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
         this.activeLogs = apiResponse.results;
         this.total = apiResponse.total;
     });
+  }
+
+  /**
+   * Initialize table state
+   */
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.limit = this.tableState.pageSize;
+      this.page = this.tableState.page;
+    }
   }
 
   private resetCollectionParameters(): void {
@@ -200,12 +254,8 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
         sortable: true,
         cssClasses: ['text-center'],
         style: { 'white-space': 'nowrap' },
-        template: this.dataTemplate,
+        template: this.dateTemplate,
         searchable: false,
-        render(data: any) {
-          const date = new Date(data);
-          return new DatePipe('en-US').transform(date, 'dd/MM/yyyy - hh:mm:ss').toString();
-        }
       } as Column
     );
 
@@ -278,6 +328,41 @@ export class ActivateTabComponent implements OnInit, OnDestroy {
     return query;
   }
 
+  /**
+   * Select a state.
+   *
+   * @param state
+   */
+  public onStateSelect(state: TableState): void {
+    this.tableStateSubject.next(state);
+    this.page = this.tableState.page;
+    this.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.loadExists();
+  }
+
+  /**
+   * On table State change.
+   * Update state.
+   */
+  public onStateChange(state: TableState): void {
+    this.tableStateSubject.next(state);
+  }
+
+  /**
+   * On table State change.
+   * Update state.
+   */
+  public onStateReset(): void {
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.limit = this.initLimit;
+    this.page = this.initPage;
+    this.loadExists();
+  }
+
+  /**
+   * Delete all selected Logs
+   */
   public cleanup() {
     this.cleanUpEmitter.emit(this.selectedLogIDs);
     this.objectsTableComponent.selectedItems = [];

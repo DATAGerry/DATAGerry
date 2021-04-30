@@ -1,0 +1,47 @@
+<div class="d-flex">
+  <div class="container limit-width">
+    <div class="btn-group float-right">
+      <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
+        <i class="fas fa-list"></i> Show Tabs
+      </button>
+      <div class="dropdown-menu dropdown-menu-right" *ngIf="referencedTypes.length > 0">
+        <button *ngFor="let item of referencedTypes" type="button" class="dropdown-item"
+                (click)="onSelect(item)">
+          <span class="form-check">
+            <input class="form-check-input" type="checkbox" [checked]="!item.hidden" title="toggle-{{item?.typeName}}">
+            <label class="form-check-label">
+              {{item?.typeLabel}}
+            </label>
+          </span>
+        </button>
+        <div class="dropdown-divider"></div>
+        <button type="button" class="dropdown-item btn text-center" (click)="onReset()">
+          <i class="fas fa-redo"></i> Reset
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container limit-width">
+  <nav class="scrollable">
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+      <a class="nav-item nav-link active" data-toggle="tab" href="#object-references" role="tab">All References
+        <span class="badge badge-pill badge-primary">{{totalReferences}}</span></a>
+      <ng-container *ngFor="let item of referencedTypes">
+        <a class="nav-item nav-link" (click)="onClick(item.typeID)" *ngIf="!item.hidden"
+           data-toggle="tab" href="#{{item.typeName}}" role="tab">{{item?.typeLabel}}
+          <span class="badge badge-pill badge-primary">{{item?.occurences}}</span></a>
+      </ng-container>
+    </div>
+  </nav>
+</div>
+<div class="tab-content">
+  <div class="tab-pane fade show active" id="object-references">
+    <cmdb-object-references-table [publicID]="publicID"></cmdb-object-references-table>
+  </div>
+  <div class="tab-pane fade" *ngFor="let item of referencedTypes" id="{{item.typeName}}">
+    <cmdb-object-references-by-type [initSubject]="clickSubject" [publicID]="publicID" [typeID]="item.typeID" [id]="'object-referer-table-by-type-' + item.typeName"></cmdb-object-references-by-type>
+  </div>
+</div>
+

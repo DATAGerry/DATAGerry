@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,22 +38,3 @@ class IterationResult(Generic[C]):
     def convert_to(self, c: Type[C]):
         """Converts the results inside the instance to a passed CmdbDAO subtype."""
         self.results = [c.from_data(result) for result in self.results]
-
-    @classmethod
-    def from_aggregation(cls, aggregation):
-        """
-        Creates a IterationResult instance from a aggregation result.
-        This class method is wrapper if the aggregation comes from the FrameworkQueryBuilder collection iteration.
-
-        Args:
-            aggregation: The database aggregation result.
-
-        Notes:
-            The structure of the aggregation is based on the passed query from the FrameworkQueryBuilder.
-
-        Returns:
-            A IterationResult instance.
-        """
-        if len(aggregation['results']) == 0:
-            return cls(aggregation['results'], total=0)
-        return cls(aggregation['results'], total=aggregation['meta'][0]['total'])

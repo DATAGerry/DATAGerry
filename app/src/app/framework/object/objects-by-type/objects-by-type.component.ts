@@ -16,7 +16,6 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import * as moment from 'moment';
 import {
   Component,
   OnDestroy,
@@ -45,7 +44,6 @@ import {
   convertResourceURL,
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
-import { DatePipe } from '@angular/common';
 import { SupportedExporterExtension } from '../../../export/export-objects/model/supported-exporter-extension';
 
 @Component({
@@ -64,7 +62,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   /**
    * Table component.
    */
-  @ViewChild(TableComponent, { static: false }) objectsTableComponent: TableComponent<RenderResult>;
+  @ViewChild(TableComponent) objectsTableComponent: TableComponent<RenderResult>;
 
   @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
   @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
@@ -268,9 +266,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       template: this.dateTemplate,
-      render(data: any, item?: any, column?: Column, index?: number) {
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
-      }
     } as Column);
     columns.push({
       display: 'Modification Time',
@@ -283,7 +278,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (!data) {
           return 'No modifications so far.';
         }
-        return moment(new Date(data)).format('DD/MM/YYYY - HH:mm:ss');
+        return data;
       }
     } as Column);
 

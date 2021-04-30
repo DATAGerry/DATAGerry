@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,16 +12,16 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-
-import logging
 import json
 
 from bson import json_util
 from flask import abort, request, current_app, Response
+
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
-    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
+    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError, MediaFileManagement
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import UserModel
@@ -36,15 +36,9 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 
 with current_app.app_context():
-    media_file_manager = current_app.media_file_manager
-    log_manager = current_app.exportd_log_manager
+    media_file_manager = MediaFileManagement(current_app.database_manager)
+    log_manager = ExportdLogManager(current_app.database_manager)
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
-LOGGER = logging.getLogger(__name__)
 media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
 
 

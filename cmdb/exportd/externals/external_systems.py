@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,8 +32,8 @@ class ExternalSystemDummy(ExternalSystem):
 
     variables = [{}]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars, event)
         self.__rows = []
 
     def prepare_export(self):
@@ -42,6 +42,7 @@ class ExternalSystemDummy(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -696,6 +697,7 @@ class ExternalSystemExecuteScript(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -759,6 +761,7 @@ class ExternalSystemGenericRestCall(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -802,6 +805,7 @@ class ExternalSystemGenericPullJson(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
+        row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))

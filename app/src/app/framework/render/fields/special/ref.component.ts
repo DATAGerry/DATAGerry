@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { RenderField } from '../components.fields';
+import { RenderFieldComponent } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import { HttpBackend, HttpResponse } from '@angular/common/http';
@@ -34,7 +34,7 @@ import { CmdbMode } from '../../../modes.enum';
   templateUrl: './ref.component.html',
   styleUrls: ['./ref.component.scss']
 })
-export class RefComponent extends RenderField implements OnInit, OnDestroy {
+export class RefComponent extends RenderFieldComponent implements OnInit, OnDestroy {
 
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
@@ -51,8 +51,7 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
   public ngOnInit(): void {
 
     this.data.default = parseInt(this.data.default, 10);
-    if (this.mode === CmdbMode.View) {
-    } else if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
+    if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
       if (this.data.ref_types) {
         if (this.data.ref_types) {
           if (!Array.isArray(this.data.ref_types)) {
@@ -70,11 +69,11 @@ export class RefComponent extends RenderField implements OnInit, OnDestroy {
       }
     }
 
-    if (this.controller.value !== '' && this.data.value) {
+    if (this.data.reference && this.data.reference.object_id !== '' && this.data.reference.object_id !== 0) {
       if (typeof this.data.reference === 'string' || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
         this.protect = true;
       } else {
-        this.objectService.getObject(this.controller.value, false).pipe(takeUntil(this.unsubscribe))
+        this.objectService.getObject(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
           .subscribe((refObject: RenderResult) => {
               this.refObject = refObject;
             },

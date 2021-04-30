@@ -20,6 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { PermissionGuard } from '../auth/guards/permission.guard';
 import { ManagementComponent } from './management.component';
+import { UserSettingsResolver } from './user-settings/resolvers/user-settings-resolver.service';
 
 const routes: Routes = [
   {
@@ -38,6 +39,9 @@ const routes: Routes = [
     data: {
       breadcrumb: 'Users',
       right: 'base.user-management.user.view'
+    },
+    resolve: {
+      userSetting: UserSettingsResolver
     },
     loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
   },

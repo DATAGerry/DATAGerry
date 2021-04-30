@@ -1,0 +1,36 @@
+<fieldset [ngSwitch]="mode">
+  <legend>{{section?.label}}</legend>
+  <ng-container *ngSwitchCase="MODES.View">
+    <ng-container>
+      <div class="object-renderInstance" *ngFor="let field of section?.reference?.selected_fields">
+        <cmdb-render-element [mode]="mode" [parentFormGroup]="form" [data]="getFieldByName(field)"
+                             [changeForm]="changeForm" [section]="section"
+                             [value]="getValueByName(field)"></cmdb-render-element>
+      </div>
+      <ng-container *ngIf="referenceField.value; else noSectionReferenced">
+        <div *ngIf="referencedType && referenceField" class="object-reference-label">
+          <small class="text-muted">from
+            <a [routerLink]="['/', 'framework', 'object', 'type', referencedType.public_id]">{{referencedType.label}}</a>
+            #<a [routerLink]="['/', 'framework', 'object', 'view', referenceField.value]">{{referenceField.value}}</a>
+          </small>
+        </div>
+      </ng-container>
+      <ng-template #noSectionReferenced>
+        <div *ngIf="referencedType" class="object-reference-label">
+          <small class="text-muted">from
+            <a
+              [routerLink]="['/', 'framework', 'object', 'type', referencedType.public_id]"><s>{{referencedType.label}}</s></a>
+          </small>
+        </div>
+      </ng-template>
+    </ng-container>
+
+  </ng-container>
+  <ng-container *ngSwitchDefault>
+    <div class="object-renderInstance">
+      <cmdb-render-element [mode]="mode" [parentFormGroup]="form" [data]="referenceField"
+                           [changeForm]="changeForm" [section]="section"></cmdb-render-element>
+    </div>
+  </ng-container>
+
+</fieldset>

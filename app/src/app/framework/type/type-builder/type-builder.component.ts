@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,26 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { TypeBasicStepComponent } from './type-basic-step/type-basic-step.component';
-import { CmdbType } from '../../models/cmdb-type';
-import { TypeFieldsStepComponent } from './type-fields-step/type-fields-step.component';
-import { TypeMetaStepComponent } from './type-meta-step/type-meta-step.component';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
-import { CategoryService } from '../../services/category.service';
 import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { CmdbCategory } from '../../models/cmdb-category';
-import { SidebarService } from '../../../layout/services/sidebar.service';
 import { Group } from '../../../management/models/group';
 import { ReplaySubject } from 'rxjs';
-import { CollectionParameters } from '../../../services/models/api-parameter';
+import { User } from '../../../management/models/user';
 import { GroupService } from '../../../management/services/group.service';
+import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { TypeAclStepComponent } from './type-acl-step/type-acl-step.component';
+import { AccessControlList } from '../../../acl/acl.types';
+import { SidebarService } from '../../../layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -44,159 +40,167 @@ import { TypeAclStepComponent } from './type-acl-step/type-acl-step.component';
 })
 export class TypeBuilderComponent implements OnInit, OnDestroy {
 
+  /**
+   * Component un-subscriber emitter.
+   * @private
+   */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() public typeInstance?: CmdbType;
-  @Input() public mode: number = CmdbMode.Create;
+  /**
+   * Possible render modes.
+   */
   public modes = CmdbMode;
 
-  @ViewChild(TypeBasicStepComponent, { static: true })
-  public basicStep: TypeBasicStepComponent;
+  /**
+   * Selected render mode.
+   */
+  @Input() public mode: CmdbMode = CmdbMode.Create;
 
-  @ViewChild(TypeFieldsStepComponent, { static: true })
-  public fieldStep: TypeFieldsStepComponent;
+  /**
+   * Type instance
+   */
+  @Input() public typeInstance: CmdbType;
 
-  @ViewChild(TypeMetaStepComponent, { static: true })
-  public metaStep: TypeMetaStepComponent;
-
-  @ViewChild(TypeAclStepComponent, { static: true })
-  public aclStep: TypeAclStepComponent;
-  public aclStepValid: boolean = true;
-  public aclEmpty: boolean = true;
-
-  public selectedCategoryID: number;
-
+  /**
+   * Index of start step
+   */
   @Input() public stepIndex: number = 0;
 
+  /**
+   * List of possible groups.
+   */
   public groups: Array<Group> = [];
 
-  public constructor(private router: Router, private typeService: TypeService,
-                     private toast: ToastService, private userService: UserService, private groupService: GroupService,
-                     private sidebarService: SidebarService, private categoryService: CategoryService) {
+  /**
+   * List of possible users.
+   */
+  public users: Array<User> = [];
 
+  /**
+   * List of possible types.
+   */
+  public types: Array<CmdbType> = [];
+
+  /**
+   * Basic step valid
+   */
+  public basicValid: boolean = true;
+
+  /**
+   * Content step valid
+   */
+  public contentValid: boolean = true;
+
+  /**
+   * Meta step valid
+   */
+  public metaValid: boolean = true;
+
+  /**
+   * ACL step valid
+   */
+  public accessValid: boolean = true;
+
+  public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
+                     private userService: UserService, private groupService: GroupService,
+                     private sidebarService: SidebarService) {
   }
 
+  /**
+   * Component lifecycle start
+   */
   public ngOnInit(): void {
-    this.selectedCategoryID = undefined;
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
+      this.typeInstance.active = true;
       this.typeInstance.version = '1.0.0';
       this.typeInstance.author_id = this.userService.getCurrentUser().public_id;
+      this.typeInstance.render_meta = {
+        icon: undefined,
+        sections: [],
+        externals: [],
+        summary: {
+          fields: undefined
+        }
+      };
+      this.typeInstance.acl = new AccessControlList(false);
     }
-    const groupParams: CollectionParameters = {
-      filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    const groupsCallParameters: CollectionParameters = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1
     };
-    this.groupService.getGroups(groupParams).pipe(takeUntil(this.subscriber))
-      .subscribe((groups: APIGetMultiResponse<Group>) => {
-        this.groups = groups.results;
+    this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((response: APIGetMultiResponse) => {
+        this.groups = [...response.results as Array<Group>];
+      });
+
+    const typesCallParameters: CollectionParameters = {
+      filter: undefined,
+      limit: 0,
+      sort: 'public_id',
+      order: 1,
+      page: 1,
+      projection: { public_id: 1, name: 1, label: 1, render_meta: 1 }
+    };
+    this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
+      .subscribe((response: APIGetMultiResponse) => {
+        this.types = response.results as Array<CmdbType>;
       });
   }
 
+  /**
+   * Component lifecycle destroyer.
+   * Auto unsubscribes the http calls and subscriptions.
+   */
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
   }
 
-  public exitBasicStep() {
-    this.selectedCategoryID = this.basicStep.basicCategoryForm.value.category_id;
-    const defaultIcon = this.basicStep.basicMetaIconForm.get('icon').value === '' ?
-      'fas fa-cube' : this.basicStep.basicMetaIconForm.get('icon').value;
-    this.assignToType({ icon: defaultIcon }, 'render_meta');
-    this.assignToType(this.basicStep.basicForm.value);
-  }
-
-  public exitFieldStep() {
-    let fieldBuffer = [];
-    let sectionBuffer = [];
-    const sectionOrigin = this.fieldStep.typeBuilder.sections;
-    for (const section of sectionOrigin) {
-      const sectionGlobe = Object.assign({}, section);
-      fieldBuffer = fieldBuffer.concat(sectionGlobe.fields);
-      const sectionFieldNames = new Set(sectionGlobe.fields.map(f => f.name));
-      delete sectionGlobe.fields;
-
-      sectionGlobe.fields = Array.from(sectionFieldNames);
-
-      sectionBuffer = sectionBuffer.concat(sectionGlobe);
-    }
-    this.assignToType({ fields: fieldBuffer });
-    this.assignToType({ sections: sectionBuffer }, 'render_meta');
-  }
-
-  public exitMetaStep() {
-    this.assignToType({ summary: this.metaStep.summaryForm.getRawValue() }, 'render_meta');
-    this.assignToType({ externals: this.metaStep.externalLinks }, 'render_meta');
-  }
-
-  public exitAccessStep() {
-    this.assignToType({ acl: this.aclStep.form.getRawValue() });
-  }
-
   public saveType() {
+    const saveTypeInstance: CmdbType = Object.assign({}, this.typeInstance) as CmdbType;
+
+    const sections: Array<CmdbTypeSection> = [];
+    for (const section of saveTypeInstance.render_meta.sections) {
+      const fields = [];
+      for (const field of section.fields) {
+        if (typeof field === 'object' && field !== null) {
+          fields.push(field.name);
+        } else {
+          fields.push(field);
+        }
+      }
+      section.fields = fields;
+      sections.push(section);
+    }
+    saveTypeInstance.render_meta.sections = sections;
+
     if (this.mode === CmdbMode.Create) {
       let newTypeID = null;
-      this.typeService.postType(this.typeInstance).subscribe((typeIDResp: CmdbType) => {
+      saveTypeInstance.editor_id = undefined;
+      this.typeService.postType(saveTypeInstance).subscribe((typeIDResp: CmdbType) => {
           newTypeID = +typeIDResp.public_id;
-          if (this.selectedCategoryID) {
-            this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
-              category.types.push(newTypeID);
-              this.categoryService.updateCategory(category).subscribe(() => {
-                this.sidebarService.loadCategoryTree();
-                this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
-              });
-            });
-          } else {
-            this.sidebarService.loadCategoryTree();
-            this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
-          }
+          this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
           this.toast.success(`Type was successfully created: TypeID: ${ newTypeID }`);
         },
         (error) => {
-          console.error(error);
+          this.toast.error(`${ error }`);
         });
     } else if (this.mode === CmdbMode.Edit) {
-      this.typeInstance.creation_time = this.typeInstance.creation_time.$date;
-      this.typeService.putType(this.typeInstance).subscribe((updateResp: CmdbType) => {
-          if (this.basicStep.originalCategoryID !== this.selectedCategoryID) {
-            // Remove from old category
-            if (this.basicStep.originalCategoryID) {
-              this.categoryService.getCategory(this.basicStep.originalCategoryID).subscribe((category: CmdbCategory) => {
-                const index = category.types.indexOf(this.typeInstance.public_id, 0);
-                if (index > -1) {
-                  category.types.splice(index, 1);
-                }
-                this.categoryService.updateCategory(category).subscribe(() => {
-                });
-              });
-            }
-            // Add to new category
-            if (this.selectedCategoryID) {
-              this.categoryService.getCategory(this.selectedCategoryID).subscribe((category: CmdbCategory) => {
-                category.types.push(this.typeInstance.public_id);
-                this.categoryService.updateCategory(category).subscribe(() => {
-                });
-              });
-            }
-          }
-          this.sidebarService.loadCategoryTree();
+      saveTypeInstance.editor_id = this.userService.getCurrentUser().public_id;
+      this.typeService.putType(saveTypeInstance).subscribe((updateResp: CmdbType) => {
           this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
           this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
         },
         (error) => {
-          console.log(error);
+          this.toast.error(`${ error }`);
         });
     }
+    this.sidebarService.loadCategoryTree();
   }
 
-  public assignToType(data: any, optional: any = null) {
-    if (optional !== null) {
-      if (this.typeInstance[optional] === undefined) {
-        this.typeInstance[optional] = {};
-      }
-      Object.assign(this.typeInstance[optional], data);
-    } else {
-      Object.assign(this.typeInstance, data);
-    }
-  }
 
 }

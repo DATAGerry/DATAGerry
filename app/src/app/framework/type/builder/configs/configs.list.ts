@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,18 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
-import { TextFieldEditComponent } from './edits/text-field-edit.component';
-import { DummyFieldEditComponent } from './edits/dummy-field-edit.component';
-import { SectionFieldEditComponent } from './edits/section-field-edit.component';
-import { TextareaEditComponent } from './edits/textarea-edit.component';
-import { RefFieldEditComponent } from './edits/ref-field-edit.component';
-import { ChoiceFieldEditComponent } from './edits/choice-field-edit.component';
-import { CheckFieldEditComponent } from './edits/check-field-edit.component';
-import { DateFieldEditComponent } from './edits/date-field-edit.component';
+import { TextFieldEditComponent } from './text/text-field-edit.component';
+import { SectionFieldEditComponent } from './section/section-field-edit.component';
+import { TextareaEditComponent } from './text/textarea-edit.component';
+import { RefFieldEditComponent } from './special/ref-field-edit.component';
+import { ChoiceFieldEditComponent } from './choice/choice-field-edit.component';
+import { CheckFieldEditComponent } from './choice/check-field-edit.component';
+import { DateFieldEditComponent } from './date-time/date-field-edit.component';
+import { SectionRefFieldEditComponent } from './section/section-ref-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {
   text: TextFieldEditComponent,
@@ -39,5 +39,5 @@ export const configComponents: { [type: string]: any } = {
   radio: ChoiceFieldEditComponent,
   select: ChoiceFieldEditComponent,
   date: DateFieldEditComponent,
-  debug: DummyFieldEditComponent
+  'ref-section': SectionRefFieldEditComponent,
 };

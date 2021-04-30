@@ -13,59 +13,28 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from datetime import datetime
+
+
+from datetime import datetime, timezone
 from typing import Union, List
 
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.framework_manager import FrameworkManager, FrameworkQueryBuilder
+from cmdb.manager.managers import ManagerBase
+from cmdb.framework.managers.object_manager import ObjectQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteError
-from cmdb.search import Query, Pipeline
+from cmdb.search import Pipeline
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 
-class ObjectLinkQueryBuilder(FrameworkQueryBuilder):
-
-    def __init__(self):
-        super(ObjectLinkQueryBuilder, self).__init__()
-
-    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
-              user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
-            Union[Query, Pipeline]:
-        self.clear()
-        self.query = Pipeline([])
-
-        if isinstance(filter, dict):
-            self.query.append(self.match_(filter))
-        elif isinstance(filter, list):
-            for pipe in filter:
-                self.query.append(pipe)
-
-        if user and permission:
-            pass  # TODO: ACLs
-
-        if limit == 0:
-            results_query = [self.skip_(limit)]
-        else:
-            results_query = [self.skip_(skip), self.limit_(limit)]
-        self.query.append(self.sort_(sort=sort, order=order))
-
-        self.query.append(self.facet_({
-            'meta': [self.count_('total')],
-            'results': results_query
-        }))
-
-        return self.query
-
-
-class ObjectLinkManager(FrameworkManager):
+class ObjectLinkManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
-        self.query_builder = ObjectLinkQueryBuilder()
+        self.query_builder = ObjectQueryBuilder()
         self.object_manager = CmdbObjectManager(database_manager)  # TODO: Replace when object api is updated
         super(ObjectLinkManager, self).__init__(ObjectLinkModel.COLLECTION, database_manager=database_manager)
 
@@ -99,12 +68,16 @@ class ObjectLinkManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
-                                                    user=user, permission=permission)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.query_builder.count(filter=filter, user=user, permission=permission)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[ObjectLinkModel] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[ObjectLinkModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ObjectLinkModel)
         return iteration_result
 
@@ -127,7 +100,7 @@ class ObjectLinkManager(FrameworkManager):
         if isinstance(link, ObjectLinkModel):
             link = ObjectLinkModel.to_json(link)
         if 'creation_time' not in link:
-            link['creation_time'] = datetime.now()
+            link['creation_time'] = datetime.now(timezone.utc)
         if user and permission:
             self.object_manager.get_object(public_id=link['primary'], user=user, permission=permission)
             self.object_manager.get_object(public_id=link['secondary'], user=user, permission=permission)

@@ -29,7 +29,7 @@ import { HttpBackend, HttpClient, HttpParams, HttpResponse } from '@angular/comm
 import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
-import { DocTemplate } from '../framework/models/cmdb-doctemplate';
+import { DocTemplate } from './models/cmdb-doctemplate';
 import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { APIGetMultiResponse } from '../services/models/api-response';

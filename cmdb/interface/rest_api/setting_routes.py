@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -22,18 +22,12 @@ from cmdb.user_management import UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 settings_blueprint = RootBlueprint('settings_rest', __name__, url_prefix='/settings')
 
 with current_app.app_context():
     from cmdb.interface.rest_api.settings_routes.system_routes import system_blueprint
-
     settings_blueprint.register_nested_blueprint(system_blueprint)
-
     system_settings_reader = SystemSettingsReader(database_manager=current_app.database_manager)
 
 

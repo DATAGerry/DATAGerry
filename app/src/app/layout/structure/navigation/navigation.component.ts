@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,8 +18,12 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from '../../../auth/services/auth.service';
-import { Router } from '@angular/router';
-import {SystemService} from '../../../settings/system/system.service';
+import { UserService } from '../../../management/services/user.service';
+import { User } from '../../../management/models/user';
+import { GroupService } from '../../../management/services/group.service';
+import { Group } from '../../../management/models/group';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { FeedbackModalComponent } from '../../helpers/modals/feedback-modal/feedback-modal.component';
 
 @Component({
   selector: 'cmdb-navigation',
@@ -29,11 +33,18 @@ import {SystemService} from '../../../settings/system/system.service';
 export class NavigationComponent implements OnInit, OnDestroy {
 
   public readonly title: string = 'DATAGERRY';
+  public user: User;
+  public group: Group;
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private router: Router) {
+  constructor(private renderer: Renderer2, public authService: AuthService, private userService: UserService,
+              private groupService: GroupService, private modalService: NgbModal) {
+    this.user = this.userService.getCurrentUser();
   }
 
   public ngOnInit(): void {
+    this.groupService.getGroup(this.user.group_id).subscribe(resp => {
+      this.group = resp;
+    });
     this.renderer.addClass(document.body, 'header-fixed');
     this.dropdownSubmenu();
   }
@@ -44,7 +55,6 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
   public logout(): void {
     this.authService.logout();
-    this.router.navigate(['/auth']);
   }
 
   private dropdownSubmenu() {
@@ -65,5 +75,10 @@ export class NavigationComponent implements OnInit, OnDestroy {
   public visibilitySidebar() {
     const sidebar = document.getElementById('sidebar').classList;
     sidebar.length === 0 ? sidebar.add('set-sidebar-visible') : sidebar.remove('set-sidebar-visible');
+  }
+
+  public feedback() {
+    const modalComponent = this.modalService.open(FeedbackModalComponent, {size: 'xl'});
+    return modalComponent.result;
   }
 }

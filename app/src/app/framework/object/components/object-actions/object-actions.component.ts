@@ -36,7 +36,7 @@ export class ObjectActionsComponent implements OnDestroy {
         this.api.callDelete('/object/' + publicID).subscribe((res: boolean) => {
           if (res) {
             this.toastService.success(`Object ${ this.renderResult.object_information.object_id } was delete succesfully!`);
-            this.router.navigate(['/']);
+            this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
           }
           this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
         });

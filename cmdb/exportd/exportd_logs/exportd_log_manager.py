@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,9 +12,9 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from cmdb.framework.cmdb_base import CmdbManagerBase
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
@@ -26,9 +26,6 @@ from cmdb.exportd.exportd_logs.exportd_log import CMDBError, LOGGER, LogAction
 class ExportdLogManager(CmdbManagerBase):
     def __init__(self, database_manager=None):
         super(ExportdLogManager, self).__init__(database_manager)
-
-    def search(self):
-        pass
 
     # CRUD functions
     def get_all_logs(self):
@@ -72,7 +69,7 @@ class ExportdLogManager(CmdbManagerBase):
         log_init['action'] = action.value
         log_init['action_name'] = action.name
         log_init['log_type'] = log_type
-        log_init['log_time'] = datetime.utcnow()
+        log_init['log_time'] = datetime.now(timezone.utc)
 
         log_data = {**log_init, **kwargs}
 

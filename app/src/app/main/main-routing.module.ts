@@ -88,6 +88,15 @@ const routes: Routes = [
     loadChildren: () => import('../management/management.module').then(m => m.ManagementModule),
   },
   {
+    path: 'docapi',
+    data: {
+      breadcrumb: 'DocAPI'
+    },
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
+    loadChildren: () => import('../docapi/docapi.module').then(m => m.DocapiModule)
+  },
+  {
     path: 'settings',
     data: {
       breadcrumb: 'Settings'
@@ -113,6 +122,15 @@ const routes: Routes = [
     canActivate: [AuthGuard],
     canActivateChild: [AuthGuard],
     loadChildren: () => import('../filemanager/filemanager.module').then(m => m.FilemanagerModule)
+  },
+  {
+    path: 'exportd',
+    data: {
+      breadcrumb: 'Exportd'
+    },
+    canActivate: [AuthGuard],
+    canActivateChild: [AuthGuard],
+    loadChildren: () => import('../exportd/exportd.module').then(m => m.ExportdModule)
   },
   {
     path: 'debug',

@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
 import logging
@@ -20,7 +20,7 @@ from typing import List
 
 import pytz
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from flask import abort, jsonify, request, current_app
 
@@ -29,7 +29,7 @@ from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError
+from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 from cmdb.framework.managers.type_manager import TypeManager
@@ -42,22 +42,19 @@ from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management import UserModel, UserManager
+from cmdb.utils.error import CMDBError
 
 with current_app.app_context():
-    object_manager = current_app.object_manager
-    log_manager = current_app.log_manager
-    user_manager = current_app.user_manager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    log_manager = CmdbLogManager(current_app.database_manager)
+    user_manager = UserManager(current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
 object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
+
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -69,7 +66,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     view = params.optional.get('view', 'native')
     if _fetch_only_active_objs():
         if isinstance(params.filter, dict):
-            params.filter.update({'$match': {'active': {"$eq": True}}})
+            filter_ = params.filter
+            params.filter = [{'$match': filter_}]
+            params.filter.append({'$match': {'active': {"$eq": True}}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
 
@@ -85,6 +84,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
             rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
@@ -114,14 +114,14 @@ def get_object(public_id, request_user: UserModel):
         return abort(403, err.message)
 
     try:
-        type_instance = object_manager.get_type(object_instance.get_type_id())
+        type_instance = TypeManager(database_manager=current_app.database_manager).get(object_instance.get_type_id())
     except ObjectManagerGetError as err:
         LOGGER.error(err.message)
         return abort(404, err.message)
 
     try:
         render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
-                            user_list=user_manager.get_users(), object_manager=object_manager, ref_render=True)
+                            object_manager=object_manager, ref_render=True)
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)
@@ -171,127 +171,10 @@ def get_objects_by_type(public_id, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager, object_manager=object_manager).render_result_list()
     resp = make_response(rendered_list)
     return resp
-
-
-@object_blueprint.route('/dt/type/<int:type_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_dt_objects_by_type(type_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        table_config = request.args
-        filter_state = {'type_id': type_id}
-
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        start_at = int(table_config.get('start'))
-        site_length = int(table_config.get('length'))
-        order_column = table_config.get('order') if table_config.get('order') else 'type_id'
-        order_direction = 1 if table_config.get('direction') == 'asc' else -1
-
-        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
-            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
-        else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
-                                                                     match=filter_state)
-        totals = len(object_list)
-        object_list = object_list[start_at:start_at + site_length]
-
-    except CMDBError:
-        return abort(400)
-
-    rendered_list = RenderList(object_list, request_user, dt_render=True).render_result_list()
-
-    table_response = {
-        'data': rendered_list,
-        'recordsTotal': totals,
-        'recordsFiltered': totals
-    }
-    return make_response(table_response)
-
-
-@object_blueprint.route('/dt/filter/type/<int:type_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_dt_filter_objects_by_type(type_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        table_config = request.args
-
-        filter_ids = table_config.getlist('idList')
-        start_at = int(table_config.get('start', 0, int))
-        site_length = int(table_config.get('length', 10, int))
-        search_for = table_config.get('search', '', str)
-        order_column = table_config.get('order', 'type_id', str)
-        order_direction = 1 if table_config.get('direction') == 'asc' else -1
-        dt_render = False if table_config.get('dtRender') == 'false' else True
-
-        # Prepare search term
-        if search_for in ['true', 'True']:
-            search_for = True
-        elif search_for in ['false', 'False']:
-            search_for = False
-        elif search_for.isdigit():
-            search_for = int(search_for)
-
-        # Filter Objects by IDS
-        filter_arg = []
-        if filter_ids:
-            filter_arg.append({'public_id': {'$in': list(map(int, filter_ids))}})
-
-        # Search default values
-        filter_arg.append({'type_id': type_id})
-        if _fetch_only_active_objs():
-            filter_arg.append({'active': {"$eq": True}})
-
-        # Search search term over entire object
-        or_conditions = []
-        if not isinstance(search_for, bool):
-            search_term = {'$regex': str(search_for), '$options': 'i'}
-        else:
-            search_term = search_for
-
-        or_conditions.append({'fields': {'$elemMatch': {'value': search_term}}})
-        # ToDo: Find - convert string to date
-        # or_conditions.append({'creation_time': {'$toDate': str(search_for)}})
-
-        if isinstance(search_for, int) and not isinstance(search_for, bool):
-            if order_column in ['public_id', 'author_id']:
-                or_conditions.append({'$where': "this.public_id.toString().includes(%s)" % search_for})
-                or_conditions.append({'$where': "this.author_id.toString().includes(%s)" % search_for})
-            else:
-                or_conditions.append({'public_id': search_for})
-                or_conditions.append({'author_id': search_for})
-
-        # Linking queries
-        filter_arg.append({'$or': or_conditions})
-        filter_state = {'$and': filter_arg}
-
-        if order_column in ['active', 'public_id', 'type_id', 'author_id', 'creation_time']:
-            object_list = object_manager.get_objects_by(sort=order_column, direction=order_direction, **filter_state)
-        else:
-            object_list = object_manager.sort_objects_by_field_value(value=order_column, order=order_direction,
-                                                                     match=filter_state)
-        totals = len(object_list)
-        object_list = object_list[start_at:start_at + site_length]
-
-    except CMDBError:
-        return abort(400)
-
-    rendered_list = RenderList(object_list, request_user, dt_render=dt_render).render_result_list()
-
-    table_response = {
-        'data': rendered_list,
-        'recordsTotal': totals,
-        'recordsFiltered': totals
-    }
-    return make_response(table_response)
 
 
 @object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
@@ -308,7 +191,8 @@ def get_objects_by_types(type_ids, request_user: UserModel):
         query = {'$and': [in_types, is_active]}
 
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
+        rendered_list = RenderList(all_objects_list, request_user,
+                                   database_manager=current_app.database_manager).render_result_list()
 
     except CMDBError:
         return abort(400)
@@ -328,7 +212,8 @@ def get_objects_by_public_id(public_ids, request_user: UserModel):
         filter_state = {'public_id': public_ids}
         query = _build_query(filter_state, q_operator='$or')
         all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user).render_result_list()
+        rendered_list = RenderList(all_objects_list, request_user,
+                                   database_manager=current_app.database_manager).render_result_list()
 
     except CMDBError:
         return abort(400)
@@ -417,7 +302,6 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {}})
 
-
     try:
         referenced_object: CmdbObject = manager.get(public_id, user=request_user,
                                                     permission=AccessControlPermission.READ)
@@ -443,6 +327,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
             rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+                                       database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
@@ -470,7 +355,8 @@ def get_objects_by_user(public_id: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -495,7 +381,8 @@ def get_new_objects_since(timestamp: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -521,7 +408,8 @@ def get_changed_objects_since(timestamp: int, request_user: UserModel):
     if len(object_list) < 1:
         return make_response(object_list, 204)
 
-    rendered_list = RenderList(object_list, request_user).render_result_list()
+    rendered_list = RenderList(object_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     return make_response(rendered_list)
 
 
@@ -533,7 +421,6 @@ def get_changed_objects_since(timestamp: int, request_user: UserModel):
 @right_required('base.framework.object.add')
 def insert_object(request_user: UserModel):
     from bson import json_util
-    from datetime import datetime
     add_data_dump = json.dumps(request.json)
 
     try:
@@ -542,7 +429,7 @@ def insert_object(request_user: UserModel):
             new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
         if not 'active' in new_object_data:
             new_object_data['active'] = True
-        new_object_data['creation_time'] = datetime.utcnow()
+        new_object_data['creation_time'] = datetime.now(timezone.utc)
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
     except TypeError as e:
@@ -565,9 +452,9 @@ def insert_object(request_user: UserModel):
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
         current_object = object_manager.get_object(new_object_id)
         current_object_render_result = CmdbRender(object_instance=current_object,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  user_list=user_manager.get_users()).result()
+                                                  render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -616,7 +503,6 @@ def update_object(public_id: int, request_user: UserModel):
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      user_list=user_manager.get_users(),
                                                       object_manager=object_manager, ref_render=True).result()
         except ObjectManagerGetError as err:
             LOGGER.error(err)
@@ -662,7 +548,7 @@ def update_object(public_id: int, request_user: UserModel):
             return abort(400)
 
         # update edit time
-        put_data['last_edit_time'] = datetime.utcnow()
+        put_data['last_edit_time'] = datetime.now(timezone.utc)
 
         try:
             update_object_instance = CmdbObject(**put_data)
@@ -723,9 +609,9 @@ def delete_object(public_id: int, request_user: UserModel):
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  user_list=user_manager.get_users()).result()
+                                                  render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -787,9 +673,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
             try:
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
+                                                          object_manager=object_manager,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user,
-                                                          user_list=user_manager.get_users()).result()
+                                                          render_user=request_user).result()
             except ObjectManagerGetError as err:
                 LOGGER.error(err)
                 return abort(404)
@@ -877,9 +763,9 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         current_type_instance = object_manager.get_type(founded_object.get_type_id())
         current_object_render_result = CmdbRender(object_instance=founded_object,
+                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  user_list=user_manager.get_users()).result()
+                                                  render_user=request_user).result()
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -929,7 +815,8 @@ def get_newest(request_user: UserModel):
                                                         user=request_user,
                                                         permission=AccessControlPermission.READ
                                                         )
-    rendered_list = RenderList(newest_objects_list, request_user).render_result_list()
+    rendered_list = RenderList(newest_objects_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)
@@ -955,7 +842,8 @@ def get_latest(request_user: UserModel):
                                                       user=request_user,
                                                       permission=AccessControlPermission.READ
                                                       )
-    rendered_list = RenderList(last_objects_list, request_user).render_result_list()
+    rendered_list = RenderList(last_objects_list, request_user,
+                               database_manager=current_app.database_manager).render_result_list()
     if len(rendered_list) < 1:
         return make_response(rendered_list, 204)
     return make_response(rendered_list)

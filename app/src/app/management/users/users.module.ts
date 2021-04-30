@@ -41,11 +41,9 @@ import { UserTableActionsComponent } from './components/user-table-actions/user-
 import { UserTableGroupCellComponent } from './components/user-table-group-cell/user-table-group-cell.component';
 import { UserTableListComponent } from './components/user-table-list/user-table-list.component';
 import { AclModule } from '../../acl/acl.module';
+import { RenderModule } from '../../framework/render/render.module';
 
 @NgModule({
-  entryComponents: [
-    UsersPasswdModalComponent
-  ],
   declarations: [
     UserViewComponent,
     UsersPasswdModalComponent,
@@ -79,6 +77,7 @@ import { AclModule } from '../../acl/acl.module';
         AuthModule,
         TableModule,
         AclModule,
+        RenderModule,
     ]
 })
 export class UsersModule {

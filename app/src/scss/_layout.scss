@@ -71,7 +71,7 @@ html{
   margin-left: 0!important;
 }
 
-#object-typeInstance-render, #object-renderInstance-render {
+.object-renderInstance{
   .ng-select-container {
     right: 5px;
     min-height: 100%;
@@ -84,7 +84,7 @@ html{
   }
 }
 
-#ng-select-valid {
+.ng-select-valid {
   .ng-select-container {
     right: 5px;
   }

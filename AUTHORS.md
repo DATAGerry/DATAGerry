@@ -2,10 +2,9 @@
 
 ## Development
 
-* Mark Heumüller [mark.heumueller@nethinks.com](mark.heumueller@nethinks.com)
 * Sergej Dumler [sergej.dumler@nethinks.com](sergej.dumler@nethinks.com)
-* Michael Batz [michael.batz@nethinks.com](michael.batz@nethinks.com)
-* Dorus Blanken [dorus.blanken@nethinks.com](dorus.blanken@nethinks.com)
 
 ## Contributors
-None yet. Why not be the first?
+* [Mark Heumüller](https://github.com/markheumueller)
+* [Michael Batz](https://github.com/michael-batz)
+* [Dorus Blanken](https://github.com/doblanken)

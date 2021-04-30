@@ -11,7 +11,6 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -30,7 +29,6 @@ import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component
 import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
@@ -76,8 +74,10 @@ import { TypeFilterPipe } from './pipes/typeFilter.pipe';
 import { TableModule } from './table/table.module';
 import { QRCodeModule } from 'angularx-qrcode';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
-import { FeedbackFormComponent } from './components/feedback-form/feedback-form.component';
 import { BlockComponent } from './components/block/block.component';
+import { JwPaginationModule } from 'jw-angular-pagination';
+import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
+import { TypeSelectComponent } from './components/type-select/type-select.component';
 
 @NgModule({
   declarations: [
@@ -88,14 +88,12 @@ import { BlockComponent } from './components/block/block.component';
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
-    GeneralModalComponent,
     IntroComponent,
     TypeLabelComponent,
     FooterComponent,
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
-    JwPaginationComponent,
     NameDirective,
     NameGuidePipe,
     FileDragDropDirective,
@@ -121,8 +119,9 @@ import { BlockComponent } from './components/block/block.component';
     TableSortEventDirective,
     AttachmentsListModalComponent,
     QrCodeComponent,
-    FeedbackFormComponent,
-    BlockComponent
+    BlockComponent,
+    FeedbackModalComponent,
+    TypeSelectComponent
   ],
   exports: [
     FileExplorerComponent,
@@ -135,7 +134,6 @@ import { BlockComponent } from './components/block/block.component';
     TypeLabelComponent,
     IconPickerComponent,
     ChartsComponent,
-    JwPaginationComponent,
     SidebarComponent,
     NameDirective,
     NameGuidePipe,
@@ -146,7 +144,8 @@ import { BlockComponent } from './components/block/block.component';
     FileExtensionPipe,
     InfoBoxComponent,
     QrCodeComponent,
-    BlockComponent
+    BlockComponent,
+    TypeSelectComponent
   ],
   imports: [
     CommonModule,
@@ -163,20 +162,12 @@ import { BlockComponent } from './components/block/block.component';
     AuthModule,
     RenderModule,
     FileexplorerModule,
-    QRCodeModule
+    QRCodeModule,
+    JwPaginationModule
   ],
   providers: [
     BreadcrumbService,
     NgbActiveModal
-  ],
-  entryComponents: [
-    GeneralModalComponent,
-    AddAttachmentsModalComponent,
-    AttachmentsListModalComponent,
-    FilemanagerModalComponent,
-    IntroComponent,
-    StepByStepIntroComponent,
-    ObjectPreviewModalComponent
   ]
 })
 export class LayoutModule {

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,13 +12,14 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
 
 from authlib.jose import jwt, JWT
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
+from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.security.key.holder import KeyHolder
 
 try:
@@ -31,8 +32,8 @@ LOGGER = logging.getLogger(__name__)
 
 class TokenValidator:
 
-    def __init__(self):
-        self.key_holder = KeyHolder()
+    def __init__(self, database_manager: DatabaseManagerMongo):
+        self.key_holder = KeyHolder(database_manager)
 
     def decode_token(self, token: (JWT, str, dict)):
         try:

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2020 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,8 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+
 from json import dumps
-from datetime import datetime
+from datetime import datetime, timezone
 from enum import Enum
 from math import ceil
 from typing import List
@@ -23,9 +25,10 @@ from werkzeug.wrappers import BaseResponse
 
 from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE
-from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.api_parameters import CollectionParameters, APIParameters
+from cmdb.interface.api_project import APIProjection, APIProjector
 
-from cmdb.interface.pagination import APIPagination, APIPager
+from cmdb.interface.api_pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
 
 
@@ -82,7 +85,7 @@ class BaseAPIResponse:
         self.url = url or ''
         self.model: Model = model or ''
         self.body = body or True
-        self.time: str = datetime.now().isoformat()
+        self.time: str = datetime.now(timezone.utc).isoformat()
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
         """
@@ -116,7 +119,7 @@ class GetSingleResponse(BaseAPIResponse):
     """
     __slots__ = 'result'
 
-    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None):
+    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None, projection: dict = None):
         """
         Constructor of GetSingleResponse.
 
@@ -125,7 +128,11 @@ class GetSingleResponse(BaseAPIResponse):
             url: requested url
             model: model type of body
         """
-        self.result: dict = result
+        if projection:
+            projection = APIProjection(projection)
+            self.result = APIProjector(result, projection).project
+        else:
+            self.result: dict = result
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
                                                 body=body)
 
@@ -173,10 +180,14 @@ class GetMultiResponse(BaseAPIResponse):
             body: If http response should not have a body.
 
         """
-        self.results: List[dict] = results
+        self.parameters = params
+        if self.parameters.projection:
+            project = APIProjection(self.parameters.projection)
+            self.results = APIProjector(results, project).project
+        else:
+            self.results = results
         self.count: int = len(self.results)
         self.total: int = total
-        self.parameters = params
 
         if params.limit == 0:
             total_pages = 1
@@ -408,10 +419,17 @@ class GetListResponse(BaseAPIResponse):
     """
     API Response for a simple list without iteration.
     """
-    __slots__ = 'results'
+    __slots__ = 'results', 'params'
 
-    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None):
-        self.results: List[dict] = results
+    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None,
+                 params: APIParameters = None):
+
+        self.params = params
+        if self.params and self.params.projection:
+            projection = APIProjection(self.params.projection)
+            self.results = APIProjector(results, projection).project
+        else:
+            self.results: List[dict] = results
         super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:

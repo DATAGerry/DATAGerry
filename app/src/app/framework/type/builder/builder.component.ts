@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,56 +13,66 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
-import {Controller} from './controls/controls.common';
-import {DndDropEvent, DropEffect} from 'ngx-drag-drop';
-import {SectionControl} from './controls/section.control';
-import {UserService} from '../../../management/services/user.service';
-import {Group} from '../../../management/models/group';
-import {User} from '../../../management/models/user';
-import {TextControl} from './controls/text/text.control';
-import {PasswordControl} from './controls/text/password.control';
-import {TextAreaControl} from './controls/textarea/textarea.control';
-import {ReferenceControl} from './controls/specials/ref.control';
-import {RadioControl} from './controls/choice/radio.control';
-import {SelectControl} from './controls/choice/select.control';
-import {CheckboxControl} from './controls/choice/checkbox.control';
-import {GroupService} from '../../../management/services/group.service';
-import {CmdbMode} from '../../modes.enum';
-import {FormGroup} from '@angular/forms';
-import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
-import {PreviewModalComponent} from './modals/preview-modal/preview-modal.component';
-import {DiagnosticModalComponent} from './modals/diagnostic-modal/diagnostic-modal.component';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Controller } from './controls/controls.common';
+import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
+import { SectionControl } from './controls/section.control';
+import { Group } from '../../../management/models/group';
+import { User } from '../../../management/models/user';
+import { TextControl } from './controls/text/text.control';
+import { PasswordControl } from './controls/text/password.control';
+import { TextAreaControl } from './controls/text/textarea.control';
+import { ReferenceControl } from './controls/specials/ref.control';
+import { RadioControl } from './controls/choice/radio.control';
+import { SelectControl } from './controls/choice/select.control';
+import { CheckboxControl } from './controls/choice/checkbox.control';
+import { CmdbMode } from '../../modes.enum';
 import { DateControl } from './controls/date-time/date.control';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { RefSectionControl } from './controls/ref-section.common';
+import { ReplaySubject } from 'rxjs';
+import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 
 declare var $: any;
 
 @Component({
   selector: 'cmdb-builder',
   templateUrl: './builder.component.html',
-  styleUrls: ['./builder.component.scss']
+  styleUrls: ['./builder.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BuilderComponent implements OnInit, OnDestroy{
+export class BuilderComponent implements OnDestroy {
 
-  public sections: any[];
-  public userList: User[] = [];
-  public groupList: Group[] = [];
-  public canEdit: boolean = false;
-  private modalRef: NgbModalRef;
-  @Input() mode = CmdbMode.View;
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() set builderConfig(data) {
-    if (data !== undefined) {
+  public MODES: typeof CmdbMode = CmdbMode;
+
+  @Input() public mode = CmdbMode.View;
+  @Input() public groups: Array<Group> = [];
+  @Input() public users: Array<User> = [];
+  @Input() public types: Array<CmdbType> = [];
+
+  public sections: Array<any> = [];
+  public typeInstance: CmdbType;
+
+  public newSections: Array<CmdbTypeSection> = [];
+  public newFields: Array<CmdbTypeSection> = [];
+
+  @Input() public valid: boolean = true;
+  @Output() public validChange: EventEmitter<boolean> = new EventEmitter<boolean>();
+
+  @Input('typeInstance')
+  public set TypeInstance(instance: CmdbType) {
+    this.typeInstance = instance;
+    if (instance !== undefined) {
       const preSectionList: any[] = [];
-      for (const section of data.render_meta.sections) {
+      for (const section of instance.render_meta.sections) {
         preSectionList.push(section);
         const fieldBufferList = [];
         for (const field of section.fields) {
-          fieldBufferList.push(data.fields.find(f => f.name === field));
+          fieldBufferList.push(instance.fields.find(f => f.name === field));
         }
         preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
       }
@@ -71,63 +81,107 @@ export class BuilderComponent implements OnInit, OnDestroy{
   }
 
   public structureControls = [
-    new Controller('section', SectionControl)
+    new Controller('section', new SectionControl()),
+    new Controller('ref-section', new RefSectionControl())
   ];
+
   public basicControls = [
-    new Controller('text', TextControl),
-    new Controller('password', PasswordControl),
-    new Controller('textarea', TextAreaControl),
-    new Controller('checkbox', CheckboxControl),
-    new Controller('radio', RadioControl),
-    new Controller('select', SelectControl),
-    new Controller('date', DateControl)
+    new Controller('text', new TextControl()),
+    new Controller('password', new PasswordControl()),
+    new Controller('textarea', new TextAreaControl()),
+    new Controller('checkbox', new CheckboxControl()),
+    new Controller('radio', new RadioControl()),
+    new Controller('select', new SelectControl()),
+    new Controller('date', new DateControl())
   ];
+
   public specialControls = [
-    new Controller('ref', ReferenceControl)
+    new Controller('ref', new ReferenceControl())
   ];
 
-  public builderFormGroup: FormGroup;
 
-  public constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal) {
-    this.groupService.getGroups().subscribe((apiGroupResponse: APIGetMultiResponse<Group>) => {
-      this.groupList = apiGroupResponse.results as Array<Group>;
-    });
-    this.userService.getUsers().subscribe((apiUserResponse: APIGetMultiResponse<User>) => {
-      this.userList = apiUserResponse.results as Array<User>;
-    });
+  public constructor() {
+    this.typeInstance = new CmdbType();
   }
 
-  public ngOnInit(): void {
-    this.sections = [];
-    this.builderFormGroup = new FormGroup({});
+  public isNewSection(section: CmdbTypeSection): boolean {
+    return this.newSections.indexOf(section) > -1;
   }
+
+  public isNewField(field: any): boolean {
+    return this.newFields.indexOf(field) > -1;
+  }
+
+
   public ngOnDestroy(): void {
-    if (this.modalRef) {
-      this.modalRef.close();
-    }
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
-  public onDrop(event: DndDropEvent, list: any[]) {
-    if (list && (event.dropEffect === 'copy')) {
-      this.canEdit = true;
-    }
+  private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
+    refSection.fields = [];
+    refSection.fields.push(`${ refSection.name }-field`);
+    this.typeInstance.fields.push({
+      type: 'ref-section-field',
+      name: `${ refSection.name }-field`,
+      label: refSection.label
+    });
+    this.typeInstance.fields = [...this.typeInstance.fields];
+  }
 
-    if (list
-      && (event.dropEffect === 'copy'
-        || event.dropEffect === 'move')) {
+  private removeRefSectionSelectionField(refSection: CmdbTypeSection): void {
+    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${ refSection.name }-field`);
+    this.typeInstance.fields.splice(index, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
+  }
+
+  public onSectionDrop(event: DndDropEvent): void {
+    if (this.sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
       let index = event.index;
-
       if (typeof index === 'undefined') {
-
-        index = list.length;
+        index = this.sections.length;
       }
-      for (const el of list) {
+      for (const el of this.sections) {
         const collapseCard = ($('#' + el.name) as any);
         collapseCard.collapse('hide');
       }
-      list.splice(index, 0, event.data);
+      if (event.dropEffect === 'copy') {
+        this.newSections.push(event.data);
+      }
+      this.sections.splice(index, 0, event.data);
+      this.typeInstance.render_meta.sections = [...this.sections];
+      if (event.data.type === 'ref-section') {
+        this.addRefSectionSelectionField(event.data as CmdbTypeSection);
+      }
     }
+  }
+
+  public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+    const fieldData = event.data;
+    if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
+
+      let index = event.index;
+      if (typeof index === 'undefined') {
+        index = section.fields.length;
+      }
+
+      if (event.dropEffect === 'copy') {
+        this.newFields.push(fieldData);
+      }
+      section.fields.splice(index, 0, fieldData);
+      this.typeInstance.render_meta.sections = [...this.sections];
+      this.typeInstance.fields.push(fieldData);
+      this.typeInstance.fields = [...this.typeInstance.fields];
+    }
+  }
+
+  public onFieldDragged(item: any, section: CmdbTypeSection) {
+    const sectionIndex = section.fields.indexOf(item);
+    section.fields.splice(sectionIndex, 1);
+    const fieldIndex = this.typeInstance.fields.indexOf(item);
+    this.typeInstance.fields.splice(fieldIndex, 1);
+    this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
@@ -138,21 +192,46 @@ export class BuilderComponent implements OnInit, OnDestroy{
     }
   }
 
-  public remove(item: any, list: any[]) {
-    const index: number = list.indexOf(item);
+  public removeSection(item: CmdbTypeSection) {
+    const index: number = this.typeInstance.render_meta.sections.indexOf(item);
     if (index !== -1) {
-      list.splice(index, 1);
+      if (item.type === 'section') {
+        const fields: Array<string> = this.typeInstance.render_meta.sections[index].fields;
+        for (const field of fields) {
+          const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field);
+          if (index !== -1) {
+            this.typeInstance.fields.splice(fieldIdx, 1);
+          }
+        }
+        this.typeInstance.fields = [...this.typeInstance.fields];
+      } else if (item.type === 'ref-section') {
+        this.removeRefSectionSelectionField(item);
+      }
+      this.sections.splice(index, 1);
+      this.typeInstance.render_meta.sections.splice(index, 1);
+      this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
+
   }
 
-  public openPreview() {
-    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
-    previewModal.componentInstance.sections = this.sections;
+  public removeField(item: any, section: CmdbTypeSection) {
+    const indexField: number = this.typeInstance.fields.indexOf(item);
+    if (indexField > -1) {
+      this.typeInstance.fields.splice(indexField, 1);
+      this.typeInstance.fields = [...this.typeInstance.fields];
+    }
+
+    const sectionFieldIndex = section.fields.indexOf(item);
+    if (sectionFieldIndex > -1) {
+      section.fields.splice(sectionFieldIndex, 1);
+    }
+    this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
   }
 
-  public openDiagnostic() {
-    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
-    diagnosticModal.componentInstance.data = this.sections;
+  public replaceAt(array, index, value) {
+    const ret = array.slice(0);
+    ret[index] = value;
+    return ret;
   }
 
   public matchedType(value: string) {
@@ -175,4 +254,5 @@ export class BuilderComponent implements OnInit, OnDestroy{
         return 'font';
     }
   }
+
 }

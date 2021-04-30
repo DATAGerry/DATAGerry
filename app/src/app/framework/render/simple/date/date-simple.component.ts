@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,22 +17,27 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
-import { DatePipe } from '@angular/common';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   selector: 'cmdb-date-simple',
   templateUrl: './date-simple.component.html',
   styleUrls: ['./date-simple.component.scss']
 })
-export class DateSimpleComponent extends RenderField implements OnInit {
+export class DateSimpleComponent extends RenderFieldComponent implements OnInit {
 
-  constructor(private datePipe: DatePipe) {
+  constructor() {
     super();
   }
 
-  ngOnInit(): void {
-    const {$date} = this.data ? {$date: null} : this.data.value;
-    if ($date) { this.datePipe.transform(new Date($date), 'dd/MM/yyyy'); }
+  public ngOnInit(): void {
+    const dateValue = this.data ? this.data.value : this.data.value;
+    if (dateValue) {
+      if (dateValue.$date) {
+        this.data.value = dateValue.$date;
+      }
+    } else {
+      this.data.value = 'no date set';
+    }
   }
 }

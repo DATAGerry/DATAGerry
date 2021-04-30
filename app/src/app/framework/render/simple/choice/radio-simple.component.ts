@@ -17,13 +17,13 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   templateUrl: './radio-simple.component.html',
   styleUrls: ['./radio-simple.component.scss']
 })
-export class RadioSimpleComponent extends RenderField {
+export class RadioSimpleComponent extends RenderFieldComponent {
 
   constructor() {
     super();

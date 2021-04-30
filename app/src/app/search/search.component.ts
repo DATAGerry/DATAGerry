@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,19 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
-import { JwPaginationComponent } from 'jw-angular-pagination';
 import { takeUntil } from 'rxjs/operators';
 import { ProgressSpinnerService } from '../layout/progress/progress-spinner.service';
+import { PageLengthEntry } from '../layout/table/components/table-page-size/table-page-size.component';
 
 @Component({
   templateUrl: './search.component.html',
@@ -66,9 +66,6 @@ export class SearchComponent implements OnInit, OnDestroy {
    * Max number of size for pagination truncate.
    */
   public maxNumberOfSites: number[];
-
-
-  @ViewChild('paginationComponent', { static: false }) pagination: JwPaginationComponent;
   private initSearch: boolean = true;
   private initFilter: boolean = true;
 
@@ -90,24 +87,35 @@ export class SearchComponent implements OnInit, OnDestroy {
   public queryParameters: any = [];
 
   /**
-   * Resolve flag.
-   */
-  public resolve: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-
-  /**
    * Component un-subscriber.
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   /**
+   * A preset of default page sizes.
+   * @private
+   */
+  public readonly defaultResultSizeList: Array<PageLengthEntry> =
+    [
+      { label: '10', value: 10 },
+      { label: '25', value: 25 },
+      { label: '50', value: 50 },
+      { label: '100', value: 100 },
+      { label: '200', value: 200 }
+    ];
+
+  /**
+   * Page size select form group.
+   */
+  public resultSizeForm: FormGroup = new FormGroup({
+    size: new FormControl(this.limit),
+  });
+
+  /**
    * Constructor of SearchComponent
-   *
-   * @param route Current activated route.
-   * @param searchService API Search service.
-   * @param spinner
    */
   constructor(private route: ActivatedRoute, private searchService: SearchService,
-              private spinner: ProgressSpinnerService) {
+              private spinner: ProgressSpinnerService, private router: Router) {
     this.searchInputForm = new FormGroup({
       input: new FormControl('', Validators.required)
     });
@@ -117,17 +125,37 @@ export class SearchComponent implements OnInit, OnDestroy {
 
     this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
       this.queryParameters = params.get('query');
-      if (params.has('resolve')) {
-        this.resolve.next(JSON.parse(params.get('resolve')));
+      if (params.has('limit')) {
+        this.limit = (+JSON.parse(params.get('limit')));
+        this.resultSizeForm.get('size').setValue(this.limit);
+      }
+      if (params.has('page')) {
+        this.currentPage = (+JSON.parse(params.get('page')));
       }
       this.initSearch = true;
       this.initFilter = true;
       this.onSearch();
     });
 
-    this.resolve.asObservable().pipe(takeUntil(this.subscriber)).subscribe(() => {
-      this.onSearch();
-    });
+    this.resultLength.valueChanges.pipe(takeUntil(this.subscriber))
+      .subscribe((size: number) => {
+        this.limit = size;
+        this.router.navigate(
+          [],
+          {
+            relativeTo: this.route,
+            queryParams: { limit: this.limit },
+            queryParamsHandling: 'merge'
+          }).then();
+        this.onSearch();
+      });
+  }
+
+  /**
+   * Get the form control of the size selection.
+   */
+  public get resultLength(): FormControl {
+    return this.resultSizeForm.get('size') as FormControl;
   }
 
   /**
@@ -139,18 +167,15 @@ export class SearchComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
-    if (this.resolve.value) {
-      params = params.set('resolve', this.resolve.value.toString());
-    }
     this.searchService.postSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber)).subscribe((results: SearchResultList) => {
         this.searchResultList = results;
         this.filterResultList = this.initFilter && results !== null ? results.groups : this.filterResultList;
         if (this.initSearch) {
-          this.maxNumberOfSites = Array.from({length: (this.searchResultList.total_results)}, (v, k) => k + 1);
+          this.maxNumberOfSites = Array.from({ length: (this.searchResultList.total_results) }, (v, k) => k + 1);
           this.initSearch = false;
           this.initFilter = false;
         }
-    });
+      });
     let localParameters = JSON.parse(this.queryParameters);
     if (localParameters.length === 1) {
       localParameters[0].searchForm = 'publicID';
@@ -170,12 +195,21 @@ export class SearchComponent implements OnInit, OnDestroy {
    * @param event: Data from the change event.
    */
   public onChangePage(event): void {
-    if (this.currentPage !== this.pagination.pager.currentPage) {
-      this.currentPage = this.pagination.pager.currentPage;
-      this.skip = (this.currentPage - 1) * this.limit;
-      this.onSearch();
-    }
+    this.currentPage = event;
+    this.skip = (this.currentPage - 1) * this.limit;
+    this.setPageParam(this.currentPage);
+    this.onSearch();
 
+  }
+
+  private setPageParam(page): void {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: { page },
+        queryParamsHandling: 'merge'
+      }).then();
   }
 
   public reSearch(value: any) {

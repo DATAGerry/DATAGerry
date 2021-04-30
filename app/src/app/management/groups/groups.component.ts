@@ -18,12 +18,16 @@
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { GroupService } from '../services/group.service';
-import { ReplaySubject } from 'rxjs';
+import {BehaviorSubject, ReplaySubject} from 'rxjs';
 import { Group } from '../models/group';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import { Column, Sort, SortDirection } from '../../layout/table/table.types';
+import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+import { convertResourceURL, UserSettingsService } from '../user-settings/services/user-settings.service';
+import { UserSetting } from '../user-settings/models/user-setting';
+import { UserSettingsDBService } from '../user-settings/services/user-settings-db.service';
 
 @Component({
   selector: 'cmdb-groups',
@@ -31,6 +35,11 @@ import { Column, Sort, SortDirection } from '../../layout/table/table.types';
   styleUrls: ['./groups.component.scss']
 })
 export class GroupsComponent implements OnInit, OnDestroy {
+
+  /**
+   * The id of the table
+   */
+  public readonly id: string = 'group-list-table';
 
   /**
    * Component title h1.
@@ -89,7 +98,33 @@ export class GroupsComponent implements OnInit, OnDestroy {
   public columns: Array<Column> = [];
   public totalGroups: number;
 
-  constructor(private groupService: GroupService) {
+  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+
+  public tableStates: Array<TableState> = [];
+
+  public get tableState(): TableState {
+    return this.tableStateSubject.getValue() as TableState;
+  }
+
+  constructor(private groupService: GroupService, private router: Router, private route: ActivatedRoute,
+              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+      if (data.userSetting) {
+        const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
+          .find(payloads => payloads.id === this.id);
+        this.tableStates = userSettingPayloads.tableStates;
+        this.tableStateSubject.next(userSettingPayloads.currentState);
+      } else {
+        this.tableStates = [];
+        this.tableStateSubject.next(undefined);
+
+        const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
+        const resource: string = convertResourceURL(this.router.url.toString());
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        this.indexDB.addSetting(userSetting);
+      }
+    });
   }
 
   public ngOnInit(): void {
@@ -136,7 +171,18 @@ export class GroupsComponent implements OnInit, OnDestroy {
         cellClasses: ['actions-buttons']
       }
     ] as Array<Column>;
+    this.initTable();
     this.loadGroupsFromApi();
+  }
+
+  private initTable() {
+    if (this.tableState) {
+      this.sort = this.tableState.sort;
+      this.params.sort = this.sort.name;
+      this.params.order = this.sort.order;
+      this.params.page = this.tableState.page;
+      this.params.limit = this.tableState.pageSize;
+    }
   }
 
   /**
@@ -172,6 +218,47 @@ export class GroupsComponent implements OnInit, OnDestroy {
    */
   public onPageSizeChange(limit: number): void {
     this.params.limit = limit;
+    this.loadGroupsFromApi();
+  }
+
+  /**
+   * On table State change.
+   * Update state.
+   */
+  public onStateChange(state: TableState): void {
+    this.tableStateSubject.next(state);
+  }
+
+  /**
+   * On table state reset.
+   * Reset State.
+   */
+  public onStateReset(): void {
+    this.params.page = this.tableState.page;
+    this.params.limit = this.tableState.pageSize;
+    this.sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    this.params.sort = this.sort.name;
+    this.params.order = this.sort.order;
+    this.tableStateSubject.next(undefined);
+    this.loadGroupsFromApi();
+  }
+
+  /**
+   * On State Select.
+   * Updates table settings according to the given table state
+   * @param state
+   */
+  public onStateSelect(state: TableState) {
+    this.tableStateSubject.next(state);
+    this.params.page = this.tableState.page;
+    this.params.limit = this.tableState.pageSize;
+    this.sort = this.tableState.sort;
+    this.params.sort = this.sort.name;
+    this.params.order = this.sort.order;
+    for (const col of this.columns) {
+      col.hidden = !this.tableState.visibleColumns.includes(col.name);
+    }
+    this.tableStateSubject.next(state);
     this.loadGroupsFromApi();
   }
 

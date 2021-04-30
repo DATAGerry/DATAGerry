@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 
 import logging
@@ -30,6 +30,7 @@ from cmdb.search.search_result import SearchResult
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
+from cmdb.framework.utils import PublicID
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,9 +52,12 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
         pipe_and = self.and_([regex, {'active': {"$eq": True}} if active_flag else {}])
         pipe_match = self.match_(pipe_and)
 
+        # load reference fields in runtime.
+        self.pipeline = SearchReferencesPipelineBuilder().build()
+
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
                                                                                  permission=permission))]
         self.add_pipe(pipe_match)
         self.add_pipe({'$group': {"_id": {'active': '$active'}, 'count': {'$sum': 1}}})
@@ -79,6 +83,56 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
                 'total': '$total'
             }})
 
+        return self.pipeline
+
+
+class SearchReferencesPipelineBuilder(PipelineBuilder):
+    def __init__(self, pipeline: Pipeline = None):
+        """
+        Init constructor load reference fields in runtime.
+        The search should interpret reference section like normal field contents.
+        This means that fields should already be loaded into the object during runtime.
+        Args:
+            pipeline: preset a for defined pipeline
+        """
+        super(SearchReferencesPipelineBuilder, self).__init__(pipeline=pipeline)
+
+    def build(self, *args, **kwargs) -> Pipeline:
+        # Load reference fields in runtime
+        self.add_pipe(self.lookup_('framework.objects', 'fields.value', 'public_id', 'data'))
+        self.add_pipe(
+            self.project_({
+                '_id': 1, 'public_id': 1, 'type_id': 1, 'active': 1, 'author_id': 1, 'creation_time': 1, 'version': 1,
+                'last_edit_time': 1, 'fields': 1, 'relatesTo': '$data.public_id',
+                'simple': {
+                    '$reduce': {
+                        'input': "$data.fields",
+                        'initialValue': [],
+                        'in': {'$setUnion': ["$$value", "$$this"]}
+                    }
+                }
+            })
+        )
+        self.add_pipe(
+            self.group_('$_id', {
+                'public_id': {'$first': '$public_id'},
+                'type_id': {'$first': '$type_id'},
+                'active': {'$first': '$active'},
+                'author_id': {'$first': '$author_id'},
+                'creation_time': {'$first': '$creation_time'},
+                'last_edit_time': {'$first': '$last_edit_time'},
+                'version': {'$first': 'version'},
+                'fields': {'$first': '$fields'},
+                'simple': {'$first': '$simple'},
+                'relatesTo': {'$first': '$relatesTo'}
+            })
+        )
+        self.add_pipe(
+            self.project_({
+                '_id': 1, 'public_id': 1, 'type_id': 1, 'active': 1, 'author_id': 1, 'creation_time': 1, 'version': 1,
+                'last_edit_time': 1, 'fields': {'$setUnion': ['$fields', '$simple']}, 'relatesTo': 1,
+            })
+        )
         return self.pipeline
 
 
@@ -124,45 +178,6 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         return regex_pipes
 
-    def build_resolve_reference_pipeline(self, user: UserModel = None, permission: AccessControlPermission = None,
-                                        *args, **kwargs):
-        """Build a resolve reference pipeline query"""
-        if kwargs.get('resolve', False):
-            self.add_pipe(
-                self.lookup_sub_(
-                    from_='framework.objects',
-                    let_={'ref_id': '$public_id'},
-                    pipeline_=[self.match_({'$expr': {'$in': ['$$ref_id', '$fields.value']}})],
-                    as_='refs'
-                ))
-
-            pipeline_ = [{'$match': {'$expr': {'$in': ['$$ref_id', '$fields.value']}}}]
-
-            # get only active objects
-            if kwargs.get('active', True):
-                pipeline_ = [*pipeline_, *[{'$match': {'active': {"$eq": True}}}]]
-
-            # permission builds
-            if user and permission:
-                pipeline_ = [*pipeline_, *(AccessControlQueryBuilder().build(group_id=user.group_id,
-                                                                             permission=permission))]
-
-            self.add_pipe(
-                self.facet_({
-                    'root': [{'$replaceRoot': {'newRoot': {'$mergeObjects': ['$$ROOT']}}}],
-                    'references': [
-                        {'$lookup': {'from': 'framework.objects', 'let': {'ref_id': '$public_id'},
-                                     'pipeline': pipeline_,
-                                     'as': 'refs'}},
-                        {'$unwind': '$refs'},
-                        {'$replaceRoot': {'newRoot': '$refs'}}
-                    ]
-                })
-            )
-            self.add_pipe(self.project_(specification={'complete': {'$concatArrays': ['$root', '$references']}}))
-            self.add_pipe(self.unwind_(path='$complete'))
-            self.add_pipe({'$replaceRoot': {'newRoot': '$complete'}})
-
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
@@ -170,6 +185,9 @@ class SearchPipelineBuilder(PipelineBuilder):
         """Build a pipeline query out of frontend params"""
         # clear pipeline
         self.clear()
+
+        # load reference fields in runtime.
+        self.pipeline = SearchReferencesPipelineBuilder().build()
 
         # fetch only active objects
         if active_flag:
@@ -210,7 +228,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=user.group_id,
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
                                                                                  permission=permission))]
         return self.pipeline
 
@@ -237,14 +255,12 @@ class SearcherFramework(Search[CmdbObjectManager]):
         Returns:
             SearchResult with generic list of RenderResults
         """
+
         # Insert skip and limit
         plb = SearchPipelineBuilder(pipeline)
 
         # define search output
         stages: dict = {}
-
-        # build resolve reference pipeline
-        plb.build_resolve_reference_pipeline(user=request_user, permission=permission, **kwargs)
 
         stages.update({'metadata': [SearchPipelineBuilder.count_('total')]})
         stages.update({'data': [
@@ -271,7 +287,6 @@ class SearcherFramework(Search[CmdbObjectManager]):
         }
         stages.update(group_stage)
         plb.add_pipe(SearchPipelineBuilder.facet_(stages))
-
         raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
 
@@ -285,7 +300,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             raw_search_result_list_entry = raw_search_result_list[0]
             # parse result list
             pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
-            rendered_result_list = RenderList(pre_rendered_result_list, request_user,
+            rendered_result_list = RenderList(pre_rendered_result_list, request_user, database_manager=self.manager.dbm,
                                               object_manager=self.manager).render_result_list()
 
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)

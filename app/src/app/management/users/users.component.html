@@ -1,9 +1,10 @@
 <h1>{{title}} <small class="text-muted">{{description}}</small></h1>
 <hr/>
 
-<cmdb-table [id]="'user-list-table'" [columns]="columns" [items]="users" [loading]="loading"
+<cmdb-table [id]="id" [columns]="columns" [items]="users" [loading]="loading"
             [customButtons]="[buttonTemplate]" [sort]="sort" [pageSize]="params.limit" [page]="params.page"
-            [totalItems]="totalUsers" [stateEnabled]="false"
+            [totalItems]="totalUsers" [stateEnabled]="true"
+            (stateChange)="onStateChange($event)" (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
 </cmdb-table>
@@ -20,6 +21,10 @@
 <ng-template #groupTemplate let-data="data">
   <cmdb-user-table-group-cell [groups]="groups" [groupID]="data" [group]="getGroupByID(data)"
                               [groupLoadingStack]="groupLoadingStack"></cmdb-user-table-group-cell>
+</ng-template>
+
+<ng-template #dateTemplate let-data="data">
+  {{data | dateFormatter}}
 </ng-template>
 
 <ng-template #actionsTemplate let-item="item">

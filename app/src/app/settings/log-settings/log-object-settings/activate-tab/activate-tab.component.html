@@ -8,16 +8,18 @@
     <hr/>
   </div>
   <div class="col-12">
-    <cmdb-table [items]="activeLogs" [totalItems]="total" [columns]="columns" [sort]="sort" [sortable]="true"
-                [selectEnabled]="true" [loading]="loading" [page]="page" [rowClasses]="['align-middle']"
-                [searchEnabled]="true" [id]="'object-log-list-table'" [pageSize]="limit"
-                [emptyMessage]="'No Log entries were found!'" (pageChange)="onPageChange($event)"
-                (pageSizeChange)="onPageSizeChange($event)" (sortChange)="onSortChange($event)"
-                (searchChange)="onSearchChange($event)" (selectedChange)="onSelectedChange($event)">
+    <cmdb-table [items]="activeLogs" [totalItems]="total" [columns]="columns" [sort]="sort"
+                [page]="page" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
+                [tableStates]="tableStates" [loading]="loading" [tableState]="tableState"
+                [emptyMessage]="'This object is not referenced!'" [stateEnabled]="true"
+                (stateSelect)="onStateSelect($event)" (selectedChange)="onSelectedChange($event)"
+                (stateChange)="onStateChange($event)" (stateReset)="onStateReset()"
+                (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+                (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
     </cmdb-table>
 
     <ng-template #dateTemplate let-data="data">
-      {{data.$date | date:'MM.dd.yyyy HH:mm:ss'}}
+      {{data.$date | dateFormatter}}
     </ng-template>
     <ng-template #actionTemplate let-data="data">
       <cmdb-log-object-table-actions [publicID]="data" (deleteEmitter)="deleteEmitter.emit(data);"></cmdb-log-object-table-actions>
@@ -26,7 +28,7 @@
       {{data}}
     </ng-template>
     <ng-template #changeTemplate let-item="item">
-      <cmdb-object-log-change-view [action]="item.action" [changes]="item.changes"></cmdb-object-log-change-view>
+      <cmdb-object-log-change-view [mode]="item.action" [changes]="item.changes"></cmdb-object-log-change-view>
     </ng-template>
     <ng-template #userTemplate let-item="item">
       <cmdb-object-log-user [userID]="item.user_id" [userName]="item.user_name"></cmdb-object-log-user>

@@ -8,10 +8,11 @@
               title="object list">
             <i class="fas fa-list"></i>
       </button>
-      <button *permissionLink="'base.framework.object.edit';requirements:'UPDATE';acl:acl"
-              routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
-              class="btn btn-sm btn-link "
-              title="edit">
+      <ng-container *ngIf="renderResult?.type_information?.active">
+        <button *permissionLink="'base.framework.object.edit';requirements:'UPDATE';acl:acl"
+                routerLink="/framework/object/edit/{{renderResult?.object_information?.object_id}}"
+                class="btn btn-sm btn-link "
+                title="edit">
         <i class="fas fa-edit"></i>
       </button>
       <button type="button" *permissionLink="['base.framework.object.view', 'base.framework.object.add'];requirements:['CREATE', 'READ'];acl:acl"
@@ -26,11 +27,12 @@
         <i class="fas fa-trash-alt"></i>
       </button>
       <button type="button" *permissionLink="'base.framework.object.add';requirements:'CREATE';acl:acl"
-         routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
-         class="btn btn-sm btn-link pr-2"
-         title="add new object">
+              routerLink="/framework/object/add/{{renderResult?.type_information?.type_id}}"
+              class="btn btn-sm btn-link pr-2"
+              title="add new object">
         <i class="fas fa-file"></i>
       </button>
+      </ng-container>
     </span>
   </div>
 </div>

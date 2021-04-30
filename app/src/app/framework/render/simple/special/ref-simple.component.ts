@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,33 +17,45 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
+import { TypeReference } from '../../../models/cmdb-type-reference';
+
+type TypeReferenceTemplate = {
+  reference: TypeReference,
+  value: any
+};
 
 @Component({
   selector: 'cmdb-ref-simple',
   templateUrl: './ref-simple.component.html',
   styleUrls: ['./ref-simple.component.scss']
 })
-export class RefSimpleComponent extends RenderField implements OnInit {
+export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
 
-  public refData: any = undefined;
+  public refData: TypeReferenceTemplate = {
+    reference: new TypeReference(),
+    value: null
+  };
 
   constructor(private objectService: ObjectService) {
     super();
   }
 
   public ngOnInit() {
+
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
           this.refData = {
-            reference: {
+            reference: new TypeReference({
+              type_id: res.type_information.type_id,
+              object_id: res.object_information.object_id,
               icon: res.type_information.icon,
               type_label: res.type_information.type_label,
               summaries: res.summaries
-            },
+            }),
             value: this.data.value,
           };
         });

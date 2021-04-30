@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,19 +13,24 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+import json
+
+from bson import json_util
 from typing import Union, List
 
+from cmdb.database.utils import object_hook
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import TypeModel
-from cmdb.framework.managers.framework_manager import FrameworkManager
+from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
-from cmdb.search import Query
+from cmdb.search import Pipeline
 
 
-class TypeManager(FrameworkManager):
+class TypeManager(ManagerBase):
     """
     Manager for the type module. Manages the CRUD functions of the types and the iteration over the collection.
     """
@@ -56,11 +61,16 @@ class TypeManager(FrameworkManager):
         """
 
         try:
-            query: Query = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
-            aggregation_result = next(self._aggregate(self.collection, query))
+            query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+            count_query: Pipeline = self.builder.count(filter=filter)
+            aggregation_result = list(self._aggregate(self.collection, query))
+            total_cursor = self._aggregate(self.collection, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err=err)
-        iteration_result: IterationResult[TypeModel] = IterationResult.from_aggregation(aggregation_result)
+        iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(TypeModel)
         return iteration_result
 
@@ -107,6 +117,9 @@ class TypeManager(FrameworkManager):
         """
         if isinstance(type, TypeModel):
             type = TypeModel.to_json(type)
+        elif isinstance(type, dict):
+            type = json.loads(json.dumps(type, default=json_util.default), object_hook=object_hook)
+
         return self._insert(self.collection, resource=type)
 
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
@@ -122,6 +135,9 @@ class TypeManager(FrameworkManager):
         """
         if isinstance(type, TypeModel):
             type = TypeModel.to_json(type)
+        elif isinstance(type, dict):
+            type = json.loads(json.dumps(type, default=json_util.default), object_hook=object_hook)
+
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=type)
         if update_result.matched_count != 1:
             raise ManagerUpdateError(f'Something happened during the update!')

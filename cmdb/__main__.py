@@ -158,17 +158,17 @@ def main(args):
 
     # create / check connection database managers
     dbm = None
-    try:
-        dbm = _check_database()
-        if not dbm:
-            raise DatabaseConnectionError('')
-        LOGGER.info("Database connection established.")
-    except CMDBError as conn_error:
-        LOGGER.critical(conn_error.message)
-        exit(1)
 
     # check db-settings and run update if needed
     if args.start:
+        try:
+            dbm = _check_database()
+            if not dbm:
+                raise DatabaseConnectionError('')
+            LOGGER.info("Database connection established.")
+        except CMDBError as conn_error:
+            LOGGER.critical(conn_error.message)
+            exit(1)
         from cmdb.__check__ import CheckRoutine
         check_routine = CheckRoutine(dbm)
         # check db-settings

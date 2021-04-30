@@ -26,7 +26,9 @@
   <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
 </ng-template>
 
+<ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>
+
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item" [acl]="type.acl"
+  <cmdb-object-table-actions *ngIf="type" [publicID]="item.object_information.object_id" [result]="item" [acl]="type?.acl"
                              (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
 </ng-template>

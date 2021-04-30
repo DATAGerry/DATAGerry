@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
@@ -28,7 +28,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TypeFieldsStepComponent } from './type-builder/type-fields-step/type-fields-step.component';
 import { QRCodeModule } from 'angularx-qrcode';
 import { NgSelectModule } from '@ng-select/ng-select';
-import { TypeValidationStepComponent } from './type-builder/type-validation-step/type-validation-step.component';
 import { RenderModule } from '../render/render.module';
 import { BuilderModule } from './builder/builder.module';
 import { TypeEditComponent } from './type-edit/type-edit.component';
@@ -44,15 +43,20 @@ import { TypeAclStepComponent } from './type-builder/type-acl-step/type-acl-step
 import { GroupsAclTabsComponent } from './type-builder/type-acl-step/groups-acl-tabs/groups-acl-tabs.component';
 import { TableModule } from '../../layout/table/table.module';
 import { TypeTableActionsComponent } from './components/type-table-actions/type-table-actions.component';
+import {
+  TypeBuilderStepComponent,
+  TypeBuilderStepValidStatusComponent
+} from './type-builder/type-builder-step.component';
+import { IconPickerModule } from 'ngx-icon-picker';
+import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-preview-step.component';
+import { UsersModule } from '../../management/users/users.module';
 
 @NgModule({
-  entryComponents: [TypeDeleteConfirmModalComponent, CleanupModalComponent],
   declarations: [
     TypeAddComponent,
     TypeBasicStepComponent,
     TypeFieldsStepComponent,
     TypeBuilderComponent,
-    TypeValidationStepComponent,
     TypeEditComponent,
     TypeMetaStepComponent,
     TypeDeleteComponent,
@@ -62,7 +66,10 @@ import { TypeTableActionsComponent } from './components/type-table-actions/type-
     CleanButtonComponent,
     TypeAclStepComponent,
     GroupsAclTabsComponent,
-    TypeTableActionsComponent
+    TypeTableActionsComponent,
+    TypeBuilderStepComponent,
+    TypeBuilderStepValidStatusComponent,
+    TypePreviewStepComponent,
   ],
     imports: [
         CommonModule,
@@ -78,7 +85,9 @@ import { TypeTableActionsComponent } from './components/type-table-actions/type-
         NgbModule,
         FontAwesomeModule,
         AuthModule,
-        TableModule
+        TableModule,
+        IconPickerModule,
+        UsersModule
     ]
 })
 export class TypeModule {

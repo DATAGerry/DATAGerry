@@ -16,34 +16,27 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-export interface ControlsCommon {
-  label: string;
-  name: string;
-  icon?: string;
-  dndType: string;
-
-  content(): any;
+export abstract class ControlsCommon {
+  abstract label: string;
+  abstract name: string;
+  abstract icon: string;
+  abstract dndType: string;
+  abstract content(): any;
 }
 
 export interface ControlsContent {
-  required: boolean;
+  required?: boolean;
   name: string;
-  helperText: string;
-  placeholder: string;
+  label: string;
   type: string;
-  access: boolean;
-  groups: number[];
-  users: number[];
-  value: any;
-  optional: any;
-
+  value?: any;
 }
 
 export interface StructureContent {
   name: string;
   label: string;
-  position: number;
   type: string;
+  fields?: Array<any>;
 }
 
 export function randomName(desc: string) {
@@ -55,8 +48,8 @@ export class Controller {
 
   public typeController: ControlsCommon;
 
-  constructor(public name: string, public descr: any) {
-    this.typeController = new descr();
+  constructor(public name: string, public control: ControlsCommon) {
+    this.typeController = control;
   }
 
 }

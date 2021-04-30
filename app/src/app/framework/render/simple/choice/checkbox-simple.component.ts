@@ -17,13 +17,13 @@
 */
 
 import { Component } from '@angular/core';
-import { RenderField } from '../../fields/components.fields';
+import { RenderFieldComponent } from '../../fields/components.fields';
 
 @Component({
   templateUrl: './checkbox-simple.component.html',
   styleUrls: ['./checkbox-simple.component.scss']
 })
-export class CheckboxSimpleComponent extends RenderField {
+export class CheckboxSimpleComponent extends RenderFieldComponent {
 
   constructor() {
     super();

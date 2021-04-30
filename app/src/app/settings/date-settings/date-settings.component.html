@@ -1,0 +1,113 @@
+<h1>Regional Settings</h1>
+<hr/>
+<div class="row">
+  <div class="col-md-8">
+    <form [formGroup]="regionalForm" (ngSubmit)="onSave()" class="needs-validation" novalidate>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="date-format">Current Format:</label>
+        <div class="col-sm-9">
+          <div class="input-group">
+            <input class="form-control" type="text" id="date-format" formControlName="date_format" [value]="format"
+                   [ngClass]="{ 'is-valid': getController('date_format').valid
+                   && (getController('date_format').dirty || getController('date_format').touched),
+                   'is-invalid': getController('date_format').invalid
+                   && (getController('date_format').dirty || getController('date_format').touched)}">
+          </div>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="date-format-dropdown">Date Format (ISO 8601):</label>
+        <div class="col-sm-9">
+          <ng-select id="date-format-dropdown"
+                     [items]="formats"
+                     bindLabel="format"
+                     bindValue="format"
+                     formControlName="date_format">
+          </ng-select>
+        </div>
+      </div>
+      <div class="form-group row mb-3">
+        <label class="col-sm-3 col-form-label" for="time-zone">Time Zone:</label>
+        <div class="col-sm-9">
+            <ng-select id="time-zone"
+                       [items]="tzNames"
+                       formControlName="timezone">
+              <ng-template ng-label-tmp let-item="item">
+                {{utcToDeviceString(item)}}
+              </ng-template>
+              <ng-template ng-option-tmp let-item="item">
+                {{utcToDeviceString(item)}}
+              </ng-template>
+            </ng-select>
+        </div>
+      </div>
+      <hr/>
+      <button type="submit" class="btn btn-success float-right" [disabled]="!regionalForm.valid">
+        <i class="far fa-save"></i> Save
+      </button>
+      <div class="clearfix"></div>
+    </form>
+  </div>
+  <div class="col-md-4">
+    <div class="row">
+      <div class="col-md-12 pb-3">
+        <div class="card">
+          <div class="card-header">
+            <h5>Live Preview</h5>
+          </div>
+          <div class="card-body text-center">
+            <h2>{{displayTzF}}</h2>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div class="card">
+          <div class="card-header">
+            <h5>Date Format Pattern</h5>
+          </div>
+          <div class="card-body">
+
+            <table class="table">
+              <thead>
+              <tr>
+                <th scope="col">Letter</th>
+                <th scope="col">Description</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">YYYY</span></th>
+                <td>four-digit year</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">MM</span></th>
+                <td>two-digit month (01=January, etc.)</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">DD</span></th>
+                <td>two-digit day of month (01 through 31)</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">hh</span></th>
+                <td>two digits of hour (00 through 23) (am/pm NOT allowed)</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">mm</span></th>
+                <td>two digits of minute (00 through 59)</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">ss</span></th>
+                <td>two digits of second (00 through 59)</td>
+              </tr>
+              <tr>
+                <th scope="row"><span class="badge badge-warning">T</span></th>
+                <td>indicates the beginning of the time element (directly following the date element)</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

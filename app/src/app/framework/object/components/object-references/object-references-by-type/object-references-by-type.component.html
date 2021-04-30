@@ -1,0 +1,58 @@
+<cmdb-table [items]="refererObjects" [columns]="columns" [page]="page" [sort]="sort" [id]="id"
+            [stateEnabled]="true" [emptyMessage]="'This object is not referenced!'" [searchEnabled]="false"
+            [totalItems]="totalReferer" [selectEnabled]="true" [loading]="loading" [pageSize]="limit"
+            [customButtons]="[exportButtonTemplate]" [tableState]="tableState"
+            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
+            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()">
+</cmdb-table>
+
+
+<!-- Table templates -->
+<ng-template #activeTemplate let-data="data">
+  <div class="text-center">
+    <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+  </div>
+</ng-template>
+
+<ng-template #referenceType let-item="item">
+  <cmdb-object-references-type-column [objectID]="publicID" [object]="item"></cmdb-object-references-type-column>
+</ng-template>
+
+<ng-template #typeNameTemplate let-item="item">
+  <cmdb-type-label [faIcon]="item.type_information?.icon" [description]="item?.description"
+                   [title]="item.type_information.type_label ? item.type_information.type_label : item.type_information.type_name"
+                   [useURL]="true" [publicID]="item.type_information?.type_id"
+  ></cmdb-type-label>
+</ng-template>
+
+<ng-template #actionTemplate let-data="data">
+  <div class="d-flex justify-content-center">
+    <a *permissionLink="['base.framework.object.view']"
+       [routerLink]="['/', 'framework', 'object', 'view', data]"
+       title="View object">
+      <i class="far fa-eye"></i>
+    </a>
+  </div>
+</ng-template>
+
+<!-- Custom table buttons -->
+<ng-template #exportButtonTemplate>
+  <div class="btn-group" *permissionLink="'base.export.object.*'">
+    <button type="button" id="exportButton" class="btn btn-warning btn-sm dropdown-toggle"
+            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+      <fa-icon icon="file-export"></fa-icon>
+      Export
+    </button>
+    <ul class="dropdown-menu dropdown-menu-right dropdown-menu-lg-left" aria-labelledby="exportButton">
+      <li *ngFor="let item of formatList" id="export-{{item.extension}}"
+          [className]="item.active && selectedObjects?.length > 0 ? 'dropdown-item' : 'dropdown-item disabled'"
+          (click)="exportingFiles(item)"
+          [ngbTooltip]="item.helperText">
+        <fa-icon icon="{{item.icon}}"></fa-icon>
+        {{item.label}}
+        <span *ngIf="selectedObjects"> ( {{selectedObjects.length}} )</span>
+      </li>
+    </ul>
+  </div>
+</ng-template>

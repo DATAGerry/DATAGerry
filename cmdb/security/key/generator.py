@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,24 +12,17 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+from Crypto import Random
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.utils.system_config import SystemConfigReader
 
 
 class KeyGenerator:
 
-    def __init__(self, key_directory=None):
-        self.scr = SystemConfigReader()
-        ssc = SystemConfigReader()
-        database_options = ssc.get_all_values_from_section('Database')
-        self.__dbm = DatabaseManagerMongo(
-            **database_options
-        )
-        self.ssw = SystemSettingsWriter(self.__dbm)
-        self.key_directory = key_directory or SystemConfigReader.DEFAULT_CONFIG_LOCATION + "/keys"
+    def __init__(self, database_manager: DatabaseManagerMongo):
+        self.ssw = SystemSettingsWriter(database_manager)
 
     def generate_rsa_keypair(self):
         from Crypto.PublicKey import RSA
@@ -44,5 +37,4 @@ class KeyGenerator:
         self.ssw.write('security', {'asymmetric_key': asymmetric_key})
 
     def generate_symmetric_aes_key(self):
-        from Crypto import Random
         self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})

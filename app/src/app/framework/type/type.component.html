@@ -6,16 +6,22 @@
 <cmdb-info-box [message]="INFO_MESSAGE"
                icon="fas fa-cube"
                doc="/docs/admin_guide/objects.html"></cmdb-info-box>
-<cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="'type-list-table'"
-            [stateEnabled]="false" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
+<cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="id" [tableState]="tableState"
+            [stateEnabled]="true" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
             [totalItems]="totalTypes" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)"></cmdb-table>
+            (searchChange)="onSearchChange($event)" (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"></cmdb-table>
 
 <!-- Table templates -->
 <ng-template #activeTemplate let-data="data">
-  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+  <div class="text-center">
+    <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+  </div>
+</ng-template>
+
+<ng-template #userTemplate let-data="data">
+  <cmdb-user-compact *ngIf="data" [userID]="data"></cmdb-user-compact>
 </ng-template>
 
 <ng-template #typeNameTemplate let-item="item">
@@ -27,6 +33,8 @@
 <ng-template #actionsTemplate let-item="item">
   <cmdb-type-table-actions [publicID]="item.public_id"></cmdb-type-table-actions>
 </ng-template>
+
+<ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>
 
 <ng-template #cleanTemplate let-item="item">
   <cmdb-clean-button [type]="item"></cmdb-clean-button>

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask import abort, request, current_app
 
 from cmdb.framework.utils import PublicID
@@ -117,7 +117,7 @@ def insert_user(data: dict):
     security_manager: SecurityManager = SecurityManager(database_manager=current_app.database_manager)
     try:
         data['password'] = security_manager.generate_hmac(data['password'])
-        data['registration_time'] = datetime.now()
+        data['registration_time'] = datetime.now(timezone.utc)
         result_id: PublicID = user_manager.insert(data)
         user = user_manager.get(public_id=result_id)
     except ManagerGetError as err:

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { BrowserModule } from '@angular/platform-browser';
@@ -24,7 +24,7 @@ import { AppComponent } from './app.component';
 import { LayoutModule } from './layout/layout.module';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 import { PreviousRouteService } from './services/previous-route.service';
-import { DatePipe } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import { ToastModule } from './layout/toast/toast.module';
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
 import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
@@ -37,12 +37,15 @@ import { ProgressModule } from './layout/progress/progress.module';
 import { AppLoadingService } from './services/app-loading.service';
 import { ProgressBarService } from './layout/progress/progress-bar.service';
 import { ProgressSpinnerService } from './layout/progress/progress-spinner.service';
+import { SessionTimeoutService } from './auth/services/session-timeout.service';
+import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
 
 @NgModule({
   declarations: [
     AppComponent,
   ],
   imports: [
+    CommonModule,
     BrowserModule,
     BrowserAnimationsModule,
     HttpClientModule,
@@ -50,13 +53,18 @@ import { ProgressSpinnerService } from './layout/progress/progress-spinner.servi
     AuthModule,
     LayoutModule,
     ToastModule,
-    AppRoutingModule,
-    ProgressModule
+    ProgressModule,
+    AppRoutingModule
+  ],
+  exports: [
+    BrowserModule
   ],
   providers: [
     PreviousRouteService,
     DatePipe,
+    DateFormatterPipe,
     AppLoadingService,
+    SessionTimeoutService,
     ProgressBarService,
     ProgressSpinnerService,
     RequestCacheService,

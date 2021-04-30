@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,10 +12,10 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from cmdb.framework import CmdbObject
@@ -73,7 +73,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             'fields': [],
             'author_id': self.request_user.get_public_id(),
             'version': '1.0.0',
-            'creation_time': datetime.datetime.utcnow()
+            'creation_time': datetime.now(timezone.utc)
         }
         map_properties = mapping.get('properties')
 
@@ -83,7 +83,8 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
         for entry_field in entry.get('fields'):
             field_exists = next((item for item in possible_fields if item["name"] == entry_field['name']), None)
             if field_exists:
-                entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
+                if 'checkbox' == field_exists['type']:
+                    entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
                 entry_field['value'] = ImproveObject.improve_date(entry_field['value'])
                 working_object.get('fields').append(entry_field)
         return working_object
@@ -137,7 +138,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
             'fields': [],
             'author_id': self.request_user.get_public_id(),
             'version': '1.0.0',
-            'creation_time': datetime.datetime.utcnow()
+            'creation_time': datetime.now(timezone.utc)
         }
         current_mapping = self.get_config().get_mapping()
         property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
@@ -238,7 +239,7 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
             'fields': [],
             'author_id': self.request_user.get_public_id(),
             'version': '1.0.0',
-            'creation_time': datetime.datetime.utcnow()
+            'creation_time': datetime.now(timezone.utc)
         }
         current_mapping = self.get_config().get_mapping()
         property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})

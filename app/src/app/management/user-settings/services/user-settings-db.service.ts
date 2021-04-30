@@ -74,7 +74,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
             await this.dbService.clear(this.storeName);
 
             for (const setting of userSettings) {
-              this.dbService.add(this.storeName, setting);
+              this.dbService.add(this.storeName, setting).subscribe();
             }
           },
           error => console.error(`Error while loading user settings: ${ error }`));

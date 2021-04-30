@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 * GNU Affero General Public License for more details.
 
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, Injectable, Input, OnInit } from '@angular/core';
@@ -127,7 +127,7 @@ export class TypeDeleteComponent implements OnInit {
     deleteModal.result.then((result) => {
       if (result === 'delete') {
         this.typeService.deleteType(this.typeID).subscribe((deletedType) => {
-          this.router.navigate(['/']);
+          this.router.navigate(['/framework/type/']);
           this.toast.success(`Type was successfully Deleted: TypeID: ${ this.typeID }`);
         });
       }
