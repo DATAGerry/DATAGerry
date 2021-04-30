@@ -10,7 +10,7 @@
             <ng-container *ngIf="data.reference; else noRef;">
               <ng-container *ngIf="!protect">
                 <ng-container *ngIf="!data?.reference.line; else refLine">
-                  <i class="{{data.reference?.icon}}"></i> {{data.reference?.label}} #{{data.value}}
+                  <i class="{{data.reference?.icon}}"></i> {{data.reference?.type_label}} #{{data.reference?.object_id}}
                   <span *ngFor="let sum of data.reference?.summaries; let last = last; let first = first">
                     <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                       <span *ngIf="first"> - </span>{{sum.value}}
@@ -23,7 +23,7 @@
                 </ng-container>
                 <ng-template #refLine>
                   <ng-container *ngIf="data?.reference?.prefix">
-                    <i class="{{data?.reference?.icon}}"></i> {{data?.reference?.label}} #{{data?.reference?.type_id}}
+                    <i class="{{data?.reference?.icon}}"></i> {{data?.reference?.type_label}} #{{data?.reference?.type_id}}
                   </ng-container>
                   <span>{{data?.reference?.line}}</span>
                 </ng-template>
@@ -37,8 +37,8 @@
               <fa-icon icon="file-powerpoint"></fa-icon>
             </span>
             <span class="input-group-text">
-              <a [class.ref-disabled]="!controller.value"
-                 [routerLink]="'/framework/object/view/'+ controller.value">
+              <a [class.ref-disabled]="!data.reference?.object_id"
+                 [routerLink]="'/framework/object/view/'+ data.reference?.object_id">
                 <fa-icon icon="arrow-right"></fa-icon>
               </a>
             </span>

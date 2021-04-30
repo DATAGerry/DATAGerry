@@ -234,7 +234,7 @@ class CmdbRender:
                         field = self.type_instance.get_field(section_field)
                         field = self.__merge_field_content_section(field, self.object_instance)
 
-                        if field['type'] == 'ref':
+                        if field['type'] == 'ref' and (not self.ref_render or 'summaries' not in field):
                             ref_field_name: str = field['name']
                             field = self.type_instance.get_field(ref_field_name)
                             reference_id: int = self.object_instance.get_value(ref_field_name)
@@ -245,6 +245,7 @@ class CmdbRender:
                                 'type_id': ref_type.public_id,
                                 'type_name': ref_type.name,
                                 'type_label': ref_type.label,
+                                'object_id': reference_id,
                                 'summaries': []
                             }
                             for ref_section_field_name in ref_type.get_fields():
@@ -299,9 +300,10 @@ class CmdbRender:
     def __merge_references(self, current_field):
 
         # Initialise TypeReference
-        reference = TypeReference(type_id=0, label='', line='')
+        reference = TypeReference(type_id=0, object_id=0, type_label='', line='')
 
         if current_field['value']:
+
             try:
                 ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
                                                             permission=AccessControlPermission.READ)
@@ -319,7 +321,8 @@ class CmdbRender:
                 _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
 
                 reference.type_id = ref_type.get_public_id()
-                reference.label = ref_type.label
+                reference.object_id = int(current_field['value'])
+                reference.type_label = ref_type.label
                 reference.icon = ref_type.get_icon()
                 reference.prefix = ref_type.has_nested_prefix(_nested_summaries)
 
