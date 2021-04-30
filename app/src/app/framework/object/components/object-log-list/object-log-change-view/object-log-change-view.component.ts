@@ -18,6 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { LogMode } from '../../../../modes.enum';
+import {isArray} from "rxjs/internal-compatibility";
 
 @Component({
   selector: 'cmdb-object-log-change-view',
@@ -27,7 +28,7 @@ import { LogMode } from '../../../../modes.enum';
 export class ObjectLogChangeViewComponent {
 
   public readonly MODES = LogMode;
-  private sortedChanges: any;
+  private sortedChanges: any = {};
 
   /**
    * Change state for Log Objects
@@ -42,8 +43,10 @@ export class ObjectLogChangeViewComponent {
     if (!Array.isArray(value)) {
       const before = value.old;
       const after = value.new;
-      value.old = before.sort((a, b) => (a.name > b.name) ? 1 : -1);
-      value.new = after.sort((a, b) => (a.name > b.name) ? 1 : -1);
+      if (isArray(before) && isArray(after)) {
+        value.old = before.sort((a, b) => (a.name > b.name) ? 1 : -1);
+        value.new = after.sort((a, b) => (a.name > b.name) ? 1 : -1);
+      }
       this.sortedChanges = value;
     }
   }

@@ -19,7 +19,8 @@
 export class TypeReference {
 
   public readonly type_id: number;
-  public label: string;
+  public object_id: number;
+  public type_label: string;
   public summaries: any[];
   public line: string;
   public icon: any;
