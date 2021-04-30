@@ -42,7 +42,8 @@ class ExternalSystemDummy(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
-        row["event"] = self.event.get_param('event')
+        if self.event:
+            row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -137,8 +138,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         "longitude": 32
     }
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__services = self._destination_parms.get("services").split()
         self.__snmp_export = False
@@ -347,8 +348,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
         {"name": "ip",          "required": True,   "description": "ip address of the DNS A record. e.g. - 8.8.8.8"}
     ]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemCpanelDns, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemCpanelDns, self).__init__(destination_parms, export_vars, event)
 
         self.__variables = export_vars
 
@@ -557,8 +558,8 @@ class ExternalSystemCsv(ExternalSystem):
 
     variables = [{}]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemCsv, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemCsv, self).__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # get parameters for cPanel access
@@ -610,8 +611,8 @@ class ExternalSystemAnsible(ExternalSystem):
         }
     ]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # initialize store for created ansible groups
@@ -682,8 +683,8 @@ class ExternalSystemExecuteScript(ExternalSystem):
 
     variables = [{}]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__script = self._destination_parms.get("script")
         self.__timeout = int(self._destination_parms.get("timeout"))
@@ -697,7 +698,8 @@ class ExternalSystemExecuteScript(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
-        row["event"] = self.event.get_param('event')
+        if self.event:
+            row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -744,8 +746,8 @@ class ExternalSystemGenericRestCall(ExternalSystem):
 
     variables = [{}]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__url = self._destination_parms.get("url")
         self.__timeout = int(self._destination_parms.get("timeout"))
@@ -761,7 +763,8 @@ class ExternalSystemGenericRestCall(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
-        row["event"] = self.event.get_param('event')
+        if self.event:
+            row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -795,8 +798,8 @@ class ExternalSystemGenericPullJson(ExternalSystem):
 
     variables = [{}]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemGenericPullJson, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemGenericPullJson, self).__init__(destination_parms, export_vars, event)
         self.__rows = []
 
     def prepare_export(self):
@@ -805,7 +808,8 @@ class ExternalSystemGenericPullJson(ExternalSystem):
     def add_object(self, cmdb_object, template_data):
         row = {}
         row["object_id"] = str(cmdb_object.object_information['object_id'])
-        row["event"] = self.event.get_param('event')
+        if self.event:
+            row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
@@ -834,8 +838,8 @@ class ExternalSystemMySQLDB(ExternalSystem):
         }
     ]
 
-    def __init__(self, destination_parms, export_vars):
-        super(ExternalSystemMySQLDB, self).__init__(destination_parms, export_vars)
+    def __init__(self, destination_parms, export_vars, event=None):
+        super(ExternalSystemMySQLDB, self).__init__(destination_parms, export_vars, event)
 
 
         # get table names for sync
