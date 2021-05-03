@@ -91,7 +91,7 @@ Objects
 
 .. http:get:: /rest/objects/(int:public_id)
 
-        Returns a collection of objects in different formats. HTTP `GET/HEAD` rest route.
+        Returns a rendered object. HTTP `GET/HEAD` rest route.
         `HEAD` will be the same result except their will be no body.
 
         **Example request**:
@@ -188,7 +188,59 @@ Objects
         :reqheader Authorization: JW-Token to authenticate
         :resheader Content-Type: application/json
         :statuscode 200: Everything is fine.
-        :statuscode 400: The request or the parameters are wrong formatted.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+        :statuscode 500: Something broke during the rendering.
+
+.. http:get:: /rest/objects/(int:public_id)/native
+
+        Returns an object in its native format. HTTP `GET/HEAD` rest route.
+        `HEAD` will be the same result except their will be no body.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/1/native HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            X-Total-Count: 1
+            X-API-Version: 1.0
+
+            {
+               "public_id": 1,
+               "type_id": 1,
+               "status": true,
+               "version": "1.0.0",
+               "creation_time": {
+                  "$date": 0
+               },
+               "author_id": 1,
+               "last_edit_time": {
+                  "$date": 0
+               },
+               "editor_id": null,
+               "active": true,
+               "fields": [
+                  {
+                     "name": "example",
+                     "value": "value"
+                  }
+               ],
+               "views":0
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
         :statuscode 403: No access to this object (For example: ACLs).
         :statuscode 404: No collection or resources found.
         :statuscode 500: Something broke during the rendering.
