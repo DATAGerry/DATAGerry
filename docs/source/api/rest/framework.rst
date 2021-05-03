@@ -6,7 +6,8 @@ Objects
 
 .. http:get:: /rest/objects/
 
-        HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
+        Returns a collection of objects in different formats. HTTP `GET/HEAD` rest route.
+        `HEAD` will be the same result except their will be no body.
 
         **Example request**:
 
@@ -72,10 +73,10 @@ Objects
                   "time": "1970-01-01T00:00:00.000000"
             }
 
-        :query view: Return view of the response. Values 'native' or 'render'. default is 'native'
+        :query view: Return view of the response. Values `native` or `render`. Default is `native`.
         :query active: Show only active objects. Could also be set over the filter.
         :query sort: the sort field name. default is public_id
-        :query order: the sort order value for ascending or descending. default is 1 for ascending
+        :query order: the sort order value for ascending or descending. Default is 1 for ascending.
         :query page: the current view page. default is 1
         :query limit: max number of results. default is 10
         :query filter: a mongodb query filter. default is {} which means everything
