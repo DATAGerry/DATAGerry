@@ -1,6 +1,93 @@
 Framework
 =========
 
+Objects
+-------
+
+.. http:get:: /rest/objects/
+
+        HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/ HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            X-Total-Count: 1
+            X-API-Version: 1.0
+
+            {
+                  "results": [
+                    {
+                      "public_id": 1
+                      "type_id": 1,
+                      "status": null,
+                      "version": "1.0.0",
+                      "creation_time": "1970-01-01T00:00:00.000000",
+                      "author_id": 1,
+                      "last_edit_time": "1970-01-01T00:00:00.000000",
+                      "editor_id": 1,
+                      "active": true,
+                      "fields": [
+                        {
+                          "name": "example",
+                          "value": "value"
+                        }
+                      ]
+                    }
+                  ],
+                  "count": 1,
+                  "total": 1,
+                  "parameters": {
+                    "limit": 10,
+                    "sort": "public_id",
+                    "order": 1,
+                    "page": 1,
+                    "filter": {},
+                    "optional": {}
+                  },
+                  "pager": {
+                    "page": 1,
+                    "page_size": 10,
+                    "total_pages": 1
+                  },
+                  "pagination": {
+                    "current": "http://datagerry.com/rest/objects/",
+                    "first": "http://datagerry.com/rest/objects/?page=1",
+                    "prev": "http://datagerry.com/rest/objects/?page=1",
+                    "next": "http://datagerry.com/rest/objects/?page=1",
+                    "last": "http://datagerry.com/rest/objects/?page=1"
+                  },
+                  "response_type": "GET",
+                  "model": "Object",
+                  "time": "1970-01-01T00:00:00.000000"
+            }
+
+        :query view: Return view of the response. Values 'native' or 'render'. default is 'native'
+        :query active: Show only active objects. Could also be set over the filter.
+        :query sort: the sort field name. default is public_id
+        :query order: the sort order value for ascending or descending. default is 1 for ascending
+        :query page: the current view page. default is 1
+        :query limit: max number of results. default is 10
+        :query filter: a mongodb query filter. default is {} which means everything
+        :query projection: a mongodb project filter.
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: The request or the parameters are wrong formatted.
+        :statuscode 404: No collection or resources found.
+
 Types
 -----
 
