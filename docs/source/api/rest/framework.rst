@@ -89,6 +89,110 @@ Objects
         :statuscode 400: The request or the parameters are wrong formatted.
         :statuscode 404: No collection or resources found.
 
+.. http:get:: /rest/objects/(int:public_id)
+
+        Returns a collection of objects in different formats. HTTP `GET/HEAD` rest route.
+        `HEAD` will be the same result except their will be no body.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**:
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            X-Total-Count: 1
+            X-API-Version: 1.0
+
+            {
+                "current_render_time": {
+                    "$date": 0
+                },
+                "object_information": {
+                    "object_id": 1,
+                    "creation_time": {
+                      "$date": 0
+                    },
+                    "last_edit_time": {
+                      "$date": 0
+                    },
+                    "author_id": 1,
+                    "author_name": "admin",
+                    "editor_id": null,
+                    "editor_name": null,
+                    "active": true,
+                    "version": "1.0.0"
+                },
+                "type_information": {
+                    "type_id": 1,
+                    "type_name": "example",
+                    "type_label": "Example",
+                    "creation_time": {
+                      "$date": 0
+                },
+                "author_id": 1,
+                "author_name": "admin",
+                "icon": "",
+                "active": true,
+                "version": "1.0.0",
+                "acl": {
+                    "activated": false,
+                    "groups": {
+                        "includes": {}
+                    }
+                },
+                "fields": [
+                    {
+                        "type": "text",
+                        "name": "example",
+                        "label": "Example",
+                        "value": "value"
+                    },
+                ],
+                "sections": [
+                    {
+                      "type": "section",
+                      "name": "example",
+                      "label": "Example-Section",
+                      "fields": ["example"]
+                    }
+                ],
+                "summaries": [
+                    {
+                      "type": "text",
+                      "name": "example",
+                      "label": "example",
+                      "value": "value"
+                    }
+                ],
+                "summary_line": "value",
+                "externals": [
+                    {
+                      "name": "google",
+                      "href": "http://www.google.de/value",
+                      "label": "Google Search",
+                      "icon": "fas fa-external-link",
+                      "fields": ["example"]
+                    }
+                ]
+            }
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: The request or the parameters are wrong formatted.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+        :statuscode 500: Something broke during the rendering.
+
 Types
 -----
 
