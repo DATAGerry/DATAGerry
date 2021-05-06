@@ -120,14 +120,21 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getObjectsByType(typeID: number): Observable<T[]> {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<T[]>(`${ this.servicePrefix }/type/${ typeID }`, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public getObjectsByType(typeID: number | Array<number>): Observable<Array<T>> {
+    if (!Array.isArray(typeID)) {
+      typeID = [typeID];
+    }
+    const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
+    const filter = JSON.stringify({ type_id: { $in: typeID } });
+    httpParams = httpParams.set('filter', filter);
+    httpParams = httpParams.set('limit', '0');
+    httpParams = httpParams.set('view', 'render');
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    options.params = httpParams;
+    return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return apiResponse.body.results as Array<T>;
       })
     );
   }
@@ -226,14 +233,20 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   // Count calls
 
-  public countObjectsByType(typeID: number) {
-    httpObjectObserveOptions[PARAMETER] = { onlyActiveObjCookie: this.api.readCookies(COOCKIENAME) };
-    return this.api.callGet<number>(this.servicePrefix + '/count/' + typeID, httpObjectObserveOptions).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
+  public countObjectsByType(typeID: number | Array<number>): Observable<number> {
+    if (!Array.isArray(typeID)) {
+      typeID = [typeID];
+    }
+    const options = this.options;
+    let httpParams: HttpParams = new HttpParams();
+    const filter = JSON.stringify({ type_id: { $in: typeID } });
+    httpParams = httpParams.set('filter', filter);
+    httpParams = httpParams.set('limit', '0');
+    httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
+    options.params = httpParams;
+    return this.api.callHead<Array<T>>(this.newServicePrefix + '/', options).pipe(
+      map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
+        return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }

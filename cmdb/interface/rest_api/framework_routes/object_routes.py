@@ -99,11 +99,10 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-@object_blueprint.route('/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/', methods=['GET'])
+@objects_blueprint.route('/<int:public_id>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
-@right_required('base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
@@ -145,95 +144,6 @@ def get_native_object(public_id: int, request_user: UserModel):
         return abort(403, err.message)
 
     resp = make_response(object_instance)
-    return resp
-
-
-@object_blueprint.route('/type/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_type(public_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        filter_state = {'type_id': public_id}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
-    except CMDBError:
-        return abort(400)
-
-    if request.args.get('start') is not None:
-        start = int(request.args.get('start'))
-        length = int(request.args.get('length'))
-        object_list = object_list[start:start + length]
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager, object_manager=object_manager).render_result_list()
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_types(type_ids, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        in_types = {'type_id': {'$in': list(map(int, type_ids.split(',')))}}
-        is_active = {'active': {"$eq": False}}
-        if _fetch_only_active_objs:
-            is_active = {'active': {"$eq": True}}
-        query = {'$and': [in_types, is_active]}
-
-        all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user,
-                                   database_manager=current_app.database_manager).render_result_list()
-
-    except CMDBError:
-        return abort(400)
-
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/count/<int:type_id>', methods=['GET'])
-@login_required
-def count_object_by_type(type_id):
-    try:
-        count = object_manager.count_objects_by_type(type_id)
-        if _fetch_only_active_objs():
-            filter_state = {'type_id': type_id, 'active': {'$eq': True}}
-            result = []
-            cursor = object_manager.group_objects_by_value('active', filter_state)
-            for document in cursor:
-                result.append(document)
-            count = result[0]['count'] if result else 0
-
-        resp = make_response(count)
-    except CMDBError:
-        return abort(400)
-    return resp
-
-
-@object_blueprint.route('/count/', methods=['GET'])
-@login_required
-def count_objects():
-    try:
-        count = object_manager.count_objects()
-        if _fetch_only_active_objs():
-            result = []
-            cursor = object_manager.group_objects_by_value('active', {'active': {"$eq": True}})
-            for document in cursor:
-                result.append(document)
-            count = result[0]['count'] if result else 0
-        resp = make_response(count)
-    except CMDBError:
-        return abort(400)
     return resp
 
 
