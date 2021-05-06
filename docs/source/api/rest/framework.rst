@@ -4,7 +4,7 @@ Framework
 Objects
 -------
 
-.. http:get:: /rest/objects/
+.. http:get:: /objects/
 
         Returns a collection of objects in different formats. HTTP `GET/HEAD` rest route.
         `HEAD` will be the same result except their will be no body.
@@ -89,7 +89,7 @@ Objects
         :statuscode 400: The request or the parameters are wrong formatted.
         :statuscode 404: No collection or resources found.
 
-.. http:get:: /rest/objects/(int:public_id)
+.. http:get:: /objects/(int:public_id)
 
         Returns a rendered object. HTTP `GET/HEAD` rest route.
         `HEAD` will be the same result except their will be no body.
@@ -192,7 +192,7 @@ Objects
         :statuscode 404: No collection or resources found.
         :statuscode 500: Something broke during the rendering.
 
-.. http:get:: /rest/objects/(int:public_id)/native
+.. http:get:: /objects/(int:public_id)/native
 
         Returns an object in its native format. HTTP `GET/HEAD` rest route.
         `HEAD` will be the same result except their will be no body.
@@ -245,7 +245,7 @@ Objects
         :statuscode 404: No collection or resources found.
         :statuscode 500: Something broke during the rendering.
 
-.. http:get:: /rest/objects/(int:public_id)/references
+.. http:get:: /objects/(int:public_id)/references
 
         HTTP `GET/HEAD` rest route. Returns all objects which reference to the object with the given id.
 
@@ -370,10 +370,119 @@ Objects
         :statuscode 404: No resource found.
         :statuscode 500: Something went wrong during deletion.
 
+.. http:delete:: /objects/(list:public_ids)
+
+        HTTP `DELETE` rest route. Delete multiple existing object.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            DELETE /rest/objects/1,2,3 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            Location: http://datagerry.com/rest/objects/1
+            X-API-Version: 1.0
+
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 403: No right to delete a object of this type.
+        :statuscode 404: No resource found.
+        :statuscode 500: Something went wrong during deletion.
+
+.. http:get:: /objects/(int:public_id)/state
+
+        HTTP `GET` rest route. Returns the activation state of an object.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/1/state HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+
+.. http:put:: /objects/(int:public_id)/state
+
+        HTTP `PUT` rest route. Update the activation state of an object.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            PUT /rest/objects/1/state HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+
+.. http:get:: /objects/clean/(int:public_id)
+
+        HTTP `GET/HEAD` rest route. Returns all unstructured/unclean objects form a type. PublicID is the id of the type.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/clean/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+
+
+.. http:put:: /objects/clean/(int:public_id)
+
+        HTTP `PUT` rest route. Cleans all unstructured/unclean objects form a type. PublicID is the id of the type.
+
+        **Example request**:
+
+        .. sourcecode:: http
+
+            PUT /rest/objects/clean/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 403: No access to this object (For example: ACLs).
+        :statuscode 404: No collection or resources found.
+
 Types
 -----
 
-.. http:get:: /rest/types/
+.. http:get:: /types/
 
        HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
 
@@ -675,7 +784,7 @@ Types
 Categories
 ----------
 
-.. http:get:: /rest/categories/
+.. http:get:: /categories/
 
        HTTP GET/HEAD rest route. HEAD will be the same result except their will be no body.
 
