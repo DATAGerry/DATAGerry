@@ -18,8 +18,6 @@ import json
 import logging
 from typing import List
 
-import pytz
-
 from datetime import datetime, timezone
 
 from flask import abort, jsonify, request, current_app
@@ -99,7 +97,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-@objects_blueprint.route('/<int:public_id>/', methods=['GET'])
 @objects_blueprint.route('/<int:public_id>', methods=['GET'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
@@ -130,10 +127,9 @@ def get_object(public_id, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('<int:public_id>/native/', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/native', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
-@right_required('base.framework.object.view')
 def get_native_object(public_id: int, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
@@ -147,8 +143,8 @@ def get_native_object(public_id: int, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/group/<string:value>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/group/<string:value>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def group_objects_by_type_id(value, request_user: UserModel):
     try:
@@ -230,11 +226,9 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 
 
 # CRUD routes
-
-@object_blueprint.route('/', methods=['POST'])
-@login_required
+@objects_blueprint.route('/', methods=['POST'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
-@right_required('base.framework.object.add')
 def insert_object(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -296,11 +290,9 @@ def insert_object(request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/<int:public_id>/', methods=['PUT'])
-@object_blueprint.route('/<int:public_id>', methods=['PUT'])
-@login_required
+@objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.edit')
 @insert_request_user
-@right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: UserModel):
     object_ids = request.args.getlist('objectIDs')
 
@@ -416,10 +408,9 @@ def update_object(public_id: int, request_user: UserModel):
     return make_response(update_ack)
 
 
-@object_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
+@objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
-@right_required('base.framework.object.delete')
 def delete_object(public_id: int, request_user: UserModel):
     try:
         current_object_instance = object_manager.get_object(public_id)
@@ -465,10 +456,9 @@ def delete_object(public_id: int, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
-@right_required('base.framework.object.delete')
 def delete_many_objects(public_ids, request_user: UserModel):
     try:
         ids = []
@@ -533,11 +523,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
 
 # Special routes
-@object_blueprint.route('/<int:public_id>/state/', methods=['GET'])
-@object_blueprint.route('/<int:public_id>/state', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/state', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
-@right_required('base.framework.object.activation')
 def get_object_state(public_id: int, request_user: UserModel):
     try:
         founded_object = object_manager.get_object(public_id=public_id, user=request_user,
@@ -548,11 +536,9 @@ def get_object_state(public_id: int, request_user: UserModel):
     return make_response(founded_object.active)
 
 
-@object_blueprint.route('/<int:public_id>/state/', methods=['PUT'])
-@object_blueprint.route('/<int:public_id>/state', methods=['PUT'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
-@right_required('base.framework.object.activation')
 def update_object_state(public_id: int, request_user: UserModel):
     if isinstance(request.json, bool):
         state = request.json
@@ -610,11 +596,9 @@ def update_object_state(public_id: int, request_user: UserModel):
     return make_response(update_ack)
 
 
-@object_blueprint.route('/clean/<int:public_id>/', methods=['GET', 'HEAD'])
-@object_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
-@login_required
+@objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
-@right_required('base.framework.type.clean')
 def get_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a multi resources which are not formatted according the type structure.
@@ -645,11 +629,9 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
-@object_blueprint.route('/clean/<int:public_id>/', methods=['PUT', 'PATCH'])
-@object_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
-@login_required
+@objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
-@right_required('base.framework.type.clean')
 def update_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for a multi resources which will be formatted based on the TypeModel
