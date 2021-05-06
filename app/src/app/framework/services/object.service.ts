@@ -163,7 +163,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   }
 
   /**
-   * Get the newest objects
+   * Get the latest objects
    * @param params
    * @param view
    */
