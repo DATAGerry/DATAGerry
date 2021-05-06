@@ -700,61 +700,6 @@ def update_object_state(public_id: int, request_user: UserModel):
     return make_response(update_ack)
 
 
-# SPECIAL ROUTES
-@object_blueprint.route('/newest', methods=['GET'])
-@object_blueprint.route('/newest/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_newest(request_user: UserModel):
-    """
-    get object with newest creation time
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
-    newest_objects_list = object_manager.get_objects_by(sort='creation_time',
-                                                        limit=10,
-                                                        active={"$eq": True},
-                                                        creation_time={'$ne': None},
-                                                        user=request_user,
-                                                        permission=AccessControlPermission.READ
-                                                        )
-    rendered_list = RenderList(newest_objects_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    if len(rendered_list) < 1:
-        return make_response(rendered_list, 204)
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/latest', methods=['GET'])
-@object_blueprint.route('/latest/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_latest(request_user: UserModel):
-    """
-    get object with newest last edit time
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
-    last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
-                                                      limit=10,
-                                                      active={"$eq": True},
-                                                      last_edit_time={'$ne': None},
-                                                      user=request_user,
-                                                      permission=AccessControlPermission.READ
-                                                      )
-    rendered_list = RenderList(last_objects_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    if len(rendered_list) < 1:
-        return make_response(rendered_list, 204)
-    return make_response(rendered_list)
-
-
 @object_blueprint.route('/clean/<int:public_id>/', methods=['GET', 'HEAD'])
 @object_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
 @login_required
