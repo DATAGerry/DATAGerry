@@ -201,27 +201,6 @@ def get_objects_by_types(type_ids, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/many/<string:public_ids>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_public_id(public_ids, request_user: UserModel):
-    """Return all objects by public_ids"""
-
-    try:
-        filter_state = {'public_id': public_ids}
-        query = _build_query(filter_state, q_operator='$or')
-        all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user,
-                                   database_manager=current_app.database_manager).render_result_list()
-
-    except CMDBError:
-        return abort(400)
-
-    resp = make_response(rendered_list)
-    return resp
-
-
 @object_blueprint.route('/count/<int:type_id>', methods=['GET'])
 @login_required
 def count_object_by_type(type_id):
