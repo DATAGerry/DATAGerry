@@ -35,7 +35,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
-from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
+from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError

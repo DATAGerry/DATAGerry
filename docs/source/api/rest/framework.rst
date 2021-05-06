@@ -245,6 +245,34 @@ Objects
         :statuscode 404: No collection or resources found.
         :statuscode 500: Something broke during the rendering.
 
+.. http:get:: /rest/objects/(int:public_id)/references
+
+        HTTP `GET/HEAD` rest route. Returns all objects which reference to the object with the given id.
+        **Example request**:
+
+        .. sourcecode:: http
+
+            GET /rest/objects/1/references HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        :query view: Return view of the response. Values `native` or `render`. Default is `native`.
+        :query active: Show only active objects. Could also be set over the filter.
+        :query sort: the sort field name. default is public_id
+        :query order: the sort order value for ascending or descending. Default is 1 for ascending.
+        :query page: the current view page. default is 1
+        :query limit: max number of results. default is 10
+        :query filter: a mongodb query filter. default is {} which means everything
+        :query projection: a mongodb project filter.
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: The request or the parameters are wrong formatted.
+        :statuscode 403: If the user has no access to the object of this public id.
+        :statuscode 404: No collection or resources found.
+
 Types
 -----
 
