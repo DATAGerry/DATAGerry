@@ -296,30 +296,6 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public getNewObjectsSince(timestamp: number) {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/new/${ timestamp }`, options).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
-  public getChangedObjectsSince(timestamp: number) {
-    return this.api.callGet<RenderResult[]>(`${ this.servicePrefix }/user/changed/${ timestamp }`).pipe(
-      map((apiResponse) => {
-        if (apiResponse.status === 204) {
-          return [];
-        }
-        return apiResponse.body;
-      })
-    );
-  }
-
   public countUncleanObjects(typeID: number): Observable<number> {
     const options = this.options;
     options.params = new HttpParams();
