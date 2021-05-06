@@ -248,6 +248,7 @@ Objects
 .. http:get:: /rest/objects/(int:public_id)/references
 
         HTTP `GET/HEAD` rest route. Returns all objects which reference to the object with the given id.
+
         **Example request**:
 
         .. sourcecode:: http
@@ -272,6 +273,102 @@ Objects
         :statuscode 400: The request or the parameters are wrong formatted.
         :statuscode 403: If the user has no access to the object of this public id.
         :statuscode 404: No collection or resources found.
+
+.. http:post:: /objects/
+
+        HTTP `POST` rest route. Insert a new object.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            POST /rest/objects/ HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            Location: http://datagerry.com/rest/objects/1
+            X-API-Version: 1.0
+
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 403: No right to insert a new object of this type.
+        :statuscode 404: No resource found.
+        :statuscode 500: Something went wrong during insertion.
+
+.. http:put:: /objects/(int:public_id)
+
+        HTTP `PUT/PATCH` rest route. Update a existing object.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            PUT /rest/objects/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            Location: http://datagerry.com/rest/objects/1
+            X-API-Version: 1.0
+
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 403: No right to update a existing object of this type.
+        :statuscode 404: No resource found.
+        :statuscode 500: Something went wrong during update.
+
+.. http:delete:: /objects/(int:public_id)
+
+        HTTP `DELETE` rest route. Delete a existing object.
+
+        **Example request**
+
+        .. sourcecode:: http
+
+            DELETE /rest/objects/1 HTTP/1.1
+            Host: datagerry.com
+            Accept: application/json
+
+        **Example response**
+
+        .. sourcecode:: http
+
+            HTTP/1.1 200 OK
+            Content-Type: application/json
+            Content-Length: 588
+            Location: http://datagerry.com/rest/objects/1
+            X-API-Version: 1.0
+
+
+        :reqheader Accept: application/json
+        :reqheader Authorization: JW-Token to authenticate
+        :resheader Content-Type: application/json
+        :statuscode 200: Everything is fine.
+        :statuscode 400: Resource could not be inserted.
+        :statuscode 403: No right to delete a object of this type.
+        :statuscode 404: No resource found.
+        :statuscode 500: Something went wrong during deletion.
 
 Types
 -----
