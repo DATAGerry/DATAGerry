@@ -87,9 +87,11 @@ export class ObjectCopyComponent implements OnInit {
       newObjectInstance.author_id = this.userService.getCurrentUser().public_id;
       newObjectInstance.fields = [];
       Object.keys(this.renderForm.controls).forEach(field => {
+        let {value} = this.renderForm.get(field);
+        value = (value === undefined || value == null) ? '' : value;
         newObjectInstance.fields.push({
           name: field,
-          value: this.renderForm.get(field).value
+          value
         });
       });
       let ack = null;
