@@ -36,7 +36,7 @@ from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
 from cmdb.interface.route_utils import make_response, insert_request_user
-from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
@@ -51,7 +51,6 @@ with current_app.app_context():
 LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
-object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
