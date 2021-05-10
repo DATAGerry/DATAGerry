@@ -148,7 +148,10 @@ jobs:
           app/node_modules
           ~/.cache/pip
         key: ${{ runner.os }}-buildcache
-    
+
+    - name: Upgrade pip
+      run: /usr/bin/pip install --upgrade pip
+
     - name: build DATAGERRY
       run:  BUILDVAR_VERSION=${VERSION_STRING} BUILDVAR_VERSION_EXT=${VERSION_ID} BUILDVAR_DOCKER_TAG=${VERSION_DOCKER_TAG} make -e
 
