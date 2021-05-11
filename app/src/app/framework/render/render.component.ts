@@ -98,7 +98,6 @@ export class RenderComponent {
       switch (field.type) {
         case 'ref': {
           field.default = parseInt(field.default, 10);
-          field.value = field.default;
           break;
         }
         default: {

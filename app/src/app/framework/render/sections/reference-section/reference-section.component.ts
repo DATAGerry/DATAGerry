@@ -64,7 +64,6 @@ export class ReferenceSectionComponent extends BaseSectionComponent implements O
     switch (field.type) {
       case 'ref': {
         field.default = parseInt(field.default, 10);
-        field.value = field.default;
         break;
       }
       default: {
@@ -76,7 +75,8 @@ export class ReferenceSectionComponent extends BaseSectionComponent implements O
   }
 
   public getValueByName(name: string) {
-    const fieldFound = this.fields.find(s => s.name === `${ this.section.name }-field`).references.fields.find(field => field.name === name);
+    const fieldFound = this.fields.find(s => s.name === `${ this.section.name }-field`)
+      .references.fields.find(field => field.name === name);
     if (fieldFound === undefined) {
       return {};
     }
