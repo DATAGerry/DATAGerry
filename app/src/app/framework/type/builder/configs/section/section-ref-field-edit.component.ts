@@ -220,6 +220,18 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   }
 
   /**
+   * Change the field label
+   * @param change
+   * @param idx
+   */
+  public onLabelChange(change: string, idx: string) {
+    this.data[idx] = change;
+    const field = this.fields.find(x => x.name === `${ this.data.name }-field`);
+    const fieldIdx = this.data.fields.indexOf(field);
+    this.data.fields[fieldIdx].label = change;
+  }
+
+  /**
    * Change the field when the reference changes
    * @param name
    */
