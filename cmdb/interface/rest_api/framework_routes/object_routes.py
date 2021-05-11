@@ -18,8 +18,6 @@ import json
 import logging
 from typing import List
 
-import pytz
-
 from datetime import datetime, timezone
 
 from flask import abort, jsonify, request, current_app
@@ -37,8 +35,8 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
-from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
@@ -53,7 +51,6 @@ with current_app.app_context():
 LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
-object_blueprint = RootBlueprint('object_blueprint', __name__, url_prefix='/object')
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
@@ -99,11 +96,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-@object_blueprint.route('/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/<int:public_id>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
-@right_required('base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
@@ -131,10 +126,9 @@ def get_object(public_id, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('<int:public_id>/native/', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/native', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
-@right_required('base.framework.object.view')
 def get_native_object(public_id: int, request_user: UserModel):
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
@@ -148,118 +142,8 @@ def get_native_object(public_id: int, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/type/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_type(public_id, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        filter_state = {'type_id': public_id}
-        if _fetch_only_active_objs():
-            filter_state['active'] = {"$eq": True}
-
-        object_list = object_manager.get_objects_by(sort="type_id", **filter_state)
-    except CMDBError:
-        return abort(400)
-
-    if request.args.get('start') is not None:
-        start = int(request.args.get('start'))
-        length = int(request.args.get('length'))
-        object_list = object_list[start:start + length]
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager, object_manager=object_manager).render_result_list()
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/type/<string:type_ids>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_types(type_ids, request_user: UserModel):
-    """Return all objects by type_id"""
-    try:
-        in_types = {'type_id': {'$in': list(map(int, type_ids.split(',')))}}
-        is_active = {'active': {"$eq": False}}
-        if _fetch_only_active_objs:
-            is_active = {'active': {"$eq": True}}
-        query = {'$and': [in_types, is_active]}
-
-        all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user, object_manager=object_manager,
-                                   database_manager=current_app.database_manager).render_result_list()
-
-    except CMDBError:
-        return abort(400)
-
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/many/<string:public_ids>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_public_id(public_ids, request_user: UserModel):
-    """Return all objects by public_ids"""
-
-    try:
-        filter_state = {'public_id': public_ids}
-        query = _build_query(filter_state, q_operator='$or')
-        all_objects_list = object_manager.get_objects_by(sort="public_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user,
-                                   database_manager=current_app.database_manager).render_result_list()
-
-    except CMDBError:
-        return abort(400)
-
-    resp = make_response(rendered_list)
-    return resp
-
-
-@object_blueprint.route('/count/<int:type_id>', methods=['GET'])
-@login_required
-def count_object_by_type(type_id):
-    try:
-        count = object_manager.count_objects_by_type(type_id)
-        if _fetch_only_active_objs():
-            filter_state = {'type_id': type_id, 'active': {'$eq': True}}
-            result = []
-            cursor = object_manager.group_objects_by_value('active', filter_state)
-            for document in cursor:
-                result.append(document)
-            count = result[0]['count'] if result else 0
-
-        resp = make_response(count)
-    except CMDBError:
-        return abort(400)
-    return resp
-
-
-@object_blueprint.route('/count/', methods=['GET'])
-@login_required
-def count_objects():
-    try:
-        count = object_manager.count_objects()
-        if _fetch_only_active_objs():
-            result = []
-            cursor = object_manager.group_objects_by_value('active', {'active': {"$eq": True}})
-            for document in cursor:
-                result.append(document)
-            count = result[0]['count'] if result else 0
-        resp = make_response(count)
-    except CMDBError:
-        return abort(400)
-    return resp
-
-
-@object_blueprint.route('/group/<string:value>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/group/<string:value>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def group_objects_by_type_id(value, request_user: UserModel):
     try:
@@ -340,85 +224,10 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
     return api_response.make_response()
 
 
-@object_blueprint.route('/user/<int:public_id>/', methods=['GET'])
-@object_blueprint.route('/user/<int:public_id>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_objects_by_user(public_id: int, request_user: UserModel):
-    try:
-        object_list = object_manager.get_objects_by(sort="type_id", author_id=public_id)
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(400)
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/user/new/<int:timestamp>/', methods=['GET'])
-@object_blueprint.route('/user/new/<int:timestamp>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_new_objects_since(timestamp: int, request_user: UserModel):
-    request_date = datetime.fromtimestamp(timestamp, pytz.utc)
-    query = {
-        'creation_time': {
-            '$gt': request_date
-        }
-    }
-    try:
-        object_list = object_manager.get_objects_by(sort="creation_time", **query)
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(400)
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/user/changed/<int:timestamp>/', methods=['GET'])
-@object_blueprint.route('/user/changed/<int:timestamp>', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_changed_objects_since(timestamp: int, request_user: UserModel):
-    request_date = datetime.fromtimestamp(timestamp, pytz.utc)
-    query = {
-        'last_edit_time': {
-            '$gt': request_date,
-            '$ne': None
-        }
-    }
-    try:
-        object_list = object_manager.get_objects_by(sort="creation_time", **query)
-    except ObjectManagerGetError as err:
-        LOGGER.error(err)
-        return abort(400)
-
-    if len(object_list) < 1:
-        return make_response(object_list, 204)
-
-    rendered_list = RenderList(object_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    return make_response(rendered_list)
-
-
 # CRUD routes
-
-@object_blueprint.route('/', methods=['POST'])
-@login_required
+@objects_blueprint.route('/', methods=['POST'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
-@right_required('base.framework.object.add')
 def insert_object(request_user: UserModel):
     from bson import json_util
     add_data_dump = json.dumps(request.json)
@@ -480,11 +289,9 @@ def insert_object(request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/<int:public_id>/', methods=['PUT'])
-@object_blueprint.route('/<int:public_id>', methods=['PUT'])
-@login_required
+@objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.edit')
 @insert_request_user
-@right_required('base.framework.object.edit')
 def update_object(public_id: int, request_user: UserModel):
     object_ids = request.args.getlist('objectIDs')
 
@@ -600,10 +407,9 @@ def update_object(public_id: int, request_user: UserModel):
     return make_response(update_ack)
 
 
-@object_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@login_required
+@objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
-@right_required('base.framework.object.delete')
 def delete_object(public_id: int, request_user: UserModel):
     try:
         current_object_instance = object_manager.get_object(public_id)
@@ -649,10 +455,9 @@ def delete_object(public_id: int, request_user: UserModel):
     return resp
 
 
-@object_blueprint.route('/delete/<string:public_ids>', methods=['GET'])
-@login_required
+@objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
-@right_required('base.framework.object.delete')
 def delete_many_objects(public_ids, request_user: UserModel):
     try:
         ids = []
@@ -717,11 +522,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
 
 # Special routes
-@object_blueprint.route('/<int:public_id>/state/', methods=['GET'])
-@object_blueprint.route('/<int:public_id>/state', methods=['GET'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/state', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
-@right_required('base.framework.object.activation')
 def get_object_state(public_id: int, request_user: UserModel):
     try:
         founded_object = object_manager.get_object(public_id=public_id, user=request_user,
@@ -732,11 +535,9 @@ def get_object_state(public_id: int, request_user: UserModel):
     return make_response(founded_object.active)
 
 
-@object_blueprint.route('/<int:public_id>/state/', methods=['PUT'])
-@object_blueprint.route('/<int:public_id>/state', methods=['PUT'])
-@login_required
+@objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
-@right_required('base.framework.object.activation')
 def update_object_state(public_id: int, request_user: UserModel):
     if isinstance(request.json, bool):
         state = request.json
@@ -794,66 +595,9 @@ def update_object_state(public_id: int, request_user: UserModel):
     return make_response(update_ack)
 
 
-# SPECIAL ROUTES
-@object_blueprint.route('/newest', methods=['GET'])
-@object_blueprint.route('/newest/', methods=['GET'])
-@login_required
+@objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
-@right_required('base.framework.object.view')
-def get_newest(request_user: UserModel):
-    """
-    get object with newest creation time
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
-    newest_objects_list = object_manager.get_objects_by(sort='creation_time',
-                                                        limit=10,
-                                                        active={"$eq": True},
-                                                        creation_time={'$ne': None},
-                                                        user=request_user,
-                                                        permission=AccessControlPermission.READ
-                                                        )
-    rendered_list = RenderList(newest_objects_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    if len(rendered_list) < 1:
-        return make_response(rendered_list, 204)
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/latest', methods=['GET'])
-@object_blueprint.route('/latest/', methods=['GET'])
-@login_required
-@insert_request_user
-@right_required('base.framework.object.view')
-def get_latest(request_user: UserModel):
-    """
-    get object with newest last edit time
-    Args:
-        request_user: auto inserted user who made the request.
-    Returns:
-        list of rendered objects
-    """
-    last_objects_list = object_manager.get_objects_by(sort='last_edit_time',
-                                                      limit=10,
-                                                      active={"$eq": True},
-                                                      last_edit_time={'$ne': None},
-                                                      user=request_user,
-                                                      permission=AccessControlPermission.READ
-                                                      )
-    rendered_list = RenderList(last_objects_list, request_user,
-                               database_manager=current_app.database_manager).render_result_list()
-    if len(rendered_list) < 1:
-        return make_response(rendered_list, 204)
-    return make_response(rendered_list)
-
-
-@object_blueprint.route('/clean/<int:public_id>/', methods=['GET', 'HEAD'])
-@object_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
-@login_required
-@insert_request_user
-@right_required('base.framework.type.clean')
 def get_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a multi resources which are not formatted according the type structure.
@@ -884,11 +628,9 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
-@object_blueprint.route('/clean/<int:public_id>/', methods=['PUT', 'PATCH'])
-@object_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
-@login_required
+@objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
-@right_required('base.framework.type.clean')
 def update_unstructured_objects(public_id: int, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for a multi resources which will be formatted based on the TypeModel
