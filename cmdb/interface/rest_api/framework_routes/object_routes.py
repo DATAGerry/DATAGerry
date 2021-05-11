@@ -191,7 +191,7 @@ def get_objects_by_types(type_ids, request_user: UserModel):
         query = {'$and': [in_types, is_active]}
 
         all_objects_list = object_manager.get_objects_by(sort="type_id", **query)
-        rendered_list = RenderList(all_objects_list, request_user,
+        rendered_list = RenderList(all_objects_list, request_user, object_manager=object_manager,
                                    database_manager=current_app.database_manager).render_result_list()
 
     except CMDBError:
