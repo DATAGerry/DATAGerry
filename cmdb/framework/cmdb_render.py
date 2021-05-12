@@ -264,11 +264,12 @@ class CmdbRender:
             elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
                 ref_field_name: str = f'{section.name}-field'
                 ref_field = self.type_instance.get_field(ref_field_name)
-                reference_id: int = self.object_instance.get_value(ref_field_name)
-                ref_field['value'] = reference_id
+
                 try:
+                    reference_id: int = self.object_instance.get_value(ref_field_name)
+                    ref_field['value'] = reference_id
                     reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
-                except ObjectManagerGetError:
+                except (ObjectManagerGetError, ValueError):
                     reference_object = None
                 ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
                 ref_section = ref_type.get_section(section.reference.section_name)
