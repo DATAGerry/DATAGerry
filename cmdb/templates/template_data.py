@@ -58,7 +58,7 @@ class ObjectTemplateData(AbstractTemplateData):
                         data['fields'][field_name]['fields'][section_ref_field['name']] = section_ref_field['value']
                 else:
                     data["fields"][field_name] = field["value"]
-            except ObjectManagerGetError:
+            except (ObjectManagerGetError, TypeError):
                 continue
             except Exception as err:
                 LOGGER.error(err)
