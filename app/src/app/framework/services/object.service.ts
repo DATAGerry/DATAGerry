@@ -143,13 +143,13 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     const options = this.options;
     options.params = new HttpParams();
     if (native === true) {
-      return this.api.callGet<CmdbObject[]>(`${ this.servicePrefix }/${ publicID }/native/`, options).pipe(
+      return this.api.callGet<CmdbObject[]>(`${ this.servicePrefix }/${ publicID }/native`, options).pipe(
         map((apiResponse) => {
           return apiResponse.body;
         })
       );
     }
-    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/`, options).pipe(
+    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
@@ -195,13 +195,13 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   public putObject(publicID: number, objectInstance: CmdbObject,
                    httpOptions = httpObserveOptions): Observable<any> {
-    return this.api.callPut<CmdbObject>(`${ this.servicePrefix }/${ publicID }/`, objectInstance, httpOptions);
+    return this.api.callPut<CmdbObject>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions);
   }
 
   public changeState(publicID: number, status: boolean) {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state/`, status, options).pipe(
+    return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state`, status, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
       })
