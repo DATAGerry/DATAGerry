@@ -96,6 +96,7 @@
   <div class="form-group col-md-12">
     <label>Default value:</label>
     <select [formControl]="valueControl" class="custom-select" (ngModelChange)="onInputChange($event, 'value')">
+      <option></option>
       <option *ngFor="let opt of options; let i = index" [value]="opt.name">
         Label: {{opt.label}} Name: {{opt.name}}
       </option>

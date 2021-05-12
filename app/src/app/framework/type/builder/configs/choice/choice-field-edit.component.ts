@@ -80,8 +80,9 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
   }
 
   public ngOnInit(): void {
-    this.options = [];
-    if (this.data.options === undefined || !Array.isArray(this.data.options)) {
+    this.options = this.data.options;
+    if (this.options === undefined || !Array.isArray(this.options)) {
+      this.options = [];
       this.options.push({
         name: `option-${ (this.options.length + 1) }`,
         label: `Option ${ (this.options.length + 1) }`
@@ -95,6 +96,7 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     this.form.addControl('description', this.descriptionControl);
     this.form.addControl('helperText', this.helperTextControl);
     this.form.addControl('value', this.valueControl);
+    this.form.addControl('options', this.optionsControl);
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
