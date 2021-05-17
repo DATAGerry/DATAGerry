@@ -19,14 +19,15 @@
           </ng-template>
           <ng-template ng-label-tmp>
             <ng-container *ngIf="selected?.value as item">
-              <i class="{{item?.type_information?.icon}}"></i>{{item?.type_information?.type_label}} #
-              {{item?.object_information?.object_id}} - <span>{{item?.summary_line}}</span>
+              <span><i class="{{item?.type_information?.icon}}"></i>
+                {{item?.type_information?.type_label}} #</span>{{item?.object_information?.object_id}} -
+              <span>{{item?.summary_line}}</span>
             </ng-container>
           </ng-template>
           <ng-template ng-option-tmp let-item="item">
             <div>
-              <span><i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}} # </span>
-              {{item?.object_information?.object_id}}</div>
+              <span><i class="{{item?.type_information?.icon}}"></i>
+                {{item?.type_information?.type_label}} #</span>{{item?.object_information?.object_id}}</div>
             <small><b>Summary:</b> {{item?.summary_line}}</small>
           </ng-template>
         </ng-select>

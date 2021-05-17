@@ -106,7 +106,7 @@ export class ApiCallService {
     /**
      * @deprecated @SD please refactor and remove this.
      */
-    return this.http.get<T>(this.apiURL + route, params);
+    return this.http.delete<T>(this.apiURL + route, params);
   }
 
   public readCookies(name: string) {
