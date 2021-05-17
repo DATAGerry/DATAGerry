@@ -54,7 +54,7 @@ class ObjectTemplateData(AbstractTemplateData):
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 elif field['type'] == 'ref-section-field':
                     data['fields'][field_name] = {'fields': {}}
-                    for section_ref_field in field['references']['fields'] and field["value"]:
+                    for section_ref_field in field['references']['fields']:
                         data['fields'][field_name]['fields'][section_ref_field['name']] = section_ref_field['value']
                 else:
                     data["fields"][field_name] = field["value"]

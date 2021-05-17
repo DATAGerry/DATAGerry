@@ -228,7 +228,9 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.data[idx] = change;
     const field = this.fields.find(x => x.name === `${ this.data.name }-field`);
     const fieldIdx = this.data.fields.indexOf(field);
-    this.data.fields[fieldIdx].label = change;
+    if (fieldIdx > -1) {
+      this.data.fields[fieldIdx].label = change;
+    }
   }
 
   /**

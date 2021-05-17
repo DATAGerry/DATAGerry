@@ -269,7 +269,7 @@ class CmdbRender:
                     reference_id: int = self.object_instance.get_value(ref_field_name)
                     ref_field['value'] = reference_id
                     reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
-                except (ObjectManagerGetError, ValueError):
+                except (ObjectManagerGetError, ValueError, KeyError):
                     reference_object = None
                 ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
                 ref_section = ref_type.get_section(section.reference.section_name)
