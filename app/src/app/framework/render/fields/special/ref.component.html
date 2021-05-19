@@ -3,23 +3,23 @@
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
   <div class="col-sm-9">
-    <div class="input-group input-group-sm">
-      <ng-container [ngSwitch]="true">
-        <ng-container *ngSwitchCase="mode == MODES.View">
+    <ng-container [ngSwitch]="true">
+      <ng-container *ngSwitchCase="mode == MODES.View">
+        <div class="input-group input-group-sm">
           <div class="form-control text-left overflow-auto" readonly>
             <ng-container *ngIf="data.reference && data.reference?.object_id !== 0; else noRef;">
               <ng-container *ngIf="!protect">
                 <ng-container *ngIf="!data?.reference.line; else refLine">
                   <i class="{{data.reference?.icon}}"></i> {{data.reference?.type_label}} #{{data.reference?.object_id}}
                   <span *ngFor="let sum of data.reference?.summaries; let last = last; let first = first">
-                    <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
-                      <span *ngIf="first"> - </span>{{sum.value}}
-                    </ng-template>
-                    <ng-template #templateDate>
-                      <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
-                    </ng-template>
-                    <span *ngIf="!last"> | </span>
-                  </span>
+                  <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                    <span *ngIf="first"> - </span>{{sum.value}}
+                  </ng-template>
+                  <ng-template #templateDate>
+                    <span *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+                  </ng-template>
+                  <span *ngIf="!last"> | </span>
+                </span>
                 </ng-container>
                 <ng-template #refLine>
                   <ng-container *ngIf="data?.reference?.prefix">
@@ -33,25 +33,27 @@
             <ng-template #noRef> No reference set</ng-template>
           </div>
           <div class="input-group-append" *ngIf="data.reference && !protect">
-            <span class="input-group-text"
-                    [class.ref-disabled]="!data.reference?.object_id"
-                    (click)="showReferencePreview()">
-              <fa-icon icon="file-powerpoint"></fa-icon>
-            </span>
+          <span class="input-group-text"
+                [class.ref-disabled]="!data.reference?.object_id"
+                (click)="showReferencePreview()">
+            <fa-icon icon="file-powerpoint"></fa-icon>
+          </span>
             <span class="input-group-text">
-              <a [class.ref-disabled]="!data.reference?.object_id"
-                 [routerLink]="'/framework/object/view/'+ data.reference?.object_id">
-                <fa-icon icon="arrow-right"></fa-icon>
-              </a>
-            </span>
+            <a [class.ref-disabled]="!data.reference?.object_id"
+               [routerLink]="'/framework/object/view/'+ data.reference?.object_id">
+              <fa-icon icon="arrow-right"></fa-icon>
+            </a>
+          </span>
           </div>
-        </ng-container>
-        <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-          <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
-                                          [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
+        </div>
+      </ng-container>
+      <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
+        <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
+                                        [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
+        <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup">
           <ng-select
             [items]="objectList"
-            class="ng-select-valid custom-select"
+            class="ng-select-valid custom-select ref-simple-select"
             [groupBy]="groupByFn"
             [groupValue]="groupValueFn"
             bindValue="object_information.object_id" [searchFn]="searchRef"
@@ -68,22 +70,6 @@
                   <i class="{{refObject?.type_information?.icon}}"></i> {{refObject?.type_information?.type_label}}
                   #{{refObject?.object_information?.object_id}}
                   <span *ngFor="let sum of refObject?.summaries; let last = last; let first = first">
-                    <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
-                      <span *ngIf="first"> - </span>{{sum.value}}
-                    </ng-template>
-                    <ng-template #templateDate>
-                      <span
-                        *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
-                    </ng-template>
-                    <span *ngIf="!last"> | </span>
-                  </span>
-                </ng-container>
-                <ng-container *ngIf="refObject == null"> No reference set</ng-container>
-              </ng-container>
-              <ng-container *ngIf="item.object_information != null">
-                <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
-                #{{item?.object_information?.object_id}}
-                <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
                   <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                     <span *ngIf="first"> - </span>{{sum.value}}
                   </ng-template>
@@ -93,12 +79,13 @@
                   </ng-template>
                   <span *ngIf="!last"> | </span>
                 </span>
+                </ng-container>
+                <ng-container *ngIf="refObject == null"> No reference set</ng-container>
               </ng-container>
-            </ng-template>
-            <ng-template ng-option-tmp let-item="item" let-index="index">
-              <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
-              # {{item?.object_information?.object_id}}
-              <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+              <ng-container *ngIf="item.object_information != null">
+                <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
+                #{{item?.object_information?.object_id}}
+                <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
                 <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
                   <span *ngIf="first"> - </span>{{sum.value}}
                 </ng-template>
@@ -108,20 +95,34 @@
                 </ng-template>
                 <span *ngIf="!last"> | </span>
               </span>
+              </ng-container>
+            </ng-template>
+            <ng-template ng-option-tmp let-item="item" let-index="index">
+              <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
+              # {{item?.object_information?.object_id}}
+              <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+              <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                <span *ngIf="first"> - </span>{{sum.value}}
+              </ng-template>
+              <ng-template #templateDate>
+                <span
+                  *ngIf="first"> - </span>{{(sum.value && sum.value.$date) ? (sum.value.$date | date:"dd/MM/yyyy") : " - "}}
+              </ng-template>
+              <span *ngIf="!last"> | </span>
+            </span>
             </ng-template>
           </ng-select>
-          <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
-        </ng-container>
-        <div *ngSwitchDefault>
-          <cmdb-mode-error></cmdb-mode-error>
-        </div>
+        </cmdb-input-appends>
       </ng-container>
-      <div *ngIf="controller.invalid && (controller.dirty || controller.touched)" class="invalid-feedback">
-        <div class="float-right" *ngIf="controller.errors.required">
-          {{data.label}} is a required field.
-        </div>
-        <div class="clearfix"></div>
+      <div *ngSwitchDefault>
+        <cmdb-mode-error></cmdb-mode-error>
       </div>
+    </ng-container>
+    <div *ngIf="controller.invalid && (controller.dirty || controller.touched)" class="invalid-feedback">
+      <div class="float-right" *ngIf="controller.errors.required">
+        {{data.label}} is a required field.
+      </div>
+      <div class="clearfix"></div>
     </div>
     <small class="description form-text text-muted">{{data?.description}}</small>
   </div>
