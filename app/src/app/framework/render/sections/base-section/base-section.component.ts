@@ -62,14 +62,15 @@ export class BaseSectionComponent {
 
   public getFieldByName(name: string) {
     const field: any = this.fields.find(f => f.name === name);
-
     switch (field.type) {
       case 'ref': {
         field.default = parseInt(field.default, 10);
         break;
       }
       default: {
-        field.default = field.value;
+        if (!field.default) {
+          field.default = field.value;
+        }
         break;
       }
     }
