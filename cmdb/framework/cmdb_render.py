@@ -277,6 +277,7 @@ class CmdbRender:
                     'type_id': ref_type.public_id,
                     'type_name': ref_type.name,
                     'type_label': ref_type.label,
+                    'type_icon': ref_type.get_icon(),
                     'fields': []
                 }
                 if not ref_section:

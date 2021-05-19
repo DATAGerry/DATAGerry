@@ -1,9 +1,5 @@
-<div class="input-group input-group-sm">
-  <div class="input-group-prepend">
-    <div class="input-group-text">
-      <form [formGroup]="changeForm">
-        <input type="checkbox" [checked]="checked" (click)="onCheckChange($event)">
-      </form>
-    </div>
-  </div>
-</div>
+
+<form [formGroup]="changeForm">
+  <input type="checkbox" class="form-check-input" [checked]="checked" (click)="onCheckChange($event)">
+</form>
+
