@@ -26,18 +26,20 @@
           </div>
         </div>
         <div class="row pb-1" *ngFor="let changedControl of changeForm.controls | keyvalue ; trackBy track">
-          <div class="col-sm-5">
-            <strong>{{getField(changedControl.key).label}}</strong>:
-            <cmdb-render-element [mode]="mode" [data]="getOriginal(itemIdx, changedControl.key)"></cmdb-render-element>
-          </div>
-          <div class="col-sm-1">
-            <i class="far fa-arrow-alt-circle-right"></i>
-          </div>
-          <div class="col-sm-5">
-            <strong>{{getField(changedControl.key).label}}</strong>:
-            <cmdb-render-element [mode]="mode" [data]="getField(changedControl.key)"
-                                 [value]="getChangedValue(changedControl.key)"></cmdb-render-element>
-          </div>
+          <ng-container *ngIf="getField(changedControl.key) as field">
+            <div class="col-sm-5">
+              <strong>{{field.label}}</strong>:
+              <cmdb-render-element [mode]="mode" [data]="getOriginal(itemIdx, changedControl.key)"></cmdb-render-element>
+            </div>
+            <div class="col-sm-1">
+              <i class="far fa-arrow-alt-circle-right"></i>
+            </div>
+            <div class="col-sm-5">
+              <strong>{{field.label}}</strong>:
+              <cmdb-render-element [mode]="mode" [data]="field"
+                                   [value]="getChangedValue(field.name)"></cmdb-render-element>
+            </div>
+          </ng-container>
         </div>
       </div>
     </div>

@@ -52,7 +52,7 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
   private getApiParameters(page: number = 1): CollectionParameters {
     return {
       filter: { type_id: this.section.reference.type_id }, limit: 10, sort: 'public_id',
-      order: 1, page, projection: { object_information: 1, type_information: 1, summary_line: 1, fields: 1}
+      order: 1, page, projection: { object_information: 1, type_information: 1, sections: 1, summary_line: 1, fields: 1}
     } as CollectionParameters;
   }
 
@@ -90,6 +90,27 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
       this.objectService.getObject<RenderResult>(publicID).pipe(takeUntil(this.subscriber)).subscribe(
         found => this.selected.next(found)
       );
+    }
+    this.prepareReferencesData();
+  }
+
+  /**
+   * Reference section fields is appended to the new data
+   * @private
+   */
+  private prepareReferencesData() {
+    if (this.mode === CmdbMode.Bulk && this.selected && this.selected.value) {
+      const { value } = this.selected;
+      const section = value.sections.find(s => s.name === this.section.reference.section_name);
+      const fields: any[] = [];
+      for (const name of section.fields) {
+        const temp = this.selected.value.fields.find(f => f.name === name);
+        if (temp) {
+          fields.push(temp);
+        }
+      }
+      const { type_id, type_name, type_label, icon } = value.type_information;
+      this.data.references = { type_id, type_name, type_label, type_icon: icon, fields };
     }
   }
 
