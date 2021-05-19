@@ -3,7 +3,7 @@
   <div class="input-group-append">
     <span class="input-group-text" *ngIf="data != undefined" (click)="changeValueToDefault()">
       <fa-icon [icon]="['fas', 'pencil-alt']" placement="left" [ngbTooltip]="tipContent"></fa-icon>
-      <ng-template #tipContent><b>Default:</b> {{data.default?.$date | date}}</ng-template>
+      <ng-template #tipContent><b>Default:</b> {{data.default ? data.default : 'None' | dateFormatter}}</ng-template>
     </span>
     <span class="input-group-text" *ngIf="data?.helperText">
       <fa-icon icon="info" placement="left" [ngbTooltip]="data?.helperText"></fa-icon>
