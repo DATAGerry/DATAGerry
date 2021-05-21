@@ -55,6 +55,7 @@ Currently we support the following field types:
 
 
 .. list-table:: Table 1: Supported field types
+   :width: 100%
    :widths: 25 75
    :align: left
    :header-rows: 1
@@ -203,6 +204,7 @@ type can be exported (therefore you will not find the "Export" button in a list 
 
 
 .. list-table:: Table 2: Supported export types
+   :width: 100%
    :widths: 25 75
    :align: left
    :header-rows: 1
@@ -298,6 +300,7 @@ In principle, there are five different access situations to objects.
 
 .. csv-table:: Table 3: Access situations
    :header: "Configuration", "Access"
+   :width: 100%
    :widths: 50 50
    :align: left
 
