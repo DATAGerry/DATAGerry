@@ -164,7 +164,7 @@ class ExportdJobManagement(CmdbManagerBase):
         if self._event_queue:
             event = Event("cmdb.exportd.run_manual", {"id": public_id,
                                                       "user_id": request_user.get_public_id(),
-                                                      "event": 'manuel'})
+                                                      "event": 'manual'})
             self._event_queue.put(event)
         return True
 
