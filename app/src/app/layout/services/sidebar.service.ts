@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,8 +19,8 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
 import { CategoryService } from '../../framework/services/category.service';
-import {ObjectService} from '../../framework/services/object.service';
-import {SidebarTypeComponent} from '../structure/sidebar/sidebar-type.component';
+import { ObjectService} from '../../framework/services/object.service';
+import { SidebarTypeComponent } from '../structure/sidebar/sidebar-type.component';
 
 @Injectable({
   providedIn: 'root'

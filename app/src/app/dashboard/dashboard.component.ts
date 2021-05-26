@@ -69,9 +69,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
    */
   private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
-  public objectCount: number;
-  public typeCount: number;
-  public userCount: number;
+  public objectCount: number = 0;
+  public typeCount: number = 0;
+  public userCount: number = 0;
 
   public readonly maxChartValue: number = 4;
 
@@ -209,7 +209,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.countTypes();
     this.countObjects();
 
-    this.userService.countUsers().subscribe((totals: any) => {
+    this.userService.countUsers().pipe(takeUntil(this.unSubscribe)).subscribe((totals: any) => {
       this.userCount = totals;
     });
 
@@ -222,7 +222,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   private countObjects(): void {
-    const apiParameters: CollectionParameters = { limit: 5, sort: 'count', order: -1, page: 1,
+    const apiParameters: CollectionParameters = { limit: 1, sort: 'public_id', order: 1, page: 1,
       filter: [{ $match: { } }]};
     this.objectService.getObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
       .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
@@ -299,39 +299,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private generateTypeChar() {
     const params = {
       filter: undefined,
-      limit: 0,
+      limit: 5,
       sort: 'public_id',
       order: 1,
-      page: 1
+      page: 1,
+      view: 'tree'
     };
     this.categoryService.getCategories(params).pipe(takeUntil(this.unSubscribe))
       .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
         const categories = apiResponse.results as Array<CmdbCategory>;
-        for (let i = 0; i < apiResponse.total; i++) {
-          this.typeService.getTypeListByCategory(categories[i].public_id).pipe(
-            takeUntil(this.unSubscribe)).subscribe((list: any[]) => {
-            this.itemsCategory.push(list.length);
-            this.labelsCategory.push(categories[i].label);
-            this.colorsCategory.push(this.getRandomColor());
-          });
-          if (i === this.maxChartValue) {
-            break;
-          }
+        for (const cate of categories) {
+          this.itemsCategory.push(cate.types.length);
+          this.labelsCategory.push(cate.label);
+          this.colorsCategory.push(this.getRandomColor());
         }
-    });
+      });
   }
 
   private generateGroupChar() {
-    let values;
-    this.groupService.getGroups().subscribe((data: APIGetMultiResponse<Group>) => {
-        values = data.results;
-      }, () => {
-      },
-      () => {
-        for (let i = 0; i < values.length; i++) {
-          this.userService.countUsers({group_id: values[i].public_id}).pipe(takeUntil(this.unSubscribe))
+    const groupsCallParameters: CollectionParameters = {
+      filter: [{
+        $lookup:
+          {
+            from: 'management.users',
+            localField: 'public_id',
+            foreignField: 'group_id',
+            as: 'users'
+          }
+      }],
+      limit: 5,
+      sort: 'public_id',
+      order: 1,
+      page: 1
+    };
+
+    this.groupService.getGroups(groupsCallParameters).subscribe((data: APIGetMultiResponse<Group>) => {
+        for (let i = 0; i < data.results.length; i++) {
+          this.userService.countUsers({group_id: data.results[i].public_id}).pipe(takeUntil(this.unSubscribe))
             .subscribe((nUsers: number) => {
-              this.labelsGroup.push(values[i].label);
+              this.labelsGroup.push(data.results[i].label);
               this.colorsGroup.push(this.getRandomColor());
               this.itemsGroup.push(nUsers);
             });
@@ -339,7 +345,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             break;
           }
         }
-
       });
   }
 
