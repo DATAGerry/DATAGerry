@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,11 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { Subscription } from 'rxjs';
 import { ObjectService } from '../../../framework/services/object.service';
-import {SidebarService} from '../../services/sidebar.service';
+import { SidebarService } from '../../services/sidebar.service';
 
 @Component({
   selector: 'cmdb-sidebar-type',
@@ -30,11 +30,10 @@ import {SidebarService} from '../../services/sidebar.service';
 export class SidebarTypeComponent implements OnInit, OnDestroy {
 
   @Input() public type: CmdbType;
-  private objectCountSubscription: Subscription;
+
   public objectCounter: unknown = 0;
 
   public constructor(private objectService: ObjectService, private sidebarService: SidebarService) {
-    this.objectCountSubscription = new Subscription();
   }
 
   public ngOnInit() {
