@@ -126,7 +126,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
   /**
-   * Filter parameter from table search-
+   * Filter parameter from table search
    */
   public filter: string;
 
@@ -343,6 +343,96 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         };
         or.push(regex);
       }
+      // Search into reference fields
+      query.push(
+        {
+            $lookup: {
+            from: 'framework.objects',
+            localField: 'fields.value',
+            foreignField: 'public_id',
+            as: 'data'
+          }
+        });
+
+      query.push({ $project: {
+          _id: 1,
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          simple: {
+            $reduce: {
+              input: '$data.fields',
+              initialValue: [],
+              in: { $setUnion: ['$$value', '$$this'] }
+            }
+          }
+        } });
+
+      query.push({
+          $group: {
+            _id: '$_id',
+            public_id : { $first: '$public_id' },
+            type_id: { $first: '$type_id' },
+            active: { $first: '$active' },
+            author_id: { $first: '$author_id' },
+            creation_time: { $first: '$creation_time' },
+            last_edit_time: { $first: '$last_edit_time' },
+            fields : { $first: '$fields' },
+            simple: { $first: '$simple' },
+          }
+        });
+
+      query.push({ $project:
+            {
+              _id: '$_id',
+              public_id: 1,
+              type_id: 1,
+              active: 1,
+              author_id: 1,
+              creation_time: 1,
+              last_edit_time: 1,
+              fields: 1,
+              references : { $setUnion: ['$fields', '$simple'] },
+            }
+        }
+      );
+      // Search for creation_time
+      query.push(
+        { $addFields: {
+            creationString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$creation_time' } }
+          }},
+      );
+      // Search for last_edit_time
+      query.push(
+        { $addFields: {
+            editString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$last_edit_time' } }
+          }},
+      );
+      // Search date in field values
+      query.push(
+        { $addFields: {
+            references: {
+              $map: {
+                input: '$references',
+                as: 'new_fields',
+                in: {
+                  $cond: [
+                    { $eq: [{ $type: '$$new_fields.value' }, 'date'] },
+                    { name: '$$new_fields.name', value: {
+                      $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' } }
+                    },
+                    { name: '$$new_fields.name', value: '$$new_fields.value'}
+                  ]
+                }
+              }
+            }
+          }
+        },
+      );
       // Nasty public id quick hack
       query.push({
         $addFields: {
@@ -354,18 +444,21 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           $elemMatch: {
             value: {
               $regex: String(this.filter),
-              $options: 'ismx'
+              $options: 'ism'
             }
           }
         }
       });
+      // Date string search
+      or.push( { creationString: { $regex: String(this.filter), $options: 'ims' } } );
+      or.push( { editString: { $regex: String(this.filter), $options: 'ims' } } );
       // Search Fields
       or.push({
-        fields: {
+        references: {
           $elemMatch: {
             value: {
               $regex: String(this.filter),
-              $options: 'ismx'
+              $options: 'ism'
             }
           }
         }
