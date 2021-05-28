@@ -233,38 +233,9 @@ export class ObjectComponent implements OnInit, OnDestroy {
    */
   private loadObjectsFromAPI(): void {
     this.setLoadingState(true);
-    let query;
-    if (this.filter) {
-      query = [];
-      const or = [];
-      const searchableColumns = this.columns.filter(c => c.searchable);
-      for (const column of searchableColumns) {
-        const regex: any = {};
-        regex[column.name] = {
-          $regex: String(this.filter),
-          $options: 'ismx'
-        };
-        or.push(regex);
-      }
-      query.push({
-        $addFields: {
-          public_id: { $toString: '$public_id' }
-        }
-      });
-      or.push({
-        public_id: {
-          $elemMatch: {
-            value: {
-              $regex: String(this.filter),
-              $options: 'ismx'
-            }
-          }
-        }
-      });
-      query.push({ $match: { $or: or } });
-    }
+    const filter = this.filterBuilder();
     const params: CollectionParameters = {
-      filter: query, limit: this.limit,
+      filter, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber)).subscribe(
@@ -275,6 +246,143 @@ export class ObjectComponent implements OnInit, OnDestroy {
       },
       (error) => this.toastService.error(error),
       () => this.setLoadingState(false));
+  }
+
+  /**
+   * * DB Query / Filter Builder
+   * Creates a database query using the passed parameters.
+   *
+   * @return query {@link: any[]}
+   */
+  private filterBuilder() {
+    let query;
+
+    if (this.filter) {
+      query = [];
+      const or = [];
+      // Search into reference fields
+      query.push(
+        {
+          $lookup: {
+            from: 'framework.objects',
+            localField: 'fields.value',
+            foreignField: 'public_id',
+            as: 'data'
+          }
+        });
+
+      query.push({ $project: {
+          _id: 1,
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          simple: {
+            $reduce: {
+              input: '$data.fields',
+              initialValue: [],
+              in: { $setUnion: ['$$value', '$$this'] }
+            }
+          }
+        } });
+
+      query.push({
+        $group: {
+          _id: '$_id',
+          public_id : { $first: '$public_id' },
+          type_id: { $first: '$type_id' },
+          active: { $first: '$active' },
+          author_id: { $first: '$author_id' },
+          creation_time: { $first: '$creation_time' },
+          last_edit_time: { $first: '$last_edit_time' },
+          fields : { $first: '$fields' },
+          simple: { $first: '$simple' },
+        }
+      });
+
+      query.push({ $project:
+            {
+              _id: '$_id',
+              public_id: 1,
+              type_id: 1,
+              active: 1,
+              author_id: 1,
+              creation_time: 1,
+              last_edit_time: 1,
+              fields: 1,
+              references : { $setUnion: ['$fields', '$simple'] },
+            }
+        }
+      );
+      // Search for creation_time
+      query.push(
+        { $addFields: {
+            creationString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$creation_time' } }
+          }},
+      );
+      // Search for last_edit_time
+      query.push(
+        { $addFields: {
+            editString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$last_edit_time' } }
+          }},
+      );
+      // Search date in field values
+      query.push(
+        { $addFields: {
+            references: {
+              $map: {
+                input: '$references',
+                as: 'new_fields',
+                in: {
+                  $cond: [
+                    { $eq: [{ $type: '$$new_fields.value' }, 'date'] },
+                    { name: '$$new_fields.name', value: {
+                        $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' } }
+                    },
+                    { name: '$$new_fields.name', value: '$$new_fields.value'}
+                  ]
+                }
+              }
+            }
+          }
+        },
+      );
+      // Nasty public id quick hack
+      query.push({
+        $addFields: {
+          public_id: { $toString: '$public_id' }
+        }
+      });
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ism'
+            }
+          }
+        }
+      });
+      // Date string search
+      or.push( { creationString: { $regex: String(this.filter), $options: 'ims' } } );
+      or.push( { editString: { $regex: String(this.filter), $options: 'ims' } } );
+      // Search Fields
+      or.push({
+        references: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.filter),
+              $options: 'ism'
+            }
+          }
+        }
+      });
+      query.push({ $match: { $or: or } });
+    }
+    return query;
   }
 
   /**
