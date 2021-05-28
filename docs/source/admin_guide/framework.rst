@@ -126,6 +126,33 @@ When using the Category tree, you can choose an Object Type (e.g. router) and ge
 By default, only summary fields of an object are shown in the table, with the yellow settings button, additional fields
 can be faded in.
 
+Active und Inactive Objects
+---------------------------
+Objects in DATAGERRY can be active or inactive. Inactive Objects are hidden in the WebUI and were not exported to
+external systems with Exportd. By default, all new created Objects in DATAGERRY are active. You can set an Object to
+inactive by hitting the small switch on the Object view page.
+
+If you want to see inactive Objects in the WebUI, click on the switch under the navigation bar.
+
+.. figure:: img/objects_active_switch.png
+    :width: 300
+
+    Figure 6: Active / Inactive objects switch
+
+Object tables filter
+---------------------------
+
+The search / filter option in the tables provides the possibility to control the search / filtering in a table. The search / filtering is performed over all searchable columns.
+If matching data is found in any column, then the entire row is matched and displayed in the result set.
+
+.. note::
+    Date values must be searched according to the following format:
+
+    **Format**: *YYYY-MM-DDThh:mmZ*
+
+    **Example**: *2019-12-19T11:02*
+
+|
 
 Bulk change of Objects
 ----------------------
@@ -140,7 +167,7 @@ Simply select all objects you want to change and click on the yellow button for 
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 6: Select objects for bulk change
+    Figure 7: Select objects for bulk change
 
 **Template**
 
@@ -151,7 +178,7 @@ transfer to the objects later and save your entries.
 .. figure:: img/objects_bulk_change_active.png
     :width: 600
 
-    Figure 7: Change template
+    Figure 8: Change template
 
 **Preview**:
 
@@ -160,7 +187,7 @@ In the preview, all changes made are listed and can be adjusted again if necessa
 .. figure:: img/objects_bulk_change_preview.png
     :width: 600
 
-    Figure 8: Overview of changes
+    Figure 9: Overview of changes
 
 **Result**:
 
@@ -169,21 +196,8 @@ After a preview, the selected objects will be changed.
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 9: Bulk change result
+    Figure 10: Bulk change result
 
-
-Active und Inactive Objects
----------------------------
-Objects in DATAGERRY can be active or inactive. Inactive Objects are hidden in the WebUI and were not exported to
-external systems with Exportd. By default, all new created Objects in DATAGERRY are active. You can set an Object to 
-inactive by hitting the small switch on the Object view page.
-
-If you want to see inactive Objects in the WebUI, click on the switch under the navigation bar.
-
-.. figure:: img/objects_active_switch.png
-    :width: 300
-
-    Figure 10: Active / Inactive objects switch
 
 Exporting Objects
 -----------------
