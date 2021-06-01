@@ -27,7 +27,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../../models/cmdb-type';
-import { takeUntil } from 'rxjs/operators';
+import {filter, takeUntil} from 'rxjs/operators';
 
 function occurrences(s, subString): number {
   s += '';
@@ -73,8 +73,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   public set TypeInstance(instance: CmdbType) {
     if (instance) {
       this.typeInstance = instance;
-      this.fields = this.typeInstance.fields;
-
+      this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
       this.summaryForm.patchValue(this.typeInstance.render_meta.summary);
       this.externalsForm.get('name').setValidators(this.listNameValidator());
     }
@@ -160,9 +159,8 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     const changes = this.iterableDiffer.diff(this.typeInstance.fields);
     if (changes) {
       const summaries = this.summaryFields.value;
-      this.fields = [...this.typeInstance.fields];
+      this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
       this.summaryFields.patchValue(summaries);
-      // this.summaryFields.setValue(this.summaryFields.value.filter(val => !this.fields.map(x => x.name).includes(val)));
     }
   }
 
