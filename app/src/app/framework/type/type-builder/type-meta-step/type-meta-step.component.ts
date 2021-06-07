@@ -158,8 +158,12 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   public ngDoCheck(): void {
     const changes = this.iterableDiffer.diff(this.typeInstance.fields);
     if (changes) {
-      const summaries = this.summaryFields.value;
+      let summaries = this.summaryFields.value;
+      changes.forEachRemovedItem(record => {
+        summaries = summaries.filter(f => f !== record.item.name);
+      });
       this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
+      this.typeInstance.render_meta.summary.fields = summaries;
       this.summaryFields.patchValue(summaries);
     }
   }

@@ -157,6 +157,24 @@ export class BuilderComponent implements OnDestroy {
     }
   }
 
+  /**
+   * This method checks if the field is used for an external link.
+   * @param field
+   */
+  public externalField(field) {
+    const include = {links: [], total: 0};
+    for (const external of this.typeInstance.render_meta.externals) {
+      const found = external.fields.find(f => f === field.name);
+      if (found) {
+        if (include.total < 10) {
+          include.links.push(external);
+        }
+        include.total = include.total + 1;
+      }
+    }
+    return include;
+  }
+
   public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
     const fieldData = event.data;
     if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {

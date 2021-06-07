@@ -124,21 +124,43 @@
                          [dndDraggable]="field"
                          (dndMoved)="onFieldDragged(field, section)">
                       <div class="fields card">
-                        <div class="card-header">
-                          <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon>
-                          {{field.label}}
-                          <span class="float-right">
-                    <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
-                            [attr.data-target]="'#field-'+ x + y + field.name">
-                      <fa-icon [icon]="['far', 'edit']"></fa-icon>
-                    </button>
-                    <button class="btn btn-link mr-1" type="button" dndHandle>
-                      <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
-                    </button>
-                    <button class="btn btn-link" type="button" (click)="removeField(field, section)">
-                      <fa-icon [icon]="['far', 'window-close']"></fa-icon>
-                    </button>
-                  </span>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                          <span>
+                            <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
+                          </span>
+                          <span>
+                            <button class="btn btn-link mr-1" type="button" data-toggle="collapse"
+                                    [attr.data-target]="'#field-'+ x + y + field.name">
+                              <fa-icon [icon]="['far', 'edit']"></fa-icon>
+                            </button>
+                            <button class="btn btn-link mr-1" type="button" dndHandle>
+                              <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
+                            </button>
+                            <button *ngIf="externalField(field) as externalLink; else removeFieldContainer"
+                                    class="btn btn-link" type="button"
+                                    [disabled]="externalLink.links.length"
+                                    [ngbTooltip]="tipContent"
+                                    [disableTooltip]="!externalLink.links.length"
+                                    (click)="removeField(field, section)">
+                              <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                              <ng-template #tipContent>
+                                <b>Used by external links</b>
+                                <span *ngFor="let linked of externalLink.links">
+                                  <br><strong>Label</strong>: {{linked.label}}
+                                </span>
+                                <p>
+                                  <strong>Show</strong>: {{externalLink.links.length}}
+                                  <strong>Total</strong>: {{externalLink.total}}
+                                </p>
+                              </ng-template>
+                            </button>
+                            <ng-template #removeFieldContainer>
+                              <button class="btn btn-link" type="button"
+                                      (click)="removeField(field, section)">
+                                <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                              </button>
+                            </ng-template>
+                          </span>
                         </div>
                         <div class="card-body collapse" id="field-{{x}}{{y}}{{field.name}}">
                           <cmdb-config-edit [mode]="isNewField(field) ? MODES.Create : mode" [types]="types" [sections]="sections" [data]="field">
