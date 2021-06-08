@@ -50,8 +50,8 @@
     <label>Default value:</label>
     <div class="input-group">
       <input
-        [formControl]="valueControl" type="text" class="form-control" placeholder="dd/mm/yyyy" ngbDatepicker
-        #d="ngbDatepicker" (ngModelChange)="onInputChange($event, 'value')"/>
+        [formControl]="valueControl" type="text" class="form-control" [placeholder]="datePlaceholder" ngbDatepicker
+        #d="ngbDatepicker" (ngModelChange)="onInputChange($event, 'value')" readonly/>
       <div class="input-group-append">
         <button class="input-group-text" (click)="d.toggle()">
           <fa-icon icon="calendar-alt"></fa-icon>

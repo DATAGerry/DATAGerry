@@ -173,7 +173,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
       searchable: true,
       fixed: true,
       template: this.dataTemplate,
-      style: { 'white-space': 'nowrap' },
     } as unknown as Column);
 
     columns.push({
@@ -184,7 +183,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
       searchable: true,
       fixed: true,
       template: this.dataTemplate,
-      style: { 'white-space': 'nowrap' },
     } as unknown as Column);
 
     columns.push({
@@ -206,8 +204,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
       searchable: false,
       fixed: true,
       template: this.changeTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
     } as unknown as Column);
 
     columns.push({
@@ -218,8 +214,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
       searchable: false,
       fixed: true,
       template: this.dataTemplate,
-      cssClasses: ['text-center'],
-      style: { width: '6em' }
     } as unknown as Column);
 
     columns.push({
@@ -252,8 +246,6 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
         name: 'log_time',
         data: 'log_time',
         sortable: true,
-        cssClasses: ['text-center'],
-        style: { 'white-space': 'nowrap' },
         template: this.dateTemplate,
         searchable: false,
       } as Column
