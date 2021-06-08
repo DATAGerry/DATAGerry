@@ -22,16 +22,31 @@
               </ng-template>
               <ng-template ng-label-tmp>
                 <ng-container *ngIf="selected?.value as item">
-                <span><i class="{{item?.type_information?.icon}}"></i>
-                  {{item?.type_information?.type_label}} #</span>{{item?.object_information?.object_id}} -
-                  <span>{{item?.summary_line}}</span>
+                <span>
+                  <i class="{{item?.type_information?.icon}}"></i>
+                  {{item?.type_information?.type_label}} #</span>{{item?.object_information?.object_id}}
+                  <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+                    <ng-template [ngIf]="sum.type != 'date'" [ngIfElse]="templateDate">
+                      <span *ngIf="first"> - </span>{{sum.value ? sum.value : 'None'}}
+                    </ng-template>
+                    <ng-template #templateDate>
+                      <span *ngIf="first"> - </span>{{sum.value ? (sum.value | dateFormatter) : 'None'}}
+                    </ng-template>
+                    <span *ngIf="!last"> | </span>
+                  </span>
                 </ng-container>
               </ng-template>
               <ng-template ng-option-tmp let-item="item">
                 <div>
                 <span><i class="{{item?.type_information?.icon}}"></i>
                   {{item?.type_information?.type_label}} #</span>{{item?.object_information?.object_id}}</div>
-                <small><b>Summary:</b> {{item?.summary_line}}</small>
+                <small>
+                  <b>Summary:</b>
+                  <span *ngFor="let sum of item?.summaries; let last = last;">
+                    {{sum.value ? (sum.value | dateFormatter) : 'None'}}
+                    <span *ngIf="!last"> | </span>
+                  </span>
+                </small>
               </ng-template>
             </ng-select>
           </cmdb-input-appends>
