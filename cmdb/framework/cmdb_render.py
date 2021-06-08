@@ -318,7 +318,7 @@ class CmdbRender:
                 ref_type = self.object_manager.get_type(ref_object.get_type_id())
 
                 _summary_fields = []
-                _nested_summaries = self.type_instance.get_nested_summaries()
+                _nested_summaries = current_field['summaries']
                 _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
 
