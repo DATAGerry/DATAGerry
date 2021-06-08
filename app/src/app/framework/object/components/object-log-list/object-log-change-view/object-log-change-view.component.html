@@ -8,11 +8,12 @@
     -
   </div>
   <div class="container-fluid" *ngSwitchCase="MODES.EDIT">
-    <div class="row" *ngFor="let change of changes?.old; let i = index">
+    <div *ngFor="let change of changes?.old; let i = index" [className]="i % 2 == 0 ? 'row bg-light' : 'row'">
       <div class="col-12 col-xl-3"><strong>{{change?.name}}:</strong></div>
       <div class="col-12 col-xl-4"><span>{{change.value | dateFormatter}}</span></div>
       <div class="col-12 col-xl-1"><i class="fas fa-arrow-right p-3"></i></div>
-      <div class="col-12 col-xl-4"><span>{{changes?.new[i].value | dateFormatter}}</span></div>
+      <div class="col-12 col-xl-4"><span>{{changes?.new[i]?.value | dateFormatter}}</span></div>
+      <hr>
     </div>
   </div>
   <div *ngSwitchDefault>

@@ -3,10 +3,10 @@
 
   <span *ngFor="let field of data?.references?.fields; let last = last; let first = first">
     <ng-template [ngIf]="field.type != 'date'" [ngIfElse]="templateDate">
-      <span *ngIf="first"> - </span>{{field.name}}: <i>{{field.value ? field.value : 'None'}}</i>
+      <span *ngIf="first"> - </span>{{field.label}}: <i>{{field.value ? field.value : 'None'}}</i>
     </ng-template>
     <ng-template #templateDate>
-      <span *ngIf="first"> - </span>{{field.name}}: <i>{{(field.value !== 'None') ? (field.value | dateFormatter) : ''}}</i>
+      <span *ngIf="first"> - </span>{{field.label}}: <i>{{(field.value !== 'None') ? (field.value | dateFormatter) : ''}}</i>
     </ng-template>
     <span *ngIf="!last"> | </span>
   </span>

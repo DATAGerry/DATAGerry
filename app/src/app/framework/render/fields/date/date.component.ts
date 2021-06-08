@@ -21,6 +21,9 @@ import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { NgbStringAdapter, CustomDateParserFormatter } from '../../../../settings/date-settings/date-settings-formatter.service';
+import { takeUntil } from 'rxjs/operators';
+import { DateSettingsService } from '../../../../settings/services/date-settings.service';
+import { ReplaySubject } from 'rxjs';
 
 
 @Component({
@@ -34,7 +37,14 @@ import { NgbStringAdapter, CustomDateParserFormatter } from '../../../../setting
 })
 export class DateComponent extends RenderFieldComponent implements  OnInit {
 
-  public constructor() {
+  /**
+   * Un-subscriber for `DateSettingsComponent`.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  public datePlaceholder = 'YYYY-MM-DD';
+
+  public constructor(private dateSettingsService: DateSettingsService) {
     super();
   }
 
@@ -42,6 +52,9 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
     if (this.parentFormGroup.get(this.data.name).value === '') {
       this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
     }
+    this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
+      this.datePlaceholder = dateSettings.date_format;
+    });
   }
 
   public get currentDate() {
@@ -53,7 +66,10 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
   }
 
   public resetDate() {
-    this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
+    this.controller.setValue(null, {onlySelf: true});
+    this.controller.reset();
+    this.controller.markAsTouched();
+    this.controller.markAsDirty();
   }
 
   public copyToClipboard() {

@@ -18,7 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { LogMode } from '../../../../modes.enum';
-import {isArray} from "rxjs/internal-compatibility";
+import { isArray } from 'rxjs/internal-compatibility';
 
 @Component({
   selector: 'cmdb-object-log-change-view',

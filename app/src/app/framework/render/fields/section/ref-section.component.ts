@@ -51,8 +51,8 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
 
   private getApiParameters(page: number = 1): CollectionParameters {
     return {
-      filter: { type_id: this.section.reference.type_id }, limit: 10, sort: 'public_id',
-      order: 1, page, projection: { object_information: 1, type_information: 1, sections: 1, summary_line: 1, fields: 1}
+      filter: { type_id: this.section.reference.type_id }, limit: 10, sort: 'public_id', order: 1, page,
+      projection: { object_information: 1, type_information: 1, sections: 1, summary_line: 1, summaries: 1, fields: 1}
     } as CollectionParameters;
   }
 
