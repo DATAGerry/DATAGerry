@@ -81,11 +81,13 @@
               </ng-container>
             </ng-template>
             <ng-template ng-option-tmp let-item="item">
-              <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
-              #{{item?.object_information?.object_id}}
-              <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
+              <span [className]="controller.value === item?.object_information?.object_id ? 'font-weight-bold' : ''">
+                <i class="{{item?.type_information?.icon}}"></i> {{item?.type_information?.type_label}}
+                #{{item?.object_information?.object_id}}
+                <span *ngFor="let sum of item?.summaries; let last = last; let first = first">
                 <span *ngIf="first"> - </span>{{sum.value ? (sum.value | dateFormatter) : 'None'}}
-                <span *ngIf="!last"> | </span>
+                  <span *ngIf="!last"> | </span>
+                </span>
               </span>
             </ng-template>
           </ng-select>
