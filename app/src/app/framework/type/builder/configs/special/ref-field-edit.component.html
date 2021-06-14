@@ -27,6 +27,9 @@
     <ng-select [items]="typeList"
                bindLabel="label"
                bindValue="public_id"
+               loadingText='Loading...'
+               [loading]="typeLoading"
+               [closeOnSelect]="false"
                [multiple]=true
                (change)="onChange()"
                [ngModelOptions]="{standalone: true}"
@@ -66,11 +69,7 @@
           <ng-select [items]="filteredTypeList"
                      bindLabel="label"
                      bindValue="public_id"
-                     loadingText='Loading...'
-                     [closeOnSelect]="false"
-                     [loading]="typeLoading"
                      (change)="changeSummaryOption($event)"
-                     [multiple]=false
                      [(ngModel)]="summary.type_id"
                      [ngModelOptions]="{standalone: true}">
           </ng-select>
@@ -95,7 +94,6 @@
           <ng-select [items]="summaryFieldFilter(summary.type_id)" [multiple]="true"
                      bindLabel="label"
                      bindValue="name"
-                     [closeOnSelect]="false"
                      placeholder="Select fields"
                      [(ngModel)]="summary.fields"
                      [ngModelOptions]="{standalone: true}">
