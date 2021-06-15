@@ -47,11 +47,11 @@ The next step is the definition of the object fields see the following figure 4:
 
     Figure 4: Definition of the object fields
 
-Fields are organized in "Sections". To add a new section or field, choose an element from the left side box and move it
-to the center with drag and drop. At first, add a section (you find it under "Structure Controls"), after that, choose
-one or more fields. Each field or section has a name and label. A name will be created automatically and cannot be
-changed manually, while a label can be changed at any time. Depending on the field type, several options can be set.
-Currently we support the following field types:
+Fields are organized in “Sections” and "Reference Sections". To add a new section or field, choose an element from the
+left side box and move it to the center with drag and drop. At first, add a 'section' or a 'reference section'
+(you find it under “Structure Controls”), after that, choose one or more fields. Each field or section has a
+name and label. A name will be created automatically and cannot be changed manually, while a label can be changed at
+any time. Depending on the field type, several options can be set. Currently we support the following field types:
 
 
 .. list-table:: Table 1: Supported field types
@@ -78,16 +78,40 @@ Currently we support the following field types:
      - A Date string according to the date format (ISO 8601)
    * - Reference
      - Reference to another object of a specific type. E.g. connection between a router and a location object
+   * - Reference Section
+     - This binds a section with all fields of a referencing object completely as a display.
+
+Special Controls
+----------------
+
+A "Reference" field type embeds a summary of a referencing object as a display.
+The summary for each object definition is predefined in the type generator under the "Meta" tab. See Figure 7.
+With the field type "Reference" it is possible to override the predefined summaries and make them user specific.
+See Figure 5.
 
 
-With the yellow preview button, an example of an object with the current configuration will be shown.
+.. figure:: img/special_control_field.png
+    :width: 600
+
+    Figure 5: Definition of the special fields
+
+Reference Section
+-----------------
+A reference type "Section reference" binds a section with all fields of a referencing object completely as a display.
+The search for the field values is run through like a normal field. The references are expanded accordingly,
+so that a distinction is made between field references and section references.
+
+.. figure:: img/object_reference_section_field.png
+    :width: 600
+
+    Figure 6: Definition of the object fields via reference section
 
 On the next page on the configuration dialog, meta information can be set:
 
 .. figure:: img/objects_type_meta.png
     :width: 600
 
-    Figure 5: Meta information
+    Figure 7: Meta information
 
 Each object has summary fields. These fields summarize the object and are shown by default in object lists. On a router,
 this could be a management ip and a hostname. The summary fields can be set under "Summary".
@@ -137,7 +161,7 @@ If you want to see inactive Objects in the WebUI, click on the switch under the 
 .. figure:: img/objects_active_switch.png
     :width: 300
 
-    Figure 6: Active / Inactive objects switch
+    Figure 8: Active / Inactive objects switch
 
 Object tables filter
 ---------------------------
@@ -167,7 +191,7 @@ Simply select all objects you want to change and click on the yellow button for 
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 7: Select objects for bulk change
+    Figure 9: Select objects for bulk change
 
 **Template**
 
@@ -178,7 +202,7 @@ transfer to the objects later and save your entries.
 .. figure:: img/objects_bulk_change_active.png
     :width: 600
 
-    Figure 8: Change template
+    Figure 10: Change template
 
 **Preview**:
 
@@ -187,7 +211,7 @@ In the preview, all changes made are listed and can be adjusted again if necessa
 .. figure:: img/objects_bulk_change_preview.png
     :width: 600
 
-    Figure 9: Overview of changes
+    Figure 11: Overview of changes
 
 **Result**:
 
@@ -196,7 +220,7 @@ After a preview, the selected objects will be changed.
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 10: Bulk change result
+    Figure 12: Bulk change result
 
 
 Exporting Objects
@@ -214,7 +238,7 @@ type can be exported (therefore you will not find the "Export" button in a list 
 .. figure:: img/raw-custom-export.png
     :width: 600
 
-    Figure 11: Export from object list overview
+    Figure 13: Export from object list overview
 
 
 .. list-table:: Table 2: Supported export types
@@ -238,7 +262,7 @@ type can be exported (therefore you will not find the "Export" button in a list 
 .. figure:: img/object-import-export.png
     :width: 300
 
-    Figure 12: Export / Import via Toolbox
+    Figure 14: Export / Import via Toolbox
 
 
 Importing Objects
@@ -342,7 +366,7 @@ These can be defined under the ACL step based on the type. By default, they are 
     :width: 600
     :alt: Deactivated object acl
 
-    Figure 13: Deactivated object acl
+    Figure 15: Deactivated object acl
 
 When activated, the menu is enabled and groups can be added to an ACL with the respective permissions.
 
@@ -350,7 +374,7 @@ When activated, the menu is enabled and groups can be added to an ACL with the r
     :width: 600
     :alt: While object acl configure
 
-    Figure 14: While object acl configure
+    Figure 16: While object acl configure
 
 After adding the groups, they are displayed in the list below and their permissions can be edited further.
 But a group can only appear once in an ACL.
@@ -360,6 +384,6 @@ Listing the same group with different permissions in the same list is not possib
     :width: 600
     :alt: Inserted object acl
 
-    Figure 15: Inserted object acl
+    Figure 17: Inserted object acl
 
 The ACL settings are retained at the object level even after the ACL is disabled, but then they are no longer applied.
