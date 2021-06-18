@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.type import TypeModel
 
 LOGGER = logging.getLogger(__name__)
 
@@ -32,7 +33,7 @@ class Update20200226(Updater):
         return '20200226'
 
     def description(self):
-        return 'Update the fieldtype date of CMDB objects: From string to date.'
+        return 'Update all types where category ID is 0, to root category public ID.'
 
     def increase_updater_version(self, value):
         super(Update20200226, self).increase_updater_version(value)
@@ -40,15 +41,15 @@ class Update20200226(Updater):
     def start_update(self):
         try:
             # Get root category
-            root_category = self.object_manager.get_categories_by(**{'root': True})
+            category = self.category_manager.iterate({'root': True}, limit=0, skip=0, sort='public_id', order=1)
             # Update all types where category ID is 0,
             # to root category public ID
-            if len(root_category):
-                self.object_manager.update_many_types(filter={'category_id': 0},
-                                                      update={'$set': {'category_id': root_category[0].get_public_id()}})
+            if len(category):
+                self.database_manager.update_many(TypeModel.COLLECTION, query={'category_id': 0},
+                                                  update={'$set': {'category_id': category[0].get_public_id()}})
 
             # Remove the property root from category collection
-            self.object_manager.unset_update(CategoryModel.COLLECTION, 'root')
+            self.database_manager.unset_update_many(CategoryModel.COLLECTION, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             raise Exception(err.message)
         self.increase_updater_version(20200226)

@@ -34,7 +34,8 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse
+from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse, UpdateSingleResponse,\
+    ResponseFailedMessage
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
@@ -42,6 +43,7 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel, UserManager
 from cmdb.utils.error import CMDBError
+from cmdb.framework.managers.object_manager import ObjectManager
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
@@ -58,9 +60,10 @@ objects_blueprint = APIBlueprint('objects', __name__)
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_objects(params: CollectionParameters, request_user: UserModel):
-    from cmdb.framework.managers.object_manager import ObjectManager
+
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
+
     if _fetch_only_active_objs():
         if isinstance(params.filter, dict):
             filter_ = params.filter
@@ -281,7 +284,7 @@ def insert_object(request_user: UserModel):
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
             'version': current_object.version
         }
-        log_ack = log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
     except LogManagerInsertError as err:
         LOGGER.error(err)
 
@@ -300,26 +303,34 @@ def update_object(public_id: int, request_user: UserModel):
     else:
         object_ids = [public_id]
 
-    update_ack = None
+    manager = ObjectManager(database_manager=current_app.database_manager)
+    results: [dict] = []
+    failed = []
 
     for obj_id in object_ids:
         # get current object state
         try:
-            current_object_instance = object_manager.get_object(obj_id)
+            current_object_instance = manager.get(obj_id, user=request_user, permission=AccessControlPermission.READ)
             current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
                                                       object_manager=object_manager, ref_render=True).result()
+
+        except AccessDeniedError as err:
+            LOGGER.error(err)
+            return abort(403)
         except ObjectManagerGetError as err:
             LOGGER.error(err)
-            return abort(404)
+            failed.append(ResponseFailedMessage(error_message=err.message, status=400, public_id=obj_id))
+            continue
         except RenderError as err:
             LOGGER.error(err)
-            return abort(500)
+            failed.append(ResponseFailedMessage(error_message=err.message, status=500, public_id=obj_id))
+            continue
 
-        update_comment = ''
         # load put data
+        update_comment = ''
         try:
             # get data as str
             add_data_dump = json.dumps(request.json)
@@ -351,46 +362,44 @@ def update_object(public_id: int, request_user: UserModel):
             except (KeyError, IndexError, ValueError):
                 update_comment = ''
         except TypeError as e:
-            LOGGER.warning(e)
+            LOGGER.error(e)
             return abort(400)
-
-        # update edit time
-        put_data['last_edit_time'] = datetime.now(timezone.utc)
-
-        try:
-            update_object_instance = CmdbObject(**put_data)
-        except ObjectManagerUpdateError as err:
-            LOGGER.error(err)
-            return abort(400)
-
-        # calc version
-
-        changes = current_object_instance / update_object_instance
-
-        if len(changes['new']) == 1:
-            update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
-        elif len(changes['new']) == len(update_object_instance.fields):
-            update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
-        elif len(changes['new']) > (len(update_object_instance.fields) / 2):
-            update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
-        else:
-            update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
 
         # insert object
         try:
-            update_ack = object_manager.update_object(update_object_instance, request_user,
-                                                      AccessControlPermission.UPDATE)
+            # update edit time
+            put_data['last_edit_time'] = datetime.now(timezone.utc)
+            update_object_instance = CmdbObject(**put_data)
 
-        except ManagerGetError as err:
-            return abort(404, err.message)
+            # calc version
+            changes = current_object_instance / update_object_instance
+
+            if len(changes['new']) == 1:
+                update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+            elif len(changes['new']) == len(update_object_instance.fields):
+                update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
+            elif len(changes['new']) > (len(update_object_instance.fields) / 2):
+                update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
+            else:
+                update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+
+            object_manager.update_object(update_object_instance, request_user, AccessControlPermission.UPDATE)
+            results.append(update_object_instance.__dict__)
+
         except AccessDeniedError as err:
-            return abort(403, err.message)
+            LOGGER.error(err)
+            return abort(403)
+        except (ManagerGetError, ObjectManagerUpdateError) as err:
+            LOGGER.error(err)
+            failed.append(ResponseFailedMessage(error_message=err.message, status=404, obj=put_data))
+            continue
         except CMDBError as e:
             LOGGER.warning(e)
-            return abort(500)
+            failed.append(ResponseFailedMessage(error_message=str(e.__repr__), status=500, obj=put_data))
+            continue
 
+        # Generate log entry
         try:
-            # generate log
             log_data = {
                 'object_id': obj_id,
                 'version': current_object_render_result.object_information['version'],
@@ -404,7 +413,8 @@ def update_object(public_id: int, request_user: UserModel):
         except (CMDBError, LogManagerInsertError) as err:
             LOGGER.error(err)
 
-    return make_response(update_ack)
+    api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model='Object')
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
@@ -547,18 +557,17 @@ def update_object_state(public_id: int, request_user: UserModel):
         founded_object = object_manager.get_object(public_id=public_id)
     except ObjectManagerGetError as err:
         LOGGER.error(err)
-        return abort(404)
+        return abort(404, err.message)
     if founded_object.active == state:
         return make_response(False, 204)
     try:
         founded_object.active = state
-        update_ack = object_manager.update_object(founded_object, user=request_user,
-                                                  permission=AccessControlPermission.READ)
+        object_manager.update_object(founded_object, user=request_user, permission=AccessControlPermission.READ)
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
         LOGGER.error(err)
-        return abort(500)
+        return abort(500, err.message)
 
         # get current object state
     try:
@@ -592,7 +601,8 @@ def update_object_state(public_id: int, request_user: UserModel):
     except (CMDBError, LogManagerInsertError) as err:
         LOGGER.error(err)
 
-    return make_response(update_ack)
+    api_response = UpdateSingleResponse(result=founded_object.__dict__, url=request.url, model='Object')
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
@@ -609,22 +619,22 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
         GetListResponse: Which includes the json data of multiple objects.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+    manager = ObjectManager(database_manager=current_app.database_manager)
 
     try:
-        type: TypeModel = type_manager.get(public_id=public_id)
-        objects: List[CmdbObject] = object_manager.get_objects_by(type_id=public_id)
+        type_instance: TypeModel = type_manager.get(public_id=public_id)
+        objects: List[CmdbObject] = manager.iterate({'type_id': public_id}, limit=0, skip=0,
+                                                    sort='public_id', order=1, user=request_user).results
     except ManagerGetError as err:
         return abort(400, err.message)
-    type_fields = sorted([field.get('name') for field in type.fields])
-    unstructured_objects: List[CmdbObject] = []
+    type_fields = sorted([field.get('name') for field in type_instance.fields])
+    unstructured_objects: List[dict] = []
     for object_ in objects:
         object_fields = [field.get('name') for field in object_.fields]
         if sorted(object_fields) != type_fields:
-            unstructured_objects.append(object_)
+            unstructured_objects.append(object_.__dict__)
 
-    api_response = GetListResponse([un_object.__dict__ for un_object in unstructured_objects], url=request.url,
-                                   model='Object', body=request.method == 'HEAD')
+    api_response = GetListResponse(unstructured_objects, url=request.url, model='Object', body=request.method == 'HEAD')
     return api_response.make_response()
 
 
@@ -643,7 +653,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+    manager = ObjectManager(database_manager=current_app.database_manager)
 
     try:
         update_type_instance = type_manager.get(public_id)
@@ -663,8 +673,8 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                         incorrect.append(field["name"])
             removed_type_fields = [item for item in incorrect if not item in correct]
             for field in removed_type_fields:
-                object_manager.remove_object_fields(filter_query={'public_id': obj.public_id},
-                                                    update={'$pull': {'fields': {"name": field}}})
+                manager.update_many(query={'public_id': obj.public_id},
+                                    update={'$pull': {'fields': {"name": field}}})
 
         objects_by_type = object_manager.get_objects_by_type(type_id=public_id)
         for obj in objects_by_type:
@@ -675,9 +685,9 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                     continue
                 if "value" in t_field:
                     value = t_field["value"]
-                object_manager.update_object_fields(filter={'public_id': obj.public_id},
-                                                    update={
-                                                        '$addToSet': {'fields': {"name": name, "value": value}}})
+
+                manager.update_many(query={'public_id': obj.public_id},
+                                    update={'$addToSet': {'fields': {"name": name, "value": value}}})
 
     except ManagerUpdateError as err:
         return abort(400, err.message)

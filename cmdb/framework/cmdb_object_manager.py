@@ -35,12 +35,11 @@ from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import WrongInputFormatError, \
-    ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
+from cmdb.framework.cmdb_errors import ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
     ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerInitError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
-from cmdb.search.query import Query, Pipeline
+from cmdb.search.query import Pipeline
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
@@ -88,12 +87,6 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err)
 
-    def search(self, collection, query: Query, **kwargs):
-        try:
-            return self._search(collection=collection, query=query, **kwargs)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
-
     def get_object(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbObject:
         try:
@@ -106,16 +99,6 @@ class CmdbObjectManager(CmdbManagerBase):
         type_ = self._type_manager.get(resource.type_id)
         verify_access(type_, user, permission)
         return resource
-
-    def get_objects(self, public_ids: list):
-        object_list = []
-        for public_id in public_ids:
-            try:
-                object_list.append(self.get_object(public_id))
-            except CMDBError as err:
-                LOGGER.error(err)
-                continue
-        return object_list
 
     def get_objects_by(self, sort='public_id', direction=-1, user: UserModel = None,
                        permission: AccessControlPermission = None, **requirements):
@@ -281,7 +264,7 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
-                      permission: AccessControlPermission = None) -> str:
+                      permission: AccessControlPermission = None):
 
         if isinstance(data, dict):
             update_object = CmdbObject(**data)
@@ -310,14 +293,6 @@ class CmdbObjectManager(CmdbManagerBase):
                                                        "user_id": user.get_public_id(),
                                                        'event': 'update'})
             self._event_queue.put(event)
-        return ack.acknowledged
-
-    def remove_object_fields(self, filter_query: dict, update: dict):
-        ack = self._update_many(CmdbObject.COLLECTION, filter_query, update)
-        return ack
-
-    def update_object_fields(self, filter: dict, update: dict):
-        ack = self._update_many(CmdbObject.COLLECTION, filter, update)
         return ack
 
     def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
@@ -444,30 +419,6 @@ class CmdbObjectManager(CmdbManagerBase):
         return type_list
 
     @deprecated
-    def update_type(self, data: (TypeModel, dict)):
-        if isinstance(data, TypeModel):
-            update_type = data
-        elif isinstance(data, dict):
-            update_type = TypeModel.from_data(data)
-        else:
-            raise WrongInputFormatError(TypeModel, data, "Possible data: dict or TypeModel")
-
-        ack = self._update(
-            collection=TypeModel.COLLECTION,
-            public_id=update_type.get_public_id(),
-            data=TypeModel.to_json(update_type)
-        )
-        if self._event_queue:
-            event = Event("cmdb.core.objecttype.updated", {"id": update_type.get_public_id()})
-            self._event_queue.put(event)
-        return ack
-
-    @deprecated
-    def update_many_types(self, filter: dict, update: dict):
-        ack = self._update_many(TypeModel.COLLECTION, filter, update)
-        return ack
-
-    @deprecated
     def count_types(self):
         return self.dbm.count(collection=TypeModel.COLLECTION)
 
@@ -518,24 +469,3 @@ class CmdbObjectManager(CmdbManagerBase):
             return self._insert(collection=CategoryModel.COLLECTION, data=CategoryModel.to_json(category))
         except Exception as err:
             raise ObjectManagerInsertError(err=err)
-
-    @deprecated
-    def update_category(self, category: CategoryModel):
-        """Update a existing category into the database"""
-        try:
-            return self._update(
-                collection=CategoryModel.COLLECTION,
-                public_id=category.get_public_id(),
-                data=CategoryModel.to_json(category)
-            )
-        except Exception as err:
-            raise ObjectManagerUpdateError(err=err)
-
-    @deprecated
-    def unset_update(self, collection: str, field: str):
-        try:
-            ack = self._unset_update_many(collection, field)
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise ObjectManagerUpdateError(err)
-        return ack.acknowledged

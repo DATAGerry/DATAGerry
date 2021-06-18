@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 from typing import Any
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.utils import Collection, PublicID
+from cmdb.framework.utils import Collection
 
 from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError
 
@@ -100,6 +100,22 @@ class AbstractManagerBase:
         """
         try:
             return self._database_manager.update(collection, filter=filter, data=resource, *args, **kwargs)
+        except Exception as err:
+            raise ManagerUpdateError(err)
+
+    def _update_many(self, collection: Collection, query: dict, update: dict):
+        """
+        update all documents that match the filter from a collection.
+        Args:
+            collection (str): name of the database collection
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            acknowledgment of database
+        """
+        try:
+            return self._database_manager.update_many(collection=collection, query=query, update=update)
         except Exception as err:
             raise ManagerUpdateError(err)
 

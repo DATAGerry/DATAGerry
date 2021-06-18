@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,8 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.framework.managers.category_manager import CategoryManager
 
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.utils.system_reader import SystemSettingsReader
@@ -35,14 +37,11 @@ class Updater(CmdbManagerBase):
 
     def __init__(self):
         scr = SystemConfigReader()
-        self.database_manager = DatabaseManagerMongo(
-            **scr.get_all_values_from_section('Database')
-        )
-        self.object_manager = CmdbObjectManager(
-            database_manager=self.database_manager
-        )
-        self.log_manager = ExportdLogManager(
-            database_manager=self.database_manager)
+        self.database_manager = DatabaseManagerMongo(**scr.get_all_values_from_section('Database'))
+        self.object_manager = CmdbObjectManager(database_manager=self.database_manager)
+        self.category_manager = CategoryManager(database_manager=self.database_manager)
+        self.type_manager = TypeManager(database_manager=self.database_manager)
+        self.log_manager = ExportdLogManager(database_manager=self.database_manager)
         super().__init__(self.database_manager)
 
     @property

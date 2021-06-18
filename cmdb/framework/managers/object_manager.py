@@ -21,11 +21,12 @@ from bson import Regex
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
+from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError
+from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
@@ -175,6 +176,38 @@ class ObjectManager(ManagerBase):
         iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
+
+    def update(self, public_id: Union[PublicID, int], data: dict, user: UserModel = None,
+               permission: AccessControlPermission = None):
+        """
+        Update a existing type in the system.
+        Args:
+            public_id (int): PublicID of the type in the system.
+            data: New object data
+            user: Request user
+            permission: ACL permission
+
+        Notes:
+            If a CmdbObject instance was passed as data argument, \
+            it will be auto converted via the model `to_json` method.
+        """
+        pass
+
+    def update_many(self, query: dict, update: dict):
+        """
+        update all documents that match the filter from a collection.
+        Args:
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            acknowledgment of database
+        """
+        try:
+            update_result = self._update_many(self.collection, query=query, update=update)
+        except (ManagerUpdateError, AccessDeniedError) as err:
+            raise err
+        return update_result
 
     def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
                    user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
