@@ -65,6 +65,45 @@ class OperationType(Enum):
     DELETE = 'DELETE'
 
 
+class ResponseMessage:
+    """Simple class wrapper for json encoding"""
+
+    def __init__(self, obj: dict = None):
+        self.obj = obj
+
+
+class ResponseSuccessMessage(ResponseMessage):
+    """Message wrapper for successfully objects"""
+
+    def __init__(self, public_id: int, status: int, obj: dict = None):
+        """Init message
+        Args:
+            status: the given status code
+            public_id: ID of the new object
+            obj (optional): cmdb object instance
+        """
+        self.status = status
+        self.public_id = public_id
+        super(ResponseSuccessMessage, self).__init__(obj=obj)
+
+
+class ResponseFailedMessage(ResponseMessage):
+    """Message wrapper for failed objects"""
+
+    def __init__(self, error_message: str, status: int, public_id: int = None, obj: dict = None):
+        """Init message
+        Args:
+            status: the given status code of exceptions
+            error_message: reason why it failed - exception error or something
+            public_id (optional): failed public_id
+            obj (optional): failed dict
+        """
+        self.status = status
+        self.public_id = public_id
+        self.error_message = error_message
+        super(ResponseFailedMessage, self).__init__(obj=obj)
+
+
 class BaseAPIResponse:
     """Basic `abstract` response class"""
     __slots__ = 'url', 'operation_type', 'time', 'model', 'body'
@@ -294,18 +333,20 @@ class UpdateSingleResponse(BaseAPIResponse):
     API Response for update call of a single resource.
     """
 
-    __slots__ = 'result'
+    __slots__ = 'result', 'failed'
 
-    def __init__(self, result: dict, url: str = None, model: Model = None):
+    def __init__(self, result: dict, failed: ResponseFailedMessage = None, url: str = None, model: Model = None):
         """
         Constructor of UpdateSingleResponse.
 
         Args:
             result: Updated resource.
+            failed: Failed data update
             url: Requested url.
             model: Data model of updated resource.
         """
         self.result: dict = result
+        self.failed: ResponseFailedMessage = failed
         super(UpdateSingleResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
@@ -328,7 +369,8 @@ class UpdateSingleResponse(BaseAPIResponse):
         Get the update instance as dict.
         """
         return {**{
-            'result': self.result
+            'result': self.result,
+            'failed': self.failed,
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
 
 
@@ -337,18 +379,21 @@ class UpdateMultiResponse(BaseAPIResponse):
     API Response for update call of a multiple resources.
     """
 
-    __slots__ = 'results'
+    __slots__ = 'results', 'failed'
 
-    def __init__(self, results: List[dict], url: str = None, model: Model = None):
+    def __init__(self, results: List[dict], failed: List[ResponseFailedMessage] = None,
+                 url: str = None, model: Model = None):
         """
         Constructor of UpdateSingleResponse.
 
         Args:
             results: Updated resources.
+            failed: Failed data update
             url: Requested url.
             model: Data model of updated resource.
         """
         self.results: List[dict] = results
+        self.failed: List[ResponseFailedMessage] = failed or []
         super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
 
     def make_response(self, *args, **kwargs) -> BaseResponse:
@@ -370,7 +415,8 @@ class UpdateMultiResponse(BaseAPIResponse):
         Get the update instance as dict.
         """
         return {**{
-            'results': self.results
+            'results': self.results,
+            'failed': self.failed,
         }, **super(UpdateMultiResponse, self).export(*args, **kwargs)}
 
 

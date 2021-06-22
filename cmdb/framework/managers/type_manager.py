@@ -102,7 +102,7 @@ class TypeManager(ManagerBase):
             return TypeModel.from_data(resource_result)
         raise ManagerGetError(f'Type with ID: {public_id} not found!')
 
-    def insert(self, type: dict) -> PublicID:
+    def insert(self, type: Union[TypeModel, dict]) -> PublicID:
         """
         Insert a single type into the system.
 

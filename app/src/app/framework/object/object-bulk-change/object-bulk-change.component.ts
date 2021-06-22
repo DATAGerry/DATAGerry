@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -28,6 +28,7 @@ import { httpObserveOptions } from '../../../services/api-call.service';
 import { CmdbObject } from '../../models/cmdb-object';
 import { takeUntil } from 'rxjs/operators';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { UserService } from '../../../management/services/user.service';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
@@ -63,7 +64,7 @@ export class ObjectBulkChangeComponent implements OnDestroy {
    */
   public renderResults: Array<RenderResult> = [];
 
-  constructor(private objectService: ObjectService, private typeService: TypeService,
+  constructor(private objectService: ObjectService, private typeService: TypeService, private userServer: UserService,
               private activeRoute: ActivatedRoute, private router: Router, private toastService: ToastService) {
     if (this.router.getCurrentNavigation().extras.state) {
       this.type = this.router.getCurrentNavigation().extras.state.type;
@@ -87,6 +88,7 @@ export class ObjectBulkChangeComponent implements OnDestroy {
     httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
     const patchValue = [];
     const newObjectInstance = new CmdbObject();
+    newObjectInstance.author_id = this.userServer.getCurrentUser().public_id;
     if (this.activeState !== undefined) {
       newObjectInstance.active = this.activeState;
     }

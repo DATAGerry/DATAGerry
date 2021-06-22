@@ -16,6 +16,7 @@
 
 import json
 import logging
+from bson import json_util
 
 from datetime import datetime, timezone
 from flask import current_app, request, abort
@@ -27,6 +28,7 @@ from cmdb.interface.route_utils import login_required, make_response
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.errors import ManagerGetError, ManagerInsertError
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
 
@@ -34,15 +36,12 @@ LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    type_manager = TypeManager(database_manager=current_app.database_manager)
 
 
 @importer_type_blueprint.route('/create/', methods=['POST'])
 @login_required
 def add_type():
-    from bson import json_util
-
-    type_manager = TypeManager(database_manager=current_app.database_manager)
-
     error_collection = {}
     upload = request.form.get('uploadFile')
     new_type_list = json.loads(upload, object_hook=json_util.object_hook)
@@ -51,16 +50,13 @@ def add_type():
             new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
             new_type_data['creation_time'] = datetime.now(timezone.utc)
         except TypeError as e:
-            LOGGER.warning(e)
+            LOGGER.error(e)
             return abort(400)
         try:
             type_instance = TypeModel.from_data(new_type_data)
-        except CMDBError:
-            return abort(400)
-        try:
             type_manager.insert(type_instance)
-        except Exception as ex:
-            error_collection.update({"public_id": type_instance.public_id, "message": ex.message})
+        except (ManagerInsertError, CMDBError) as err:
+            error_collection.update({"public_id": new_type_data['public_id'], "message": err.message})
 
     resp = make_response(error_collection)
     return resp
@@ -69,8 +65,6 @@ def add_type():
 @importer_type_blueprint.route('/update/', methods=['POST'])
 @login_required
 def update_type():
-    from bson import json_util
-
     error_collection = {}
     upload = request.form.get('uploadFile')
     data_dump = json.loads(upload, object_hook=json_util.object_hook)
@@ -80,15 +74,10 @@ def update_type():
         except CMDBError:
             return abort(400)
         try:
-            old_fields = object_manager.get_type(update_type_instance.get_public_id()).get_fields()
-            new_fields = update_type_instance.get_fields()
-
-        except Exception as ex:
-            error_collection.update({"public_id": add_data_dump['public_id'], "message": ex.message})
-        try:
-            object_manager.update_type(update_type_instance)
-        except Exception as ex:
-            error_collection.update({"public_id": update_type_instance.public_id, "message": ex.details})
+            type_manager.get(update_type_instance.public_id)
+            type_manager.update(update_type_instance.public_id, update_type_instance)
+        except (Exception, ManagerGetError) as err:
+            error_collection.update({"public_id": add_data_dump['public_id'], "message": err.message})
 
     resp = make_response(error_collection)
     return resp

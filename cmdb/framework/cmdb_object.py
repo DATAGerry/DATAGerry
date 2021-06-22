@@ -30,19 +30,64 @@ LOGGER = logging.getLogger(__name__)
 
 
 class CmdbObject(CmdbDAO):
-    """The CMDB object is the basic data wrapper for storing and holding the pure objects within the CMDB.
+    """
+    The CMDB object is the basic data wrapper for storing and
+    holding the pure objects within the CMDB.
+
+    Attributes:
+        COLLECTION (Collection):    Name of the database collection.
+        MODEL (Model):              Name of the DAO.
+        DEFAULT_VERSION (str):      The default "starting" version number.
+        SCHEMA (dict):              The validation schema for this DAO.
+        INDEX_KEYS (list):          List of index keys for the database.
+
     """
 
     COLLECTION: Collection = 'framework.objects'
     MODEL: Model = 'Object'
-    REQUIRED_INIT_KEYS = [
-        'type_id',
-        'creation_time',
-        'author_id',
-        'active',
-        'fields',
-        'version'
-    ]
+    DEFAULT_VERSION: str = '1.0.0'
+    REQUIRED_INIT_KEYS = ['type_id', 'creation_time', 'author_id', 'active', 'fields', 'version']
+    SCHEMA: dict = {
+        'public_id': {
+            'type': 'integer'
+        },
+        'type_id': {
+            'type': 'integer'
+        },
+        'status': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'version': {
+            'type': 'string',
+            'default': DEFAULT_VERSION
+        },
+        'author_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'creation_time': {
+            'type': 'dict',
+            'nullable': True,
+            'required': False
+        },
+        'last_edit_time': {
+            'type': 'dict',
+            'nullable': True,
+            'required': False
+        },
+        'active': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'fields': {
+            'type': 'list',
+            'required': True,
+            'default': [],
+        }
+    }
 
     def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, editor_id: int = None,
                  status: int = None, version: str = '1.0.0', **kwargs):
@@ -85,16 +130,33 @@ class CmdbObject(CmdbDAO):
         if last_edit_time and isinstance(last_edit_time, str):
             last_edit_time = parse(last_edit_time, fuzzy=True)
         return cls(
+            public_id=data.get('public_id'),
             type_id=data.get('type_id'),
+            status=data.get('status', False),
             version=data.get('version'),
             creation_time=creation_time,
             author_id=data.get('author_id'),
             last_edit_time=last_edit_time,
             editor_id=data.get('editor_id', None),
             active=data.get('active'),
-            fields=data.get('fields', []),
-            public_id=data.get('public_id')
+            fields=data.get('fields', [])
         )
+
+    @classmethod
+    def to_json(cls, instance: "CmdbObject") -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id': instance.get_public_id(),
+            'type_id': instance.get_type_id(),
+            'status': instance.status,
+            'version': instance.version,
+            'creation_time': instance.creation_time,
+            'author_id': instance.author_id,
+            'last_edit_time': instance.last_edit_time,
+            'editor_id': instance.editor_id,
+            'active': instance.active,
+            'fields': instance.fields,
+        }
 
     def get_type_id(self) -> int:
         """get input_type if of this object
