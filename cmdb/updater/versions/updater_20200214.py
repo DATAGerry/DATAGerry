@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2019 - 2021 NETHINKS GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ import time
 import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
+from cmdb.framework.managers.object_manager import ObjectManager
 
 LOGGER = logging.getLogger(__name__)
 
@@ -61,6 +62,7 @@ class Update20200214(Updater):
     def worker(self, type):
         try:
             from datetime import datetime
+            manager = ObjectManager(database_manager=self.database_manager)  # TODO: Replace when object api is updated
             object_list = self.object_manager.get_objects_by_type(type.public_id)
             matches = type.matches
 
@@ -74,7 +76,7 @@ class Update20200214(Updater):
                                 field['value'] = value
                             else:
                                 field['value'] = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
-                self.object_manager.update_object(obj, None)
+                manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             LOGGER.error(err.message)
 

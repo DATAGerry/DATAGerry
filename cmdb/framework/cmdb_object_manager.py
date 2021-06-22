@@ -25,7 +25,6 @@ import json
 
 from cmdb.database.utils import object_hook
 from bson import json_util
-from datetime import datetime, timezone
 from typing import List
 from queue import Queue
 
@@ -36,7 +35,7 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerUpdateError, ObjectManagerInitError
+    ObjectManagerInsertError, ObjectManagerInitError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Pipeline
@@ -261,38 +260,6 @@ class CmdbObjectManager(CmdbManagerBase):
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as e:
             raise ObjectInsertError(e)
-        return ack
-
-    def update_object(self, data: (dict, CmdbObject), user: UserModel = None,
-                      permission: AccessControlPermission = None):
-
-        if isinstance(data, dict):
-            update_object = CmdbObject(**data)
-        elif isinstance(data, CmdbObject):
-            update_object = data
-        else:
-            raise ObjectManagerUpdateError('Wrong CmdbObject init format - expecting CmdbObject or dict')
-        update_object.last_edit_time = datetime.now(timezone.utc)
-        if user:
-            update_object.editor_id = user.public_id
-
-        type_ = self._type_manager.get(update_object.type_id)
-        if not type_.active:
-            raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
-        verify_access(type_, user, permission)
-
-        ack = self._update(
-            collection=CmdbObject.COLLECTION,
-            public_id=update_object.get_public_id(),
-            data=update_object.__dict__
-        )
-
-        if self._event_queue and user:
-            event = Event("cmdb.core.object.updated", {"id": update_object.get_public_id(),
-                                                       "type_id": update_object.get_type_id(),
-                                                       "user_id": user.get_public_id(),
-                                                       'event': 'update'})
-            self._event_queue.put(event)
         return ack
 
     def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
