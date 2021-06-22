@@ -233,61 +233,61 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 @objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_object(request_user: UserModel):
-    from bson import json_util
     add_data_dump = json.dumps(request.json)
-
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        if not 'public_id' in new_object_data:
+
+        if 'public_id' not in new_object_data:
             new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
-        if not 'active' in new_object_data:
+        else:
+            try:
+                object_manager.get_object(public_id=new_object_data['public_id'])
+            except ObjectManagerGetError:
+                pass
+            else:
+                return abort(400, f'Type with PublicID {new_object_data["public_id"]} already exists.')
+
+        if 'active' not in new_object_data:
             new_object_data['active'] = True
         new_object_data['creation_time'] = datetime.now(timezone.utc)
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
-    except TypeError as e:
-        LOGGER.warning(e)
-        abort(400)
 
-    try:
         new_object_id = object_manager.insert_object(new_object_data, user=request_user,
                                                      permission=AccessControlPermission.CREATE)
-    except ManagerGetError as err:
-        return abort(404, err.message)
-    except AccessDeniedError as err:
-        return abort(403, err.message)
-    except ObjectInsertError as err:
-        LOGGER.error(err)
-        return abort(400, str(err))
-
-    # get current object state
-    try:
+        # get current object state
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
         current_object = object_manager.get_object(new_object_id)
         current_object_render_result = CmdbRender(object_instance=current_object,
                                                   object_manager=object_manager,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
-    except ObjectManagerGetError as err:
+
+        # Generate new insert log
+        try:
+            log_params = {
+                'object_id': new_object_id,
+                'user_id': request_user.get_public_id(),
+                'user_name': request_user.get_display_name(),
+                'comment': 'Object was created',
+                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+                'version': current_object.version
+            }
+            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        except LogManagerInsertError as err:
+            LOGGER.error(err)
+
+    except (TypeError, ObjectInsertError) as err:
         LOGGER.error(err)
-        return abort(404)
+        return abort(400, str(err))
+    except (ManagerGetError, ObjectManagerGetError) as err:
+        LOGGER.error(err)
+        return abort(404, err.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
     except RenderError as err:
         LOGGER.error(err)
         return abort(500)
-
-    # Generate new insert log
-    try:
-        log_params = {
-            'object_id': new_object_id,
-            'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_display_name(),
-            'comment': 'Object was created',
-            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-            'version': current_object.version
-        }
-        log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
-    except LogManagerInsertError as err:
-        LOGGER.error(err)
 
     resp = make_response(new_object_id)
     return resp
