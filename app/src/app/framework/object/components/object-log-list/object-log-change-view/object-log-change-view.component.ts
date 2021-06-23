@@ -40,7 +40,7 @@ export class ObjectLogChangeViewComponent {
    */
   @Input()
   public set changes(value: any) {
-    if (!Array.isArray(value)) {
+    if (value && !Array.isArray(value)) {
       const before = value.old;
       const after = value.new;
       if (isArray(before) && isArray(after)) {
