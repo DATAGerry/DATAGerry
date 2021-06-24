@@ -26,7 +26,11 @@ import { RenderResult } from '../models/cmdb-render';
 import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetListResponse, APIGetMultiResponse } from '../../services/models/api-response';
+import {
+  APIGetListResponse,
+  APIGetMultiResponse,
+  APIUpdateMultiResponse,
+} from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { FormControl } from '@angular/forms';
 
@@ -195,7 +199,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   public putObject(publicID: number, objectInstance: CmdbObject,
                    httpOptions = httpObserveOptions): Observable<any> {
-    return this.api.callPut<CmdbObject>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions);
+    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
+      map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
+        return apiResponse.body;
+      })
+    );
   }
 
   public changeState(publicID: number, status: boolean) {

@@ -1,0 +1,28 @@
+
+
+<div class="text-center align-items-center" *ngIf="done && failedChanges?.length === 0; else exceptions">
+  <div class="card-body">
+    <h1 class="display-1 text-success"><fa-icon icon="check-circle"></fa-icon></h1>
+  </div>
+  <h3>Bulk changes was successfully.</h3>
+  <div class="card-body">
+    <ng-container *ngTemplateOutlet="changesState"></ng-container>
+  </div>
+</div>
+
+<ng-template #exceptions>
+  <div class="card-body">
+    <ng-container *ngTemplateOutlet="changesState"></ng-container>
+    <h3>Failed Changes <fa-icon class="text-danger" icon="exclamation-triangle"></fa-icon></h3>
+    <cmdb-object-bulk-change-failed [failedChanges]="failedChanges" ></cmdb-object-bulk-change-failed>
+  </div>
+</ng-template>
+
+<ng-template #changesState>
+    <h6 class="card-subtitle mb-2">
+      Number of objects successfully changed: {{successfulChanges?.length}}
+      from {{successfulChanges?.length + failedChanges?.length}}
+    </h6>
+    <hr/>
+</ng-template>
+

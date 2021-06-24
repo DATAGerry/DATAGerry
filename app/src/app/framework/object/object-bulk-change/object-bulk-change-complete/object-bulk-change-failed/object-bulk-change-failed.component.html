@@ -1,0 +1,13 @@
+<cmdb-table [items]="failedChanges" [columns]="columns" [sortable]="false"
+            [id]="'failed-bulk-changes-table'" [stateEnabled]="false" [searchEnabled]="false"
+            [totalItems]="failedChanges?.length" [selectEnabled]="false" [loading]="false"
+            [paginationEnabled]="true" [pageSizeEnabled]="true" [toggleable]="false">
+</cmdb-table>
+
+<ng-template #errorTemplate let-data="data">
+  {{data}}
+</ng-template>
+
+<ng-template #objectTemplate let-data="data">
+  {{data | json}}
+</ng-template>

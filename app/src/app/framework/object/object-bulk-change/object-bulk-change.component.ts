@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { FormGroup } from '@angular/forms';
 import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
@@ -29,6 +29,9 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { takeUntil } from 'rxjs/operators';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { UserService } from '../../../management/services/user.service';
+import { ProgressSpinnerService } from '../../../layout/progress/progress-spinner.service';
+import { WizardComponent } from 'angular-archwizard';
+import { APIUpdateMultiResponse } from '../../../services/models/api-response';
 
 @Component({
   selector: 'cmdb-object-bulk-change',
@@ -36,6 +39,11 @@ import { UserService } from '../../../management/services/user.service';
   styleUrls: ['./object-bulk-change.component.scss']
 })
 export class ObjectBulkChangeComponent implements OnDestroy {
+
+  /**
+   * The aw-wizard component defines the root component of a wizard.
+   */
+  @ViewChild('wizard', { static: false }) public wizard: WizardComponent;
 
   /**
    * Component un subscriber.
@@ -64,11 +72,25 @@ export class ObjectBulkChangeComponent implements OnDestroy {
    */
   public renderResults: Array<RenderResult> = [];
 
+  /**
+   * APIUpdateMultiResponse
+   */
+  public apiResponse: APIUpdateMultiResponse;
+
+  /**
+   * HTTP Options for PUT request
+   * @private
+   */
+  private httpOptions;
+
   constructor(private objectService: ObjectService, private typeService: TypeService, private userServer: UserService,
-              private activeRoute: ActivatedRoute, private router: Router, private toastService: ToastService) {
+              private activeRoute: ActivatedRoute, private router: Router, private toastService: ToastService,
+              private spinner: ProgressSpinnerService, ) {
     if (this.router.getCurrentNavigation().extras.state) {
       this.type = this.router.getCurrentNavigation().extras.state.type;
       this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
+      this.httpOptions = Object.assign({}, httpObserveOptions);
+      this.httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
     }
   }
 
@@ -83,29 +105,41 @@ export class ObjectBulkChangeComponent implements OnDestroy {
    * Save a references object to the database.
    */
   public saveObject() {
+    this.spinner.show();
+
     const changes = this.changeForm.getRawValue();
-    const httpOptions = Object.assign({}, httpObserveOptions);
-    httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
-    const patchValue = [];
     const newObjectInstance = new CmdbObject();
-    newObjectInstance.author_id = this.userServer.getCurrentUser().public_id;
+
     if (this.activeState !== undefined) {
       newObjectInstance.active = this.activeState;
     }
+
+    newObjectInstance.author_id = this.userServer.getCurrentUser().public_id;
     newObjectInstance.type_id = this.type.public_id;
     newObjectInstance.fields = [];
+
     Object.keys(changes).forEach((key: string) => {
-      patchValue.push({
+      newObjectInstance.fields.push({
         name: key,
         value: changes[key]
       });
     });
-    newObjectInstance.fields = patchValue;
-    this.objectService.putObject(0, newObjectInstance, httpOptions).pipe(takeUntil(this.subscriber))
-      .subscribe((res: boolean) => {
-        this.toastService.success(`Bulk updated objects of type ${this.type.label}`);
-        this.router.navigate(['framework', 'object', 'type', this.type.public_id]);
+
+    this.objectService.putObject(0, newObjectInstance, this.httpOptions)
+      .pipe(takeUntil(this.subscriber)).subscribe((response: APIUpdateMultiResponse) => {
+        this.apiResponse = response;
+        this.goToNextStepIndex(2);
+      }, () => {
+        this.spinner.hide();
+      }, () => {
+        this.spinner.hide();
       });
+  }
+
+  private goToNextStepIndex(index: number) {
+    if (this.wizard ) {
+      this.wizard.goToStep(index);
+    }
   }
 
   public ngOnDestroy(): void {
