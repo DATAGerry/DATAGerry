@@ -103,6 +103,14 @@ class ResponseFailedMessage(ResponseMessage):
         self.error_message = error_message
         super(ResponseFailedMessage, self).__init__(obj=obj)
 
+    def to_dict(self) -> dict:
+        return {
+            'status': self.status,
+            'public_id': self.public_id,
+            'error_message': self.error_message,
+            'obj': self.obj,
+        }
+
 
 class BaseAPIResponse:
     """Basic `abstract` response class"""
@@ -370,7 +378,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         """
         return {**{
             'result': self.result,
-            'failed': self.failed,
+            'failed': self.failed.to_dict(),
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
 
 

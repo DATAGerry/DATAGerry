@@ -343,9 +343,11 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 
             except (KeyError, IndexError, ValueError):
                 update_comment = ''
-            except TypeError as e:
-                LOGGER.error(e)
-                return abort(400)
+            except TypeError as err:
+                LOGGER.error(f'Error: {str(err.args)} Object: {json.dumps(data, default=default)}')
+                failed.append(ResponseFailedMessage(error_message=str(err.args), status=400,
+                                                    public_id=obj_id, obj=data).to_dict())
+                continue
 
             # update edit time
             data['last_edit_time'] = datetime.now(timezone.utc)
@@ -389,15 +391,18 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             return abort(403)
         except ObjectManagerGetError as err:
             LOGGER.error(err)
-            failed.append(ResponseFailedMessage(error_message=err.message, status=400, public_id=obj_id))
+            failed.append(ResponseFailedMessage(error_message=err.message, status=400,
+                                                public_id=obj_id, obj=data).to_dict())
             continue
         except (ManagerGetError, ObjectManagerUpdateError) as err:
             LOGGER.error(err)
-            failed.append(ResponseFailedMessage(error_message=err.message, status=404, obj=data))
+            failed.append(ResponseFailedMessage(error_message=err.message, status=404,
+                                                public_id=obj_id, obj=data).to_dict())
             continue
         except (CMDBError, RenderError) as e:
             LOGGER.warning(e)
-            failed.append(ResponseFailedMessage(error_message=str(e.__repr__), status=500, obj=data))
+            failed.append(ResponseFailedMessage(error_message=str(e.__repr__), status=500,
+                                                public_id=obj_id, obj=data).to_dict())
             continue
 
     api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model=CmdbObject.MODEL)
