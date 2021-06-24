@@ -378,7 +378,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         """
         return {**{
             'result': self.result,
-            'failed': self.failed.to_dict(),
+            'failed': self.failed.to_dict() if self.failed else None,
         }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
 
 
