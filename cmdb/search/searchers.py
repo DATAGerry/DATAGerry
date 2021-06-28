@@ -130,7 +130,7 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
         self.add_pipe(
             self.project_({
                 '_id': 1, 'public_id': 1, 'type_id': 1, 'active': 1, 'author_id': 1, 'creation_time': 1, 'version': 1,
-                'last_edit_time': 1, 'fields': {'$setUnion': ['$fields', '$simple']}, 'relatesTo': 1,
+                'last_edit_time': 1, 'fields': {'$concatArrays': ['$fields', '$simple']}, 'relatesTo': 1,
             })
         )
         return self.pipeline
