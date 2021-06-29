@@ -22,7 +22,7 @@ import logging
 from typing import List, Union
 
 from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, TypeReferenceLineFillError, FieldNotFoundError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.security.acl.errors import AccessDeniedError
@@ -319,8 +319,15 @@ class CmdbRender:
 
                 _summary_fields = []
                 _nested_summaries = current_field.get('summaries', [])
-                _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 _nested_summary_line = ref_type.get_nested_summary_line(_nested_summaries)
+                _nested_summary_fields = _nested_summaries
+
+                try:
+                    _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
+                except FieldNotFoundError as e:
+                    LOGGER.warning(f'Type #{self.type_instance.public_id} '
+                                   f'Summary setting refers to non-existent field(s).'
+                                   f'{e.message}')
 
                 reference.type_id = ref_type.get_public_id()
                 reference.object_id = int(current_field['value'])
@@ -349,10 +356,10 @@ class CmdbRender:
                 except (TypeReferenceLineFillError, Exception):
                     pass
 
-            except ObjectManagerGetError:
+            except ObjectManagerGetError as err:
+                LOGGER.error(err.message)
+            finally:
                 return TypeReference.to_json(reference)
-
-        return TypeReference.to_json(reference)
 
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
