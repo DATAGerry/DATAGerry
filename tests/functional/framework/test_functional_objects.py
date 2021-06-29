@@ -66,6 +66,25 @@ def collection(connector, database_name):
 @fixture(scope='module', autouse=True)
 def setup(request, collection, example_type):
     collection.insert_one(document=TypeModel.to_json(example_type))
+    dummy_type = example_type
+    dummy_type.public_id = 2
+    dummy_type.fields = []
+    dummy_type.fields.append({
+                             "type": "ref",
+                             "name": "test-field",
+                             "label": "simple reference field",
+                             "ref_types": [1],
+                             "summaries": [{
+                                 "type_id": 1,
+                                 "line": "ReferenceTO: {}",
+                                 "label": "ReferenceTO",
+                                 "fields": ["test-field"],
+                                 "icon": "fa fa-cube",
+                                 "prefix": False
+                             }
+                             ],
+                             "value": ""})
+    collection.insert_one(document=TypeModel.to_json(dummy_type))
 
     def drop_collection():
         collection.drop()
@@ -85,6 +104,11 @@ class TestFrameworkObjects:
         assert default_response.status_code == HTTPStatus.OK
 
         example_object.public_id = 2
+        example_object.type_id = 2
+        example_object.fields = [{
+            "name": "test-field",
+            "value": 1,
+        }]
 
         default_response = rest_api.post(f'{self.ROUTE_URL}/', json=CmdbObject.to_json(example_object))
         assert default_response.status_code == HTTPStatus.OK
