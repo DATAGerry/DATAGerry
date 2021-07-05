@@ -293,11 +293,39 @@ class CmdbRender:
                     if reference_object:
                         try:
                             ref_section_field = self.__merge_field_content_section(ref_section_field, reference_object)
+                            reference_section_fields = self.__merge_reference_section_fields(ref_section_field,
+                                                                                             ref_type,
+                                                                                             [])
+                            if len(reference_section_fields) > 0:
+                                ref_section_field.get('references', {'fields': []})['fields'] = reference_section_fields
+
                         except (FileNotFoundError, ValueError, IndexError, ObjectManagerGetError):
                             continue
                     ref_field['references']['fields'].append(ref_section_field)
                 field_map.append(ref_field)
         return field_map
+
+    def __merge_reference_section_fields(self, ref_section_field, ref_type, ref_section_fields):
+        if ref_section_field and ref_section_field.get('type', '') == 'ref-section-field':
+            try:
+                instance = self.object_manager.get_object(ref_section_field.get('value'))
+                reference_type: TypeModel = self.type_manager.get(instance.get_type_id())
+                render = CmdbRender(object_instance=instance, type_instance=ref_type,
+                                    render_user=self.render_user,
+                                    object_manager=self.object_manager, ref_render=True)
+                fields = render.result().fields
+                res = next((x for x in fields if x['name'] == ref_section_field.get('name', '')), None)
+                if res and ref_section_field.get('type', '') == 'ref-section-field':
+                    self.__merge_reference_section_fields(res, reference_type, ref_section_fields)
+                    for field in res['references']['fields']:
+                        merged_field_content = self.__merge_field_content_section(field, instance)
+                        if merged_field_content and merged_field_content.get('type', '') == 'ref-section-field':
+                            self.__merge_reference_section_fields(merged_field_content, reference_type, ref_section_fields)
+                        else:
+                            ref_section_fields.append(merged_field_content)
+            except (Exception, TypeError, ObjectManagerGetError) as err:
+                LOGGER.info(err)
+        return ref_section_fields
 
     def __merge_references(self, current_field):
 
