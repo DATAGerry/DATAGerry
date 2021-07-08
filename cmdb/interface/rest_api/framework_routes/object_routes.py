@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import copy
 import logging
 from typing import List
 from bson import json_util
@@ -310,6 +311,9 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     failed = []
 
     for obj_id in object_ids:
+        # deep copy
+        active_state = request.get_json().get('active', None)
+        new_data = copy.deepcopy(data)
         try:
             current_object_instance = manager.get(obj_id, user=request_user, permission=AccessControlPermission.READ)
             current_type_instance = type_manager.get(current_object_instance.get_type_id())
@@ -318,16 +322,15 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                                                       type_instance=current_type_instance,
                                                       render_user=request_user).result()
             update_comment = ''
-
             try:
                 # check for comment
-                data['public_id'] = obj_id
-                data['creation_time'] = current_object_instance.creation_time
-                data['author_id'] = current_object_instance.author_id
-                data['active'] = data['active'] if 'active' not in data else current_object_instance.active
+                new_data['public_id'] = obj_id
+                new_data['creation_time'] = current_object_instance.creation_time
+                new_data['author_id'] = current_object_instance.author_id
+                new_data['active'] = active_state if active_state else current_object_instance.active
 
                 if 'version' not in data:
-                    data['version'] = current_object_instance.version
+                    new_data['version'] = current_object_instance.version
 
                 old_fields = list(map(lambda x: {k: v for k, v in x.items() if k in ['name', 'value']},
                                       current_object_render_result.fields))
@@ -336,40 +339,40 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                     for old in old_fields:
                         if item['name'] == old['name']:
                             old['value'] = item['value']
-                data['fields'] = old_fields
+                new_data['fields'] = old_fields
 
                 update_comment = data['comment']
-                del data['comment']
+                del new_data['comment']
 
             except (KeyError, IndexError, ValueError):
                 update_comment = ''
             except TypeError as err:
-                LOGGER.error(f'Error: {str(err.args)} Object: {json.dumps(data, default=default)}')
+                LOGGER.error(f'Error: {str(err.args)} Object: {json.dumps(new_data, default=default)}')
                 failed.append(ResponseFailedMessage(error_message=str(err.args), status=400,
-                                                    public_id=obj_id, obj=data).to_dict())
+                                                    public_id=obj_id, obj=new_data).to_dict())
                 continue
 
             # update edit time
-            data['last_edit_time'] = datetime.now(timezone.utc)
-            data['editor_id'] = request_user.public_id
+            new_data['last_edit_time'] = datetime.now(timezone.utc)
+            new_data['editor_id'] = request_user.public_id
 
-            update_object_instance = CmdbObject(**json.loads(json.dumps(data, default=json_util.default),
+            update_object_instance = CmdbObject(**json.loads(json.dumps(new_data, default=json_util.default),
                                                              object_hook=object_hook))
 
             # calc version
             changes = current_object_instance / update_object_instance
 
             if len(changes['new']) == 1:
-                data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+                new_data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
             elif len(changes['new']) == len(update_object_instance.fields):
-                data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
+                new_data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_MAJOR)
             elif len(changes['new']) > (len(update_object_instance.fields) / 2):
-                data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
+                new_data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_MINOR)
             else:
-                data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
+                new_data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
 
-            manager.update(obj_id, data, request_user, AccessControlPermission.UPDATE)
-            results.append(data)
+            manager.update(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
+            results.append(new_data)
 
             # Generate log entry
             try:
@@ -392,17 +395,17 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         except ObjectManagerGetError as err:
             LOGGER.error(err)
             failed.append(ResponseFailedMessage(error_message=err.message, status=400,
-                                                public_id=obj_id, obj=data).to_dict())
+                                                public_id=obj_id, obj=new_data).to_dict())
             continue
         except (ManagerGetError, ObjectManagerUpdateError) as err:
             LOGGER.error(err)
             failed.append(ResponseFailedMessage(error_message=err.message, status=404,
-                                                public_id=obj_id, obj=data).to_dict())
+                                                public_id=obj_id, obj=new_data).to_dict())
             continue
         except (CMDBError, RenderError) as e:
             LOGGER.warning(e)
             failed.append(ResponseFailedMessage(error_message=str(e.__repr__), status=500,
-                                                public_id=obj_id, obj=data).to_dict())
+                                                public_id=obj_id, obj=new_data).to_dict())
             continue
 
     api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model=CmdbObject.MODEL)
