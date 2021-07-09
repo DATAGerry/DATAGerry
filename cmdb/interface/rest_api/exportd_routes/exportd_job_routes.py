@@ -253,6 +253,7 @@ def get_run_job_manual(public_id, request_user: UserModel):
      run job manual
     """
     try:
+        exportd_manager.get_job(public_id=public_id)
         ack = exportd_manager.run_job_manual(public_id, request_user)
     except Exception as err:
         LOGGER.error(err)
