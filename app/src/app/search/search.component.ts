@@ -197,25 +197,15 @@ export class SearchComponent implements OnInit, OnDestroy {
   public onChangePage(event): void {
     this.currentPage = event;
     this.skip = (this.currentPage - 1) * this.limit;
-    this.setPageParam(this.currentPage);
     this.onSearch();
-
-  }
-
-  private setPageParam(page): void {
-    this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams: { page },
-        queryParamsHandling: 'merge'
-      }).then();
   }
 
   public reSearch(value: any) {
     this.queryParameters = JSON.stringify(value.query);
     this.initSearch = true;
     this.initFilter = value.rebuild;
+    this.currentPage = 1;
+    this.skip = 0;
     this.onSearch();
   }
 
