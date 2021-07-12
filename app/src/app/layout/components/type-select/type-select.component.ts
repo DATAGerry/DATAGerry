@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { takeUntil } from 'rxjs/operators';
@@ -80,6 +80,11 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
       this.formGroup.addControl('type_id', this.typeControl);
     }
   }
+
+  /**
+   * Search function enabled
+   */
+  @Input() public searchable: boolean = true;
 
   /**
    * Virtual scroll enabled
@@ -211,6 +216,33 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
         this.maxPages = apiResponse.pager.total_pages;
       }, (error) => this.toast.error(error)
     ).add(() => this.loading = false);
+  }
+
+  /**
+   * Allow to filter by custom search function
+   * @param value search term as string
+   * @param item CmdbType object
+   */
+  public searchRef(value: string, item: CmdbType) {
+    const term: string = value.toLocaleLowerCase();
+    const line: string = item.label + item.name + item.public_id;
+    return line.toLocaleLowerCase().indexOf(term) > -1 || line.toLocaleLowerCase().includes(term);
+  }
+
+  /**
+   * Fired while typing search term. Outputs search term with filtered items
+   * @param term search term as string
+   * @param items RenderResult objects
+   */
+  public onCustomSearch(term: string, items: CmdbType[]) {
+    for (const obj of this.types) {
+      if (this.searchRef(term, obj)) {
+        items = [...[obj]];
+      } else {
+        this.onScrollEnd();
+      }
+    }
+    return items;
   }
 
   /**
