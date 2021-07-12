@@ -33,7 +33,7 @@ import { ReplaySubject } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormControl, FormGroup } from '@angular/forms';
-import { debounceTime, takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
 import { SearchService } from '../search.service';
@@ -74,8 +74,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   private subscriber = new ReplaySubject<void>();
 
   constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
-              private typeService: TypeService, private categoryService: CategoryService, private objectService: ObjectService) {
-
+              private typeService: TypeService, private categoryService: CategoryService) {
     this.searchBarForm = new FormGroup({
       inputControl: new FormControl('')
     });
@@ -83,7 +82,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.syncQuerySearchParameters();
-    this.inputControl.valueChanges.pipe(debounceTime(300)).subscribe((changes: string) => {
+    this.inputControl.valueChanges.pipe(debounceTime(500), distinctUntilChanged()).subscribe((changes: string) => {
       if (changes.trim() !== '') {
         if (ValidatorService.getRegex().test(changes)) {
           this.searchService.getEstimateValueResults(changes).pipe(takeUntil(this.subscriber))
