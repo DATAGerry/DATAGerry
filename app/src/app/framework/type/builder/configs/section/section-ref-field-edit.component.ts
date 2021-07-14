@@ -26,6 +26,7 @@ import { APIGetMultiResponse } from '../../../../../services/models/api-response
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import {ToastService} from "../../../../../layout/toast/toast.service";
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -109,7 +110,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public selectDisabled: boolean = false;
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private toast: ToastService) {
     super();
   }
 
@@ -146,10 +147,11 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.loading = true;
     this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: CmdbType) => {
-        // this.types = [...this.types, ...[apiResponse as CmdbType]];
         this.typeSections = apiResponse.render_meta.sections;
         this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
-      }).add(() => this.loading = false);
+      }, error =>
+        this.toast.error(error.error.message, {headerName: 'Field error: ' + this.nameControl.value}))
+      .add(() => this.loading = false);
   }
 
   public triggerAPICall(): void {
