@@ -23,6 +23,7 @@ import { CmdbMode } from '../../../modes.enum';
 import { CmdbType, CmdbTypeSection } from '../../../models/cmdb-type';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+import { ToastService } from '../../../../layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-reference-section',
@@ -42,7 +43,7 @@ export class ReferenceSectionComponent extends BaseSectionComponent implements O
     }
   }
 
-  constructor(private typeService: TypeService) {
+  constructor(private typeService: TypeService, private toast: ToastService) {
     super();
   }
 
@@ -51,6 +52,8 @@ export class ReferenceSectionComponent extends BaseSectionComponent implements O
       this.typeService.getType(this.section.reference.type_id).pipe(takeUntil(this.subscriber))
          .subscribe((apiResponse: CmdbType) => {
            this.referencedType = apiResponse;
+         }, error => {
+           this.toast.error(error.error.message, {headerName: 'Error when setting the reference'});
          });
     }
   }

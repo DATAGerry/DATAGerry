@@ -194,7 +194,8 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   public summaryFieldFilter(id: number) {
-    return id ? this.typeList.find(s => s.public_id === id).fields : [];
+    const found = this.typeList.find(s => s.public_id === id);
+    return id ? found ? found.fields : [] : [];
   }
 
   public changeSummaryOption(type: CmdbType) {
