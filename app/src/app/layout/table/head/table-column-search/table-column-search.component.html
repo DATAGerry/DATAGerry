@@ -1,0 +1,6 @@
+<ng-container *ngIf="form" class="column-search-input-field">
+  <form *ngIf="column?.name != 'actions'" [formGroup]="form" class="form-inline">
+    <input class="form-control form-control-sm" placeholder="" formControlName="{{column.name}}"
+           [type]="column?.type !== 'checkbox' ? 'text' : column?.type">
+  </form>
+</ng-container>

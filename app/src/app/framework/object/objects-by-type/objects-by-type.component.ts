@@ -16,11 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {
-  Component,
-  OnDestroy,
-  OnInit, TemplateRef, ViewChild,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute, Data, Router } from '@angular/router';
@@ -45,6 +41,7 @@ import {
   UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 import { SupportedExporterExtension } from '../../../export/export-objects/model/supported-exporter-extension';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -205,7 +202,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   private setColumns(type: CmdbType): void {
-
     const fields = type.fields || [];
     const summaryFields = type.render_meta.summary.fields || [];
 
@@ -216,6 +212,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         data: 'object_information.active',
         searchable: false,
         sortable: false,
+        type: 'checkbox',
         template: this.activeTemplate,
         cssClasses: ['text-center'],
         style: { width: '6rem' }
@@ -224,6 +221,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         display: 'Public ID',
         name: 'public_id',
         data: 'object_information.object_id',
+        type: 'text',
         searchable: true,
         sortable: true
       }
@@ -234,6 +232,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         display: field.label,
         name: `fields.${ field.name }`,
         data: field.name,
+        type: field.type,
         sortable: true,
         searchable: false,
         hidden: !summaryFields.includes(field.name),
@@ -255,6 +254,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       display: 'Author',
       name: 'author_id',
       data: 'object_information.author_name',
+      type: 'text',
       sortable: true,
       searchable: false,
     } as Column);
@@ -263,6 +263,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       display: 'Creation Time',
       name: 'creation_time',
       data: 'object_information.creation_time',
+      type: 'text',
       sortable: true,
       searchable: false,
       template: this.dateTemplate,
@@ -271,6 +272,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       display: 'Modification Time',
       name: 'last_edit_time',
       data: 'object_information.last_edit_time',
+      type: 'text',
       sortable: true,
       searchable: false,
       template: this.dateTemplate,
@@ -287,6 +289,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       name: 'actions',
       sortable: false,
       searchable: false,
+      type: 'text',
       fixed: true,
       template: this.actionTemplate,
       cssClasses: ['text-center'],

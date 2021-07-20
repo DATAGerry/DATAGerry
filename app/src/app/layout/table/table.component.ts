@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -30,9 +30,10 @@ import {
 import { Observable, ReplaySubject, merge } from 'rxjs';
 import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, debounceTime } from 'rxjs/operators';
 import { TableService } from './table.service';
 import { Router } from '@angular/router';
+import { FormControl, FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-table',
@@ -108,7 +109,29 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
     this.items = [];
+    this.setColumnSearchForm(columns);
   }
+
+  /**
+   * Column search columnSearchForm group.
+   */
+  public columnSearchForm: FormGroup;
+
+
+  /**
+   * Column search columnSearchForm group.
+   */
+  public columnSearchIconHidden: boolean = false;
+
+  /**
+   * Column search input enabled.
+   */
+  @Input() public columnSearchEnabled: boolean = false;
+
+  /**
+   * Event Emitter for column search input change.
+   */
+  @Output() public columnSearchChange: EventEmitter<any> = new EventEmitter<any>();
 
   /**
    * Items or data which will be inserted into the tbody.
@@ -302,6 +325,10 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         this.stateChange.emit(this.tableState);
       }
     });
+
+    this.columnSearchForm.valueChanges.pipe(takeUntil(this.subscriber)).pipe(debounceTime(this.debounceTime))
+      .subscribe(change => { this.onColumnSearchChange(change); });
+
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
         console.log(`[TableEvent] Page size changed to: ${ size }`);
@@ -321,7 +348,20 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         console.log(sort);
       });
     }
+  }
 
+  /**
+   * Preparation of column search form. The form object with the individual
+   * values is transferred for the column search.
+   * @param columns
+   * @private
+   */
+  private setColumnSearchForm(columns: Array<Column>) {
+    this.columnSearchForm = new FormGroup({});
+    for (const c of columns) {
+      if (c.hidden) { continue; }
+      this.columnSearchForm.addControl(c.name, new FormControl(''));
+    }
   }
 
   /**
@@ -380,6 +420,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.columnVisibilityChange.emit(column);
   }
 
+  /**
+   * On hidden status change of a column.
+   * @param change
+   */
+  public onColumnSearchChange(change: any) {
+    console.log(this.columns);
+  }
 
   /**
    * Reset the columns to the initial set.
@@ -389,6 +436,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       col.hidden = !this.initialVisibleColumns.includes(col.name);
     }
     this.columnVisibilityChange.emit();
+  }
+
+  /**
+   * On hidden change of a column search.
+   */
+  public onColumnSearchVisibilityChange() {
+    this.columnSearchIconHidden = !this.columnSearchIconHidden;
   }
 
   /**

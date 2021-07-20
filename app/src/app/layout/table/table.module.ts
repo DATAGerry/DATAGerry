@@ -34,6 +34,7 @@ import { TableRowDirective } from './body/table-row.directive';
 import { TableColumnToggleComponent } from './components/table-column-toggle/table-column-toggle.component';
 import { TableLoadingComponent } from './components/table-loading/table-loading.component';
 import { TableStateComponent } from './components/table-states/table-state.component';
+import { TableColumnSearchComponent } from './head/table-column-search/table-column-search.component';
 
 
 @NgModule({
@@ -41,7 +42,8 @@ import { TableStateComponent } from './components/table-states/table-state.compo
     TableComponent, TableSearchComponent, TablePageSizeComponent,
     TablePaginationComponent, TableFootDirective, TableHeadDirective, TableDirective,
     TableBodyDirective, TableColumnHeadComponent, TableInfoComponent, TableCellComponent,
-    TableRowDirective, TableColumnToggleComponent, TableLoadingComponent, TableStateComponent],
+    TableRowDirective, TableColumnToggleComponent, TableLoadingComponent, TableStateComponent,
+    TableColumnSearchComponent],
     exports: [
         TableComponent,
         TablePaginationComponent

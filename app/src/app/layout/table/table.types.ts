@@ -84,6 +84,11 @@ export interface Column {
   name: string;
 
   /**
+   * Field type (text, checkbox, reference etc.)
+   */
+  type?: string;
+
+  /**
    * Field is hidden
    */
   hidden?: boolean;
