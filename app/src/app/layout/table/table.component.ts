@@ -30,10 +30,10 @@ import {
 import { Observable, ReplaySubject, merge } from 'rxjs';
 import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
-import { takeUntil, debounceTime } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
 import { Router } from '@angular/router';
-import { FormControl, FormGroup } from '@angular/forms';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-table',
@@ -109,14 +109,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
     this.items = [];
-    this.setColumnSearchForm(columns);
   }
 
   /**
-   * Column search columnSearchForm group.
+   * Column search form group.
    */
   public columnSearchForm: FormGroup;
-
 
   /**
    * Column search columnSearchForm group.
@@ -308,7 +306,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   public constructor(private tableService: TableService, private router: Router) {
-
   }
 
   public ngOnInit(): void {
@@ -325,9 +322,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         this.stateChange.emit(this.tableState);
       }
     });
-
-    this.columnSearchForm.valueChanges.pipe(takeUntil(this.subscriber)).pipe(debounceTime(this.debounceTime))
-      .subscribe(change => { this.onColumnSearchChange(change); });
 
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
@@ -347,20 +341,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         console.log(`[TableEvent] Sort changed to:`);
         console.log(sort);
       });
-    }
-  }
-
-  /**
-   * Preparation of column search form. The form object with the individual
-   * values is transferred for the column search.
-   * @param columns
-   * @private
-   */
-  private setColumnSearchForm(columns: Array<Column>) {
-    this.columnSearchForm = new FormGroup({});
-    for (const c of columns) {
-      if (c.hidden) { continue; }
-      this.columnSearchForm.addControl(c.name, new FormControl(''));
     }
   }
 
@@ -418,14 +398,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     const colIndex = this.columns.indexOf(col);
     this.columns[colIndex].hidden = column.hidden;
     this.columnVisibilityChange.emit(column);
-  }
-
-  /**
-   * On hidden status change of a column.
-   * @param change
-   */
-  public onColumnSearchChange(change: any) {
-    console.log(this.columns);
   }
 
   /**
@@ -536,6 +508,4 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.subscriber.next();
     this.subscriber.complete();
   }
-
-
 }

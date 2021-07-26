@@ -1,6 +1,21 @@
-<ng-container *ngIf="form" class="column-search-input-field">
-  <form *ngIf="column?.name != 'actions'" [formGroup]="form" class="form-inline">
-    <input class="form-control form-control-sm" placeholder="" formControlName="{{column.name}}"
-           [type]="column?.type !== 'checkbox' ? 'text' : column?.type">
-  </form>
+<ng-container [formGroup]="form">
+  <ng-container formArrayName="rows"
+                *ngFor="let item of form.get('rows')['controls']; let i = index;">
+    <tr class="table-head" [formGroupName]="i">
+      <ng-container class="column-search-input-field">
+        <th *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}">
+          <i class="fas fa-plus" (click)="onAddRow()"></i>
+        </th>
+        <ng-container *ngFor="let column of columns">
+          <th *ngIf="!column.hidden" [ngStyle]="column.style" [hidden]="column.hidden">
+            <input *ngIf="column.name != 'actions'; else delete_row" class="form-control form-control-sm" placeholder=""
+                   formControlName="{{column.name}}" [type]="column?.type !== 'checkbox' ? 'text' : column?.type">
+            <ng-template #delete_row>
+              <i class="far fa-trash-alt" (click)="onRemoveRow(i)" [hidden]="rows.length<2"></i>
+            </ng-template>
+          </th>
+        </ng-container>
+      </ng-container>
+    </tr>
+  </ng-container>
 </ng-container>

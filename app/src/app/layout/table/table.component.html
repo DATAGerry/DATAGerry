@@ -43,13 +43,10 @@
           (sortChange)="onSortChange($event)" [ngClass]="columnClasses" [ngStyle]="column.style"
           [hidden]="column.hidden"></th>
     </tr>
-    <tr *ngIf="columnSearchEnabled && columnSearchIconHidden" class="table-head">
-      <th *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}"></th>
-      <th table-column-search *ngFor="let column of columns" [column]="column" [ngClass]="columnClasses"
-          [ngStyle]="column.style" [hidden]="column.hidden" [form]="columnSearchForm"></th>
-    </tr>
-
     </thead>
+    <thead table-column-search *ngIf="columnSearchEnabled && columnSearchIconHidden"
+           [form]="columnSearchForm" [columns]="columns" [selectEnabled]="selectEnabled"
+           (columnSearchChange)="columnSearchChange.emit($event)"></thead>
     <tbody table-body [bodyClasses]="bodyClasses" *ngIf="!groupRowsBy; else rowGroupTable">
     <tr table-row *ngFor="let item of items; let rowIndex = index" [item]="item" [rowIndex]="rowIndex"
         [ngClass]="rowClasses">

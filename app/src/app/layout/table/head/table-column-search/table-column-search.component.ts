@@ -21,21 +21,38 @@ import {
   Component,
   EventEmitter,
   Input,
-  Output, ViewEncapsulation
+  OnDestroy,
+  OnInit,
+  Output,
+  ViewEncapsulation
 } from '@angular/core';
 import { Column } from '../../table.types';
-import { FormGroup } from '@angular/forms';
+import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
   // tslint:disable-next-line:component-selector
-  selector: 'th[table-column-search]',
+  selector: 'thead[table-column-search]',
   templateUrl: './table-column-search.component.html',
   styleUrls: ['./table-column-search.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   encapsulation: ViewEncapsulation.Emulated
 })
-export class TableColumnSearchComponent<T> {
+export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
+
+  /**
+   * Component un subscriber.
+   * @private
+   */
+  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+  /**
+   * Time debounce for search change emits.
+   * Default time slot for change emits.
+   * @private
+   */
+  private readonly debounceTime: number = 500;
 
   /**
    * Column search form group.
@@ -43,17 +60,95 @@ export class TableColumnSearchComponent<T> {
   @Input() form: FormGroup;
 
   /**
-   * Column of this head element.
+   * Is row selected enabled.
    */
-  public column: Column;
+  @Input() selectEnabled: boolean = false;
 
   /**
-   * Column setter. Also sets the `hidden`, `sortable` and `cssClasses`
-   * property from the Column element.
-   * @param c Column
+   * Column setter.
+   *
+   * @param columns
    */
-  @Input('column')
-  public set Column(c: Column) {
-    this.column = c;
+  @Input() columns: Array<Column>;
+
+  /**
+   * Event emitter when the search input changed.
+   */
+  @Output() public columnSearchChange: EventEmitter<string> = new EventEmitter<string>();
+
+  public constructor(private fb: FormBuilder) {
+  }
+
+  public static maskRegex(value: string): string {
+    return value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  /**
+   * OnInit of `TableColumnSearchComponent`.
+   * Auto subscribes to search input control values changes.
+   * Emits changes to columnSearchChange EventEmitter.
+   */
+  ngOnInit(): void {
+    this.initColumnSearchForm();
+    this.form.valueChanges.pipe(debounceTime(this.debounceTime), distinctUntilChanged(), takeUntil(this.subscriber))
+      .subscribe(changes => {
+        const validatedRows: any = [];
+        for (const row of changes.rows) {
+          const validatedChange = {};
+          for (const key of Object.keys(row)){
+            if (row[key]) { validatedChange[key] = TableColumnSearchComponent.maskRegex(row[key]); }
+          }
+          if (Object.keys(validatedChange).length > 0) { validatedRows.push(validatedChange); }
+        }
+        this.columnSearchChange.emit(validatedRows);
+      });
+  }
+
+  /**
+   * Initialise form
+   */
+  private initColumnSearchForm() {
+    this.form = this.fb.group({
+      rows: this.fb.array([this.createItemFormGroup()])
+    });
+  }
+
+  /**
+   * Generate form controller from columns (dynamic)
+   * @private
+   */
+  private createItemFormGroup(): FormGroup {
+    const group: any = {};
+    for (const c of this.columns) {
+      if (c.hidden) { continue; }
+      group[c.name] = '';
+    }
+    return this.fb.group(group);
+  }
+
+  /**
+   * Get FormArray
+   */
+  public get rows() {
+    return this.form.get('rows') as FormArray;
+  }
+
+  /**
+   * Add new form controller
+   */
+  onAddRow() {
+    this.rows.push(this.createItemFormGroup());
+  }
+
+  /**
+   * Remove form controller at index
+   */
+  onRemoveRow(rowIndex: number){
+    this.rows.removeAt(rowIndex);
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 }

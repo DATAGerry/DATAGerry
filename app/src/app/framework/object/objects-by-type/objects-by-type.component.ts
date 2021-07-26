@@ -234,7 +234,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         data: field.name,
         type: field.type,
         sortable: true,
-        searchable: false,
+        searchable: true,
         hidden: !summaryFields.includes(field.name),
         render(data: RenderResult, item: RenderResult, column: Column, index?: number) {
           const renderedField = item.fields.find(f => f.name === column.data);
@@ -468,6 +468,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       });
       query.push({ $match: { $or: or } });
     }
+    console.log(query);
     return query;
   }
 
@@ -519,6 +520,25 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       this.filter = undefined;
     }
     this.loadObjects();
+  }
+
+  /**
+   * On column search change.
+   * Reload all objects.
+   *
+   * @param changes
+   */
+  public onColumnSearchChange(changes: any): void {
+    const query = [];
+    query.push({
+      $match: {
+        type_id: this.type.public_id
+      }
+    });
+    if (changes.length > 0) {
+      console.log(changes);
+    }
+
   }
 
   /**
