@@ -74,12 +74,21 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
   /**
    * Event emitter when the search input changed.
    */
-  @Output() public columnSearchChange: EventEmitter<string> = new EventEmitter<string>();
+  @Output() public columnSearchChange: EventEmitter<any[]> = new EventEmitter<any[]>();
 
   public constructor(private fb: FormBuilder) {
   }
 
-  public static maskRegex(value: string): string {
+  /**
+   * Parse input field values
+   * @param value string or boolean
+   */
+  public static maskRegex(value: string): string | boolean{
+    try {
+      if (typeof value === 'boolean') {
+        return Boolean(JSON.parse(value));
+      }
+    } catch (e) {}
     return value.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
   }
 
@@ -92,15 +101,21 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
     this.initColumnSearchForm();
     this.form.valueChanges.pipe(debounceTime(this.debounceTime), distinctUntilChanged(), takeUntil(this.subscriber))
       .subscribe(changes => {
-        const validatedRows: any = [];
+        const validatedResults: any[] = [];
         for (const row of changes.rows) {
-          const validatedChange = {};
+          const validatedRows: any[] = [];
           for (const key of Object.keys(row)){
-            if (row[key]) { validatedChange[key] = TableColumnSearchComponent.maskRegex(row[key]); }
+            const validatedChange: Column = {name: '', type: 'text', data: ''};
+            if (row[key]) {
+              validatedChange.name = key;
+              validatedChange.type = this.columns.find(c => c.name === key).type;
+              validatedChange.data = TableColumnSearchComponent.maskRegex(row[key]);
+              validatedRows.push(validatedChange);
+            }
           }
-          if (Object.keys(validatedChange).length > 0) { validatedRows.push(validatedChange); }
+          if (validatedRows.length > 0) { validatedResults.push(validatedRows); }
         }
-        this.columnSearchChange.emit(validatedRows);
+        this.columnSearchChange.emit(validatedResults);
       });
   }
 

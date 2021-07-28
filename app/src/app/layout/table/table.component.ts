@@ -129,7 +129,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Event Emitter for column search input change.
    */
-  @Output() public columnSearchChange: EventEmitter<any> = new EventEmitter<any>();
+  @Output() public columnSearchChange: EventEmitter<any[]> = new EventEmitter<any[]>();
 
   /**
    * Items or data which will be inserted into the tbody.
@@ -415,6 +415,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    */
   public onColumnSearchVisibilityChange() {
     this.columnSearchIconHidden = !this.columnSearchIconHidden;
+    this.columnSearchChange.emit([]);
   }
 
   /**
