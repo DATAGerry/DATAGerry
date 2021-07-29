@@ -126,6 +126,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   public search_term: string;
 
+  /**
+   *
+   * @private
+   */
+  private collectionFilterParameter: any[] = [];
+
   public selectReset: Array<RenderResult> = [];
 
   public initialVisibleColumns: Array<string> = [];
@@ -182,6 +188,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public reload(type: CmdbType): void {
     this.resetTable();
     this.setColumns(type);
+    this.filterBuilder(this.columns);
     if (this.tableState) {
       this.page = this.tableState.page;
       this.limit = this.tableState.pageSize;
@@ -239,7 +246,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         sortable: true,
         searchable: true,
         hidden: !summaryFields.includes(field.name),
-        render(data: RenderResult, item: RenderResult, column: Column, index?: number) {
+        render(data: RenderResult, item: RenderResult, column: Column) {
           const renderedField = item.fields.find(f => f.name === column.data);
           if (!renderedField) {
             return {};
@@ -279,7 +286,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       sortable: true,
       searchable: false,
       template: this.dateTemplate,
-      render(data: any, item?: any, column?: Column, index?: number) {
+      render(data: any) {
         if (!data) {
           return 'No modifications so far.';
         }
@@ -307,23 +314,20 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Load objects from the backend with default filters
    */
   public loadObjects() {
-    const searchableColumns = this.columns.filter(c => c.searchable);
-    const filter = this.filterBuilder(searchableColumns);
-    this.getObjectsFromBackend(filter);
+    this.getObjectsFromBackend();
   }
 
   /**
    * Load objects from the backend with custom filters
-   * @param filter
    * @private
    */
-  private getObjectsFromBackend(filter: any[]) {
+  private getObjectsFromBackend() {
     this.loading = true;
     this.selectedObjects = [];
     this.selectedObjectsIDs = [];
 
     const params: CollectionParameters = {
-      filter, limit: this.limit,
+      filter: this.collectionFilterParameter, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
@@ -339,11 +343,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Creates a database query using the passed parameters.
    *
    * @param columns {@link Array<Column>} are taken into account in the query.
-   * @return query {@link: any[]}
    */
   private filterBuilder(columns: Array<Column>) {
-    const query = [];
-    query.push({
+    this.collectionFilterParameter = [];
+    this.collectionFilterParameter.push({
       $match: {
         type_id: this.type.public_id
       }
@@ -360,17 +363,16 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           } catch (e) {}
         }
       }
-      this.referenceFieldQuery(query);
-      this.addFieldsCreationTime(query);
-      this.addFieldsLastEditTime(query);
-      this.dateFieldValuesQuery(query);
-      this.publicIdQuery(query);
+      this.referenceFieldQuery(this.collectionFilterParameter);
+      this.addFieldsCreationTime(this.collectionFilterParameter);
+      this.addFieldsLastEditTime(this.collectionFilterParameter);
+      this.dateFieldValuesQuery(this.collectionFilterParameter);
+      this.publicIdQuery(this.collectionFilterParameter);
 
       // Search Fields
       or.push(this.elementMatchFields(this.search_term));
-      query.push({ $match: { $or: or } });
+      this.collectionFilterParameter.push({ $match: { $or: or } });
     }
-    return query;
   }
 
   /**
@@ -518,6 +520,14 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   /**
+   * Search Active State
+   * @private
+   */
+  private activeStateQuery(query: any[]) {
+    return query.push({ $addFields: { active: { $toString: '$active' }}});
+  }
+
+  /**
    * On table page change.
    * Reload all objects.
    *
@@ -564,6 +574,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     } else {
       this.search_term = undefined;
     }
+    const searchableColumns = this.columns.filter(c => c.searchable);
+    this.filterBuilder(searchableColumns);
     this.loadObjects();
   }
 
@@ -574,63 +586,71 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param changes
    */
   public onColumnSearchChange(changes: any[]): void {
-    const filter = [];
-    filter.push({
-      $match: {
-        type_id: this.type.public_id
-      }
-    });
-    const or: any[] = [];
-    if (changes.length > 0) {
-      for (const change of changes) {
-        const and: any[] = [];
-        for ( const column of change) {
-          const prefix = column.name.slice(0, 6);
-          const name = 'fields' === prefix ? column.name.slice(7) : column.name;
-          const regex: any = {};
-          switch (column.type) {
-            case 'ref':
-            case 'ref-section-field':
-              this.referenceFieldQuery(filter);
-              and.push({ references: { $elemMatch: { value: { $regex: String(column.data), $options: 'ism' } } } });
-              break;
-            case 'date':
-              // Date string search
-              if ('fields' === prefix) {
-                this.dateFieldValuesQuery(filter, 'fields');
-                or.push(this.elementMatchFields(column.data, name));
-              }
-              if ('creation_time' === name) {
-                this.addFieldsCreationTime(filter);
-                and.push(this.searchRegexProperty('creationString', column.data));
-              }
-              if ('last_edit_time' === name) {
-                this.addFieldsLastEditTime(filter);
-                and.push( { editString: { $regex: String(column.data), $options: 'ims' } } );
-              }
-              break;
-            case 'checkbox':
-              try {
-                and.push(this.elementMatchFields(Boolean(JSON.parse(column.data)), column.name.slice(7), 'fields'));
-              } catch (e) {}
-              break;
-            default:
-              if ('public_id' === name) {
-                this.publicIdQuery(filter);
-                and.push(this.searchRegexProperty('public_id', column.data));
-              }else {
-                and.push(this.elementMatchFields(column.data, 'fields' === prefix ? name : column.name, 'fields'));
-              }
-              break;
-          }
-        }
-        or.push({ $and: and });
-      }
-      filter.push({ $match: { $or: or } });
+    if ( changes.length === 0 && this.objectsTableComponent && !this.objectsTableComponent.columnSearchIconHidden) {
+      this.onSearchChange(this.search_term);
     }
-
-    this.page = this.initPage;
-    this.getObjectsFromBackend(filter);
+    else {
+      this.collectionFilterParameter = [];
+      this.collectionFilterParameter.push({
+        $match: {
+          type_id: this.type.public_id
+        }
+      });
+      if (changes.length > 0 ) {
+        const or: any[] = [];
+        for (const change of changes) {
+          const and: any[] = [];
+          for ( const column of change) {
+            const prefix = column.name.slice(0, 6);
+            const name = 'fields' === prefix ? column.name.slice(7) : column.name;
+            switch (column.type) {
+              case 'ref':
+              case 'ref-section-field':
+                this.referenceFieldQuery(this.collectionFilterParameter);
+                and.push({ references: { $elemMatch: { value: { $regex: String(column.data), $options: 'ism' } } } });
+                break;
+              case 'date':
+                // Date string search
+                if ('fields' === prefix) {
+                  this.dateFieldValuesQuery(this.collectionFilterParameter, 'fields');
+                  or.push(this.elementMatchFields(column.data, name));
+                }
+                if ('creation_time' === name) {
+                  this.addFieldsCreationTime(this.collectionFilterParameter);
+                  and.push(this.searchRegexProperty('creationString', column.data));
+                }
+                if ('last_edit_time' === name) {
+                  this.addFieldsLastEditTime(this.collectionFilterParameter);
+                  and.push( { editString: { $regex: String(column.data), $options: 'ims' } } );
+                }
+                break;
+              case 'checkbox':
+                try {
+                  if ('active' === name) {
+                    and.push({active: column.data});
+                  } else {
+                    and.push(this.elementMatchFields(Boolean(JSON.parse(column.data)), column.name.slice(7), 'fields'));
+                  }
+                } catch (e) {}
+                break;
+              default:
+                console.log(name);
+                if ('public_id' === name) {
+                  this.publicIdQuery(this.collectionFilterParameter);
+                  and.push(this.searchRegexProperty('public_id', column.data));
+                } else {
+                  and.push(this.elementMatchFields(column.data, 'fields' === prefix ? name : column.name, 'fields'));
+                }
+                break;
+            }
+          }
+          or.push({ $and: and });
+        }
+        this.collectionFilterParameter.push({ $match: { $or: or } });
+      }
+      this.page = this.initPage;
+      this.getObjectsFromBackend();
+    }
   }
 
   /**
@@ -668,7 +688,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   public exportingFiles(see: SupportedExporterExtension) {
     const optional = {classname: see.extension, zip: false, metadata: undefined};
     const columns = this.columns.filter(c => !c.hidden && !c.fixed);
-    const filter = this.filterBuilder(columns);
 
     const properties = [];
     const fields = [];
@@ -682,9 +701,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     }
     optional.metadata = {header: properties, columns: fields};
 
-    const exportAPI: CollectionParameters = {filter, optional, order: this.sort.order, sort: this.sort.name};
+    const exportAPI: CollectionParameters = {filter: this.collectionFilterParameter, optional,
+      order: this.sort.order, sort: this.sort.name};
     if (this.selectedObjectsIDs.length > 0) {
-      exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...filter] ;
+      exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...this.collectionFilterParameter] ;
     }
     this.fileService.callExportRoute(exportAPI, see.view)
       .subscribe(res => {
@@ -693,7 +713,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public onObjectDelete(publicID: number) {
-    this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(response => {
+    this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
         this.toastService.success(`Object ${ publicID } was deleted successfully`);
         this.sidebarService.updateTypeCounter(this.type.public_id);
         this.loadObjects();

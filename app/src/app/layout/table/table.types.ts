@@ -138,7 +138,7 @@ export interface Column {
    * @param column
    * @param index
    */
-  render?(data: any, item: any, column?: Column, index?: number);
+  render?(data: any, item?: any, column?: Column, index?: number);
 }
 
 

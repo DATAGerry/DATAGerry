@@ -13,7 +13,11 @@
                      formControlName="{{column.name}}" type="text">
             </ng-container>
             <ng-template #check_box_input>
-              <input class="form-control form-control-sm" formControlName="{{column.name}}" type="checkbox">
+              <input class="form-control form-control-sm" type="checkbox"
+                     [indeterminate]="getController(column?.name, i).value === 'crossed'"
+                     [ngModelOptions]="{standalone: true}"
+                     [ngModel]="getController(column?.name, i).value === 'checked'"
+                     (ngModelChange)="setState(column.name, i)">
             </ng-template>
             <ng-template #delete_row>
               <i class="far fa-trash-alt" (click)="onRemoveRow(i)" [hidden]="rows.length<2"></i>

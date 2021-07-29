@@ -109,8 +109,11 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
             if (row[key]) {
               validatedChange.name = key;
               validatedChange.type = this.columns.find(c => c.name === key).type;
-              validatedChange.data = TableColumnSearchComponent.maskRegex(row[key]);
-              validatedRows.push(validatedChange);
+              const value = validatedChange.type === 'checkbox' ? 'unchecked' !== row[key] : row[key];
+              validatedChange.data = TableColumnSearchComponent.maskRegex(value);
+              if ('crossed' !== row[key]) {
+                validatedRows.push(validatedChange);
+              }
             }
           }
           if (validatedRows.length > 0) { validatedResults.push(validatedRows); }
@@ -160,6 +163,36 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
    */
   onRemoveRow(rowIndex: number){
     this.rows.removeAt(rowIndex);
+  }
+
+  public getController(name: string, level: number) {
+    const group: any = this.form.controls.rows;
+    return group.controls[level].controls[name];
+  }
+
+  /**
+   *
+   * @param name form control name
+   * @param level form group control level
+   * @private
+   */
+  public setState(name: string, level: number) {
+    const control: any = this.getController(name, level);
+    switch (control.value) {
+      case '':
+      case 'crossed': {
+        control.setValue('checked');
+        break;
+      }
+      case 'checked': {
+        control.setValue('unchecked');
+        break;
+      }
+      case 'unchecked': {
+        control.setValue('crossed');
+        break;
+      }
+    }
   }
 
   public ngOnDestroy(): void {
