@@ -20,6 +20,11 @@
                            (columnVisibilityChange)="onColumnVisibilityChange($event)">
       </table-column-toggle>
     </div>
+    <div *ngIf="columnSearchEnabled" class="btn-group mr-1 ml-1 border-right">
+      <button class="btn btn-secondary btn-sm" type="button" (click)="onColumnSearchVisibilityChange()">
+        <i class="fas fa-filter"></i> Filter
+      </button>
+    </div>
     <div class="table-search ml-1" *ngIf="searchEnabled">
       <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)"></table-search>
     </div>
@@ -27,7 +32,7 @@
   <table #table layout-table class="table">
     <thead table-head [sortable]="sortable">
     <tr class="table-head">
-      <th *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+      <th *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" value="all" title="select-all-rows"
                  [checked]="items.length === selectedItems.length && items.length > 0"
@@ -39,10 +44,13 @@
           [hidden]="column.hidden"></th>
     </tr>
     </thead>
+    <thead table-column-search *ngIf="columnSearchEnabled && columnSearchIconHidden"
+           [form]="columnSearchForm" [columns]="columns" [selectEnabled]="selectEnabled"
+           (columnSearchChange)="columnSearchChange.emit($event)"></thead>
     <tbody table-body [bodyClasses]="bodyClasses" *ngIf="!groupRowsBy; else rowGroupTable">
     <tr table-row *ngFor="let item of items; let rowIndex = index" [item]="item" [rowIndex]="rowIndex"
         [ngClass]="rowClasses">
-      <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+      <td *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
                  title="" [checked]="selectedItems.includes(item)"
