@@ -401,6 +401,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @private
    */
   private referenceFieldQuery(query: any[]) {
+    if (query.find(x => x.hasOwnProperty('$lookup')
+      || x.hasOwnProperty('$project')
+      || x.hasOwnProperty('$group'))) {
+      return query;
+    }
     return query.push(
       {
         $lookup: {
