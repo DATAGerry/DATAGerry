@@ -53,6 +53,11 @@ import { FolderPathViewerComponent } from './components/file-explorer/components
 import { MoveDialogComponent } from './components/file-explorer/modal/move-dialog/move-dialog.component';
 import { MetadataInfoComponent } from './components/file-explorer/modal/metadata-info/metadata-info.component';
 import { AttachmentsListModalComponent } from './helpers/modals/attachments-list-modal/attachments-list-modal.component';
+import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
+import { BlockComponent } from './components/block/block.component';
+import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
+import { TypeSelectComponent } from './components/type-select/type-select.component';
+
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
@@ -62,26 +67,24 @@ import { IconPickerModule } from 'ngx-icon-picker';
 import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
-import { FileDragDropDirective } from './directives/fileDragDrop.directive';
-import { NameDirective } from './directives/name.directive';
-import { LowercaseDirective } from './directives/lowercase.directive';
-import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
+import { TableModule } from './table/table.module';
+import { QRCodeModule } from 'angularx-qrcode';
+import { JwPaginationModule } from 'jw-angular-pagination';
+
 import { FileSizePipe } from './pipes/file-size.pipe';
 import { NameGuidePipe } from './pipes/name-guide.pipe';
 import { FileExtensionPipe } from './pipes/file-extension.pipe';
 import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
 import { TypeFilterPipe } from './pipes/typeFilter.pipe';
-import { TableModule } from './table/table.module';
-import { QRCodeModule } from 'angularx-qrcode';
-import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
-import { BlockComponent } from './components/block/block.component';
-import { JwPaginationModule } from 'jw-angular-pagination';
-import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
-import { TypeSelectComponent } from './components/type-select/type-select.component';
+
+import { FileDragDropDirective } from './directives/fileDragDrop.directive';
+import { NameDirective } from './directives/name.directive';
+import { LowercaseDirective } from './directives/lowercase.directive';
+import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
+import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.directive';
 
 @NgModule({
   declarations: [
-    LowercaseDirective,
     BreadcrumbComponent,
     NavigationComponent,
     SidebarComponent,
@@ -94,9 +97,6 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
-    NameDirective,
-    NameGuidePipe,
-    FileDragDropDirective,
     FileSizePipe,
     SidebarTypeComponent,
     CategoryTreeFilterPipe,
@@ -116,16 +116,20 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
     ContextmenuComponent,
     FolderPathViewerComponent,
     MoveDialogComponent,
-    TableSortEventDirective,
+    NameGuidePipe,
     AttachmentsListModalComponent,
     QrCodeComponent,
     BlockComponent,
     FeedbackModalComponent,
-    TypeSelectComponent
+    TypeSelectComponent,
+    NameDirective,
+    LowercaseDirective,
+    FileDragDropDirective,
+    TableSortEventDirective,
+    PreventDoubleSubmitDirective,
   ],
   exports: [
     FileExplorerComponent,
-    LowercaseDirective,
     NavigationComponent,
     BreadcrumbComponent,
     FooterComponent,
@@ -135,9 +139,6 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
     IconPickerComponent,
     ChartsComponent,
     SidebarComponent,
-    NameDirective,
-    NameGuidePipe,
-    FileDragDropDirective,
     FileSizePipe,
     CategoryTreeFilterPipe,
     TypeFilterPipe,
@@ -145,7 +146,12 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
     InfoBoxComponent,
     QrCodeComponent,
     BlockComponent,
-    TypeSelectComponent
+    TypeSelectComponent,
+    NameDirective,
+    NameGuidePipe,
+    LowercaseDirective,
+    FileDragDropDirective,
+    PreventDoubleSubmitDirective
   ],
   imports: [
     CommonModule,
