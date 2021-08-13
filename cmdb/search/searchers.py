@@ -133,6 +133,7 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
                 'last_edit_time': 1, 'fields': {'$concatArrays': ['$fields', '$simple']}, 'relatesTo': 1,
             })
         )
+        self.add_pipe(self.sort_('public_id', 1))
         return self.pipeline
 
 
