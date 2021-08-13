@@ -124,7 +124,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   public ngOnInit(): void {
 
     this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
-      this.queryParameters = params.get('query');
+      this.queryParameters = this.queryParameters.length > 0 ? this.queryParameters : params.get('query');
       if (params.has('limit')) {
         this.limit = (+JSON.parse(params.get('limit')));
         this.resultSizeForm.get('size').setValue(this.limit);
@@ -132,6 +132,10 @@ export class SearchComponent implements OnInit, OnDestroy {
       if (params.has('page')) {
         this.currentPage = (+JSON.parse(params.get('page')));
       }
+      if (params.has('skip')) {
+        this.skip = (+JSON.parse(params.get('skip')));
+      }
+
       this.initSearch = true;
       this.initFilter = true;
       this.onSearch();
@@ -167,6 +171,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     let params = new HttpParams();
     params = params.set('limit', this.limit.toString());
     params = params.set('skip', this.skip.toString());
+
     this.searchService.postSearch(this.queryParameters, params).pipe(takeUntil(this.subscriber)).subscribe((results: SearchResultList) => {
         this.searchResultList = results;
         this.filterResultList = this.initFilter && results !== null ? results.groups : this.filterResultList;
@@ -196,9 +201,32 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onChangePage(event): void {
     this.currentPage = event;
-    this.skip = (this.currentPage - 1) * this.limit;
+    this.setPageParam(this.currentPage);
     this.onSearch();
 
+  }
+
+  private setPageParam(page): void {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: { page },
+        queryParamsHandling: 'merge'
+      }).then(() => {
+        this.skip = (page - 1) * this.limit;
+        this.setSkipParam(this.skip);
+    });
+  }
+
+  private setSkipParam(next): void {
+    this.router.navigate(
+      [],
+      {
+        relativeTo: this.route,
+        queryParams: { skip: next },
+        queryParamsHandling: 'merge'
+      });
   }
 
   public reSearch(value: any) {
@@ -207,6 +235,7 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.initFilter = value.rebuild;
     this.currentPage = 1;
     this.skip = 0;
+    this.setPageParam(this.currentPage);
     this.onSearch();
   }
 
