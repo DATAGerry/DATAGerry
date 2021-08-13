@@ -1,0 +1,16 @@
+@import '~src/scss/variables';
+
+.input-wrapper-search {
+  position: relative;
+  input {
+    padding-left: 30px;
+    color: $input-color;
+  }
+  i.fa-search.input-icon-search {
+    position: absolute;
+    color: $gray-500;
+    top: calc(50% - 0.5em);
+    left: 10px;
+  }
+}
+

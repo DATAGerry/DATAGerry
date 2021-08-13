@@ -163,19 +163,65 @@ If you want to see inactive Objects in the WebUI, click on the switch under the 
 
     Figure 8: Active / Inactive objects switch
 
-Object tables filter
+Object tables search / filter
 ---------------------------
 
-The search / filter option in the tables provides the possibility to control the search / filtering in a table. The search / filtering is performed over all searchable columns.
-If matching data is found in any column, then the entire row is matched and displayed in the result set.
+Searching a table is one of the most common user interactions with a DATAGERRY table, and DATAGERRY provides a number
+of methods for you to control this interaction. There are tools for the table search(search) and for each individual
+column (filter). Each search (table or column) can be marked as a regular expression (allowing you to create very complex interactions).
 
+| Please note that this method only applies the search to the table - it does not actually perform the search.
+
+.. figure:: img/table_search_filter/object_table_search_initial.png
+    :width: 600
+
+    Figure 9: Unfiltered object overview
+
+Table search
+^^^^^^^^^^^^
+The search option offers the possibility to check the results in a table.
+The search is performed across all searchable columns. If matching data is found in a column,
+the entire row is matched and displayed in the result set. See Figure 10: *Search result after searching for "B"*
+
+.. figure:: img/table_search_filter/object_table_search_result.png
+    :width: 600
+
+    Figure 10: Search result after searching for "B"
+
+Table filter
+^^^^^^^^^^^^
+While the search function offers the possibility to search the table,
+the filter method provides the ability to search for data in a specific column.
+
+The column searches are cumulative, so additional columns can be inserted to apply multiple individual column searches,
+presenting the user with complex search options.
+
+.. figure:: img/table_search_filter/object_table_filter_result.png
+    :width: 600
+
+    Figure 11: Filter result after filtering for "B"
+
+The search terms within different rows are linked with each other with the condition *OR* (Figure 12: *Filtering by OR-expression*).
+The search terms within a row are all linked with the condition *AND* (Figure 13: *Filter by AND-expression*).
+Only the filtered objects are available for exporting the values from the current table.
+
+.. figure:: img/table_search_filter/object_table_filter_example_1_result.png
+    :width: 600
+
+    Figure 12: Filtering by OR expression
+
+.. figure:: img/table_search_filter/object_table_filter_example_2_result.png
+    :width: 600
+
+    Figure 13: Filtering by AND expression
+
+|
 .. note::
     Date values must be searched according to the following format:
 
     **Format**: *YYYY-MM-DDThh:mmZ*
 
     **Example**: *2019-12-19T11:02*
-
 |
 
 Bulk change of Objects
@@ -191,7 +237,7 @@ Simply select all objects you want to change and click on the yellow button for 
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 9: Select objects for bulk change
+    Figure 14: Select objects for bulk change
 
 **Template**
 
@@ -202,7 +248,7 @@ transfer to the objects later and save your entries.
 .. figure:: img/objects_bulk_change_active.png
     :width: 600
 
-    Figure 10: Change template
+    Figure 15: Change template
 
 **Preview**:
 
@@ -211,7 +257,7 @@ In the preview, all changes made are listed and can be adjusted again if necessa
 .. figure:: img/objects_bulk_change_preview.png
     :width: 600
 
-    Figure 11: Overview of changes
+    Figure 16: Overview of changes
 
 **Result**:
 
@@ -220,7 +266,7 @@ After a preview, the selected objects will be changed.
 .. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-    Figure 12: Bulk change result
+    Figure 17: Bulk change result
 
 
 Exporting Objects
@@ -238,7 +284,7 @@ type can be exported (therefore you will not find the "Export" button in a list 
 .. figure:: img/raw-custom-export.png
     :width: 600
 
-    Figure 13: Export from object list overview
+    Figure 18: Export from object list overview
 
 
 .. list-table:: Table 2: Supported export types
@@ -262,7 +308,7 @@ type can be exported (therefore you will not find the "Export" button in a list 
 .. figure:: img/object-import-export.png
     :width: 300
 
-    Figure 14: Export / Import via Toolbox
+    Figure 19: Export / Import via Toolbox
 
 
 Importing Objects
@@ -366,7 +412,7 @@ These can be defined under the ACL step based on the type. By default, they are 
     :width: 600
     :alt: Deactivated object acl
 
-    Figure 15: Deactivated object acl
+    Figure 20: Deactivated object acl
 
 When activated, the menu is enabled and groups can be added to an ACL with the respective permissions.
 
@@ -374,7 +420,7 @@ When activated, the menu is enabled and groups can be added to an ACL with the r
     :width: 600
     :alt: While object acl configure
 
-    Figure 16: While object acl configure
+    Figure 21: While object acl configure
 
 After adding the groups, they are displayed in the list below and their permissions can be edited further.
 But a group can only appear once in an ACL.
@@ -384,6 +430,6 @@ Listing the same group with different permissions in the same list is not possib
     :width: 600
     :alt: Inserted object acl
 
-    Figure 17: Inserted object acl
+    Figure 22: Inserted object acl
 
 The ACL settings are retained at the object level even after the ACL is disabled, but then they are no longer applied.
