@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -37,7 +37,6 @@ import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
 import { SearchService } from '../search.service';
-import { ObjectService } from '../../framework/services/object.service';
 import * as $ from 'jquery';
 import { NumberSearchResults } from '../models/search-result';
 
@@ -206,7 +205,12 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
     if (this.tags.length > 0) {
       this.inputControl.setValue('', { onlySelf: true });
-      this.router.navigate(['/search'], { queryParams: { query: JSON.stringify(this.tags) } });
+      this.router.navigate(['/search'],
+        {
+          queryParams: { query: JSON.stringify(this.tags) },
+          replaceUrl: true,
+          state: {load: true}
+        });
     }
   }
 
