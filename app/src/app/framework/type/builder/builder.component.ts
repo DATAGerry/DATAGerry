@@ -34,6 +34,9 @@ import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
+import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
+import {PreviewModalComponent} from "./modals/preview-modal/preview-modal.component";
+import {DiagnosticModalComponent} from "./modals/diagnostic-modal/diagnostic-modal.component";
 
 declare var $: any;
 
@@ -100,7 +103,7 @@ export class BuilderComponent implements OnDestroy {
   ];
 
 
-  public constructor() {
+  public constructor(private modalService: NgbModal) {
     this.typeInstance = new CmdbType();
   }
 
@@ -164,7 +167,8 @@ export class BuilderComponent implements OnDestroy {
   public externalField(field) {
     const include = {links: [], total: 0};
     for (const external of this.typeInstance.render_meta.externals) {
-      const found = external.fields.find(f => f === field.name);
+      const fields = external.hasOwnProperty('fields') ? Array.isArray(external.fields) ? external.fields : [] : [];
+      const found = fields.find(f => f === field.name);
       if (found) {
         if (include.total < 10) {
           include.links.push(external);
@@ -250,6 +254,16 @@ export class BuilderComponent implements OnDestroy {
     const ret = array.slice(0);
     ret[index] = value;
     return ret;
+  }
+
+  public openPreview() {
+    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
+    previewModal.componentInstance.sections = this.sections;
+  }
+
+  public openDiagnostic() {
+    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
+    diagnosticModal.componentInstance.data = this.sections;
   }
 
   public matchedType(value: string) {

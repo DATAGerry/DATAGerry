@@ -36,6 +36,8 @@ import { CategoryModule } from '../../category/category.module';
 import { SectionRefFieldEditComponent } from './configs/section/section-ref-field-edit.component';
 import { LayoutModule } from '../../../layout/layout.module';
 import { ConfigEditComponent } from './configs/config-edit.component';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 
 @NgModule({
   imports: [
@@ -63,6 +65,8 @@ import { ConfigEditComponent } from './configs/config-edit.component';
     CheckFieldEditComponent,
     DateFieldEditComponent,
     SectionRefFieldEditComponent,
+    PreviewModalComponent,
+    DiagnosticModalComponent
   ],
   exports: [
     BuilderComponent
