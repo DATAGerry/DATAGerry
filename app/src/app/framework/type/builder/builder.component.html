@@ -75,6 +75,16 @@
           </div>
         </div>
       </div>
+      <div id="builder-controls-action" role="group" aria-label="Controls helper buttons"
+           class="btn-group btn-group-sm mt-2 d-flex justify-content-between align-items-center">
+        <button id="builder-controls-action-preview" type="button" class="btn btn-secondary" (click)="openPreview()">
+          Preview
+        </button>
+        <button id="builder-controls-action-diagnostic" type="button" class="btn btn-secondary"
+                (click)="openDiagnostic()">
+          Diagnostic
+        </button>
+      </div>
     </div>
   </div>
   <div id="form-container" class="col-9">
