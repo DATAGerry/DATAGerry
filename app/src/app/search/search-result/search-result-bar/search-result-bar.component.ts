@@ -28,11 +28,7 @@ import {
 } from '@angular/core';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SearchResultList } from '../../models/search-result';
-
-export interface ReSearchParameters {
-  rebuild: boolean;
-  query: any[];
-}
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'cmdb-search-result-bar',
@@ -42,7 +38,6 @@ export interface ReSearchParameters {
 
 export class SearchResultBarComponent implements OnInit, OnChanges {
 
-  @Output() refreshSearch = new EventEmitter<ReSearchParameters>();
   @Input() queryParameters: any;
   @Input() searchResultList: SearchResultList;
   @Input() referenceResultList: SearchResultList;
@@ -50,13 +45,11 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
 
   // Filterers results
   public preSelectedFilterList: any[] = [];
-  private rollbackQueryParameters: string = '';
 
-  constructor(private toast: ToastService) {
+  constructor(private toast: ToastService, private router: Router) {
   }
 
   public ngOnInit(): void {
-    this.rollbackQueryParameters = this.queryParameters;
     this.addPreSelectedFilterItem(this.queryParameters);
 
   }
@@ -96,16 +89,17 @@ export class SearchResultBarComponent implements OnInit, OnChanges {
   }
 
   public rollbackQueryParametersIfNeeded(): void {
-    this.reSearch(JSON.parse(this.rollbackQueryParameters), true);
+    this.reSearch(JSON.parse(this.queryParameters)
+      .filter(x => x.searchForm === 'text'), true, true);
   }
 
-  private reSearch(value: any[], refreshFilter: boolean = false) {
-    if (this.preSelectedFilterList.length === 0) {
-      this.refreshSearch.emit({ rebuild: true, query: JSON.parse(this.rollbackQueryParameters) });
-      this.addPreSelectedFilterItem(this.rollbackQueryParameters);
-    } else {
-      this.refreshSearch.emit({ rebuild: refreshFilter, query: value });
-    }
+  private reSearch(value: any[], replaceUrl: boolean = false, state: boolean = false) {
+    this.router.navigate(['/search'],
+      {
+        queryParams: { query: JSON.stringify(value) },
+        replaceUrl: true,
+        state: {load: state}
+      });
   }
 
   public async delFilterItem(value: any) {

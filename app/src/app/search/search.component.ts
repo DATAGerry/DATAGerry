@@ -19,11 +19,11 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SearchService } from './search.service';
 import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import { ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
 import { HttpParams } from '@angular/common/http';
-import { takeUntil } from 'rxjs/operators';
+import {filter, skip, takeUntil} from 'rxjs/operators';
 import { ProgressSpinnerService } from '../layout/progress/progress-spinner.service';
 import { PageLengthEntry } from '../layout/table/components/table-page-size/table-page-size.component';
 
@@ -122,22 +122,25 @@ export class SearchComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-
     this.route.queryParamMap.pipe(takeUntil(this.subscriber)).subscribe(params => {
-      this.queryParameters = this.queryParameters.length > 0 ? this.queryParameters : params.get('query');
+      this.queryParameters = params.get('query');
       if (params.has('limit')) {
         this.limit = (+JSON.parse(params.get('limit')));
         this.resultSizeForm.get('size').setValue(this.limit);
       }
       if (params.has('page')) {
         this.currentPage = (+JSON.parse(params.get('page')));
+      } else {
+        this.currentPage = 1;
       }
       if (params.has('skip')) {
         this.skip = (+JSON.parse(params.get('skip')));
+      } else {
+        this.skip = 0;
       }
 
       this.initSearch = true;
-      this.initFilter = true;
+      this.initFilter = (window.history.state.load || window.history.state.load === undefined);
       this.onSearch();
     });
 
@@ -201,6 +204,7 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   public onChangePage(event): void {
     this.currentPage = event;
+    this.skip = (this.currentPage - 1) * this.limit;
     this.setPageParam(this.currentPage);
     this.onSearch();
 
@@ -211,32 +215,9 @@ export class SearchComponent implements OnInit, OnDestroy {
       [],
       {
         relativeTo: this.route,
-        queryParams: { page },
+        queryParams: { page, skip: this.skip, query: this.queryParameters },
         queryParamsHandling: 'merge'
-      }).then(() => {
-        this.skip = (page - 1) * this.limit;
-        this.setSkipParam(this.skip);
-    });
-  }
-
-  private setSkipParam(next): void {
-    this.router.navigate(
-      [],
-      {
-        relativeTo: this.route,
-        queryParams: { skip: next },
-        queryParamsHandling: 'merge'
-      });
-  }
-
-  public reSearch(value: any) {
-    this.queryParameters = JSON.stringify(value.query);
-    this.initSearch = true;
-    this.initFilter = value.rebuild;
-    this.currentPage = 1;
-    this.skip = 0;
-    this.setPageParam(this.currentPage);
-    this.onSearch();
+      }).then();
   }
 
   public ngOnDestroy(): void {
