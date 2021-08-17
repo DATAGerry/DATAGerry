@@ -35,7 +35,7 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerInitError
+    ObjectManagerInsertError, ObjectManagerInitError, FieldNotFoundError, FieldInitError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Pipeline
@@ -291,7 +291,7 @@ class CmdbObjectManager(CmdbManagerBase):
                 for ref_field in ref_fields:
                     type_init_list.append(
                         {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
-            except CMDBError:
+            except (CMDBError, FieldNotFoundError, FieldInitError):
                 continue
 
         referenced_by_objects = []
