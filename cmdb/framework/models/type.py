@@ -404,7 +404,94 @@ class TypeModel(CmdbDAO):
         'fields': {
             'type': 'list',
             'required': False,
-            'default': None
+            'default': None,
+            'schema': {
+                'type': 'dict',
+                'schema': {
+                    "type": {
+                        'type': 'string',  # Text, Password, Textarea, radio, select, date
+                        'required': True
+                    },
+                    "name": {
+                        'type': 'string',
+                        'required': True
+                    },
+                    "label": {
+                        'type': 'string',
+                        'required': True
+                    },
+                    "default": {
+                        'type': 'integer',
+                        'nullable': True,
+                        'empty': True
+                    },
+                    "options": {
+                        'type': 'list',
+                        'empty': True,
+                        'required': False,
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                "name": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                                "label": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                            }
+                        }
+                    },
+                    "ref_types": {
+                        'type': 'list',  # List of public_id of type
+                        'required': False,
+                        'empty': True,
+                        'schema': {
+                            'type': 'integer',
+                        }
+                    },
+                    "summaries": {
+                        'type': 'list',
+                        'empty': True,
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                "type_id": {
+                                    'type': 'integer',
+                                    'required': True
+                                },
+                                "line": {
+                                    'type': 'string',
+                                    # enter curved brackets for field interpolation example: Customer IP {}
+                                    'required': True
+                                },
+                                "label": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                                "fields": {  # List of field names
+                                    'type': 'list',
+                                    'empty': True,
+                                    'schema': {
+                                        'type': 'string',
+                                        'required': False
+                                    },
+                                },
+                                "icon": {
+                                    'type': 'string',  # Free Font Awesome example: 'fa fa-cube'
+                                    'required': True
+                                },
+                                "prefix": {
+                                    'type': 'boolean',
+                                    'required': False,
+                                    'default': True
+                                }
+                            }
+                        }
+                    }
+                }
+            },
         },
         'version': {
             'type': 'string',
@@ -425,14 +512,96 @@ class TypeModel(CmdbDAO):
                 },
                 'sections': {
                     'type': 'list',
+                    'schema': {
+                        'type': 'dict',
+                        'schema': {
+                            "type": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "name": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "label": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "reference": {
+                                'type': 'dict',
+                                'empty': True,
+                                'schema': {
+                                    "type_id": {
+                                        'type': 'integer',
+                                        'required': True
+                                    },
+                                    "section_name": {
+                                        'type': 'string',
+                                        'required': True
+                                    },
+                                    'selected_fields': {
+                                        'type': 'list',
+                                        'empty': True
+                                    }
+                                }
+                            },
+                            'fields': {
+                                'type': 'list',
+                                'schema': {
+                                    'type': 'string',
+                                    'required': False
+                                },
+                                'empty': True,
+                            }
+                        }
+                    },
                     'empty': True
                 },
                 'externals': {
                     'type': 'list',
-                    'empty': True
+                    'schema': {
+                        'type': 'dict',
+                        'schema': {
+                            'name': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'href': {
+                                'type': 'string',  # enter curved brackets for field interpolation example: Field {}
+                                'required': True
+                            },
+                            'label': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'icon': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'fields': {
+                                'type': 'list',
+                                'schema': {
+                                    'type': 'string',
+                                    'required': False
+                                },
+                                'empty': True,
+                            }
+                        }
+                    },
+                    'empty': True,
                 },
                 'summary': {
                     'type': 'dict',
+                    'schema': {
+                        'fields': {
+                            'type': 'list',
+                            'schema': {
+                                'type': 'string',
+                                'required': False
+                            },
+                            'empty': True,
+                        }
+                    },
                     'empty': True
                 }
             }

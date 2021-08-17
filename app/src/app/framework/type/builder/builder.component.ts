@@ -34,9 +34,9 @@ import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
-import {NgbModal} from "@ng-bootstrap/ng-bootstrap";
-import {PreviewModalComponent} from "./modals/preview-modal/preview-modal.component";
-import {DiagnosticModalComponent} from "./modals/diagnostic-modal/diagnostic-modal.component";
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 
 declare var $: any;
 
@@ -75,7 +75,10 @@ export class BuilderComponent implements OnDestroy {
         preSectionList.push(section);
         const fieldBufferList = [];
         for (const field of section.fields) {
-          fieldBufferList.push(instance.fields.find(f => f.name === field));
+          const found = instance.fields.find(f => f.name === field);
+          if (found) {
+            fieldBufferList.push(found);
+          }
         }
         preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
       }
