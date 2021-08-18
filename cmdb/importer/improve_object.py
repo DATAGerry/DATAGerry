@@ -52,8 +52,11 @@ class ImproveObject:
         for entry_field in self.field_entries:
             for item in self.possible_fields:
                 self.value = self.entry.get(entry_field.get_value())
-                if item['type'] == 'date' and item["name"] == entry_field.get_name():
-                    self.entry.update({entry_field.get_value(): ImproveObject.improve_date(self.value)})
+                if item["name"] == entry_field.get_name():
+                    if item['type'] == 'date':
+                        self.entry.update({entry_field.get_value(): ImproveObject.improve_date(self.value)})
+                    if item['type'] == 'text' and not isinstance(self.value, str):
+                        self.entry.update({entry_field.get_value(): str(self.value)})
         return self.entry
 
     @staticmethod
