@@ -157,7 +157,7 @@ export class BuilderComponent implements OnDestroy {
       }
       this.sections.splice(index, 0, event.data);
       this.typeInstance.render_meta.sections = [...this.sections];
-      if (event.data.type === 'ref-section') {
+      if (event.data.type === 'ref-section' && event.dropEffect === 'copy') {
         this.addRefSectionSelectionField(event.data as CmdbTypeSection);
       }
     }
@@ -214,6 +214,8 @@ export class BuilderComponent implements OnDestroy {
     if (effect === 'move') {
       const index = list.indexOf(item);
       list.splice(index, 1);
+      this.sections = list;
+      this.typeInstance.render_meta.sections = [...this.sections];
     }
   }
 
