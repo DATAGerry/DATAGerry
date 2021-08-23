@@ -66,7 +66,11 @@ export class GroupsAclTabsComponent implements OnDestroy {
   public readonly operations: Array<string> = Object.keys(AccessControlPermission);
 
   public getGroupLabelByID(publicID: number): string {
-    return this.groups.find(g => g.public_id === publicID).label;
+    const found = this.groups.find(g => g.public_id === publicID);
+    if (found) {
+      return found.label;
+    }
+    return `GroupID: ${ publicID } does not exist`;
   }
 
   /**

@@ -135,7 +135,10 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
       .subscribe((response: APIGetMultiResponse) => {
         this.groups = [...response.results as Array<Group>];
-      });
+      }, () => {}
+      , () => {
+          this.checkAclGroupExist();
+        });
 
     const typesCallParameters: CollectionParameters = {
       filter: undefined,
@@ -149,6 +152,22 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       .subscribe((response: APIGetMultiResponse) => {
         this.types = response.results as Array<CmdbType>;
       });
+  }
+
+  /**
+   * Check ACL group assignment.
+   * Check if assigned groups still exist. Error message if group cannot be found.
+   * @private
+   */
+  private checkAclGroupExist(): void {
+    if (this.typeInstance.acl && this.typeInstance.acl.groups && this.typeInstance.acl.groups.includes && this.groups) {
+      Object.keys(this.typeInstance.acl.groups.includes).forEach((key) => {
+        const found = this.groups.find(g => g.public_id === Number(key));
+        if (!found) {
+          this.toast.error(`The group for the ACL setting does not exist: GroupID: ${ key }`);
+        }
+      });
+    }
   }
 
   /**
