@@ -128,7 +128,7 @@
                               <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
                             </ng-template>
                             <ng-template ng-label-tmp>
-                              {{(loadDisplayType(templ.get('type').value) | async)?.label}}
+                              {{(loadDisplayType(templ.get('type').value))?.label}}
                             </ng-template>
                             <ng-template ng-option-tmp let-item="item">
                               <div><span>{{item.label}}</span></div>
