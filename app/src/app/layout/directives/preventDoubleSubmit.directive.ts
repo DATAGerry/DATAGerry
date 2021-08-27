@@ -35,9 +35,4 @@ export class PreventDoubleSubmitDirective {
   onClick() {
     if (this.valid) { this.disabled = true; }
   }
-
-  @HostListener('document:keypress', ['$event'])
-  onEnter(event: KeyboardEvent | undefined) {
-    if (event && KEY_CODE.ENTER === event.key && this.valid) { this.disabled = true; }
-  }
 }
