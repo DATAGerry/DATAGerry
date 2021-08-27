@@ -412,6 +412,10 @@ class TypeModel(CmdbDAO):
                         'type': 'string',  # Text, Password, Textarea, radio, select, date
                         'required': True
                     },
+                    "required": {
+                        'type': 'boolean',
+                        'required': False
+                    },
                     "name": {
                         'type': 'string',
                         'required': True
@@ -419,6 +423,26 @@ class TypeModel(CmdbDAO):
                     "label": {
                         'type': 'string',
                         'required': True
+                    },
+                    "description": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "regex": {
+                        'type': 'string',
+                        'required': False
+                    },
+                    "placeholder": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "value": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "helperText": {
+                        'type': 'string',
+                        'required': False,
                     },
                     "default": {
                         'type': 'integer',
