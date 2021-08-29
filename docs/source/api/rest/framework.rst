@@ -1,8 +1,21 @@
 Framework
 =========
 
+For the creation and editing of datasets in DATAGERRY certain validation schemes are followed.
+For the validation of the datasets the Python library 'Cerberus_' is used. A validation schema is a mapping,
+usually a dict. Schema keys are the keys allowed in the target dictionary.
+Schema values express the rules that must match the corresponding target values.
+
+.. _Cerberus: https://docs.python-cerberus.org/en/stable/
+
 Objects
 -------
+Create and manage your first objects via the Rest-API
+
+READ (GET) - Operation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Overview of all GET routes to get objects from the database.
 
 .. http:get:: /objects/
 
@@ -274,6 +287,71 @@ Objects
         :statuscode 403: If the user has no access to the object of this public id.
         :statuscode 404: No collection or resources found.
 
+Create / Update (POST / PUT) - Operation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Validation Schema**
+
+.. code-block::
+
+    {
+        'public_id': {
+            'type': 'integer'
+        },
+        'type_id': {
+            'type': 'integer'
+        },
+        'status': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'version': {
+            'type': 'string',
+            'default': DEFAULT_VERSION
+        },
+        'author_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'creation_time': {
+            'type': 'dict',
+            'nullable': True,
+            'required': False
+        },
+        'last_edit_time': {
+            'type': 'dict',
+            'nullable': True,
+            'required': False
+        },
+        'active': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'fields': {
+            'type': 'list',
+            'required': True,
+            'default': [],
+            'schema': {
+                'type': 'dict',
+                'schema': {
+                        "name" : {
+                            'type': 'string',
+                                'required': true
+                        },
+                        "value" : {
+                            'type': 'string',
+                                'nullable': True
+                                'required': true
+                        },
+                }
+            }
+        }
+    }
+
+
+
 .. http:post:: /objects/
 
         HTTP `POST` rest route. Insert a new object.
@@ -285,6 +363,21 @@ Objects
             POST /rest/objects/ HTTP/1.1
             Host: datagerry.com
             Accept: application/json
+            Content-Type: application/json
+
+            {
+                "type_id": 1,
+                "version": "1.0.1",
+                "author_id": 1,
+                "active": true,
+                "fields": [
+                    {
+                        "name" : "dummy-field",
+                        "value" : null
+                    }
+                ],
+                "views": 0
+            }
 
         **Example response**
 
@@ -317,6 +410,22 @@ Objects
             PUT /rest/objects/1 HTTP/1.1
             Host: datagerry.com
             Accept: application/json
+            Content-Type: application/json
+
+            {
+                "type_id": 1,
+                "version": "1.0.1",
+                "author_id": 1,
+                "active": true,
+                "fields": [
+                    {
+                        "name": "dummy-field",
+                        "value": "update"
+                    }
+                ],
+                "public_id": 1,
+                "views": 0
+            }
 
         **Example response**
 
@@ -337,6 +446,9 @@ Objects
         :statuscode 403: No right to update a existing object of this type.
         :statuscode 404: No resource found.
         :statuscode 500: Something went wrong during update.
+
+Delete - Operation
+^^^^^^^^^^^^^^^^^^
 
 .. http:delete:: /objects/(int:public_id)
 
@@ -401,6 +513,10 @@ Objects
         :statuscode 403: No right to delete a object of this type.
         :statuscode 404: No resource found.
         :statuscode 500: Something went wrong during deletion.
+
+
+Special - Operation
+^^^^^^^^^^^^^^^^^^^
 
 .. http:get:: /objects/(int:public_id)/state
 
@@ -481,6 +597,12 @@ Objects
 
 Types
 -----
+Create and manage your first types via the Rest-API
+
+READ (GET) - Operation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Overview of all GET routes to get types from the database.
 
 .. http:get:: /types/
 
@@ -668,6 +790,276 @@ Types
         :statuscode 200: Everything is fine.
         :statuscode 404: No resource found.
 
+Create / Update (POST / PUT) - Operation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Validation Schema**
+
+.. code-block::
+
+    {
+        'public_id': {
+            'type': 'integer'
+        },
+        'name': {
+            'type': 'string',
+            'required': True,
+            'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+        },
+        'label': {
+            'type': 'string',
+            'required': False
+        },
+        'author_id': {
+            'type': 'integer',
+            'required': True
+        },
+        'editor_id': {
+            'type': 'integer',
+            'nullable': True,
+            'required': False
+        },
+        'active': {
+            'type': 'boolean',
+            'required': False,
+            'default': True
+        },
+        'fields': {
+            'type': 'list',
+            'required': False,
+            'default': None,
+            'schema': {
+                'type': 'dict',
+                'schema': {
+                    "type": {
+                        'type': 'string',  # Text, Password, Textarea, radio, select, date
+                        'required': True
+                    },
+                    "required": {
+                        'type': 'boolean',
+                        'required': False
+                    },
+                    "name": {
+                        'type': 'string',
+                        'required': True
+                    },
+                    "label": {
+                        'type': 'string',
+                        'required': True
+                    },
+                    "description": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "regex": {
+                        'type': 'string',
+                        'required': False
+                    },
+                    "placeholder": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "value": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "helperText": {
+                        'type': 'string',
+                        'required': False,
+                    },
+                    "default": {
+                        'type': 'integer',
+                        'nullable': True,
+                        'empty': True
+                    },
+                    "options": {
+                        'type': 'list',
+                        'empty': True,
+                        'required': False,
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                "name": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                                "label": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                            }
+                        }
+                    },
+                    "ref_types": {
+                        'type': 'list',  # List of public_id of type
+                        'required': False,
+                        'empty': True,
+                        'schema': {
+                            'type': 'integer',
+                        }
+                    },
+                    "summaries": {
+                        'type': 'list',
+                        'empty': True,
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                "type_id": {
+                                    'type': 'integer',
+                                    'required': True
+                                },
+                                "line": {
+                                    'type': 'string',
+                                    # enter curved brackets for field interpolation example: Customer IP {}
+                                    'required': True
+                                },
+                                "label": {
+                                    'type': 'string',
+                                    'required': True
+                                },
+                                "fields": {  # List of field names
+                                    'type': 'list',
+                                    'empty': True,
+                                    'schema': {
+                                        'type': 'string',
+                                        'required': False
+                                    },
+                                },
+                                "icon": {
+                                    'type': 'string',  # Free Font Awesome example: 'fa fa-cube'
+                                    'required': True
+                                },
+                                "prefix": {
+                                    'type': 'boolean',
+                                    'required': False,
+                                    'default': True
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+        },
+        'version': {
+            'type': 'string',
+            'default': DEFAULT_VERSION
+        },
+        'description': {
+            'type': 'string',
+            'nullable': True,
+            'empty': True
+        },
+        'render_meta': {
+            'type': 'dict',
+            'allow_unknown': False,
+            'schema': {
+                'icon': {
+                    'type': 'string',
+                    'nullable': True
+                },
+                'sections': {
+                    'type': 'list',
+                    'schema': {
+                        'type': 'dict',
+                        'schema': {
+                            "type": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "name": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "label": {
+                                'type': 'string',
+                                'required': True
+                            },
+                            "reference": {
+                                'type': 'dict',
+                                'empty': True,
+                                'schema': {
+                                    "type_id": {
+                                        'type': 'integer',
+                                        'required': True
+                                    },
+                                    "section_name": {
+                                        'type': 'string',
+                                        'required': True
+                                    },
+                                    'selected_fields': {
+                                        'type': 'list',
+                                        'empty': True
+                                    }
+                                }
+                            },
+                            'fields': {
+                                'type': 'list',
+                                'schema': {
+                                    'type': 'string',
+                                    'required': False
+                                },
+                                'empty': True,
+                            }
+                        }
+                    },
+                    'empty': True
+                },
+                'externals': {
+                    'type': 'list',
+                    'schema': {
+                        'type': 'dict',
+                        'schema': {
+                            'name': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'href': {
+                                'type': 'string',  # enter curved brackets for field interpolation example: Field {}
+                                'required': True
+                            },
+                            'label': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'icon': {
+                                'type': 'string',
+                                'required': True
+                            },
+                            'fields': {
+                                'type': 'list',
+                                'schema': {
+                                    'type': 'string',
+                                    'required': False
+                                },
+                                'empty': True,
+                            }
+                        }
+                    },
+                    'empty': True,
+                },
+                'summary': {
+                    'type': 'dict',
+                    'schema': {
+                        'fields': {
+                            'type': 'list',
+                            'schema': {
+                                'type': 'string',
+                                'required': False
+                            },
+                            'empty': True,
+                        }
+                    },
+                    'empty': True
+                }
+            }
+        },
+        'acl': {
+            'type': 'dict',
+            'allow_unknown': True,
+            'required': False,
+        }
+    }
+
 .. http:post:: /types/
 
         HTTP Post route for inserting a new type.
@@ -678,7 +1070,57 @@ Types
 
             POST /rest/types/ HTTP/1.1
             Host: datagerry.com
+            Content-Type: application/json
             Accept: application/json
+
+            {
+                "name" : "dummy-type-example",
+                "label" : "Example Type",
+                "description" : "",
+                "version" : "1.0.0",
+                "status" : null,
+                "active" : true,
+                "clean_db" : true,
+                "access" : {
+                    "groups" : "",
+                    "users" : ""
+                },
+                "author_id" : 1,
+                "render_meta" : {
+                    "icon" : "fab fa-windows",
+                    "sections" : [
+                        {
+                            "type" : "section",
+                            "name" : "basic-sections",
+                            "label" : "Basicsection",
+                            "fields" : [
+                                "dummy-field"
+                            ]
+                        }
+                    ],
+                    "externals" : [],
+                    "summary" : {
+                        "fields" : [
+                            "dummy-field"
+                        ]
+                    }
+                },
+                "fields" : [
+                    {
+                        "type" : "text",
+                        "name" : "dummy-field",
+                        "label" : "Label may differ"
+                    }
+
+                ],
+                "category_id" : null,
+                "acl" : {
+                    "activated" : false,
+                    "groups" : {
+                        "includes" : {}
+                    }
+                }
+            }
 
         **Example response**
 
@@ -715,9 +1157,57 @@ Types
 
             PUT /rest/types/1 HTTP/1.1
             Host: datagerry.com
+            Content-Type: application/json
             Accept: application/json
 
             {
+                "name" : "dummy-type-example",
+                "label" : "Example Type",
+                "description" : "",
+                "version" : "1.0.0",
+                "status" : null,
+                "active" : true,
+                "clean_db" : true,
+                "public_id": 1,
+                "access" : {
+                    "groups" : "",
+                    "users" : ""
+                },
+                "author_id" : 1,
+                "render_meta" : {
+                    "icon" : "fab fa-windows",
+                    "sections" : [
+                        {
+                            "type" : "section",
+                            "name" : "basic-sections",
+                            "label" : "Basicsection",
+                            "fields" : [
+                                "dummy-field"
+                            ]
+                        }
+                    ],
+                    "externals" : [],
+                    "summary" : {
+                        "fields" : [
+                            "dummy-field"
+                        ]
+                    }
+                },
+                "fields" : [
+                    {
+                        "type" : "text",
+                        "name" : "dummy-field",
+                        "label" : "Rename field label"
+                    }
+
+                ],
+                "category_id" : null,
+                "acl" : {
+                    "activated" : false,
+                    "groups" : {
+                        "includes" : {}
+                    }
+                }
             }
 
         **Example response**
@@ -744,6 +1234,9 @@ Types
         :statuscode 202: Everything is fine.
         :statuscode 400: Resource could not be updated.
         :statuscode 404: No resource found.
+
+Delete - Operation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. http:delete:: /type/(int:public_id)
 
@@ -783,6 +1276,13 @@ Types
 
 Categories
 ----------
+
+Create and manage your first categories via the Rest-API
+
+READ (GET) - Operation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Overview of all GET routes to get categories from the database.
 
 .. http:get:: /categories/
 
@@ -907,6 +1407,54 @@ Categories
         :statuscode 200: Everything is fine.
         :statuscode 404: No resource found.
 
+Create / Update (POST / PUT) - Operation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+**Validation Schema**
+
+.. code-block::
+        {
+            'public_id': {
+                'type': 'integer'
+            },
+            'name': {
+                'type': 'string',
+                'required': True,
+                'regex': r'(\w+)-*(\w)([\w-]*)'  # kebab case validation,
+            },
+            'label': {
+                'type': 'string',
+                'required': False
+            },
+            'parent': {
+                'type': 'integer',
+                'nullable': True,
+                'default': None
+            },
+            'types': {
+                'type': 'list',	# List of public_id of Types
+                'default': []
+            },
+            'meta': {
+                'type': 'dict',
+                'schema': {
+                    'icon': {
+                        'type': 'string',
+                        'empty': True
+                    },
+                    'order': {
+                        'type': 'integer',
+                        'nullable': True
+                    }
+                },
+                'default': {
+                    'icon': '',
+                    'order': None,
+                }
+            }
+        }
+
+
 .. http:post:: /categories/
 
         HTTP Post route for inserting a new category.
@@ -917,6 +1465,7 @@ Categories
 
             POST /rest/categories/ HTTP/1.1
             Host: datagerry.com
+            Content-Type: application/json
             Accept: application/json
 
             {
@@ -975,10 +1524,11 @@ Categories
 
             PUT /rest/categories/1 HTTP/1.1
             Host: datagerry.com
+            Content-Type: application/json
             Accept: application/json
 
             {
-              ""public_id": 1,
+              "public_id": 1,
               "name": "example",
               "label": "Example",
               "meta": {
@@ -997,13 +1547,12 @@ Categories
             Content-Type: application/json
             Content-Length: 170
             Location: http://datagerry.com/rest/categories/1
-            X-API-Version: 1.0
 
             {
               "result": {
                 "public_id": 1,
                 "name": "example2",
-                "label": "Example,
+                "label": "Example",
                 "meta": {
                   "icon": "",
                   "order": 0
