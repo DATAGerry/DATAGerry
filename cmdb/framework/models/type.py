@@ -472,7 +472,7 @@ class TypeModel(CmdbDAO):
                         'required': False,
                         'empty': True,
                         'schema': {
-                            'type': 'integer',
+                            'type': ['integer', 'list'],
                         }
                     },
                     "summaries": {
