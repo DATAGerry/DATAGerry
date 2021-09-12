@@ -53,12 +53,12 @@ export class DateSettingsComponent implements OnInit, OnDestroy {
    */
   public formats: any[] = [
     {id: 'short', format: 'YYYY-MM-DD', view:  '2013-07-16'},
-    {id: 'medium', format: 'YYYY-MM-DDThh', view: '2013-07-16T19'},
-    {id: 'mediumZ', format: 'YYYY-MM-DDThhZ', view: '2013-07-16T19Z'},
-    {id: 'long', format: 'YYYY-MM-DDThh:mm', view: '2013-07-16T19:23'},
-    {id: 'longZ', format: 'YYYY-MM-DDThh:mmZ', view: '2013-07-16T19:23Z'},
-    {id: 'full', format: 'YYYY-MM-DDThh:mm:ss', view: '2013-07-16T19:23:51Z'},
-    {id: 'fullZ', format: 'YYYY-MM-DDThh:mm:ssZ', view: '2013-07-16T19:23:51Z'}
+    {id: 'medium', format: 'YYYY-MM-DDTHH', view: '2013-07-16T19'},
+    {id: 'mediumZ', format: 'YYYY-MM-DDTHHZ', view: '2013-07-16T19Z'},
+    {id: 'long', format: 'YYYY-MM-DDTHH:mm', view: '2013-07-16T19:23'},
+    {id: 'longZ', format: 'YYYY-MM-DDTHH:mmZ', view: '2013-07-16T19:23Z'},
+    {id: 'full', format: 'YYYY-MM-DDTHH:mm:ss', view: '2013-07-16T19:23:51Z'},
+    {id: 'fullZ', format: 'YYYY-MM-DDTHH:mm:ssZ', view: '2013-07-16T19:23:51Z'}
   ];
 
   /**
