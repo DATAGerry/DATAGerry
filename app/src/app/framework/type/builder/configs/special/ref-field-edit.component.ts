@@ -125,10 +125,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     type_id: this.typeControl,
   });
 
-  public test = [];
-  public dura = 'zwei';
-  public dura2 = 21;
-
   public ngOnInit(): void {
 
     this.form.addControl('name', this.nameControl);
@@ -171,7 +167,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   private prepareSummaries() {
     if (this.data.ref_types) {
       if (!Array.isArray(this.data.ref_types)) {
-        this.data.ref_types = [...this.data.ref_types];
+        this.data.ref_types = [this.data.ref_types];
       }
       this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
       this.data.summaries = this.data.summaries ? this.data.summaries : this.summaries;
@@ -181,7 +177,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   public onChange() {
     const { ref_types } = this.data;
-    if (ref_types && ref_types.length === 0) {
+    if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.filteredTypeList = [];
       this.data.value = '';
