@@ -52,8 +52,9 @@
           Please enter format
         </div>
       </div>
-
-      <button type="submit" class="btn btn-primary float-right">Go!</button>
+      <button type="button" class="btn btn-primary float-right"
+              (click)="this.exportObjectByTypeID()"
+              [disabled]="!formExport.valid">Go!</button>
     </div>
   </div>
 </form>
