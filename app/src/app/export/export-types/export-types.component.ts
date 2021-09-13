@@ -40,6 +40,13 @@ export class ExportTypesComponent implements OnInit {
     return this.formExport.get('format');
   }
 
+  private resetForm() {
+    this.formExport.reset();
+    this.formExport.markAsPristine();
+    this.formExport.markAsUntouched();
+    this.formExport.markAsDirty();
+  }
+
   public export() {
     this.isSubmitted = true;
     if (!this.formExport.valid) {
@@ -48,6 +55,9 @@ export class ExportTypesComponent implements OnInit {
 
     const typeID = this.formExport.get('type').value;
     const fileExtension: any = this.formExport.get('format').value;
+
+    // Reset FormGroup
+    this.resetForm();
 
     if (fileExtension != null && typeID != null) {
       this.exportService.callExportTypeRoute('export/type/' + typeID.toString())

@@ -64,6 +64,13 @@ export class ExportObjectsComponent implements OnInit {
     return this.formExport.get('format');
   }
 
+  private resetForm() {
+    this.formExport.reset();
+    this.formExport.markAsPristine();
+    this.formExport.markAsUntouched();
+    this.formExport.markAsDirty();
+  }
+
   public exportObjectByTypeID() {
     this.isSubmitted = true;
     if (!this.formExport.valid) {
@@ -72,6 +79,9 @@ export class ExportObjectsComponent implements OnInit {
 
     const typeID = this.formExport.get('type').value;
     const fileExtension: any = this.formExport.get('format').value;
+
+    // Reset FormGroup
+    this.resetForm();
 
     if (fileExtension != null && typeID != null) {
       const filter = {type_id: typeID};
