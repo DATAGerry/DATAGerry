@@ -48,6 +48,7 @@ all: bin rpm targz docker
 # install Python requirements
 .PHONY: requirements
 requirements:
+	${BIN_PIP} install --upgrade pip 
 	${BIN_PIP} install -r requirements.txt
 
 
