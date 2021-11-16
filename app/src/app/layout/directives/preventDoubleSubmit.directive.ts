@@ -28,11 +28,7 @@ export enum KEY_CODE {
 })
 export class PreventDoubleSubmitDirective {
 
-  @Input() valid: boolean = true;
-  @HostBinding() disabled: boolean = false;
-
-  @HostListener('click')
-  onClick() {
-    if (this.valid) { this.disabled = true; }
-  }
+  /**
+   * TODO: This solution was not satisfactory.Here you have to think about how to best intercept a double click
+   */
 }
