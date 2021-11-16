@@ -14,18 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+
+import json
+
+from queue import Queue
 from typing import Union, List
+from bson import Regex, json_util
 
-from bson import Regex
-
+from cmdb.database.utils import object_hook
+from cmdb.event_management.event import Event
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
+from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError
+from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Query, Pipeline
 from cmdb.search.query.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
@@ -132,8 +138,17 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
 
 class ObjectManager(ManagerBase):
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, event_queue: Union[Queue, Event] = None):
+        """
+        Set the database connection and the queue for sending events.
+
+        Args:
+            database_manager (DatabaseManagerMongo): Active database managers instance.
+            event_queue (Queue, Event): The queue for sending events or the created event to send
+        """
+        self.event_queue = event_queue
         self.object_builder = ObjectQueryBuilder()
+        self.type_manager = TypeManager(database_manager)
         super(ObjectManager, self).__init__(CmdbObject.COLLECTION, database_manager=database_manager)
 
     def get(self, public_id: Union[PublicID, int], user: UserModel = None,
@@ -175,6 +190,60 @@ class ObjectManager(ManagerBase):
         iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
+
+    def update(self, public_id: Union[PublicID, int], data: Union[CmdbObject, dict], user: UserModel = None,
+               permission: AccessControlPermission = None):
+        """
+        Update a existing type in the system.
+        Args:
+            public_id (int): PublicID of the type in the system.
+            data: New object data
+            user: Request user
+            permission: ACL permission
+
+        Notes:
+            If a CmdbObject instance was passed as data argument, \
+            it will be auto converted via the model `to_json` method.
+        """
+
+        if isinstance(data, CmdbObject):
+            instance = CmdbObject.to_json(data)
+        else:
+            instance = json.loads(json.dumps(data, default=json_util.default), object_hook=object_hook)
+
+        type_ = self.type_manager.get(instance.get('type_id'))
+
+        if not type_.active:
+            raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
+        verify_access(type_, user, permission)
+
+        update_result = self._update(self.collection, filter={'public_id': public_id}, resource=instance)
+
+        if update_result.matched_count != 1:
+            raise ManagerUpdateError(f'Something happened during the update!')
+
+        if self.event_queue and user:
+            event = Event("cmdb.core.object.updated", {"id": public_id, "type_id": instance.get('type_id'),
+                                                       "user_id": user.get_public_id(), 'event': 'update'})
+            self.event_queue.put(event)
+
+        return update_result
+
+    def update_many(self, query: dict, update: dict):
+        """
+        update all documents that match the filter from a collection.
+        Args:
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            acknowledgment of database
+        """
+        try:
+            update_result = self._update_many(self.collection, query=query, update=update)
+        except (ManagerUpdateError, AccessDeniedError) as err:
+            raise err
+        return update_result
 
     def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
                    user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \

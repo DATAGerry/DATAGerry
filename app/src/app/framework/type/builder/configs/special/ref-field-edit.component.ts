@@ -16,20 +16,22 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { TypeService } from '../../../../services/type.service';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { ObjectService } from '../../../../services/object.service';
 import { CmdbType } from '../../../../models/cmdb-type';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil, tap } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../../../layout/toast/toast.service';
-import { FormControl, Validators } from '@angular/forms';
+import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
+import { ChangeDetectorRef } from '@angular/core';
+
 
 @Component({
   selector: 'cmdb-ref-field-edit',
@@ -38,7 +40,8 @@ import { nameConvention } from '../../../../../layout/directives/name.directive'
 })
 export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  constructor(private typeService: TypeService, private objectService: ObjectService, private toast: ToastService) {
+  constructor(private typeService: TypeService, private objectService: ObjectService,
+              private toast: ToastService, private cd: ChangeDetectorRef) {
     super();
   }
 
@@ -59,10 +62,20 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public labelControl: FormControl = new FormControl('', Validators.required);
 
   /**
+   * Type form control.
+   */
+  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+
+  /**
+   * Summary form control.
+   */
+  public summaryControl: FormControl = new FormControl(undefined, Validators.required);
+
+  /**
    * Type list for reference selection
    */
   public typesAPIResponse: APIGetMultiResponse<CmdbType>;
-  public typeList: Array<CmdbType>;
+  public typeList: Array<CmdbType> = [];
   public filteredTypeList: CmdbType[] = [];
   public totalTypes: number = 0;
 
@@ -96,7 +109,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   /**
    * Object list for default reference value
    */
-  public objectList: RenderResult[] = [];
+  public objectList: RenderResult[];
 
   /**
    * Types params
@@ -105,22 +118,46 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
   };
 
-  public ngOnInit(): void {
-    this.typeLoading = true;
-    this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
-      (apiResponse: APIGetMultiResponse<CmdbType>) => {
-        this.typeList = apiResponse.results as Array<CmdbType>;
-        this.totalTypes = apiResponse.total;
-        this.prepareSummaries();
-        this.typeLoading = false;
-      },
-      (err) => this.toast.error(err)).add(() => this.typeLoading = false);
+  /**
+   * Reference form control.
+   */
+  public referenceGroup: FormGroup = new FormGroup({
+    type_id: this.typeControl,
+  });
 
-    if (this.data.value !== null && this.data.value !== undefined && this.data.value !== '') {
-      this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
-        this.objectList = res;
-      });
-    }
+  public ngOnInit(): void {
+
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+    this.form.addControl('ref_types', this.typeControl);
+    this.form.addControl('summaries', this.summaryControl);
+
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
+    this.triggerAPICall();
+  }
+
+  public triggerAPICall() {
+    this.typeLoading = true;
+    this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
+      .pipe(tap(() => this.typeLoading = false))
+      .subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.typeList = [...apiResponse.results as Array<CmdbType>];
+          this.totalTypes = apiResponse.total;
+          this.typeLoading = false;
+          this.prepareSummaries();
+          this.cd.markForCheck();
+        },
+        (err) => this.toast.error(err),
+        () => {
+          if (this.data.ref_types) {
+            this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+              this.objectList = res;
+              this.cd.markForCheck();
+            });
+          }
+        });
   }
 
   /**
@@ -140,7 +177,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   public onChange() {
     const { ref_types } = this.data;
-    if (ref_types && ref_types.length === 0) {
+    if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.filteredTypeList = [];
       this.data.value = '';
@@ -153,7 +190,8 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   }
 
   public summaryFieldFilter(id: number) {
-    return id ? this.typeList.find(s => s.public_id === id).fields : [];
+    const found = this.typeList.find(s => s.public_id === id);
+    return id ? found ? found.fields : [] : [];
   }
 
   public changeSummaryOption(type: CmdbType) {
@@ -204,6 +242,4 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     this.subscriber.next();
     this.subscriber.complete();
   }
-
-
 }

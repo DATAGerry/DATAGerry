@@ -4,7 +4,7 @@
     {{data.label}}: <span class="required" *ngIf="data?.required">*</span>
   </label>
   <div class="col-sm-9">
-    <div class="input-group input-group-sm ">
+    <div class="input-group input-group-sm">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <div class="custom-control custom-checkbox">
@@ -14,25 +14,21 @@
           </div>
         </ng-container>
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
-          <div class="container">
-            <div class="row">
-              <div class="col-sm-auto p-0" *ngIf="mode == MODES.Bulk">
-                <cmdb-object-bulk-input-appends [data]="data" [controller]="controller"
-                                                [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
-              </div>
-              <div class="col-sm-4">
-                <div class="custom-control custom-checkbox">
-                  <input type="checkbox" name="{{namePrefix + data.name}}" class="custom-control-input"
-                         [formControlName]="data.name" [attr.id]="namePrefix + data.name"
-                         [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                 'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
-                  <label class="custom-control-label" for="{{namePrefix + data.name}}"></label>
-                </div>
-              </div>
-              <div class="col-sm">
-                <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
+          <div class="d-flex justify-content-between align-items-center">
+            <div class="position-absolute sticky-top">
+              <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
+                                              [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
+            </div>
+            <div>
+              <div class="custom-control custom-checkbox">
+                <input type="checkbox" name="{{namePrefix + data.name}}" class="custom-control-input"
+                       [formControlName]="data.name" [attr.id]="namePrefix + data.name"
+                       [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
+                     'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"/>
+                <label class="custom-control-label" for="{{namePrefix + data.name}}"></label>
               </div>
             </div>
+            <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
           </div>
         </ng-container>
         <div *ngSwitchDefault>

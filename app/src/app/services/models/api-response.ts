@@ -45,6 +45,11 @@ export class APIInsertSingleResponse<T = CmdbDao> extends APIResponse {
   raw: T;
 }
 
+export class APIUpdateMultiResponse<T = CmdbDao> extends APIResponse {
+  results: Array<T>;
+  failed: Array<any>;
+}
+
 export class APIUpdateSingleResponse<T = CmdbDao> extends APIResponse {
   result: T;
 }

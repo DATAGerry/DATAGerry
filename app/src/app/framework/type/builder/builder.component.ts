@@ -34,6 +34,9 @@ import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
+import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 
 declare var $: any;
 
@@ -72,7 +75,10 @@ export class BuilderComponent implements OnDestroy {
         preSectionList.push(section);
         const fieldBufferList = [];
         for (const field of section.fields) {
-          fieldBufferList.push(instance.fields.find(f => f.name === field));
+          const found = instance.fields.find(f => f.name === field);
+          if (found) {
+            fieldBufferList.push(found);
+          }
         }
         preSectionList.find(s => s.name === section.name).fields = fieldBufferList;
       }
@@ -100,7 +106,7 @@ export class BuilderComponent implements OnDestroy {
   ];
 
 
-  public constructor() {
+  public constructor(private modalService: NgbModal) {
     this.typeInstance = new CmdbType();
   }
 
@@ -151,10 +157,29 @@ export class BuilderComponent implements OnDestroy {
       }
       this.sections.splice(index, 0, event.data);
       this.typeInstance.render_meta.sections = [...this.sections];
-      if (event.data.type === 'ref-section') {
+      if (event.data.type === 'ref-section' && event.dropEffect === 'copy') {
         this.addRefSectionSelectionField(event.data as CmdbTypeSection);
       }
     }
+  }
+
+  /**
+   * This method checks if the field is used for an external link.
+   * @param field
+   */
+  public externalField(field) {
+    const include = {links: [], total: 0};
+    for (const external of this.typeInstance.render_meta.externals) {
+      const fields = external.hasOwnProperty('fields') ? Array.isArray(external.fields) ? external.fields : [] : [];
+      const found = fields.find(f => f === field.name);
+      if (found) {
+        if (include.total < 10) {
+          include.links.push(external);
+        }
+        include.total = include.total + 1;
+      }
+    }
+    return include;
   }
 
   public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
@@ -189,6 +214,8 @@ export class BuilderComponent implements OnDestroy {
     if (effect === 'move') {
       const index = list.indexOf(item);
       list.splice(index, 1);
+      this.sections = list;
+      this.typeInstance.render_meta.sections = [...this.sections];
     }
   }
 
@@ -232,6 +259,16 @@ export class BuilderComponent implements OnDestroy {
     const ret = array.slice(0);
     ret[index] = value;
     return ret;
+  }
+
+  public openPreview() {
+    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
+    previewModal.componentInstance.sections = this.sections;
+  }
+
+  public openDiagnostic() {
+    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
+    diagnosticModal.componentInstance.data = this.sections;
   }
 
   public matchedType(value: string) {

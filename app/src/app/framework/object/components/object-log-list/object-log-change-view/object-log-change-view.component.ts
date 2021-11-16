@@ -18,7 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { LogMode } from '../../../../modes.enum';
-import {isArray} from "rxjs/internal-compatibility";
+import { isArray } from 'rxjs/internal-compatibility';
 
 @Component({
   selector: 'cmdb-object-log-change-view',
@@ -40,7 +40,7 @@ export class ObjectLogChangeViewComponent {
    */
   @Input()
   public set changes(value: any) {
-    if (!Array.isArray(value)) {
+    if (value && !Array.isArray(value)) {
       const before = value.old;
       const after = value.new;
       if (isArray(before) && isArray(after)) {

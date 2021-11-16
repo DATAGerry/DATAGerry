@@ -9,20 +9,20 @@ Object Types are organized in Categories. Categories can be managed under Framew
 assigned to one Category. Categories can be organized hierarchically, just define a parent Category. The tree of
 Categories and their assigned Object Types are displayed on the sidebar on the left side of DATAGERRY.
 
-.. image:: img/objects_categories_sidebar.png
-    :width: 100
+.. figure:: img/objects_categories_sidebar.png
+    :width: 200
 
+    Figure 1: Sidebar
 
 Managing Object Types
 =====================
 
 To manage Object Types select Framework -> Types in the menu bar:
 
-.. image:: img/objects_menu_types.png
-    :width: 200
+.. figure:: img/objects_menu_types.png
+    :width: 300
 
-A list with defined object types will be shown.
-
+    Figure 2: Type list overview
 
 Adding/Editing an Object Type
 -----------------------------
@@ -31,45 +31,87 @@ wizzard will guide you through the process.
 
 At first, some basic information about the type will be asked:
 
-.. image:: img/objects_type_basic.png
+.. figure:: img/objects_type_basic.png
     :width: 600
+
+    Figure 3: Add a new type
 
 Choose a label and icon for the Object Type, that will be shown in the frontend. The name of the Object Type will be 
 created automatically and cannot be changed and is only for internal use. Each Type is connected with a category. With
 the exception of name, each setting on this page can be changed at any time.
 
+The next step is the definition of the object fields see the following figure 4:
 
-As a next step, the object fields can be defined:
-
-.. image:: img/objects_type_fields.png
+.. figure:: img/objects_type_fields.png
     :width: 600
 
-Fields are organized in "Sections". To add a new section or field, choose an element from the left side box and move it
-to the center with drag and drop. At first, add a section (you find it under "Structure Controls"), after that, choose
-one or more fields. Each field or section has a name and label. A name will be created automatically and cannot be
-changed manually, while a label can be changed at any time. Depending on the field type, several options can be set.
-Currently we support the following field types:
+    Figure 4: Definition of the object fields
 
-.. csv-table::
-    :header: "type", "description"
-    :align: left
+Fields are organized in “Sections” and "Reference Sections". To add a new section or field, choose an element from the
+left side box and move it to the center with drag and drop. At first, add a 'section' or a 'reference section'
+(you find it under “Structure Controls”), after that, choose one or more fields. Each field or section has a
+name and label. A name will be created automatically and cannot be changed manually, while a label can be changed at
+any time. Depending on the field type, several options can be set. Currently we support the following field types:
 
-    "Text", "A text field. Content validation with regular expression is possible"
-    "Password", "A password field with integrated password generator and hiding of content"
-    "Textarea", "Textbox with multiple lines"
-    "Checkbox", "A boolean checkbox"
-    "Radio", "Selection between multiple options"
-    "Select", "Selection between multiple options with a dropdown menu"
-    "Date", "A datepicker"
-    "Reference", "Reference to another object of a specific type. E.g. connection between a router and a location object"
 
-With the yellow preview button, an example of an object with the current configuration will be shown.
+.. list-table:: Table 1: Supported field types
+   :width: 100%
+   :widths: 25 75
+   :align: left
+   :header-rows: 1
 
+   * - Type
+     - Description
+   * - Text
+     - A text field. Content validation with regular expression is possible
+   * - Password
+     - password field with integrated password generator and hiding of content
+   * - Textarea
+     - Textbox with multiple lines
+   * - Checkbox
+     - A boolean checkbox
+   * - Radio
+     - Selection between multiple options
+   * - Select
+     - Selection between multiple options with a dropdown menu
+   * - Date
+     - A Date string according to the date format (ISO 8601)
+   * - Reference
+     - Reference to another object of a specific type. E.g. connection between a router and a location object
+   * - Reference Section
+     - This binds a section with all fields of a referencing object completely as a display.
+
+Special Controls
+----------------
+
+A "Reference" field type embeds a summary of a referencing object as a display.
+The summary for each object definition is predefined in the type generator under the "Meta" tab. See Figure 7.
+With the field type "Reference" it is possible to override the predefined summaries and make them user specific.
+See Figure 5.
+
+
+.. figure:: img/special_control_field.png
+    :width: 600
+
+    Figure 5: Definition of the special fields
+
+Reference Section
+-----------------
+A reference type "Section reference" binds a section with all fields of a referencing object completely as a display.
+The search for the field values is run through like a normal field. The references are expanded accordingly,
+so that a distinction is made between field references and section references.
+
+.. figure:: img/object_reference_section_field.png
+    :width: 600
+
+    Figure 6: Definition of the object fields via reference section
 
 On the next page on the configuration dialog, meta information can be set:
 
-.. image:: img/objects_type_meta.png
+.. figure:: img/objects_type_meta.png
     :width: 600
+
+    Figure 7: Meta information
 
 Each object has summary fields. These fields summarize the object and are shown by default in object lists. On a router,
 this could be a management ip and a hostname. The summary fields can be set under "Summary".
@@ -108,6 +150,79 @@ When using the Category tree, you can choose an Object Type (e.g. router) and ge
 By default, only summary fields of an object are shown in the table, with the yellow settings button, additional fields
 can be faded in.
 
+Active und Inactive Objects
+---------------------------
+Objects in DATAGERRY can be active or inactive. Inactive Objects are hidden in the WebUI and were not exported to
+external systems with Exportd. By default, all new created Objects in DATAGERRY are active. You can set an Object to
+inactive by hitting the small switch on the Object view page.
+
+If you want to see inactive Objects in the WebUI, click on the switch under the navigation bar.
+
+.. figure:: img/objects_active_switch.png
+    :width: 300
+
+    Figure 8: Active / Inactive objects switch
+
+Object tables search / filter
+---------------------------
+
+Searching a table is one of the most common user interactions with a DATAGERRY table, and DATAGERRY provides a number
+of methods for you to control this interaction. There are tools for the table search(search) and for each individual
+column (filter). Each search (table or column) can be marked as a regular expression (allowing you to create very complex interactions).
+
+| Please note that this method only applies the search to the table - it does not actually perform the search.
+
+.. figure:: img/table_search_filter/object_table_search_initial.png
+    :width: 600
+
+    Figure 9: Unfiltered object overview
+
+Table search
+^^^^^^^^^^^^
+The search option offers the possibility to check the results in a table.
+The search is performed across all searchable columns. If matching data is found in a column,
+the entire row is matched and displayed in the result set. See Figure 10: *Search result after searching for "B"*
+
+.. figure:: img/table_search_filter/object_table_search_result.png
+    :width: 600
+
+    Figure 10: Search result after searching for "B"
+
+Table filter
+^^^^^^^^^^^^
+While the search function offers the possibility to search the table,
+the filter method provides the ability to search for data in a specific column.
+
+The column searches are cumulative, so additional columns can be inserted to apply multiple individual column searches,
+presenting the user with complex search options.
+
+.. figure:: img/table_search_filter/object_table_filter_result.png
+    :width: 600
+
+    Figure 11: Filter result after filtering for "B"
+
+The search terms within different rows are linked with each other with the condition *OR* (Figure 12: *Filtering by OR-expression*).
+The search terms within a row are all linked with the condition *AND* (Figure 13: *Filter by AND-expression*).
+Only the filtered objects are available for exporting the values from the current table.
+
+.. figure:: img/table_search_filter/object_table_filter_example_1_result.png
+    :width: 600
+
+    Figure 12: Filtering by OR expression
+
+.. figure:: img/table_search_filter/object_table_filter_example_2_result.png
+    :width: 600
+
+    Figure 13: Filtering by AND expression
+
+|
+.. note::
+    Date values must be searched according to the following format:
+
+    **Format**: *YYYY-MM-DDThh:mmZ*
+
+    **Example**: *2019-12-19T11:02*
+|
 
 Bulk change of Objects
 ----------------------
@@ -119,9 +234,10 @@ on the basis of change templates. With this change, the selected objects adopt t
 
 Simply select all objects you want to change and click on the yellow button for mass changes above the list.
 
-.. image:: img/objects_bulk_change_list.png
+.. figure:: img/objects_bulk_change_list.png
     :width: 600
 
+    Figure 14: Select objects for bulk change
 
 **Template**
 
@@ -129,36 +245,28 @@ A change template is generated based on the assigned object type. The following 
 to the creation of a regular object. Store all contents that you want to
 transfer to the objects later and save your entries.
 
-.. image:: img/objects_bulk_change_active.png
+.. figure:: img/objects_bulk_change_active.png
     :width: 600
 
+    Figure 15: Change template
 
 **Preview**:
 
 In the preview, all changes made are listed and can be adjusted again if necessary.
 
-.. image:: img/objects_bulk_change_preview.png
+.. figure:: img/objects_bulk_change_preview.png
     :width: 600
 
+    Figure 16: Overview of changes
 
 **Result**:
 
 After a preview, the selected objects will be changed.
 
-.. image:: img/objects_bulk_change_list.png
+.. figure:: img/objects_bulk_change_list.png
     :width: 600
 
-
-Active und Inactive Objects
----------------------------
-Objects in DATAGERRY can be active or inactive. Inactive Objects are hidden in the WebUI and were not exported to
-external systems with Exportd. By default, all new created Objects in DATAGERRY are active. You can set an Object to 
-inactive by hitting the small switch on the Object view page.
-
-If you want to see inactive Objects in the WebUI, click on the switch under the navigation bar.
-
-.. image:: img/objects_active_switch.png
-    :width: 200
+    Figure 17: Bulk change result
 
 
 Exporting Objects
@@ -170,10 +278,37 @@ Objects can be exported in several formats. Currently we support:
  * JSON
  * XML
 
-To export objects, click on the "Export" button in an Object list and choose the export format. Only Objects of a single
-type can be exported (so you won't find the Export button in a list with Objects of multiple types).
+To export objects, click the "Export" button in an object list and select the desired format. Only objects of a single
+type can be exported (therefore you will not find the "Export" button in a list with objects of multiple types).
 
-An export is also possible in the menu, choose "Object Import/Export" -> "Export Objects".
+.. figure:: img/raw-custom-export.png
+    :width: 600
+
+    Figure 18: Export from object list overview
+
+
+.. list-table:: Table 2: Supported export types
+   :width: 100%
+   :widths: 25 75
+   :align: left
+   :header-rows: 1
+
+   * - Type
+     - Description
+   * - Raw Export
+     - All fields of the objects are exported raw. This functionality makes it easier for the user to make some changes
+       and import the changed data back into DATAGERRY.
+   * - Customer Export
+     - Only the fields selected by the user are exported. When using a quick filter in the table, only iltered objects
+       are exported and only rendered fields are displayed instead of raw data.
+
+
+| Export is also possible from the menu, select "Toolbox" -> "Exporter" -> "Objects".
+
+.. figure:: img/object-import-export.png
+    :width: 300
+
+    Figure 19: Export / Import via Toolbox
 
 
 Importing Objects
@@ -247,19 +382,17 @@ up to and including search, export, etc.
 
 In principle, there are five different access situations to objects.
 
-+-------------------------------------------------------------------------------+-----------------------------------------------+
-| Configuration                                                                 | Access                                        |
-+===============================================================================+===============================================+
-| No ACL defined                                                                | Everyone has access to objects of this type   |
-+-------------------------------------------------------------------------------+-----------------------------------------------+
-| ACL deactivated                                                               | Everyone has access to objects of this type   |
-+-------------------------------------------------------------------------------+-----------------------------------------------+
-| ACL enabled, but group not included                                           | No access to objects of this type             |
-+-------------------------------------------------------------------------------+-----------------------------------------------+
-| ACL enabled and group included, but not the grant permission of the operation | No access to objects of this type             |
-+-------------------------------------------------------------------------------+-----------------------------------------------+
-| ACL enabled and group included and grant permission of the operation          | User group has access to objects of this type |
-+-------------------------------------------------------------------------------+-----------------------------------------------+
+.. csv-table:: Table 3: Access situations
+   :header: "Configuration", "Access"
+   :width: 100%
+   :widths: 50 50
+   :align: left
+
+   "No ACL defined", "Everyone has access to objects of this type"
+   "ACL deactivated", "Everyone has access to objects of this type"
+   "ACL enabled, but group not included", "No access to objects of this type"
+   "ACL enabled and group included, but not the grant permission of the operation", "No access to objects of this type"
+   "ACL enabled and group included and grant permission of the operation", "User group has access to objects of this type"
 
 **Why additional protection of objects?**
 
@@ -275,22 +408,28 @@ Configure Object ACL
 Object ACL are defined in the respective type definitions via the type builder.
 These can be defined under the ACL step based on the type. By default, they are disabled and the menu is excluded.
 
-.. image:: img/object_type_builder_acl_protected.png
+.. figure:: img/object_type_builder_acl_protected.png
     :width: 600
     :alt: Deactivated object acl
 
+    Figure 20: Deactivated object acl
+
 When activated, the menu is enabled and groups can be added to an ACL with the respective permissions.
 
-.. image:: img/object_type_builder_acl_setup.png
+.. figure:: img/object_type_builder_acl_setup.png
     :width: 600
     :alt: While object acl configure
+
+    Figure 21: While object acl configure
 
 After adding the groups, they are displayed in the list below and their permissions can be edited further.
 But a group can only appear once in an ACL.
 Listing the same group with different permissions in the same list is not possible.
 
-.. image:: img/object_type_builder_acl_example.png
+.. figure:: img/object_type_builder_acl_example.png
     :width: 600
     :alt: Inserted object acl
+
+    Figure 22: Inserted object acl
 
 The ACL settings are retained at the object level even after the ACL is disabled, but then they are no longer applied.

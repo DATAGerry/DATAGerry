@@ -1,3 +1,8 @@
 .table-container {
   position: relative;
 }
+
+.disableContent {
+  pointer-events: none;
+  opacity: 0.4;
+}

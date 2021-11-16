@@ -26,18 +26,13 @@ import { RenderFieldComponent } from '../../fields/components.fields';
 })
 export class DateSimpleComponent extends RenderFieldComponent implements OnInit {
 
+  public date: any = 'no date set';
+
   constructor() {
     super();
   }
 
   public ngOnInit(): void {
-    const dateValue = this.data ? this.data.value : this.data.value;
-    if (dateValue) {
-      if (dateValue.$date) {
-        this.data.value = dateValue.$date;
-      }
-    } else {
-      this.data.value = 'no date set';
-    }
+    this.date = this.data ? this.data.value ? this.data.value : this.date : this.date;
   }
 }

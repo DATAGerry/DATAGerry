@@ -25,7 +25,13 @@ def example_type():
         fields=[{
             "type": "text",
             "name": "test-field",
-            "label": "Test"
+            "label": "Test",
+            "required": False,
+            "description": "Description",
+            "regex": "TEST .*",
+            "placeholder": "entre you value",
+            "value": "this ist the default value",
+            "helperText": "Help, i need somebody"
         }],
         acl=AccessControlList(activated=False, groups=GroupACL(includes=None))
     )
@@ -69,6 +75,7 @@ class TestFrameworkTypes(RestAPITestSuite):
         assert len(response_dict['results']) == int(default_response.headers['X-Total-Count'])
         assert len(response_dict['results'])
         assert isinstance(test_type, TypeModel)
+        assert len(test_type.fields[0].keys()) == 9
 
         # Test filter
         filter_response = rest_api.get(f'{self.ROUTE_URL}/', query_string={'filter': dumps({'public_id': 1})})
@@ -106,6 +113,7 @@ class TestFrameworkTypes(RestAPITestSuite):
         test_type_json = response_dict['result']
         test_type = TypeModel.from_data(test_type_json)
         assert isinstance(test_type, TypeModel)
+        assert len(test_type.fields[0].keys()) == 9
 
         # Not Found
         not_found_response = rest_api.get(f'{self.ROUTE_URL}/{-1}')
@@ -131,6 +139,7 @@ class TestFrameworkTypes(RestAPITestSuite):
         default_response = rest_api.post(f'{self.ROUTE_URL}/', json=TypeModel.to_json(example_type))
         assert default_response.status_code == HTTPStatus.CREATED
         validate_response = rest_api.get(f'{self.ROUTE_URL}/{example_type.public_id}')
+
         assert validate_response.status_code == HTTPStatus.OK
         double_check_response = rest_api.post(f'{self.ROUTE_URL}/', json=TypeModel.to_json(example_type))
         assert double_check_response.status_code == HTTPStatus.BAD_REQUEST

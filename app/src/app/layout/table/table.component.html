@@ -9,16 +9,23 @@
     <div *ngIf="customButtons && customButtons.length > 0" class="custom-button-templates">
       <ng-template *ngFor="let customButton of customButtons" [ngTemplateOutlet]="customButton"></ng-template>
     </div>
-    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled">
+    <div class="table-config-switch mr-1 ml-1 border-right" *ngIf="stateEnabled"
+         [ngClass]="columnSearchIconHidden ? 'disableContent' : ''">
       <table-state [tableStates]="tableStates" [currentState]="tableState" (stateSave)="onStateSave($event)"
                    (stateSelect)="onStateSelect($event)" (stateDelete)="onStateDelete($event)"
                    (stateUpdate)="onStateUpdate($event)" (stateReset)="onStateReset()">
       </table-state>
     </div>
-    <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable">
+    <div class="table-toggle mr-1 ml-1 border-right" *ngIf="toggleable"
+         [ngClass]="columnSearchIconHidden ? 'disableContent' : ''">
       <table-column-toggle [columns]="columns" (columnsReset)="onColumnsReset()"
                            (columnVisibilityChange)="onColumnVisibilityChange($event)">
       </table-column-toggle>
+    </div>
+    <div *ngIf="columnSearchEnabled" class="btn-group mr-1 ml-1 border-right">
+      <button class="btn btn-secondary btn-sm" type="button" (click)="onColumnSearchVisibilityChange()">
+        <i class="fas fa-filter"></i> Filter
+      </button>
     </div>
     <div class="table-search ml-1" *ngIf="searchEnabled">
       <table-search [debounceTime]="debounceTime" (searchChange)="searchChange.emit($event)"></table-search>
@@ -27,7 +34,7 @@
   <table #table layout-table class="table">
     <thead table-head [sortable]="sortable">
     <tr class="table-head">
-      <th *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+      <th *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" value="all" title="select-all-rows"
                  [checked]="items.length === selectedItems.length && items.length > 0"
@@ -39,10 +46,13 @@
           [hidden]="column.hidden"></th>
     </tr>
     </thead>
+    <thead table-column-search *ngIf="columnSearchEnabled && columnSearchIconHidden"
+           [form]="columnSearchForm" [columns]="columns" [selectEnabled]="selectEnabled"
+           (columnSearchChange)="columnSearchChange.emit($event)"></thead>
     <tbody table-body [bodyClasses]="bodyClasses" *ngIf="!groupRowsBy; else rowGroupTable">
     <tr table-row *ngFor="let item of items; let rowIndex = index" [item]="item" [rowIndex]="rowIndex"
         [ngClass]="rowClasses">
-      <td *ngIf="selectEnabled" [ngStyle]="{'width': '3rem'}">
+      <td *ngIf="selectEnabled" [ngStyle]="{'width': '2rem'}">
         <div class="form-check">
           <input class="form-check-input position-static" type="checkbox" [value]="item"
                  title="" [checked]="selectedItems.includes(item)"

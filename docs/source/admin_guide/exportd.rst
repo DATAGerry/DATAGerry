@@ -81,10 +81,68 @@ following syntax is supported::
 
 Configure Scheduling
 --------------------
-ExportJob can be triggered manually by clicking "Run Now" on the Export Job List. It is also possible to run the job
-event based (this must be enabled in the configuration). That means, the job is triggered, if one of the sources'
-objects has changed or a new object was added.
+This step sets the settings for running exportd jobs.
 
+.. csv-table:: Table 1: Execution settings
+   :header: "Execution", "Description"
+   :widths: 30 70
+   :align: left
+
+   "Run Exportd Job on Event", "It is also possible to run the job event based (this must be enabled in the configuration). That means, the job is triggered, if one of the sources objects has changed or a new object was added. All objects are transmitted that correspond to the previously defined conditions "
+   "Transfer subset", "Transfer only the objects that have been changed. Excludes jobs that have been executed manually and jobs that are executed automatically after they have been created."
+
+| When executing the following Exportd jobs, additional 'event' information is transmitted.
+
+- External systems
+    * ExternalSystemDummy
+    * ExternalSystemExecuteScript
+    * ExternalSystemGenericRestCall
+    * ExternalSystemGenericPullJson
+
+- Events
+    * Run on Event
+        * insert
+        * update
+        * delete
+    * Run manual
+        * manual
+    * After creating Exportd Job
+        * automatic
+
+| If the switch 'Run on Event' is set, all objects are transmitted that correspond to the previously defined conditions ( hostname == '.*host').
+
+.. code-block:: json
+
+    [
+       {
+          "object_id": "1",
+          "event": "insert",
+          "variables":{
+             "hostname": "localhost",
+          }
+       },
+       {
+          "object_id": "5",
+          "event": "insert",
+          "variables":{
+             "hostname": "datagerry-host",
+          }
+       },
+    ]
+
+| If the switch 'Transfer subset' is set, only the changed objects are transferred. The condition ( hostname == '.*host'). still applies.
+
+.. code-block:: json
+
+    [
+       {
+          "object_id": "7",
+          "event": "insert",
+          "variables":{
+             "hostname": "customer-host",
+          }
+       }
+    ]
 
 ExternalSystems
 ===============
@@ -95,8 +153,10 @@ Currently the follwowing ExternalSystems are supported:
     You can add your own ExternalSystems with a plugin system, that will be available soon.
 
 
-.. csv-table:: 
-    :header: "ExternalSystem", "description"
+.. csv-table:: Table 2: Supported external systems
+    :header: "External system", "Description"
+    :width: 100%
+    :widths: 30 70
     :align: left
 
     "ExternalSystemAnsible", "Provides a dynamic inventory for Ansible"
@@ -131,8 +191,10 @@ Download the script and change the config variables to met your DATAGERRY config
 
 This exporter class has no parameters, but needs some Export Variables to be set:
 
-.. csv-table::
-    :header: "name", "required", "description"
+.. csv-table:: Table 3: ExternalSystemAnsible - Supported export variables
+    :header: "Name", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "hostname", "True", "hostname or IP that Ansible uses for connecting to the host. e.g. - test.example.com"
@@ -168,8 +230,10 @@ The exporter will not create a DNS zone for you. So the DNS zone should already 
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 4: ExternalSystemCpanelDns - Supported export parameters
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "cpanelApiUrl", "True", "cPanel API base URL"
@@ -182,8 +246,10 @@ The exporter class has the following parameters:
 
 The following variables needs to be set:
 
-.. csv-table::
-    :header: "name", "required", "description"
+.. csv-table:: Table 5: ExternalSystemCpanelDns - Supported export variables
+    :header: "Name", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "hostname", "True", "host part of the DNS A record. e.g. - test"
@@ -196,8 +262,10 @@ This class will create a CSV file on the filesystem.
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 6: ExternalSystemCsv - Supported export variables
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "csv_filename", "False", "name of the output CSV file. Default: stdout"
@@ -216,8 +284,10 @@ export variables will be passed to the external script/binary via stdin.
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 7: ExternalSystemExecuteScript - Supported export parameters
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "script", "True", "full path to the script that should be executed"
@@ -322,8 +392,10 @@ will be sent as data within the HTTP request.
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 8: ExternalSystemGenericRestCall - Supported export parameters
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "url", "True", "URL for HTTP POST request"
@@ -366,8 +438,10 @@ syntax, etc.), a rollback will be done.
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 9: ExternalSystemMySQLDB - Supported export parameters
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "dbserver", "True", "Hostname or IP of the database server"
@@ -378,8 +452,10 @@ The exporter class has the following parameters:
 
 The following export variables can be defined:
 
-.. csv-table::
-    :header: "name", "required", "description"
+.. csv-table:: Table 10: ExternalSystemMySQLDB - Supported export variables
+    :header: "Name", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "table\_<name>", "True", "adding CMDB data to database table with name <name>. As value, comma seperated field values (in SQL INSERT syntax) should be defined"
@@ -405,8 +481,10 @@ supported) can be done.
 
 The exporter class has the following parameters:
 
-.. csv-table::
-    :header: "parameter", "required", "description"
+.. csv-table:: Table 11: ExternalSystemOpenNMS - Supported export parameters
+    :header: "Parameter", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "resturl", "True", "OpenNMS REST URL"
@@ -421,8 +499,10 @@ The exporter class has the following parameters:
 
 The following export variables can be defined:
 
-.. csv-table::
-    :header: "name", "required", "description"
+.. csv-table:: Table 12: ExternalSystemOpenNMS - Supported export variables
+    :header: "Name", "Required", "Description"
+    :width: 100%
+    :widths: 30 20 50
     :align: left
 
     "nodelabel", "True", "nodelabel for the OpenNMS node"

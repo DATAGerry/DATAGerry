@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2019 - 2021 NETHINKS GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@ import { PageLengthEntry } from './components/table-page-size/table-page-size.co
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
 import { Router } from '@angular/router';
+import { FormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-table',
@@ -109,6 +110,26 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.columns = columns;
     this.items = [];
   }
+
+  /**
+   * Column search form group.
+   */
+  public columnSearchForm: FormGroup;
+
+  /**
+   * Column search columnSearchForm group.
+   */
+  public columnSearchIconHidden: boolean = false;
+
+  /**
+   * Column search input enabled.
+   */
+  @Input() public columnSearchEnabled: boolean = false;
+
+  /**
+   * Event Emitter for column search input change.
+   */
+  @Output() public columnSearchChange: EventEmitter<any[]> = new EventEmitter<any[]>();
 
   /**
    * Items or data which will be inserted into the tbody.
@@ -285,7 +306,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   public constructor(private tableService: TableService, private router: Router) {
-
   }
 
   public ngOnInit(): void {
@@ -302,6 +322,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         this.stateChange.emit(this.tableState);
       }
     });
+
     if (isDevMode()) {
       this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
         console.log(`[TableEvent] Page size changed to: ${ size }`);
@@ -321,7 +342,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         console.log(sort);
       });
     }
-
   }
 
   /**
@@ -380,7 +400,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.columnVisibilityChange.emit(column);
   }
 
-
   /**
    * Reset the columns to the initial set.
    */
@@ -389,6 +408,14 @@ export class TableComponent<T> implements OnInit, OnDestroy {
       col.hidden = !this.initialVisibleColumns.includes(col.name);
     }
     this.columnVisibilityChange.emit();
+  }
+
+  /**
+   * On hidden change of a column search.
+   */
+  public onColumnSearchVisibilityChange() {
+    this.columnSearchIconHidden = !this.columnSearchIconHidden;
+    this.columnSearchChange.emit([]);
   }
 
   /**
@@ -482,6 +509,4 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     this.subscriber.next();
     this.subscriber.complete();
   }
-
-
 }

@@ -9,7 +9,7 @@
               autocomplete="off">
           <div class="form-group">
             <label>Fields</label>
-            <ng-select [items]="fields" [multiple]="true" [searchable]="false" bindLabel="label" (change)="onSummaryChange($event)"
+            <ng-select [items]="summaries" [multiple]="true" [searchable]="false" bindLabel="label" (change)="onSummaryChange($event)"
                        bindValue="name" placeholder="Select fields" formControlName="fields">
               <ng-template ng-option-tmp let-item="item">
                 <div><span>Field: </span>{{item.label}}</div>

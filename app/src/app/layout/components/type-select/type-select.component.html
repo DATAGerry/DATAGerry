@@ -1,9 +1,10 @@
 <ng-container [formGroup]="formGroup">
-  <ng-select [closeOnSelect]="true" [items]="types" [searchable]="false" [formControl]="typeControl" [virtualScroll]="virtualScroll"
-             [loading]="loading" [bindValue]="bindValue" [bindLabel]="bindLabel" [placeholder]="placeHolderText"
-             [clearable]="clearable" (scrollToEnd)="onScrollEnd()">
+  <ng-select [closeOnSelect]="true" [items]="types" [searchable]="searchable" [formControl]="typeControl"
+             [searchFn]="searchRef" (search)="onCustomSearch($event.term, $event.items)"
+             [virtualScroll]="virtualScroll" [loading]="loading" [bindValue]="bindValue" [bindLabel]="bindLabel"
+             [placeholder]="placeHolderText" [clearable]="clearable" (scrollToEnd)="onScrollEnd()">
     <ng-template ng-header-tmp>
-      <small class="form-text text-muted">Loaded {{types.length}} of {{totalTypes}}</small>
+      <small class="form-text text-muted">Loaded {{types?.length}} of {{totalTypes}}</small>
     </ng-template>
     <ng-template ng-label-tmp>
       {{(loadDisplayType(typeControl.value) | async)?.label}}

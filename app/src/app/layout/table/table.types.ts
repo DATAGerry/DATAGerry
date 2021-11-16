@@ -84,6 +84,11 @@ export interface Column {
   name: string;
 
   /**
+   * Field type (text, checkbox, reference etc.)
+   */
+  type?: string;
+
+  /**
    * Field is hidden
    */
   hidden?: boolean;
@@ -133,7 +138,7 @@ export interface Column {
    * @param column
    * @param index
    */
-  render?(data: any, item: any, column?: Column, index?: number);
+  render?(data: any, item?: any, column?: Column, index?: number);
 }
 
 

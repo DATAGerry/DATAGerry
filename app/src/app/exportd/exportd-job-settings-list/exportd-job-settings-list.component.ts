@@ -370,14 +370,12 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
   public run_job_manual(job: ExportdJob) {
     job.running = true;
     job.state = ExecuteState.RUNNING;
-    this.taskService.putTask(job).pipe(takeUntil(this.subscriber)).subscribe(value => this.toast.success('Job started'),
-      error => this.toast.error(error),
-      () =>
-        this.taskService.run_task(job.public_id).pipe(takeUntil(this.subscriber)).subscribe(resp => console.log(resp),
-          error => {
-          },
-          () => this.loadsTasksFromAPI())
-    );
+    this.taskService.run_task(job.public_id).pipe(takeUntil(this.subscriber)).subscribe(resp => console.log(resp),
+        error => this.toast.error(error.message),
+      () => {
+        this.toast.success('Job started');
+        this.loadsTasksFromAPI();
+      });
   }
 
   /**

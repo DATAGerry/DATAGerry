@@ -22,7 +22,7 @@ import { ObjectService } from '../../../services/object.service';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { CmdbMode } from '../../../modes.enum';
 import { takeUntil } from 'rxjs/operators';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { RenderResult } from '../../../models/cmdb-render';
 import { NgSelectComponent } from '@ng-select/ng-select';
@@ -35,6 +35,7 @@ import { NgSelectComponent } from '@ng-select/ng-select';
 export class RefSectionComponent extends RenderFieldComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  public selected: BehaviorSubject<RenderResult> = new BehaviorSubject(null);
   public objects: Array<RenderResult> = [];
   public loading: boolean = false;
 
@@ -50,8 +51,8 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
 
   private getApiParameters(page: number = 1): CollectionParameters {
     return {
-      filter: { type_id: this.section.reference.type_id }, limit: 10, sort: 'public_id',
-      order: 1, page, projection: { object_information: 1, summary_line: 1 }
+      filter: { type_id: this.section.reference.type_id }, limit: 10, sort: 'public_id', order: 1, page,
+      projection: { object_information: 1, type_information: 1, sections: 1, summary_line: 1, summaries: 1, fields: 1}
     } as CollectionParameters;
   }
 
@@ -74,14 +75,77 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
     }
   }
 
-  public loadDisplayObject(publicID: number): Observable<RenderResult> {
+  /**
+   * Loads pre-selected/selected objects.
+   * Objects that do not exist in the existing object list
+   * are reloaded from the database if necessary.
+   * @param publicID
+   */
+  public loadDisplayObject(publicID: number) {
     const foundObject = this.objects.find(f => f.object_information.object_id === publicID);
     if (foundObject) {
-      return new BehaviorSubject<RenderResult>(foundObject).asObservable();
+      this.selected.next(foundObject);
     }
-    return this.objectService.getObject<RenderResult>(publicID).pipe(takeUntil(this.subscriber));
+    if (publicID) {
+      this.objectService.getObject<RenderResult>(publicID).pipe(takeUntil(this.subscriber)).subscribe(
+        found => this.selected.next(found)
+      );
+    }
+    this.prepareReferencesData();
   }
 
+  /**
+   * Reference section fields is appended to the new data
+   * @private
+   */
+  private prepareReferencesData() {
+    if (this.mode === CmdbMode.Bulk && this.selected && this.selected.value) {
+      const { value } = this.selected;
+      const section = value.sections.find(s => s.name === this.section.reference.section_name);
+      const fields: any[] = [];
+      for (const name of section.fields) {
+        const temp = this.selected.value.fields.find(f => f.name === name);
+        if (temp) {
+          fields.push(temp);
+        }
+      }
+      const { type_id, type_name, type_label, icon } = value.type_information;
+      this.data.references = { type_id, type_name, type_label, type_icon: icon, fields };
+    }
+  }
+
+  /**
+   * Allow to filter by custom search function
+   * @param value search term as string
+   * @param item RenderResult object
+   */
+  public searchRef(value: string, item: RenderResult) {
+    const term: string = value.toLocaleLowerCase();
+    const line: string = item.object_information.object_id + item.summary_line;
+    const has_line: boolean = line.toLocaleLowerCase().indexOf(term) > -1 || line.toLocaleLowerCase().includes(term);
+    return item.fields.find(f => has_line || ((typeof f.value === 'string' || f.value instanceof String)
+      && f.value.toLocaleLowerCase().includes(term)));
+  }
+
+  /**
+   * Fired while typing search term. Outputs search term with filtered items
+   * @param term search term as string
+   * @param items RenderResult objects
+   */
+  public onCustomSearch(term: string, items: RenderResult[]) {
+    for (const obj of this.objects) {
+      if (this.searchRef(term, obj)) {
+        items = [...items, ...[obj]];
+      } else {
+        this.triggerAPICall();
+      }
+    }
+    return items;
+  }
+
+  /**
+   * Infinite Scrolling
+   */
   public onScrollToEnd(): void {
     this.triggerAPICall();
   }
@@ -93,6 +157,7 @@ export class RefSectionComponent extends RenderFieldComponent implements OnInit,
       case CmdbMode.Edit:
       case CmdbMode.Bulk: {
         this.triggerAPICall();
+        this.loadDisplayObject(this.controller.value);
         break;
       }
 

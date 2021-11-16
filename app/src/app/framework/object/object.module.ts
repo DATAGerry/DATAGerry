@@ -71,6 +71,8 @@ import { ObjectReferencesByTypeComponent } from './components/object-references/
 import { JwPaginationModule } from 'jw-angular-pagination';
 import { ObjectComponent } from './object.component';
 import { ObjectReferencesTypeColumnComponent } from './components/object-references/object-references-type-column/object-references-type-column.component';
+import { ObjectBulkChangeFailedComponent } from './object-bulk-change/object-bulk-change-complete/object-bulk-change-failed/object-bulk-change-failed.component';
+import { ObjectBulkChangeCompleteComponent } from './object-bulk-change/object-bulk-change-complete/object-bulk-change-complete.component';
 
 @NgModule({
   declarations: [
@@ -111,7 +113,9 @@ import { ObjectReferencesTypeColumnComponent } from './components/object-referen
     ObjectReferencesComponent,
     ObjectReferencesByTypeComponent,
     ObjectComponent,
-    ObjectReferencesTypeColumnComponent
+    ObjectReferencesTypeColumnComponent,
+    ObjectBulkChangeFailedComponent,
+    ObjectBulkChangeCompleteComponent
   ],
   imports: [
     CommonModule,

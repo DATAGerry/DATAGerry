@@ -339,12 +339,12 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
    * Load types to display
    * @param publicID
    */
-  public loadDisplayType(publicID: number): Observable<CmdbType> {
+  public loadDisplayType(publicID: number): CmdbType {
     const foundType = this.types.find(f => f.public_id === publicID);
     if (foundType) {
-      return new BehaviorSubject<CmdbType>(foundType).asObservable();
+      return foundType;
     }
-    return this.typeService.getType(publicID).pipe(takeUntil(this.subscriber));
+    return undefined;
   }
 
   public ngOnDestroy(): void {

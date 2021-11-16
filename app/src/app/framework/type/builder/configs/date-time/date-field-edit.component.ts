@@ -22,6 +22,8 @@ import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstr
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
 import { ReplaySubject } from 'rxjs';
 import { FormControl, Validators } from '@angular/forms';
+import { takeUntil } from 'rxjs/operators';
+import { DateSettingsService } from '../../../../../settings/services/date-settings.service';
 
 @Component({
   selector: 'cmdb-date-field-edit',
@@ -38,7 +40,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
    * @protected
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
+  public datePlaceholder = 'YYYY-MM-DD';
 
   public requiredControl: FormControl = new FormControl(false);
   public nameControl: FormControl = new FormControl('', Validators.required);
@@ -47,11 +49,15 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
   public valueControl: FormControl = new FormControl(undefined);
   public helperTextControl: FormControl = new FormControl(undefined);
 
-  constructor() {
+  constructor(private dateSettingsService: DateSettingsService) {
     super();
   }
 
   public ngOnInit(): void {
+    this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
+      this.datePlaceholder = dateSettings.date_format;
+    });
+
     this.form.addControl('required', this.requiredControl);
     this.form.addControl('name', this.nameControl);
     this.form.addControl('label', this.labelControl);

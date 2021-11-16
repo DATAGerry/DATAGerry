@@ -27,7 +27,7 @@ import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/fo
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../../models/cmdb-type';
-import { takeUntil } from 'rxjs/operators';
+import { takeUntil} from 'rxjs/operators';
 
 function occurrences(s, subString): number {
   s += '';
@@ -67,14 +67,15 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   public hasInter: boolean = false;
 
   public fields: Array<any> = [];
+  public summaries: Array<any> = [];
   private iterableDiffer: IterableDiffer<any>;
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     if (instance) {
       this.typeInstance = instance;
-      this.fields = this.typeInstance.fields;
-
+      this.summaries = [...this.typeInstance.fields];
+      this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
       this.summaryForm.patchValue(this.typeInstance.render_meta.summary);
       this.externalsForm.get('name').setValidators(this.listNameValidator());
     }
@@ -159,10 +160,14 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
   public ngDoCheck(): void {
     const changes = this.iterableDiffer.diff(this.typeInstance.fields);
     if (changes) {
-      const summaries = this.summaryFields.value;
-      this.fields = [...this.typeInstance.fields];
+      let summaries = this.summaryFields.value;
+      changes.forEachRemovedItem(record => {
+        summaries = summaries.filter(f => f !== record.item.name);
+      });
+      this.summaries = [...this.typeInstance.fields];
+      this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
+      this.typeInstance.render_meta.summary.fields = summaries;
       this.summaryFields.patchValue(summaries);
-      // this.summaryFields.setValue(this.summaryFields.value.filter(val => !this.fields.map(x => x.name).includes(val)));
     }
   }
 
