@@ -49,7 +49,7 @@ all: bin rpm targz docker
 .PHONY: requirements
 requirements:
     ${BIN_PIP} install --upgrade pip
-	${BIN_PIP} install -r requirements.txt
+    ${BIN_PIP} install -r requirements.txt
 
 
 # substitue BUILD variables
