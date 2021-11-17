@@ -437,8 +437,8 @@ class TypeModel(CmdbDAO):
                         'required': False,
                     },
                     "value": {
-                        'type': 'string',
                         'required': False,
+                        'nullable': True,
                     },
                     "helperText": {
                         'type': 'string',
@@ -497,10 +497,6 @@ class TypeModel(CmdbDAO):
                                 "fields": {  # List of field names
                                     'type': 'list',
                                     'empty': True,
-                                    'schema': {
-                                        'type': 'string',
-                                        'required': False
-                                    },
                                 },
                                 "icon": {
                                     'type': 'string',  # Free Font Awesome example: 'fa fa-cube'
@@ -571,10 +567,6 @@ class TypeModel(CmdbDAO):
                             },
                             'fields': {
                                 'type': 'list',
-                                'schema': {
-                                    'type': 'string',
-                                    'required': False
-                                },
                                 'empty': True,
                             }
                         }
