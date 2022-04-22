@@ -47,7 +47,7 @@ pylint==2.7.2
 pymongo==3.11.2
 PyMySQL==0.10.1
 pyparsing==2.4.7
-PyPDF2==1.26.0
+PyPDF2==1.27.5
 pytest==6.2.2
 pytest-cov==2.11.1
 pytest-html==3.1.1
