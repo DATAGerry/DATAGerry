@@ -41,7 +41,7 @@
     "core-js": "^3.8.1",
     "file-saver": "^2.0.5",
     "jquery": "^3.4.1",
-    "jszip": "^3.2.2",
+    "jszip": "^3.7.0",
     "jw-angular-pagination": "^1.2.0",
     "moment-timezone": "^0.5.33",
     "ng-inline-svg": "^11.0.2",
