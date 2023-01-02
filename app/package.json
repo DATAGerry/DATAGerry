@@ -38,7 +38,7 @@
     "bootstrap": "^4.6.0",
     "chart.js": "^2.9.3",
     "chartjs-plugin-datalabels": "^0.7.0",
-    "core-js": "^3.8.1",
+    "core-js": "^3.27.1",
     "file-saver": "^2.0.5",
     "jquery": "^3.4.1",
     "jszip": "^3.2.2",
