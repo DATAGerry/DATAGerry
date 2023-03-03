@@ -25,7 +25,7 @@ Clone the git repository from our official mirror:
 
 .. code:: bash
 
-    git clone https://github.com/NETHINKS/DATAGERRY
+    git clone https://github.com/DATAGerry/DATAGerry
 
 Install requirements
 --------------------
