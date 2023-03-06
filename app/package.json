@@ -1,7 +1,7 @@
 {
   "name": "datagerry",
   "version": "0.0.0",
-  "author": "NETHINKS GmbH",
+  "author": "becon GmbH",
   "license": "AGPLv3",
   "scripts": {
     "ng": "ng",
