@@ -311,7 +311,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public ngOnInit(): void {
     this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.tableState = {
-        name,
+        name: '',
         page: this.page,
         pageSize: this.pageSize,
         sort: this.sort,
