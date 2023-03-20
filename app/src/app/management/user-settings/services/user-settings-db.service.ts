@@ -50,7 +50,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
    */
   private newSettings: Subject<UserSetting> = new Subject<UserSetting>();
 
-  constructor(private dbService: NgxIndexedDBService<UserSetting<P>>,
+  constructor(private dbService: NgxIndexedDBService,
               private userSettingsService: UserSettingsService<UserSetting<P>>) {
     this.newSettings.asObservable().pipe(takeUntil(this.subscriber)).subscribe();
     this.userSettingsService.currentUserObservable.subscribe((user: User) => {

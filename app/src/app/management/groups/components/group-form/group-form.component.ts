@@ -55,7 +55,7 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Validation status event emitter.
    */
-  @Output() public validation: EventEmitter<boolean>;
+  @Output() public validation: EventEmitter<string>;
 
   /**
    * Form submit event emitter.
@@ -64,7 +64,7 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private groupService: GroupService) {
     this.subscriber = new Subject<void>();
-    this.validation = new EventEmitter<boolean>();
+    this.validation = new EventEmitter<string>();
     this.submit = new EventEmitter<Group>();
     this.form = new FormGroup({
       name: new FormControl('', [Validators.required],

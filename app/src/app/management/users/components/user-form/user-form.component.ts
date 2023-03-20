@@ -64,7 +64,7 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Output if validation status was changed.
    */
-  @Output() public validation: EventEmitter<boolean> = new EventEmitter<boolean>();
+  @Output() public validation: EventEmitter<string> = new EventEmitter<string>();
 
   @Input() cancel: boolean = true;
 
