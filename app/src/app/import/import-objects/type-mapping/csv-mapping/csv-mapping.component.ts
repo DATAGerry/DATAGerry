@@ -27,7 +27,7 @@ import {
   AfterViewInit
 } from '@angular/core';
 import { TypeMappingBaseComponent } from '../type-mapping-base.component';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -39,13 +39,13 @@ import { Subscription } from 'rxjs';
 export class CsvMappingComponent extends TypeMappingBaseComponent implements OnInit, AfterViewInit, OnDestroy {
 
   public previewIndex: number = 0;
-  public previewIndexSelectionForm: FormGroup;
+  public previewIndexSelectionForm: UntypedFormGroup;
   private previewSelectionSubscription: Subscription;
 
   constructor() {
     super();
-    this.previewIndexSelectionForm = new FormGroup({
-      indexSelection: new FormControl(0)
+    this.previewIndexSelectionForm = new UntypedFormGroup({
+      indexSelection: new UntypedFormControl(0)
     });
     this.previewSelectionSubscription = this.previewIndexSelectionForm.get('indexSelection').valueChanges
       .subscribe((change) => {

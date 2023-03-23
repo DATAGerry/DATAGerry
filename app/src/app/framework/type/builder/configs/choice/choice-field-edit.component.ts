@@ -19,7 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
 @Component({
@@ -37,37 +37,37 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
   /**
    * Required form control.
    */
-  public requiredControl: FormControl = new FormControl(false);
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
 
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Description form control.
    */
-  public descriptionControl: FormControl = new FormControl('');
+  public descriptionControl: UntypedFormControl = new UntypedFormControl('');
 
   /**
    * Helper form control.
    */
-  public helperTextControl: FormControl = new FormControl('');
+  public helperTextControl: UntypedFormControl = new UntypedFormControl('');
 
   /**
    * Options form control.
    */
-  public optionsControl: FormControl = new FormControl([]);
+  public optionsControl: UntypedFormControl = new UntypedFormControl([]);
 
   /**
    * Helper form control.
    */
-  public valueControl: FormControl = new FormControl();
+  public valueControl: UntypedFormControl = new UntypedFormControl();
 
 
   /**

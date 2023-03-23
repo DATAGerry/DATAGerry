@@ -19,7 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { CmdbObject } from '../models/cmdb-object';
 import { RenderResult } from '../models/cmdb-render';
 
@@ -34,8 +34,8 @@ export class RenderComponent {
   private objectInstanceBack: CmdbObject;
   private renderResultBack: RenderResult = undefined;
 
-  @Input() public renderForm: FormGroup;
-  @Input() public changeForm: FormGroup;
+  @Input() public renderForm: UntypedFormGroup;
+  @Input() public changeForm: UntypedFormGroup;
 
   @Input() public mode: CmdbMode;
   private field: any;

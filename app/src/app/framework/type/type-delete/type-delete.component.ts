@@ -23,7 +23,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ObjectService } from '../../services/object.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PreviousRouteService } from '../../../services/previous-route.service';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
 
 
@@ -74,12 +74,12 @@ export class TypeDeleteConfirmModalComponent {
   @Input() typeName: string = '';
   @Input() typeLabel: string = '';
 
-  public deleteTypeModalForm: FormGroup;
+  public deleteTypeModalForm: UntypedFormGroup;
 
   constructor(public modal: NgbActiveModal) {
 
-    this.deleteTypeModalForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.equalName()]),
+    this.deleteTypeModalForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required, this.equalName()]),
     });
   }
 

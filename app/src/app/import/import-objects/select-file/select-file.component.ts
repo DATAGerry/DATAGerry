@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ImportService } from '../../import.service';
 import { Subscription } from 'rxjs';
 
@@ -29,7 +29,7 @@ import { Subscription } from 'rxjs';
 export class SelectFileComponent implements OnInit, OnDestroy {
 
   private defaultFileFormat: string = '';
-  public fileForm: FormGroup;
+  public fileForm: UntypedFormGroup;
   public fileName: string = 'Choose file';
   public selectedFileFormat: string = `.${ this.defaultFileFormat }`;
   public importerTypes: any[] = [];
@@ -51,9 +51,9 @@ export class SelectFileComponent implements OnInit, OnDestroy {
     this.fileFormatChangeSubscription = new Subscription();
     this.fileChangeSubscription = new Subscription();
 
-    this.fileForm = new FormGroup({
-      fileFormat: new FormControl(this.defaultFileFormat, Validators.required),
-      file: new FormControl(null, Validators.required),
+    this.fileForm = new UntypedFormGroup({
+      fileFormat: new UntypedFormControl(this.defaultFileFormat, Validators.required),
+      file: new UntypedFormControl(null, Validators.required),
     });
   }
 

@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SystemService } from '../../../../settings/system/system.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -29,26 +29,26 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 })
 export class FeedbackModalComponent implements OnInit, OnDestroy {
 
-  public feedbackForm: FormGroup;
+  public feedbackForm: UntypedFormGroup;
   public formListener: Subscription;
   public feedbackUrl: string = 'https://datagerry.com/feedback-v1/0/0/0/0/0/unknown/';
 
   constructor(private systemService: SystemService, public activeModal: NgbActiveModal) {
-    this.feedbackForm = new FormGroup({
-      happiness: new FormControl(0),
-      usability: new FormControl(0),
-      functionality: new FormControl(0),
-      performance: new FormControl(0),
-      stability: new FormControl(0),
-      version: new FormControl(''),
-      email: new FormControl('', [
+    this.feedbackForm = new UntypedFormGroup({
+      happiness: new UntypedFormControl(0),
+      usability: new UntypedFormControl(0),
+      functionality: new UntypedFormControl(0),
+      performance: new UntypedFormControl(0),
+      stability: new UntypedFormControl(0),
+      version: new UntypedFormControl(''),
+      email: new UntypedFormControl('', [
         Validators.email, Validators.pattern('^[a-z0-9._%+-]+@[a-z0-9.-]+\\.[a-z]{2,4}$')
       ]),
     });
   }
 
-  public get emailController(): FormControl {
-    return this.feedbackForm.get('email') as FormControl;
+  public get emailController(): UntypedFormControl {
+    return this.feedbackForm.get('email') as UntypedFormControl;
   }
 
   public ngOnInit(): void {

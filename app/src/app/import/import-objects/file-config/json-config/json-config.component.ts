@@ -18,7 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { FileConfig } from '../file-config';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-json-config',
@@ -34,7 +34,7 @@ export class JsonConfigComponent extends FileConfig implements OnInit {
   public ngOnInit(): void {
     // tslint:disable-next-line:forin
     for (const defaultConfigEntry in this.defaultParserConfig) {
-      this.configForm.addControl(defaultConfigEntry, new FormControl(''));
+      this.configForm.addControl(defaultConfigEntry, new UntypedFormControl(''));
     }
     this.configForm.patchValue(this.defaultParserConfig);
   }

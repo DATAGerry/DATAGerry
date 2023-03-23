@@ -32,10 +32,10 @@ import {
   APIUpdateMultiResponse,
 } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 
 export const checkObjectExistsValidator = (objectService: ObjectService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return objectService.getObject(+control.value).pipe(
         map((response) => {

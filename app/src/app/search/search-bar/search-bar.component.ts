@@ -32,7 +32,7 @@ import { CmdbType } from '../../framework/models/cmdb-type';
 import { ReplaySubject } from 'rxjs';
 import { SearchBarTagComponent } from './search-bar-tag/search-bar-tag.component';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 import { CategoryService } from '../../framework/services/category.service';
 import { CmdbCategory } from '../../framework/models/cmdb-category';
@@ -61,7 +61,7 @@ export class SearchBarComponent implements OnInit, OnDestroy {
   public tags: SearchBarTag[] = [];
 
   // Form
-  public searchBarForm: FormGroup;
+  public searchBarForm: UntypedFormGroup;
 
   // Dropdown
   public possibleTextResults: NumberSearchResults = new NumberSearchResults();
@@ -74,8 +74,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
 
   constructor(private router: Router, private route: ActivatedRoute, private searchService: SearchService,
               private typeService: TypeService, private categoryService: CategoryService) {
-    this.searchBarForm = new FormGroup({
-      inputControl: new FormControl('')
+    this.searchBarForm = new UntypedFormGroup({
+      inputControl: new UntypedFormControl('')
     });
   }
 
@@ -125,8 +125,8 @@ export class SearchBarComponent implements OnInit, OnDestroy {
     }
   }
 
-  public get inputControl(): FormControl {
-    return this.searchBarForm.get('inputControl') as FormControl;
+  public get inputControl(): UntypedFormControl {
+    return this.searchBarForm.get('inputControl') as UntypedFormControl;
   }
 
   public addTag(searchForm: string, params?: any) {

@@ -21,7 +21,7 @@ import { fieldComponents } from '../fields/fields.list';
 import { simpleComponents } from '../simple/simple.list';
 import { RenderFieldComponent } from '../fields/components.fields';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, UntypedFormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 
 @Component({
@@ -58,7 +58,7 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         this.componentRef.instance.mode = this.mode;
         this.componentRef.instance.section = this.section;
         this.componentRef.instance.toast = this.toast;
-        const fieldControl = new FormControl('');
+        const fieldControl = new UntypedFormControl('');
         const validators = [];
         if (this.mode === CmdbMode.View || CmdbMode.Edit) {
           fieldControl.patchValue(this.value);

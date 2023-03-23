@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { Group } from '../../../../management/models/group';
@@ -49,14 +49,14 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
 
   @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   constructor() {
     super();
-    this.form = new FormGroup({
-      activated: new FormControl(false),
-      groups: new FormGroup({
-        includes: new FormGroup({})
+    this.form = new UntypedFormGroup({
+      activated: new UntypedFormControl(false),
+      groups: new UntypedFormGroup({
+        includes: new UntypedFormGroup({})
       })
     });
   }
@@ -66,12 +66,12 @@ export class TypeAclStepComponent extends TypeBuilderStepComponent implements On
     return this.form.get('activated').value;
   }
 
-  public get groupsControl(): FormGroup {
-    return this.form.get('groups') as FormGroup;
+  public get groupsControl(): UntypedFormGroup {
+    return this.form.get('groups') as UntypedFormGroup;
   }
 
-  public get includesControl(): FormGroup {
-    return this.groupsControl.get('includes') as FormGroup;
+  public get includesControl(): UntypedFormGroup {
+    return this.groupsControl.get('includes') as UntypedFormGroup;
   }
 
   public onAddChange(event) {

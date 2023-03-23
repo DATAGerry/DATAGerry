@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { TemplateHelperService } from '../../../settings/services/template-helper.service';
 
@@ -51,7 +51,7 @@ export class DocapiBuilderContentStepComponent {
 
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
-  public contentForm: FormGroup;
+  public contentForm: UntypedFormGroup;
   public templateHelperData: any;
 
   public editorConfig = {
@@ -111,8 +111,8 @@ export class DocapiBuilderContentStepComponent {
   };
 
   constructor(private templateHelperService: TemplateHelperService) {
-    this.contentForm = new FormGroup({
-      template_data: new FormControl('', [Validators.required, Validators.max(15 * 1024 * 1024)])
+    this.contentForm = new UntypedFormGroup({
+      template_data: new UntypedFormControl('', [Validators.required, Validators.max(15 * 1024 * 1024)])
     });
   }
 

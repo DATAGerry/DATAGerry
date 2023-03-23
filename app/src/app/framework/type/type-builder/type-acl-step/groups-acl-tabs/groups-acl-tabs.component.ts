@@ -22,7 +22,7 @@ import {
   AccessControlPermission
 } from '../../../../../acl/acl.types';
 import { Group } from '../../../../../management/models/group';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 
 @Component({
@@ -44,7 +44,7 @@ export class GroupsAclTabsComponent implements OnDestroy {
   @Output() public valueChange: EventEmitter<any> = new EventEmitter<any>();
 
   @Input() public groups: Array<Group> = [];
-  @Input() public form: FormGroup;
+  @Input() public form: UntypedFormGroup;
 
   public groupsACL: AccessControlListSection<number> = new AccessControlListSection<number>();
   public selectedGroup: Group;
@@ -93,7 +93,7 @@ export class GroupsAclTabsComponent implements OnDestroy {
    * Add a new acl entry.
    */
   public addControl(name: number | string): void {
-    const control = new FormControl([]);
+    const control = new UntypedFormControl([]);
     control.setValidators([Validators.required, Validators.minLength(1)]);
     this.form.addControl(`${ name }`, control);
   }

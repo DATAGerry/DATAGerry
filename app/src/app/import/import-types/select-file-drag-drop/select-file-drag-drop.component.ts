@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup} from '@angular/forms';
+import { UntypedFormGroup} from '@angular/forms';
 
 @Component({
   selector: 'cmdb-select-file-drag-drop',
@@ -26,7 +26,7 @@ import { FormGroup} from '@angular/forms';
 })
 export class SelectFileDragDropComponent implements OnInit {
 
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
   public syntaxError: boolean = false;
 
   ngOnInit() {

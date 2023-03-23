@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TableState } from '../../table.types';
 
 @Component({
@@ -67,19 +67,19 @@ export class TableStateComponent {
   /**
    * Name form validation
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   constructor() {
-    this.form = new FormGroup({
-      name: new FormControl('', Validators.required)
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required)
     });
   }
 
   /**
    * Get the control of the settings.
    */
-  public get nameControl(): FormControl {
-    return this.form.get('name') as FormControl;
+  public get nameControl(): UntypedFormControl {
+    return this.form.get('name') as UntypedFormControl;
   }
 
   /**

@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { ConnectionService } from './connection.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 
 @Component({
@@ -29,7 +29,7 @@ export class ConnectComponent implements OnInit, OnDestroy {
 
   public connectionTest: boolean = false;
   public connectionResponse;
-  public connectionForm: FormGroup;
+  public connectionForm: UntypedFormGroup;
   private connectionValues;
 
   private readonly defaultHost: string = '127.0.0.1';
@@ -37,10 +37,10 @@ export class ConnectComponent implements OnInit, OnDestroy {
   private readonly defaultProtocol: string = 'http';
 
   public constructor(private domRender: Renderer2, private connService: ConnectionService, private router: Router) {
-    this.connectionForm = new FormGroup({
-      host: new FormControl(this.defaultHost, Validators.required),
-      port: new FormControl(this.defaultPort, Validators.required),
-      protocol: new FormControl(this.defaultProtocol)
+    this.connectionForm = new UntypedFormGroup({
+      host: new UntypedFormControl(this.defaultHost, Validators.required),
+      port: new UntypedFormControl(this.defaultPort, Validators.required),
+      protocol: new UntypedFormControl(this.defaultProtocol)
     });
   }
 

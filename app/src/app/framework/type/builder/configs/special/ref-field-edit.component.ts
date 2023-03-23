@@ -28,7 +28,7 @@ import { APIGetMultiResponse } from '../../../../../services/models/api-response
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { ReplaySubject } from 'rxjs';
 import { ToastService } from '../../../../../layout/toast/toast.service';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
 import { ChangeDetectorRef } from '@angular/core';
 
@@ -54,22 +54,22 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Type form control.
    */
-  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Summary form control.
    */
-  public summaryControl: FormControl = new FormControl(undefined, Validators.required);
+  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Type list for reference selection
@@ -121,7 +121,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   /**
    * Reference form control.
    */
-  public referenceGroup: FormGroup = new FormGroup({
+  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
     type_id: this.typeControl,
   });
 

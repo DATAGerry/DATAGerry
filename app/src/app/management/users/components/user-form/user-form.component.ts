@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { User } from '../../../models/user';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Group } from '../../../models/group';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
@@ -54,7 +54,7 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * User NgForm.
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * Output if submit was triggered.
@@ -71,15 +71,15 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   public preview: any = undefined;
 
   constructor() {
-    this.form = new FormGroup({
-      user_name: new FormControl('', [Validators.required]),
-      email: new FormControl('', [Validators.email]),
-      password: new FormControl('', [Validators.required]),
-      first_name: new FormControl(null),
-      last_name: new FormControl(null),
-      authenticator: new FormControl('LocalAuthenticationProvider', Validators.required),
-      group_id: new FormControl(2, Validators.required),
-      image: new FormControl(null)
+    this.form = new UntypedFormGroup({
+      user_name: new UntypedFormControl('', [Validators.required]),
+      email: new UntypedFormControl('', [Validators.email]),
+      password: new UntypedFormControl('', [Validators.required]),
+      first_name: new UntypedFormControl(null),
+      last_name: new UntypedFormControl(null),
+      authenticator: new UntypedFormControl('LocalAuthenticationProvider', Validators.required),
+      group_id: new UntypedFormControl(2, Validators.required),
+      image: new UntypedFormControl(null)
     });
   }
 
@@ -89,36 +89,36 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
     });
   }
 
-  public get usernameControl(): FormControl {
-    return this.form.get('user_name') as FormControl;
+  public get usernameControl(): UntypedFormControl {
+    return this.form.get('user_name') as UntypedFormControl;
   }
 
-  public get emailControl(): FormControl {
-    return this.form.get('email') as FormControl;
+  public get emailControl(): UntypedFormControl {
+    return this.form.get('email') as UntypedFormControl;
   }
 
-  public get passwordControl(): FormControl {
-    return this.form.get('password') as FormControl;
+  public get passwordControl(): UntypedFormControl {
+    return this.form.get('password') as UntypedFormControl;
   }
 
   public get firstNameControl() {
-    return this.form.get('first_name') as FormControl;
+    return this.form.get('first_name') as UntypedFormControl;
   }
 
   public get lastNameControl() {
-    return this.form.get('last_name') as FormControl;
+    return this.form.get('last_name') as UntypedFormControl;
   }
 
   public get authenticatorControl() {
-    return this.form.get('authenticator') as FormControl;
+    return this.form.get('authenticator') as UntypedFormControl;
   }
 
   public get groupControl() {
-    return this.form.get('group_id') as FormControl;
+    return this.form.get('group_id') as UntypedFormControl;
   }
 
   public get imageControl() {
-    return this.form.get('image') as FormControl;
+    return this.form.get('image') as UntypedFormControl;
   }
 
   public previewImage(event) {

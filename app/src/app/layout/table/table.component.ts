@@ -33,7 +33,7 @@ import { PageLengthEntry } from './components/table-page-size/table-page-size.co
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
 import { Router } from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-table',
@@ -114,7 +114,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Column search form group.
    */
-  public columnSearchForm: FormGroup;
+  public columnSearchForm: UntypedFormGroup;
 
   /**
    * Column search columnSearchForm group.

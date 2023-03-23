@@ -16,9 +16,9 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { AbstractControl, FormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
-export const ValidRegexValidator: ValidatorFn = (control: AbstractControl | FormControl): ValidationErrors | null => {
+export const ValidRegexValidator: ValidatorFn = (control: AbstractControl | UntypedFormControl): ValidationErrors | null => {
   let regexInValid;
   try {
     // tslint:disable-next-line:no-unused-expression

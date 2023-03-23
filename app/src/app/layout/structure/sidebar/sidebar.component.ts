@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CategoryService } from '../../../framework/services/category.service';
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -64,7 +64,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
   /**
    * Filter
    */
-  public filterTerm: FormControl = new FormControl('');
+  public filterTerm: UntypedFormControl = new UntypedFormControl('');
   private filterTermSubscription: Subscription;
 
   constructor(private sidebarService: SidebarService, private categoryService: CategoryService,

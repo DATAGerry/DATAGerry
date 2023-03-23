@@ -21,7 +21,7 @@ import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
 import { Group } from '../../../../management/models/group';
 import { User } from '../../../../management/models/user';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { nameConvention } from '../../../../layout/directives/name.directive';
@@ -41,9 +41,9 @@ export abstract class ConfigEditBaseComponent {
   @Input() public mode: CmdbMode = CmdbMode.Create;
 
 
-  @Input() public form: FormGroup;
-  public abstract nameControl: FormControl;
-  public abstract labelControl: FormControl;
+  @Input() public form: UntypedFormGroup;
+  public abstract nameControl: UntypedFormControl;
+  public abstract labelControl: UntypedFormControl;
 
   @Input() public data: any;
   @Input() public sections: Array<any>;
@@ -55,10 +55,10 @@ export abstract class ConfigEditBaseComponent {
 
 
   protected constructor() {
-    this.form = new FormGroup({});
+    this.form = new UntypedFormGroup({});
   }
 
-  protected disableControlOnEdit(control: FormControl): void {
+  protected disableControlOnEdit(control: UntypedFormControl): void {
     if (this.mode === CmdbMode.Edit) {
       control.disable({ onlySelf: false, emitEvent: false });
     }
@@ -68,7 +68,7 @@ export abstract class ConfigEditBaseComponent {
     this.data[idx] = change;
   }
 
-  protected validateNameLabelControl(nameControl: FormControl, labelControl: FormControl, subscriber: ReplaySubject<void>): void {
+  protected validateNameLabelControl(nameControl: UntypedFormControl, labelControl: UntypedFormControl, subscriber: ReplaySubject<void>): void {
     this.disableControlOnEdit(nameControl);
     if (this.mode === CmdbMode.Create) {
       labelControl.valueChanges.pipe(takeUntil(subscriber)).subscribe((changes: string) => {
@@ -79,7 +79,7 @@ export abstract class ConfigEditBaseComponent {
     }
   }
 
-  protected patchData(data: any, form: FormGroup): void {
+  protected patchData(data: any, form: UntypedFormGroup): void {
     form.patchValue(data);
     if (this.mode === CmdbMode.Edit) {
       this.form.markAllAsTouched();

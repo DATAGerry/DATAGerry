@@ -19,7 +19,7 @@
 import { Component } from '@angular/core';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-type-preview-step',
@@ -29,7 +29,7 @@ import { FormGroup } from '@angular/forms';
 export class TypePreviewStepComponent extends TypeBuilderStepComponent {
 
   public mode: CmdbMode = CmdbMode.View;
-  public previewForm: FormGroup = new FormGroup({});
+  public previewForm: UntypedFormGroup = new UntypedFormGroup({});
 
   constructor() {
     super();

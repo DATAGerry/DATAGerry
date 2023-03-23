@@ -21,7 +21,7 @@ import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {HttpHeaders, HttpParams, HttpResponse} from '@angular/common/http';
 import { FileMetadata } from '../model/metadata';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { FileElement } from '../model/file-element';
 import {APIGetMultiResponse, APIGetSingleResponse} from '../../../../services/models/api-response';
 import {
@@ -34,7 +34,7 @@ import {
 import { ValidatorService } from '../../../../services/validator.service';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return fileService.getFileElement(control.value, metadata).pipe(
         map((apiResponse: HttpResponse<any>) => {

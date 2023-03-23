@@ -19,7 +19,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-check-field-edit',
@@ -37,27 +37,27 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Description form control.
    */
-  public descriptionControl: FormControl = new FormControl('');
+  public descriptionControl: UntypedFormControl = new UntypedFormControl('');
 
   /**
    * Value form control.
    */
-  public valueControl: FormControl = new FormControl(false);
+  public valueControl: UntypedFormControl = new UntypedFormControl(false);
 
   /**
    * Helper form control.
    */
-  public helperTextControl: FormControl = new FormControl('');
+  public helperTextControl: UntypedFormControl = new UntypedFormControl('');
 
   constructor() {
     super();

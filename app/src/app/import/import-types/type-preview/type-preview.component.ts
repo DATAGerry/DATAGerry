@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit} from '@angular/core';
-import { FormGroup} from '@angular/forms';
+import { UntypedFormGroup} from '@angular/forms';
 
 @Component({
   selector: 'cmdb-type-preview',
@@ -26,14 +26,14 @@ import { FormGroup} from '@angular/forms';
 })
 export class TypePreviewComponent implements OnInit {
 
-  private fileForm: FormGroup;
+  private fileForm: UntypedFormGroup;
   public filterTypes: string = '';
 
   ngOnInit() {
   }
 
   @Input('data')
-  public set data(value: FormGroup) {
+  public set data(value: UntypedFormGroup) {
     this.fileForm = value;
   }
 

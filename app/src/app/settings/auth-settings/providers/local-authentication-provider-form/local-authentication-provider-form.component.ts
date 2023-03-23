@@ -18,7 +18,7 @@
 
 import { Component, Input } from '@angular/core';
 import { AuthProvider } from '../../../../auth/models/providers';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-local-authentication-provider-form',
@@ -27,16 +27,16 @@ import { FormArray, FormControl, FormGroup } from '@angular/forms';
 })
 export class LocalAuthenticationProviderFormComponent {
 
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
-  public parent: FormArray;
+  public parent: UntypedFormArray;
   public provider: AuthProvider;
 
   @Input('parent')
-  public set Parent(form: FormArray) {
+  public set Parent(form: UntypedFormArray) {
     this.parent = form;
-    this.parent.insert(0, new FormGroup({
-      class_name: new FormControl('LocalAuthenticationProvider'),
+    this.parent.insert(0, new UntypedFormGroup({
+      class_name: new UntypedFormControl('LocalAuthenticationProvider'),
       config: this.form
     }));
   }
@@ -48,8 +48,8 @@ export class LocalAuthenticationProviderFormComponent {
   }
 
   constructor() {
-    this.form = new FormGroup({
-      active: new FormControl()
+    this.form = new UntypedFormGroup({
+      active: new UntypedFormControl()
     });
     this.form.get('active').disable({onlySelf: true});
   }

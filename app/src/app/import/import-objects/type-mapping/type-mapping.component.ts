@@ -35,7 +35,7 @@ import {
 } from '@angular/core';
 import { TypeService } from '../../../framework/services/type.service';
 import { CmdbType } from '../../../framework/models/cmdb-type';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { JsonMappingComponent } from './json-mapping/json-mapping.component';
 import { CsvMappingComponent } from './csv-mapping/csv-mapping.component';
@@ -81,7 +81,7 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
   private typeIDSubscription: Subscription;
   public typeList: CmdbType[];
   public typeInstance: CmdbType;
-  public configForm: FormGroup;
+  public configForm: UntypedFormGroup;
 
   private component: any;
   public componentRef: ComponentRef<any>;
@@ -91,8 +91,8 @@ export class TypeMappingComponent extends TypeMappingBaseComponent implements On
               private resolver: ComponentFactoryResolver) {
     super();
     this.typeChange = new EventEmitter<any>();
-    this.configForm = new FormGroup({
-      typeID: new FormControl(null, Validators.required)
+    this.configForm = new UntypedFormGroup({
+      typeID: new UntypedFormControl(null, Validators.required)
     });
     this.typeIDSubject = new BehaviorSubject<number>(null);
     this.typeID = this.typeIDSubject.asObservable();
