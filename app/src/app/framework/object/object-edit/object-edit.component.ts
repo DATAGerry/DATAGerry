@@ -22,7 +22,7 @@ import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { TypeService } from '../../services/type.service';
@@ -41,8 +41,8 @@ export class ObjectEditComponent implements OnInit {
   public objectInstance: CmdbObject;
   public typeInstance: CmdbType;
   public renderResult: RenderResult;
-  public renderForm: FormGroup;
-  public commitForm: FormGroup;
+  public renderForm: UntypedFormGroup;
+  public commitForm: UntypedFormGroup;
   private objectID: number;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
@@ -50,9 +50,9 @@ export class ObjectEditComponent implements OnInit {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
-    this.renderForm = new FormGroup({});
-    this.commitForm = new FormGroup({
-      comment: new FormControl('')
+    this.renderForm = new UntypedFormGroup({});
+    this.commitForm = new UntypedFormGroup({
+      comment: new UntypedFormControl('')
     });
   }
 

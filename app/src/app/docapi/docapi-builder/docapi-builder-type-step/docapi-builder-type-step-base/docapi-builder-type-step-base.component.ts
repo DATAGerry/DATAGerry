@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { CmdbMode } from '../../../../framework/modes.enum';
 
 @Component({
@@ -38,7 +38,7 @@ export class DocapiBuilderTypeStepBaseComponent {
 
   @Output() public formValidationEmitter: EventEmitter<boolean>;
   public formValid: boolean = false;
-  public typeParamForm: FormGroup;
+  public typeParamForm: UntypedFormGroup;
   public modes = CmdbMode;
 
   constructor() {

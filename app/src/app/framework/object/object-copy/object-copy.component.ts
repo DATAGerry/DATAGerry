@@ -22,7 +22,7 @@ import { ObjectService } from '../../services/object.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { UserService } from '../../../management/services/user.service';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
@@ -41,7 +41,7 @@ export class ObjectCopyComponent implements OnInit {
   private objectID: number;
   public typeInstance: CmdbType;
   public renderResult: RenderResult;
-  public renderForm: FormGroup;
+  public renderForm: UntypedFormGroup;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
               private route: ActivatedRoute, private router: Router, private userService: UserService,
@@ -49,7 +49,7 @@ export class ObjectCopyComponent implements OnInit {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
-    this.renderForm = new FormGroup({
+    this.renderForm = new UntypedFormGroup({
     });
   }
 

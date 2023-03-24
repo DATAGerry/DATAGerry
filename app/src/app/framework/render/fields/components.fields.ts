@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { AbstractControl, FormGroup } from '@angular/forms';
+import { AbstractControl, UntypedFormGroup } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbTypeSection } from '../../models/cmdb-type';
@@ -54,8 +54,8 @@ export class RenderFieldComponent {
   public toast: ToastService;
 
   @Input() public mode: CmdbMode = this.MODES.View;
-  @Input() public parentFormGroup: FormGroup;
-  @Input() public changeForm: FormGroup;
+  @Input() public parentFormGroup: UntypedFormGroup;
+  @Input() public changeForm: UntypedFormGroup;
 
   @Input('data')
   public set data(value: any) {

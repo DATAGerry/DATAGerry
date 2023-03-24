@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit, Input, ViewChild, EventEmitter, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import {
   DocapiBuilderTypeStepBaseComponent
 } from './docapi-builder-type-step-base/docapi-builder-type-step-base.component';
@@ -42,7 +42,7 @@ export class DocapiBuilderTypeStepComponent implements OnInit {
 
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
-  public typeForm: FormGroup;
+  public typeForm: UntypedFormGroup;
   public readonly docTypeSelect: any[] = [
     { label: 'Object Template', content: 'OBJECT', description: 'Template for single objects' }
   ];
@@ -60,8 +60,8 @@ export class DocapiBuilderTypeStepComponent implements OnInit {
   constructor() {
     // setup form
     this.formValidEmitter = new EventEmitter<boolean>();
-    this.typeForm = new FormGroup({
-      template_type: new FormControl('', Validators.required)
+    this.typeForm = new UntypedFormGroup({
+      template_type: new UntypedFormControl('', Validators.required)
     });
   }
 

@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CmdbType } from '../../../models/cmdb-type';
 
@@ -37,8 +37,8 @@ export class ObjectBulkChangeEditorComponent {
   /**
    * Form control
    */
-  @Input() public changeForm: FormGroup = new FormGroup({});
-  @Input() public renderForm: FormGroup = new FormGroup({});
+  @Input() public changeForm: UntypedFormGroup = new UntypedFormGroup({});
+  @Input() public renderForm: UntypedFormGroup = new UntypedFormGroup({});
 
   /**
    * Bulk deactivation.

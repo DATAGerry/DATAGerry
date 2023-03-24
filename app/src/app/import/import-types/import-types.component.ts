@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ImportService } from '../import.service';
 
 @Component({
@@ -29,18 +29,18 @@ export class ImportTypesComponent implements OnInit {
 
   public constructor(private importService: ImportService) {}
 
-  public fileForm: FormGroup;
+  public fileForm: UntypedFormGroup;
   public preview: any;
   public done: boolean = false;
   public errorHandling = [];
 
   ngOnInit() {
-    this.fileForm = new FormGroup({
-      format: new FormControl('json', Validators.required),
-      name: new FormControl('', Validators.required),
-      size: new FormControl('', Validators.required),
-      file: new FormControl(null, Validators.required),
-      action: new FormControl('create', Validators.required),
+    this.fileForm = new UntypedFormGroup({
+      format: new UntypedFormControl('json', Validators.required),
+      name: new UntypedFormControl('', Validators.required),
+      size: new UntypedFormControl('', Validators.required),
+      file: new UntypedFormControl(null, Validators.required),
+      action: new UntypedFormControl('create', Validators.required),
     });
 
     this.fileForm.valueChanges.subscribe(newValue => {

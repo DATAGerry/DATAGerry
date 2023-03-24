@@ -19,7 +19,7 @@
 import { Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { RenderComponent } from '../../render/render.component';
@@ -41,14 +41,14 @@ import { takeUntil } from 'rxjs/operators';
 export class ObjectAddComponent implements OnInit, OnDestroy {
 
   public typeList: CmdbType[] = [];
-  public typeIDForm: FormGroup;
+  public typeIDForm: UntypedFormGroup;
   private typeIDSubject: BehaviorSubject<number>;
   public typeID: Observable<number>;
   public typeInstance: CmdbType;
   public mode: CmdbMode = CmdbMode.Create;
   public objectInstance: CmdbObject;
-  public renderForm: FormGroup;
-  public fieldsGroups: FormGroup;
+  public renderForm: UntypedFormGroup;
+  public fieldsGroups: UntypedFormGroup;
 
   @Output() parentSubmit = new EventEmitter<any>();
   @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
@@ -77,9 +77,9 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
         });
       }
     });
-    this.fieldsGroups = new FormGroup({});
-    this.renderForm = new FormGroup({
-      active: new FormControl(true)
+    this.fieldsGroups = new UntypedFormGroup({});
+    this.renderForm = new UntypedFormGroup({
+      active: new UntypedFormControl(true)
     });
   }
 
@@ -89,8 +89,8 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
     }, (e) => {
       this.toastService.error(e);
     });
-    this.typeIDForm = new FormGroup({
-      typeID: new FormControl(null, Validators.required)
+    this.typeIDForm = new UntypedFormGroup({
+      typeID: new UntypedFormControl(null, Validators.required)
     });
 
   }

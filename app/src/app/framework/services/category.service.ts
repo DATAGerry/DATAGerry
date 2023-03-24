@@ -26,7 +26,7 @@ import {
 } from '../../services/api-call.service';
 import { ValidatorService } from '../../services/validator.service';
 import { CmdbCategory, CmdbCategoryNode, CmdbCategoryTree } from '../models/cmdb-category';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
@@ -39,7 +39,7 @@ import {
 import { CollectionParameters } from '../../services/models/api-parameter';
 
 export const checkCategoryExistsValidator = (categoryService: CategoryService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return categoryService.getCategoryByName(control.value).pipe(
         map((response) => {

@@ -18,7 +18,7 @@
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
 import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
 import { ReplaySubject } from 'rxjs';
@@ -40,7 +40,7 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
   }
 
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   private sameIDValidator(): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
@@ -50,19 +50,19 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
   }
 
   constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
-    this.form = new FormGroup({
-      primary: new FormControl(null, [Validators.required]),
-      secondary: new FormControl('', [Validators.required, this.sameIDValidator],
+    this.form = new UntypedFormGroup({
+      primary: new UntypedFormControl(null, [Validators.required]),
+      secondary: new UntypedFormControl('', [Validators.required, this.sameIDValidator],
         [checkObjectExistsValidator(objectService)])
     });
   }
 
-  public get primary(): FormControl {
-    return this.form.get('primary') as FormControl;
+  public get primary(): UntypedFormControl {
+    return this.form.get('primary') as UntypedFormControl;
   }
 
-  public get secondary(): FormControl {
-    return this.form.get('secondary') as FormControl;
+  public get secondary(): UntypedFormControl {
+    return this.form.get('secondary') as UntypedFormControl;
   }
 
   public ngOnInit(): void {

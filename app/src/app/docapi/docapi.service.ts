@@ -26,7 +26,7 @@ import {
   httpObserveOptions
 } from '../services/api-call.service';
 import { HttpBackend, HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { DocTemplate } from './models/cmdb-doctemplate';
@@ -138,7 +138,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 // Form Validators
 export const checkDocTemplateExistsValidator = (docApiService: DocapiService<DocTemplate>, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return docApiService.checkDocTemplateExists(control.value).pipe(
         map(() => {

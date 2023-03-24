@@ -25,7 +25,7 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { PermissionService } from '../../../auth/services/permission.service';
 
 @Component({
@@ -40,8 +40,8 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public activatedForm = new FormGroup({
-    active: new FormControl(false)
+  public activatedForm = new UntypedFormGroup({
+    active: new UntypedFormControl(false)
   });
 
   /**
@@ -124,8 +124,8 @@ export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
   constructor(private typeService: TypeService, private permissionService: PermissionService) {
   }
 
-  public get activeControl(): FormControl {
-    return this.activatedForm.get('active') as FormControl;
+  public get activeControl(): UntypedFormControl {
+    return this.activatedForm.get('active') as UntypedFormControl;
   }
 
   public ngOnInit(): void {

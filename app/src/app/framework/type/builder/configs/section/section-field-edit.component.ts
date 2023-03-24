@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-section-field-edit',
@@ -36,12 +36,12 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   public constructor() {
     super();

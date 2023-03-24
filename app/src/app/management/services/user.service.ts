@@ -27,7 +27,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { HttpBackend, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import {
   APIDeleteSingleResponse,
@@ -38,7 +38,7 @@ import {
 } from '../../services/models/api-response';
 
 export const userExistsValidator = (userService: UserService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return userService.getUserByName(control.value).pipe(
         map((response) => {

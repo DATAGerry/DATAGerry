@@ -17,7 +17,7 @@
 */
 
 import { Component, Input } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { CmdbMode } from '../../../framework/modes.enum';
 
 @Component({
@@ -36,11 +36,11 @@ export class DocapiBuilderStyleStepComponent {
 
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
-  public styleForm: FormGroup;
+  public styleForm: UntypedFormGroup;
 
   constructor() {
-    this.styleForm = new FormGroup({
-      template_style: new FormControl('')
+    this.styleForm = new UntypedFormGroup({
+      template_style: new UntypedFormControl('')
     });
   }
 

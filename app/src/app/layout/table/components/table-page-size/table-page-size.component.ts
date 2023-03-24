@@ -26,7 +26,7 @@ import {
   Output
 } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
 
 /**
@@ -55,7 +55,7 @@ export class TablePageSizeComponent implements OnInit, OnDestroy {
   /**
    * Page size select form group.
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * The default page size.
@@ -115,8 +115,8 @@ export class TablePageSizeComponent implements OnInit, OnDestroy {
    * Constructor of `TablePageSizeComponent`.
    */
   constructor() {
-    this.form = new FormGroup({
-      size: new FormControl(this.pageSize),
+    this.form = new UntypedFormGroup({
+      size: new UntypedFormControl(this.pageSize),
     });
   }
 
@@ -133,8 +133,8 @@ export class TablePageSizeComponent implements OnInit, OnDestroy {
   /**
    * Get the form control of the size selection.
    */
-  public get size(): FormControl {
-    return this.form.get('size') as FormControl;
+  public get size(): UntypedFormControl {
+    return this.form.get('size') as UntypedFormControl;
   }
 
   /**

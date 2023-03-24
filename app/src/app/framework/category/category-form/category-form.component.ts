@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ReplaySubject, Subscription } from 'rxjs';
 import { CmdbMode } from '../../modes.enum';
 import { CmdbCategory } from '../../models/cmdb-category';
@@ -89,7 +89,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Category add form.
    */
-  public categoryForm: FormGroup;
+  public categoryForm: UntypedFormGroup;
 
   /**
    * Are categories loading?
@@ -125,15 +125,15 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
    * Category form constructor - Inits the category form
    */
   public constructor(private categoryService: CategoryService, private toast: ToastService) {
-    this.categoryForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl(''),
-      meta: new FormGroup({
-        icon: new FormControl(null),
-        order: new FormControl(null)
+    this.categoryForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required),
+      label: new UntypedFormControl(''),
+      meta: new UntypedFormGroup({
+        icon: new UntypedFormControl(null),
+        order: new UntypedFormControl(null)
       }),
-      parent: new FormControl(null),
-      types: new FormArray([])
+      parent: new UntypedFormControl(null),
+      types: new UntypedFormArray([])
     });
   }
 
@@ -176,7 +176,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
       this.$category = this.category;
       this.categoryForm.patchValue(this.$category);
       for (const type of this.$category.types) {
-        this.types.push(new FormControl(type));
+        this.types.push(new UntypedFormControl(type));
       }
     }
     // TODO fix wrong order!!!
@@ -212,32 +212,32 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     this.subscriber.complete();
   }
 
-  public get name(): FormControl {
-    return this.categoryForm.get('name') as FormControl;
+  public get name(): UntypedFormControl {
+    return this.categoryForm.get('name') as UntypedFormControl;
   }
 
-  public get label(): FormControl {
-    return this.categoryForm.get('label') as FormControl;
+  public get label(): UntypedFormControl {
+    return this.categoryForm.get('label') as UntypedFormControl;
   }
 
-  public get meta(): FormGroup {
-    return this.categoryForm.get('meta') as FormGroup;
+  public get meta(): UntypedFormGroup {
+    return this.categoryForm.get('meta') as UntypedFormGroup;
   }
 
-  public get icon(): FormControl {
-    return this.meta.get('icon') as FormControl;
+  public get icon(): UntypedFormControl {
+    return this.meta.get('icon') as UntypedFormControl;
   }
 
   public onIconSelect(value: string): void {
     this.icon.setValue(value);
   }
 
-  public get parent(): FormControl {
-    return this.categoryForm.get('parent') as FormControl;
+  public get parent(): UntypedFormControl {
+    return this.categoryForm.get('parent') as UntypedFormControl;
   }
 
-  public get types(): FormArray {
-    return this.categoryForm.get('types') as FormArray;
+  public get types(): UntypedFormArray {
+    return this.categoryForm.get('types') as UntypedFormArray;
   }
 
   public findAssignedTypeByIndex(idx: number): CmdbType | undefined {
@@ -269,7 +269,7 @@ export class CategoryFormComponent implements OnInit, OnChanges, OnDestroy {
     }
     list.splice(index, 0, event.data);
     if (control) {
-      this.types.insert(index, new FormControl(event.data.public_id));
+      this.types.insert(index, new UntypedFormControl(event.data.public_id));
     }
   }
 

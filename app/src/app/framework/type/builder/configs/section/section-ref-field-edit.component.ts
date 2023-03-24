@@ -25,7 +25,7 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import {ToastService} from "../../../../../layout/toast/toast.service";
 
 @Component({
@@ -43,32 +43,32 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Type form control.
    */
-  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Type form control.
    */
-  public sectionNameControl: FormControl = new FormControl(undefined, Validators.required);
+  public sectionNameControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Type form control.
    */
-  public selectedFieldsControl: FormControl = new FormControl([], Validators.required);
+  public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([], Validators.required);
 
   /**
    * Reference form control.
    */
-  public referenceGroup: FormGroup = new FormGroup({
+  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
     type_id: this.typeControl,
     section_name: this.sectionNameControl,
     selected_fields: this.selectedFieldsControl

@@ -28,7 +28,7 @@ import {
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { ConfigEditBaseComponent } from './config.edit';
 import { ReplaySubject } from 'rxjs';
 
@@ -43,7 +43,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   @Input() public mode: CmdbMode = CmdbMode.Create;
   @Input() public data: any;
@@ -58,7 +58,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
   private componentRef: ComponentRef<any>;
 
   constructor(private resolver: ComponentFactoryResolver) {
-    this.form = new FormGroup({});
+    this.form = new UntypedFormGroup({});
   }
 
   public ngOnInit(): void {

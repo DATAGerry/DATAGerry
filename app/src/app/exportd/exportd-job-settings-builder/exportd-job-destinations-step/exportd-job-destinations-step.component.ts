@@ -18,7 +18,7 @@
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ExternalSystemService } from '../../../settings/services/external-system.service';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
@@ -41,13 +41,13 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
       if (data.destination) {
         // Create destination
         this.destinationForm = this.formBuilder.group({
-          destination: new FormArray([])
+          destination: new UntypedFormArray([])
         });
         this.destinationForm.removeControl('destination');
-        const forArray: FormArray = this.formBuilder.array([]);
+        const forArray: UntypedFormArray = this.formBuilder.array([]);
         for (const source of data.destination) {
           forArray.push(this.formBuilder.group({
-            className: new FormControl('', Validators.required),
+            className: new UntypedFormControl('', Validators.required),
             parameter: this.formBuilder.array([])
           }));
         }
@@ -57,7 +57,7 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
         let i = 0;
         while (i < forArray.controls.length) {
           for (let c = 0; c < data.destination[i].parameter.length; c++) {
-            const control = forArray.controls[i].get('parameter') as FormArray;
+            const control = forArray.controls[i].get('parameter') as UntypedFormArray;
             let required: boolean = false;
             let description: string = '';
             const classname = forArray.controls[i].get('className').value;
@@ -82,10 +82,10 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
   @Input() public mode: CmdbMode;
   public externalSystemList: any[] = [];
   public externalSystems: any[] = [];
-  public destinationForm: FormGroup;
+  public destinationForm: UntypedFormGroup;
   readonly DESTINATION = 'destination';
 
-  constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService) {
+  constructor(private formBuilder: UntypedFormBuilder, private externalService: ExternalSystemService) {
     super();
   }
 
@@ -112,24 +112,24 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
     this.subscriber.complete();
   }
 
-  private createDestination(): FormGroup {
+  private createDestination(): UntypedFormGroup {
     return this.formBuilder.group({
-      className: new FormControl('', Validators.required),
+      className: new UntypedFormControl('', Validators.required),
       parameter: this.formBuilder.array([this.createParameters()])
     });
   }
 
-  private createParameters(name = '', value = '', description = '', required = false): FormGroup {
+  private createParameters(name = '', value = '', description = '', required = false): UntypedFormGroup {
     return this.formBuilder.group({
-      name: new FormControl(name, Validators.required),
-      value: new FormControl(value, Validators.required),
-      required: new FormControl(required, Validators.required),
-      description: new FormControl(description, Validators.required)
+      name: new UntypedFormControl(name, Validators.required),
+      value: new UntypedFormControl(value, Validators.required),
+      required: new UntypedFormControl(required, Validators.required),
+      description: new UntypedFormControl(description, Validators.required)
     });
   }
 
   private getDestinationAsFormArray(): any {
-    return this.destinationForm.controls[this.DESTINATION] as FormArray;
+    return this.destinationForm.controls[this.DESTINATION] as UntypedFormArray;
   }
 
   public addDestination(): void {
@@ -138,7 +138,7 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
   }
 
   public addParameters(event): void {
-    const control = this.getDestinationAsFormArray().at(event).get('parameter') as FormArray;
+    const control = this.getDestinationAsFormArray().at(event).get('parameter') as UntypedFormArray;
     control.push(this.createParameters());
   }
 
@@ -148,7 +148,7 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
   }
 
   public delParameter(index, event): void {
-    const control = this.getDestinationAsFormArray().at(event).get('parameter') as FormArray;
+    const control = this.getDestinationAsFormArray().at(event).get('parameter') as UntypedFormArray;
     control.removeAt(index);
   }
 
@@ -166,7 +166,7 @@ export class ExportdJobDestinationsStepComponent extends ExportdJobBaseStepCompo
         externalSystemParams = params as [];
       }, error => console.log(error),
       () => {
-        const controlArray = this.getDestinationAsFormArray().at(index).get('parameter') as FormArray;
+        const controlArray = this.getDestinationAsFormArray().at(index).get('parameter') as UntypedFormArray;
         controlArray.clear();
         for (const param of externalSystemParams) {
           controlArray.push(this.createParameters(param.name, param.default, param.description, param.required));

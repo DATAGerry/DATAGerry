@@ -18,7 +18,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { FileMetadata } from '../../model/metadata';
 import { checkFolderExistsValidator, FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
@@ -40,7 +40,7 @@ export class RenameDialogComponent implements OnInit {
   get selectedFileFolder(): BehaviorSubject<any> {
     return this.selectedFileElement;
   }
-  public basicForm: FormGroup;
+  public basicForm: UntypedFormGroup;
 
 
   static generateMetaData(value: BehaviorSubject<any> ): FileMetadata {
@@ -55,8 +55,8 @@ export class RenameDialogComponent implements OnInit {
 
   public ngOnInit(): void {
     const placeholder: string = this.selectedFileElement.getValue() ? this.selectedFileElement.getValue().filename : '';
-    this.basicForm = new FormGroup({
-      name: new FormControl(placeholder, Validators.required)
+    this.basicForm = new UntypedFormGroup({
+      name: new UntypedFormControl(placeholder, Validators.required)
     });
     this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService,
       RenameDialogComponent.generateMetaData(this.selectedFileFolder)));

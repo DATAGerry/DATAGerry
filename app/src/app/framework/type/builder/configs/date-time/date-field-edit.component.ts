@@ -21,7 +21,7 @@ import { ConfigEditBaseComponent } from '../config.edit';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
 import { ReplaySubject } from 'rxjs';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { takeUntil } from 'rxjs/operators';
 import { DateSettingsService } from '../../../../../settings/services/date-settings.service';
 
@@ -42,12 +42,12 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public datePlaceholder = 'YYYY-MM-DD';
 
-  public requiredControl: FormControl = new FormControl(false);
-  public nameControl: FormControl = new FormControl('', Validators.required);
-  public labelControl: FormControl = new FormControl('', Validators.required);
-  public descriptionControl: FormControl = new FormControl(undefined);
-  public valueControl: FormControl = new FormControl(undefined);
-  public helperTextControl: FormControl = new FormControl(undefined);
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
   constructor(private dateSettingsService: DateSettingsService) {
     super();

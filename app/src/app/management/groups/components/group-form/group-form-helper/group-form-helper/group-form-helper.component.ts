@@ -1,6 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { Right } from '../../../../../models/right';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-group-form-helper',
@@ -15,7 +15,7 @@ export class GroupFormHelperComponent implements OnInit {
 
   public rightNames: any[] = [];
 
-  @Input() public form: FormGroup;
+  @Input() public form: UntypedFormGroup;
 
   public minRights: any[] = [];
 

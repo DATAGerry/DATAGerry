@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import {
   DocapiBuilderTypeStepBaseComponent
 } from '../docapi-builder-type-step-base/docapi-builder-type-step-base.component';
@@ -36,8 +36,8 @@ export class DocapiBuilderTypeStepObjectComponent extends DocapiBuilderTypeStepB
 
   constructor(private typeService: TypeService) {
     super();
-    this.typeParamForm = new FormGroup({
-      type: new FormControl('', Validators.required)
+    this.typeParamForm = new UntypedFormGroup({
+      type: new UntypedFormControl('', Validators.required)
     });
   }
 

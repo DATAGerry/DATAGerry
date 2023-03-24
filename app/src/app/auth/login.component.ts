@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { AuthService } from './services/auth.service';
 import { Router } from '@angular/router';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { first } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { PermissionService } from './services/permission.service';
@@ -43,7 +43,7 @@ export class LoginComponent implements OnInit, OnDestroy {
   public imageUrl: string = LoginComponent.defaultLogoUrl;
   public itemUrl: string = LoginComponent.defaultFallItems;
 
-  public loginForm: FormGroup;
+  public loginForm: UntypedFormGroup;
   public submitted = false;
 
   private loginSubscription: Subscription = new Subscription();
@@ -67,9 +67,9 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   public ngOnInit(): void {
     this.render.addClass(document.body, 'embedded');
-    this.loginForm = new FormGroup({
-      username: new FormControl('', [Validators.required]),
-      password: new FormControl('', [Validators.required])
+    this.loginForm = new UntypedFormGroup({
+      username: new UntypedFormControl('', [Validators.required]),
+      password: new UntypedFormControl('', [Validators.required])
     });
   }
 

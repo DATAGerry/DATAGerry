@@ -20,7 +20,7 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -32,10 +32,10 @@ export class ObjectPreviewModalComponent implements OnInit {
 
   @Input() renderResult: RenderResult;
   public mode = CmdbMode.View;
-  public formGroupDummy: FormGroup;
+  public formGroupDummy: UntypedFormGroup;
 
   constructor(public activeModal: NgbActiveModal) {
-    this.formGroupDummy = new FormGroup({});
+    this.formGroupDummy = new UntypedFormGroup({});
   }
 
   public ngOnInit(): void {

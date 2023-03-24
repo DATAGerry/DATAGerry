@@ -19,7 +19,7 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import {NgbActiveModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
 import { CmdbCategory } from '../../../../models/cmdb-category';
-import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-category-delete',
@@ -70,17 +70,17 @@ import { AbstractControl, FormControl, FormGroup, ValidatorFn, Validators } from
 export class DeleteCategoryModalComponent implements OnDestroy {
 
   constructor(public modal: NgbActiveModal) {
-    this.deleteCategoryModalForm = new FormGroup({
-      name: new FormControl('', [Validators.required, this.equalName()]),
+    this.deleteCategoryModalForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required, this.equalName()]),
     });
   }
 
-  public get name(): FormControl {
-    return this.deleteCategoryModalForm.get('name') as FormControl;
+  public get name(): UntypedFormControl {
+    return this.deleteCategoryModalForm.get('name') as UntypedFormControl;
   }
 
   @Input() public category: CmdbCategory;
-  public deleteCategoryModalForm: FormGroup;
+  public deleteCategoryModalForm: UntypedFormGroup;
   private modalRef: NgbModalRef;
 
   public ngOnDestroy(): void {

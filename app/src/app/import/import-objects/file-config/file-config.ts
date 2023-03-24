@@ -16,14 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 export class FileConfig {
   public defaultParserConfig: any = {};
-  public configForm: FormGroup;
+  public configForm: UntypedFormGroup;
 
   public constructor() {
-    this.configForm = new FormGroup({});
+    this.configForm = new UntypedFormGroup({});
 
   }
 

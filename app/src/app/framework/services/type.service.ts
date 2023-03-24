@@ -26,7 +26,7 @@ import {
 } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
@@ -42,7 +42,7 @@ import { AccessControlPermission } from '../../acl/acl.types';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return typeService.getTypeByName(control.value).pipe(
         map((response) => {

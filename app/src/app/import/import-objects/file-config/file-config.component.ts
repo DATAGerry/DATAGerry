@@ -32,7 +32,7 @@ import { JsonConfigComponent } from './json-config/json-config.component';
 import { FileConfig } from './file-config';
 import { ImportService } from '../../import.service';
 import { Subscription } from 'rxjs';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 export const configComponents: { [type: string]: any } = {
   json: JsonConfigComponent,
@@ -77,7 +77,7 @@ export class FileConfigComponent extends FileConfig implements OnInit, OnChanges
     if (changes.fileFormat !== undefined && (changes.fileFormat.currentValue !== undefined || changes.fileFormat.currentValue !== '')
       && changes.fileFormat.firstChange === false) {
       this.fileConfig.clear();
-      this.configForm = new FormGroup({});
+      this.configForm = new UntypedFormGroup({});
       this.resetConfigSub();
       this.component = configComponents[this.fileFormat];
       this.currentFactory = this.resolver.resolveComponentFactory(this.component);

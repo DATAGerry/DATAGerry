@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
@@ -35,14 +35,14 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: FormControl = new FormControl(false);
-  public nameControl: FormControl = new FormControl('', Validators.required);
-  public labelControl: FormControl = new FormControl('', Validators.required);
-  public descriptionControl: FormControl = new FormControl(undefined);
-  public regexControl: FormControl = new FormControl(undefined, ValidRegexValidator);
-  public placeholderControl: FormControl = new FormControl(undefined);
-  public valueControl: FormControl = new FormControl(undefined);
-  public helperTextControl: FormControl = new FormControl(undefined);
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public regexControl: UntypedFormControl = new UntypedFormControl(undefined, ValidRegexValidator);
+  public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
   constructor() {
     super();

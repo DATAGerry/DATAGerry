@@ -28,7 +28,7 @@ import {
   Renderer2
 } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
 import { ExportdJobDestinationsStepComponent } from '../exportd-job-destinations-step/exportd-job-destinations-step.component';
@@ -124,15 +124,15 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
     if (data !== undefined) {
       if (data.variables) {
         this.variableForm = this.formBuilder.group({
-          variables: new FormArray([])
+          variables: new UntypedFormArray([])
         });
         this.variableForm.removeControl('variables');
-        const forArray: FormArray = this.formBuilder.array([]);
+        const forArray: UntypedFormArray = this.formBuilder.array([]);
         let i = 0;
         while (i < data.variables.length) {
           forArray.push(this.formBuilder.group({
-            name: new FormControl('', Validators.required),
-            default: new FormControl('', Validators.required),
+            name: new UntypedFormControl('', Validators.required),
+            default: new UntypedFormControl('', Validators.required),
             templates: this.formBuilder.array([])
           }));
           i++;
@@ -141,7 +141,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
         i = 0;
         while (i < forArray.controls.length) {
           data.variables[i].templates.forEach((item, index) => {
-            const control = forArray.controls[i].get('templates') as FormArray;
+            const control = forArray.controls[i].get('templates') as UntypedFormArray;
             control.push(this.createTemplate());
             this.onOptionSelected(i, index, item.type);
           });
@@ -156,7 +156,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
 
   private destinationForm: ExportdJobDestinationsStepComponent;
 
-  public variableForm: FormGroup;
+  public variableForm: UntypedFormGroup;
   public variableHelper: any[];
   public dragVariableName: string = '';
   public templateHelperData: any = {};
@@ -174,7 +174,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
     return this.sourceTypes;
   }
 
-  constructor(private formBuilder: FormBuilder, private externalService: ExternalSystemService,
+  constructor(private formBuilder: UntypedFormBuilder, private externalService: ExternalSystemService,
               private templateHelperService: TemplateHelperService, private typeService: TypeService) {
     super();
   }
@@ -193,24 +193,24 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
     });
   }
 
-  private createVariable(): FormGroup {
+  private createVariable(): UntypedFormGroup {
     return this.formBuilder.group({
-      name: new FormControl('', Validators.required),
-      default: new FormControl('', Validators.required),
+      name: new UntypedFormControl('', Validators.required),
+      default: new UntypedFormControl('', Validators.required),
       templates: this.formBuilder.array([this.createTemplate()])
     });
   }
 
 
-  private createTemplate(): FormGroup {
+  private createTemplate(): UntypedFormGroup {
     return this.formBuilder.group({
-      type: new FormControl('', Validators.required),
-      template: new FormControl('', Validators.required)
+      type: new UntypedFormControl('', Validators.required),
+      template: new UntypedFormControl('', Validators.required)
     });
   }
 
   private getVariableAsFormArray(): any {
-    return this.variableForm.controls[this.VARIABLES] as FormArray;
+    return this.variableForm.controls[this.VARIABLES] as UntypedFormArray;
   }
 
   public addVariable(): void {
@@ -219,7 +219,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
   }
 
   public addTemplate(event): void {
-    const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
+    const control = this.getVariableAsFormArray().at(event).get('templates') as UntypedFormArray;
     control.push(this.createTemplate());
   }
 
@@ -229,7 +229,7 @@ export class ExportdJobVariablesStepComponent extends ExportdJobBaseStepComponen
   }
 
   public delTemplate(index, event): void {
-    const control = this.getVariableAsFormArray().at(event).get('templates') as FormArray;
+    const control = this.getVariableAsFormArray().at(event).get('templates') as UntypedFormArray;
     control.removeAt(index);
     if (this.templateHelperData[event][index]) {
       delete this.templateHelperData[event][index];
