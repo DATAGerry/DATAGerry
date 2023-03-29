@@ -34,7 +34,7 @@ import { ProgressSpinner } from './progress-spinner.types';
   selector: 'cmdb-progress-spinner',
   templateUrl: './progress-spinner.component.html',
   styleUrls: ['./progress-spinner.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated
+  encapsulation: ViewEncapsulation.None
 })
 export class ProgressSpinnerComponent implements OnInit, OnDestroy {
 

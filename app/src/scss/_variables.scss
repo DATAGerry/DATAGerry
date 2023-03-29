@@ -1,6 +1,6 @@
 @import 'bootstrap_variables';
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
 @import 'mixins';
 
 $navbar-height: calc(80px + #{$navbar-padding-y});
