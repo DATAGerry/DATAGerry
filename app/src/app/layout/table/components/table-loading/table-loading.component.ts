@@ -23,7 +23,7 @@ import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@a
   selector: 'table-loading',
   templateUrl: './table-loading.component.html',
   styleUrls: ['./table-loading.component.scss'],
-  encapsulation: ViewEncapsulation.Emulated,
+  encapsulation: ViewEncapsulation.None,
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TableLoadingComponent {
