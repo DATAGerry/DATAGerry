@@ -11,3 +11,7 @@ a {
     }
   }
 }
+
+::ng-deep ngb-modal-backdrop {
+  z-index: 100 !important;
+}
