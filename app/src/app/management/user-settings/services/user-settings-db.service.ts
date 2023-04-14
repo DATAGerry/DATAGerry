@@ -71,7 +71,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
     try {
       this.userSettingsService.getUserSettings()
         .subscribe(async (userSettings: Array<UserSetting<P>>) => {
-            await this.dbService.clear(this.storeName);
+            this.dbService.clear(this.storeName).subscribe(() => {});
 
             for (const setting of userSettings) {
               this.dbService.add(this.storeName, setting).subscribe();

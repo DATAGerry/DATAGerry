@@ -36,6 +36,12 @@ export class DateFormatterPipe implements PipeTransform {
       data = new Date(data.$date).toUTCString();
     }
     if (isNaN(data) && !isNaN(Date.parse(data))) {
+
+      if(!this.dateSettingsService.currentDateSettings) {
+        const defaultDate = moment.utc(data);
+        return defaultDate.isValid() ? moment.tz(defaultDate, "UTC").format("YYYY-MM-DDThh:mm:ssZ") : data;
+      }
+
       const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
       const date = moment.utc(data);
       return date.isValid() ? moment.tz(date, timezone).format(date_format) : data;

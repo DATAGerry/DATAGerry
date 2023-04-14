@@ -98,10 +98,12 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
   @HostListener('window:scroll')
   onWindowScroll() {
     const dialog = document.getElementById('object-form-action');
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.visibility = 'visible';
-    } else {
-      dialog.style.visibility = 'hidden';
+    if (dialog ) {
+      if ((document.body.scrollTop > 10 || document.documentElement.scrollTop > 10)) {
+        dialog.style.visibility = 'visible';
+      } else {
+        dialog.style.visibility = 'hidden';
+      }
     }
   }
 

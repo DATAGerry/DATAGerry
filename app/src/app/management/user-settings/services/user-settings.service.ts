@@ -74,7 +74,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
     this.currentUserObservable = this.authService.currentUser;
     this.currentUserObservable.subscribe((user: User) => {
       this.currentUser = user;
-      this.servicePrefix = `users/${ this.authService.currentUserValue.public_id }/settings`;
+      this.servicePrefix = `users/${ this.authService.currentUserValue?.public_id }/settings`;
     });
   }
 
@@ -93,7 +93,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public getUserSettings(): Observable<Array<T>> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callGet<T>(`users/${ this.authService.currentUserValue.public_id }/settings/`, options).pipe(
+    return this.api.callGet<T>(`users/${ this.authService.currentUserValue?.public_id }/settings/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
