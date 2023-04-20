@@ -108,7 +108,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.items = [];
   }
 
   /**

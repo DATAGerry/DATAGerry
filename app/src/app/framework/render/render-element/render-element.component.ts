@@ -87,6 +87,7 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         break;
       }
       case CmdbMode.Simple: {
+        if(!this.data) break;
         this.data.value = this.value;
         this.component = simpleComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
