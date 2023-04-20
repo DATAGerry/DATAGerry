@@ -67,11 +67,11 @@
 }
 
 .progress {
-  background-color: gray;
+  background-color: green;
 }
 
 
-@-webkit-keyframes progressBar {
+@keyframes progressBar {
   0% { width: 0; }
   100% { width: 100%; }
 }
