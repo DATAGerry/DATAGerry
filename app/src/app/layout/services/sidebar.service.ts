@@ -31,6 +31,7 @@ export class SidebarService {
    * Basic tree observer.
    */
   private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
+  private reloadData = new BehaviorSubject(false);
   private sideBarType: SidebarTypeComponent[] = [];
 
   constructor(private categoryService: CategoryService, private objectService: ObjectService) {
@@ -84,8 +85,10 @@ export class SidebarService {
    * @param sidebarType the sidebar-type component which will be inserted
    */
   public initializeCounter(sidebarType: SidebarTypeComponent) {
-    this.sideBarType.push(sidebarType);
-    this.updateTypeCounter(sidebarType.type.public_id);
+    this.reloadData.subscribe( (data) => { 
+      this.sideBarType.push(sidebarType);
+      this.updateTypeCounter(sidebarType.type.public_id);
+    });
   }
 
   /**
@@ -95,6 +98,10 @@ export class SidebarService {
    */
   public deleteCounter(sidebarType: SidebarTypeComponent) {
     this.sideBarType = this.sideBarType.filter( type => type !== sidebarType);
+  }
+
+  public ReloadSideBarData() {
+    this.reloadData.next(true);
   }
 
 }
