@@ -105,7 +105,7 @@ export class TableStateComponent {
   public saveState(name: string, event: Event) {
     event.stopPropagation();
     this.stateSave.emit(name);
-    this.nameControl.setValue('');
+    this.form.reset();
   }
 
   /**
