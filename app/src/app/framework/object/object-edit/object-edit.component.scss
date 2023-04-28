@@ -1,0 +1,14 @@
+.editButton {
+    background-color: rgba(0, 0, 0, 0.03);
+    padding:10px;
+    margin-bottom: 10px;
+}
+
+.active-control {
+
+    &:checked ~ .custom-control-label::before {
+      background-color: green;
+      border-color: green;
+    }
+  
+  }

@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { Component, ElementRef, EventEmitter, Input, Output, Renderer2, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TableState } from '../../table.types';
 
@@ -65,13 +65,33 @@ export class TableStateComponent {
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   /**
+   * Toggle button element reference.
+   */
+  @ViewChild('toggleButton') toggleButton: ElementRef;
+
+  /**
    * Name form validation
    */
   public form: UntypedFormGroup;
 
-  constructor() {
+  constructor(private renderer: Renderer2) {
     this.form = new UntypedFormGroup({
       name: new UntypedFormControl('', Validators.required)
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.renderer.listen('window', 'click',(e:Event)=>{
+      /**
+       * Only run when toggleButton is not clicked
+       * If we don't check this, all clicks (even on the toggle button) gets into this
+       * section which in the result we might never see the menu open!
+       * And the menu itself is checked here, and it's where we check just outside of
+       * the menu and button the condition abbove must close the menu
+       */
+     if(e.target !== this.toggleButton.nativeElement){
+      this.form.reset();
+      }
     });
   }
 
