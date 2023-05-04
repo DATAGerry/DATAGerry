@@ -108,9 +108,9 @@ export class ObjectEditComponent implements OnInit {
         if (res.failed.length === 0) {
           this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
             this.sidebarService.ReloadSideBarData();
+            this.toastService.success('Object was successfully updated!');
+            this.router.navigate(['/framework/object/view/' + this.objectID]);
           });
-          this.toastService.success('Object was successfully updated!');
-          this.router.navigate(['/framework/object/view/' + this.objectID]);
         } else {
           for (const err of res.failed) {
             this.toastService.error(err.error_message);
