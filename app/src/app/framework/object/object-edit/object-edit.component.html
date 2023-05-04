@@ -21,8 +21,15 @@
   <div class="card-body">
     <form [formGroup]="renderForm" class="renderForm needs-validation" novalidate autocomplete="off"
           (ngSubmit)="editObject()">
-      <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode"
-                   [renderForm]="renderForm"></cmdb-render>
+      <div class="editButton">
+        <div *permissionLink="'base.framework.object.edit'" class="custom-control custom-switch">
+          <input type="checkbox" class="custom-control-input active-control" id="object-view-active"
+            (change)="toggleChange()" [checked]="activeState">
+          <label class="custom-control-label" for="object-view-active">Object active?</label>
+        </div>
+      </div>
+      <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode" 
+      [renderForm]="renderForm"> </cmdb-render>
       <hr/>
       <form [formGroup]="commitForm" class="renderForm needs-validation" novalidate autocomplete="off">
         <fieldset class="log-comment">

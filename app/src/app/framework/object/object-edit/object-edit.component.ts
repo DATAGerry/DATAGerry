@@ -29,6 +29,7 @@ import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
 import {text} from "@fortawesome/fontawesome-svg-core";
+import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -44,9 +45,11 @@ export class ObjectEditComponent implements OnInit {
   public renderForm: UntypedFormGroup;
   public commitForm: UntypedFormGroup;
   private objectID: number;
+  public activeState : boolean ;
 
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private toastService: ToastService) {
+              private route: ActivatedRoute, private router: Router, private toastService: ToastService , 
+              private sidebarService : SidebarService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
@@ -59,6 +62,7 @@ export class ObjectEditComponent implements OnInit {
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
         this.renderResult = rr;
+        this.activeState = this.renderResult.object_information.active;
       },
       error => {
         console.error(error);
@@ -99,10 +103,14 @@ export class ObjectEditComponent implements OnInit {
 
       this.objectInstance.fields = patchValue;
       this.objectInstance.comment = this.commitForm.get('comment').value;
+      this.objectInstance.active = this.activeState;
       this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: APIUpdateMultiResponse) => {
         if (res.failed.length === 0) {
-          this.toastService.success('Object was successfully updated!');
-          this.router.navigate(['/framework/object/view/' + this.objectID]);
+          this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
+            this.sidebarService.ReloadSideBarData();
+            this.toastService.success('Object was successfully updated!');
+            this.router.navigate(['/framework/object/view/' + this.objectID]);
+          });
         } else {
           for (const err of res.failed) {
             this.toastService.error(err.error_message);
@@ -115,5 +123,10 @@ export class ObjectEditComponent implements OnInit {
       });
     }
   }
+
+  public toggleChange() {
+    this.activeState = this.activeState !== true;
+    this.renderForm.markAsDirty();
+    }
 
 }

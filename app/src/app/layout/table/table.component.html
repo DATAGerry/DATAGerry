@@ -62,7 +62,7 @@
       <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [hidden]="column.hidden"
           [ngStyle]="column.style"></td>
     </tr>
-    <tr *ngIf="items.length === 0">
+    <tr *ngIf="items?.length === 0">
       <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">
         {{emptyMessage}}
       </td>
@@ -82,7 +82,7 @@
   </table>
   <div class="table-footer d-flex">
     <div class="mr-auto">
-      <table-info [show]="items.length" [total]="totalItems" *ngIf="infoEnabled"
+      <table-info [show]="items?.length" [total]="totalItems" *ngIf="infoEnabled"
                   [selectEnabled]="selectEnabled" [selected]="selectedItems.length"></table-info>
     </div>
     <div *ngIf="paginationEnabled">
