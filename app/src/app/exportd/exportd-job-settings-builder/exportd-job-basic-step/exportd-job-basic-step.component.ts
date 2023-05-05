@@ -77,7 +77,7 @@ export class ExportdJobBasicStepComponent extends ExportdJobBaseStepComponent im
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
     } else if (CmdbMode.Edit) {
-      this.basicForm.get('name').disable();
+      // this.basicForm.get('name').disable();
       this.basicForm.markAllAsTouched();
     }
   }
