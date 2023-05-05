@@ -226,6 +226,13 @@ export class ExportdJobSettingsListComponent implements OnInit, OnDestroy {
       },
       {
         display: 'Name',
+        name: 'name',
+        data: 'name',
+        searchable: true,
+        sortable: true
+      },
+      {
+        display: 'Label',
         name: 'label',
         data: 'label',
         searchable: true,
