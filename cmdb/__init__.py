@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 """
 DATAGERRY is a flexible asset management tool and
@@ -22,8 +22,8 @@ import time
 
 __title__ = 'DATAGERRY'
 __version__ = '@@DG_BUILDVAR_VERSION@@'
-__author__ = 'NETHINKS GmbH'
+__author__ = 'becon GmbH'
 __license__ = 'AGPLv3'
-__copyright__ = 'Copyright 2019 NETHINKS GmbH'
+__copyright__ = 'Copyright 2023 becon GmbH'
 __runtime__ = time.time()
 __MODE__ = 'INFO'
