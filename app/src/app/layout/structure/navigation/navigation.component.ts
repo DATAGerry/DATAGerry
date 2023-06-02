@@ -23,7 +23,13 @@ import { User } from '../../../management/models/user';
 import { GroupService } from '../../../management/services/group.service';
 import { Group } from '../../../management/models/group';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FeedbackModalComponent } from '../../helpers/modals/feedback-modal/feedback-modal.component';
+import * as jQuery from 'jquery';
+
+declare global {
+  interface Window { ATL_JQ_PAGE_PROPS: any; }
+}
+
+window.ATL_JQ_PAGE_PROPS = window.ATL_JQ_PAGE_PROPS || {};
 
 @Component({
   selector: 'cmdb-navigation',
@@ -78,7 +84,20 @@ export class NavigationComponent implements OnInit, OnDestroy {
   }
 
   public feedback() {
-    const modalComponent = this.modalService.open(FeedbackModalComponent, {size: 'xl'});
-    return modalComponent.result;
+
+    jQuery.ajax({
+      url: "https://becon88.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/6i46lu/b/8/b0105d975e9e59f24a3230a22972a71a/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector-embededjs/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector-embededjs.js?locale=de-DE&collectorId=f2da5b6f",
+      type: 'get',
+      cache: true,
+      dataType: 'script'
+    });
+
+    window.ATL_JQ_PAGE_PROPS =  {
+      "triggerFunction": function(showCollectorDialog) {
+        showCollectorDialog();
+      }
+    };
+    
   }
+
 }
