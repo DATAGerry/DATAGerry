@@ -42,7 +42,7 @@
     "chartjs-plugin-datalabels": "^0.7.0",
     "core-js": "^3.29.1",
     "file-saver": "^2.0.5",
-    "jquery": "^3.6.4",
+    "jquery": "^3.7.0",
     "jszip": "^3.10.1",
     "jw-angular-pagination": "^1.2.0",
     "moment-timezone": "^0.5.41",
