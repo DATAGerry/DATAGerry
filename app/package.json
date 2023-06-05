@@ -50,7 +50,7 @@
     "ngx-drag-drop": "^2.0.0",
     "ngx-filesaver": "^11.0.0",
     "ngx-icon-picker": "^1.9.1",
-    "ngx-indexed-db": "^11.0.2",
+    "ngx-indexed-db": "^16.0.0",
     "node-sass": "^8.0.0",
     "rxjs": "^6.6.7",
     "tinymce": "^5.10.7",
