@@ -31,7 +31,7 @@
     "@fortawesome/free-solid-svg-icons": "^6.4.0",
     "@ng-bootstrap/ng-bootstrap": "^13.1.1",
     "@ng-select/ng-select": "^9.1.0",
-    "@popperjs/core": "^2.11.6",
+    "@popperjs/core": "^2.11.8",
     "@tinymce/tinymce-angular": "^4.2.4",
     "@types/chart.js": "^2.9.37",
     "@types/file-saver": "^2.0.5",
