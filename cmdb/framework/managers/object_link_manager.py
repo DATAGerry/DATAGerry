@@ -69,7 +69,18 @@ class ObjectLinkManager(ManagerBase):
 
         try:
             query: Pipeline = self.query_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
+
+            #Links don't have a type_id
+            #TODO: integrate quick fix in basic workflow (DAT-348)
+            query[1]['$unwind'] = {"path": "$type", "preserveNullAndEmptyArrays": True}
+            del query[2]
+
             count_query: Pipeline = self.query_builder.count(filter=filter, user=user, permission=permission)
+
+            #Links don't have a type_id
+            #TODO: integrate quick fix in basic workflow (DAT-348)
+            del count_query[2]
+
             aggregation_result = list(self._aggregate(self.collection, query))
             total_cursor = self._aggregate(self.collection, count_query)
             total = 0
