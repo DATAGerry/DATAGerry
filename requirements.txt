@@ -67,7 +67,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.4
 toml==0.10.1
-urllib3==1.25.10
+urllib3==1.26.5
 webencodings==0.5.1
 Werkzeug==1.0.1
 wrapt==1.12.1
