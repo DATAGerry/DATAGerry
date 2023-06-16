@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -307,7 +307,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         object_ids = [public_id]
 
     manager = ObjectManager(database_manager=current_app.database_manager, event_queue=current_app.event_queue)
-    results: [dict] = []
+    results: list[dict] = []
     failed = []
 
     for obj_id in object_ids:
@@ -327,7 +327,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                 new_data['public_id'] = obj_id
                 new_data['creation_time'] = current_object_instance.creation_time
                 new_data['author_id'] = current_object_instance.author_id
-                new_data['active'] = active_state if active_state else current_object_instance.active
+                new_data['active'] = active_state if active_state in [True, False] else current_object_instance.active
 
                 if 'version' not in data:
                     new_data['version'] = current_object_instance.version
