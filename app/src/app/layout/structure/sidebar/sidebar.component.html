@@ -29,7 +29,7 @@
           </ng-container>
 
         </ng-container>
-        <ng-container *ngIf="unCategorizedTypes && unCategorizedTypes.length > 0">
+        <ng-container *ngIf="!filterTerm.value && unCategorizedTypes && unCategorizedTypes.length > 0">
           <label class="nav-title"><strong>Uncategorized</strong></label>
           <ng-container *ngFor="let type of unCategorizedTypes">
             <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
