@@ -59,7 +59,7 @@ requests==2.31.0
 six==1.16.0
 snowballstemmer==2.0.0
 Sphinx==3.2.1
-sphinxcontrib-applehelp==1.0.2
+sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==1.0.3
 sphinxcontrib-httpdomain==1.7.0
