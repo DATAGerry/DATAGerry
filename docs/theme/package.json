@@ -9,7 +9,7 @@
     "build-prod": "webpack -p --mode production",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "NETHINKS GmbH",
+  "author": "becon GmbH",
   "license": "AGPL-3.0",
   "dependencies": {
     "bootstrap": "^4.3.1",
