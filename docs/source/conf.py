@@ -21,8 +21,8 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'DATAGERRY'
-copyright = '2019, NETHINKS GmbH'
-author = 'NETHINKS GmbH'
+copyright = '2023, becon GmbH'
+author = 'becon GmbH'
 
 # The short X.Y version
 version = 'undefined'
@@ -131,7 +131,7 @@ latex_elements = {
 #  author, documentclass [howto, manual, or own class]).
 latex_documents = [
     (master_doc, 'DATAGERRY.tex', 'DATAGERRY Documentation',
-     'NETHINKS GmbH', 'manual'),
+     'becon GmbH', 'manual'),
 ]
 
 # -- Options for manual page output ------------------------------------------
