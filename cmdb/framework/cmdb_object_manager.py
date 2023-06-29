@@ -23,11 +23,11 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from cmdb.database.utils import object_hook
-from bson import json_util
 from typing import List
 from queue import Queue
+from bson import json_util
 
+from cmdb.database.utils import object_hook
 from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
@@ -68,13 +68,21 @@ def verify_access(model: TypeModel, user: UserModel = None, permission: AccessCo
 
 
 class CmdbObjectManager(CmdbManagerBase):
-
+    """
+    class CmdbObjectManager
+    """
     def __init__(self, database_manager=None, event_queue: Queue = None):
         self._event_queue = event_queue
         self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
+        """
+        function 'is_ready' returns the current database connector status
+
+        Returns:
+            bool: Connector is connected to database
+        """
         return self.dbm.status()
 
     def get_new_id(self, collection: str) -> int:
@@ -114,6 +122,15 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def get_objects_by_type(self, type_id: int):
+        """
+        function 'get_objects_by_type' gets all objects with the given type_id
+
+        Args: 
+            type_id (int): ID of the type
+
+        Returns:
+            list: All objects with the given ID (empty list if none found) 
+        """
         return self.get_objects_by(type_id=type_id)
 
     def count_objects_by_type(self, public_id: int):
@@ -335,7 +352,7 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    @deprecated
+    #@deprecated
     def get_all_types(self) -> List[TypeModel]:
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
@@ -346,7 +363,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err=err)
 
-    @deprecated
+    #@deprecated
     def get_type(self, public_id: int):
         try:
             return TypeModel.from_data(self.dbm.find_one(
@@ -358,7 +375,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    @deprecated
+    #@deprecated
     def get_types_by(self, sort='public_id', **requirements):
         try:
             return [TypeModel.from_data(data) for data in
@@ -366,7 +383,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerGetError(err=err)
 
-    @deprecated
+    #@deprecated
     def get_type_aggregate(self, arguments):
         """This method does not actually
            performs the find() operation
@@ -385,11 +402,11 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeModel.from_data(put_data))
         return type_list
 
-    @deprecated
+    #@deprecated
     def count_types(self):
         return self.dbm.count(collection=TypeModel.COLLECTION)
 
-    @deprecated
+    #@deprecated
     def get_categories(self) -> List[CategoryModel]:
         """Get all categories as nested list"""
         try:
@@ -401,7 +418,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err)
 
-    @deprecated
+    #@deprecated
     def get_category_by(self, **requirements) -> CategoryModel:
         """Get a single category by requirements
         Notes:
@@ -417,7 +434,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err)
 
-    @deprecated
+    #@deprecated
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
@@ -429,7 +446,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as err:
             raise ObjectManagerInitError(err)
 
-    @deprecated
+    #@deprecated
     def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:

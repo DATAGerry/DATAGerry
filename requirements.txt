@@ -4,6 +4,7 @@ astroid==2.5.1
 attrs==20.3.0
 Authlib==0.15.3
 Babel==2.9.1
+blinker==1.6.2
 Cerberus==1.3.2
 certifi==2022.12.7
 cffi==1.14.3
@@ -14,7 +15,7 @@ cryptography==3.4.7
 docutils==0.16
 et-xmlfile==1.0.1
 flake8==3.8.4
-Flask==1.1.2
+Flask==2.3.2
 Flask-Cors==3.0.9
 gunicorn==20.0.4
 html5lib==1.1
@@ -22,12 +23,12 @@ idna==3.4
 imagesize==1.2.0
 iniconfig==1.1.1
 isort==5.5.3
-itsdangerous==1.1.0
+itsdangerous==2.1.2
 jdcal==1.4.1
-Jinja2==2.11.2
+Jinja2==3.1.2
 lazy-object-proxy==1.4.3
 ldap3==2.8.1
-MarkupSafe==1.1.1
+MarkupSafe==2.1.3
 mccabe==0.6.1
 openpyxl==3.0.5
 packaging==20.4
@@ -58,7 +59,7 @@ reportlab==3.5.55
 requests==2.31.0
 six==1.16.0
 snowballstemmer==2.0.0
-Sphinx==3.2.1
+Sphinx==4.5.0
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
 sphinxcontrib-htmlhelp==2.0.1
@@ -69,6 +70,6 @@ sphinxcontrib-serializinghtml==1.1.5
 toml==0.10.1
 urllib3==1.26.5
 webencodings==0.5.1
-Werkzeug==1.0.1
+Werkzeug==2.3.6
 wrapt==1.12.1
 xhtml2pdf==0.2.4
