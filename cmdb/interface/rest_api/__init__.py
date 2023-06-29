@@ -93,21 +93,46 @@ def register_blueprints(app):
 
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_multi_blueprint(date_blueprint, multi_prefix=['/date'])
-    app.register_multi_blueprint(objects_blueprint, multi_prefix=['/object', '/objects'])
-    app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
-    app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
+    #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
+    # needs to be refactored for the following blueprints
+    app.register_blueprint(objects_blueprint, url_prefix='/objects')
+    objects_blueprint.name = 'object'
+    app.register_blueprint(objects_blueprint, url_prefix='/object')
+    app.register_blueprint(links_blueprint, url_prefix='/objects/links')
+    links_blueprint.name = 'link'
+    app.register_blueprint(links_blueprint, url_prefix='/object/link')
+    app.register_blueprint(types_blueprint, url_prefix='/types')
+    types_blueprint.name = 'type'
+    app.register_blueprint(types_blueprint, url_prefix='/type')
+
     app.register_blueprint(connection_routes)
 
-    app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
-    app.register_multi_blueprint(users_blueprint, multi_prefix=['/user', '/users'])
+    app.register_blueprint(categories_blueprint, url_prefix='/categories')
+    categories_blueprint.name = 'category'
+    app.register_blueprint(categories_blueprint, url_prefix='/category')
+    app.register_blueprint(users_blueprint, url_prefix='/users')
+    users_blueprint.name = 'user'
+    app.register_blueprint(users_blueprint, url_prefix='/user')
+
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
 
-    app.register_multi_blueprint(groups_blueprint, multi_prefix=['/group', '/groups'])
-    app.register_multi_blueprint(rights_blueprint, multi_prefix=['/right', '/rights'])
+    app.register_blueprint(groups_blueprint, url_prefix='/groups')
+    groups_blueprint.name = 'group'
+    app.register_blueprint(groups_blueprint, url_prefix='/group')
+    app.register_blueprint(rights_blueprint, url_prefix='/rights')
+    rights_blueprint.name = 'right'
+    app.register_blueprint(rights_blueprint, url_prefix='/right')
     app.register_blueprint(search_blueprint)
-    app.register_multi_blueprint(exporter_blueprint, multi_prefix=['/exporter', '/exporter/'])
+    app.register_blueprint(exporter_blueprint, url_prefix='/exporter/')
+    exporter_blueprint.name = 'export'
+    app.register_blueprint(exporter_blueprint, url_prefix='/exporter')
+
     app.register_blueprint(type_export_blueprint)
-    app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
+
+    app.register_blueprint(log_blueprint, url_prefix='/log')
+    log_blueprint.name = 'logs'
+    app.register_blueprint(log_blueprint, url_prefix='/logs')
+
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
     app.register_multi_blueprint(exportd_blueprint, multi_prefix=['/exportd'])
@@ -115,7 +140,11 @@ def register_blueprints(app):
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
-    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docs', '/doc'])
+
+    app.register_blueprint(docs_blueprint, url_prefix='/docs')
+    docs_blueprint.name = 'doc'
+    app.register_blueprint(docs_blueprint, url_prefix='/doc')
+    
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
