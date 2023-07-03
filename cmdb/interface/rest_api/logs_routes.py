@@ -35,7 +35,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
-log_blueprint = APIBlueprint('log', __name__)
+logs_blueprint = APIBlueprint('logs', __name__)
 
 with current_app.app_context():
     database_manager = current_app.database_manager
@@ -44,8 +44,8 @@ with current_app.app_context():
 
 
 # CRUD routes
-@log_blueprint.route('/<int:public_id>', methods=['GET'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.route('/<int:public_id>', methods=['GET'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @insert_request_user
 def get_log(public_id: int, request_user: UserModel):
     manager = CmdbLogManager(database_manager=database_manager)
@@ -60,7 +60,7 @@ def get_log(public_id: int, request_user: UserModel):
     return make_response(selected_log)
 
 
-@log_blueprint.route('/', methods=['POST'])
+@logs_blueprint.route('/', methods=['POST'])
 def insert_log(*args, **kwargs):
     """
     It is not planned to insert a log
@@ -70,8 +70,8 @@ def insert_log(*args, **kwargs):
     return abort(405)
 
 
-@log_blueprint.route('/<int:public_id>/', methods=['PUT'])
-@log_blueprint.route('/<int:public_id>', methods=['PUT'])
+@logs_blueprint.route('/<int:public_id>/', methods=['PUT'])
+@logs_blueprint.route('/<int:public_id>', methods=['PUT'])
 def update_log(public_id, *args, **kwargs):
     """
     It is not planned to update a log
@@ -81,8 +81,8 @@ def update_log(public_id, *args, **kwargs):
     return abort(405)
 
 
-@log_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@log_blueprint.protect(auth=True, right='base.framework.log.delete')
+@logs_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.delete')
 @insert_request_user
 def delete_log(public_id: int, request_user: UserModel):
     manager = CmdbLogManager(database_manager=database_manager)
@@ -101,9 +101,9 @@ def delete_log(public_id: int, request_user: UserModel):
 
 
 # FIND routes
-@log_blueprint.route('/object/exists', methods=['GET', 'HEAD'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
-@log_blueprint.parse_collection_parameters()
+@logs_blueprint.route('/object/exists', methods=['GET', 'HEAD'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_logs_with_existing_objects(params: CollectionParameters, request_user: UserModel):
     try:
@@ -147,9 +147,9 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
     return api_response.make_response()
 
 
-@log_blueprint.route('/object/notexists', methods=['GET', 'HEAD'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
-@log_blueprint.parse_collection_parameters()
+@logs_blueprint.route('/object/notexists', methods=['GET', 'HEAD'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.parse_collection_parameters()
 def get_logs_with_deleted_objects(params: CollectionParameters):
     manager = CmdbLogManager(database_manager=database_manager)
     try:
@@ -193,9 +193,9 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
     return api_response.make_response()
 
 
-@log_blueprint.route('/object/deleted', methods=['GET', 'HEAD'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
-@log_blueprint.parse_collection_parameters()
+@logs_blueprint.route('/object/deleted', methods=['GET', 'HEAD'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.parse_collection_parameters()
 def get_object_delete_logs(params: CollectionParameters):
     manager = CmdbLogManager(database_manager=database_manager)
     try:
@@ -218,9 +218,9 @@ def get_object_delete_logs(params: CollectionParameters):
     return api_response.make_response()
 
 
-@log_blueprint.route('/object/<int:object_id>', methods=['GET', 'HEAD'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
-@log_blueprint.parse_collection_parameters()
+@logs_blueprint.route('/object/<int:object_id>', methods=['GET', 'HEAD'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_logs_by_object(object_id: int, params: CollectionParameters, request_user: UserModel):
     manager = CmdbLogManager(database_manager=database_manager)
@@ -243,8 +243,8 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
     return api_response.make_response()
 
 
-@log_blueprint.route('/<int:public_id>/corresponding', methods=['GET', 'HEAD'])
-@log_blueprint.protect(auth=True, right='base.framework.log.view')
+@logs_blueprint.route('/<int:public_id>/corresponding', methods=['GET', 'HEAD'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @insert_request_user
 def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     try:

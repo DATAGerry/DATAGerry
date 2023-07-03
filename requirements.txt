@@ -20,7 +20,7 @@ Flask-Cors==3.0.9
 gunicorn==20.0.4
 html5lib==1.1
 idna==3.4
-imagesize==1.2.0
+imagesize==1.4.1
 iniconfig==1.1.1
 isort==5.5.3
 itsdangerous==2.1.2

@@ -31,12 +31,12 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
     DeleteSingleResponse
 
 LOGGER = logging.getLogger(__name__)
-type_blueprint = APIBlueprint('type', __name__)
+types_blueprint = APIBlueprint('types', __name__)
 
 
-@type_blueprint.route('/', methods=['GET', 'HEAD'])
-@type_blueprint.protect(auth=True, right='base.framework.type.view')
-@type_blueprint.parse_parameters(TypeIterationParameters)
+@types_blueprint.route('/', methods=['GET', 'HEAD'])
+@types_blueprint.protect(auth=True, right='base.framework.type.view')
+@types_blueprint.parse_parameters(TypeIterationParameters)
 def get_types(params: TypeIterationParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -80,8 +80,8 @@ def get_types(params: TypeIterationParameters):
     return api_response.make_response()
 
 
-@type_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@type_blueprint.protect(auth=True, right='base.framework.type.view')
+@types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@types_blueprint.protect(auth=True, right='base.framework.type.view')
 def get_type(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single type resource.
@@ -107,9 +107,9 @@ def get_type(public_id: int):
     return api_response.make_response()
 
 
-@type_blueprint.route('/', methods=['POST'])
-@type_blueprint.protect(auth=True, right='base.framework.type.add')
-@type_blueprint.validate(TypeModel.SCHEMA)
+@types_blueprint.route('/', methods=['POST'])
+@types_blueprint.protect(auth=True, right='base.framework.type.add')
+@types_blueprint.validate(TypeModel.SCHEMA)
 def insert_type(data: dict):
     """
     HTTP `POST` route for insert a single type resource.
@@ -147,9 +147,9 @@ def insert_type(data: dict):
     return api_response.make_response(prefix='types')
 
 
-@type_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@type_blueprint.protect(auth=True, right='base.framework.type.edit')
-@type_blueprint.validate(TypeModel.SCHEMA)
+@types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@types_blueprint.protect(auth=True, right='base.framework.type.edit')
+@types_blueprint.validate(TypeModel.SCHEMA)
 def update_type(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single type resource.
@@ -181,8 +181,8 @@ def update_type(public_id: int, data: dict):
     return api_response.make_response()
 
 
-@type_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@type_blueprint.protect(auth=True, right='base.framework.type.delete')
+@types_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@types_blueprint.protect(auth=True, right='base.framework.type.delete')
 def delete_type(public_id: int):
     """
     HTTP `DELETE` route for delete a single type resource.

@@ -36,12 +36,12 @@ from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 
-group_blueprint = APIBlueprint('group', __name__)
+groups_blueprint = APIBlueprint('groups', __name__)
 
 
-@group_blueprint.route('/', methods=['GET', 'HEAD'])
-@group_blueprint.protect(auth=True, right='base.user-management.group.view')
-@group_blueprint.parse_collection_parameters()
+@groups_blueprint.route('/', methods=['GET', 'HEAD'])
+@groups_blueprint.protect(auth=True, right='base.user-management.group.view')
+@groups_blueprint.parse_collection_parameters()
 def get_groups(params: CollectionParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -74,8 +74,8 @@ def get_groups(params: CollectionParameters):
     return api_response.make_response()
 
 
-@group_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@group_blueprint.protect(auth=True, right='base.user-management.group.view')
+@groups_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@groups_blueprint.protect(auth=True, right='base.user-management.group.view')
 def get_group(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single group resource.
@@ -103,9 +103,9 @@ def get_group(public_id: int):
     return api_response.make_response()
 
 
-@group_blueprint.route('/', methods=['POST'])
-@group_blueprint.protect(auth=True, right='base.user-management.group.add')
-@group_blueprint.validate(UserGroupModel.SCHEMA)
+@groups_blueprint.route('/', methods=['POST'])
+@groups_blueprint.protect(auth=True, right='base.user-management.group.add')
+@groups_blueprint.validate(UserGroupModel.SCHEMA)
 def insert_group(data: dict):
     """
     HTTP `POST` route for insert a single group resource.
@@ -134,9 +134,9 @@ def insert_group(data: dict):
     return api_response.make_response(prefix='groups')
 
 
-@group_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@group_blueprint.protect(auth=True, right='base.user-management.group.edit')
-@group_blueprint.validate(UserGroupModel.SCHEMA)
+@groups_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@groups_blueprint.protect(auth=True, right='base.user-management.group.edit')
+@groups_blueprint.validate(UserGroupModel.SCHEMA)
 def update_group(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single group resource.
@@ -168,9 +168,9 @@ def update_group(public_id: int, data: dict):
     return api_response.make_response()
 
 
-@group_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@group_blueprint.protect(auth=True, right='base.user-management.group.delete')
-@group_blueprint.parse_parameters(GroupDeletionParameters)
+@groups_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@groups_blueprint.protect(auth=True, right='base.user-management.group.delete')
+@groups_blueprint.parse_parameters(GroupDeletionParameters)
 def delete_group(public_id: int, params: GroupDeletionParameters):
     """
     HTTP `DELETE` route for delete a single group resource.
