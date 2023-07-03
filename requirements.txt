@@ -13,7 +13,7 @@ click==8.1.3
 coverage==5.5
 cryptography==41.0.1
 docutils==0.16
-et-xmlfile==1.0.1
+et-xmlfile==1.1.0
 flake8==3.8.4
 Flask==2.3.2
 Flask-Cors==3.0.9
@@ -27,7 +27,7 @@ itsdangerous==2.1.2
 jdcal==1.4.1
 Jinja2==3.1.2
 lazy-object-proxy==1.4.3
-ldap3==2.8.1
+ldap3==2.9.1
 MarkupSafe==2.1.3
 mccabe==0.6.1
 openpyxl==3.0.5
@@ -46,7 +46,7 @@ pyinstaller==4.0
 pyinstaller-hooks-contrib==2020.8
 pylint==2.7.2
 pymongo==3.11.2
-PyMySQL==0.10.1
+PyMySQL==1.1.0
 pyOpenSSL==23.2.0
 pyparsing==2.4.7
 PyPDF2==1.28.6
