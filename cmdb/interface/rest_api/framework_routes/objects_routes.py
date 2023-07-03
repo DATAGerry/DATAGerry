@@ -54,12 +54,11 @@ with current_app.app_context():
 
 LOGGER = logging.getLogger(__name__)
 
-object_blueprint = APIBlueprint('object', __name__)
+objects_blueprint = APIBlueprint('objects', __name__)
 
-
-@object_blueprint.route('/', methods=['GET', 'HEAD'])
-@object_blueprint.protect(auth=True, right='base.framework.object.view')
-@object_blueprint.parse_collection_parameters(view='native')
+@objects_blueprint.route('/', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_objects(params: CollectionParameters, request_user: UserModel):
     manager = ObjectManager(database_manager=current_app.database_manager)
@@ -99,8 +98,8 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         return abort(404, err.message)
     return api_response.make_response()
 
-@object_blueprint.route('/<int:public_id>', methods=['GET'])
-@object_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.route('/<int:public_id>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_object(public_id, request_user: UserModel):
     try:
@@ -128,8 +127,8 @@ def get_object(public_id, request_user: UserModel):
     resp = make_response(render_result)
     return resp
 
-@object_blueprint.route('/<int:public_id>/native', methods=['GET'])
-@object_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.route('/<int:public_id>/native', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_native_object(public_id: int, request_user: UserModel):
     try:
@@ -143,8 +142,8 @@ def get_native_object(public_id: int, request_user: UserModel):
     resp = make_response(object_instance)
     return resp
 
-@object_blueprint.route('/group/<string:value>', methods=['GET'])
-@object_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.route('/group/<string:value>', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def group_objects_by_type_id(value, request_user: UserModel):
     try:
@@ -166,9 +165,9 @@ def group_objects_by_type_id(value, request_user: UserModel):
         return abort(400)
     return resp
 
-@object_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
-@object_blueprint.protect(auth=True, right='base.framework.object.view')
-@object_blueprint.parse_collection_parameters(view='native')
+@objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
     from cmdb.framework.managers.object_manager import ObjectManager
@@ -225,8 +224,8 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 
 
 # CRUD routes
-@object_blueprint.route('/', methods=['POST'])
-@object_blueprint.protect(auth=True, right='base.framework.object.add')
+@objects_blueprint.route('/', methods=['POST'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_object(request_user: UserModel):
     add_data_dump = json.dumps(request.json)
@@ -288,9 +287,9 @@ def insert_object(request_user: UserModel):
     resp = make_response(new_object_id)
     return resp
 
-@object_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@object_blueprint.protect(auth=True, right='base.framework.object.edit')
-@object_blueprint.validate(CmdbObject.SCHEMA)
+@objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.edit')
+@objects_blueprint.validate(CmdbObject.SCHEMA)
 @insert_request_user
 def update_object(public_id: int, data: dict, request_user: UserModel):
     object_ids = request.args.getlist('objectIDs')
@@ -405,8 +404,8 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
 
-@object_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@object_blueprint.protect(auth=True, right='base.framework.object.delete')
+@objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_object(public_id: int, request_user: UserModel):
     """
@@ -461,8 +460,8 @@ def delete_object(public_id: int, request_user: UserModel):
     resp = make_response(ack)
     return resp
 
-@object_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
-@object_blueprint.protect(auth=True, right='base.framework.object.delete')
+@objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_many_objects(public_ids, request_user: UserModel):
     try:
@@ -528,8 +527,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
 
 # Special routes
-@object_blueprint.route('/<int:public_id>/state', methods=['GET'])
-@object_blueprint.protect(auth=True, right='base.framework.object.activation')
+@objects_blueprint.route('/<int:public_id>/state', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
 def get_object_state(public_id: int, request_user: UserModel):
     try:
@@ -540,8 +539,8 @@ def get_object_state(public_id: int, request_user: UserModel):
         return abort(404)
     return make_response(founded_object.active)
 
-@object_blueprint.route('/<int:public_id>/state', methods=['PUT'])
-@object_blueprint.protect(auth=True, right='base.framework.object.activation')
+@objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
 def update_object_state(public_id: int, request_user: UserModel):
     if isinstance(request.json, bool):
@@ -600,8 +599,8 @@ def update_object_state(public_id: int, request_user: UserModel):
     api_response = UpdateSingleResponse(result=founded_object.__dict__, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
 
-@object_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
-@object_blueprint.protect(auth=True, right='base.framework.type.clean')
+@objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
 def get_unstructured_objects(public_id: int, request_user: UserModel):
     """
@@ -631,8 +630,8 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     api_response = GetListResponse(unstructured, url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
 
-@object_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
-@object_blueprint.protect(auth=True, right='base.framework.type.clean')
+@objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
+@objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
 def update_unstructured_objects(public_id: int, request_user: UserModel):
     """

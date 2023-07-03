@@ -23,7 +23,7 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from typing import List
+from typing import List, Union
 from queue import Queue
 from bson import json_util
 
@@ -44,7 +44,7 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
-from cmdb.utils.wraps import deprecated
+#from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
@@ -91,8 +91,8 @@ class CmdbObjectManager(CmdbManagerBase):
     def aggregate(self, collection, pipeline: Pipeline, **kwargs):
         try:
             return self._aggregate(collection=collection, pipeline=pipeline, **kwargs)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
     def get_object(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbObject:
@@ -100,8 +100,8 @@ class CmdbObjectManager(CmdbManagerBase):
             resource = CmdbObject(**self._get(
                 collection=CmdbObject.COLLECTION,
                 public_id=public_id))
-        except Exception as err:
-            raise ObjectManagerGetError(str(err))
+        except Exception as error:
+            raise ObjectManagerGetError(str(error)) from error
 
         type_ = self._type_manager.get(resource.type_id)
         verify_access(type_, user, permission)
@@ -237,7 +237,7 @@ class CmdbObjectManager(CmdbManagerBase):
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
 
-    def insert_object(self, data: (CmdbObject, dict), user: UserModel = None,
+    def insert_object(self, data: Union[CmdbObject, dict], user: UserModel = None,
                       permission: AccessControlPermission = None) -> int:
         """
         Insert new CMDB Object
@@ -252,9 +252,9 @@ class CmdbObjectManager(CmdbManagerBase):
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
-            except CMDBError as e:
-                LOGGER.debug(f'Error while inserting object - error: {e.message}')
-                raise ObjectManagerInsertError(e)
+            except CMDBError as error:
+                LOGGER.debug('Error while inserting object - error: %s', error)
+                raise ObjectManagerInsertError(error) from error
         elif isinstance(data, CmdbObject):
             new_object = data
 
@@ -275,8 +275,8 @@ class CmdbObjectManager(CmdbManagerBase):
                                                          "user_id": new_object.author_id,
                                                          "event": 'insert'})
                 self._event_queue.put(event)
-        except (CMDBError, PublicIDAlreadyExists) as e:
-            raise ObjectInsertError(e)
+        except (CMDBError, PublicIDAlreadyExists) as error:
+            raise ObjectInsertError(error) from error
         return ack
 
     def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
@@ -340,8 +340,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
-        except (CMDBError, Exception):
-            raise ObjectDeleteError(msg=public_id)
+        except (CMDBError, Exception) as error:
+            raise ObjectDeleteError(msg=public_id) from error
 
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
@@ -356,12 +356,12 @@ class CmdbObjectManager(CmdbManagerBase):
     def get_all_types(self) -> List[TypeModel]:
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except Exception as error:
+            raise ObjectManagerGetError(err=error) from error
         try:
             return [TypeModel.from_data(type) for type in raw_types]
-        except Exception as err:
-            raise ObjectManagerInitError(err=err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
     #@deprecated
     def get_type(self, public_id: int):
@@ -370,18 +370,18 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=TypeModel.COLLECTION,
                 public_id=public_id)
             )
-        except RequiredInitKeyNotFoundError as err:
-            raise ObjectManagerInitError(err=err.message)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except RequiredInitKeyNotFoundError as error:
+            raise ObjectManagerInitError(err=error.message)  from error
+        except Exception as error:
+            raise ObjectManagerGetError(err=error) from error
 
     #@deprecated
     def get_types_by(self, sort='public_id', **requirements):
         try:
             return [TypeModel.from_data(data) for data in
                     self._get_many(collection=TypeModel.COLLECTION, sort=sort, **requirements)]
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
     #@deprecated
     def get_type_aggregate(self, arguments):
@@ -411,12 +411,12 @@ class CmdbObjectManager(CmdbManagerBase):
         """Get all categories as nested list"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort='public_id')
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
         try:
             return [CategoryModel.from_data(category) for category in raw_categories]
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
     #@deprecated
     def get_category_by(self, **requirements) -> CategoryModel:
@@ -426,30 +426,30 @@ class CmdbObjectManager(CmdbManagerBase):
         """
         try:
             raw_category = self._get_by(collection=CategoryModel.COLLECTION, **requirements)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
         try:
             return CategoryModel.from_data(raw_category)
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
     #@deprecated
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort=sort, **requirements)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
         try:
             return [CategoryModel.from_data(category) for category in raw_categories]
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
     #@deprecated
     def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:
             return self._insert(collection=CategoryModel.COLLECTION, data=CategoryModel.to_json(category))
-        except Exception as err:
-            raise ObjectManagerInsertError(err=err)
+        except Exception as error:
+            raise ObjectManagerInsertError(error) from error

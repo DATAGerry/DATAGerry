@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from json import dumps
-
-from pytest import fixture
 from datetime import datetime, timezone
 from http import HTTPStatus
+
+from pytest import fixture
 
 from cmdb.framework import TypeModel, CmdbObject
 from cmdb.framework.models.type import TypeRenderMeta, TypeFieldSection, TypeSummary

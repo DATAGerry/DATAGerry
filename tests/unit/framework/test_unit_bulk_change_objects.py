@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -103,17 +103,6 @@ def setup(request, collection, example_type):
         collection.drop()
 
     request.addfinalizer(drop_collection)
-
-
-@fixture(scope='module', autouse=True)
-def setup(request, collection, example_type):
-    collection.insert_one(document=TypeModel.to_json(example_type))
-
-    def drop_collection():
-        collection.drop()
-
-    request.addfinalizer(drop_collection)
-
 
 class TestBulkChangeFrameworkObjects:
 

@@ -27,18 +27,18 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 
-exporter_blueprint = APIBlueprint('exporter', __name__)
+export_blueprint = APIBlueprint('export', __name__)
 
 
-@exporter_blueprint.route('/extensions', methods=['GET'])
+@export_blueprint.route('/extensions', methods=['GET'])
 @login_required
 def get_export_file_types():
     return make_response(SupportedExporterExtension().convert_to())
 
 
-@exporter_blueprint.route('/', methods=['GET'])
-@exporter_blueprint.protect(auth=True, right='base.framework.object.view')
-@exporter_blueprint.parse_collection_parameters(view='native')
+@export_blueprint.route('/', methods=['GET'])
+@export_blueprint.protect(auth=True, right='base.framework.object.view')
+@export_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @insert_request_user
 def export_objects(params: CollectionParameters, request_user: UserModel):

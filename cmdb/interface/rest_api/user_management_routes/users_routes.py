@@ -29,12 +29,12 @@ from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
-user_blueprint = APIBlueprint('user', __name__)
+users_blueprint = APIBlueprint('users', __name__)
 
 
-@user_blueprint.route('/', methods=['GET', 'HEAD'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.view')
-@user_blueprint.parse_collection_parameters()
+@users_blueprint.route('/', methods=['GET', 'HEAD'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.view')
+@users_blueprint.parse_collection_parameters()
 def get_users(params: CollectionParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -67,8 +67,8 @@ def get_users(params: CollectionParameters):
     return api_response.make_response()
 
 
-@user_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
+@users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
 def get_user(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single user resource.
@@ -96,9 +96,9 @@ def get_user(public_id: int):
     return api_response.make_response()
 
 
-@user_blueprint.route('/', methods=['POST'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.add')
-@user_blueprint.validate(UserModel.SCHEMA)
+@users_blueprint.route('/', methods=['POST'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.add')
+@users_blueprint.validate(UserModel.SCHEMA)
 def insert_user(data: dict):
     """
     HTTP `POST` route for insert a single user resource.
@@ -129,9 +129,9 @@ def insert_user(data: dict):
     return api_response.make_response(prefix='users')
 
 
-@user_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
-@user_blueprint.validate(UserModel.SCHEMA)
+@users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
+@users_blueprint.validate(UserModel.SCHEMA)
 def update_user(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single user resource.
@@ -159,8 +159,8 @@ def update_user(public_id: int, data: dict):
     return api_response.make_response()
 
 
-@user_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.delete')
+@users_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.delete')
 def delete_user(public_id: int):
     """
     HTTP `DELETE` route for delete a single user resource.
@@ -186,8 +186,8 @@ def delete_user(public_id: int):
     return api_response.make_response()
 
 
-@user_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
-@user_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
+@users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
+@users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 def change_user_password(public_id: int):
     """
     HTTP `PATCH` route for updating a single user password.

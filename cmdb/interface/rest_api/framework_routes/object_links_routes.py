@@ -29,12 +29,12 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
-link_blueprint = APIBlueprint('link', __name__)
+links_blueprint = APIBlueprint('links', __name__)
 
 
-@link_blueprint.route('/', methods=['GET', 'HEAD'])
-@link_blueprint.protect(auth=True, right='base.framework.object.view')
-@link_blueprint.parse_collection_parameters()
+@links_blueprint.route('/', methods=['GET', 'HEAD'])
+@links_blueprint.protect(auth=True, right='base.framework.object.view')
+@links_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_links(params: CollectionParameters, request_user: UserModel):
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
@@ -54,8 +54,8 @@ def get_links(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-@link_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@link_blueprint.protect(auth=True, right='base.framework.object.view')
+@links_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@links_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_link(public_id: int, request_user: UserModel):
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
@@ -71,8 +71,8 @@ def get_link(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
-@link_blueprint.route('/', methods=['POST'])
-@link_blueprint.protect(auth=True, right='base.framework.object.add')
+@links_blueprint.route('/', methods=['POST'])
+@links_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_link(request_user: UserModel):
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
@@ -90,14 +90,14 @@ def insert_link(request_user: UserModel):
     return api_response.make_response(prefix='objects/links')
 
 
-@link_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@link_blueprint.protect(auth=True, right='base.framework.object.edit')
+@links_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@links_blueprint.protect(auth=True, right='base.framework.object.edit')
 def update_link(public_id: int):
     return abort(501, 'Links must could not be changed!')
 
 
-@link_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@link_blueprint.protect(auth=True, right='base.framework.object.delete')
+@links_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@links_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_link(public_id: int, request_user: UserModel):
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
