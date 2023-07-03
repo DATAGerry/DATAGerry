@@ -43,12 +43,14 @@ def get_external_system_list():
 # @login_required
 def get_external_system_params(class_external_system):
     try:
-        external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
+        external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.parameters
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=str(e)))
-    except Exception as e:
-        return abort(400, e)
+    except CMDBError as error:
+        #error=str(error)
+        LOGGER.info(str(error))
+        return abort(404, jsonify(message='Not Found', error='external system params'))
+    except Exception as error:
+        return abort(400, error)
     return make_response(list_of_parameters)
 
 
@@ -56,10 +58,12 @@ def get_external_system_params(class_external_system):
 # @login_required
 def get_external_system_variables(class_external_system):
     try:
-        external_system_class = load_class("cmdb.exportd.externals.external_systems.{}".format(class_external_system))
+        external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.variables
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=str(e)))
-    except Exception as e:
-        return abort(400, e)
+    except CMDBError as error:
+        #error=str(error)
+        LOGGER.info(str(error))
+        return abort(404, jsonify(message='Not Found', error='external system variables'))
+    except Exception as error:
+        return abort(400, error)
     return make_response(list_of_parameters)

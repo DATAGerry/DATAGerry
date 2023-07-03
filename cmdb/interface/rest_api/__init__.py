@@ -59,8 +59,10 @@ def register_converters(app):
 
 
 def register_blueprints(app):
+    import cmdb
+
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.object_routes import objects_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_routes import objects_blueprint, object_blueprint
     from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
@@ -77,10 +79,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
     from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
-
     from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
 
@@ -96,8 +95,8 @@ def register_blueprints(app):
     #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
     # needs to be refactored for the following blueprints
     app.register_blueprint(objects_blueprint, url_prefix='/objects')
-    objects_blueprint.name = 'object'
-    app.register_blueprint(objects_blueprint, url_prefix='/object')
+    app.register_blueprint(object_blueprint, url_prefix='/object')
+
     app.register_blueprint(links_blueprint, url_prefix='/objects/links')
     links_blueprint.name = 'link'
     app.register_blueprint(links_blueprint, url_prefix='/object/link')
@@ -148,13 +147,19 @@ def register_blueprints(app):
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
-    import cmdb
+    
     if cmdb.__MODE__ == 'DEBUG':
         from cmdb.interface.rest_api.debug_routes import debug_blueprint
         app.register_blueprint(debug_blueprint)
 
 
 def register_error_pages(app):
+    """
+    Registers error handlers for the app
+
+    Params:
+        app (BaseCmdbApp): app where to register the error handlers
+    """
     from cmdb.interface.error_handlers import not_implemented
     from cmdb.interface.error_handlers import internal_server_error
     from cmdb.interface.error_handlers import page_gone
