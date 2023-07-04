@@ -34,12 +34,12 @@ openpyxl==3.1.2
 packaging==23.1
 pika==0.12.0
 Pillow==9.5.0
-pluggy==0.13.1
-py==1.10.0
+pluggy==1.2.0
+py==1.11.0
 pyasn1==0.5.0
 pycodestyle==2.6.0
 pycparser==2.21
-pycryptodome==3.10.1
+pycryptodome==3.18.0
 pyflakes==2.2.0
 Pygments==2.7.1
 pyinstaller==4.0
