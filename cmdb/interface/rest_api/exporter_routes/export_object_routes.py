@@ -56,6 +56,6 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
     except ModuleNotFoundError as error:
         return abort(400, error)
     except CMDBError as error:
-        return abort(404, jsonify(message='Not Found', error=error))
+        return abort(404, jsonify(message='Not Found', error='Export objects CMDBError'))
 
     return exporter.export()
