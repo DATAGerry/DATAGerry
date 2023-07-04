@@ -51,7 +51,7 @@ pyOpenSSL==23.2.0
 pyparsing==2.4.7
 PyPDF2==1.28.6
 pytest==6.2.2
-pytest-cov==2.11.1
+pytest-cov==4.1.0
 pytest-html==3.2.0
 pytest-metadata==1.11.0
 python-dateutil==2.8.2
@@ -59,7 +59,7 @@ pytz==2023.3
 reportlab==3.5.55
 requests==2.31.0
 six==1.16.0
-snowballstemmer==2.0.0
+snowballstemmer==2.2.0
 Sphinx==4.5.0
 sphinxcontrib-applehelp==1.0.4
 sphinxcontrib-devhelp==1.0.2
@@ -73,4 +73,4 @@ urllib3==1.26.5
 webencodings==0.5.1
 Werkzeug==2.3.6
 wrapt==1.12.1
-xhtml2pdf==0.2.4
+xhtml2pdf==0.2.11
