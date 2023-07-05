@@ -1,6 +1,6 @@
 alabaster==0.7.13
 altgraph==0.17.3
-astroid==2.5.1
+astroid==2.15.5
 attrs==23.1.0
 Authlib==0.15.3
 Babel==2.12.1
@@ -44,7 +44,7 @@ pyflakes==2.2.0
 Pygments==2.15.1
 pyinstaller==5.13.0
 pyinstaller-hooks-contrib==2023.4
-pylint==2.7.2
+pylint==2.17.4
 pymongo==3.11.2
 PyMySQL==1.1.0
 pyOpenSSL==23.2.0
@@ -72,5 +72,5 @@ toml==0.10.2
 urllib3==2.0.3
 webencodings==0.5.1
 Werkzeug==2.3.6
-wrapt==1.12.1
+wrapt==1.15.0
 xhtml2pdf==0.2.11
