@@ -15,8 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
+from typing import Union
 
-from authlib.jose import jwt, JWT
+from authlib.jose import jwt, JsonWebToken
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
 from cmdb.database.managers import DatabaseManagerMongo
@@ -31,23 +32,43 @@ LOGGER = logging.getLogger(__name__)
 
 
 class TokenValidator:
+    """
+    Decodes and validates tokens
+    """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.key_holder = KeyHolder(database_manager)
 
-    def decode_token(self, token: (JWT, str, dict)):
+    def decode_token(self, token: Union[JsonWebToken, str, dict]):
+        """
+        Decodes a given token
+
+        Params:
+            token(JsonWebToken, str, dict): the given token
+        Returns:
+            JWTClaims: decoded token
+        """
         try:
             decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
         except (BadSignatureError, Exception) as err:
-            raise ValidationError(err)
+            raise ValidationError(err) from err
         return decoded_token
 
-    def validate_token(self, token: (JWT, str, dict)):
+
+    def validate_token(self, token: Union[JsonWebToken, str, dict]):
+        """
+        Validates a given token regarding its expiration
+
+        Params:
+            token(JsonWebToken, str, dict): the given token
+        Returns:
+            JWTClaims: decoded token
+        """
         try:
             import time
             token.validate(time.time())
         except InvalidClaimError as err:
-            raise ValidationError(err)
+            raise ValidationError(err) from err
 
 
 class ValidationError(CMDBError):
