@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# pylint: disable=invalid-name
 #
 # Configuration file for the Sphinx documentation builder.
 #
@@ -77,7 +78,7 @@ master_doc = 'index'
 #
 # This is also used if you do content translation via gettext catalogs.
 # Usually you set "language" from the command line for these cases.
-language = None
+language = 'en'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -99,7 +100,6 @@ html_theme = 'sphinx_dg_theme'
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-html_logo = '_static/img/datagerry_logo.svg'
 html_favicon = '_static/img/datagerry_favicon.png'
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -162,3 +162,4 @@ http_index_localname = 'REST API'
 # -- Options for todo extension ----------------------------------------------
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = True
+# pylint: enable=invalid-name
