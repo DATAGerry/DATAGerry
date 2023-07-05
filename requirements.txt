@@ -42,13 +42,13 @@ pycparser==2.21
 pycryptodome==3.18.0
 pyflakes==2.2.0
 Pygments==2.15.1
-pyinstaller==4.0
-pyinstaller-hooks-contrib==2020.8
+pyinstaller==5.13.0
+pyinstaller-hooks-contrib==2023.4
 pylint==2.7.2
 pymongo==3.11.2
 PyMySQL==1.1.0
 pyOpenSSL==23.2.0
-pyparsing==2.4.7
+pyparsing==3.1.0
 PyPDF2==1.28.6
 pytest==7.4.0
 pytest-cov==4.1.0
