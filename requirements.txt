@@ -49,14 +49,14 @@ pymongo==3.11.2
 PyMySQL==1.1.0
 pyOpenSSL==23.2.0
 pyparsing==3.1.0
-PyPDF2==1.28.6
+PyPDF2==3.0.1
 pytest==7.4.0
 pytest-cov==4.1.0
 pytest-html==3.2.0
 pytest-metadata==3.0.0
 python-dateutil==2.8.2
 pytz==2023.3
-reportlab==3.5.55
+reportlab==3.6.13
 requests==2.31.0
 six==1.16.0
 snowballstemmer==2.2.0
@@ -69,7 +69,7 @@ sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.3
 sphinxcontrib-serializinghtml==1.1.5
 toml==0.10.2
-urllib3==1.26.5
+urllib3==2.0.3
 webencodings==0.5.1
 Werkzeug==2.3.6
 wrapt==1.12.1
