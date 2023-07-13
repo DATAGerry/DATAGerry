@@ -15,8 +15,11 @@
       </li>
       <li id="sidebar-categories" class="category-tree" *ngIf="categoryTree">
         <label class="nav-title" for="category-filter">Categories</label>
-        <input id="category-filter" class="form-control form-control-sm" type="text" placeholder="Filter.."
+        <div class="input-wrapper-search">
+          <input id="category-filter" class="form-control form-control-sm" type="text" placeholder="Filter.."
                [formControl]="filterTerm">
+          <i class="fas fa-times input-icon-clear"  (click)="this.filterTerm.reset()"></i>
+        </div>
         <div class="list-group panel">
           <label *ngIf="filterTerm.value" class="nav-title"><strong>Matched Categories</strong></label>
           <cmdb-sidebar-category *ngFor="let categoryNode of categoryTree | categoryTreeFilter: filterTerm.value;"
