@@ -10,6 +10,11 @@
     color: black;
     opacity: 0.8;
     top: calc(50% - 0.5em);
-    right: 30%;
+    right: 10%;
   }
+}
+
+#category-filter {
+  margin-right: 10px;
+  min-width: 90%;
 }
