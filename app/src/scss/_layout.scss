@@ -64,6 +64,7 @@ html{
 .sidebar-fixed {
   #sidebar {
     position: fixed;
+    z-index: 55;
   }
 }
 
@@ -107,11 +108,11 @@ html{
       margin-left: 0;
     }
   }
-  #sidebar-categories {
-    input.form-control {
-      display: none;
-    }
-  }
+  // #sidebar-categories {
+  //   input.form-control {
+  //     display: none;
+  //   }
+  // }
 }
 
 @include media-breakpoint-down('md') {
