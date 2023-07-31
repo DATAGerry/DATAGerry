@@ -18,15 +18,18 @@
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
-import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
-import { CategoryService } from '../../../framework/services/category.service';
+
 import { ReplaySubject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
+
 import { SidebarService } from '../../services/sidebar.service';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import { takeUntil } from 'rxjs/operators';
+
 import {AccessControlPermission} from "../../../acl/acl.types";
 
 @Component({
@@ -67,12 +70,18 @@ export class SidebarComponent implements OnInit, OnDestroy {
   public filterTerm: UntypedFormControl = new UntypedFormControl('');
   private filterTermSubscription: Subscription;
 
-  constructor(private sidebarService: SidebarService, private categoryService: CategoryService,
-              private typeService: TypeService, private renderer: Renderer2) {
+  /**
+   * String representation of currently selected tab menu in sidebar (Default is Categories)
+   */
+  selectedMenu: string = 'categories';
+
+  constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
     this.categoryTreeSubscription = new Subscription();
     this.unCategorizedTypesSubscription = new Subscription();
     this.filterTermSubscription = new Subscription();
   }
+
+  
 
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
@@ -97,6 +106,16 @@ export class SidebarComponent implements OnInit, OnDestroy {
     this.unCategorizedTypesSubscription.unsubscribe();
     this.filterTermSubscription.unsubscribe();
     this.renderer.removeClass(document.body, 'sidebar-fixed');
+  }
+
+  
+  /**
+   * Toggles the activated menu tabs (categories and locations)
+   * 
+   * @param selection :string = String representation of the selected menu
+   */
+  onSidebarMenuClicked(selection: HTMLDivElement){
+    this.selectedMenu = selection.getAttribute('value');
   }
 
 }
