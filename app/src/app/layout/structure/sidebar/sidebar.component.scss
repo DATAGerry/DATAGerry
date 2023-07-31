@@ -14,7 +14,20 @@
   }
 }
 
+.sidebar-menu-item:hover {
+  background-color: #cfc8c8;
+  cursor: pointer;
+}
+
 #category-filter {
   margin-right: 10px;
   min-width: 90%;
+}
+
+.sidebar-nav {
+  overflow:auto !important;
+}
+
+.selectedMenu {
+  background-color: #ffbb00;
 }

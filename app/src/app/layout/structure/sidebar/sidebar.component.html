@@ -14,30 +14,43 @@
           Add Object</a>
       </li>
       <li id="sidebar-categories" class="category-tree" *ngIf="categoryTree">
-        <label class="nav-title" for="category-filter">Categories</label>
-        <div class="input-wrapper-search">
-          <input id="category-filter" class="form-control form-control-sm" type="text" placeholder="Filter.."
-               [formControl]="filterTerm">
-          <i class="fas fa-times input-icon-clear"  (click)="this.filterTerm.reset('')"></i>
+        <div>
+            <label class="nav-title sidebar-menu-item" 
+                  [class.selectedMenu]="this.selectedMenu == 'categories'" 
+                  value="categories" 
+                  (click)="onSidebarMenuClicked(selectedCategories)" 
+                  #selectedCategories>Categories</label>
+            <label class="nav-title sidebar-menu-item" 
+                    [class.selectedMenu]="this.selectedMenu == 'locations'" 
+                    value="locations" 
+                    (click)="onSidebarMenuClicked(selectedLocations)" 
+                    #selectedLocations>Locations</label>
         </div>
-        <div class="list-group panel">
-          <label *ngIf="filterTerm.value" class="nav-title"><strong>Matched Categories</strong></label>
-          <cmdb-sidebar-category *ngFor="let categoryNode of categoryTree | categoryTreeFilter: filterTerm.value;"
-                                 [categoryNode]="categoryNode"></cmdb-sidebar-category>
+        <div class="sidebar-menu-categories" *ngIf="this.selectedMenu == 'categories'">
+              <div class="input-wrapper-search">
+                <input id="category-filter" class="form-control form-control-sm" type="text" placeholder="Filter.." [formControl]="filterTerm">
+                <i class="fas fa-times input-icon-clear"  (click)="this.filterTerm.reset('')"></i>
+              </div>
+              <div class="list-group panel">
+                <label *ngIf="filterTerm.value" class="nav-title"><strong>Matched Categories</strong></label>
+                <cmdb-sidebar-category *ngFor="let categoryNode of categoryTree | categoryTreeFilter: filterTerm.value;"
+                                    [categoryNode]="categoryNode"></cmdb-sidebar-category>
+              </div>
+              <ng-container *ngIf="filterTerm.value">
+                  <label class="nav-title"><strong>Matched Types</strong></label>
+                  <ng-container *ngFor="let type of typeList | typeFilter: filterTerm.value;">
+                    <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
+                  </ng-container>
+              </ng-container>
+              <ng-container *ngIf="!filterTerm.value && unCategorizedTypes && unCategorizedTypes.length > 0">
+                  <label class="nav-title"><strong>Uncategorized</strong></label>
+                  <ng-container *ngFor="let type of unCategorizedTypes">
+                    <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
+                  </ng-container>
+              </ng-container>
+          </div>
+        <div class="sidebar-menu-categories" *ngIf="this.selectedMenu == 'locations'">
         </div>
-        <ng-container *ngIf="filterTerm.value">
-          <label class="nav-title"><strong>Matched Types</strong></label>
-          <ng-container *ngFor="let type of typeList | typeFilter: filterTerm.value;">
-            <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
-          </ng-container>
-
-        </ng-container>
-        <ng-container *ngIf="!filterTerm.value && unCategorizedTypes && unCategorizedTypes.length > 0">
-          <label class="nav-title"><strong>Uncategorized</strong></label>
-          <ng-container *ngFor="let type of unCategorizedTypes">
-            <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
-          </ng-container>
-        </ng-container>
       </li>
     </ul>
   </nav>
