@@ -1,0 +1,39 @@
+<div [formGroup]="form" class="form-row">
+    <div class="form-group col-md-12" hidden="true">
+        <label> Name: <span class="required">*</span></label>
+        <div class="input-group" >
+            <input [(ngModel)]="data.name" 
+                [ngModelOptions]="{standalone: true}" 
+                type="text" class="form-control" 
+                [disabled]="true" 
+                value="{{data.name}}"
+                (ngModelChange)="onNameChange($event)">
+        </div>
+        <div class="clearfix"></div>
+    </div>
+    <div class="form-group col-md-12">
+        <label>Label:</label>
+        <input [(ngModel)]="data.label" 
+               [ngModelOptions]="{standalone: true}" 
+               type="text" 
+               class="form-control">
+        <small class="form-text text-muted">This label will be displayed in the object overview</small>
+    </div>
+    <div class="form-group col-md-12">
+        <label>Parent Location:<span class="required">*</span></label>
+        <ng-select [items]="typeList"
+                    bindLabel="label"
+                    bindValue="public_id"
+                    loadingText='Loading...'
+                    [loading]="typeLoading"
+                    [closeOnSelect]="true"
+                    [multiple]="true"
+                    maxSelectedItems="1"
+                    (change)="onChange()"
+                    [ngModelOptions]="{standalone: true}"
+                    [(ngModel)]="data.ref_types">
+        </ng-select>
+        <small class="form-text text-muted">Select the root location</small>
+    </div>
+</div>
+  

@@ -50,3 +50,8 @@
 @import "scss/dnd";
 @import "scss/tree";
 @import "scss/filemanager";
+
+
+.modal-backdrop {
+    z-index: 1040 !important;
+}

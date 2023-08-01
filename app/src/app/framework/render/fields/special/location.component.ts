@@ -20,8 +20,6 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
-import { HttpBackend } from '@angular/common/http';
-import { AuthService } from '../../../../auth/services/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../../object/modals/object-preview-modal/object-preview-modal.component';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
@@ -31,11 +29,10 @@ import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../modes.enum';
 
 @Component({
-  templateUrl: './ref.component.html',
-  styleUrls: ['./ref.component.scss']
+  templateUrl: './location.component.html',
+  styleUrls: ['./location.component.scss']
 })
-export class RefComponent extends RenderFieldComponent implements OnInit, OnDestroy {
-
+export class LocationComponent extends RenderFieldComponent implements OnInit, OnDestroy {
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   public objectList: Array<RenderResult> = [];
@@ -43,8 +40,11 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
   public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
   public protect: boolean = false;
 
-  public constructor(private objectService: ObjectService, private backend: HttpBackend,
-                     private authService: AuthService, private modalService: NgbModal) {
+  public location;
+
+  /***** LIFE CYCLE - SECTION *****/
+
+  public constructor(private objectService: ObjectService, private modalService: NgbModal) {
     super();
   }
 
@@ -52,18 +52,18 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
     this.data.default = parseInt(this.data.default, 10);
     if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
       if (this.data.ref_types) {
-        if (this.data.ref_types) {
-          if (!Array.isArray(this.data.ref_types)) {
-            this.data.ref_types = [this.data.ref_types];
-          }
+        if (!Array.isArray(this.data.ref_types)) {
+        this.data.ref_types = [this.data.ref_types];
         }
+    
         const params: CollectionParameters = {
           filter: [{ $match: { type_id: { $in: this.data.ref_types } } }],
           limit: 0, sort: 'public_id', order: 1, page: 1
         };
         this.objectService.getObjects(params).pipe(takeUntil(this.unsubscribe))
           .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-            this.objectList = apiResponse.results;
+            this.objectList = [this.rootElement];
+            //this.objectList = apiResponse.results;
           });
       }
     }
@@ -74,7 +74,8 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
       } else {
         this.objectService.getObject(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
           .subscribe((refObject: RenderResult) => {
-              this.refObject = refObject;
+              //this.refObject = refObject;
+              this.refObject = this.rootElement;
             },
             (error) => {
               console.error(error);
@@ -97,6 +98,8 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
     this.unsubscribe.complete();
   }
 
+  /** HELPER - SECTION **/
+
   public searchRef(term: string, item: any) {
     term = term.toLocaleLowerCase();
     const value = item.object_information.object_id + item.type_information.type_label + item.summary_line;
@@ -107,4 +110,44 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
     this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
     this.modalRef.componentInstance.renderResult = this.refObject;
   }
+
+  rootElement: RenderResult = {
+    current_render_time: {
+        $date: '1'},
+    object_information:{
+        object_id: -1,
+        creation_time: {
+            $date: '1'
+        },
+        last_edit_time: {
+            $date: '1'
+        },
+        author_id: 1,
+        author_name: 'admin',
+        active: true,
+        version: '1.0.0'
+
+    },
+    type_information:{
+        type_id: 1,
+        type_label: 'Root',
+        type_name: 'root',
+        version: '1.0.0',
+        creation_time: {$date: '1'},
+        author_id: 1,
+        author_name: 'Admin',
+        active: true,
+        acl: {
+            activated: false,
+
+        },
+        icon: 'fas fa-globe'
+
+    },
+    externals: [],
+    fields:[],
+    sections: [],
+    summaries: [],
+    summary_line: "",
+};
 }

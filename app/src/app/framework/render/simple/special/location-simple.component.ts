@@ -32,7 +32,7 @@ type TypeReferenceTemplate = {
   templateUrl: './ref-simple.component.html',
   styleUrls: ['./ref-simple.component.scss']
 })
-export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
+export class LocationSimpleComponent extends RenderFieldComponent implements OnInit {
 
   public refData: TypeReferenceTemplate = {
     reference: new TypeReference(),
@@ -48,7 +48,7 @@ export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
-          console.log("RSC: ",res);
+          console.log(res);
           this.refData = {
             reference: new TypeReference({
               type_id: res.type_information.type_id,
