@@ -1,0 +1,22 @@
+<span *ngIf="refData; else noRef">
+
+    <ng-container *ngIf="!refData?.reference.line; else refLine">
+      <i class="{{refData?.reference?.icon}}"></i> {{refData?.reference?.type_label}} #{{refData?.value}}
+      <span *ngFor="let sum of refData?.reference.summaries; let last = last; let first = first">
+        <span *ngIf="first"> - </span>{{sum.value ? (sum.value | dateFormatter) : 'None'}}
+        <span *ngIf="!last"> | </span>
+      </span>
+    </ng-container>
+  
+    <ng-template #refLine>
+      <ng-container *ngIf="refData?.reference?.prefix">
+        <i class="{{refData?.reference?.icon}}"></i> {{refData?.reference?.type_label}} #{{refData?.reference?.type_id}}
+      </ng-container>
+      <span>{{refData?.reference?.line}}</span>
+    </ng-template>
+  
+  </span>
+  <ng-template #noRef>
+    <span>No reference set</span>
+  </ng-template>
+  

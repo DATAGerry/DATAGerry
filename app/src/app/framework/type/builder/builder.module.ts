@@ -27,6 +27,7 @@ import { TextFieldEditComponent } from './configs/text/text-field-edit.component
 import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
 import { TextareaEditComponent } from './configs/text/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/special/ref-field-edit.component';
+import { LocationFieldEditComponent } from './configs/special/location-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/choice/choice-field-edit.component';
 import { CheckFieldEditComponent } from './configs/choice/check-field-edit.component';
 import { NgbDatepickerModule, NgbModalModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -61,6 +62,7 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
     SectionFieldEditComponent,
     TextareaEditComponent,
     RefFieldEditComponent,
+    LocationFieldEditComponent,
     ChoiceFieldEditComponent,
     CheckFieldEditComponent,
     DateFieldEditComponent,

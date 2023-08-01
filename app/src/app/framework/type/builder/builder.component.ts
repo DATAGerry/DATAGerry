@@ -26,6 +26,7 @@ import { TextControl } from './controls/text/text.control';
 import { PasswordControl } from './controls/text/password.control';
 import { TextAreaControl } from './controls/text/textarea.control';
 import { ReferenceControl } from './controls/specials/ref.control';
+import { LocationControl } from './controls/specials/location.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
@@ -102,7 +103,8 @@ export class BuilderComponent implements OnDestroy {
   ];
 
   public specialControls = [
-    new Controller('ref', new ReferenceControl())
+    new Controller('ref', new ReferenceControl()),
+    new Controller('location', new LocationControl())
   ];
 
 
@@ -210,7 +212,6 @@ export class BuilderComponent implements OnDestroy {
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
-
     if (effect === 'move') {
       const index = list.indexOf(item);
       list.splice(index, 1);
@@ -285,6 +286,8 @@ export class BuilderComponent implements OnDestroy {
         return 'list';
       case 'ref':
         return 'retweet';
+      case 'location':
+        return 'globe';
       case 'date':
         return 'calendar-alt';
       default:

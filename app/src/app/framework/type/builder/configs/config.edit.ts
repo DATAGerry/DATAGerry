@@ -16,14 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { CmdbType } from '../../../models/cmdb-type';
-import { CmdbMode } from '../../../modes.enum';
-import { Group } from '../../../../management/models/group';
-import { User } from '../../../../management/models/user';
+import { Component, Input } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
+
+import { Group } from '../../../../management/models/group';
+import { User } from '../../../../management/models/user';
+
 import { nameConvention } from '../../../../layout/directives/name.directive';
 
 @Component({

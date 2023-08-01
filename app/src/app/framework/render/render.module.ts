@@ -29,6 +29,7 @@ import { HrefComponent } from './fields/text/href.component';
 import { RadioComponent } from './fields/choice/radio.component';
 import { SelectComponent } from './fields/choice/select.component';
 import { RefComponent } from './fields/special/ref.component';
+import { LocationComponent } from './fields/special/location.component';
 import { CheckboxComponent } from './fields/choice/checkbox.component';
 import { TextareaComponent } from './fields/textarea/textarea.component';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
@@ -44,6 +45,7 @@ import { SelectSimpleComponent } from './simple/choice/select-simple.component';
 import { RouterModule } from '@angular/router';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { RefSimpleComponent } from './simple/special/ref-simple.component';
+import { LocationSimpleComponent } from './simple/special/location-simple.component';
 import { DateComponent } from './fields/date/date.component';
 import { DateSimpleComponent } from './simple/date/date-simple.component';
 import { NumberComponent } from './fields/math/number.component';
@@ -80,6 +82,7 @@ import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.c
     RadioComponent,
     SelectComponent,
     RefComponent,
+    LocationComponent,
     CheckboxComponent,
     TextareaComponent,
     ModeErrorComponent,
@@ -90,6 +93,7 @@ import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.c
     RadioSimpleComponent,
     SelectSimpleComponent,
     RefSimpleComponent,
+    LocationSimpleComponent,
     DateSimpleComponent,
     DateComponent,
     NumberComponent,
