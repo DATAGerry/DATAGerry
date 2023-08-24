@@ -20,20 +20,25 @@
         <small class="form-text text-muted">This label will be displayed in the object overview</small>
     </div>
     <div class="form-group col-md-12">
-        <label>Parent Location:<span class="required">*</span></label>
-        <ng-select [items]="typeList"
-                    bindLabel="label"
-                    bindValue="public_id"
-                    loadingText='Loading...'
-                    [loading]="typeLoading"
-                    [closeOnSelect]="true"
-                    [multiple]="true"
-                    maxSelectedItems="1"
-                    (change)="onChange()"
-                    [ngModelOptions]="{standalone: true}"
-                    [(ngModel)]="data.ref_types">
-        </ng-select>
-        <small class="form-text text-muted">Select the root location</small>
-    </div>
+        <label>Selectable as location:</label>
+        <div class="input-group">
+          <div class="input-group-prepend">
+                <span class="input-group-text pr-1">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" 
+                           [(ngModel)]=" this.selectable_as_parent" 
+                           (click)="updateSelectableAsParent()" 
+                           [ngModelOptions]="{standalone: true}" 
+                           class="custom-control-input"
+                           [id]="data.name+'_selectable'"
+                        />
+                        <label class="custom-control-label" [for]="data.name+'_selectable'"></label>
+                    </div>
+                </span>
+          </div>
+        </div>
+        <small class="form-text text-muted float-left is_selectable">Uncheck this to prevent this type from being selected as a parent</small>
+        <div class="clearfix"></div>
+      </div>
 </div>
   

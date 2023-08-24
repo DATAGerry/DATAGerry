@@ -51,7 +51,10 @@
 @import "scss/tree";
 @import "scss/filemanager";
 
+// material imports
+@import "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css";
 
+//fix for z-indext of semitransparent modal background
 .modal-backdrop {
     z-index: 1040 !important;
 }

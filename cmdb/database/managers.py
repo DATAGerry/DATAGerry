@@ -155,22 +155,39 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).find(*args, **kwargs)
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
-        """calls __find with single return
+        """
+        Retrieves a single document with the given public_id from the given collection 
 
         Args:
             collection (str): name of database collection
-            public_id (int): public id of document
+            public_id (int): public_id of document
             *args: arguments for search operation
             **kwargs:
 
         Returns:
-            founded document
+            document with given public_id
 
         """
 
         cursor_result = self.__find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
+        
+    def find_one_by_object(self, collection: str, object_id: int, *args, **kwargs):
+        """
+        Retrieves a single document with the given object_id from the given collection
+
+        Args:
+            collection (str): name of database collection
+            object_id (int): object_id of document
+
+        Returns:
+            document with given object_id
+        """
+        cursor_result = self.__find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
+            return result
+
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
         """find one specific document by special requirements

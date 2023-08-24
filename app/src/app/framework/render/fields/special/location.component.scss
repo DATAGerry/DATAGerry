@@ -1,8 +1,12 @@
-.location-disabled {
-    pointer-events: none;
-    cursor: not-allowed;
-  }
-  
-  .location-simple-select {
-    background: None!important;
-  }
+.ref-disabled {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.ref-simple-select {
+  background: None!important;
+}
+
+.viewMode{
+background-color: #e9ecef;
+}

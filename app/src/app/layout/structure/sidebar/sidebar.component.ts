@@ -82,7 +82,6 @@ export class SidebarComponent implements OnInit, OnDestroy {
   }
 
   
-
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
     this.sidebarService.loadCategoryTree();

@@ -78,6 +78,8 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.framework_routes.category_routes import category_blueprint
     from cmdb.interface.rest_api.framework_routes.categories_routes import categories_blueprint
 
+    from cmdb.interface.rest_api.framework_routes.location_routes import location_blueprint
+
     from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
     from cmdb.interface.rest_api.user_management_routes.users_routes import users_blueprint
 
@@ -133,6 +135,8 @@ def register_blueprints(app):
     app.register_blueprint(category_blueprint, url_prefix='/category')
     app.register_blueprint(categories_blueprint, url_prefix='/categories')
     
+    app.register_blueprint(location_blueprint, url_prefix='/locations')
+
     app.register_blueprint(user_blueprint, url_prefix='/user')
     app.register_blueprint(users_blueprint, url_prefix='/users')
 

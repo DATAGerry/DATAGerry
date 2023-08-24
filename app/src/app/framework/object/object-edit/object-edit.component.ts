@@ -28,8 +28,8 @@ import { RenderResult } from '../../models/cmdb-render';
 import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
-import {text} from "@fortawesome/fontawesome-svg-core";
 import { SidebarService } from 'src/app/layout/services/sidebar.service';
+import { LocationService } from '../../services/location.service';
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -47,9 +47,13 @@ export class ObjectEditComponent implements OnInit {
   private objectID: number;
   public activeState : boolean ;
 
+  public selectedLocation: number = -1;
+  public locationTreeName: string;
+  public locationForObjectExists: boolean = false;
+
   constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private toastService: ToastService , 
-              private sidebarService : SidebarService) {
+              private route: ActivatedRoute, private router: Router, private toastService: ToastService, 
+              private locationService: LocationService, private sidebarService : SidebarService) {
     this.route.params.subscribe((params) => {
       this.objectID = params.publicID;
     });
@@ -92,14 +96,46 @@ export class ObjectEditComponent implements OnInit {
     if (this.renderForm.valid) {
       const patchValue = [];
 
+      console.log("this.renderForm.value: ", this.renderForm.value)
       Object.keys(this.renderForm.value).forEach((key: string) => {
         let val = this.renderForm.value[key];
-        if (val === undefined || val == null) { val = ''; }
-        patchValue.push({
-          name: key,
-          value: val
-        });
+        
+        //handle locations
+        if(key == "locationForObjectExists"){
+          console.log("locationForObjectExists is key and val is: ", val);
+        }
+
+        if(key == 'dg_location'){
+          this.selectedLocation = val; 
+        }
+        else if(key == 'locationTreeName'){
+          this.locationTreeName = val; 
+          return;
+        } else if(key == 'locationForObjectExists'){
+          this.locationForObjectExists = String(val).toLowerCase() === 'true' ? true : false;
+          return;
+        }
+
+        if (val === undefined || val == null) { 
+          val = ''; 
+          
+          if(key == "dg_location"){
+            patchValue.push({
+              name: key,
+              value: null
+            });
+          }
+
+        } else {
+          patchValue.push({
+            name: key,
+            value: val
+          });
+        }
       });
+
+      this.handleLocation(this.objectInstance.public_id, this.selectedLocation, this.locationTreeName, this.objectInstance.type_id);
+      console.log("this.objectInstance", this.objectInstance);
 
       this.objectInstance.fields = patchValue;
       this.objectInstance.comment = this.commitForm.get('comment').value;
@@ -129,4 +165,42 @@ export class ObjectEditComponent implements OnInit {
     this.renderForm.markAsDirty();
     }
 
+  private handleLocation(object_id: number, parent: number, name: string = "", type_id: number){
+      let params = {
+        "object_id": object_id,
+        "parent": parent,
+        "name": name,
+        "type_id": type_id 
+      }
+
+    //a parent is selected and there is no existing location for this object => create it
+    if(parent && parent > 0 && !this.locationForObjectExists){
+      this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
+        this.toastService.success('Location was successfully created!');
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+    
+    //a parent is selected and location for this object exists => update existing location
+    if(parent && parent > 0 && this.locationForObjectExists) {
+      this.locationService.updateLocationForObject(params).subscribe((res: APIUpdateMultiResponse) => {
+        this.toastService.success('Location was successfully updated!');
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+
+    //parent is removed but location still exists => delete location
+    if(!parent && this.locationForObjectExists){
+      this.locationService.deleteLocationForObject(object_id).subscribe((res: APIUpdateMultiResponse) => {
+        this.toastService.success('Location was successfully deleted!');
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+  }
 }

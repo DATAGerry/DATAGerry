@@ -1,0 +1,46 @@
+@import 'src/scss/variables';
+
+.location-tree-invisible {
+    display: none;
+}
+  
+.location-tree ul,
+.location-tree li {
+  margin-top: 0;
+  margin-bottom: 0;
+  list-style-type: none;
+}
+
+// /*
+//  * This padding sets alignment of the nested nodes.
+//  */
+.location-tree .mat-nested-tree-node div[role=group] {
+  padding-left: 30px;
+}
+
+/*
+ * Padding for leaf nodes.
+ * Leaf nodes need to have padding so as to align with other non-leaf nodes
+ * under the same parent.
+ */
+.location-tree div[role=group] > .mat-tree-node {
+  padding-left: 30px;
+}
+
+.location_icon{
+  padding-right: 5px;
+}
+
+.location_element:hover {
+  
+  background-color: $dg-hover-background-color;
+}
+
+.location_name:hover {
+  cursor: pointer;
+  color: $dg-primary-color;
+}
+
+.location-selected {
+  background-color: $dg-selected-background-color;
+}

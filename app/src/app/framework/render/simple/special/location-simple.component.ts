@@ -28,9 +28,9 @@ type TypeReferenceTemplate = {
 };
 
 @Component({
-  selector: 'cmdb-ref-simple',
-  templateUrl: './ref-simple.component.html',
-  styleUrls: ['./ref-simple.component.scss']
+  selector: 'cmdb-location-simple',
+  templateUrl: './location-simple.component.html',
+  styleUrls: ['./location-simple.component.scss']
 })
 export class LocationSimpleComponent extends RenderFieldComponent implements OnInit {
 
@@ -44,11 +44,9 @@ export class LocationSimpleComponent extends RenderFieldComponent implements OnI
   }
 
   public ngOnInit() {
-
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
-          console.log(res);
           this.refData = {
             reference: new TypeReference({
               type_id: res.type_information.type_id,
