@@ -21,14 +21,20 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { ReplaySubject } from 'rxjs';
 
 import { ConfigEditBaseComponent } from '../config.edit';
-
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { CmdbType } from '../../../../models/cmdb-type';
-
+import { takeUntil, tap } from 'rxjs/operators';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
 
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
+
+import { ToastService } from '../../../../../layout/toast/toast.service';
+import { ObjectService } from '../../../../services/object.service';
+import { TypeService } from '../../../../services/type.service';
+
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   selector: 'cmdb-location-field-edit',
@@ -37,8 +43,9 @@ import { nameConvention } from '../../../../../layout/directives/name.directive'
 })
 export class LocationFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  constructor(private cd: ChangeDetectorRef) {
-    super();
+  constructor(private typeService: TypeService, private objectService: ObjectService,
+    private toast: ToastService, private cd: ChangeDetectorRef, private activeRoute: ActivatedRoute) {
+  super();
   }
 
   /**
@@ -70,9 +77,8 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
   /**
    * Type list for reference selection
    */
-  public typeList: CmdbType[] = [];
-  public filteredTypeList: CmdbType[] = [];
-  public totalTypes: number = 1;
+  public selectable_as_parent: boolean = false;
+  public currentTypeID: number;
 
   /**
    * Type loading indicator.
@@ -120,30 +126,14 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
   /** LIFE CYCLE - SECTION **/
   public ngOnInit(): void {
     this.setDraggable("false");
-    
+    console.log("this:", this);
     this.form.addControl('name', this.nameControl);
     this.form.addControl('label', this.labelControl);
-    this.form.addControl('ref_types', this.typeControl);
-    this.form.addControl('summaries', this.summaryControl);
 
+    this.currentTypeID = this.activeRoute.data['_value'].type.public_id;
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
-
-    this.typeList = [this.getRootElement() as CmdbType];
-    this.prepareSummaries();
-    this.cd.markForCheck();
-  }
-
-  public onChange() {
-    const { ref_types } = this.data;
-    if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
-      this.objectList = [];
-      this.filteredTypeList = [];
-      this.data.value = '';
-    } else {
-      this.objectList = this.getRootElementRenderResult();
-      this.prepareSummaries();
-    }
+    this.triggerAPICall();
   }
 
   /**
@@ -157,26 +147,32 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
 
   /** HELPER - SECTION **/
 
-    /**
-   * Structure of the Summaries depending on the selected types
-   * @private
-   */
-    private prepareSummaries() {
-      if (this.data.ref_types) {
-        if (!Array.isArray(this.data.ref_types)) {
-          this.data.ref_types = [this.data.ref_types];
-        }
-        this.filteredTypeList = this.typeList.filter(type => this.data.ref_types.includes(type.public_id));
-        this.summaries = this.data.summaries ? this.data.summaries : this.summaries;
-      }
-    }
+  public triggerAPICall() {
+    this.typeLoading = true;
+    this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
+      .pipe(tap(() => this.typeLoading = false))
+      .subscribe(
+        (apiResponse: CmdbType) => {
+          this.typeLoading = false;
+          this.selectable_as_parent = apiResponse.selectable_as_parent;
+          console.log("getType.apiResponse: ", apiResponse);
+          this.cd.markForCheck();
+        },
+        (err) => this.toast.error(err));
+  }
 
-   /**
-   * Name converter on ng model change.
-   * @param name
-   */
+  //  /**
+  //  * Name converter on ng model change.
+  //  * @param name
+  //  */
   public onNameChange(name: string){
     this.data.name = nameConvention(name);
+  }
+
+  public updateSelectableAsParent(){
+    this.selectable_as_parent = !this.selectable_as_parent;
+    this.setSelectableAsParent(this.selectable_as_parent);
+    this.cd.markForCheck();
   }
 
   //TODO: this is just a work around and need to be set with proper angular code 
@@ -190,63 +186,8 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     (specialControlLocation as HTMLElement).style.opacity = opacity;
   }
 
-  private getRootElement(){
-    return {
-      public_id: -1,
-          editor_id: 1,
-          name: 'root',
-          label: 'Root',
-          active: true,
-          author_id: 1,
-          version: "1.0.0",
-          creation_time: new Date(),
-          last_edit_time: new Date(),
-          fields: [
-  
-          ],
-          render_meta: {
-              icon: 'fas fa-globe',
-              externals: [],
-              sections: [],
-              summary: {
-                  fields:[]
-              },
-          },
-    };
-  }
-
-  private getRootElementRenderResult(): [RenderResult]{
-    return [{
-          current_render_time: {$date: '1'},
-          object_information:{
-              object_id: -1,
-              creation_time: {$date: '1'},
-              last_edit_time: {$date: '1'},
-              author_id: 1,
-              author_name: 'Admin',
-              active: true,
-              version: '1.0.0'
-
-          },
-          type_information:{
-              type_id: 1,
-              type_label: 'Root',
-              type_name: 'root',
-              version: '1.0.0',
-              creation_time: {$date: '1'},
-              author_id: 1,
-              author_name: 'Admin',
-              active: true,
-              acl: {activated: false},
-              icon: 'fas fa-globe'
-
-          },
-          externals: [],
-          fields:[],
-          sections: [],
-          summaries: [],
-          summary_line: "",
-      }];
+  private setSelectableAsParent(value: boolean): void{
+    this.activeRoute.snapshot.data.type.selectable_as_parent = value;
   }
 }
 

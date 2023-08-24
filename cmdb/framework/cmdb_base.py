@@ -92,6 +92,36 @@ class CmdbManagerBase(ABC):
             collection=collection,
             public_id=public_id
         )
+    
+    def _get_location(self, collection: str, object_id: int) -> dict:
+        """get location document from the database by their object id
+
+        Args:
+            collection (str): name of the database collection
+            object_id (int): object id of the location document
+
+        Returns:
+            str: location document in json format
+        """
+        return self.dbm.find_one(
+            collection=collection,
+            object_id=object_id
+        )
+    
+    def _get_location_by_object(self, collection: str, object_id: int) -> dict:
+        """get location document from the database by their object id
+
+        Args:
+            collection (str): name of the database collection
+            object_id (int): object id of the location document
+
+        Returns:
+            str: location document in json format
+        """
+        return self.dbm.find_one_by_object(
+            collection=collection,
+            object_id=object_id
+        )
 
     def _get_by(self, collection: str, **requirements: dict) -> dict:
         """get document from the database by requirements
@@ -158,6 +188,23 @@ class CmdbManagerBase(ABC):
         return self.dbm.update(
             collection=collection,
             filter={'public_id': public_id},
+            data=data
+        )
+    
+    def _update_for_object(self, collection: str, object_id: int, data: dict) -> object:
+        """
+        update document/object in database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+            data: changed data/object
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.update(
+            collection=collection,
+            filter={'object_id': object_id},
             data=data
         )
 

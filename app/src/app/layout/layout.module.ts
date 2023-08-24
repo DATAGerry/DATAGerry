@@ -33,6 +33,7 @@ import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
 import { SidebarComponent } from './structure/sidebar/sidebar.component';
+import { CategoryTreeComponent } from './structure/sidebar/category-tree/category-tree.component';
 import { SidebarCategoryComponent } from './structure/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
@@ -83,11 +84,18 @@ import { LowercaseDirective } from './directives/lowercase.directive';
 import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
 import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.directive';
 
+//tree imports - start
+import {MatTreeModule} from '@angular/material/tree';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+//tree imports - ned
+
 @NgModule({
   declarations: [
     BreadcrumbComponent,
     NavigationComponent,
     SidebarComponent,
+    CategoryTreeComponent,
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
@@ -151,7 +159,7 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     NameGuidePipe,
     LowercaseDirective,
     FileDragDropDirective,
-    PreventDoubleSubmitDirective
+    PreventDoubleSubmitDirective,
   ],
   imports: [
     CommonModule,
@@ -169,7 +177,10 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     RenderModule,
     FileexplorerModule,
     QRCodeModule,
-    JwPaginationModule
+    JwPaginationModule,
+    MatTreeModule,
+    MatButtonModule,
+    MatIconModule
   ],
   providers: [
     BreadcrumbService,

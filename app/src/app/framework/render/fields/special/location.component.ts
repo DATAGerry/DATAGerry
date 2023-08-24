@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
-import { ObjectService } from '../../../services/object.service';
+import { LocationService } from '../../../services/location.service';
 import { RenderResult } from '../../../models/cmdb-render';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../../object/modals/object-preview-modal/object-preview-modal.component';
@@ -26,7 +26,8 @@ import { CollectionParameters } from '../../../../services/models/api-parameter'
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { CmdbMode } from '../../../modes.enum';
+import { FormControl, Validators } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 
 @Component({
   templateUrl: './location.component.html',
@@ -35,60 +36,55 @@ import { CmdbMode } from '../../../modes.enum';
 export class LocationComponent extends RenderFieldComponent implements OnInit, OnDestroy {
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
-  public objectList: Array<RenderResult> = [];
-  public refObject: RenderResult;
   public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
   public protect: boolean = false;
 
-  public location;
+  public currentobjectID: number;
 
-  /***** LIFE CYCLE - SECTION *****/
+  public locationsList: Array<RenderResult> = [];
+  public objectLocation: RenderResult;
 
-  public constructor(private objectService: ObjectService, private modalService: NgbModal) {
+  public locationTree = new FormControl('', Validators.required);
+  public locationForObjectExists = new FormControl('', Validators.required);
+  
+  public ref;
+
+  
+  /* -------------------------------------------------------------------------- */
+  /*                            LIFE CYCLE - SECTION                            */
+  /* -------------------------------------------------------------------------- */
+
+  public constructor(private locationService: LocationService, private modalService: NgbModal, private route: ActivatedRoute) {    
     super();
   }
 
   public ngOnInit(): void {
-    this.data.default = parseInt(this.data.default, 10);
-    if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
-      if (this.data.ref_types) {
-        if (!Array.isArray(this.data.ref_types)) {
-        this.data.ref_types = [this.data.ref_types];
-        }
-    
-        const params: CollectionParameters = {
-          filter: [{ $match: { type_id: { $in: this.data.ref_types } } }],
-          limit: 0, sort: 'public_id', order: 1, page: 1
-        };
-        this.objectService.getObjects(params).pipe(takeUntil(this.unsubscribe))
-          .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-            this.objectList = [this.rootElement];
-            //this.objectList = apiResponse.results;
-          });
-      }
+    this.registerForEventChanges();
+
+    this.setTreeName('');
+    this.setLocationExists('false');
+
+    this.currentobjectID = this.route.snapshot.params.publicID;
+
+    if(this.data.reference?.object_id > 0){
+      this.locationService.getLocation(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
+      .subscribe((locationObject: RenderResult) => {
+          this.objectLocation = locationObject;
+        },
+        (error) => {
+          console.error(error);
+        });
     }
 
-    if (this.data.reference && this.data.reference.object_id !== '' && this.data.reference.object_id !== 0) {
-      if (typeof this.data.reference === 'string' || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
-        this.protect = true;
-      } else {
-        this.objectService.getObject(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
-          .subscribe((refObject: RenderResult) => {
-              //this.refObject = refObject;
-              this.refObject = this.rootElement;
-            },
-            (error) => {
-              console.error(error);
-            });
-      }
-    }
+    this.getLocations();
   }
 
-  groupByFn = (item) => item.type_information.type_label;
+  groupByFn = (item) => item.type_label;
   groupValueFn = (_: string, children: any[]) => ({
-    name: children[0].type_information.type_label,
-    total: children.length
+    name: children[0].type_label,
+    // total: children.length
   })
+
 
   public ngOnDestroy(): void {
     if (this.modalRef) {
@@ -98,7 +94,9 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
     this.unsubscribe.complete();
   }
 
-  /** HELPER - SECTION **/
+  /* -------------------------------------------------------------------------- */
+  /*                              HELPER - SECTION                              */
+  /* -------------------------------------------------------------------------- */
 
   public searchRef(term: string, item: any) {
     term = term.toLocaleLowerCase();
@@ -108,46 +106,79 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
 
   public showReferencePreview() {
     this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
-    this.modalRef.componentInstance.renderResult = this.refObject;
+    this.modalRef.componentInstance.renderResult = this.objectLocation;
   }
 
-  rootElement: RenderResult = {
-    current_render_time: {
-        $date: '1'},
-    object_information:{
-        object_id: -1,
-        creation_time: {
-            $date: '1'
-        },
-        last_edit_time: {
-            $date: '1'
-        },
-        author_id: 1,
-        author_name: 'admin',
-        active: true,
-        version: '1.0.0'
+  public onTreeNameChanged(currentName){
+    this.locationTree.setValue(currentName);
+    this.parentFormGroup.value['locationTreeName'] = currentName;
+    this.parentFormGroup.markAsDirty();
 
-    },
-    type_information:{
-        type_id: 1,
-        type_label: 'Root',
-        type_name: 'root',
-        version: '1.0.0',
-        creation_time: {$date: '1'},
-        author_id: 1,
-        author_name: 'Admin',
-        active: true,
-        acl: {
-            activated: false,
+  }
 
-        },
-        icon: 'fas fa-globe'
 
-    },
-    externals: [],
-    fields:[],
-    sections: [],
-    summaries: [],
-    summary_line: "",
-};
+  /**
+   * Get all locations which are selectable as parent
+   */
+  private getLocations(){
+    
+    const params: CollectionParameters = {
+      filter: [{ $match: { type_selectable: { $eq: true } } }],
+      limit: 0, sort: 'public_id', order: 1, page: 1
+    };
+
+    this.locationService.getLocations(params).pipe(takeUntil(this.unsubscribe))
+          .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+            this.setLocationExists('false');
+            this.locationsList = this.extractOwnLocation(apiResponse.results);
+          });
+  }
+
+
+  private extractOwnLocation(locations){
+    let indexOfOwnLocation: number = -1;
+
+    for(let i = 0; i<locations.length; i++){
+      if(locations[i].object_id == this.currentobjectID){
+        indexOfOwnLocation = i;
+        break;
+      }
+    }
+
+    if(indexOfOwnLocation != -1){
+      let ownLocation = locations.splice(indexOfOwnLocation,1)[0];
+      
+      this.setTreeName(ownLocation['name']);
+      this.setLocationExists('true');
+    }
+
+    return locations;
+  }
+
+  //removes the selected location when unselecting
+  public locationChanged(event){
+    if(event == undefined){
+      this.data.value = null;
+    }
+  }
+
+
+  private setLocationExists(val: string){
+      this.locationForObjectExists.setValue(val);
+      this.parentFormGroup.value['locationForObjectExists'] = val;
+  }
+
+
+  private setTreeName(val: string){
+      this.locationTree.setValue(val);
+      this.parentFormGroup.value['locationTreeName'] = val;
+  }
+
+
+  private registerForEventChanges() {
+    this.parentFormGroup.valueChanges.subscribe( (event) => {
+      this.parentFormGroup.value['locationTreeName'] = this.locationTree.value;
+      this.parentFormGroup.value['locationForObjectExists'] = this.locationForObjectExists.value;
+    });
+  }
 }

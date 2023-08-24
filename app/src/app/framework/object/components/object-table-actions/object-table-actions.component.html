@@ -4,14 +4,14 @@
     <i class="far fa-eye"></i>
   </a>
   <ng-container *ngIf="result.type_information?.active">
-    <a *permissionLink="['base.framework.object.view', 'base.framework.object.add'];requirements:['CREATE', 'READ'];acl:acl"
-       [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
-       title="Copy object">
-      <i class="far fa-clone"></i>
-    </a>
     <a *permissionLink="'base.framework.object.edit';requirements:'UPDATE';acl:acl" [routerLink]="['/', 'framework', 'object', 'edit', publicID]"
        title="Edit object">
       <i class="far fa-edit"></i>
+    </a>
+    <a *permissionLink="['base.framework.object.view', 'base.framework.object.add'];requirements:['CREATE', 'READ'];acl:acl"
+      [routerLink]="['/', 'framework', 'object', 'copy', publicID]"
+      title="Copy object">
+      <i class="far fa-clone"></i>
     </a>
   </ng-container>
   <a *permissionLink="'base.framework.object.view';requirements:'READ';acl:acl" class="pointer" (click)="openPreviewModal()"

@@ -31,7 +31,7 @@ class LocationContent implements ControlsContent {
 
   public constructor() {
     this.type = 'location';
-    this.name = 'dg_parent';
+    this.name = 'dg_location';
     this.label = 'Location';
   }
 

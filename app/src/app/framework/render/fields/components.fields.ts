@@ -22,11 +22,6 @@ import { CmdbMode } from '../../modes.enum';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { CmdbTypeSection } from '../../models/cmdb-type';
 
-// deprecated
-export interface ComponentsFields {
-  data: Input;
-}
-
 @Component({
   template: ''
 })

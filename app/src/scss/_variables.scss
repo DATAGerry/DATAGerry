@@ -28,3 +28,12 @@ $footer-color: $body-color !default;
 $footer-borders: (
   top: (size: 2px, style: solid, color: theme-color('primary'))
 ) !default;
+
+
+/* -------------------------------------------------------------------------- */
+/*                                GLOBAL COLORS                               */
+/* -------------------------------------------------------------------------- */
+$dg-primary-color: #e94d18;
+
+$dg-selected-background-color: #cccccc;
+$dg-hover-background-color: #bfbfbf;

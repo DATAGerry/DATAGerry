@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
+import logging
 
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
@@ -26,6 +27,7 @@ from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
+LOGGER = logging.getLogger(__name__)
 
 class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
@@ -127,6 +129,20 @@ class APIBlueprint(Blueprint):
 
             return _decorate
 
+        return _parse
+
+    @classmethod
+    def parse_location_parameters(cls, **optional):
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+
+                try:
+                    locationArgs = request.args.to_dict()
+                except Exception as error:
+                    return abort(400, str(error))
+                return f(locationArgs)
+            return _decorate
         return _parse
 
     @classmethod

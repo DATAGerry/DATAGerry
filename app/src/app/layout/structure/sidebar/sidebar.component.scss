@@ -15,7 +15,7 @@
 }
 
 .sidebar-menu-item:hover {
-  background-color: #cfc8c8;
+  background-color: $dg-hover-background-color;
   cursor: pointer;
 }
 
@@ -29,5 +29,7 @@
 }
 
 .selectedMenu {
-  background-color: #ffbb00;
+  background-color: $dg-selected-background-color;
 }
+
+
