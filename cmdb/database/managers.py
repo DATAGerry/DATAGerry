@@ -16,7 +16,6 @@
 
 """
 Database Management instance for database actions
-
 """
 import logging
 from typing import Generic, List
@@ -25,12 +24,12 @@ from pymongo import IndexModel
 from pymongo.database import Database
 from pymongo.results import DeleteResult, UpdateResult
 
+from gridfs import GridFS
 from cmdb.database import CONNECTOR
 from cmdb.database.connection import MongoConnector
 from cmdb.database.counter import PublicIDCounter
 from cmdb.database.errors.database_errors import CollectionAlreadyExists, NoDocumentFound, DocumentCouldNotBeDeleted, \
     DatabaseAlreadyExists, DatabaseNotExists
-from gridfs import GridFS
 
 from cmdb.database.utils import DESCENDING
 
@@ -39,7 +38,7 @@ LOGGER = logging.getLogger(__name__)
 
 class DatabaseManager(Generic[CONNECTOR]):
     """
-    Base database managers
+    Base database manager
     """
 
     def __init__(self, connector: CONNECTOR, *args, **kwargs):
@@ -317,7 +316,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         result = self.connector.get_collection(collection).update_many(filter=query, update=update)
         if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection)
+            raise DocumentCouldNotBeDeleted(collection, None)
         return result
 
     def insert_with_internal(self, collection: str, _id: int or str, data: dict):
@@ -376,7 +375,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         result = self.connector.get_collection(collection).delete_many(requirements_filter)
         if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection)
+            raise DocumentCouldNotBeDeleted(collection, None)
         return result
 
     def create_database(self, name: str) -> Database:
@@ -516,6 +515,76 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             counter_doc['counter'] = value
             self.connector.get_collection(PublicIDCounter.COLLECTION).update(query, counter_doc)
 
+    def get_root_location_data(self) -> dict:
+        """
+        This class holds the correct root location data
+        
+        Returns:
+            (dict): Returns valid root location data
+        """
+        return {
+            "public_id":1,
+            "name":"Root",
+            "parent":0,
+            "object_id":0,
+            "type_id":0,
+            "type_label":"Root",
+            "type_icon":"fas fa-globe",
+            "type_selectable":True
+        }
+
+        
+
+    def validate_root_location(self, tested_location: dict) -> bool:
+        """
+        Checks if a given location holds valid root location data
+
+        Args:
+            tested_location (dict): location data which should be tested
+
+        Returns:
+            (bool): Returns boolean if the given dict has valid root location data
+        """
+
+        root_location = self.get_root_location_data()
+       
+        for root_key, root_value in root_location.items():
+            if root_key not in tested_location.keys():
+                return False
+
+            # check if value is valid
+            if root_value != tested_location[root_key]:
+                return False
+
+        return True
+
+    def set_root_location(self, collection: str, create: bool = False):
+        """
+        Does the setup for root location. If no counter for locations exist, it will be created
+
+        Args:
+            collection (str): framework.locations
+            create (bool): If true the root location will be created, else it will be updated
+
+        Returns:
+            status: status of location creation or update
+        """
+
+        status:int = 0
+
+        if create:
+            ## check if counter is created in db, else create one
+            counter = self.connector.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
+
+            if not counter:
+                self._init_public_id_counter(collection)
+
+            status = self.insert(collection, self.get_root_location_data())
+        else:
+            status = self.update(collection,{'public_id':1},self.get_root_location_data())
+
+        return status
+
 
 class DatabaseGridFS(GridFS):
     """
@@ -524,4 +593,4 @@ class DatabaseGridFS(GridFS):
 
     def __init__(self, database, collection_name):
         super().__init__(database, collection_name)
-        self.message = "Collection {} already exists".format(collection_name)
+        self.message = f"Collection {collection_name} already exists"
