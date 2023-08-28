@@ -81,7 +81,7 @@ class CmdbLocation(CmdbDAO):
     #                               DUNDER FUNCTIONS                               #
     # ---------------------------------------------------------------------------- #
 
-    def __init__(self, name, parent, object_id, type_id, type_label, type_icon="fas fa-cube", type_selectable=True, **kwargs):
+    def __init__(self, name, parent, object_id, type_id, type_label, type_icon="fas fa-cube", type_selectable=True, public_id = None, **kwargs):
         """
         Initialisation of location
 
@@ -93,7 +93,9 @@ class CmdbLocation(CmdbDAO):
             type_label (str): label of type for which this location is set
             type_icon (str): icon of type for which this location is set, default is 'fas fa-cube'
             type_selectable (bool): sets if this type is selectable as a parent for other locations, default is yes
+            public_id (int): public_id of the location
         """
+        self.public_id: int = public_id
         self.name: str = name
         self.parent: int = parent
         self.object_id: int = object_id
@@ -155,9 +157,19 @@ class CmdbLocation(CmdbDAO):
     @classmethod
     def to_data(cls, instance: "CmdbLocation") -> dict:
         """
-        Not used
+        Dict representation of a CmdbLocation
         """
-        return []
+        return {
+            'public_id': instance['public_id'],
+            'name': instance['name'],
+            'parent': instance['parent'],
+            'object_id': instance['object_id'],
+            'type_id': instance['type_id'],
+            'type_label': instance['type_label'],
+            'type_icon': instance['type_icon'],
+            'type_selectable': instance['type_selectable'],
+        }
+
 
     @classmethod
     def to_dict(cls, instance: "CmdbLocation") -> dict:
