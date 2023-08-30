@@ -101,9 +101,10 @@ class CmdbLocationManager(CmdbManagerBase):
     def get_location_for_object(self, object_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
         try:
-            resource = CmdbLocation(**self._get_location_by_object(
-                collection=CmdbLocation.COLLECTION,
-                object_id=object_id))
+            resource = self._get_location_by_object(collection=CmdbLocation.COLLECTION, object_id=object_id)
+            if resource:
+                resource = CmdbLocation(**resource)
+
         except Exception as error:
             raise LocationManagerError(str(error)) from error
 
@@ -111,6 +112,19 @@ class CmdbLocationManager(CmdbManagerBase):
         #     type_ = self._type_manager.get(resource.type_id)
         #     verify_access(type_, user, permission)
         return resource
+    
+    def has_children(self, public_id: int):
+        try:
+            has_child = False
+            a_child = self._get_child(CmdbLocation.COLLECTION,public_id)
+            LOGGER.info(f"Inner children: \n {a_child}")
+
+            if a_child:
+                has_child = True
+        except Exception as error:
+            raise LocationManagerError(str(error)) from error
+        
+        return has_child
     
     def get_location(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:

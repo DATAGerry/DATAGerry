@@ -87,7 +87,7 @@ class LocationNode:
         Returns:
             list[LocationNode]: returns all children for the given public_id
         """
-        LOGGER.info(f"GET_CHILDREN FOR ID({public_id})")
+        #LOGGER.info(f"GET_CHILDREN FOR ID({public_id})")
         sorted_children: list["LocationNode"] = []
         filtered_list: list[dict] = []
 
@@ -101,16 +101,7 @@ class LocationNode:
             if len(filtered_list) > 0:
                 for child in sorted_children:
                     child.children = self.get_children(child.get_public_id(), filtered_list)
-            # if children were found then search recursively for all found children
-            # if match_counter > 0:
-            #     child_counter = 0
-            #     for child in sorted_children:
-            #         child.children = self.get_children(child.get_public_id(), filtered_list, sorted_children[child_counter].children)
-            #         child_counter += 1
-            # else:
-            #     LOGGER.info(f"returned children: \n {children})")
-            #     return children
-        LOGGER.info(f"CHILDREN for ID({public_id}): \n {sorted_children}")
+        #LOGGER.info(f"CHILDREN for ID({public_id}): \n {sorted_children}")
         return sorted_children
 
 
@@ -282,8 +273,6 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
             children = root_location.get_children(root_location.public_id, filtered_location_list)
             root_location.children = children
 
-        LOGGER.info(f"rootLocations: \n {root_locations}")
-
         # pack the root locations
         packed_locations = []
 
@@ -336,7 +325,6 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         object_id (int): object_id of object 
         request_user (UserModel): User which is requesting the data
     """
-    LOGGER.info("get_location_for_object()")
     try:
         location_instance = location_manager.get_location_for_object(object_id, user=request_user,
                                                     permission=AccessControlPermission.READ)
@@ -347,6 +335,33 @@ def get_location_for_object(object_id: int, request_user: UserModel):
 
     return make_response(location_instance)
 
+@location_blueprint.route('/<int:object_id>/parent', methods=['GET'])
+@location_blueprint.protect(auth=True, right='base.framework.object.view')
+@insert_request_user
+def get_parent(object_id: int, request_user: UserModel):
+    """
+    Returns the parent location for a given object_id
+    
+    Args:
+        object_id (int): object_id of object 
+        request_user (UserModel): User which is requesting the data
+    """
+    parent = None
+
+    try:
+        current_location = location_manager.get_location_for_object(object_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
+        
+        if current_location:
+            parent_id = current_location.parent
+            parent = location_manager.get_location(parent_id, request_user, AccessControlPermission.READ)
+
+    except (LocationManagerGetError, ManagerGetError) as err:
+        return abort(404, err.message)
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+
+    return make_response(parent)
 
 # ------------------------------- CRUD - UPDATE ------------------------------ #
 
@@ -365,9 +380,6 @@ def update_location_for_object(params: dict, request_user: UserModel):
     Returns:
         _type_: _description_
     """
-    LOGGER.info("update_location_for_object()")
-    LOGGER.info(f"params: \n {params}")
-
     location_update_params = {}
     failed: ResponseFailedMessage = []
 
@@ -413,27 +425,26 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
     Returns:
         _type_: confirmation for deletion
     """
-    LOGGER.info("delete_location_for_object()")
     try:
         current_location_instance = location_manager.get_location_for_object(object_id)
-        # LOGGER.info(f"current_location_instance: {current_location_instance} ")
-
         location_public_id = current_location_instance.public_id
-        # LOGGER.info(f"location_public_id: {location_public_id} ")
 
+        # delete is only allowed if this location don't have any children
+        has_children = location_manager.has_children(location_public_id)
+
+        if has_children:
+            raise LocationManagerDeleteError('Deleting is only possbile if there are no children for this location')
+        
+        ack = location_manager.delete_location(public_id=location_public_id, user=request_user, permission=AccessControlPermission.DELETE)
     except LocationManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
-
-    try:
-        ack = location_manager.delete_location(public_id=location_public_id, user=request_user,
-                                           permission=AccessControlPermission.DELETE)
-    except LocationManagerGetError as err:
-        return abort(400, err.message)
+    except LocationManagerDeleteError as err:
+        LOGGER.error(err)
+        return abort(405)
     except AccessDeniedError as err:
+        LOGGER.error(err)
         return abort(403, err.message)
-    except LocationManagerDeleteError:
-        return abort(400)
     except CMDBError:
         return abort(500)
 
@@ -450,5 +461,4 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
     #     log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
     # except (CMDBError, LogManagerInsertError) as err:
     #     LOGGER.error(err)
-
     return make_response(ack)

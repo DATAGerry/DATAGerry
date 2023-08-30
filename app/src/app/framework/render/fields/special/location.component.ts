@@ -63,19 +63,22 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
 
     this.setTreeName('');
     this.setLocationExists('false');
-
     this.currentobjectID = this.route.snapshot.params.publicID;
 
-    if(this.data.reference?.object_id > 0){
-      this.locationService.getLocation(this.data.reference?.object_id, false).pipe(takeUntil(this.unsubscribe))
-      .subscribe((locationObject: RenderResult) => {
-          this.objectLocation = locationObject;
-        },
-        (error) => {
-          console.error(error);
-        });
-    }
-
+    this.locationService.getParent(this.currentobjectID).pipe(takeUntil(this.unsubscribe))
+    .subscribe((locationObject: RenderResult) => {
+        if(locationObject){
+            this.objectLocation = locationObject;
+            this.setTreeName(this.objectLocation['name']);
+            var public_id = this.objectLocation['public_id'];
+            this.parentFormGroup.patchValue({'dg_location': public_id});
+            this.setLocationExists('true');
+        }
+    },
+    (error) => {
+      console.error("Error:", error);
+    });
+  
     this.getLocations();
   }
 
@@ -123,7 +126,7 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
   private getLocations(){
     
     const params: CollectionParameters = {
-      filter: [{ $match: { type_selectable: { $eq: true } } }],
+      filter: [{ $match: { name: { $ne: null } } }],
       limit: 0, sort: 'public_id', order: 1, page: 1
     };
 
@@ -137,22 +140,26 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
 
   private extractOwnLocation(locations){
     let indexOfOwnLocation: number = -1;
+    let selectableLocations = [];
 
     for(let i = 0; i<locations.length; i++){
       if(locations[i].object_id == this.currentobjectID){
         indexOfOwnLocation = i;
-        break;
+      }
+
+      if(locations[i].type_selectable){
+        selectableLocations.push(locations[i]);
       }
     }
 
     if(indexOfOwnLocation != -1){
-      let ownLocation = locations.splice(indexOfOwnLocation,1)[0];
       
+      let ownLocation = locations.splice(indexOfOwnLocation,1)[0];
       this.setTreeName(ownLocation['name']);
       this.setLocationExists('true');
     }
 
-    return locations;
+    return selectableLocations;
   }
 
   //removes the selected location when unselecting

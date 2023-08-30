@@ -116,10 +116,6 @@ export class CategoryTreeComponent implements OnInit {
                 console.log("locationSList: ", this.locationsList);
 
                 this.dataSource.data = this.forceCast<LocationNode[]>(this.locationsList);
-
-                for(var location in this.locationsList){
-                  console.log("Location:", location);
-                }
         });
     }
 
@@ -139,11 +135,13 @@ export class CategoryTreeComponent implements OnInit {
      */
     hasChild = (_: number, node: LocationNode) => !!node.children && node.children.length > 0;
 
+    /**
+     * This function is used to force cast to LocationNode[]
+     * 
+     * @param input 
+     * @returns 
+     */
     public forceCast<T>(input: any): T {
-
-      // ... do runtime checks here
-    
-      // @ts-ignore <-- forces TS compiler to compile this as-is
       return input;
     }
 }

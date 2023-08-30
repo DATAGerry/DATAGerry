@@ -122,6 +122,21 @@ class CmdbManagerBase(ABC):
             collection=collection,
             object_id=object_id
         )
+    
+    def _get_child(self, collection: str, parent_id: int) -> dict:
+        """_summary_
+
+        Args:
+            collection (str): name of the database collection
+            parent_id (int): public_id of parent
+
+        Returns:
+            (dict): Child location dict 
+        """
+        return self.dbm.find_one_child(
+            collection=collection,
+            parent_id=parent_id
+        )
 
     def _get_by(self, collection: str, **requirements: dict) -> dict:
         """get document from the database by requirements

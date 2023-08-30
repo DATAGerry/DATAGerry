@@ -186,6 +186,21 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         cursor_result = self.__find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
+        
+    def find_one_child(self, collection: str, parent_id: int, *args, **kwargs):
+        """
+        Retrieves a single child location of given parent
+
+        Args:
+            collection (str): name of database collection
+            parent_id (int): public_id of parent
+
+        Returns:
+            document with given parent
+        """
+        cursor_result = self.__find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
+            return result
 
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:

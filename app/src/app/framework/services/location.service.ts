@@ -226,31 +226,58 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
     }
 
 
-      /**
+   /**
    * Retrieves the location for the object with the given object_id
    * 
    * @param objectID (int): object_id of the location
    * @param native (boolean): return native or not
    * @returns Observable<R>
    */
-      public getLocationForObject<R>(publicID: number, native: boolean = false): Observable<R> {
+      public getLocationForObject<R>(objectID: number, native: boolean = false): Observable<R> {
         const options = this.options;
         options.params = new HttpParams();
 
         if (native === true) {
-            return this.api.callGet<CmdbLocation[]>(`${ this.servicePrefix }/${ publicID }/object`, options).pipe(
+            return this.api.callGet<CmdbLocation[]>(`${ this.servicePrefix }/${ objectID }/object`, options).pipe(
                 map((apiResponse) => {
                     return apiResponse.body;
                 })
             );
         }
 
-        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }`, options).pipe(
+        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ objectID }/object`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             })
         );
     }
+
+
+    /**
+   * Retrieves the location for the object with the given object_id
+   * 
+   * @param objectID (int): object_id of the location
+   * @param native (boolean): return native or not
+   * @returns Observable<R>
+   */
+    public getParent<R>(objectID: number, native: boolean = false): Observable<R> {
+      const options = this.options;
+      options.params = new HttpParams();
+
+      if (native === true) {
+          return this.api.callGet<CmdbLocation[]>(`${ this.servicePrefix }/${ objectID }/parent`, options).pipe(
+              map((apiResponse) => {
+                  return apiResponse.body;
+              })
+          );
+      }
+
+      return this.api.callGet<R[]>(`${ this.servicePrefix }/${ objectID }/parent`, options).pipe(
+          map((apiResponse) => {
+              return apiResponse.body;
+          })
+      );
+  }
 
 
 /* ------------------------------ CRUD - UPDATE ----------------------------- */

@@ -29,6 +29,8 @@ from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
+from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+from cmdb.framework.cmdb_location import CmdbLocation
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
@@ -166,6 +168,7 @@ def update_type(public_id: int, data: dict):
         UpdateSingleResponse: With update result of the new updated type.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
+    location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     try:
 
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
@@ -177,6 +180,19 @@ def update_type(public_id: int, data: dict):
         return abort(404, err.message)
     except ManagerUpdateError as err:
         return abort(400, err.message)
+    
+    # when types are updated, update all locations with relevant data from this type
+    updated_type = type_manager.get(public_id)
+    locations_with_type = location_manager.get_locations_by_type(public_id)
+
+    data = {
+        'type_label': updated_type.label,
+        'type_icon': updated_type.render_meta.icon,
+        'type_selectable': updated_type.selectable_as_parent
+    }
+
+    for location in locations_with_type:
+        location_manager._update(CmdbLocation.COLLECTION, location.public_id, data)
 
     return api_response.make_response()
 
