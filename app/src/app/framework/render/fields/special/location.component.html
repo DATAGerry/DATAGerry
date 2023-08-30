@@ -7,7 +7,7 @@
             <ng-container *ngSwitchCase="mode == MODES.View">
                 <div class="input-group input-group-sm">
                     <div class="form-control text-left overflow-auto" readonly>
-                        <ng-container *ngIf="data?.reference && data?.reference?.object_id !== 0; else noRef;"><!-- start init view-->
+                        <ng-container *ngIf="objectLocation; else noRef;">
                             <ng-container *ngIf="!protect">
                                 <ng-container *ngIf="!data?.reference?.line; else refLine">
                                     <i class="{{objectLocation?.type_icon}}"></i> {{objectLocation?.type_label}} #{{objectLocation?.public_id}} - {{objectLocation?.name}}

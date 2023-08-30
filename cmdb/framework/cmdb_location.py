@@ -81,7 +81,7 @@ class CmdbLocation(CmdbDAO):
     #                               DUNDER FUNCTIONS                               #
     # ---------------------------------------------------------------------------- #
 
-    def __init__(self, name, parent, object_id, type_id, type_label, type_icon="fas fa-cube", type_selectable=True, public_id = None, **kwargs):
+    def __init__(self, name, parent, object_id, type_id, type_label, type_icon="fas fa-cube", type_selectable=True, **kwargs):
         """
         Initialisation of location
 
@@ -93,9 +93,7 @@ class CmdbLocation(CmdbDAO):
             type_label (str): label of type for which this location is set
             type_icon (str): icon of type for which this location is set, default is 'fas fa-cube'
             type_selectable (bool): sets if this type is selectable as a parent for other locations, default is yes
-            public_id (int): public_id of the location
         """
-        self.public_id: int = public_id
         self.name: str = name
         self.parent: int = parent
         self.object_id: int = object_id
