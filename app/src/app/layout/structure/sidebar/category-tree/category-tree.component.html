@@ -1,15 +1,15 @@
 <div>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="location-tree">
-        <!-- There is inline padding applied to this node using styles.
-        This padding value depends on the mat-icon-button width. -->
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="location_element" [class.location-selected]="node.object_id == selectedLocationID">
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="location_element child_locations" [class.location-selected]="node.object_id == selectedLocationID">
         <!-- level 2+ -->
-            <i class="location_icon" [class]="node.icon"></i>
-            <span class="location_name" [id]="node.object_id" (click)="locationClicked($event.target.id)">{{node.name}}</span>
+            <div class="test">
+                <i class="location_icon" [class]="node.icon"></i>
+                <span class="location_name" [id]="node.object_id" (click)="locationClicked($event.target.id)">{{node.name}}</span>
+            </div>
         </mat-tree-node>
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <!-- level 1 -->
-            <div class="mat-tree-node location_element" [class.location-selected]="node.object_id == selectedLocationID">
+            <div class="mat-tree-node location_element root_locations" [class.location-selected]="node.object_id == selectedLocationID">
                 <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name">
                     <mat-icon class="mat-icon-rtl-mirror">
                         {{treeControl.isExpanded(node) ? 'remove' : 'add'}}
@@ -18,9 +18,7 @@
                 <i class="location_icon" [class]="node.icon"></i>
                 <span class="location_name" [id]="node.object_id" (click)="locationClicked($event.target.id)">{{node.name}}</span>
             </div>
-            <!-- There is inline padding applied to this div using styles.
-                This padding value depends on the mat-icon-button width.  -->
-            <div [class.location-tree-invisible]="!treeControl.isExpanded(node)" role="group">
+            <div class="child_locations" [class.location-tree-invisible]="!treeControl.isExpanded(node)" role="group">
                 <ng-container matTreeNodeOutlet></ng-container>
             </div>
         </mat-nested-tree-node>
