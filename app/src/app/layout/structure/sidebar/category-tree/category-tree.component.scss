@@ -44,3 +44,41 @@
 .location-selected {
   background-color: $dg-selected-background-color;
 }
+
+mat-tree-node {
+  padding-left: 5px;
+}
+
+.mat-tree-node {
+  min-height: 30px;
+}
+
+.mat-mdc-icon-button.mat-mdc-button-base {
+  width: 30px;
+  height: 30px;
+  padding: 0px;
+}
+
+.mat-mdc-icon-button .mat-mdc-button-touch-target {
+  position: absolute;
+  top: 50%;
+  height: 30px;
+  left: 50%;
+  width: 30px;
+  transform: translate(-50%, -50%);
+}
+
+.material-icons {
+  font-family: 'Material Icons';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 22px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+}
+
+

@@ -59,27 +59,29 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
   }
 
   public ngOnInit(): void {
-    this.registerForEventChanges();
+    if(this.mode != this.MODES.Bulk){
+      this.registerForEventChanges();
 
-    this.setTreeName('');
-    this.setLocationExists('false');
-    this.currentobjectID = this.route.snapshot.params.publicID;
-
-    this.locationService.getParent(this.currentobjectID).pipe(takeUntil(this.unsubscribe))
-    .subscribe((locationObject: RenderResult) => {
-        if(locationObject){
-            this.objectLocation = locationObject;
-            this.setTreeName(this.objectLocation['name']);
-            var public_id = this.objectLocation['public_id'];
-            this.parentFormGroup.patchValue({'dg_location': public_id});
-            this.setLocationExists('true');
-        }
-    },
-    (error) => {
-      console.error("Error:", error);
-    });
+      this.setTreeName('');
+      this.setLocationExists('false');
+      this.currentobjectID = this.route.snapshot.params.publicID;
   
-    this.getLocations();
+      this.locationService.getParent(this.currentobjectID).pipe(takeUntil(this.unsubscribe))
+      .subscribe((locationObject: RenderResult) => {
+          if(locationObject){
+              this.objectLocation = locationObject;
+              this.setTreeName(this.objectLocation['name']);
+              var public_id = this.objectLocation['public_id'];
+              this.parentFormGroup.patchValue({'dg_location': public_id});
+              this.setLocationExists('true');
+          }
+      },
+      (error) => {
+        console.error("Error:", error);
+      });
+    
+      this.getLocations();
+    } 
   }
 
   groupByFn = (item) => item.type_label;
