@@ -109,6 +109,10 @@ export class CleanButtonComponent implements OnChanges, OnDestroy {
       if (result === 'Clean') {
         this.toastService.success(`Objects of ${ this.type.label } were cleaned up!`);
         this.loadObjectCleanStatus();
+        //TODO : reload is done for now but should be replaced 
+        // apparantely a delay of 1500ms between this.objectService.cleanObjects and 
+        //  this.objectService.getObjectCleanStatus gets the updated data
+        window.location.reload();
       }
     });
   }
