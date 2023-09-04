@@ -1,3 +1,5 @@
+@import 'src/scss/variables';
+
 #deleteTypeModalForm{
   small{
     float: left;
@@ -7,4 +9,13 @@
   div{
     float: right;
   }
+}
+
+.disabled {
+  pointer-events: none;
+}
+
+#error_message {
+  padding-top: 10px;
+  color: $dg-error-message-color;
 }

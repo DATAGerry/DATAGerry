@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import json
+import logging
 
 from queue import Queue
 from typing import Union, List
@@ -37,6 +38,7 @@ from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
+LOGGER = logging.getLogger(__name__)
 
 class ObjectQueryBuilder(ManagerQueryBuilder):
 
@@ -271,3 +273,20 @@ class ObjectManager(ManagerBase):
         query.append(Builder.match_({'fields.value': object_.public_id}))
         return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
                             user=user, permission=permission)
+
+    def count_objects(self, type_id: int):
+        """
+        Returns the number of documents with the given type_id
+
+        Args:
+            type_id (int): public_id of type 
+
+        Returns:
+            (int): Returns the number of documents with the given type_id
+        """
+        try:
+            cursor_result = self._get(self.collection, filter={'type_id': type_id}, limit=0).limit(0).count()
+        except ManagerGetError as err:
+            raise ManagerIterationError(err) from err
+
+        return cursor_result

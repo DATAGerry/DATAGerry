@@ -96,6 +96,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)
+    
     return api_response.make_response()
 
 @objects_blueprint.route('/<int:public_id>', methods=['GET'])

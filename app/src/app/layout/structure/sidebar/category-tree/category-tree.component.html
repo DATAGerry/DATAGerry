@@ -2,7 +2,7 @@
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" class="location-tree">
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="location_element child_locations" [class.location-selected]="node.object_id == selectedLocationID">
         <!-- level 2+ -->
-            <div class="test">
+            <div>
                 <i class="location_icon" [class]="node.icon"></i>
                 <span class="location_name" [id]="node.object_id" (click)="locationClicked($event.target.id)">{{node.name}}</span>
             </div>

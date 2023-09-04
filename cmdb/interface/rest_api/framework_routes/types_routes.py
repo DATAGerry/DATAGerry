@@ -28,9 +28,10 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
-    DeleteSingleResponse
+    DeleteSingleResponse, make_api_response
 from cmdb.framework.cmdb_location_manager import CmdbLocationManager
 from cmdb.framework.cmdb_location import CmdbLocation
+from cmdb.framework.managers.object_manager import ObjectManager
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
@@ -232,3 +233,27 @@ def delete_type(public_id: int):
     except Exception as err:
         return abort(400, str(err))
     return api_response.make_response()
+
+
+@types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
+@types_blueprint.protect(auth=True, right='base.framework.type.read')
+def count_objects(public_id: int):
+    """
+    Return the number of objects in der database with the given public_id as type_id
+
+    Args:
+        public_id (int): public_id of the type
+    """
+    LOGGER.info("GET COUNT_OBJECTS")
+    object_manager = ObjectManager(current_app.database_manager)
+    #body = request.method == 'HEAD'
+
+    try:
+        LOGGER.info("BEFORE COUNT")
+        objects_count = object_manager.count_objects(public_id)
+        LOGGER.info(f"COUNT: {objects_count}")
+    except ManagerGetError as err:
+        return abort(404, err.message)
+    # api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
+    #                                  model=TypeModel.MODEL, body=body)
+    return make_api_response(objects_count)
