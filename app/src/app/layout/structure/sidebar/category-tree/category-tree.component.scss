@@ -15,7 +15,7 @@
 //  * This padding sets alignment of the nested nodes.
 //  */
 .location-tree .mat-nested-tree-node div[role=group] {
-  padding-left: 30px;
+  padding-left: 20px;
 }
 
 /*
@@ -24,7 +24,7 @@
  * under the same parent.
  */
 .location-tree div[role=group] > .mat-tree-node {
-  padding-left: 30px;
+  padding-left: 20px;
 }
 
 .location_icon{

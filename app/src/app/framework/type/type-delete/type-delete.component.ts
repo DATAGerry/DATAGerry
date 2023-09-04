@@ -16,11 +16,10 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Injectable, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ObjectService } from '../../services/object.service';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PreviousRouteService } from '../../../services/previous-route.service';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
@@ -39,9 +38,9 @@ import { ToastService } from '../../../layout/toast/toast.service';
     </div>
     <div class="modal-body">
       <strong>Are you sure you want to delete <span class="text-primary">{{typeLabel}}</span> type?</strong>
-      <p>
+      <!-- <p>
         All objects associated to this type will permanently deleted. <span class="text-danger">This operation can not be undone!</span>
-      </p>
+      </p> -->
       <form id="deleteTypeModalForm" [formGroup]="deleteTypeModalForm" class="needs-validation" novalidate autocomplete="off">
         <div class="form-group">
           <label for="typeNameInput">Type the name: {{typeName}} <span class="required">*</span></label>
@@ -111,9 +110,8 @@ export class TypeDeleteComponent implements OnInit {
   public typeInstance: CmdbType;
   public numberOfObjects: number;
 
-  constructor(private typeService: TypeService, private objectService: ObjectService, private router: Router,
-              private route: ActivatedRoute, public prevRoute: PreviousRouteService, private modalService: NgbModal,
-              private toast: ToastService) {
+  constructor(private typeService: TypeService, private router: Router, private route: ActivatedRoute,
+                      public prevRoute: PreviousRouteService, private modalService: NgbModal, private toast: ToastService) {
     this.route.params.subscribe((id) => {
       this.typeID = id.publicID;
     });
@@ -141,7 +139,7 @@ export class TypeDeleteComponent implements OnInit {
     this.typeService.getType(this.typeID).subscribe((typeInstanceResp: CmdbType) => {
       this.typeInstance = typeInstanceResp;
     });
-    this.objectService.countObjectsByType(this.typeID).subscribe((count: number) => {
+     this.typeService.countTypeObjects(this.typeID).subscribe((count: number) => {
       this.numberOfObjects = count;
     });
   }

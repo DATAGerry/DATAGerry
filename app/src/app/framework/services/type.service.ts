@@ -320,5 +320,19 @@ export class TypeService<T = CmdbType> implements ApiService {
     );
   }
 
+  /**
+   * Retrieves the number of objects with the given type_id
+   * 
+   * @param typeID (number): type_id for which the objects should be counted
+   * @returns (Observable<number>): Number of objects with the given type_id
+   */
+  public countTypeObjects(typeID: number): Observable<number> {
+    return this.api.callGet<number>(this.servicePrefix + '/' + typeID + '/count_objects', this.options).pipe(
+      map((apiResponse: HttpResponse<number>) => {
+        return apiResponse.body;
+      })
+    );
+  }
+
 }
 

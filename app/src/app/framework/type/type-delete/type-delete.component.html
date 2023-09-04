@@ -14,6 +14,9 @@
 </dl>
 
 <hr />
-<button class="btn btn-danger" (click)="open()">Delete type?</button>
+<button class="btn btn-danger" [class.disabled]="numberOfObjects > 0" (click)="open()">Delete</button>
 <a routerLink="{{prevRoute.getPreviousUrl()}}" class="btn btn-outline-secondary ml-3">Back to previous site</a>
+<div>
+  <label id="error_message" *ngIf="numberOfObjects > 0">Deletion is only possible if there are no objects of this type!</label>
+</div>
 
