@@ -1,0 +1,9 @@
+.scrollable-textarea {
+    height: 150px;
+    overflow-y: scroll;
+    scrollbar-width: thin;
+
+    &::-webkit-scrollbar {
+        width: 10px;
+    }
+}
