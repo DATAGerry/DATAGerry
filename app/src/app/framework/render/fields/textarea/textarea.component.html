@@ -6,9 +6,9 @@
     <div class="input-group input-group-sm ">
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
-           <textarea [formControlName]="data.name" class="form-control" name="{{data.name}}"
-                     placeholder="{{data?.placeholder}}"
-                     rows="{{data?.rows ? data?.rows : 3}}"></textarea>
+          <textarea [formControlName]="data.name" class="form-control scrollable-textarea" name="{{data.name}}"
+          placeholder="{{data?.placeholder}}"
+          rows="{{data?.rows ? data?.rows : 3}}"></textarea>
           <div class="input-group-append">
             <span class="input-group-text" (click)="copyToClipboard()">
               <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
