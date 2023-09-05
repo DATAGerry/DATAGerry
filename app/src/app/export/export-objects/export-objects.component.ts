@@ -36,7 +36,7 @@ export class ExportObjectsComponent implements OnInit {
   public typeList: CmdbType[];
   public formatList: SupportedExporterExtension[] = [];
   public formExport: UntypedFormGroup;
-  public isSubmitted = false;
+  public isVisible: boolean;
 
   constructor(private exportService: FileService, private datePipe: DatePipe, private typeService: TypeService,
               private fileSaverService: FileSaverService ) {
@@ -72,7 +72,6 @@ export class ExportObjectsComponent implements OnInit {
   }
 
   public exportObjectByTypeID() {
-    this.isSubmitted = true;
     if (!this.formExport.valid) {
       return false;
     }
@@ -93,6 +92,7 @@ export class ExportObjectsComponent implements OnInit {
   }
 
   public downLoadFile(data: any, exportType: any) {
+    this.isVisible = false;
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     const extension = this.formatList.find(x => x.extension === exportType);
     this.fileSaverService.save(data.body, timestamp + '.' + extension.label);
