@@ -34,7 +34,7 @@ import { takeUntil } from 'rxjs/operators';
           </button>
       </div>
       <div class="modal-body">
-          Are you sure you want to delete this log??
+          Are you sure you want to delete this log?
       </div>
       <div class="modal-footer">
           <button type="button" class="btn btn-danger" (click)="activeModal.close(this.publicID)">Delete</button>
