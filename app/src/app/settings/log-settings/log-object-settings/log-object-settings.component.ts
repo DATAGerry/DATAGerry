@@ -111,7 +111,7 @@ export class LogObjectSettingsComponent {
         );
       },
       (error) => {
-        if (this.isDismissClicked && error !== 'Cross click') {
+        if (!this.isDismissClicked && error !== 'Cross click') {
           console.error(error);
         }
       });
