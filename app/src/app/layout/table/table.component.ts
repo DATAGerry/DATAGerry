@@ -264,7 +264,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Table sort value.
    */
-  public sort: Sort = { name: null, order: SortDirection.NONE };
+  public sort: Sort = { name: null, order: SortDirection.ASCENDING };
 
   /**
    * Sort input setter.
@@ -303,6 +303,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public stateUpdate: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
+
+  ASC : number = SortDirection.ASCENDING;
+  DSC : number = SortDirection.DESCENDING;
 
   public constructor(private tableService: TableService, private router: Router) {
   }
@@ -422,8 +425,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * @param sort
    */
   public onSortChange(sort: Sort): void {
-    this.sort = sort;
-    this.sortChange.emit(sort);
+    if (this.sort.name === sort.name && this.sort.order === sort.order) {
+      this.sort.order = this.sort.order === this.ASC ? this.DSC : this.ASC;
+    } else {
+      this.sort.name = sort.name;
+      this.sort.order = sort.order
+    }
+    this.sortChange.emit(this.sort);
   }
 
   /**
