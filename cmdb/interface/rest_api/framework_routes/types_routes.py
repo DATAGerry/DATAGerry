@@ -218,14 +218,27 @@ def delete_type(public_id: int):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-    deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+    
+    object_manager = ObjectManager(current_app.database_manager)
 
     try:
+        #objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
+        # deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
+        # deleted_type = type_manager.delete(public_id=PublicID(public_id))
+        # api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
+        objects_count = object_manager.count_objects(public_id)
+
+        if objects_count > 0:
+            raise ManagerDeleteError('Delete not possible if objects of this type exist')
+        
+        from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+        deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
         objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
         deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
+
+
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:

@@ -48,9 +48,9 @@
                     <cmdb-sidebar-type *permissionLink="'base.framework.object.view'" [type]="type"></cmdb-sidebar-type>
                   </ng-container>
               </ng-container>
-          </div>
+        </div>
         <div class="sidebar-menu-categories" *ngIf="this.selectedMenu == 'locations'">
-          <category-tree></category-tree>
+          <location-tree></location-tree>
         </div>
       </li>
     </ul>

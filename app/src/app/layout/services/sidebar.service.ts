@@ -21,6 +21,8 @@ import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
 import { CategoryService } from '../../framework/services/category.service';
 import { ObjectService} from '../../framework/services/object.service';
 import { SidebarTypeComponent } from '../structure/sidebar/sidebar-type.component';
+import { LocationTreeComponent } from '../structure/sidebar/location-tree/location-tree.component';
+
 
 @Injectable({
   providedIn: 'root'
@@ -33,6 +35,13 @@ export class SidebarService {
   private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
   private reloadData = new BehaviorSubject(false);
   private sideBarType: SidebarTypeComponent[] = [];
+
+  public locationTreeComponent: LocationTreeComponent;
+
+  /**
+   * Used to track which tab was selected before reload
+   */
+  public selectedMenu: string = 'categories';
 
   constructor(private categoryService: CategoryService, private objectService: ObjectService) {
     this.loadCategoryTree();
@@ -102,6 +111,10 @@ export class SidebarService {
 
   public ReloadSideBarData() {
     this.reloadData.next(true);
+
+    if(this.selectedMenu == 'locations' && this.locationTreeComponent){
+      this.locationTreeComponent.reloadTree();
+    }
   }
 
 }
