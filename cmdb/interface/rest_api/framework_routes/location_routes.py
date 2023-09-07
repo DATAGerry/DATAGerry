@@ -18,32 +18,23 @@
 """
 Definition of all routes for locations
 """
-import json
-import copy
 import logging
 from typing import List
-from datetime import datetime, timezone
-from bson import json_util
-from flask import abort, jsonify, request, current_app
+from flask import abort, request, current_app
 
-from cmdb.database.utils import object_hook
-from cmdb.database.utils import default
-from cmdb.framework import CmdbLocation, TypeModel
-from cmdb.framework.cmdb_errors import LocationManagerDeleteError, ObjectInsertError, LocationManagerGetError, \
-    ObjectManagerUpdateError
+from cmdb.framework import CmdbLocation
+from cmdb.framework.cmdb_errors import LocationManagerDeleteError, LocationManagerGetError, ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
 from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_location_manager import CmdbLocationManager
-from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
+from cmdb.framework.cmdb_render import RenderList
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
-from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse, UpdateSingleResponse,\
-    ResponseFailedMessage
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ResponseFailedMessage
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
+from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel, UserManager
@@ -87,7 +78,6 @@ class LocationNode:
         Returns:
             list[LocationNode]: returns all children for the given public_id
         """
-        #LOGGER.info(f"GET_CHILDREN FOR ID({public_id})")
         sorted_children: list["LocationNode"] = []
         filtered_list: list[dict] = []
 
@@ -101,7 +91,6 @@ class LocationNode:
             if len(filtered_list) > 0:
                 for child in sorted_children:
                     child.children = self.get_children(child.get_public_id(), filtered_list)
-        #LOGGER.info(f"CHILDREN for ID({public_id}): \n {sorted_children}")
         return sorted_children
 
 
@@ -113,9 +102,14 @@ class LocationNode:
             (int): public_id of this LocationNode
         """
         return self.public_id
-    
+
     def __repr__(self) -> str:
-        return f"[LocationNode => public_id: {self.public_id} , name: {self.name}, parent: {self.parent}, icon: {self.icon}, object_id: {self.object_id}, children: {len(self.children)}]"
+        return f"[LocationNode => public_id: {self.public_id}, \
+                                  name: {self.name}, \
+                                  parent: {self.parent}, \
+                                  icon: {self.icon}, \
+                                  object_id: {self.object_id}, \
+                                  children: {len(self.children)}]"
 
     @classmethod
     def to_json(cls, instance: "LocationNode") -> dict:
@@ -203,7 +197,14 @@ def create_location(params: dict, request_user: UserModel):
 @insert_request_user
 def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
-    Gets all locations
+    Returns all locations based on the params
+
+    Args:
+        params (CollectionParameters): params for locations request
+        request_user (UserModel): User requesting the data
+
+    Returns:
+        (Response): All locations considering the params
     """
 
     manager = LocationManager(database_manager=current_app.database_manager)
@@ -237,13 +238,16 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 @location_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_locations_tree(params: CollectionParameters, request_user: UserModel):
-    """_summary_
+    """
+    Returns all locations as a location tree
 
     Args:
-        params (CollectionParameters): _description_
-        request_user (UserModel): _description_
+        params (CollectionParameters): params for location tree (excluding root location)
+        request_user (UserModel): User requesting the data
+
+    Returns:
+        _type_: _description_
     """
-    LOGGER.info("GET LOCATIONS TREE")
     manager = LocationManager(database_manager=current_app.database_manager)
 
     try:
@@ -279,7 +283,6 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
         for root_location in root_locations:
             packed_locations.append(root_location.to_json(root_location))
 
-        # LOGGER.info(f"rootLocations: \n {packed_locations}")
         api_response = GetMultiResponse(packed_locations, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbLocation.MODEL, body=request.method == 'HEAD')
 
@@ -351,7 +354,7 @@ def get_parent(object_id: int, request_user: UserModel):
     try:
         current_location = location_manager.get_location_for_object(object_id, user=request_user,
                                                     permission=AccessControlPermission.READ)
-        
+
         if current_location:
             parent_id = current_location.parent
             parent = location_manager.get_location(parent_id, request_user, AccessControlPermission.READ)
@@ -393,7 +396,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
                                     object_manager=object_manager ).render_result_list(raw=True)
 
         params['name'] = rendered_list[0]['summary_line']
-        
+
     location_update_params['name'] =  params['name'] if params['name'] not in ['', None] else f"ObjectID: {location_update_params['object_id']}"
 
     try:
@@ -434,8 +437,10 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
 
         if has_children:
             raise LocationManagerDeleteError('Deleting is only possbile if there are no children for this location')
-        
-        ack = location_manager.delete_location(public_id=location_public_id, user=request_user, permission=AccessControlPermission.DELETE)
+
+        ack = location_manager.delete_location(public_id=location_public_id,
+                                               user=request_user,
+                                               permission=AccessControlPermission.DELETE)
     except LocationManagerGetError as err:
         LOGGER.error(err)
         return abort(404)

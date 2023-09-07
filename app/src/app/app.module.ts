@@ -39,6 +39,7 @@ import { ProgressBarService } from './layout/progress/progress-bar.service';
 import { ProgressSpinnerService } from './layout/progress/progress-spinner.service';
 import { SessionTimeoutService } from './auth/services/session-timeout.service';
 import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
+import { TreeManagerService } from './services/tree-manager.service';
 
 @NgModule({
   declarations: [
@@ -68,6 +69,7 @@ import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
     ProgressBarService,
     ProgressSpinnerService,
     RequestCacheService,
+    TreeManagerService,
     { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: APICachingInterceptor, multi: true }

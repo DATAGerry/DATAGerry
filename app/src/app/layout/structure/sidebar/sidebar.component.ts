@@ -11,12 +11,12 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { Component, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -37,7 +37,7 @@ import {AccessControlPermission} from "../../../acl/acl.types";
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
 
   /**
    * Global un-subscriber for http calls to the rest backend.
@@ -73,14 +73,13 @@ export class SidebarComponent implements OnInit, OnDestroy {
   /**
    * String representation of currently selected tab menu in sidebar (Default is Categories)
    */
-  selectedMenu: string = 'categories';
+  selectedMenu: string;
 
   constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
     this.categoryTreeSubscription = new Subscription();
     this.unCategorizedTypesSubscription = new Subscription();
     this.filterTermSubscription = new Subscription();
   }
-
   
   public ngOnInit(): void {
     this.renderer.addClass(document.body, 'sidebar-fixed');
@@ -98,7 +97,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
           this.typeList = apiResponse.results as Array<CmdbType>;
         });
     });
+
+
+    this.selectedMenu = this.sidebarService.selectedMenu;
   }
+
+  public ngOnChanges(changes: SimpleChanges): void {
+    console.log("Sidebar => ngOnChanges: ", changes)
+  }
+
 
   public ngOnDestroy(): void {
     this.categoryTreeSubscription.unsubscribe();
@@ -114,7 +121,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
    * @param selection :string = String representation of the selected menu
    */
   onSidebarMenuClicked(selection: HTMLDivElement){
-    this.selectedMenu = selection.getAttribute('value');
+    let newValue = selection.getAttribute('value');
+    this.selectedMenu = newValue;
+    this.sidebarService.selectedMenu = newValue; 
   }
 
 }

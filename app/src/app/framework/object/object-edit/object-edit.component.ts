@@ -96,14 +96,8 @@ export class ObjectEditComponent implements OnInit {
     if (this.renderForm.valid) {
       const patchValue = [];
 
-      console.log("this.renderForm.value: ", this.renderForm.value)
       Object.keys(this.renderForm.value).forEach((key: string) => {
         let val = this.renderForm.value[key];
-        
-        //handle locations
-        if(key == "locationForObjectExists"){
-          console.log("locationForObjectExists is key and val is: ", val);
-        }
 
         if(key == 'dg_location'){
           this.selectedLocation = val; 
@@ -135,7 +129,6 @@ export class ObjectEditComponent implements OnInit {
       });
 
       this.handleLocation(this.objectInstance.public_id, this.selectedLocation, this.locationTreeName, this.objectInstance.type_id);
-      console.log("this.objectInstance", this.objectInstance);
 
       this.objectInstance.fields = patchValue;
       this.objectInstance.comment = this.commitForm.get('comment').value;
