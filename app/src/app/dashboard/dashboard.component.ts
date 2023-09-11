@@ -235,7 +235,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter};
     this.typeService.getTypes(apiParameters).pipe(takeUntil(this.unSubscribe))
       .subscribe((response: APIGetMultiResponse<CmdbType>) => {
-        console.log("Types Count", response.total)
         this.typeCount = response.total;
       });
   }
