@@ -16,12 +16,12 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Directive, Input, OnChanges, OnInit} from '@angular/core';
+import {Component, Directive, Input, OnChanges, OnInit, SimpleChanges} from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
 import { ObjectService } from '../../../services/object.service';
-import { Subject } from 'rxjs';
+import { Subject, Subscription } from 'rxjs';
 
 interface TypeRef {
   typeID: number;
@@ -58,26 +58,39 @@ export class ObjectReferencesComponent implements OnChanges {
    * List of referenced Types
    */
   referencedTypes: Array<TypeRef> = [];
+  referenceSubscription: Subscription;
 
   constructor(public objectService: ObjectService) { }
   /**
    * Load/reload objects from the api.
    * @private
    */
-  public ngOnChanges() {
-    const params: CollectionParameters = {
-      filter: undefined,
-      limit: 0,
-      sort: 'public_id',
-      order: 1,
-      page: 1
-    };
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes.publicID) {
+      const params: CollectionParameters = {
+        filter: undefined,
+        limit: 0,
+        sort: 'public_id',
+        order: 1,
+        page: 1
+      };
 
-    const referenceSubscription = this.objectService.getObjectReferences(this.publicID, params).subscribe(
-      (apiResponse: APIGetMultiResponse<RenderResult>) => {
-        this.sortReferencesByType(apiResponse.results as Array<RenderResult>);
-        referenceSubscription.unsubscribe();
-      });
+      if (this.referenceSubscription) {
+        this.referenceSubscription.unsubscribe();
+      }
+
+      this.referenceSubscription = this.objectService.getObjectReferences(this.publicID, params).subscribe(
+        (apiResponse: APIGetMultiResponse<RenderResult>) => {
+          this.sortReferencesByType(apiResponse.results as Array<RenderResult>);
+        }
+      );
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.referenceSubscription) {
+      this.referenceSubscription.unsubscribe();
+    }
   }
 
   /**
