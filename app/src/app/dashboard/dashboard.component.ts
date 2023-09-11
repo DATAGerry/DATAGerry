@@ -309,9 +309,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
       .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
         const categories = apiResponse.results as Array<CmdbCategory>;
         for (const cate of categories) {
-          this.itemsCategory.push(cate.types.length);
           this.labelsCategory.push(cate.label);
           this.colorsCategory.push(this.getRandomColor());
+
+          if (cate.types.length !== 0) {
+            this.itemsCategory.push(cate.types.length);
+          } else {
+            this.itemsCategory.push(null);
+          }
         }
       });
   }
