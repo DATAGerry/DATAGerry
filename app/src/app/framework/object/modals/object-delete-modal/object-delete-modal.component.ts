@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -32,4 +32,7 @@ export class ObjectDeleteModalComponent {
   constructor(public activeModal: NgbActiveModal) {
   }
 
+  closeModal(): void {
+    this.activeModal.close();
+  }
 }
