@@ -27,12 +27,12 @@ import {
   Output, TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import { Observable, ReplaySubject, merge } from 'rxjs';
+import { Observable, ReplaySubject, Subscription, merge } from 'rxjs';
 import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
-import { Router } from '@angular/router';
+import { Router, NavigationEnd } from '@angular/router';
 import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
@@ -304,10 +304,23 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
-  ASC : number = SortDirection.ASCENDING;
-  DSC : number = SortDirection.DESCENDING;
+  ASC: number = SortDirection.ASCENDING;
+  DSC: number = SortDirection.DESCENDING;
+  routerSubscription: Subscription | undefined;
 
   public constructor(private tableService: TableService, private router: Router) {
+    this.resetSelectedItems()
+  }
+
+  /**
+   * Reseting the selected Items
+   */
+  private resetSelectedItems(): void {
+    this.routerSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.selectedItems = []
+      }
+    });
   }
 
   public ngOnInit(): void {
@@ -515,5 +528,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+    this.routerSubscription.unsubscribe();
   }
 }
