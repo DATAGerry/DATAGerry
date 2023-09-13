@@ -4,13 +4,6 @@
     display: none;
 }
   
-.location-tree ul,
-.location-tree li {
-  margin-top: 0;
-  margin-bottom: 0;
-  list-style-type: none;
-}
-
 // /*
 //  * This padding sets alignment of the nested nodes.
 //  */
@@ -27,12 +20,16 @@
   padding-left: 20px;
 }
 
+.location-tree div[role=group] > .mat-tree-node.no-children {
+  padding-left: 30px;
+}
+
 .location_icon{
-  padding-right: 5px;
+  padding-right: 4px;
+  margin-left: -6px;
 }
 
 .location_element:hover {
-  
   background-color: $dg-hover-background-color;
 }
 
@@ -53,19 +50,14 @@ mat-tree-node {
   min-height: 30px;
 }
 
+.mat-mdc-icon-button .mat-mdc-button-persistent-ripple {
+  border-radius: 20% !important;
+}
+
 .mat-mdc-icon-button.mat-mdc-button-base {
   width: 30px;
   height: 30px;
   padding: 0px;
-}
-
-.mat-mdc-icon-button .mat-mdc-button-touch-target {
-  position: absolute;
-  top: 50%;
-  height: 30px;
-  left: 50%;
-  width: 30px;
-  transform: translate(-50%, -50%);
 }
 
 .material-icons {
@@ -79,6 +71,14 @@ mat-tree-node {
   display: inline-block;
   white-space: nowrap;
   word-wrap: normal;
+  margin-left: -10px;
 }
 
+#location-tree > mat-tree-node.mat-tree-node.no-children{
+  padding-left: 30px;
+}
 
+.mat-mdc-button {
+  --mat-mdc-button-persistent-ripple-color: none !important;
+  --mat-mdc-button-ripple-color: none !important;
+}

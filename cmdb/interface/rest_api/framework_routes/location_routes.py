@@ -286,7 +286,6 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
         api_response = GetMultiResponse(packed_locations, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbLocation.MODEL, body=request.method == 'HEAD')
 
-
     except ManagerIterationError as err:
         return abort(400, err.message)
     except ManagerGetError as err:
@@ -317,6 +316,7 @@ def get_location(public_id: int, request_user: UserModel):
     resp = make_response(location_instance)
     return resp
 
+
 @location_blueprint.route('/<int:object_id>/object', methods=['GET'])
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
@@ -337,6 +337,7 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         return abort(403, err.message)
 
     return make_response(location_instance)
+
 
 @location_blueprint.route('/<int:object_id>/parent', methods=['GET'])
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -365,6 +366,34 @@ def get_parent(object_id: int, request_user: UserModel):
         return abort(403, err.message)
 
     return make_response(parent)
+
+@location_blueprint.route('/<int:object_id>/children', methods=['GET'])
+@location_blueprint.protect(auth=True, right='base.framework.object.view')
+@insert_request_user
+def get_children(object_id: int, request_user: UserModel):
+    """
+    Get all children of next level for a given object_id
+    
+    Args:
+        object_id (int): object_id of object 
+        request_user (UserModel): User which is requesting the data
+    
+    Returns:
+        (Response): All children of next level for the given object_id
+    """
+    children = []
+
+    try:
+        current_location = location_manager.get_location_for_object(object_id, user=request_user,
+                                                    permission=AccessControlPermission.READ)
+        if current_location:
+            location_public_id = current_location.public_id
+            children = location_manager.get_locations_by(parent=location_public_id)
+
+    except (LocationManagerGetError, ManagerGetError) as err:
+        return abort(404, err.message)
+
+    return make_response(children)
 
 # ------------------------------- CRUD - UPDATE ------------------------------ #
 

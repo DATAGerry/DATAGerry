@@ -16,28 +16,28 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnChanges, OnDestroy, OnInit, Renderer2, SimpleChanges } from '@angular/core';
+import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
 import { ReplaySubject, Subscription } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
+import { TypeService } from '../../../framework/services/type.service';
+import { SidebarService } from '../../services/sidebar.service';
+
 import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CmdbType } from '../../../framework/models/cmdb-type';
-import { TypeService } from '../../../framework/services/type.service';
-
-import { SidebarService } from '../../services/sidebar.service';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-
 import {AccessControlPermission} from "../../../acl/acl.types";
+/* -------------------------------------------------------------------------- */
 
 @Component({
   selector: 'cmdb-sidebar',
   templateUrl: './sidebar.component.html',
   styleUrls: ['./sidebar.component.scss'],
 })
-export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
+export class SidebarComponent implements OnInit, OnDestroy {
 
   /**
    * Global un-subscriber for http calls to the rest backend.
@@ -75,55 +75,55 @@ export class SidebarComponent implements OnInit, OnChanges, OnDestroy {
    */
   selectedMenu: string;
 
-  constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
-    this.categoryTreeSubscription = new Subscription();
-    this.unCategorizedTypesSubscription = new Subscription();
-    this.filterTermSubscription = new Subscription();
-  }
-  
-  public ngOnInit(): void {
-    this.renderer.addClass(document.body, 'sidebar-fixed');
-    this.sidebarService.loadCategoryTree();
-    this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
-      this.categoryTree = categoryTree;
-      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ,
-        false).subscribe(
-          (apiResponse: APIGetMultiResponse<CmdbType>) => {
-            this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-          });
+/* -------------------------------------------------------------------------- */
+/*                                 LIFE CYCLE                                 */
+/* -------------------------------------------------------------------------- */
 
-      this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
-        (apiResponse: APIGetMultiResponse<CmdbType>) => {
-          this.typeList = apiResponse.results as Array<CmdbType>;
+    constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
+        this.categoryTreeSubscription = new Subscription();
+        this.unCategorizedTypesSubscription = new Subscription();
+        this.filterTermSubscription = new Subscription();
+    }
+  
+    public ngOnInit(): void {
+        this.renderer.addClass(document.body, 'sidebar-fixed');
+        this.sidebarService.loadCategoryTree();
+        this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
+            this.categoryTree = categoryTree;
+            this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false).subscribe(
+              (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+            });
+
+            this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
+              (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.typeList = apiResponse.results as Array<CmdbType>;
+            });
         });
-    });
+
+      this.selectedMenu = this.sidebarService.selectedMenu;
+    }
 
 
-    this.selectedMenu = this.sidebarService.selectedMenu;
-  }
+    public ngOnDestroy(): void {
+        this.categoryTreeSubscription.unsubscribe();
+        this.unCategorizedTypesSubscription.unsubscribe();
+        this.filterTermSubscription.unsubscribe();
+        this.renderer.removeClass(document.body, 'sidebar-fixed');
+    }
 
-  public ngOnChanges(changes: SimpleChanges): void {
-    console.log("Sidebar => ngOnChanges: ", changes)
-  }
+/* -------------------------------------------------------------------------- */
+/*                              SIDEBAR HANDLING                              */
+/* -------------------------------------------------------------------------- */
 
-
-  public ngOnDestroy(): void {
-    this.categoryTreeSubscription.unsubscribe();
-    this.unCategorizedTypesSubscription.unsubscribe();
-    this.filterTermSubscription.unsubscribe();
-    this.renderer.removeClass(document.body, 'sidebar-fixed');
-  }
-
-  
-  /**
-   * Toggles the activated menu tabs (categories and locations)
-   * 
-   * @param selection :string = String representation of the selected menu
-   */
-  onSidebarMenuClicked(selection: HTMLDivElement){
-    let newValue = selection.getAttribute('value');
-    this.selectedMenu = newValue;
-    this.sidebarService.selectedMenu = newValue; 
-  }
-
+    /**
+     * Toggles the activated menu tabs (categories and locations)
+     * 
+     * @param selection :string = String representation of the selected menu
+     */
+    onSidebarMenuClicked(selection: HTMLDivElement){
+        let newValue = selection.getAttribute('value');
+        this.selectedMenu = newValue;
+        this.sidebarService.selectedMenu = newValue; 
+    }
 }

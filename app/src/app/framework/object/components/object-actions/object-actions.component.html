@@ -22,7 +22,7 @@
         <i class="fas fa-clone"></i>
       </button>
       <button type="button" class="btn btn-sm btn-link" *permissionLink="'base.framework.object.delete';requirements:'DELETE';acl:acl"
-              (click)="deleteObject(renderResult?.object_information?.object_id)"
+              (click)="handleDelete(renderResult?.object_information?.object_id)"
               title="delete">
         <i class="fas fa-trash-alt"></i>
       </button>

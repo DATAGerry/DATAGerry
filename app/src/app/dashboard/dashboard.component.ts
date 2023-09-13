@@ -11,31 +11,33 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ApiCallService } from '../services/api-call.service';
+
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+
 import { TypeService } from '../framework/services/type.service';
 import { ObjectService } from '../framework/services/object.service';
-import { CmdbCategory } from '../framework/models/cmdb-category';
 import { CategoryService } from '../framework/services/category.service';
 import { GroupService } from '../management/services/group.service';
-import { Group } from '../management/models/group';
 import { UserService } from '../management/services/user.service';
+import { ToastService } from '../layout/toast/toast.service';
+import { SidebarService } from '../layout/services/sidebar.service';
+
+import { CmdbCategory } from '../framework/models/cmdb-category';
+import { Group } from '../management/models/group';
 import { APIGetMultiResponse } from '../services/models/api-response';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
-import { takeUntil } from 'rxjs/operators';
-import { ReplaySubject } from 'rxjs';
-import { ToastService } from '../layout/toast/toast.service';
-import { SidebarService } from '../layout/services/sidebar.service';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { CmdbType } from '../framework/models/cmdb-type';
-
+/* -------------------------------------------------------------------------- */
 
 @Component({
   selector: 'cmdb-dashboard',
@@ -105,10 +107,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public latestPage: number = this.latestInnitPage;
   public latestLoading: boolean = false;
 
-  constructor(private api: ApiCallService, private typeService: TypeService,
-              private objectService: ObjectService, private categoryService: CategoryService,
-              private toastService: ToastService, private sidebarService: SidebarService,
-              private userService: UserService, private groupService: GroupService) {
+/* -------------------------------------------------------------------------- */
+/*                                 LIFE CYCLE                                 */
+/* -------------------------------------------------------------------------- */
+
+  constructor(private typeService: TypeService,
+              private objectService: ObjectService, 
+              private categoryService: CategoryService,
+              private toastService: ToastService, 
+              private sidebarService: SidebarService,
+              private userService: UserService, 
+              private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -221,6 +230,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.generateGroupChar();
   }
 
+  public ngOnDestroy(): void {
+    this.unSubscribe.next();
+    this.unSubscribe.complete();
+  }
+
+/* -------------------------------------------------------------------------- */
+/*                                 OBJECTS API                                */
+/* -------------------------------------------------------------------------- */
+
+
+  /**
+   * Returns the number of objects
+   */
   private countObjects(): void {
     const apiParameters: CollectionParameters = { limit: 1, sort: 'public_id', order: 1, page: 1,
       filter: [{ $match: { } }]};
@@ -230,25 +252,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private countTypes(): void {
-    const filter = JSON.stringify(this.typeService.getAclFilter());
-    const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter};
-    this.typeService.getTypes(apiParameters).pipe(takeUntil(this.unSubscribe))
-      .subscribe((response: APIGetMultiResponse<CmdbType>) => {
-        this.typeCount = response.total;
-      });
-  }
-
-  public onNewestPageChange(event) {
-    this.newestPage = event;
-    this.loadNewestObjects();
-  }
-
-  public  onLatestPageChange(event) {
-    this.latestPage = event;
-    this.loadLatestObjects();
-  }
-
+  /**
+   * Gets newest objects
+   */
   private loadNewestObjects(): void {
     this.newestLoading = true;
     const apiParameters: CollectionParameters = {page: this.newestPage, limit: 10, order: -1};
@@ -261,6 +267,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       } );
   }
 
+
   private loadLatestObjects(): void {
     this.latestLoading = true;
     const apiParameters: CollectionParameters = {page: this.latestPage, limit: 10, order: -1};
@@ -272,6 +279,64 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.latestLoading = false;
       } );
   }
+
+
+  public onObjectDelete(value: RenderResult) {
+    this.objectService.deleteObject(value.object_information.object_id, true).pipe(takeUntil(this.unSubscribe))
+      .subscribe(() => {
+          this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
+          this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+              this.loadLatestObjects();
+              this.loadNewestObjects();
+            }
+          );
+        },
+        (error) => {
+          this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
+        }
+        );
+  }
+
+  public onObjectDeleteWithLocations(value: RenderResult){
+    console.log("delete with locations");
+  }
+
+  public onObjectDeleteWithObjects(value: RenderResult){
+    console.log("delete with objects");
+  }
+
+/* -------------------------- OBJECTS API - HELPER -------------------------- */
+
+public onNewestPageChange(event) {
+  this.newestPage = event;
+  this.loadNewestObjects();
+}
+
+public  onLatestPageChange(event) {
+  this.latestPage = event;
+  this.loadLatestObjects();
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                  TYPES API                                 */
+/* -------------------------------------------------------------------------- */
+
+  /**
+   * Returns the number number of types
+   */
+  private countTypes(): void {
+    const filter = JSON.stringify(this.typeService.getAclFilter());
+    const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter};
+    this.typeService.getTypes(apiParameters).pipe(takeUntil(this.unSubscribe))
+      .subscribe((response: APIGetMultiResponse<CmdbType>) => {
+        this.typeCount = response.total;
+      });
+  }
+
+
+/* -------------------------------------------------------------------------- */
+/*                              CHARTS FUNCTIONS                              */
+/* -------------------------------------------------------------------------- */
 
   private generateObjectChar() {
     this.optionsObject = {
@@ -353,28 +418,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
+  /* ------------------------------ CHARTS HELPER ----------------------------- */
   getRandomColor() {
     const color = Math.floor(0x1000000 * Math.random()).toString(16);
     return '#' + ('000000' + color).slice(-6);
-  }
-
-  public onObjectDelete(value: RenderResult) {
-    this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
-      .subscribe(() => {
-          this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
-          this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
-              this.loadLatestObjects();
-              this.loadNewestObjects();
-            }
-          );
-        },
-        (error) => {
-          this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
-        });
-  }
-
-  public ngOnDestroy(): void {
-    this.unSubscribe.next();
-    this.unSubscribe.complete();
   }
 }

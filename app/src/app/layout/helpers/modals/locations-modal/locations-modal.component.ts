@@ -22,19 +22,20 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 
 @Component({
-  selector: 'cmdb-general-modal',
-  templateUrl: './general-modal.component.html',
-  styleUrls: ['./general-modal.component.scss']
+  selector: 'cmdb-locations-modal',
+  templateUrl: './locations-modal.component.html',
+  styleUrls: ['./locations-modal.component.scss']
 })
-export class GeneralModalComponent {
-
+export class LocationsModalComponent {
   @Input() title = 'Information';
   @Input() modalIcon = 'trash';
-  @Input() modalMessage = 'Are you sure, you want to delete all selected objects?';
+  @Input() modalMessage = `This object has a location which is a parent to other locations and can't be deleted alone. 
+                           If you want to delete this object and all children objects with their locations press 'Objects and Locations'.
+                           If you want to delete only the locations of the child objects press 'Locations'.`;
   @Input() subModalMessage = '';
-  @Input() buttonDeny = 'Cancel';
-  @Input() buttonAccept = 'Accept';
+  @Input() deleteObjectsButton = 'Objects and Locations';
+  @Input() deleteChildrenButton = 'Locations';
+  @Input() cancelButton = 'Cancel';
 
   constructor(public activeModal: NgbActiveModal) {}
-
 }
