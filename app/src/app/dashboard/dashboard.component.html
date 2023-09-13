@@ -11,6 +11,8 @@
 <ng-template #actionTemplate let-item="item">
   <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
                              [acl]="item.type_information.acl"
+                             (deleteObjectsEmitter)="onoDeleteWithObjects(item)"
+                             (deleteLocationsEmitter)="onDeleteWithLocations(item)"
                              (deleteEmitter)="onObjectDelete(item)"></cmdb-object-table-actions>
 </ng-template>
 

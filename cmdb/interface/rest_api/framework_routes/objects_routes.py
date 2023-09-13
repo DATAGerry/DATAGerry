@@ -45,12 +45,15 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel, UserManager
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+from cmdb.framework import CmdbLocation
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
     type_manager = TypeManager(database_manager=current_app.database_manager)
     log_manager = CmdbLogManager(current_app.database_manager)
     user_manager = UserManager(current_app.database_manager)
+    location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -418,6 +421,7 @@ def delete_object(public_id: int, request_user: UserModel):
     Returns:
         Response: Acknowledgment of database 
     """
+    LOGGER.info("DELETE object")
     try:
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
@@ -425,6 +429,14 @@ def delete_object(public_id: int, request_user: UserModel):
                                                   object_manager=object_manager,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
+
+        #an object can not be deleted if it has a location AND the location is a parent for other locations
+        current_location = location_manager._get_location_by_object(CmdbLocation.COLLECTION, public_id)
+        # child_location = location_manager._get_child(CmdbLocation.COLLECTION,current_location['public_id'])
+        
+        # if child_location and len(child_location) > 0:
+        #     return abort(405, message='The location of this object has child locations!')
+
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404)
@@ -433,6 +445,10 @@ def delete_object(public_id: int, request_user: UserModel):
         return abort(500)
 
     try:
+        #when deleting an object also delete the corresponding location
+        if current_location:
+            deleted = location_manager.delete_location(current_location['public_id'], request_user)
+
         ack = object_manager.delete_object(public_id=public_id, user=request_user,
                                            permission=AccessControlPermission.DELETE)
     except ObjectManagerGetError as err:

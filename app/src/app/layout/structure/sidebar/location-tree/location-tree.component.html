@@ -1,6 +1,9 @@
 <div>
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" id="location-tree" #locationTree class="location-tree">
-        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle class="location_element child_locations" [class.location-selected]="node.object_id == selectedLocationID">
+        <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle 
+        class="location_element child_locations"  
+        [class.location-selected]="node.object_id == selectedLocationID"
+        [class.no-children]="treeControl.getChildren(node) == null">
         <!-- level 2+ -->
             <div>
                 <i class="location_icon" [class]="node.icon"></i>
@@ -9,9 +12,14 @@
         </mat-tree-node>
         <mat-nested-tree-node *matTreeNodeDef="let node; when: hasChild">
         <!-- level 1 -->
-            <div class="mat-tree-node location_element root_locations" [class.location-selected]="node.object_id == selectedLocationID">
-                <button mat-icon-button matTreeNodeToggle [attr.aria-label]="'Toggle ' + node.name" [id]="'node_' + node.object_id" (click)="onExpandClicked()">
-                    <mat-icon class="mat-icon-rtl-mirror" >
+            <div class="mat-tree-node location_element root_locations" 
+                 [class.location-selected]="node.object_id == selectedLocationID"
+                 [class.no-children]="treeControl.getChildren(node) == null">
+                <button mat-icon-button matTreeNodeToggle 
+                        [attr.aria-label]="'Toggle ' + node.name" 
+                        style="--mat-mdc-button-persistent-ripple-color: none;--mat-mdc-button-ripple-color: none;"
+                        (click)="onExpandClicked()" >
+                    <mat-icon class="mat-icon-rtl-mirror">
                         {{treeControl.isExpanded(node) ? 'remove' : 'add'}}
                     </mat-icon>
                 </button>

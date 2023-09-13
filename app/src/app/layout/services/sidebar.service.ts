@@ -16,12 +16,14 @@
 */
 
 import { Injectable } from '@angular/core';
+
 import { BehaviorSubject } from 'rxjs';
+
 import { CmdbCategoryTree } from '../../framework/models/cmdb-category';
 import { CategoryService } from '../../framework/services/category.service';
 import { ObjectService} from '../../framework/services/object.service';
 import { SidebarTypeComponent } from '../structure/sidebar/sidebar-type.component';
-import { LocationTreeComponent } from '../structure/sidebar/location-tree/location-tree.component';
+/* -------------------------------------------------------------------------- */
 
 
 @Injectable({
@@ -35,8 +37,6 @@ export class SidebarService {
   private categoryTreeObserver = new BehaviorSubject<CmdbCategoryTree>(new CmdbCategoryTree());
   private reloadData = new BehaviorSubject(false);
   private sideBarType: SidebarTypeComponent[] = [];
-
-  public locationTreeComponent: LocationTreeComponent;
 
   /**
    * Used to track which tab was selected before reload
@@ -83,9 +83,12 @@ export class SidebarService {
    */
   public async updateTypeCounter(typeID) {
     const sidebarType = this.sideBarType.filter(type => type.type.public_id === typeID).pop();
-    await this.getObjectCount(sidebarType.type.public_id).then( count => {
-      sidebarType.objectCounter = count;
-    });
+
+    if(sidebarType){
+      await this.getObjectCount(sidebarType.type.public_id).then( count => {
+        sidebarType.objectCounter = count;
+      });
+    } 
   }
 
   /**
@@ -111,10 +114,5 @@ export class SidebarService {
 
   public ReloadSideBarData() {
     this.reloadData.next(true);
-
-    if(this.selectedMenu == 'locations' && this.locationTreeComponent){
-      this.locationTreeComponent.reloadTree();
-    }
   }
-
 }

@@ -11,7 +11,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -30,9 +30,5 @@ export class ObjectDeleteModalComponent {
   @Output() public closeEmitter: EventEmitter<number> = new EventEmitter<number>();
 
   constructor(public activeModal: NgbActiveModal) {
-  }
-
-  closeModal(): void {
-    this.activeModal.close();
   }
 }

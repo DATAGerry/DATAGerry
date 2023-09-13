@@ -43,7 +43,7 @@
                     <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
                                                     [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
                     <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup">
-                        <ng-select
+                        <ng-select #locationSelect
                             [items]="locationsList"
                             class="ng-select-valid custom-select ref-simple-select"
                             [groupBy]="groupByFn"
@@ -73,6 +73,9 @@
                             </ng-template>
                         </ng-select>
                     </cmdb-input-appends>
+                    <small class="form-text text-muted float-left warning" [style.visibility]="(mode == MODES.Edit && hasChildren == true) ? 'visible' : 'hidden'">
+                        <span class="warning">Only deletable if this object is not a parent of a location</span>
+                    </small>
                 </ng-container> <!-- edit, create, bulk - container -->
                 <div *ngSwitchDefault>
                 <cmdb-mode-error></cmdb-mode-error>
@@ -107,7 +110,7 @@
                         />
                 </div>
                 <small class="form-text text-muted float-left" [style.visibility]="mode == MODES.View ? 'hidden' : 'visible'">
-                    This will only be saved if a parent location is selected
+                    <span >This is only saved if a parent location is selected in Field "{{data.label}}" above</span>
                 </small>
             </ng-container>
         </div>

@@ -17,17 +17,19 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
-import { CmdbLocation } from '../models/cmdb-location';
-import { Observable, timer } from 'rxjs';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { catchError, map, switchMap } from 'rxjs/operators';
-import { RenderResult } from '../models/cmdb-render';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
-import { CollectionParameters } from '../../services/models/api-parameter';
-import { APIGetMultiResponse, APIUpdateMultiResponse, APIUpdateSingleResponse } from '../../services/models/api-response';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { UntypedFormControl } from '@angular/forms';
+
+import { Observable, timer } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
+
+import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+
+import { CmdbLocation } from '../models/cmdb-location';
+import { RenderResult } from '../models/cmdb-render';
+import { CollectionParameters } from '../../services/models/api-parameter';
+import { APIGetMultiResponse, APIUpdateSingleResponse } from '../../services/models/api-response';
+
 
 export const checkLocationExistsValidator = (locationService: LocationService, time: number = 500) => {
   return (control: UntypedFormControl) => {
@@ -78,7 +80,8 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
         observe: resp
     };
 
-    constructor(private api: ApiCallService, private http: HttpClient, private modalService: NgbModal) {
+    constructor(private api: ApiCallService) {
+
     }
 
   /* -------------------------------------------------------------------------- */
@@ -253,7 +256,7 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
     }
 
 
-    /**
+  /**
    * Retrieves the location for the object with the given object_id
    * 
    * @param objectID (int): object_id of the location
@@ -278,6 +281,24 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
           })
       );
   }
+
+
+  /**
+   * Retrieves the next level of children for the object with the given object_id
+   * 
+   * @param objectID (int): object_id of the location
+   * @returns Observable<R>
+   */
+  public getChildren<R>(objectID: number): Observable<R> {
+    const options = this.options;
+    options.params = new HttpParams();
+
+    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ objectID }/children`, options).pipe(
+        map((apiResponse) => {
+            return apiResponse.body;
+        })
+    );
+}
 
 
 /* ------------------------------ CRUD - UPDATE ----------------------------- */
@@ -350,21 +371,4 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
           })
       );
   }
-
-
-/* -------------------------------------------------------------------------- */
-/*                               MODAL COMPONENT                              */
-/* -------------------------------------------------------------------------- */
-
-    public openModalComponent(title: string,
-                            modalMessage: string,
-                            buttonDeny: string,
-                            buttonAccept: string) {
-        const modalComponent = this.modalService.open(GeneralModalComponent);
-        modalComponent.componentInstance.title = title;
-        modalComponent.componentInstance.modalMessage = modalMessage;
-        modalComponent.componentInstance.buttonDeny = buttonDeny;
-        modalComponent.componentInstance.buttonAccept = buttonAccept;
-        return modalComponent;
-    }
 }

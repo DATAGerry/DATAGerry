@@ -11,22 +11,26 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnInit } from '@angular/core';
+
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { NestedTreeControl } from '@angular/cdk/tree';
 import { MatTreeNestedDataSource } from '@angular/material/tree';
+import { Router } from '@angular/router';
+
+import { ReplaySubject, BehaviorSubject, Subscription } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
 import { LocationService } from 'src/app/framework/services/location.service';
+import { TreeManagerService } from 'src/app/services/tree-manager.service';
+import { ObjectService } from 'src/app/framework/services/object.service';
+
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { RenderResult } from '../../../../framework/models/cmdb-render';
-import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
-import { ReplaySubject, BehaviorSubject } from 'rxjs';
-import { Router } from '@angular/router';
-import { TreeManagerService } from 'src/app/services/tree-manager.service';
-import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 /* -------------------------------------------------------------------------- */
 /*                                 INTERFACES                                 */
@@ -47,10 +51,12 @@ interface LocationNode {
     templateUrl: './location-tree.component.html',
     styleUrls: ['./location-tree.component.scss'],
 })
-export class LocationTreeComponent implements OnInit {
+export class LocationTreeComponent implements OnInit, OnDestroy {
 
     private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
     public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
+
+    objectServiceSubscription: Subscription;
 
     treeControl = new NestedTreeControl<LocationNode>(node => node.children);
     dataSource = new MatTreeNestedDataSource<LocationNode>();
@@ -58,7 +64,7 @@ export class LocationTreeComponent implements OnInit {
     /**
      * used for highlighting the selected location
      */
-    private selectedLocationID: number;
+    public selectedLocationID: number;
 
   /* -------------------------------------------------------------------------- */
   /*                                LIFE - CYCLE                                */
@@ -66,20 +72,25 @@ export class LocationTreeComponent implements OnInit {
 
 
     constructor(private locationService: LocationService,
-                private sidebarService: SidebarService,
                 private treeManagerService: TreeManagerService,
+                private objectService: ObjectService,
                 private route: Router){
-        
+
     }
 
 
     public ngOnInit(){
-        this.getLocationTree();
+        this.objectServiceSubscription = this.objectService.objectActionSource.subscribe(
+          (action: string) => this.onObjectActionEventRecieved(action)
+        );
 
-        if(!this.sidebarService.locationTreeComponent){
-          this.sidebarService.locationTreeComponent = this;
-        }
+        this.getLocationTree();
     }
+
+    public ngOnDestroy(): void {
+        this.objectServiceSubscription.unsubscribe();
+    }
+
 
     /* -------------------------------------------------------------------------- */
     /*                               TREE FUNCTIONS                               */
@@ -104,11 +115,22 @@ export class LocationTreeComponent implements OnInit {
 
 
     /**
+     * EventListener function which will update the tree when objects were changed
+     * 
+     * @param action (string): Type of object action (create, delete or update)
+     */
+    public onObjectActionEventRecieved(action: string){
+      console.log("Object Action:", action);
+      this.getLocationTree();
+    }
+
+  
+    /**
     * Set the selected location and loads the object overview in the content view
     * 
     * @param clickedObjectID the objectID of the location which is clicked in location tree
     */
-    private onLocationElementClicked(clickedObjectID: number){
+    public onLocationElementClicked(clickedObjectID: number){
         this.selectedLocationID = clickedObjectID;
         this.route.navigateByUrl('/framework/object/view/'+clickedObjectID);
      }
@@ -117,7 +139,7 @@ export class LocationTreeComponent implements OnInit {
     /**
      * Updates status of all expanded locations and saves them
      */
-    private onExpandClicked(){
+    public onExpandClicked(){
         this.treeManagerService.extractExpandedIds(this.treeControl.expansionModel.selected);
     }
 

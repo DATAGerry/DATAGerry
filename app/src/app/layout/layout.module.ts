@@ -39,14 +39,13 @@ import { ContentHeaderComponent } from './components/content-header/content-head
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-modal/add-attachments-modal.component';
 import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
+import { LocationsModalComponent } from './helpers/modals/locations-modal/locations-modal.component';
 import { ObjectPreviewModalComponent } from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 import { InfoBoxComponent } from './components/info-box/info-box.component';
 import { FilemanagerModalComponent } from './helpers/modals/filemanager-modal/filemanager-modal.component';
 import { FileExplorerComponent } from './components/file-explorer/fileexplorer.component';
 import { FolderTreeComponent } from './components/file-explorer/components/folder-tree/folder-tree.component';
-import {
-  FileViewListComponent,
-} from './components/file-explorer/components/file-view-list/file-view-list.component';
+import { FileViewListComponent } from './components/file-explorer/components/file-view-list/file-view-list.component';
 import { NewFolderDialogComponent } from './components/file-explorer/modal/new-folder-dialog/new-folder-dialog.component';
 import { RenameDialogComponent } from './components/file-explorer/modal/rename-dialog/rename-dialog.component';
 import { ContextmenuComponent } from './components/file-explorer/components/contextmenu/contextmenu.component';
@@ -113,6 +112,7 @@ import {MatButtonModule} from '@angular/material/button';
     AddAttachmentsModalComponent,
     FilemanagerModalComponent,
     GeneralModalComponent,
+    LocationsModalComponent,
     ObjectPreviewModalComponent,
     InfoBoxComponent,
     FileExplorerComponent,

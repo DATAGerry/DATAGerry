@@ -11,25 +11,29 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, HostListener, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import { ObjectService } from '../../services/object.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { CmdbMode } from '../../modes.enum';
-import { CmdbObject } from '../../models/cmdb-object';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { ObjectService } from '../../services/object.service';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { RenderResult } from '../../models/cmdb-render';
 import { TypeService } from '../../services/type.service';
-import { CmdbType } from '../../models/cmdb-type';
-import { APIUpdateMultiResponse } from '../../../services/models/api-response';
 import { SidebarService } from 'src/app/layout/services/sidebar.service';
 import { LocationService } from '../../services/location.service';
+
+
+import { CmdbMode } from '../../modes.enum';
+import { CmdbObject } from '../../models/cmdb-object';
+import { RenderResult } from '../../models/cmdb-render';
+import { CmdbType } from '../../models/cmdb-type';
+import { APIUpdateMultiResponse } from '../../../services/models/api-response';
+/* -------------------------------------------------------------------------- */
+
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -45,39 +49,50 @@ export class ObjectEditComponent implements OnInit {
   public renderForm: UntypedFormGroup;
   public commitForm: UntypedFormGroup;
   private objectID: number;
-  public activeState : boolean ;
+  public activeState : boolean;
+
 
   public selectedLocation: number = -1;
   public locationTreeName: string;
   public locationForObjectExists: boolean = false;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private toastService: ToastService, 
-              private locationService: LocationService, private sidebarService : SidebarService) {
-    this.route.params.subscribe((params) => {
-      this.objectID = params.publicID;
-    });
-    this.renderForm = new UntypedFormGroup({});
-    this.commitForm = new UntypedFormGroup({
-      comment: new UntypedFormControl('')
-    });
+/* -------------------------------------------------------------------------- */
+/*                                 LIFE CYCLE                                 */
+/* -------------------------------------------------------------------------- */
+
+  constructor(private objectService: ObjectService,
+              private typeService: TypeService,
+              private route: ActivatedRoute,
+              private router: Router,
+              private toastService: ToastService,
+              private locationService: LocationService,
+              private sidebarService : SidebarService){
+      this.route.params.subscribe((params) => {
+          this.objectID = params.publicID;
+      });
+
+      this.renderForm = new UntypedFormGroup({});
+      this.commitForm = new UntypedFormGroup({
+          comment: new UntypedFormControl('')
+      });
   }
 
   public ngOnInit(): void {
-    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-        this.renderResult = rr;
-        this.activeState = this.renderResult.object_information.active;
+      this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+          this.renderResult = rr;
+          this.activeState = this.renderResult.object_information.active;
       },
       error => {
-        console.error(error);
+          console.error(error);
       },
       () => {
-        this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
-          this.objectInstance = ob;
-        });
-        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-          this.typeInstance = value;
-        });
+          this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
+              this.objectInstance = ob;
+          });
+
+          this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+              this.typeInstance = value;
+          });
       });
   }
 

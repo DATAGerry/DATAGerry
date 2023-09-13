@@ -144,6 +144,7 @@ class CmdbLocationManager(CmdbManagerBase):
                        permission: AccessControlPermission = None, **requirements):
         ack = []
         locations = self._get_many(collection=CmdbLocation.COLLECTION, sort=sort, direction=direction, **requirements)
+
         for location in locations:
             location_ = CmdbLocation(**location)
             try:
@@ -181,45 +182,6 @@ class CmdbLocationManager(CmdbManagerBase):
 
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbLocation.COLLECTION, formatted_type_id)
-
-    def group_locations_by_value(self, value: str, match=None, user: UserModel = None,
-                               permission: AccessControlPermission = None):
-        """This method does not actually
-           performs the find() operation
-           but instead returns
-           a objects grouped by type of the documents that meet the selection criteria.
-
-           Args:
-               value (str): grouped by value
-               match (dict): stage filters the documents to only pass documents.
-               user (UserModel): request user
-               permission (AccessControlPermission):  ACL operations
-           Returns:
-               returns the objects grouped by value of the documents
-           """
-        ack = []
-        agr = []
-        if match:
-            agr.append({'$match': match})
-        agr.append({
-            '$group': {
-                '_id': '$' + value,
-                'result': {'$first': '$$ROOT'},
-                'count': {'$sum': 1},
-            }
-        })
-        agr.append({'$sort': {'count': -1}})
-
-        locations = self.dbm.aggregate(CmdbLocation.COLLECTION, agr)
-        for location in locations:
-            location_ = CmdbLocation(**location['result'])
-            try:
-                type_ = self._type_manager.get(location_.type_id)
-                verify_access(type_, user, permission)
-            except CMDBError:
-                continue
-            ack.append(location)
-        return ack
 
     def count_locations(self):
         return self.dbm.count(collection=CmdbLocation.COLLECTION)

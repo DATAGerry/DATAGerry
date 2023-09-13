@@ -498,7 +498,7 @@ class RenderList:
         self.type_manager = TypeManager(database_manager=database_manager)
         self.user_manager = UserManager(database_manager=database_manager)
 
-    @timing('RenderList')
+    #@timing('RenderList')
     def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
