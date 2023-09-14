@@ -208,7 +208,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
 
     manager = LocationManager(database_manager=current_app.database_manager)
-
+    # test_params = CollectionParameters(query_string=None,filter=[{"$match":{"public_id":{"$gt":1}}}],limit=0,sort='public_id',order=1)
     try:
         iteration_result: IterationResult[CmdbLocation] = manager.iterate(
             filter=params.filter,
@@ -394,6 +394,7 @@ def get_children(object_id: int, request_user: UserModel):
         return abort(404, err.message)
 
     return make_response(children)
+
 
 # ------------------------------- CRUD - UPDATE ------------------------------ #
 

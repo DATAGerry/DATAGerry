@@ -34,6 +34,8 @@
 
 <ng-template #actionTemplate let-item="item" let-data="data">
   <cmdb-object-table-actions [publicID]="data" [result]="item" [acl]="item.type_information.acl"
+                             (deleteObjectsEmitter)="onoDeleteWithObjects(data)"
+                             (deleteLocationsEmitter)="onDeleteWithLocations(data)"
                              (deleteEmitter)="onObjectDelete(data)">
   </cmdb-object-table-actions>
 </ng-template>

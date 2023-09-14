@@ -282,7 +282,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
   public onObjectDelete(value: RenderResult) {
-    this.objectService.deleteObject(value.object_information.object_id, true).pipe(takeUntil(this.unSubscribe))
+    this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
       .subscribe(() => {
           this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
           this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
@@ -297,12 +297,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
         );
   }
 
+  /**
+   * Deletes the object, the corresponding location and all locations from child objects
+   * 
+   * @param value object which should be deleted
+   */
   public onObjectDeleteWithLocations(value: RenderResult){
-    console.log("delete with locations");
+    console.log("delete with locations => value:", value);
+    this.objectService.deleteObjectWithLocations(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
+    .subscribe(() => {
+        this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
+        this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+            this.loadLatestObjects();
+            this.loadNewestObjects();
+          }
+        );
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
+      }
+      );
   }
 
   public onObjectDeleteWithObjects(value: RenderResult){
     console.log("delete with objects");
+    this.objectService.deleteObjectWithChildren(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
+    .subscribe(() => {
+        this.toastService.success(`Object ${ value.object_information.object_id } was deleted successfully`);
+        this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+            this.loadLatestObjects();
+            this.loadNewestObjects();
+          }
+        );
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ value.object_information.object_id } | Error: ${ error }`);
+      }
+      );
   }
 
 /* -------------------------- OBJECTS API - HELPER -------------------------- */

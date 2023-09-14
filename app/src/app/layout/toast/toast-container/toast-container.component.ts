@@ -11,7 +11,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
@@ -33,11 +33,11 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
 
       transition(':enter', [
         style({opacity: 0}),
-        animate(500 )
+        animate(500)
       ]),
 
       transition(':leave',
-        animate(500, style({opacity: 0})))
+        animate('0.5s 3s', style({opacity: 0})))
     ])
   ]
 })

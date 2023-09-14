@@ -46,6 +46,7 @@ from cmdb.user_management import UserModel, UserManager
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
 from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+from cmdb.framework.managers.location_manager import LocationManager
 from cmdb.framework import CmdbLocation
 
 with current_app.app_context():
@@ -59,11 +60,26 @@ LOGGER = logging.getLogger(__name__)
 
 objects_blueprint = APIBlueprint('objects', __name__)
 
+
+# ------------------------------------------------------------------------------------------------ #
+#                                         CRUD - API CALLS                                         #
+# ------------------------------------------------------------------------------------------------ #
+
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_objects(params: CollectionParameters, request_user: UserModel):
+    """
+    Retrieves multiple objects from db regarding the used params
+
+    Args:
+        params (CollectionParameters): Parameters for which objects and how they should be returned
+        request_user (UserModel): User requesting this operation
+
+    Returns:
+        (Response): The objects from db fitting the params
+    """
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
@@ -99,8 +115,12 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         return abort(400, err.message)
     except ManagerGetError as err:
         return abort(404, err.message)
-    
+
     return api_response.make_response()
+
+# ------------------------------------------ CRUD - READ ----------------------------------------- #
+
+
 
 @objects_blueprint.route('/<int:public_id>', methods=['GET'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -174,7 +194,6 @@ def group_objects_by_type_id(value, request_user: UserModel):
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
-    from cmdb.framework.managers.object_manager import ObjectManager
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
@@ -227,7 +246,8 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
     return api_response.make_response()
 
 
-# CRUD routes
+# ----------------------------------------- CRUD - CREATE ---------------------------------------- #
+
 @objects_blueprint.route('/', methods=['POST'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
@@ -408,6 +428,9 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
 
+
+# ----------------------------------------- CRUD - DELETE ---------------------------------------- #
+
 @objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
@@ -421,7 +444,6 @@ def delete_object(public_id: int, request_user: UserModel):
     Returns:
         Response: Acknowledgment of database 
     """
-    LOGGER.info("DELETE object")
     try:
         current_object_instance = object_manager.get_object(public_id)
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
@@ -431,7 +453,7 @@ def delete_object(public_id: int, request_user: UserModel):
                                                   render_user=request_user).result()
 
         #an object can not be deleted if it has a location AND the location is a parent for other locations
-        current_location = location_manager._get_location_by_object(CmdbLocation.COLLECTION, public_id)
+        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
         # child_location = location_manager._get_child(CmdbLocation.COLLECTION,current_location['public_id'])
         
         # if child_location and len(child_location) > 0:
@@ -477,6 +499,138 @@ def delete_object(public_id: int, request_user: UserModel):
     resp = make_response(ack)
     return resp
 
+@objects_blueprint.route('/<int:public_id>/locations', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
+@insert_request_user
+def delete_object_with_child_locations(public_id: int, request_user: UserModel):
+    try:
+        # check if object exists
+        current_object_instance = object_manager.get_object(public_id)
+
+        # check if location for this object exists
+        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
+
+        if current_object_instance and current_location:
+            # get all child locations for this location
+            manager = LocationManager(database_manager=current_app.database_manager)
+
+            params = CollectionParameters(query_string=None,
+                                          filter=[{"$match":{"public_id":{"$gt":1}}}],
+                                          limit=0,
+                                          sort='public_id',
+                                          order=1)
+
+            iteration_result: IterationResult[CmdbLocation] = manager.iterate(
+                                                                filter=params.filter,
+                                                                limit=params.limit,
+                                                                skip=params.skip,
+                                                                sort=params.sort,
+                                                                order=params.order,
+                                                                user=request_user,
+                                                                permission=AccessControlPermission.READ
+                                                              )
+
+            all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
+
+            all_children = location_manager.get_all_children(current_location['public_id'], all_locations)
+
+            # delete all child locations
+            for child in all_children:
+                location_manager.delete_location(child['public_id'], request_user)
+
+            # delete the current object and its location
+            location_manager.delete_location(current_location['public_id'], request_user)
+
+            deleted = object_manager.delete_object(public_id, request_user, permission=AccessControlPermission.DELETE)
+
+        else:
+            # something went wrong, either object or location don't exist
+            return abort(404)
+
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    return make_response(deleted)
+
+
+@objects_blueprint.route('/<int:public_id>/children', methods=['DELETE'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.delete')
+@insert_request_user
+def delete_object_with_child_objects(public_id: int, request_user: UserModel):
+    """
+    Deletes an object and all objects which are child objects of it in the location tree.
+    The corresponding locations of each object are also deleted
+
+    Args:
+        public_id (int): public_id of the object which should be deleted with its children
+        request_user (UserModel): User requesting this operation
+
+    Returns:
+        (int): Success of this operation
+    """
+    try:
+        # check if object exists
+        current_object_instance = object_manager.get_object(public_id)
+
+        # check if location for this object exists
+        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
+
+        if current_object_instance and current_location:
+            # get all child locations for this location
+            manager = LocationManager(database_manager=current_app.database_manager)
+
+            params = CollectionParameters(query_string=None,
+                                          filter=[{"$match":{"public_id":{"$gt":1}}}],
+                                          limit=0,
+                                          sort='public_id',
+                                          order=1)
+
+            iteration_result: IterationResult[CmdbLocation] = manager.iterate(
+                                                                filter=params.filter,
+                                                                limit=params.limit,
+                                                                skip=params.skip,
+                                                                sort=params.sort,
+                                                                order=params.order,
+                                                                user=request_user,
+                                                                permission=AccessControlPermission.READ
+                                                              )
+
+            all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
+            all_children_locations = location_manager.get_all_children(current_location['public_id'], all_locations)
+
+            children_object_ids = []
+
+            # delete all child locations and extract their corresponding object_ids
+            for child in all_children_locations:
+                children_object_ids.append(child['object_id'])
+                location_manager.delete_location(child['public_id'], request_user)
+
+            # # delete the objects of child locations
+            for child_object_id in children_object_ids:
+                object_manager.delete_object(child_object_id, request_user, AccessControlPermission.DELETE)
+
+            # # delete the current object and its location
+            location_manager.delete_location(current_location['public_id'], request_user)
+            deleted = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
+
+        else:
+            # something went wrong, either object or location don't exist
+            return abort(404)
+
+    except ObjectManagerGetError as err:
+        LOGGER.error(err)
+        return abort(404)
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    return make_response(deleted)
+
+
 @objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
@@ -495,6 +649,15 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
         ack = []
         objects = object_manager.get_objects_by(**filter_public_ids)
+
+        # TODO: At the current state it is not possible to bulk delete objects with locations
+        #
+        # check if any object has a location
+        for current_object_instance in objects:
+            location_for_object = location_manager.get_location_for_object(current_object_instance.public_id)
+
+            if location_for_object:
+                return abort(405)
 
         for current_object_instance in objects:
             try:
@@ -537,8 +700,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
         resp = make_response({'successfully': ack})
         return resp
 
-    except ObjectDeleteError as e:
-        return jsonify(message='Delete Error', error=e.message)
+    except ObjectDeleteError as error:
+        return jsonify(message='Delete Error', error=error.message)
     except CMDBError:
         return abort(500)
 
@@ -555,6 +718,7 @@ def get_object_state(public_id: int, request_user: UserModel):
         LOGGER.debug(err)
         return abort(404)
     return make_response(founded_object.active)
+
 
 @objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')

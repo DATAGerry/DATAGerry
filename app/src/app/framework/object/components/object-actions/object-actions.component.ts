@@ -137,11 +137,30 @@ export class ObjectActionsComponent implements OnDestroy {
       this.modalRef.result.then((result) => {
           //delete all child objects with their locations
           if(result == 'objects'){
+            console.log("delete locations for publicID: ", publicID);
+            this.objectService.deleteObjectWithChildren(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
+                this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
+                this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
+                this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+            },
+            (error) => {
+              this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
+              console.log(error);
+            });
           }
 
           //delete only locations of children
           if(result == 'locations'){
-
+            console.log("delete locations for publicID: ", publicID);
+              this.objectService.deleteObjectWithLocations(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
+                  this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
+                  this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
+                  this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+              },
+              (error) => {
+                this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
+                console.log(error);
+              });
           }
       });
     }

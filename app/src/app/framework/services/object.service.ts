@@ -90,10 +90,33 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
 
   }
 
-  executedAction(action: string){
-    console.log("change action: ", action);
-    this.objectActionSource.next(action);
-  }
+/* -------------------------------------------------------------------------- */
+/*                                 CRUD CALLS                                 */
+/* -------------------------------------------------------------------------- */
+
+/* ------------------------------ CRUD - CREATE ----------------------------- */
+    public postObject(objectInstance: CmdbObject): Observable<any> {
+        const options = this.options;
+        options.params = new HttpParams();
+        return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
+          map((apiResponse) => {
+            return apiResponse.body;
+          }),
+          finalize(() => this.executedAction('create'))
+        );
+    }
+
+/* ------------------------------ CRUD - UPDATE ----------------------------- */
+    public putObject(publicID: number, objectInstance: CmdbObject, httpOptions = httpObserveOptions): Observable<any> {
+        return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
+            map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
+                return apiResponse.body;
+            }),
+            finalize(() => this.executedAction('update'))
+        );
+    }
+
+/* ------------------------------- CRUD - READ ------------------------------ */
 
   public getObjects(
     params: CollectionParameters = {
@@ -194,26 +217,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     return this.getObjects(params, view);
   }
 
-  // CRUD calls
-  public postObject(objectInstance: CmdbObject): Observable<any> {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
-      }),
-      finalize(() => this.executedAction('create'))
-    );
-  }
 
-  public putObject(publicID: number, objectInstance: CmdbObject, httpOptions = httpObserveOptions): Observable<any> {
-      return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
-        map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
-          return apiResponse.body;
-        }),
-        finalize(() => this.executedAction('update'))
-      );
-  }
 
   public changeState(publicID: number, status: boolean) {
     const options = this.options;
@@ -226,6 +230,8 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
       
     );
   }
+
+/* ---------------------------------------- CRUD - DELETE --------------------------------------- */
 
   public deleteManyObjects(publicID: any) {
     const options = this.options;
@@ -241,20 +247,44 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  public deleteObject(publicID: any, withModalConfirm: boolean = false): Observable<any> {
+  public deleteObject(publicID: any): Observable<any> {
     const options = this.options;
     options.params = new HttpParams();
 
     return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
-        console.log(apiResponse);
         return apiResponse.body;
       }),
       finalize(() => this.executedAction('delete'))
     );
   }
 
-  // Count calls
+
+    public deleteObjectWithLocations(publicID: any): Observable<any>{
+        const options = this.options;
+        options.params = new HttpParams();
+        return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/locations`, options).pipe(
+          map((apiResponse) => {
+            return apiResponse.body;
+          }),
+          finalize(() => this.executedAction('delete'))
+        );
+    }
+
+    public deleteObjectWithChildren(publicID: any): Observable<any>{
+      const options = this.options;
+      options.params = new HttpParams();
+      return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/children`, options).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        }),
+        finalize(() => this.executedAction('delete'))
+      );
+  }
+
+/* ---------------------------------------------------------------------------------------------- */
+/*                                          COUNT OBJECTS                                         */
+/* ---------------------------------------------------------------------------------------------- */
 
   public countObjectsByType(typeID: number | Array<number>): Observable<number> {
     if (!Array.isArray(typeID)) {
@@ -296,7 +326,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
-  // Custom calls
+/* -------------------------------------------------------------------------- */
+/*                                CUSTOM CALLS                                */
+/* -------------------------------------------------------------------------- */
+
   /**
    * API call to get iterable objects which referer to a object.
    * @param publicID of the referenced object.
@@ -331,6 +364,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
       })
     );
   }
+
+/* -------------------------------------------------------------------------- */
+/*                               UNCLEAN OBJECTS                              */
+/* -------------------------------------------------------------------------- */
 
   public countUncleanObjects(typeID: number): Observable<number> {
     const options = this.options;
@@ -397,5 +434,18 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
    */
   public openLocationModalComponent(){
     return this.modalService.open(LocationsModalComponent);
+  }
+
+/* -------------------------------------------------------------------------- */
+/*                               HELPER SECTION                               */
+/* -------------------------------------------------------------------------- */
+  
+/**
+ * Notifies subscribers that an operation was executed by the ObjectService
+ * 
+ * @param action (string): Which operation was executed (create, update, delete)
+ */
+  executedAction(action: string){
+    this.objectActionSource.next(action);
   }
 }

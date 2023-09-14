@@ -115,3 +115,6 @@ class CollectionParameters(APIParameters):
         if parameters.projection:
             params.update({'projection': parameters.projection})
         return params
+
+    def __repr__(self):
+        return f'Parameters: Query({self.query_string}),Filter({self.filter})  | Projection({self.projection}) |Optional({self.optional})'
