@@ -129,7 +129,6 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
       this.locationService.getChildren(this.currentObjectID).pipe(takeUntil(this.unsubscribe))
       .subscribe((children: RenderResult[]) => {
           if(children.length > 0){
-            console.log("hasChildren");
             this.hasChildren = true;
           } 
       },

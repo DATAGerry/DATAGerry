@@ -11,36 +11,39 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { BehaviorSubject, ReplaySubject } from 'rxjs';
-import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute, Data, Router } from '@angular/router';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RenderResult } from '../../models/cmdb-render';
-import { TableComponent } from '../../../layout/table/table.component';
-import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../layout/table/table.types';
+
 import { ObjectService } from '../../services/object.service';
-import { CollectionParameters } from '../../../services/models/api-parameter';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { CmdbMode } from '../../modes.enum';
 import { FileService } from '../../../export/export.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { SidebarService } from '../../../layout/services/sidebar.service';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
+import { convertResourceURL, UserSettingsService } from '../../../management/user-settings/services/user-settings.service';
+
+import { CmdbType } from '../../models/cmdb-type';
+import { RenderResult } from '../../models/cmdb-render';
+import { TableComponent } from '../../../layout/table/table.component';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../layout/table/table.types';
+import { CollectionParameters } from '../../../services/models/api-parameter';
+import { APIGetMultiResponse } from '../../../services/models/api-response';
+import { CmdbMode } from '../../modes.enum';
 import { ObjectsDeleteModalComponent } from '../modals/objects-delete-modal/objects-delete-modal.component';
 import { UserSetting } from '../../../management/user-settings/models/user-setting';
-import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
-import {
-  convertResourceURL,
-  UserSettingsService
-} from '../../../management/user-settings/services/user-settings.service';
 import { SupportedExporterExtension } from '../../../export/export-objects/model/supported-exporter-extension';
+import { HttpErrorResponse } from '@angular/common/http';
+/* ---------------------------------------------------------------------------------------------- */
+
 
 @Component({
   selector: 'cmdb-objects-by-type',
@@ -69,7 +72,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * Component un-subscriber.
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
+ 
   /**
    * Current render results
    */
@@ -148,6 +151,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   private deleteManyModalRef: NgbModalRef;
 
+
+/* ---------------------------------------------------------------------------------------------- */
+/*                                           LIFE CYCLE                                           */
+/* ---------------------------------------------------------------------------------------------- */
+
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
               private fileService: FileService, private fileSaverService: FileSaverService,
               private toastService: ToastService, private sidebarService: SidebarService,
@@ -165,7 +173,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
         const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
         const resource: string = convertResourceURL(this.router.url.toString());
-        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
         this.indexDB.addSetting(userSetting);
       }
       this.typeSubject.next(data.type as CmdbType);
@@ -740,6 +748,16 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             this.selectedObjects = [];
             this.objectsTableComponent.selectedItems = [];
             this.loadObjects();
+          },
+          (error: HttpErrorResponse) => {
+            if(error.status == 405){
+              this.toastService.error("Objects with Locations can't be deleted via Bulk delete!");
+            } else {
+              this.toastService.error(error.statusText);
+            }
+            this.sidebarService.updateTypeCounter(this.type.public_id);
+            this.selectedObjects = [];
+            this.objectsTableComponent.selectedItems = [];
           });
         }
       });

@@ -101,7 +101,7 @@ class CmdbLocationManager(CmdbManagerBase):
     def get_location_for_object(self, object_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
         try:
-            resource = self._get_location_by_object(collection=CmdbLocation.COLLECTION, object_id=object_id)
+            resource = self.get_location_by_object(collection=CmdbLocation.COLLECTION, object_id=object_id)
             if resource:
                 resource = CmdbLocation(**resource)
 
@@ -117,7 +117,6 @@ class CmdbLocationManager(CmdbManagerBase):
         try:
             has_child = False
             a_child = self._get_child(CmdbLocation.COLLECTION,public_id)
-            LOGGER.info(f"Inner children: \n {a_child}")
 
             if a_child:
                 has_child = True
@@ -126,6 +125,39 @@ class CmdbLocationManager(CmdbManagerBase):
         
         return has_child
     
+    def get_all_children(self, public_id: int, all_locations: dict):
+        """
+        Retrieves all children for a given location with the public_id
+
+        Args:
+            public_id (int): public_id of the parent location
+            all_locations (dict): all locations from db
+
+        Returns:
+            (list[dict]): Returns all child locations
+        """
+        found_children: list[dict] = []
+        recursive_children: list[dict] = []
+
+        # add direct children
+        for location in all_locations:
+            if location['parent'] == public_id:
+                found_children.append(location)
+
+        # search recursive for all children
+        if len(found_children) > 0:
+            for child in found_children:
+                recursive_children = self.get_all_children(child['public_id'], all_locations)
+
+                # add recursive children to found_children
+                if len(recursive_children) > 0:
+                    found_children += recursive_children
+                    # for recursive_child in recursive_children:
+                    #     found_children.append(recursive_child)
+
+        return found_children
+
+
     def get_location(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
         try:

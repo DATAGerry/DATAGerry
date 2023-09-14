@@ -108,7 +108,7 @@ class CmdbManagerBase(ABC):
             object_id=object_id
         )
     
-    def _get_location_by_object(self, collection: str, object_id: int) -> dict:
+    def get_location_by_object(self, collection: str, object_id: int) -> dict:
         """get location document from the database by their object id
 
         Args:
