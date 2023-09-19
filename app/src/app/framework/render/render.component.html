@@ -2,7 +2,7 @@
      *ngIf="renderResult; then renderResultTemplate else mergeBlockTemplate"></div>
 <ng-template #renderResultTemplate>
   <cmdb-sections-factory
-    [mode]="mode" [form]="renderForm" [changeForm]="changeForm"
+    [mode]="mode" [form]="renderForm" [changeForm]="changeForm" [objectID]="objectID"
     [sections]="renderResult.sections" [fields]="renderResult.fields" [values]="renderResult.fields">
   </cmdb-sections-factory>
 </ng-template>

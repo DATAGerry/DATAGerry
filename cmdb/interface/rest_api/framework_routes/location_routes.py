@@ -208,7 +208,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
 
     manager = LocationManager(database_manager=current_app.database_manager)
-    # test_params = CollectionParameters(query_string=None,filter=[{"$match":{"public_id":{"$gt":1}}}],limit=0,sort='public_id',order=1)
+    # CollectionParameters(query_string=None,filter=[{"$match":{"public_id":{"$gt":1}}}],limit=0,sort='public_id',order=1)
     try:
         iteration_result: IterationResult[CmdbLocation] = manager.iterate(
             filter=params.filter,
@@ -313,6 +313,9 @@ def get_location(public_id: int, request_user: UserModel):
     except AccessDeniedError as err:
         return abort(403, err.message)
 
+    if not location_instance:
+        location_instance = []
+
     resp = make_response(location_instance)
     return resp
 
@@ -335,6 +338,9 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         return abort(404, err.message)
     except AccessDeniedError as err:
         return abort(403, err.message)
+
+    if not location_instance:
+        location_instance = []
 
     return make_response(location_instance)
 
@@ -396,7 +402,7 @@ def get_children(object_id: int, request_user: UserModel):
     return make_response(children)
 
 
-# ------------------------------- CRUD - UPDATE ------------------------------ #
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @location_blueprint.route('/update_location', methods=['PUT', 'PATCH'])
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
@@ -442,7 +448,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
     return api_response.make_response()
 
 
-# ------------------------------- CRUD - DELETE ------------------------------ #
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 
 @location_blueprint.route('/<int:object_id>/object', methods=['DELETE'])
@@ -463,10 +469,10 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         location_public_id = current_location_instance.public_id
 
         # delete is only allowed if this location don't have any children
-        has_children = location_manager.has_children(location_public_id)
+        # has_children = location_manager.has_children(location_public_id)
 
-        if has_children:
-            raise LocationManagerDeleteError('Deleting is only possbile if there are no children for this location')
+        # if has_children:
+        #     raise LocationManagerDeleteError('Deleting is only possbile if there are no children for this location')
 
         ack = location_manager.delete_location(public_id=location_public_id,
                                                user=request_user,

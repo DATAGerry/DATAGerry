@@ -29,12 +29,8 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 export class LocationsModalComponent {
   @Input() title = 'Information';
   @Input() modalIcon = 'trash';
-  @Input() modalMessage = `This object has a location which is a parent to other locations and can't be deleted alone. 
-                           If you want to delete this object and all children objects with their locations press 'Objects and Locations'.
-                           If you want to delete only the locations of the child objects press 'Locations'.`;
-  @Input() subModalMessage = '';
-  @Input() deleteObjectsButton = 'Objects and Locations';
-  @Input() deleteChildrenButton = 'Locations';
+  @Input() deleteObjectsButton = 'Delete with sub objects';
+  @Input() deleteChildrenButton = 'Remove locations from sub objects';
   @Input() cancelButton = 'Cancel';
 
   constructor(public activeModal: NgbActiveModal) {}

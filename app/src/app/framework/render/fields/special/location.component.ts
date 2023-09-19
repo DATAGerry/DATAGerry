@@ -40,6 +40,8 @@ import { APIGetMultiResponse } from '../../../../services/models/api-response';
   styleUrls: ['./location.component.scss']
 })
 export class LocationComponent extends RenderFieldComponent implements OnInit, OnDestroy {
+  // fallback objectID for modal preview
+  public objectID: number;
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
@@ -78,6 +80,11 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
       this.setTreeName('');
       this.setLocationExists('false');
       this.currentObjectID = this.route.snapshot.params.publicID;
+
+      if(!this.currentObjectID){
+        this.currentObjectID = this.objectID;
+      } 
+
   
       this.getParent();
       this.getChildren();
@@ -98,6 +105,8 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
     }
     this.unsubscribe.next();
     this.unsubscribe.complete();
+
+    this.locationService.locationTreeName = "";
   }
 
   /* -------------------------------------------------------------------------- */
@@ -219,6 +228,8 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
       this.locationTree.setValue(currentName);
       this.parentFormGroup.value['locationTreeName'] = currentName;
       this.parentFormGroup.markAsDirty();
+
+      this.locationService.locationTreeName = currentName;
   }
 
 
@@ -236,6 +247,7 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
   
   private registerForEventChanges() {
     this.parentFormGroup.valueChanges.subscribe( (event) => {
+      
       this.parentFormGroup.value['locationTreeName'] = this.locationTree.value;
       this.parentFormGroup.value['locationForObjectExists'] = this.locationForObjectExists.value;
     });

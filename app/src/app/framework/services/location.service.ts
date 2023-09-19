@@ -80,6 +80,9 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
         observe: resp
     };
 
+    /**TODO: temporary used for creation of new objects, will be refactored in future */
+    public locationTreeName: string = "";
+
     constructor(private api: ApiCallService) {
 
     }

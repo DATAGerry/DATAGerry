@@ -184,7 +184,6 @@ export class ObjectEditComponent implements OnInit {
     //a parent is selected and there is no existing location for this object => create it
     if(parent && parent > 0 && !this.locationForObjectExists){
       this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
-        this.toastService.success('Location was successfully created!');
       }, error => {
         this.toastService.error(error);
       });
@@ -194,7 +193,6 @@ export class ObjectEditComponent implements OnInit {
     //a parent is selected and location for this object exists => update existing location
     if(parent && parent > 0 && this.locationForObjectExists) {
       this.locationService.updateLocationForObject(params).subscribe((res: APIUpdateMultiResponse) => {
-        this.toastService.success('Location was successfully updated!');
       }, error => {
         this.toastService.error(error);
       });
@@ -204,7 +202,6 @@ export class ObjectEditComponent implements OnInit {
     //parent is removed but location still exists => delete location
     if(!parent && this.locationForObjectExists){
       this.locationService.deleteLocationForObject(object_id).subscribe((res: APIUpdateMultiResponse) => {
-        this.toastService.success('Location was successfully deleted!');
       }, error => {
         this.toastService.error(error);
       });
