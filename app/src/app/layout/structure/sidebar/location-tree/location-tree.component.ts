@@ -120,7 +120,6 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
      * @param action (string): Type of object action (create, delete or update)
      */
     public onObjectActionEventRecieved(action: string){
-      console.log("Object Action:", action);
       this.getLocationTree();
     }
 

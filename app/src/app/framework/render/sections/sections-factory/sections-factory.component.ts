@@ -28,5 +28,6 @@ import { BaseSectionComponent } from '../base-section/base-section.component';
 export class SectionsFactoryComponent extends BaseSectionComponent {
 
     @Input() public sections: Array<CmdbTypeSection> = [];
+    @Input() objectID: number;
 
 }

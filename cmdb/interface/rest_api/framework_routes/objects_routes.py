@@ -80,6 +80,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): The objects from db fitting the params
     """
+    
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
@@ -106,6 +107,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                        database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
+            # LOGGER.info(f"rendered List: {rendered_list}")
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
@@ -311,6 +313,8 @@ def insert_object(request_user: UserModel):
     resp = make_response(new_object_id)
     return resp
 
+#                                                     CRUD - UPDATE                                                    #
+
 @objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.edit')
 @objects_blueprint.validate(CmdbObject.SCHEMA)
@@ -455,7 +459,7 @@ def delete_object(public_id: int, request_user: UserModel):
         #an object can not be deleted if it has a location AND the location is a parent for other locations
         current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
         # child_location = location_manager._get_child(CmdbLocation.COLLECTION,current_location['public_id'])
-        
+
         # if child_location and len(child_location) > 0:
         #     return abort(405, message='The location of this object has child locations!')
 

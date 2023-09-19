@@ -11,21 +11,18 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnInit } from '@angular/core';
-import { RenderFieldComponent } from '../../fields/components.fields';
-import { ObjectService } from '../../../services/object.service';
-import { RenderResult } from '../../../models/cmdb-render';
-import { TypeReference } from '../../../models/cmdb-type-reference';
 
-type TypeReferenceTemplate = {
-  reference: TypeReference,
-  value: any
-};
+import { LocationService } from 'src/app/framework/services/location.service';
+
+import { RenderFieldComponent } from '../../fields/components.fields';
+import { RenderResult } from '../../../models/cmdb-render';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-location-simple',
@@ -34,35 +31,38 @@ type TypeReferenceTemplate = {
 })
 export class LocationSimpleComponent extends RenderFieldComponent implements OnInit {
 
-  public refData: TypeReferenceTemplate = {
-    reference: new TypeReference(),
-    value: null
-  };
+  /** hold the location data if there is any */
+  locationData: RenderResult;
 
-  constructor(private objectService: ObjectService) {
-    super();
-  }
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-  public ngOnInit() {
-    if (this.data && this.data.value && this.data.value !== 0) {
-      if (!this.data.reference) {
-        this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
-          this.refData = {
-            reference: new TypeReference({
-              type_id: res.type_information.type_id,
-              object_id: res.object_information.object_id,
-              icon: res.type_information.icon,
-              type_label: res.type_information.type_label,
-              summaries: res.summaries
-            }),
-            value: this.data.value,
-          };
-        });
-      } else {
-        this.refData = this.data;
-      }
-    } else {
-      this.refData = undefined;
+    constructor(private locationService: LocationService) {
+      super();
     }
-  }
+
+
+    public ngOnInit() {
+      if(this.data.value && this.data.value > 0){
+        this.getLocation(this.data.value);
+      }
+    }
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                      API CALLS                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+
+    /**
+     * Retrieves the location of the current object
+     * 
+     * @param public_id public_id of the location which should be retrieved
+     */
+    private getLocation(public_id: number){
+      this.locationService.getLocation(public_id).subscribe((response: RenderResult) => {
+        this.locationData = response;
+      });
+    }
+
 }

@@ -11,24 +11,25 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-
-import { Component, Input, OnInit } from '@angular/core';
-import { RenderResult } from '../../../models/cmdb-render';
-import { CmdbMode } from '../../../modes.enum';
+import { Component, Input } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { RenderResult } from '../../../models/cmdb-render';
+import { CmdbMode } from '../../../modes.enum';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-object-preview-modal',
   templateUrl: './object-preview-modal.component.html',
   styleUrls: ['./object-preview-modal.component.scss']
 })
-export class ObjectPreviewModalComponent implements OnInit {
+export class ObjectPreviewModalComponent {
 
   @Input() renderResult: RenderResult;
   public mode = CmdbMode.View;
@@ -36,9 +37,6 @@ export class ObjectPreviewModalComponent implements OnInit {
 
   constructor(public activeModal: NgbActiveModal) {
     this.formGroupDummy = new UntypedFormGroup({});
-  }
-
-  public ngOnInit(): void {
   }
 
 }
