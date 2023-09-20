@@ -113,7 +113,7 @@ class LocationNode:
 
     @classmethod
     def to_json(cls, instance: "LocationNode") -> dict:
-        """Convert a ExportdJobLog instance to json conform data"""
+        """Convert a LocationNode instance to json conform data"""
 
         json_data = {
             'public_id': instance.public_id,
@@ -129,18 +129,24 @@ class LocationNode:
             for child in instance.children:
                 children.append(cls.to_json(child))
 
-        # if there were any children then append the children-key
+        # if there are any children then append the children-key
         if len(children) > 0:
             json_data['children'] = children
 
         return json_data
 
-# ---------------------------------------------------------------------------- #
-#                                CRUD - SECTION                                #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    CRUD - SECTION                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
+    # Example Parameters
+    # params = CollectionParameters(query_string=None,
+    #                               filter=[{"$match":{"public_id":{"$gt":1}}}],
+    #                               limit=0,
+    #                               sort='public_id',
+    #                               order=1)
 
-# ------------------------------- CRUD - CREATE ------------------------------ #
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @location_blueprint.route('/', methods=['POST'])
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
@@ -206,9 +212,8 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): All locations considering the params
     """
-
     manager = LocationManager(database_manager=current_app.database_manager)
-    # CollectionParameters(query_string=None,filter=[{"$match":{"public_id":{"$gt":1}}}],limit=0,sort='public_id',order=1)
+
     try:
         iteration_result: IterationResult[CmdbLocation] = manager.iterate(
             filter=params.filter,
@@ -221,8 +226,13 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
         )
 
         location_list: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
-        api_response = GetMultiResponse(location_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=CmdbLocation.MODEL, body=request.method == 'HEAD')
+
+        api_response = GetMultiResponse(location_list,
+                                        iteration_result.total,
+                                        params,
+                                        request.url,
+                                        CmdbLocation.MODEL,
+                                        request.method == 'HEAD')
 
     except ManagerIterationError as err:
         return abort(400, err.message)
@@ -467,12 +477,6 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
     try:
         current_location_instance = location_manager.get_location_for_object(object_id)
         location_public_id = current_location_instance.public_id
-
-        # delete is only allowed if this location don't have any children
-        # has_children = location_manager.has_children(location_public_id)
-
-        # if has_children:
-        #     raise LocationManagerDeleteError('Deleting is only possbile if there are no children for this location')
 
         ack = location_manager.delete_location(public_id=location_public_id,
                                                user=request_user,

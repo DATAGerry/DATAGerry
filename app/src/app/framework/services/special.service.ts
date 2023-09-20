@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, resp } from '../../services/api-call.service';
 import { CmdbDao } from '../models/cmdb-dao';
 import { HttpHeaders } from '@angular/common/http';
 
@@ -36,7 +36,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-export class SpecialService<T = CmdbDao> implements ApiService {
+export class SpecialService<T = CmdbDao> implements ApiServicePrefix {
   public servicePrefix: string = '/';
 
   constructor(private api: ApiCallService) {

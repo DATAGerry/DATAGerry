@@ -11,7 +11,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -23,44 +23,44 @@ import { UntypedFormControl } from '@angular/forms';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 
-import { ApiCallService, ApiService, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, resp } from '../../services/api-call.service';
 
 import { CmdbLocation } from '../models/cmdb-location';
 import { RenderResult } from '../models/cmdb-render';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { APIGetMultiResponse, APIUpdateSingleResponse } from '../../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
+// export const checkLocationExistsValidator = (locationService: LocationService, time: number = 500) => {
+//   return (control: UntypedFormControl) => {
+//     return timer(time).pipe(switchMap(() => {
+//       return locationService.getLocation(+control.value).pipe(
+//         map((response) => {
+//           if (response === null) {
+//             return { locationExists: true };
+//           } else {
+//             return null;
+//           }
+//         }),
+//         catchError((e) => {
+//           return new Promise(resolve => {
+//             if (e.status === 403) {
+//               resolve({ locationProtected: true });
+//             }
+//             resolve({ locationExists: true });
+//           });
+//         })
+//       );
+//     }));
+//   };
+// };
 
-export const checkLocationExistsValidator = (locationService: LocationService, time: number = 500) => {
-  return (control: UntypedFormControl) => {
-    return timer(time).pipe(switchMap(() => {
-      return locationService.getLocation(+control.value).pipe(
-        map((response) => {
-          if (response === null) {
-            return { locationExists: true };
-          } else {
-            return null;
-          }
-        }),
-        catchError((e) => {
-          return new Promise(resolve => {
-            if (e.status === 403) {
-              resolve({ locationProtected: true });
-            }
-            resolve({ locationExists: true });
-          });
-        })
-      );
-    }));
-  };
-};
-
-export const httpLocationObserveOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  }),
-  observe: resp
-};
+// export const httpLocationObserveOptions = {
+//   headers: new HttpHeaders({
+//     'Content-Type': 'application/json'
+//   }),
+//   observe: resp
+// };
 
 export const PARAMETER = 'params';
 export const COOCKIENAME = 'onlyActiveObjCookie';
@@ -68,7 +68,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-export class LocationService<T = CmdbLocation | RenderResult> implements ApiService {
+export class LocationService<T = CmdbLocation | RenderResult> implements ApiServicePrefix {
 
     public servicePrefix: string = 'locations';
 
@@ -87,12 +87,12 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
 
     }
 
-  /* -------------------------------------------------------------------------- */
-  /*                               CRUD OPERATIONS                              */
-  /* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                   CRUD - SECTION                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 
-  /* ------------------------------ CRUD - CREATE ----------------------------- */
+/* -------------------------------------------------- CRUD - CREATE ------------------------------------------------- */
 
 
     /**
@@ -121,16 +121,16 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
   }
 
 
-  /* ------------------------------- CRUD - READ ------------------------------ */
+/* --------------------------------------------------- CRUD - READ -------------------------------------------------- */
 
 
-  /**
-   * Retrieves all locations with the given parameters
-   * 
-   * @param params (CollectionParameters): parameters for db call
-   * @param view (string): view mode ('native' or 'render')
-   * @returns Observable<APIGetMultiResponse<T>>
-   */
+    /**
+     * Retrieves all locations with the given parameters
+     * 
+     * @param params (CollectionParameters): parameters for db call
+     * @param view (string): view mode ('native' or 'render')
+     * @returns Observable<APIGetMultiResponse<T>>
+     */
     public getLocations(
         params: CollectionParameters = {
             filter: undefined, 
@@ -205,13 +205,13 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
     }
 
 
-  /**
-   * Retrieves a location with given public_id
-   * 
-   * @param publicID (int): public_id of the location
-   * @param native (boolean): return native or not
-   * @returns Observable<R>
-   */
+    /**
+     * Retrieves a location with given public_id
+     * 
+     * @param publicID (int): public_id of the location
+     * @param native (boolean): return native or not
+     * @returns Observable<R>
+     */
     public getLocation<R>(publicID: number, native: boolean = false): Observable<R> {
         const options = this.options;
         options.params = new HttpParams();
@@ -239,7 +239,7 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
    * @param native (boolean): return native or not
    * @returns Observable<R>
    */
-      public getLocationForObject<R>(objectID: number, native: boolean = false): Observable<R> {
+    public getLocationForObject<R>(objectID: number, native: boolean = false): Observable<R> {
         const options = this.options;
         options.params = new HttpParams();
 
@@ -283,28 +283,28 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
               return apiResponse.body;
           })
       );
-  }
+    }
 
 
-  /**
-   * Retrieves the next level of children for the object with the given object_id
-   * 
-   * @param objectID (int): object_id of the location
-   * @returns Observable<R>
-   */
-  public getChildren<R>(objectID: number): Observable<R> {
-    const options = this.options;
-    options.params = new HttpParams();
+    /**
+     * Retrieves the next level of children for the object with the given object_id
+     * 
+     * @param objectID (int): object_id of the location
+     * @returns Observable<R>
+     */
+    public getChildren<R>(objectID: number): Observable<R> {
+        const options = this.options;
+        options.params = new HttpParams();
 
-    return this.api.callGet<R[]>(`${ this.servicePrefix }/${ objectID }/children`, options).pipe(
-        map((apiResponse) => {
-            return apiResponse.body;
-        })
-    );
-}
+        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ objectID }/children`, options).pipe(
+            map((apiResponse) => {
+                return apiResponse.body;
+            })
+        );
+    }
 
 
-/* ------------------------------ CRUD - UPDATE ----------------------------- */
+/* -------------------------------------------------- CRUD - UPDATE ------------------------------------------------- */
 
     /**
      * Updates a CmdbLocation in the database
@@ -326,15 +326,15 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
 
         putOptions.params = httpParams;
 
-            return this.api.callPut<T>(`${ this.servicePrefix }/update_location`, params, putOptions).pipe(
-                map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
-                    return apiResponse.body;
-                })
-            );
-        }
+        return this.api.callPut<T>(`${ this.servicePrefix }/update_location`, params, putOptions).pipe(
+            map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
+                return apiResponse.body;
+            })
+        );
+    }
 
 
-/* ------------------------------ CRUD - DELETE ----------------------------- */
+/* -------------------------------------------------- CRUD - DELETE ------------------------------------------------- */
 
     /**
      * Deletes a location from the database with the given public_id
@@ -356,7 +356,6 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
     //         })
     //     );
     // }
-    //TODO: not implemented on backend - end
 
     /**
      * Deletes a location from the database where the object_id matches the given objectID
@@ -365,13 +364,56 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
      * @returns Observable<any>
      */
     public deleteLocationForObject(objectID: any): Observable<any> {
-      const options = this.options;
-      options.params = new HttpParams();
+        const options = this.options;
+        options.params = new HttpParams();
 
-      return this.api.callDelete(`${ this.servicePrefix }/${ objectID }/object`, options).pipe(
-          map((apiResponse) => {
-              return apiResponse.body;
-          })
-      );
-  }
+        return this.api.callDelete(`${ this.servicePrefix }/${ objectID }/object`, options).pipe(
+            map((apiResponse) => {
+                return apiResponse.body;
+            })
+        );
+    }
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                   HELPER SECTION                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+
+    /**
+     * Extracts all children for a given public_id of a location from the locationsList
+     * 
+     * @param publicID public_id of the location for which the children should be searched
+     * @param locationsList list of locations where the children should be searched
+     * @returns (list): All found children
+     */
+    public extractAllChildren(publicID: number, locationsList){
+      let foundChildren = [];
+      let recursiveChildren = [];
+      let allChildren = [];
+      
+      //add direct children
+      for (let location of locationsList){
+          if (location['parent'] == publicID){
+            foundChildren.push(location);
+          }
+      }
+
+      //search recursive for all children
+      if(foundChildren.length > 0){
+        for(let child of foundChildren){
+            allChildren.push(child);
+
+            recursiveChildren = this.extractAllChildren(child['public_id'], locationsList);
+
+            if(recursiveChildren.length > 0){
+              for (let recChild of recursiveChildren){
+                allChildren.push(recChild);
+              }
+            }
+        }
+      }
+
+      return allChildren;
+    }
+
 }

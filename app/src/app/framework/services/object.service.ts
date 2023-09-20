@@ -24,7 +24,7 @@ import { UntypedFormControl } from '@angular/forms';
 import { Observable, Subject, timer } from 'rxjs';
 import { catchError, map, switchMap, finalize } from 'rxjs/operators';
 
-import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../../services/api-call.service';
 
 import { CmdbObject } from '../models/cmdb-object';
 import { RenderResult } from '../models/cmdb-render';
@@ -73,7 +73,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-export class ObjectService<T = CmdbObject | RenderResult> implements ApiService {
+export class ObjectService<T = CmdbObject | RenderResult> implements ApiServicePrefix {
   
   public objectActionSource = new Subject();
   public servicePrefix: string = 'objects';

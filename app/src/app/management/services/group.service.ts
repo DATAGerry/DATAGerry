@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   resp
 } from '../../services/api-call.service';
 import { Group } from '../models/group';
@@ -59,7 +59,7 @@ export const groupNameExistsValidator = (groupService: GroupService, time: numbe
 @Injectable({
   providedIn: 'root'
 })
-export class GroupService<T = Group> implements ApiService {
+export class GroupService<T = Group> implements ApiServicePrefix {
 
   public servicePrefix: string = 'groups';
 
