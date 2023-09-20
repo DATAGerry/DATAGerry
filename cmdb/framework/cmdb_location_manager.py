@@ -135,8 +135,6 @@ class CmdbLocationManager(CmdbManagerBase):
                 # add recursive children to found_children
                 if len(recursive_children) > 0:
                     found_children += recursive_children
-                    # for recursive_child in recursive_children:
-                    #     found_children.append(recursive_child)
 
         return found_children
 
