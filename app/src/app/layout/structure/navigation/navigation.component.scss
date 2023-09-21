@@ -171,6 +171,10 @@ $navbar-dropdown-header-background: theme-color('primary');
       line-height: initial;
     }
 
+    .dropdown-icon-item:hover{
+      cursor: pointer;
+    }
+
     .dropdown-lg {
       width: 320px;
     }

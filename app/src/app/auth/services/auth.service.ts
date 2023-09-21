@@ -173,11 +173,13 @@ export class AuthService<T = any> implements ApiServicePrefix {
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                    INTRO SECTION                                                   */
 /* ------------------------------------------------------------------------------------------------------------------ */
-  private showIntro() {
+  public showIntro() {
     this.specialService.getIntroStarter().subscribe(value => {
+      const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
       const RUN = 'execute';
+      // if (!value[RUN]) {
       if (!value[RUN]) {
-        const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
+        
         
         this.startIntroModal = this.introService.open(IntroComponent, options);
         this.startIntroModal.result.then((result) => {
@@ -189,6 +191,10 @@ export class AuthService<T = any> implements ApiServicePrefix {
         (reason) => {
           console.log(reason);
         });
+      } else {
+        //display assistant not usable
+        this.startIntroModal = this.introService.open(IntroComponent, options);
+        this.startIntroModal.componentInstance.isUsable = false;
       }
     });
   }
