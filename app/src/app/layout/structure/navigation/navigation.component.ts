@@ -11,19 +11,23 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+
+import * as jQuery from 'jquery';
+
 import { AuthService } from '../../../auth/services/auth.service';
 import { UserService } from '../../../management/services/user.service';
-import { User } from '../../../management/models/user';
 import { GroupService } from '../../../management/services/group.service';
+
+import { User } from '../../../management/models/user';
 import { Group } from '../../../management/models/group';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import * as jQuery from 'jquery';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 
 declare global {
   interface Window { ATL_JQ_PAGE_PROPS: any; }
@@ -42,8 +46,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
   public user: User;
   public group: Group;
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private userService: UserService,
-              private groupService: GroupService, private modalService: NgbModal) {
+  constructor(private renderer: Renderer2, 
+              public authService: AuthService, 
+              private userService: UserService,
+              private groupService: GroupService) {
+
     this.user = this.userService.getCurrentUser();
   }
 
@@ -70,7 +77,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
       }
       const $subMenu = $(this).next('.dropdown-menu');
       $subMenu.toggleClass('show');
-      // tslint:disable-next-line:only-arrow-functions
+
       $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', () => {
         $('.dropdown-submenu .show').removeClass('show');
       });
@@ -97,7 +104,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
         showCollectorDialog();
       }
     };
-    
+  }
+
+
+  public openIntroModal(){
+    this.authService.showIntro();
   }
 
 }
