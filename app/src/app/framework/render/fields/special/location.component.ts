@@ -162,7 +162,6 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
           .subscribe((locationObject: RenderResult) => {
               if(locationObject){
                   this.objectLocation = locationObject;
-                  this.setTreeName(this.objectLocation['name']);
                   var public_id = this.objectLocation['public_id'];
                   this.parentFormGroup.patchValue({'dg_location': public_id});
                   this.setLocationExists('true');

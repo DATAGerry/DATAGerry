@@ -108,7 +108,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
 
 
   public openIntroModal(){
-    this.authService.showIntro();
+    this.authService.showIntro(true);
   }
 
 }

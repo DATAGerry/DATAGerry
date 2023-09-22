@@ -20,8 +20,8 @@ import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { UntypedFormControl } from '@angular/forms';
 
-import { Observable, timer } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { Observable, timer, Subject } from 'rxjs';
+import { catchError, map, switchMap, finalize } from 'rxjs/operators';
 
 import { ApiCallService, ApiServicePrefix, resp } from '../../services/api-call.service';
 
@@ -72,6 +72,8 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
 
     public servicePrefix: string = 'locations';
 
+    public locationActionSource = new Subject();
+
     public readonly options = {
         headers: new HttpHeaders({
             'Content-Type': 'application/json'
@@ -116,7 +118,8 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
       return this.api.callPost<CmdbLocation>(this.servicePrefix + '/', params , postOptions).pipe(
           map((apiResponse) => {
           return apiResponse.body;
-          })
+          }),
+          finalize(() => this.executedAction('create'))
       );
   }
 
@@ -329,7 +332,8 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
         return this.api.callPut<T>(`${ this.servicePrefix }/update_location`, params, putOptions).pipe(
             map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
                 return apiResponse.body;
-            })
+            }),
+            finalize(() => this.executedAction('update'))
         );
     }
 
@@ -370,7 +374,8 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
         return this.api.callDelete(`${ this.servicePrefix }/${ objectID }/object`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
-            })
+            }),
+            finalize(() => this.executedAction('delete'))
         );
     }
 
@@ -414,6 +419,17 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
       }
 
       return allChildren;
+    }
+
+
+    /**
+     * Notifies subscribers that an operation was executed by the LocationService
+     * 
+     * @param action (string): Which operation was executed (create, update, delete)
+     */
+    executedAction(action: string){
+        console.log("location action:", action)
+        this.locationActionSource.next(action);
     }
 
 }
