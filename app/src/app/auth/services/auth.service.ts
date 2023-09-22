@@ -181,7 +181,7 @@ export class AuthService<T = any> implements ApiServicePrefix {
       const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
       const RUN = 'execute';
       // if (!value[RUN]) {
-      if (value[RUN]) {
+      if (!value[RUN]) {
         
         
         this.startIntroModal = this.introService.open(IntroComponent, options);
