@@ -57,6 +57,7 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
 
     objectServiceSubscription: Subscription;
+    locationServiceSubscription: Subscription;
 
     treeControl = new NestedTreeControl<LocationNode>(node => node.children);
     dataSource = new MatTreeNestedDataSource<LocationNode>();
@@ -82,6 +83,10 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     public ngOnInit(){
         this.objectServiceSubscription = this.objectService.objectActionSource.subscribe(
           (action: string) => this.onObjectActionEventRecieved(action)
+        );
+
+        this.locationServiceSubscription = this.locationService.locationActionSource.subscribe(
+          (action: string) => this.onLocationActionEventRecieved(action)
         );
 
         this.getLocationTree();
@@ -123,7 +128,15 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
       this.getLocationTree();
     }
 
-  
+        /**
+     * EventListener function which will update the tree when objects were changed
+     * 
+     * @param action (string): Type of object action (create, delete or update)
+     */
+      public onLocationActionEventRecieved(action: string){
+        this.getLocationTree();
+      }
+
     /**
     * Set the selected location and loads the object overview in the content view
     * 

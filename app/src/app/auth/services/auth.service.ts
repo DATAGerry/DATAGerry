@@ -37,6 +37,7 @@ import { IntroComponent } from '../../layout/intro/intro.component';
 import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/step-by-step-intro.component';
 import { LoginResponse } from '../models/responses';
 import { Token } from '../models/token';
+import { BranchInfoModalComponent } from 'src/app/layout/intro/branch-info-modal/branch-info-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 
@@ -66,6 +67,8 @@ export class AuthService<T = any> implements ApiServicePrefix {
   // First Step Intro
   private startIntroModal: any = undefined;
   private stepByStepModal: any = undefined;
+
+  private branchInfoModal: any = undefined;
 
   constructor(private backend: HttpBackend, 
               private connectionService: ConnectionService, 
@@ -173,28 +176,31 @@ export class AuthService<T = any> implements ApiServicePrefix {
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                    INTRO SECTION                                                   */
 /* ------------------------------------------------------------------------------------------------------------------ */
-  public showIntro() {
+  public showIntro(triggered: boolean = false) {
     this.specialService.getIntroStarter().subscribe(value => {
       const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
       const RUN = 'execute';
       // if (!value[RUN]) {
-      if (!value[RUN]) {
+      if (value[RUN]) {
         
         
         this.startIntroModal = this.introService.open(IntroComponent, options);
         this.startIntroModal.result.then((result) => {
           if (result) {
-            this.router.navigate(['/framework/category/add']);
-            this.showSteps();
+            // this.router.navigate(['/framework/category/add']);
+            // this.showSteps();
+            this.showBranchInfoModal();
           }
         }, 
-        (reason) => {
-          console.log(reason);
+        (error) => {
+          console.log(error);
         });
       } else {
         //display assistant not usable
-        this.startIntroModal = this.introService.open(IntroComponent, options);
-        this.startIntroModal.componentInstance.isUsable = false;
+        if(triggered){
+            this.startIntroModal = this.introService.open(IntroComponent, options);
+            this.startIntroModal.componentInstance.isUsable = false;
+        }
       }
     });
   }
@@ -206,8 +212,21 @@ export class AuthService<T = any> implements ApiServicePrefix {
       if (resp) {
         this.router.navigate(['/']);
       }
-    }, (reason) => {
-      console.log(reason);
+    }, 
+    (error) => {
+      console.log(error);
     });
   }
+
+  private showBranchInfoModal(){
+    const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
+
+    this.branchInfoModal = this.introService.open(BranchInfoModalComponent, options);
+    this.branchInfoModal.result.then((result) => {
+      if(result){
+        console.log("result of branchInfoModal:", result);
+      }
+    });
+  }
+
 }

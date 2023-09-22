@@ -75,9 +75,6 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
       console.log("copy object");
       this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
           this.renderResult = rr;
-          console.log("this.renderResult", this.renderResult);
-          console.log("this.renderform oninit:", this.renderForm);
-
           for (let field of this.renderResult.fields){
             if (field['name'] == 'dg_location' && field['value'] > 0){
               this.getOriginalObjectLocation();
@@ -113,7 +110,6 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
       newObjectInstance.version = '1.0.0';
       newObjectInstance.author_id = this.userService.getCurrentUser().public_id;
       newObjectInstance.fields = [];
-      console.log("this.renderForm.controls",this.renderForm.controls);
       Object.keys(this.renderForm.controls).forEach(field => {
         if(field == 'dg_location' && this.renderForm.get(field).value > 0){
           this.newLocationParentID = this.renderForm.get(field).value;
