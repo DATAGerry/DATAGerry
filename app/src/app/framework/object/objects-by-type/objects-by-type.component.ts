@@ -364,15 +364,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       query = [];
       const or = [];
       for (const column of columns) {
-        console.log('columns', columns);
         const regex: any = {};
-        console.log('COLUMN NAME', column);
         regex[column.name] = {
           $regex: String(this.search_term),
           $options: 'ismx'
         };
         or.push(regex);
-        console.log('PUSHHH ORR', or);
       }
 
       // Add a separate condition for numeric search
@@ -525,7 +522,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
         this.results = apiResponse.results as Array<RenderResult>;
-        console.log('backend', this.results);
         this.totalResults = apiResponse.total;
         this.loading = false;
       });
@@ -806,7 +802,6 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                 } catch (e) { }
                 break;
               default:
-                console.log(name);
                 if ('public_id' === name) {
                   this.publicIdQuery(this.collectionFilterParameter);
                   and.push(this.searchRegexProperty('public_id', column.data));
