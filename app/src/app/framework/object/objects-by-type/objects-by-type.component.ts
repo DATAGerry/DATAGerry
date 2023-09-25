@@ -148,6 +148,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   private deleteManyModalRef: NgbModalRef;
 
+  /* ---------------------------------------------------------------------------------------------- */
+  /*                                           LIFE CYCLE                                           */
+  /* ---------------------------------------------------------------------------------------------- */
+
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
     private fileService: FileService, private fileSaverService: FileSaverService,
     private toastService: ToastService, private sidebarService: SidebarService,
@@ -544,7 +548,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param value search term
    */
   private searchRegexProperty(property: string, value: string) {
-    return {[property]: { $regex: String(value), $options: 'ims' } };
+    return { [property]: { $regex: String(value), $options: 'ims' } };
   }
 
   /**
