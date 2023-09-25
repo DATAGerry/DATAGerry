@@ -169,7 +169,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
         const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
         const resource: string = convertResourceURL(this.router.url.toString());
-        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
         this.indexDB.addSetting(userSetting);
       }
       this.typeSubject.next(data.type as CmdbType);
