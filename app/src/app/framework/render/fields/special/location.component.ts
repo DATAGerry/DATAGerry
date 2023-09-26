@@ -19,11 +19,12 @@
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { NgSelectComponent } from '@ng-select/ng-select';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { LocationService } from '../../../services/location.service';
 
@@ -40,9 +41,10 @@ import { APIGetMultiResponse } from '../../../../services/models/api-response';
   styleUrls: ['./location.component.scss']
 })
 export class LocationComponent extends RenderFieldComponent implements OnInit, OnDestroy {
+  // fallback objectID for modal preview
+  public objectID: number;
   private modalRef: NgbModalRef;
   private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
-  public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
   public protect: boolean = false;
 
 
@@ -54,7 +56,7 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
   private hasChildren: boolean = false; 
 
   public locationsList: Array<RenderResult> = [];
-  
+  public ownLocation;
 
   public locationTree = new FormControl('', Validators.required);
   public locationForObjectExists = new FormControl('', Validators.required);
@@ -78,6 +80,11 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
       this.setTreeName('');
       this.setLocationExists('false');
       this.currentObjectID = this.route.snapshot.params.publicID;
+
+      if(!this.currentObjectID){
+        this.currentObjectID = this.objectID;
+      } 
+
   
       this.getParent();
       this.getChildren();
@@ -98,6 +105,8 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
     }
     this.unsubscribe.next();
     this.unsubscribe.complete();
+
+    this.locationService.locationTreeName = "";
   }
 
   /* -------------------------------------------------------------------------- */
@@ -117,7 +126,16 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
     this.locationService.getLocations(params).pipe(takeUntil(this.unsubscribe))
           .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
             this.setLocationExists('false');
-            this.locationsList = this.extractOwnLocation(apiResponse.results);
+            let locations = this.extractOwnLocation(apiResponse.results);
+
+            let ownChildren = [];
+
+            if(this.ownLocation){
+              ownChildren = this.locationService.extractAllChildren(this.ownLocation['public_id'],locations);
+            }
+            
+            this.setValidLocations(ownChildren,locations);
+
             if(this.mode == this.MODES.Edit && this.hasChildren){
               this.locationSelect.clearable = false;
             }
@@ -144,7 +162,6 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
           .subscribe((locationObject: RenderResult) => {
               if(locationObject){
                   this.objectLocation = locationObject;
-                  this.setTreeName(this.objectLocation['name']);
                   var public_id = this.objectLocation['public_id'];
                   this.parentFormGroup.patchValue({'dg_location': public_id});
                   this.setLocationExists('true');
@@ -161,32 +178,53 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
 /* -------------------------------------------------------------------------- */
 
   /**
-   * Removes the location of the current object and uses its attributes to set data
+   * Removes the location of the current object and filters unselectable locations
    * 
-   * @param locations all selectable locations
+   * @param locations all locations from backend
    * @returns all selectable locations without the location of the current object
    */
   private extractOwnLocation(locations){
-    let indexOfOwnLocation: number = -1;
     let selectableLocations = [];
 
-    for(let i = 0; i<locations.length; i++){
-      if(locations[i].object_id == this.currentObjectID){
-        indexOfOwnLocation = i;
+    for(let location of locations){
+      if(location['object_id'] == this.currentObjectID){
+        this.ownLocation = location;
+        this.setTreeName(this.ownLocation['name']);
+        this.setLocationExists('true');
+        continue;
       }
 
-      if(locations[i].type_selectable){
-        selectableLocations.push(locations[i]);
+      if(location['type_selectable']){
+        selectableLocations.push(location);
       }
-    }
-
-    if(indexOfOwnLocation != -1){
-      let ownLocation = locations.splice(indexOfOwnLocation,1)[0];
-      this.setTreeName(ownLocation['name']);
-      this.setLocationExists('true');
     }
 
     return selectableLocations;
+  }
+
+
+  /**
+   * Removes child locations of current object location to prevent loops
+   * 
+   * @param children 
+   * @param locations 
+   */
+  private setValidLocations(children, locations){
+    let validLocations = [];
+    let childIDs: number[] = [];
+
+    for(let child of children){
+      childIDs.push(Number(child['public_id']));
+    }
+
+    for(let location of locations){
+      //add location to selection when it is not a child of current object
+      if(!childIDs.includes(location['public_id'])){
+          validLocations.push(location);
+      }
+    }
+
+    this.locationsList = validLocations;
   }
 
 
@@ -219,6 +257,8 @@ export class LocationComponent extends RenderFieldComponent implements OnInit, O
       this.locationTree.setValue(currentName);
       this.parentFormGroup.value['locationTreeName'] = currentName;
       this.parentFormGroup.markAsDirty();
+
+      this.locationService.locationTreeName = currentName;
   }
 
 

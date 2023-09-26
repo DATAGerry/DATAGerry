@@ -19,14 +19,14 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { ApiCallService, ApiService } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix } from '../../services/api-call.service';
 import { CmdbStatus } from '../models/cmdb-status';
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class StatusService<T = CmdbStatus> implements ApiService {
+export class StatusService<T = CmdbStatus> implements ApiServicePrefix {
   public servicePrefix: string = 'status';
 
   constructor(private api: ApiCallService) {

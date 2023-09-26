@@ -334,6 +334,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       filter: this.collectionFilterParameter, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
+
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
         this.results = apiResponse.results as Array<RenderResult>;

@@ -11,23 +11,24 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
-* along with this program. If not, see <https://www.gnu.org/licenses/>.
+* along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
-import { CmdbTypeSection } from '../../../models/cmdb-type';
-import { BaseSectionComponent } from '../base-section/base-section.component';
+
+import {Component } from '@angular/core';
+
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
-    selector: 'cmdb-sections-factory',
-    templateUrl: './sections-factory.component.html',
-    styleUrls: ['./sections-factory.component.scss']
-})
-export class SectionsFactoryComponent extends BaseSectionComponent {
+    selector: 'cmdb-branch-info-modal',
+    templateUrl: './branch-info-modal.component.html',
+    styleUrls: ['./branch-info-modal.component.scss']
+  })
+  export class BranchInfoModalComponent {
 
-    @Input() public sections: Array<CmdbTypeSection> = [];
-    @Input() objectID: number;
+    constructor(public activeModal: NgbActiveModal){
 
-}
+    }
+  }

@@ -20,7 +20,7 @@ import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   HttpProtocolHelper,
   resp
 } from '../../services/api-call.service';
@@ -65,7 +65,7 @@ export const checkTypeExistsValidator = (typeService: TypeService, time: number 
 @Injectable({
   providedIn: 'root'
 })
-export class TypeService<T = CmdbType> implements ApiService {
+export class TypeService<T = CmdbType> implements ApiServicePrefix {
 
   public servicePrefix: string = 'types';
   public options = {

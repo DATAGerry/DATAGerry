@@ -19,6 +19,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -29,6 +30,7 @@ import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component
 import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
+import { BranchInfoModalComponent } from './intro/branch-info-modal/branch-info-modal.component';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
@@ -104,6 +106,7 @@ import {MatButtonModule} from '@angular/material/button';
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
+    BranchInfoModalComponent,
     FileSizePipe,
     SidebarTypeComponent,
     CategoryTreeFilterPipe,
@@ -180,7 +183,7 @@ import {MatButtonModule} from '@angular/material/button';
     JwPaginationModule,
     MatTreeModule,
     MatButtonModule,
-    MatIconModule
+    MatIconModule,
   ],
   providers: [
     BreadcrumbService,

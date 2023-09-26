@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
 import { UntypedFormGroup } from '@angular/forms';
@@ -28,7 +28,7 @@ import { RenderResult } from '../models/cmdb-render';
   templateUrl: './render.component.html',
   styleUrls: ['./render.component.scss']
 })
-export class RenderComponent {
+export class RenderComponent implements OnInit {
 
   private typeInstanceBack: CmdbType;
   private objectInstanceBack: CmdbObject;
@@ -36,7 +36,7 @@ export class RenderComponent {
 
   @Input() public renderForm: UntypedFormGroup;
   @Input() public changeForm: UntypedFormGroup;
-
+  public objectID: number;
   @Input() public mode: CmdbMode;
   private field: any;
 
@@ -88,6 +88,14 @@ export class RenderComponent {
     if (this.mode === CmdbMode.View) {
       this.renderForm.disable();
     }
+    
+  }
+
+  public ngOnInit(): void {
+    if(this.renderResult){
+      this.objectID = this.renderResult.object_information.object_id;
+    }
+    
   }
 
   public getFieldByName(name: string) {

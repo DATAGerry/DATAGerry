@@ -1,0 +1,31 @@
+<div class="modal-content">
+    <div class="modal-body">
+        <img id="login-logo" 
+            src="/assets/img/datagerry_logo.svg" 
+            class="img-fluid mx-auto d-block w-50"
+            alt="DATAGERRY"/>
+        <br>
+        Welcome to the initial setup of datagerry. Select the branches for which you would like to use DATAGERRY.<br>
+        <br>
+        <form>
+            <section class="checkbox-section">
+                <div>
+                    <input type="checkbox" id="hospital-branch">
+                    <label class="branch-label" for="hospital-branch">Hospital</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="sales-branch">
+                    <label class="branch-label" for="sales-branch">Sales</label>
+                </div>
+                <div>
+                    <input type="checkbox" id="service-provider-branch">
+                    <label class="branch-label" for="service-provider-branch">Service provider</label>
+                </div>
+            </section>
+        </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary mr-auto" (click)="activeModal.close(true)">Continue</button>
+      <button type="button" class="btn btn-light" (click)="activeModal.dismiss(false)">Cancel</button>
+    </div>
+</div>

@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, resp } from '../../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, resp } from '../../../services/api-call.service';
 import { UserSetting, UserSettingPayload } from '../models/user-setting';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../models/user';
@@ -41,7 +41,7 @@ export function convertResourceURL(url: string): string {
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implements ApiService {
+export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implements ApiServicePrefix {
 
   /**
    * Default REST URL Prefix.

@@ -26,7 +26,7 @@ import { FileElement } from '../model/file-element';
 import {APIGetMultiResponse, APIGetSingleResponse} from '../../../../services/models/api-response';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   httpFileOptions,
   httpObserveOptions,
   resp
@@ -61,7 +61,7 @@ export const RESPONSETYPE = 'responseType';
   providedIn: 'root'
 })
 
-export class FileService<T = any> implements ApiService {
+export class FileService<T = any> implements ApiServicePrefix {
   public servicePrefix: string = 'media_file';
 
   constructor(private api: ApiCallService) {

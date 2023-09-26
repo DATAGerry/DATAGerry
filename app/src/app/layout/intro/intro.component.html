@@ -1,4 +1,4 @@
-<div class="modal-content">
+<div class="modal-content" *ngIf="isUsable; else notUsableModal">
   <div class="modal-body">
 
     <img id="login-logo" src="/assets/img/datagerry_logo.svg" class="img-fluid mx-auto d-block w-50"
@@ -9,14 +9,31 @@
         <h3 class="card-title">Welcome to your first DATAGERRY launch.</h3>
 
         <p class="card-text text-muted">
-          Take a short spin through your DATAGERRY CMDB.<br>
-          See how DATAGERRY is making life a bit easier for you.
+          <!-- Take a short spin through your DATAGERRY CMDB.<br>
+          See how DATAGERRY is making life a bit easier for you. -->
+          The assistant can help you setup up your initial structure for DATAGERRY with some simple steps.<br>
+          Try it out by clicking on the <b>'Start Assistant'</b>-button.<br>
+          <br>
+          The Assistant can also be started by pressing " <i class="fas fa-th"></i><b> => Assistant</b>" in the top right corner.
         </p>
       </div>
     </div>
   </div>
   <div class="modal-footer">
-    <button type="button" class="btn btn-light mr-auto" (click)="activeModal.dismiss(false)">SKIP</button>
-    <button type="button" class="btn btn-primary" (click)="activeModal.close(true)">Start Tour</button>
+    <button type="button" class="btn btn-primary mr-auto" (click)="activeModal.close(true)">Start Assistant</button>
+    <button type="button" class="btn btn-light" (click)="activeModal.dismiss(false)">Cancel</button>
   </div>
 </div>
+
+<ng-template #notUsableModal>
+    <div class="modal-content">
+        <div class="modal-body">
+          <img id="login-logo" src="/assets/img/datagerry_logo.svg" class="img-fluid mx-auto d-block w-50" alt="DATAGERRY"/>
+          <br>
+            The assistant is only usable when no categories, types and objects exist in the database.
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" (click)="activeModal.close(false)">Close</button>
+        </div>
+    </div>
+</ng-template>

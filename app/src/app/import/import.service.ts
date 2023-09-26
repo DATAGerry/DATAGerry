@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../services/api-call.service';
+import { ApiCallService, ApiServicePrefix } from '../services/api-call.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
@@ -35,7 +35,7 @@ export const httpImportFileOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class ImportService implements ApiService {
+export class ImportService implements ApiServicePrefix {
 
   public servicePrefix: string = 'import';
   private objectPrefix: string = 'object';

@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, httpObserveOptions } from '../../services/api-call.service';
 import { Right, SecurityLevel } from '../models/right';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -28,7 +28,7 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 @Injectable({
   providedIn: 'root'
 })
-export class RightService<T = Right> implements ApiService {
+export class RightService<T = Right> implements ApiServicePrefix {
 
   public readonly servicePrefix: string = 'rights';
 

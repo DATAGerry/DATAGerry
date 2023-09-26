@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   httpObserveOptions, resp
 } from '../../services/api-call.service';
 import { User } from '../models/user';
@@ -61,7 +61,7 @@ export const userExistsValidator = (userService: UserService, time: number = 500
 @Injectable({
   providedIn: 'root'
 })
-export class UserService<T = User> implements ApiService {
+export class UserService<T = User> implements ApiServicePrefix {
 
   public readonly servicePrefix: string = 'users';
 
