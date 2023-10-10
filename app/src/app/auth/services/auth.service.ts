@@ -38,6 +38,7 @@ import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/
 import { LoginResponse } from '../models/responses';
 import { Token } from '../models/token';
 import { BranchInfoModalComponent } from 'src/app/layout/intro/branch-info-modal/branch-info-modal.component';
+import { ProfileInfoModalComponent } from 'src/app/layout/intro/profile-info-modal/profile-info-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 
@@ -69,8 +70,9 @@ export class AuthService<T = any> implements ApiServicePrefix {
   private stepByStepModal: any = undefined;
 
   private branchInfoModal: any = undefined;
+  private profileInfoModal: any = undefined;
 
-  constructor(private backend: HttpBackend, 
+  constructor(public backend: HttpBackend, 
               private connectionService: ConnectionService, 
               private api: ApiCallService,
               private permissionService: PermissionService, 
@@ -218,14 +220,41 @@ export class AuthService<T = any> implements ApiServicePrefix {
     });
   }
 
+
+  /**
+   * Modal for branch selection
+   */
   private showBranchInfoModal(){
     const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
 
     this.branchInfoModal = this.introService.open(BranchInfoModalComponent, options);
-    this.branchInfoModal.result.then((result) => {
+    this.branchInfoModal.result.then((result: any) => {
       if(result){
-        console.log("result of branchInfoModal:", result);
+        this.showProfileInfoModal(result);
       }
+    },
+    () => {
+    });
+  }
+
+  
+  /**
+   * Modal for profile selection
+   * 
+   * @param selectedBranches (dict): selected branches from branch modal
+   */
+  private showProfileInfoModal(selectedBranches){
+    const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
+
+    this.profileInfoModal = this.introService.open(ProfileInfoModalComponent, options);
+    this.profileInfoModal.componentInstance.selectedBranches = selectedBranches;
+
+    this.profileInfoModal.result.then((result: any) => {
+      if(result){
+        console.log("All selections:", result);
+      }
+    },
+    () => {
     });
   }
 

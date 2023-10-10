@@ -31,6 +31,7 @@ import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { BranchInfoModalComponent } from './intro/branch-info-modal/branch-info-modal.component';
+import { ProfileInfoModalComponent } from './intro/profile-info-modal/profile-info-modal.component';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
@@ -107,6 +108,7 @@ import {MatButtonModule} from '@angular/material/button';
     ChartsComponent,
     StepByStepIntroComponent,
     BranchInfoModalComponent,
+    ProfileInfoModalComponent,
     FileSizePipe,
     SidebarTypeComponent,
     CategoryTreeFilterPipe,

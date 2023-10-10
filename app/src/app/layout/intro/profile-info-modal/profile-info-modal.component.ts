@@ -23,19 +23,22 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-    selector: 'cmdb-branch-info-modal',
-    templateUrl: './branch-info-modal.component.html',
-    styleUrls: ['./branch-info-modal.component.scss']
+    selector: 'cmdb-profile-info-modal',
+    templateUrl: './profile-info-modal.component.html',
+    styleUrls: ['./profile-info-modal.component.scss']
   })
-  export class BranchInfoModalComponent {
+  export class ProfileInfoModalComponent {
+    public selectedBranches :any;
+    public allSelections = {};
 
-    
+
     constructor(public activeModal: NgbActiveModal){}
 
-    branchForm = new FormGroup({
-      'hospital-branch': new FormControl(false),
-      'sales-branch': new FormControl(false),
-      'service-provider-branch': new FormControl(false)
+    profileForm = new FormGroup({
+      'hardware-inventory-profile': new FormControl(false),
+      'software-profile': new FormControl(false),
+      'contract-management-profile': new FormControl(false),
+      'ipam-profile': new FormControl(false)
     },
       this.oneCheckedRequired()
     );
@@ -65,4 +68,17 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
         return null;
       };
     }
+
+
+    /**
+     * Creates the return dict with all selected values
+     */
+    setProfileSelections(){
+        if(Object.keys(this.allSelections).length == 0){
+            this.allSelections['branches'] = this.selectedBranches;
+        }
+
+        this.allSelections['profiles'] = this.profileForm.value;
+    }
+
   }
