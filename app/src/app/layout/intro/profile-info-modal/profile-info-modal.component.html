@@ -1,0 +1,35 @@
+<div class="modal-content">
+    <div class="modal-body">
+        <img id="login-logo" 
+            src="/assets/img/datagerry_logo.svg" 
+            class="img-fluid mx-auto d-block w-50"
+            alt="DATAGERRY"/>
+        <br>
+        Select the sections for which you would like use DATAGerry.<br>
+        <br>
+        <form [formGroup]="profileForm">
+            <div class="checkbox-section">
+                <div class="form-group">
+                    <input formControlName="hardware-inventory-profile" type="checkbox" (change)="setProfileSelections()" id="hardware-inventory-profile">
+                    <label class="profile-label" for="hardware-inventory-profile">Hardware inventory</label>
+                </div>
+                <div class="form-group">
+                    <input formControlName="software-profile" type="checkbox" (change)="setProfileSelections()" id="software-profile">
+                    <label class="profile-label" for="software-profile">Software</label>
+                </div>
+                <div class="form-group">
+                    <input formControlName="contract-management-profile" type="checkbox" (change)="setProfileSelections()" id="contract-management-profile">
+                    <label class="profile-label" for="contract-management-profile">Contract management</label>
+                </div>
+                <div class="form-group">
+                    <input formControlName="ipam-profile" type="checkbox" id="ipam-profile">
+                    <label class="profile-label" for="ipam-profile">IPAM</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-primary mr-auto" [disabled]="!profileForm.valid" (click)="activeModal.close(allSelections)">Create Types</button>
+      <button type="button" class="btn btn-light" (click)="activeModal.dismiss(false)">Cancel</button>
+    </div>
+</div>
