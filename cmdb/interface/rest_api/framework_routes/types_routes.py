@@ -257,14 +257,11 @@ def count_objects(public_id: int):
     Args:
         public_id (int): public_id of the type
     """
-    LOGGER.info("GET COUNT_OBJECTS")
     object_manager = ObjectManager(current_app.database_manager)
     #body = request.method == 'HEAD'
 
     try:
-        LOGGER.info("BEFORE COUNT")
         objects_count = object_manager.count_objects(public_id)
-        LOGGER.info(f"COUNT: {objects_count}")
     except ManagerGetError as err:
         return abort(404, err.message)
     # api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,

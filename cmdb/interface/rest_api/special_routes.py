@@ -19,9 +19,12 @@ import logging
 from flask import request, abort, current_app
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
+from cmdb.framework.assistant_profiles.profiles import ProfileAssistant
+from cmdb.manager.errors import ManagerInsertError
 
 
 with current_app.app_context():
@@ -35,6 +38,12 @@ special_blueprint = RootBlueprint('special_rest', __name__, url_prefix='/special
 @special_blueprint.route('/intro', methods=['GET'])
 @login_required
 def get_intro_starter():
+    """
+    Creates steps for intro and checks if there are any objects, categories or types in the DB
+
+    Returns:
+        _type_: Steps and if there are any objects, types and categories in the database
+    """
     try:
         steps = []
         categories_total = len(object_manager.get_categories())
@@ -68,12 +77,46 @@ def get_intro_starter():
     return resp
 
 
+@special_blueprint.route('/profiles', methods=['POST'])
+@special_blueprint.parse_assistant_parameters()
+@login_required
+def create_initial_profiles(data: str):
+    """
+    Creates all profiles selected in the assistant
+
+    Args:
+        data (str): profile string seperated by '#'
+
+    Returns:
+        _type_: list of created public_ids of types
+    """
+    profiles = data['data'].split('#')
+
+    categories_total = len(object_manager.get_categories())
+    types_total = object_manager.count_types()
+    objects_total = object_manager.count_objects()
+
+    # only execute if there are no categories, types and objects in the database
+    if categories_total == 0 and types_total == 0 and objects_total == 0:
+        LOGGER.info("EMPTY DB")
+    else:
+        LOGGER.info("STUFF in DB")
+
+    try:
+        profile_assistant = ProfileAssistant()
+        created_ids = profile_assistant.create_profiles(profiles)
+    except ManagerInsertError as err:
+        return abort(400, err.message)
+
+    return make_response(created_ids)
+
+
 def _fetch_only_active_objs():
     """
-        Checking if request have cookie parameter for object active state
-        Returns:
-            True if cookie is set or value is true else false
-        """
+    Checking if request have cookie parameter for object active state
+    Returns:
+        True if cookie is set or value is true else false
+    """
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
         if value in ['True', 'true']:

@@ -28,11 +28,11 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     styleUrls: ['./branch-info-modal.component.scss']
   })
   export class BranchInfoModalComponent {
-
     
     constructor(public activeModal: NgbActiveModal){}
 
-    branchForm = new FormGroup({
+
+    branchForm: FormGroup = new FormGroup({
       'hospital-branch': new FormControl(false),
       'sales-branch': new FormControl(false),
       'service-provider-branch': new FormControl(false)
@@ -64,5 +64,18 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
         
         return null;
       };
+    }
+
+    /**
+     * Sets the initial values for the branches
+     * 
+     * @param selectedBranches (dict): Dict of branches and their selection state
+     */
+    public setBranchState(selectedBranches){
+        for(let controlName in this.branchForm.controls){
+            if(controlName in selectedBranches){
+                this.branchForm.controls[controlName].setValue(selectedBranches[controlName]);
+            }
+        }
     }
   }

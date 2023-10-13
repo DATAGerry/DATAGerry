@@ -16,9 +16,10 @@
 
 import json
 import logging
-from bson import json_util
 
 from datetime import datetime, timezone
+
+from bson import json_util
 from flask import current_app, request, abort
 
 from cmdb.framework import TypeModel

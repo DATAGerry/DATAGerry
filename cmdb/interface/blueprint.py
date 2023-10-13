@@ -188,6 +188,19 @@ class RootBlueprint(Blueprint):
         """
         self.nested_blueprints.append(nested_blueprint)
 
+    @classmethod
+    def parse_assistant_parameters(cls, **optional):
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                try:
+                    locationArgs = request.args.to_dict()
+                except Exception as error:
+                    return abort(400, str(error))
+                return f(locationArgs)
+            return _decorate
+        return _parse
+
 
 class NestedBlueprint:
     """Default Blueprint class but with parent prefix route

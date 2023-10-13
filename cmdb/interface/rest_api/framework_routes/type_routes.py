@@ -19,22 +19,27 @@ from datetime import datetime, timezone
 
 from flask import abort, request, current_app
 
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
-from cmdb.framework.cmdb_location_manager import CmdbLocationManager
 from cmdb.framework.cmdb_location import CmdbLocation
+
 
 LOGGER = logging.getLogger(__name__)
 type_blueprint = APIBlueprint('type', __name__)
 
+with current_app.app_context():
+    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
 
 @type_blueprint.route('/', methods=['GET', 'HEAD'])
 @type_blueprint.protect(auth=True, right='base.framework.type.view')
@@ -181,7 +186,6 @@ def update_type(public_id: int, data: dict):
         return abort(404, err.message)
     except ManagerUpdateError as err:
         return abort(400, err.message)
-    
 
     # when types are updated, update all locations with relevant data from this type
     updated_type = type_manager.get(public_id)
@@ -219,7 +223,7 @@ def delete_type(public_id: int):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+    #from cmdb.framework.cmdb_object_manager import CmdbObjectManager
     deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
 
     try:
