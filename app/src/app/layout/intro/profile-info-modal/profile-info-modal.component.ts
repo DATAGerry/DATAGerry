@@ -29,23 +29,21 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
   })
   export class ProfileInfoModalComponent {
     public selectedBranches :any;
-    public allSelections = {};
+    public profileForm: FormGroup;
+
+    public activeProfiles: Set<string>;
 
 
-    constructor(public activeModal: NgbActiveModal){}
-
-    profileForm = new FormGroup({
-      'hardware-inventory-profile': new FormControl(false),
-      'software-profile': new FormControl(false),
-      'contract-management-profile': new FormControl(false),
-      'ipam-profile': new FormControl(false)
-    },
-      this.oneCheckedRequired()
-    );
+    constructor(public activeModal: NgbActiveModal){
+      this.profileForm = new FormGroup({
+        },
+        this.oneCheckedRequired()
+      );
+    }
 
 
     /**
-     * Validator for which checks if at least one checkbox is selected
+     * Validator which checks if at least one checkbox is selected
      * 
      * @returns Error or null
      */
@@ -69,16 +67,68 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
       };
     }
 
+    /**
+     * Creates distict Set of profiles for selected branches
+     * 
+     * @param selectedBranches The selected branches
+     */
+    public setProfiles(selectedBranches){
+      let tmpActiveProfiles: Set<string> = new Set();
+
+      for (let branchName of Object.keys(selectedBranches)){
+        //if branch was selected
+        if(selectedBranches[branchName]){
+          let tmpBranchProfiles = this.branchProfiles[branchName];
+
+          for(let profile of tmpBranchProfiles){
+            tmpActiveProfiles.add(profile);
+          }
+        }
+      }
+
+      this.addControlsForProfiles(tmpActiveProfiles);
+      this.activeProfiles = tmpActiveProfiles;
+    }
+
 
     /**
-     * Creates the return dict with all selected values
+     * Adds controls to formgroup for each profile
+     * 
+     * @param tmpActiveProfiles list of profiles 
      */
-    setProfileSelections(){
-        if(Object.keys(this.allSelections).length == 0){
-            this.allSelections['branches'] = this.selectedBranches;
-        }
+    private addControlsForProfiles(tmpActiveProfiles){
+      for(let profileName of tmpActiveProfiles){
+        this.profileForm.addControl(profileName, new FormControl(true));
+      }
+    }
 
-        this.allSelections['profiles'] = this.profileForm.value;
+    /**
+     * List of profiles for each branch
+     */
+    private branchProfiles = {
+      'hospital-branch': [
+          'hardware-inventory-profile', 
+          'contract-management-profile'
+      ],
+      'sales-branch': [
+          'software-profile',
+          'contract-management-profile'
+      ],
+      'service-provider-branch': [
+          'hardware-inventory-profile',
+          'contract-management-profile',
+          'ipam-profile'
+      ]
+    }
+
+    /**
+     * List of names for each Profile
+     */
+    private branchProfileNames = {
+      'hardware-inventory-profile':'Hardware inventory',
+      'software-profile': 'Software',
+      'contract-management-profile': 'Contract management',
+      'ipam-profile': 'IPAM',
     }
 
   }

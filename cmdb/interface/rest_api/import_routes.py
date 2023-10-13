@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
+"""
+Registering import routes for objects and types
+"""
+
 from flask import current_app
 from cmdb.interface.blueprint import RootBlueprint
 
@@ -24,5 +28,3 @@ with current_app.app_context():
     importer_blueprint.register_nested_blueprint(importer_object_blueprint)
     from cmdb.interface.rest_api.importer_routes.importer_type_routes import importer_type_blueprint
     importer_blueprint.register_nested_blueprint(importer_type_blueprint)
-
-

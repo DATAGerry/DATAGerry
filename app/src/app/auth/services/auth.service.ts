@@ -207,27 +207,29 @@ export class AuthService<T = any> implements ApiServicePrefix {
     });
   }
 
-  private showSteps() {
-    const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step' };
-    this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
-    this.stepByStepModal.result.then((resp) => {
-      if (resp) {
-        this.router.navigate(['/']);
-      }
-    }, 
-    (error) => {
-      console.log(error);
-    });
-  }
+  // private showSteps() {
+  //   const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step' };
+  //   this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
+  //   this.stepByStepModal.result.then((resp) => {
+  //     if (resp) {
+  //       this.router.navigate(['/']);
+  //     }
+  //   }, 
+  //   (error) => {
+  //     console.log(error);
+  //   });
+  // }
 
 
   /**
    * Modal for branch selection
    */
-  private showBranchInfoModal(){
+  private showBranchInfoModal(selectedBranches = {}){
     const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
 
     this.branchInfoModal = this.introService.open(BranchInfoModalComponent, options);
+    this.branchInfoModal.componentInstance.selectedBranches = selectedBranches;
+    this.branchInfoModal.componentInstance.setBranchState(selectedBranches);
     this.branchInfoModal.result.then((result: any) => {
       if(result){
         this.showProfileInfoModal(result);
@@ -248,11 +250,30 @@ export class AuthService<T = any> implements ApiServicePrefix {
 
     this.profileInfoModal = this.introService.open(ProfileInfoModalComponent, options);
     this.profileInfoModal.componentInstance.selectedBranches = selectedBranches;
-
+    this.profileInfoModal.componentInstance.setProfiles(selectedBranches);
     this.profileInfoModal.result.then((result: any) => {
-      if(result){
-        console.log("All selections:", result);
+      if(result == 'back'){
+        this.showBranchInfoModal(selectedBranches);
+      } else {
+        
+        let selectedProfiles: string = "";
+
+        //filter selected profiles
+        for(let profile of Object.keys(result)){
+          if(result[profile]){
+            selectedProfiles += profile + "#";
+          }
+        }
+        selectedProfiles = selectedProfiles.slice(0,-1);
+
+        this.specialService.createProfiles(selectedProfiles).subscribe((response) => {
+          this.router.navigate(['/framework/type/']);
+        },
+        (error) => {
+          console.log(error);
+        });
       }
+ 
     },
     () => {
     });
