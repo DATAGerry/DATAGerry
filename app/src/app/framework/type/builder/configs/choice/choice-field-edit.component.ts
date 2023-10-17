@@ -21,6 +21,7 @@ import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-choice-field-edit',
@@ -75,7 +76,10 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
    */
   public options: Array<any> = [];
 
-  constructor() {
+  private previousNameControlValue: string = '';
+  private initialValue: string;
+
+  constructor(private validationService: ValidationService) {
     super();
   }
 
@@ -100,6 +104,9 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
   }
 
   /**
@@ -122,6 +129,20 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
       if (index > -1) {
         this.options.splice(index, 1);
       }
+    }
+  }
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
     }
   }
 

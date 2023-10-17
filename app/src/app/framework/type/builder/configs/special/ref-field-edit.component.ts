@@ -31,6 +31,7 @@ import { ToastService } from '../../../../../layout/toast/toast.service';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
 import { ChangeDetectorRef } from '@angular/core';
+import { ValidationService } from '../../../services/validation.service';
 
 
 @Component({
@@ -41,7 +42,8 @@ import { ChangeDetectorRef } from '@angular/core';
 export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
   constructor(private typeService: TypeService, private objectService: ObjectService,
-              private toast: ToastService, private cd: ChangeDetectorRef) {
+    private toast: ToastService, private cd: ChangeDetectorRef,
+    private validationService: ValidationService) {
     super();
   }
 
@@ -71,6 +73,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    */
   public summaryControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
   /**
    * Type list for reference selection
    */
@@ -111,6 +114,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    */
   public objectList: RenderResult[];
 
+  private previousNameControlValue: string = '';
+  private initialValue: string;
+
   /**
    * Types params
    */
@@ -127,6 +133,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   public ngOnInit(): void {
 
+    this.form.addControl('required', this.requiredControl);
     this.form.addControl('name', this.nameControl);
     this.form.addControl('label', this.labelControl);
     this.form.addControl('ref_types', this.typeControl);
@@ -135,6 +142,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
     this.triggerAPICall();
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
   }
 
   public triggerAPICall() {
@@ -231,7 +241,22 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    * Name converter on ng model change.
    * @param name
    */
-  public onNameChange(name: string){
+  public onNameChange(name: string) {
+    this.nameControl.setValue(name); // Set the value of the nameControl
+    this.nameControl.updateValueAndValidity(); // Update the validity of the nameControl
+
+    const isValid = this.nameControl.valid;
+    const fieldName = 'name';
+    const fieldValue = this.nameControl.value;
+    const fieldsToValidate = ['label'];
+
+    this.validationService.updateValidationStatus('name', isValid, fieldName, name, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
     this.data.name = nameConvention(name);
   }
 

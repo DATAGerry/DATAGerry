@@ -35,6 +35,7 @@ import { ObjectService } from '../../../../services/object.service';
 import { TypeService } from '../../../../services/type.service';
 
 import { ActivatedRoute } from '@angular/router';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-location-field-edit',
@@ -44,8 +45,8 @@ import { ActivatedRoute } from '@angular/router';
 export class LocationFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
   constructor(private typeService: TypeService, private objectService: ObjectService,
-    private toast: ToastService, private cd: ChangeDetectorRef, private activeRoute: ActivatedRoute) {
-  super();
+    private toast: ToastService, private cd: ChangeDetectorRef, private activeRoute: ActivatedRoute, private validationService: ValidationService) {
+    super();
   }
 
   /**
@@ -134,6 +135,8 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
     this.triggerAPICall();
+
+    this.validationService.initializeData('dg_location');
   }
 
   /**
@@ -186,7 +189,22 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     (specialControlLocation as HTMLElement).style.opacity = opacity;
   }
 
-  private setSelectableAsParent(value: boolean): void{
+  onInputChange(event: any, type: string) {
+    const fieldValue = this.labelControl.value;
+    const fieldName = 'dg_location'; // Fixed key for 'label'
+
+    let isValid = type === 'label' ? fieldValue.length > 0 : true; // Adjust as needed
+
+    // If type is 'label' and fieldValue.length > 0, set isValid to true
+    if (type === 'label' && fieldValue.length > 0) {
+      isValid = true;
+    }
+
+    // Update the validation status using the service
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, fieldValue, fieldValue);
+  }
+
+  private setSelectableAsParent(value: boolean): void {
     this.activeRoute.snapshot.data.type.selectable_as_parent = value;
   }
 }

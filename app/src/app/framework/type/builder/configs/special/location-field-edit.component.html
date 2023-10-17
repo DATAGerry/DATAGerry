@@ -13,10 +13,17 @@
     </div>
     <div class="form-group col-md-12">
         <label>Label:</label>
-        <input [(ngModel)]="data.label" 
+
+        <input  [(ngModel)]="data.label" [formControl]="labelControl" type="text" class="form-control" placeholder="Field label"
+        [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
+              'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"
+        (ngModelChange)="onInputChange($event, 'label')"/>
+
+        <!-- <input [(ngModel)]="data.label" 
                [ngModelOptions]="{standalone: true}" 
+               (ngModelChange)="onInputChange($event, 'label')"
                type="text" 
-               class="form-control">
+               class="form-control"> -->
         <small class="form-text text-muted">This label will be displayed in the object overview</small>
     </div>
     <div class="form-group col-md-12">
