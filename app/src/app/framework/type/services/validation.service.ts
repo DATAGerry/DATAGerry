@@ -25,11 +25,8 @@ export class ValidationService {
         this.labelValidationStatusMap
     );
 
-
+    // Updates labelValidationStatusMap when a label is changed
     updatelabelValidationStatusMap(previousValue: string, newValue: string) {
-        console.log('Previous Value', previousValue);
-        // console.log('New Value', newValue);
-        console.log('VALIDATION MAP', this.labelValidationStatus$);
 
         let existingMap = this.labelValidationStatus$.getValue();
         // console.log('existing mappppp', existingMap)
@@ -54,13 +51,14 @@ export class ValidationService {
     }
 
 
-
+    // Initializes data in labelValidationStatusMap
     initializeData(initialData: string) {
         let existingMap = this.labelValidationStatus$.getValue();
         existingMap.set(initialData, { fieldName: 'label', isValid: true, initialValue: initialData })
         this.labelValidationStatus$.next(existingMap)
     }
 
+    // Updates labelValidationStatusMap when labels are deleted
     updatelabelValidationStatusMaponDeletion(updatedFields: any[]) {
         console.log('Updated Fields', updatedFields)
         const updatedFieldKeys = updatedFields.map(field => field.name);
@@ -76,7 +74,7 @@ export class ValidationService {
         this.labelValidationStatus$.next(existingMap);
     }
 
-
+    // Updates nameValidationStatusMap based on changes to name validation status
     updateNameValidationStatus(fieldName: string, isValid: boolean, fieldValue: string, initialValue: string) {
         // Check if the fieldValue already exists
         if (this.nameValidationStatusMap.has(fieldValue)) {
@@ -103,13 +101,13 @@ export class ValidationService {
         this.nameValidationStatus$.next(this.nameValidationStatusMap);
     }
 
-
+    // Gets the label field value for a given field name
     getLabelFieldValue(fieldName: string): string {
         return this.labelFieldValues.get(fieldName) || '';
     }
 
 
-
+    // Updates labelValidationStatusMap based on changes to label validation status
     updateLabelValidationStatus(fieldName: string, isValid: boolean, fieldValue: string, initialValue: string) {
         if (fieldValue.length === 0 || fieldValue.length > 0) {
             if (this.labelValidationStatusMap.has(fieldValue)) {
@@ -124,7 +122,7 @@ export class ValidationService {
         }
     }
 
-
+    // Updates validation status based on the type (name or label)
     updateValidationStatus(type: string, isValid: boolean, fieldName: string, fieldValue: string, initialValue: string, previousValue: string) {
         if (type === 'name') {
             this.updatelabelValidationStatusMap(previousValue, fieldValue);
