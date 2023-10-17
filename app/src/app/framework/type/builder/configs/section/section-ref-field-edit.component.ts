@@ -26,7 +26,8 @@ import { APIGetMultiResponse } from '../../../../../services/models/api-response
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import {ToastService} from "../../../../../layout/toast/toast.service";
+import { ToastService } from "../../../../../layout/toast/toast.service";
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -110,7 +111,10 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public selectDisabled: boolean = false;
 
-  constructor(private typeService: TypeService, private toast: ToastService) {
+  private previousNameControlValue: string = '';
+  private initialValue: string;
+
+  constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService) {
     super();
   }
 
@@ -141,6 +145,9 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.patchData(this.data, this.form);
 
     this.triggerAPICall();
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
   }
 
   private loadPresetType(publicID: number): void {
@@ -241,10 +248,24 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public onNameChange(name: string) {
     const oldName = this.data.name;
-    const fieldIdx = this.data.fields.indexOf(`${ oldName }-field`);
-    const field = this.fields.find(x => x.name === `${ oldName }-field`);
-    this.data.fields[fieldIdx] = `${ name }-field`;
-    field.name = `${ name }-field`;
+    const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
+    const field = this.fields.find(x => x.name === `${oldName}-field`);
+    this.data.fields[fieldIdx] = `${name}-field`;
+    field.name = `${name}-field`;
+  }
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
   }
 
   /**

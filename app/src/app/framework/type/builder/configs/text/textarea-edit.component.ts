@@ -21,6 +21,7 @@ import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
 import { UntypedFormControl, Validators } from '@angular/forms';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-textarea-edit',
@@ -43,8 +44,10 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
   public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+  private previousNameControlValue: string = '';
+  private initialValue: string;
 
-  public constructor() {
+  public constructor(private validationService: ValidationService) {
     super();
   }
 
@@ -60,6 +63,24 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
+  }
+
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
   }
 
   public ngOnDestroy(): void {

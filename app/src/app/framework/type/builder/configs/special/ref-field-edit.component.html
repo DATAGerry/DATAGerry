@@ -19,11 +19,13 @@
   </div>
   <div class="form-group col-md-12">
     <label>Label:</label>
-    <input [(ngModel)]="data.label" [ngModelOptions]="{standalone: true}" type="text" class="form-control">
+    <input [(ngModel)]="data.label"  [ngModelOptions]="{standalone: true}" type="text" class="form-control"
+    [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
+    'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}">
     <small class="form-text text-muted">a static display name</small>
   </div>
-  <div class="form-group col-md-12">
-    <label>Reference type selections:</label>
+  <!-- <div class="form-group col-md-12">
+    <label>Reference type selections: <span class="required">*</span></label>
     <ng-select [items]="typeList"
                bindLabel="label"
                bindValue="public_id"
@@ -36,6 +38,27 @@
                [(ngModel)]="data.ref_types">
     </ng-select>
     <small class="form-text text-muted">Multiple types possible</small>
+  </div> -->
+
+  <div class="form-group col-md-12" [class.has-error]="form.get('ref_types').hasError('required')">
+    <label>Reference type selections: <span class="required">*</span></label>
+    <ng-select [items]="typeList"
+               bindLabel="label"
+               bindValue="public_id"
+               loadingText='Loading...'
+               [loading]="typeLoading"
+               [closeOnSelect]="false"
+               [multiple]=true
+               (change)="onChange()"
+               [ngModelOptions]="{standalone: true}"
+               [(ngModel)]="data.ref_types"
+             
+              >
+    </ng-select>
+    <small class="form-text text-muted">Multiple types possible</small>
+    <div *ngIf="form.get('ref_types').hasError('required')" class="invalid-feedback">
+      Reference type is required.
+    </div>
   </div>
   <div class="form-group col-md-12">
     <label>Description:</label>

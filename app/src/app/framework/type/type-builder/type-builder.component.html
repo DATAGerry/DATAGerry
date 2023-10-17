@@ -7,7 +7,7 @@
         <cmdb-type-basic-step [mode]="mode" [typeInstance]="typeInstance"
                               (validateChange)="basicValid = $event"></cmdb-type-basic-step>
         <hr/>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step
+        <button class="btn btn-primary next" type="button" awNextStep [disabled]="!basicValid">Next Step
           <i class="fas fa-angle-double-right"></i></button>
       </aw-wizard-step>
       <aw-wizard-step [stepId]="'2'" stepTitle="Content">
@@ -19,8 +19,10 @@
         <button class="btn btn-primary prev" type="button" awPreviousStep><i class="fas fa-angle-double-left"></i>
           Previous Step
         </button>
-        <button class="btn btn-primary next" type="button" awNextStep>Next Step
-          <i class="fas fa-angle-double-right"></i></button>
+          <button class="btn btn-primary next" type="button" awNextStep [disabled]="!contentValid || !isNameValid || !isLabelValid">Next Step
+            <i class="fas fa-angle-double-right"></i>
+          </button>
+
       </aw-wizard-step>
       <!--<aw-wizard-step [stepId]="'3'" stepTitle="Preview">
         <ng-template awWizardStepSymbol><i class="fas fa-eye"></i></ng-template>
@@ -77,8 +79,12 @@
         </li>
       </ul>
     </div>
-    <button type="button" class="btn btn-block btn-success mt-2" (click)="saveType()"
-            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid">Save
-    </button>
+
+    <button type="button"
+    class="btn btn-block btn-success mt-2"
+    (click)="saveType()"
+    [disabled]="!basicValid || !contentValid || !metaValid || !accessValid || !isLabelValid || !isNameValid">
+     Save
+</button>
   </div>
 </div>

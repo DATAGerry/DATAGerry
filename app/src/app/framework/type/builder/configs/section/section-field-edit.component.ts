@@ -20,6 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
 import { UntypedFormControl, Validators } from '@angular/forms';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-section-field-edit',
@@ -43,7 +44,10 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
    */
   public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
-  public constructor() {
+  private previousNameControlValue: string = '';
+  private initialValue: string;
+
+  public constructor(private validationService: ValidationService) {
     super();
   }
 
@@ -53,6 +57,23 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
+  }
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
   }
 
   public ngOnDestroy(): void {
