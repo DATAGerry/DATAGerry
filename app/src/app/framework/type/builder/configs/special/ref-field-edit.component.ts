@@ -188,10 +188,12 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public onChange() {
     const { ref_types } = this.data;
     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
+      console.log('noreference ')
       this.objectList = [];
       this.filteredTypeList = [];
       this.data.value = '';
     } else {
+      console.log('reference more than 1')
       this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
         this.prepareSummaries();
@@ -242,6 +244,11 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    * @param name
    */
   public onNameChange(name: string) {
+    this.onInputChange(name);
+    this.data.name = nameConvention(name);
+  }
+
+  public onInputChange(name: string) {
     this.nameControl.setValue(name); // Set the value of the nameControl
     this.nameControl.updateValueAndValidity(); // Update the validity of the nameControl
 
@@ -257,7 +264,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     } else {
       this.previousNameControlValue = fieldValue;
     }
-    this.data.name = nameConvention(name);
   }
 
   /**
