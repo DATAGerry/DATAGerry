@@ -57,7 +57,7 @@
     "primeicons": "^5.0.0",
     "rxjs": "^6.6.7",
     "socket.io-parser": "^4.2.4",
-    "tinymce": "^5.10.7",
+    "tinymce": "^5.10.8",
     "tslib": "^2.5.0",
     "uninstall": "0.0.0",
     "zone.js": "~0.11.4",
