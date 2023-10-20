@@ -39,6 +39,7 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 import { ValidatorService } from '../../services/validator.service';
 import { UserService } from '../../management/services/user.service';
 import { AccessControlPermission } from '../../acl/acl.types';
+import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
@@ -76,7 +77,7 @@ export class TypeService<T = CmdbType> implements ApiServicePrefix {
     observe: resp
   };
 
-  constructor(private api: ApiCallService, private userService: UserService) {
+  constructor(private api: ApiCallService, private userService: UserService, private sideBarService: SidebarService) {
   }
 
   /**
@@ -245,6 +246,7 @@ export class TypeService<T = CmdbType> implements ApiServicePrefix {
     options.params = new HttpParams();
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
+        this.sideBarService.loadCategoryTree()
         return apiResponse.body.raw as T;
       })
     );
