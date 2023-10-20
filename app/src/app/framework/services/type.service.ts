@@ -200,7 +200,7 @@ export class TypeService<T = CmdbType> implements ApiServicePrefix {
       $and: [{
         $or: [{ name: { $regex: regex, $options: 'ism' } }, { label: { $regex: regex, $options: 'ism' } }]
       },
-        this.getAclFilter(aclRequirements)
+      this.getAclFilter(aclRequirements)
       ]
     };
     const options = HttpProtocolHelper.createHttpProtocolOptions(this.options, JSON.stringify(filter), 0);
@@ -258,7 +258,7 @@ export class TypeService<T = CmdbType> implements ApiServicePrefix {
    * @param active filter types by activation status. Default: Active types are fetched
    */
   public getUncategorizedTypes(aclRequirements?: AccessControlPermission | AccessControlPermission[],
-                               active: boolean = true):
+    active: boolean = true):
     Observable<APIGetMultiResponse<T>> {
     const pipeline = [
       { $match: this.getAclFilter(aclRequirements) },
