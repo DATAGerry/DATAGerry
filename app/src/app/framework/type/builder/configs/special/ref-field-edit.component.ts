@@ -114,8 +114,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    */
   public objectList: RenderResult[];
 
-  private previousNameControlValue: string = '';
-  private initialValue: string;
 
   /**
    * Types params
@@ -131,6 +129,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     type_id: this.typeControl,
   });
 
+  private initialValue: string;
+  isValid$ = true;
+
   public ngOnInit(): void {
 
     this.form.addControl('required', this.requiredControl);
@@ -144,7 +145,25 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     this.triggerAPICall();
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
+
+    // tarmah
+    this.validationService.getIsValid().subscribe((isvalid) => {
+      console.log("sub from src", isvalid)
+    });
+
+    this.validationService.getIsValid().subscribe((isValid) => {
+      console.log('Subscription from source', isValid);
+    });
+  }
+
+  public hasValidator(control: string): void {
+    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+      // if (valid == false || valid != this.isValid$)
+    }
   }
 
   public triggerAPICall() {
@@ -188,12 +207,10 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   public onChange() {
     const { ref_types } = this.data;
     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
-      console.log('noreference ')
       this.objectList = [];
       this.filteredTypeList = [];
       this.data.value = '';
     } else {
-      console.log('reference more than 1')
       this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
         this.objectList = res;
         this.prepareSummaries();
@@ -244,26 +261,21 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    * @param name
    */
   public onNameChange(name: string) {
-    this.onInputChange(name);
+    this.onInputChange(name)
     this.data.name = nameConvention(name);
   }
 
-  public onInputChange(name: string) {
-    this.nameControl.setValue(name); // Set the value of the nameControl
-    this.nameControl.updateValueAndValidity(); // Update the validity of the nameControl
+  onInputChange(event: any) {
 
-    const isValid = this.nameControl.valid;
-    const fieldName = 'name';
-    const fieldValue = this.nameControl.value;
-    const fieldsToValidate = ['label'];
-
-    this.validationService.updateValidationStatus('name', isValid, fieldName, name, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
+    // tarmah
+    for (let item in this.form.controls) {
+      this.hasValidator(item);
     }
+
+    // this.validationService.setIsValid(this.isValid$);
+    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
   /**

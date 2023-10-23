@@ -24,7 +24,7 @@ import { CmdbMode } from '../../modes.enum';
 import { Router } from '@angular/router';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { Group } from '../../../management/models/group';
-import { ReplaySubject } from 'rxjs';
+import { Observable, ReplaySubject } from 'rxjs';
 import { User } from '../../../management/models/user';
 import { GroupService } from '../../../management/services/group.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
@@ -104,6 +104,10 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
 
   isNameValid = true;
   isLabelValid = true;
+  isValid$: Observable<boolean>;
+
+  // isValid$: Observable<boolean> = new Observable<boolean>();
+
 
   public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
     private userService: UserService, private groupService: GroupService,
@@ -114,6 +118,12 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
    * Component lifecycle start
    */
   public ngOnInit(): void {
+    // tarmah
+    this.isValid$ = this.validationService.getIsValid1();
+
+    // this.isValid$ = this.validationService.getIsValid() as Observable<boolean>;
+
+
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
       this.typeInstance.active = true;
@@ -139,8 +149,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
       .subscribe((response: APIGetMultiResponse) => {
         this.groups = [...response.results as Array<Group>];
-      }, () => {}
-      , () => {
+      }, () => { }
+        , () => {
           this.checkAclGroupExist();
         });
 
@@ -181,7 +191,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       Object.keys(this.typeInstance.acl.groups.includes).forEach((key) => {
         const found = this.groups.find(g => g.public_id === Number(key));
         if (!found) {
-          this.toast.error(`The group for the ACL setting does not exist: GroupID: ${ key }`);
+          this.toast.error(`The group for the ACL setting does not exist: GroupID: ${key}`);
         }
       });
     }
@@ -218,21 +228,21 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       let newTypeID = null;
       saveTypeInstance.editor_id = undefined;
       this.typeService.postType(saveTypeInstance).subscribe((typeIDResp: CmdbType) => {
-          newTypeID = +typeIDResp.public_id;
-          this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
-          this.toast.success(`Type was successfully created: TypeID: ${ newTypeID }`);
-        },
+        newTypeID = +typeIDResp.public_id;
+        this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
+        this.toast.success(`Type was successfully created: TypeID: ${newTypeID}`);
+      },
         (error) => {
-          this.toast.error(`${ error }`);
+          this.toast.error(`${error}`);
         });
     } else if (this.mode === CmdbMode.Edit) {
       saveTypeInstance.editor_id = this.userService.getCurrentUser().public_id;
       this.typeService.putType(saveTypeInstance).subscribe((updateResp: CmdbType) => {
-          this.toast.success(`Type was successfully edited: TypeID: ${ updateResp.public_id }`);
-          this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
-        },
+        this.toast.success(`Type was successfully edited: TypeID: ${updateResp.public_id}`);
+        this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });
+      },
         (error) => {
-          this.toast.error(`${ error }`);
+          this.toast.error(`${error}`);
         });
     }
     this.sidebarService.loadCategoryTree();

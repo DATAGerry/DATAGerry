@@ -1,7 +1,7 @@
 
 
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 export interface ValidationStatus {
     fieldName: string;
@@ -13,6 +13,79 @@ export interface ValidationStatus {
     providedIn: 'root',
 })
 export class ValidationService {
+
+    // private isValidMap: Map<string, boolean> = new Map<string, boolean>();
+
+    // private isValid$ = new BehaviorSubject<boolean>(true);
+
+    // setIsValid(componentKey: string, value: boolean) {
+    //     this.isValidMap.set(componentKey, value);
+
+    //     // Recalculate overall validity based on all components' validity
+    //     const overallValidity = Array.from(this.isValidMap.values()).every(
+    //         (isValid) => isValid
+    //     );
+
+    //     this.isValid$.next(overallValidity);
+    // }
+
+    // getIsValid(): Observable<boolean> {
+    //     return this.isValid$.asObservable();
+    // }
+
+    //new tarmah
+
+    public fieldValidity = new Map<string, boolean>();
+    private isValid1$ = new BehaviorSubject<boolean>(true);
+
+
+    setIsValid1(key: string, value: boolean) {
+        // let currentMap = this.fieldValidity;
+
+        this.fieldValidity.set(key, value);
+
+        const overallValidity = Array.from(this.fieldValidity.values()).every(
+            (isValid) => isValid
+        );
+
+        this.isValid1$.next(overallValidity);
+
+        // if (currentMap.has(key)){
+
+        // } else{
+
+        // }
+
+    }
+    getIsValid1() {
+        return this.isValid1$.asObservable();
+    }
+
+
+
+    updateFieldValidityOnDeletion(deletedKey: string) {
+        this.fieldValidity.delete(deletedKey);
+        console.log('field validity after delete', this.fieldValidity)
+
+        let overallValidity = Array.from(this.fieldValidity.values()).every(
+            (isValid) => isValid
+        );
+
+        this.isValid1$.next(overallValidity);
+
+    }
+
+
+    // tarmah
+    private isValid$ = new BehaviorSubject<boolean>(true);
+
+    setIsValid(value: boolean) {
+        this.isValid$.next(value);
+    }
+    getIsValid() {
+        return this.isValid$.asObservable();
+    }
+
     private labelFieldValues = new Map<string, string>();
 
     private nameValidationStatusMap = new Map<string, ValidationStatus>();
@@ -29,7 +102,7 @@ export class ValidationService {
     updatelabelValidationStatusMap(previousValue: string, newValue: string) {
 
         let existingMap = this.labelValidationStatus$.getValue();
-        // console.log('existing mappppp', existingMap)
+        console.log('existing mappppp', existingMap)
         if (existingMap.has(previousValue)) {
             const tempValue = existingMap.get(previousValue);
 
@@ -109,6 +182,7 @@ export class ValidationService {
 
     // Updates labelValidationStatusMap based on changes to label validation status
     updateLabelValidationStatus(fieldName: string, isValid: boolean, fieldValue: string, initialValue: string) {
+        console.log('this.labelValidationStatusMap', this.labelValidationStatusMap)
         if (fieldValue.length === 0 || fieldValue.length > 0) {
             if (this.labelValidationStatusMap.has(fieldValue)) {
                 const existingStatus = this.labelValidationStatusMap.get(fieldValue);
@@ -131,6 +205,8 @@ export class ValidationService {
                 this.updateLabelValidationStatus(fieldName, isValid, 'dg_location', 'dg_location');
             } else {
                 const previousValue = this.getLabelFieldValue(fieldName);
+                console.log('previousValue - ', previousValue)
+                console.log('fieldValue - ', fieldValue)
                 const valueToPass = previousValue !== fieldValue ? fieldValue : previousValue;
                 this.updateLabelValidationStatus(fieldName, isValid, valueToPass, initialValue);
             }

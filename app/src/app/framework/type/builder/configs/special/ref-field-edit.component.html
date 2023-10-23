@@ -6,7 +6,7 @@
             <span class="input-group-text pr-1">
                <div class="custom-control custom-checkbox">
                 <input type="checkbox" [(ngModel)]="data.required" [ngModelOptions]="{standalone: true}" class="custom-control-input"
-                       [id]="data.name+'-required'" />
+                       [id]="data.name+'-required'"  />
                  <label class="custom-control-label" [for]="data.name+'-required'"></label>
                </div>
             </span>
@@ -18,10 +18,10 @@
     <div class="clearfix"></div>
   </div>
   <div class="form-group col-md-12">
-    <label>Label: <span class="required">*</span></label>
+    <label>Label:</label>
     <input [(ngModel)]="data.label"  [ngModelOptions]="{standalone: true}" type="text" class="form-control"
-    [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
-    'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}" (ngModelChange)="onInputChange($event)">
+    [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
+    'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}" (ngModelChange)="onInputChange($event)"/>
     <small class="form-text text-muted">a static display name</small>
   </div>
   <!-- <div class="form-group col-md-12">

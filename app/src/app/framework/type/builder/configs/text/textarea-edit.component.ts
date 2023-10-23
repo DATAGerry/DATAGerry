@@ -16,11 +16,10 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
 import { ReplaySubject } from 'rxjs';
 import { UntypedFormControl, Validators } from '@angular/forms';
-import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 import { ValidationService } from '../../../services/validation.service';
 
 @Component({
@@ -44,8 +43,9 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
   public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
-  private previousNameControlValue: string = '';
+  // private previousNameControlValue: string = '';
   private initialValue: string;
+  isValid$ = true;
 
   public constructor(private validationService: ValidationService) {
     super();
@@ -63,24 +63,41 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
-
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
+
+    // tarmah
+    this.validationService.getIsValid().subscribe((isvalid) => {
+      console.log("sub from src", isvalid)
+    });
+
+    this.validationService.getIsValid().subscribe((isValid) => {
+      console.log('Subscription from source', isValid);
+    });
+  }
+
+  public hasValidator(control: string): void {
+    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+      // if (valid == false || valid != this.isValid$)
+    }
   }
 
 
   onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
 
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
+    console.log('onInput Change text Area')
+    // tarmah
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
     }
+
+    // this.validationService.setIsValid(this.isValid$);
+    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
   public ngOnDestroy(): void {

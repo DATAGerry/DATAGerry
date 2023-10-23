@@ -124,6 +124,9 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
    */
   public referenceGroup: UntypedFormGroup = new UntypedFormGroup({ type_id: this.typeControl });
 
+  private initialValue: string;
+  isValid$ = true;
+
   /** LIFE CYCLE - SECTION **/
   public ngOnInit(): void {
     this.setDraggable("false");
@@ -135,8 +138,32 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
     this.triggerAPICall();
+    this.initialValue = this.nameControl.value;
 
-    this.validationService.initializeData('dg_location');
+    // this.validationService.initializeData('dg_location');
+  }
+
+  public hasValidator(control: string): void {
+    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+      // if (valid == false || valid != this.isValid$)
+    }
+  }
+
+  onInputChange(event: any, type: string) {
+
+    // tarmah
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
+    }
+
+    // this.validationService.setIsValid(this.isValid$);
+    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
   /**
@@ -168,11 +195,11 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
   //  * Name converter on ng model change.
   //  * @param name
   //  */
-  public onNameChange(name: string){
+  public onNameChange(name: string) {
     this.data.name = nameConvention(name);
   }
 
-  public updateSelectableAsParent(){
+  public updateSelectableAsParent() {
     this.selectable_as_parent = !this.selectable_as_parent;
     this.setSelectableAsParent(this.selectable_as_parent);
     this.cd.markForCheck();
@@ -180,7 +207,7 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
 
   //TODO: this is just a work around and need to be set with proper angular code 
   //sets the special control location to not draggable when there is already a location present
-  private setDraggable(isDraggable: string): void{
+  private setDraggable(isDraggable: string): void {
     let opacity: string = isDraggable == "true" ? "1.0" : "0.5";
 
     //this only works if the special control "location" is the 2nd element
@@ -189,20 +216,20 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     (specialControlLocation as HTMLElement).style.opacity = opacity;
   }
 
-  onInputChange(event: any, type: string) {
-    const fieldValue = this.labelControl.value;
-    const fieldName = 'dg_location'; // Fixed key for 'label'
+  // onInputChange(event: any, type: string) {
+  //   const fieldValue = this.labelControl.value;
+  //   const fieldName = 'dg_location'; // Fixed key for 'label'
 
-    let isValid = type === 'label' ? fieldValue.length > 0 : true; // Adjust as needed
+  //   let isValid = type === 'label' ? fieldValue.length > 0 : true; // Adjust as needed
 
-    // If type is 'label' and fieldValue.length > 0, set isValid to true
-    if (type === 'label' && fieldValue.length > 0) {
-      isValid = true;
-    }
+  //   // If type is 'label' and fieldValue.length > 0, set isValid to true
+  //   if (type === 'label' && fieldValue.length > 0) {
+  //     isValid = true;
+  //   }
 
-    // Update the validation status using the service
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, fieldValue, fieldValue);
-  }
+  //   // Update the validation status using the service
+  //   this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, fieldValue, fieldValue);
+  // }
 
   private setSelectableAsParent(value: boolean): void {
     this.activeRoute.snapshot.data.type.selectable_as_parent = value;

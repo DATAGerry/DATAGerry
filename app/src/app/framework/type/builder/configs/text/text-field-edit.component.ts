@@ -44,8 +44,9 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
   public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
-  private previousNameControlValue: string = '';
+
   private initialValue: string;
+  isValid$ = true;
 
   constructor(private validationService: ValidationService) {
     super();
@@ -65,23 +66,56 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     this.patchData(this.data, this.form);
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
+
+
+
+    // tarmah
+    this.validationService.getIsValid().subscribe((isvalid) => {
+      console.log("sub from src", isvalid)
+    });
+
+    this.validationService.getIsValid().subscribe((isValid) => {
+      console.log('Subscription from source', isValid);
+    });
     // call service to initialize the data
   }
 
 
-  onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
+  // onInputChange(event: any, type: string) {
+  //   const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+  //   const fieldName = 'label';
+  //   const fieldValue = this.nameControl.value;
 
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+  //   this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
 
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
+  //   if (fieldValue.length === 0) {
+  //     this.previousNameControlValue = this.initialValue;
+  //   } else {
+  //     this.previousNameControlValue = fieldValue;
+  //   }
+  // }
+
+  public hasValidator(control: string): void {
+    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+      // if (valid == false || valid != this.isValid$)
     }
+  }
+
+  onInputChange(event: any, type: string) {
+
+    // tarmah
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
+    }
+
+    // this.validationService.setIsValid(this.isValid$);
+    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
   public ngOnDestroy(): void {
