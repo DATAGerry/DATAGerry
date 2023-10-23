@@ -10,7 +10,7 @@
           <div class="form-group">
             <label>Fields</label>
             <ng-select [items]="summaries" [multiple]="true" [searchable]="false" bindLabel="label" (change)="onSummaryChange($event)"
-                       bindValue="name" placeholder="Select fields" formControlName="fields">
+                       bindValue="name" placeholder="Select fields" >
               <ng-template ng-option-tmp let-item="item">
                 <div><span>Field: </span>{{item.label}}</div>
                 <small><b>Name:</b> {{item.name}} | <b>Type:</b> {{item.type}}</small>
