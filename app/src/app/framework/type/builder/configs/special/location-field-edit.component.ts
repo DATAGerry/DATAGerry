@@ -151,17 +151,19 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
   /** HELPER - SECTION **/
 
   public triggerAPICall() {
-    this.typeLoading = true;
-    this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
-      .pipe(tap(() => this.typeLoading = false))
-      .subscribe(
-        (apiResponse: CmdbType) => {
-          this.typeLoading = false;
-          this.selectable_as_parent = apiResponse.selectable_as_parent;
-          console.log("getType.apiResponse: ", apiResponse);
-          this.cd.markForCheck();
-        },
-        (err) => this.toast.error(err));
+      if(this.currentTypeID){
+          this.typeLoading = true;
+          this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
+            .pipe(tap(() => this.typeLoading = false))
+            .subscribe(
+              (apiResponse: CmdbType) => {
+                this.typeLoading = false;
+                this.selectable_as_parent = apiResponse.selectable_as_parent;
+                console.log("getType.apiResponse: ", apiResponse);
+                this.cd.markForCheck();
+              },
+              (err) => this.toast.error(err));
+      }
   }
 
   //  /**
