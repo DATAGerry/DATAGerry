@@ -106,29 +106,42 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
      * List of profiles for each branch
      */
     private branchProfiles = {
-      'hospital-branch': [
-          'hardware-inventory-profile', 
-          'contract-management-profile'
+      'telecommunications-branch': [
+          'user-management-profile', 
+          'location-profile',
+          'ipam-profile',
+          'server-management-profile',
+          'network-infrastructure-profile'
       ],
-      'sales-branch': [
-          'software-profile',
-          'contract-management-profile'
+      'helpdesk-branch': [
+          'user-management-profile',
+          'location-profile',
+          'client-management-profile',
+          'ipam-profile',
+          'server-management-profile',
+          'network-infrastructure-profile'
       ],
       'service-provider-branch': [
-          'hardware-inventory-profile',
-          'contract-management-profile',
-          'ipam-profile'
-      ]
+          'user-management-profile',
+          'location-profile',
+      ],
+      'healthcare-branch': [
+          'user-management-profile',
+          'location-profile',
+          'client-management-profile'
+    ]
     }
 
     /**
      * List of names for each Profile
      */
-    private branchProfileNames = {
-      'hardware-inventory-profile':'Hardware inventory',
-      'software-profile': 'Software',
-      'contract-management-profile': 'Contract management',
+    public branchProfileNames = {
+      'user-management-profile': 'User management',
+      'location-profile': 'Location',
+      'client-management-profile': 'Client management',
       'ipam-profile': 'IPAM',
+      'server-management-profile': 'Server management',
+      'network-infrastructure-profile': 'Network infrastructure'
     }
 
   }

@@ -33,9 +33,10 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 
     branchForm: FormGroup = new FormGroup({
-      'hospital-branch': new FormControl(false),
-      'sales-branch': new FormControl(false),
-      'service-provider-branch': new FormControl(false)
+      'telecommunications-branch': new FormControl(false),
+      'helpdesk-branch': new FormControl(false),
+      'service-provider-branch': new FormControl(false),
+      'healthcare-branch': new FormControl(false),
     },
       this.oneCheckedRequired()
     );
