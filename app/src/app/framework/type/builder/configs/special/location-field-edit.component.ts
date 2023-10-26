@@ -151,7 +151,6 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
                 (apiResponse: CmdbType) => {
                   this.typeLoading = false;
                   this.selectable_as_parent = apiResponse.selectable_as_parent;
-                  console.log("getType.apiResponse: ", apiResponse);
                   this.cd.markForCheck();
                 },
                 (err) => this.toast.error(err));
