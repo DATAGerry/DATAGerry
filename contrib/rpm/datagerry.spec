@@ -5,9 +5,9 @@ Summary:	DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leav
 
 Group:		Applications/Databases
 License:	AGPLv3
-URL:		https://www.datagerry.org
-Vendor:     NETHINKS GmbH
-Source0:	https://github.com/NETHINKS/DATAGERRY
+URL:		https://www.datagerry.com
+Vendor:     becon GmbH
+Source0:	https://github.com/DATAGERRY/DATAGERRY
 BuildRequires: systemd
 
 %description
