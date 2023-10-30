@@ -79,7 +79,6 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
   }
 
   onInputChange(event: any, type: string) {
-    console.log('onInput Change text Area', event)
 
     for (let item in this.form.controls) {
       this.hasValidator(item)

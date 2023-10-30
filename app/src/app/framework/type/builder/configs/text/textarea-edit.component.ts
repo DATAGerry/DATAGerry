@@ -77,7 +77,6 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
 
   onInputChange(event: any, type: string) {
 
-    console.log('onInput Change text Area')
     for (let item in this.form.controls) {
       this.hasValidator(item)
     }

@@ -142,7 +142,6 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
 
   onInputChange(event: any) {
 
-    console.log('onInput Change text Area')
     for (let item in this.form.controls) {
       this.hasValidator(item)
     }

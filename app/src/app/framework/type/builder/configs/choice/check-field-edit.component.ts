@@ -95,8 +95,6 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
 
 
   onInputChange(event: any, type: string) {
-
-    console.log('onInput Change text Area')
     for (let item in this.form.controls) {
       this.hasValidator(item)
     }
