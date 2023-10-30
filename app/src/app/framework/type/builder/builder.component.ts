@@ -201,7 +201,7 @@ export class BuilderComponent implements OnDestroy {
       this.typeInstance.render_meta.sections = [...this.sections];
       this.typeInstance.fields.push(fieldData);
       this.typeInstance.fields = [...this.typeInstance.fields];
-      this.validationService.initializeData(fieldData.name)
+      // this.validationService.initializeData(fieldData.name)
     }
   }
 
@@ -220,7 +220,7 @@ export class BuilderComponent implements OnDestroy {
 
     console.log('map onFieldDragged', this.validationService.fieldValidity)
     console.log('setting true this field name', updatedDraggedFieldName)
-    this.validationService.setIsValid1(updatedDraggedFieldName, true)
+    this.validationService.setIsValid(updatedDraggedFieldName, true)
 
   }
 
@@ -264,7 +264,6 @@ export class BuilderComponent implements OnDestroy {
       this.typeInstance.fields.splice(indexField, 1);
       console.log('index field after delete', this.typeInstance.fields, indexField)
       this.typeInstance.fields = [...this.typeInstance.fields];
-      // this.validationService.updatelabelValidationStatusMaponDeletion(this.typeInstance.fields)
       this.validationService.updateFieldValidityOnDeletion(removedFieldName);
 
     }

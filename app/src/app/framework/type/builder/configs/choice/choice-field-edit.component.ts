@@ -76,8 +76,8 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
    */
   public options: Array<any> = [];
 
-  private previousNameControlValue: string = '';
   private initialValue: string;
+  isValid$ = true;
 
   constructor(private validationService: ValidationService) {
     super();
@@ -88,8 +88,8 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     if (this.options === undefined || !Array.isArray(this.options)) {
       this.options = [];
       this.options.push({
-        name: `option-${ (this.options.length + 1) }`,
-        label: `Option ${ (this.options.length + 1) }`
+        name: `option-${(this.options.length + 1)}`,
+        label: `Option ${(this.options.length + 1)}`
       });
       this.data.options = this.options;
     }
@@ -106,7 +106,6 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     this.patchData(this.data, this.form);
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
   }
 
   /**
@@ -114,8 +113,8 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
    */
   public addOption(): void {
     this.options.push({
-      name: `option-${ (this.options.length + 1) }`,
-      label: `Option ${ (this.options.length + 1) }`
+      name: `option-${(this.options.length + 1)}`,
+      label: `Option ${(this.options.length + 1)}`
     });
   }
 
@@ -132,18 +131,24 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     }
   }
 
-  onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
 
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
     }
+  }
+
+
+  onInputChange(event: any) {
+
+    console.log('onInput Change text Area')
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
+    }
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
 }

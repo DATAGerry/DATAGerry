@@ -157,7 +157,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
         this.typeSections = apiResponse.render_meta.sections;
         this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
       }, error =>
-        this.toast.error(error.error.message, {headerName: 'Field error: ' + this.nameControl.value}))
+        this.toast.error(error.error.message, { headerName: 'Field error: ' + this.nameControl.value }))
       .add(() => this.loading = false);
   }
 
@@ -235,7 +235,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public onLabelChange(change: string, idx: string) {
     this.data[idx] = change;
-    const field = this.fields.find(x => x.name === `${ this.data.name }-field`);
+    const field = this.fields.find(x => x.name === `${this.data.name}-field`);
     const fieldIdx = this.data.fields.indexOf(field);
     if (fieldIdx > -1) {
       this.data.fields[fieldIdx].label = change;
@@ -254,19 +254,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     field.name = `${name}-field`;
   }
 
-  onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
 
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
-    }
-  }
 
   /**
    * Destroy component.

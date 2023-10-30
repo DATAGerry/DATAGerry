@@ -60,8 +60,8 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
    */
   public helperTextControl: UntypedFormControl = new UntypedFormControl('');
 
-  private previousNameControlValue: string = '';
   private initialValue: string;
+  isValid$ = true;
 
   constructor(private validationService: ValidationService) {
     super();
@@ -82,22 +82,27 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
     this.patchData(this.data, this.form);
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
+  }
+
+
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+    }
   }
 
 
   onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
 
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
+    console.log('onInput Change text Area')
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
     }
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
 }

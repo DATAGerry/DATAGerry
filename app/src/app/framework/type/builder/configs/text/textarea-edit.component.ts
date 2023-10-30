@@ -43,7 +43,6 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
   public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
-  // private previousNameControlValue: string = '';
   private initialValue: string;
   isValid$ = true;
 
@@ -65,23 +64,13 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
     this.patchData(this.data, this.form);
     this.initialValue = this.nameControl.value;
 
-    // tarmah
-    this.validationService.getIsValid().subscribe((isvalid) => {
-      console.log("sub from src", isvalid)
-    });
-
-    this.validationService.getIsValid().subscribe((isValid) => {
-      console.log('Subscription from source', isValid);
-    });
   }
 
   public hasValidator(control: string): void {
-    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
     if (this.form.controls[control].hasValidator(Validators.required)) {
 
       let valid = this.form.controls[control].valid;
       this.isValid$ = this.isValid$ && valid;
-      // if (valid == false || valid != this.isValid$)
     }
   }
 
@@ -89,13 +78,10 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
   onInputChange(event: any, type: string) {
 
     console.log('onInput Change text Area')
-    // tarmah
     for (let item in this.form.controls) {
       this.hasValidator(item)
     }
-
-    // this.validationService.setIsValid(this.isValid$);
-    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
     this.isValid$ = true;
 
   }

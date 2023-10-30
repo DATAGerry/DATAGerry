@@ -118,8 +118,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
    * Component lifecycle start
    */
   public ngOnInit(): void {
-    // tarmah
-    this.isValid$ = this.validationService.getIsValid1();
+    this.isValid$ = this.validationService.getIsValid();
 
     // this.isValid$ = this.validationService.getIsValid() as Observable<boolean>;
 
@@ -167,16 +166,16 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         this.types = response.results as Array<CmdbType>;
       });
 
-    this.validationService.labelValidationStatus$.subscribe((validationStatusMap) => {
-      this.isLabelValid = true;
+    // this.validationService.labelValidationStatus$.subscribe((validationStatusMap) => {
+    //   this.isLabelValid = true;
 
-      validationStatusMap.forEach((value: ValidationStatus, key: string) => {
-        if (key == "" || !value.isValid) {
-          this.isLabelValid = false;
-          return;
-        }
-      });
-    });
+    //   validationStatusMap.forEach((value: ValidationStatus, key: string) => {
+    //     if (key == "" || !value.isValid) {
+    //       this.isLabelValid = false;
+    //       return;
+    //     }
+    //   });
+    // });
 
 
   }

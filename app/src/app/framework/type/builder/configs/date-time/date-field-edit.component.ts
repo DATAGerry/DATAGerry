@@ -30,8 +30,8 @@ import { ValidationService } from '../../../services/validation.service';
   selector: 'cmdb-date-field-edit',
   templateUrl: './date-field-edit.component.html',
   providers: [
-    {provide: NgbDateAdapter, useClass: NgbStringAdapter},
-    {provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter}
+    { provide: NgbDateAdapter, useClass: NgbStringAdapter },
+    { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
   ]
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
@@ -49,8 +49,8 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
   public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
-  private previousNameControlValue: string = '';
   private initialValue: string;
+  isValid$ = true;
 
   constructor(private dateSettingsService: DateSettingsService, private validationService: ValidationService) {
     super();
@@ -72,12 +72,31 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     this.patchData(this.data, this.form);
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
   }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+  }
+
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+    }
+  }
+
+  onInputChange(event: any) {
+    console.log('onInput Change text Area', event)
+
+
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
+    }
+
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
 
@@ -89,19 +108,5 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     this.data.value = null;
   }
 
-
-  onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
-
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
-    }
-  }
 
 }

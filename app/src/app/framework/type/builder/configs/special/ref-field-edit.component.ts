@@ -32,6 +32,7 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { nameConvention } from '../../../../../layout/directives/name.directive';
 import { ChangeDetectorRef } from '@angular/core';
 import { ValidationService } from '../../../services/validation.service';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 
 @Component({
@@ -71,7 +72,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   /**
    * Summary form control.
    */
-  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
 
   public requiredControl: UntypedFormControl = new UntypedFormControl(false);
   /**
@@ -146,23 +147,19 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
     this.initialValue = this.nameControl.value;
 
-    // tarmah
-    this.validationService.getIsValid().subscribe((isvalid) => {
-      console.log("sub from src", isvalid)
-    });
 
-    this.validationService.getIsValid().subscribe((isValid) => {
-      console.log('Subscription from source', isValid);
-    });
+    if (this.form.get('ref_types').invalid) {
+      this.isValid$ = false
+    }
+
+    this.onInputChange('')
+
   }
 
   public hasValidator(control: string): void {
-    // if !!this.form.controls[control].validator(control).hasOwnProperty(validator);
     if (this.form.controls[control].hasValidator(Validators.required)) {
-
       let valid = this.form.controls[control].valid;
       this.isValid$ = this.isValid$ && valid;
-      // if (valid == false || valid != this.isValid$)
     }
   }
 
@@ -206,6 +203,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   public onChange() {
     const { ref_types } = this.data;
+    this.onInputChange('')
     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.filteredTypeList = [];
@@ -267,13 +265,12 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   onInputChange(event: any) {
 
-    // tarmah
     for (let item in this.form.controls) {
       this.hasValidator(item);
     }
 
     // this.validationService.setIsValid(this.isValid$);
-    this.validationService.setIsValid1(this.initialValue, this.isValid$);
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
     this.isValid$ = true;
 
   }
