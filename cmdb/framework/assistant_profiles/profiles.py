@@ -19,15 +19,13 @@ This file contans all profile data and logics for the initial assistant
 """
 import logging
 from enum import Enum
-# from typing import List
-from datetime import datetime, timezone
 
-from flask import current_app
-
-from cmdb.framework import TypeModel
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-
+from cmdb.framework.assistant_profiles.profile_user_management import UserManagementProfile
+from cmdb.framework.assistant_profiles.profile_location import LocationProfile
+from cmdb.framework.assistant_profiles.profile_ipam import IPAMProfile
+from cmdb.framework.assistant_profiles.profile_client_management import ClientManagementProfile
+from cmdb.framework.assistant_profiles.profile_server_management import ServerManagementProfile
+from cmdb.framework.assistant_profiles.profile_network_infrastructure import NetworkInfrastructureProfile
 
 LOGGER = logging.getLogger(__name__)
 
@@ -39,22 +37,17 @@ class ProfileName(str, Enum):
     Args:
         Enum (str): Name of a profile
     """
-    HARDWARE_INVENTORY = 'hardware-inventory-profile'
-    SOFTWARE = 'software-profile'
-
+    USER_MANAGEMENT = 'user-management-profile'
+    LOCATION = 'location-profile'
+    IPAM = 'ipam-profile'
+    CLIENT_MANAGEMENT = 'client-management-profile'
+    SERVER_MANAGEMENT = 'server-management-profile'
+    NETWORK_INFRASTRUCTURE = 'network-infrastructure-profile'
 
 class ProfileAssistant:
     """
     This class holds all profiles and logics for the initial assistant
     """
-
-    def __init__(self):
-        with current_app.app_context():
-            self.type_manager: TypeManager = TypeManager(current_app.database_manager)
-            self.object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
-
-
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   PROFILE CREATION                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -66,280 +59,66 @@ class ProfileAssistant:
         Args:
             profile_list: List of profiles which should be created
         """
+        created_type_ids: dict = {
+            'company_id': None,
+            'user_id': None,
+            'customer_user_id': None,
+            'country_id': None,
+            'city_id': None,
+            'building_id': None,
+            'room_id': None,
+            'rack_id': None,
+            'network_id': None,
+            'vlan_id': None,
+            'operating_system_id': None,
+            'client_id': None,
+            'monitor_id': None,
+            'printer_id': None,
+            'server_id': None,
+            'appliance_id': None,
+            'virtual_server_id': None,
+            'switch_id': None,
+            'router_id': None,
+            'patch_panel_id': None,
+            'wireless_access_point_id': None,
+        }
+
+        try:
+            # create all types from user management profile
+            if ProfileName.USER_MANAGEMENT in profile_list:
+                cur_profile = UserManagementProfile(created_type_ids)
+                created_type_ids = cur_profile.create_user_management_profile()
+
+            # create all types from location profile
+            if ProfileName.LOCATION in profile_list:
+                cur_profile = LocationProfile(created_type_ids)
+                created_type_ids = cur_profile.create_location_profile()
+
+            # create all types from ipam profile
+            if ProfileName.IPAM in profile_list:
+                cur_profile = IPAMProfile(created_type_ids)
+                created_type_ids = cur_profile.create_ipam_profile()
+
+            # create all types from client management profile
+            if ProfileName.CLIENT_MANAGEMENT in profile_list:
+                cur_profile = ClientManagementProfile(created_type_ids)
+                created_type_ids = cur_profile.create_client_management_profile()
+
+            # create all types from server management profile
+            if ProfileName.SERVER_MANAGEMENT in profile_list:
+                cur_profile = ServerManagementProfile(created_type_ids)
+                created_type_ids = cur_profile.create_server_management_profile()
+
+            # create all types from network infrastructure profile
+            if ProfileName.SERVER_MANAGEMENT in profile_list:
+                cur_profile = NetworkInfrastructureProfile(created_type_ids)
+                created_type_ids = cur_profile.create_network_infrastructure_profile()
+        except Exception as error:
+            LOGGER.info(f"Assitant Error: {error}")
+
         created_ids = []
-        LOGGER.info(f"create_profiles with: {profile_list}")
 
-        for profile in profile_list:
-            LOGGER.info(f"cur_profile: {profile}")
-            LOGGER.info(f"ProfileName.HARDWARE_INVENTORY: {ProfileName.HARDWARE_INVENTORY}")
-
-            if profile == ProfileName.HARDWARE_INVENTORY:
-                LOGGER.info("Profile HARDWARE_INVENTORY")
-                new_ids = self.create_hardware_inventory_profile()
-                created_ids.append(new_ids)
+        for type_id in created_type_ids:
+            created_ids.append(type_id)
 
         return created_ids
-
-
-
-    def create_hardware_inventory_profile(self):
-        """
-        Creates all types of the assistant profile "hardware-inventory-profile"
-        """
-        created_ids = []
-
-        initial_type = self.get_hardware_inventory_profile_initial()
-        initial_type['public_id'] = self.object_manager.get_new_id(TypeModel.COLLECTION)
-
-        # create initial type and save publicID
-        owner_type_id: int = self.type_manager.insert(initial_type)
-        created_ids.append(owner_type_id)
-
-        # get all dependant types
-        dependent_types = self.get_hardware_inventory_profile_dependent_types(owner_type_id)
-
-        # create all dependant types
-        for cur_type in dependent_types:
-            cur_type['public_id'] = self.object_manager.get_new_id(TypeModel.COLLECTION)
-            cur_type_id = self.type_manager.insert(cur_type)
-            created_ids.append(cur_type_id)
-
-        return created_ids
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                     PROFILE DATA                                                     #
-# -------------------------------------------------------------------------------------------------------------------- #
-
-
-# ------------------------------------------ HARDWARE - INVENTORY - PROFILE ------------------------------------------ #
-
-    def get_hardware_inventory_profile_initial(self) -> dict:
-        """
-        Returns the initial required type which first need to be created due to refereces 
-
-        Returns:
-            dict: TypeModel of owner type
-        """
-        return {
-                "name": "owner",
-                "active": True,
-                "author_id": 1,
-                "creation_time": datetime.now(timezone.utc),
-                "editor_id": None,
-                "last_edit_time": None,
-                "label": "Owner",
-                "version": "1.0.0",
-                "description": None,
-                "render_meta": {
-                    "icon": "fa fa-user",
-                    "sections": [{
-                        "type": "section",
-                        "name": "owner",
-                        "label": "General",
-                        "fields": [
-                            "firstname",
-                            "lastname",
-                            "mail",
-                            "username"
-                        ]
-                    }],
-                    "externals": [],
-                    "summary": {
-                        "fields": [
-                        "firstname",
-                        "lastname"
-                        ]
-                    }
-                },
-                "fields": [
-                    {
-                        "type": "text",
-                        "name": "firstname",
-                        "label": "Firstname"
-                    },
-                    {
-                        "type": "text",
-                        "name": "lastname",
-                        "label": "Lastname"
-                    },
-                    {
-                        "type": "text",
-                        "name": "mail",
-                        "label": "Mail"
-                    },
-                    {
-                        "type": "text",
-                        "name": "username",
-                        "label": "Username"
-                    }
-                ],
-                "acl": {
-                    "activated": False,
-                    "groups": {
-                        "includes": {}
-                    }
-                }
-            }
-
-    def get_hardware_inventory_profile_dependent_types(self, owner_type_id: int) -> list:
-        """
-        Sets the public_id of owner-Type in References and returns all types which need to be
-        created for the profile 'hardware-inventory-profile'
-        
-        Args:
-            ownerTypeID (int): public_id of owner-Type
-
-        Returns:
-            dict: All depedent types for the hardware-inventory-profile
-        """
-        return [
-            {
-                "name": "VirtualServer",
-                "active": True,
-                "author_id": 1,
-                "creation_time": datetime.now(timezone.utc),
-                "editor_id": None,
-                "last_edit_time": None,
-                "label": "Virtual Server",
-                "version": "1.0.0",
-                "description": None,
-                "render_meta": {
-                    "icon": "fa fa-cube",
-                    "sections": [
-                        {
-                            "type": "section",
-                            "name": "general",
-                            "label": "General",
-                            "fields": [
-                                "name",
-                                "inventoryno",
-                                "purpose"
-                            ]
-                        },
-                        {
-                            "type": "section",
-                            "name": "cpu",
-                            "label": "CPU",
-                            "fields": [
-                                "cpu",
-                                "cpu_type"
-                            ]
-                        },
-                        {
-                            "type": "section",
-                            "name": "model",
-                            "label": "Model",
-                            "fields": [
-                                "manufacturer",
-                                "model",
-                                "serial"
-                            ]
-                        },
-                        {
-                            "type": "section",
-                            "name": "os",
-                            "label": "Operation System",
-                            "fields": [
-                                "os",
-                                "version"
-                            ]
-                        },
-                        {
-                            "type": "section",
-                            "name": "userassignment",
-                            "label": "Userassignment",
-                            "fields": [
-                                "userassigment-ref"
-                            ]
-                        }
-                    ],
-                    "externals": [
-                        {
-                            "name": "loginventory",
-                            "href": "http://20.224.182.51/LOGINventory9/details.aspx?pcuid={}",
-                            "label": "Loginventory",
-                            "icon": "fas fa-external-link-alt",
-                            "fields": [
-                                "name"
-                            ]
-                        }
-                    ],
-                    "summary": {
-                        "fields": [
-                            "name",
-                            "inventoryno",
-                            "serial",
-                            "os",
-                            "userassigment-ref"
-                        ]
-                    }
-                },
-                "fields": [
-                    {
-                        "type": "text",
-                        "name": "name",
-                        "label": "Name"
-                    },
-                    {
-                        "type": "text",
-                        "name": "inventoryno",
-                        "label": "Inventory No."
-                    },
-                    {
-                        "type": "text",
-                        "name": "manufacturer",
-                        "label": "Manufacturer"
-                    },
-                    {
-                        "type": "text",
-                        "name": "model",
-                        "label": "Model"
-                    },
-                    {
-                        "type": "text",
-                        "name": "serial",
-                        "label": "Serialnumber"
-                    },
-                    {
-                        "type": "text",
-                        "name": "purpose",
-                        "label": "Purpose"
-                    },
-                    {
-                        "type": "text",
-                        "name": "os",
-                        "label": "Operation System"
-                    },
-                    {
-                        "type": "text",
-                        "name": "version",
-                        "label": "Version"
-                    },
-                    {
-                        "type": "text",
-                        "name": "cpu",
-                        "label": "CPU"
-                    },
-                    {
-                        "type": "text",
-                        "name": "cpu_type",
-                        "label": "Type"
-                    },
-                    {
-                        "type": "ref",
-                        "name": "userassigment-ref",
-                        "label": "Userassignment",
-                        "ref_types": [
-                            owner_type_id
-                        ],
-                        "summaries": []
-                    }
-                ],
-                "acl": {
-                    "activated": False,
-                    "groups": {
-                        "includes": {}
-                    }
-                }
-            } # end 'VirtualServer'
-        ]

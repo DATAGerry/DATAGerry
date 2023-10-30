@@ -268,6 +268,7 @@ export class AuthService<T = any> implements ApiServicePrefix {
 
         this.specialService.createProfiles(selectedProfiles).subscribe((response) => {
           this.router.navigate(['/framework/type/']);
+          window.location.reload();
         },
         (error) => {
           console.log(error);

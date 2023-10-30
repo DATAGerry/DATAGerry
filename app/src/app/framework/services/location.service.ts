@@ -428,7 +428,6 @@ export class LocationService<T = CmdbLocation | RenderResult> implements ApiServ
      * @param action (string): Which operation was executed (create, update, delete)
      */
     executedAction(action: string){
-        console.log("location action:", action)
         this.locationActionSource.next(action);
     }
 

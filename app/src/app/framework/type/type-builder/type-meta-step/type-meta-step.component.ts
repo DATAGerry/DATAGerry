@@ -131,6 +131,8 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     this.externalsForm.get('href').valueChanges.pipe(takeUntil(this.subscriber)).subscribe((href: string) => {
       this.hasInter = occurrences(href, '{}') > 0;
     });
+
+
   }
 
   public get summaryFields(): UntypedFormControl {
@@ -173,5 +175,6 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
 
   public onSummaryChange(fields: Array<any>) {
     this.typeInstance.render_meta.summary.fields = fields.map(f => f.name);
+
   }
 }
