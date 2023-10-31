@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { SearchService } from './search.service';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, NavigationEnd, Router} from '@angular/router';
 import { ReplaySubject } from 'rxjs';
 import { SearchResultList } from './models/search-result';
@@ -72,7 +72,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   /**
    * Search form input group.
    */
-  public searchInputForm: FormGroup;
+  public searchInputForm: UntypedFormGroup;
 
   /**
    * List of search results.
@@ -107,8 +107,8 @@ export class SearchComponent implements OnInit, OnDestroy {
   /**
    * Page size select form group.
    */
-  public resultSizeForm: FormGroup = new FormGroup({
-    size: new FormControl(this.limit),
+  public resultSizeForm: UntypedFormGroup = new UntypedFormGroup({
+    size: new UntypedFormControl(this.limit),
   });
 
   /**
@@ -116,8 +116,8 @@ export class SearchComponent implements OnInit, OnDestroy {
    */
   constructor(private route: ActivatedRoute, private searchService: SearchService,
               private spinner: ProgressSpinnerService, private router: Router) {
-    this.searchInputForm = new FormGroup({
-      input: new FormControl('', Validators.required)
+    this.searchInputForm = new UntypedFormGroup({
+      input: new UntypedFormControl('', Validators.required)
     });
   }
 
@@ -161,8 +161,8 @@ export class SearchComponent implements OnInit, OnDestroy {
   /**
    * Get the form control of the size selection.
    */
-  public get resultLength(): FormControl {
-    return this.resultSizeForm.get('size') as FormControl;
+  public get resultLength(): UntypedFormControl {
+    return this.resultSizeForm.get('size') as UntypedFormControl;
   }
 
   /**

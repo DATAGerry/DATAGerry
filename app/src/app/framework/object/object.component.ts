@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -448,6 +448,30 @@ export class ObjectComponent implements OnInit, OnDestroy {
         (error) => {
           this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
         });
+  }
+
+  public onObjectDeleteWithLocations(objectID: number){
+    console.log("object.component => delete with locations");
+    this.objectService.deleteObjectWithLocations(objectID).pipe(takeUntil(this.subscriber))
+    .subscribe(() => {
+        this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
+        this.loadObjectsFromAPI();
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
+      });
+  }
+
+  public onObjectDeleteWithObjects(objectID: number){
+    console.log("object.component => delete with objects");
+    this.objectService.deleteObjectWithChildren(objectID).pipe(takeUntil(this.subscriber))
+    .subscribe(() => {
+        this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
+        this.loadObjectsFromAPI();
+      },
+      (error) => {
+        this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
+      });
   }
 
   /**

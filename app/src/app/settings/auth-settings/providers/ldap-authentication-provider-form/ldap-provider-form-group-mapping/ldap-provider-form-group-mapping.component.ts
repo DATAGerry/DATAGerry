@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { Group } from '../../../../../management/models/group';
-import { AbstractControl, FormArray, FormControl, FormGroup, ValidatorFn, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormArray, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
 import { DndDropEvent } from 'ngx-drag-drop';
 
 @Component({
@@ -36,30 +36,30 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
   /**
    * Parent mapping form.
    */
-  @Input() public mappingForm: FormArray;
+  @Input() public mappingForm: UntypedFormArray;
 
   /**
    * Mapping insert form.
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * OnInit for `LdapProviderFormGroupMappingComponent`.
    * Implements the insertion form for LDAP group mapping.
    */
   public ngOnInit(): void {
-    this.form = new FormGroup({
-      group_dn: new FormControl('', [
+    this.form = new UntypedFormGroup({
+      group_dn: new UntypedFormControl('', [
         Validators.required, this.dnAlreadyExistsValidator(this.mappingForm)]),
-      group_id: new FormControl(null, Validators.required)
+      group_id: new UntypedFormControl(null, Validators.required)
     });
   }
 
   /**
    * Get the control of the dn input field.
    */
-  public get groupDNControl(): FormControl {
-    return this.form.get('group_dn') as FormControl;
+  public get groupDNControl(): UntypedFormControl {
+    return this.form.get('group_dn') as UntypedFormControl;
   }
 
   /**
@@ -72,8 +72,8 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
   /**
    * Get the control of the group id field.
    */
-  public get groupIDControl(): FormControl {
-    return this.form.get('group_id') as FormControl;
+  public get groupIDControl(): UntypedFormControl {
+    return this.form.get('group_id') as UntypedFormControl;
   }
 
   /**
@@ -89,9 +89,9 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
    */
   public addMapping(): void {
     if (this.form.valid) {
-      const formGroup = new FormGroup({
-        group_dn: new FormControl(this.groupDNValue),
-        group_id: new FormControl(this.groupIDValue)
+      const formGroup = new UntypedFormGroup({
+        group_dn: new UntypedFormControl(this.groupDNValue),
+        group_id: new UntypedFormControl(this.groupIDValue)
       });
       this.mappingForm.push(formGroup);
       this.form.reset();
@@ -119,7 +119,7 @@ export class LdapProviderFormGroupMappingComponent implements OnInit {
    * @param mapForm - passed `mappingForm` as `FormArray`.
    * @private
    */
-  private dnAlreadyExistsValidator(mapForm: FormArray): ValidatorFn {
+  private dnAlreadyExistsValidator(mapForm: UntypedFormArray): ValidatorFn {
     return (control: AbstractControl): { [key: string]: any } | null => {
       let controlValue = control.value;
       if (controlValue) {

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -21,12 +21,12 @@ import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import {HttpHeaders, HttpParams, HttpResponse} from '@angular/common/http';
 import { FileMetadata } from '../model/metadata';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { FileElement } from '../model/file-element';
 import {APIGetMultiResponse, APIGetSingleResponse} from '../../../../services/models/api-response';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   httpFileOptions,
   httpObserveOptions,
   resp
@@ -34,7 +34,7 @@ import {
 import { ValidatorService } from '../../../../services/validator.service';
 
 export const checkFolderExistsValidator = (fileService: FileService, metadata: any, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return fileService.getFileElement(control.value, metadata).pipe(
         map((apiResponse: HttpResponse<any>) => {
@@ -61,7 +61,7 @@ export const RESPONSETYPE = 'responseType';
   providedIn: 'root'
 })
 
-export class FileService<T = any> implements ApiService {
+export class FileService<T = any> implements ApiServicePrefix {
   public servicePrefix: string = 'media_file';
 
   constructor(private api: ApiCallService) {

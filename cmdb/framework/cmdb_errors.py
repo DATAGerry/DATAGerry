@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 from cmdb.framework.cmdb_base import ManagerInitError, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError
@@ -20,32 +20,32 @@ from cmdb.utils.error import CMDBError
 
 class WrongInputFormatError(CMDBError):
     def __init__(self, class_name, data, error):
-        self.message = 'Error while parsing {} - Data: {} - Error: '.format(class_name, data, error)
+        self.message = f"Error while parsing {class_name} - Data: {data} - Error: {error}"
 
 
 class UpdateError(CMDBError):
     def __init__(self, class_name, data, error):
-        self.message = 'Update error while updating {} - Data: {} - Error: '.format(class_name, data, error)
+        self.message = f"Update error while updating {class_name} - Data: {data} - Error: {error}"
 
 
 class TypeInsertError(CMDBError):
     def __init__(self, type_id):
-        self.message = 'Type with ID: {} could not be inserted!'.format(type_id)
+        self.message = f"Type with ID: {type_id} could not be inserted!"
 
 
 class TypeAlreadyExists(CMDBError):
     def __init__(self, type_id):
-        self.message = 'Type with ID: {} already exists!'.format(type_id)
+        self.message = f"Type with ID: {type_id} already exists!"
 
 
 class TypeNotFoundError(CMDBError):
     def __init__(self, type_id):
-        self.message = 'Type with ID: {} not found!'.format(type_id)
+        self.message = f"Type with ID: {type_id} not found!"
 
 
 class ObjectNotFoundError(CMDBError):
     def __init__(self, obj_id):
-        self.message = 'Object with ID: {} not found!'.format(obj_id)
+        self.message = f"Object with ID: {obj_id} not found!"
 
 
 class ObjectInsertError(CMDBError):
@@ -107,32 +107,70 @@ class FieldNotFoundError(CMDBError):
         super().__init__()
         self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
 
+# ---------------------------------------------------------------------------- #
+#                              LOCATION EXCEPTIONS                             #
+# ---------------------------------------------------------------------------- #
+class LocationManagerError(ManagerGetError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class LocationManagerInitError(ManagerInitError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class LocationManagerGetError(ManagerGetError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class LocationManagerInsertError(ManagerInsertError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+class LocationManagerUpdateError(ManagerUpdateError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+class LocationManagerDeleteError(ManagerDeleteError):
+
+    def __init__(self, err):
+        super().__init__(err=err)
+
+# ---------------------------------------------------------------------------- #
+#                               OBJECT EXCEPTIONS                              #
+# ---------------------------------------------------------------------------- #
 
 class ObjectManagerInitError(ManagerInitError):
 
     def __init__(self, err):
-        super(ObjectManagerInitError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class ObjectManagerGetError(ManagerGetError):
 
     def __init__(self, err):
-        super(ObjectManagerGetError, self).__init__(err=err)
-
+        super().__init__(err=err)
 
 class ObjectManagerInsertError(ManagerInsertError):
 
     def __init__(self, err):
-        super(ObjectManagerInsertError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class ObjectManagerUpdateError(ManagerUpdateError):
 
     def __init__(self, err):
-        super(ObjectManagerUpdateError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class ObjectManagerDeleteError(ManagerDeleteError):
 
     def __init__(self, err):
-        super(ObjectManagerDeleteError, self).__init__(err=err)
+        super().__init__(err=err)

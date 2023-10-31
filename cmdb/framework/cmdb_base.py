@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 import logging
 from abc import ABC
 from typing import List
@@ -92,6 +92,51 @@ class CmdbManagerBase(ABC):
             collection=collection,
             public_id=public_id
         )
+    
+    def _get_location(self, collection: str, object_id: int) -> dict:
+        """get location document from the database by their object id
+
+        Args:
+            collection (str): name of the database collection
+            object_id (int): object id of the location document
+
+        Returns:
+            str: location document in json format
+        """
+        return self.dbm.find_one(
+            collection=collection,
+            object_id=object_id
+        )
+    
+    def get_location_by_object(self, collection: str, object_id: int) -> dict:
+        """get location document from the database by their object id
+
+        Args:
+            collection (str): name of the database collection
+            object_id (int): object id of the location document
+
+        Returns:
+            str: location document in json format
+        """
+        return self.dbm.find_one_by_object(
+            collection=collection,
+            object_id=object_id
+        )
+    
+    def _get_child(self, collection: str, parent_id: int) -> dict:
+        """_summary_
+
+        Args:
+            collection (str): name of the database collection
+            parent_id (int): public_id of parent
+
+        Returns:
+            (dict): Child location dict 
+        """
+        return self.dbm.find_one_child(
+            collection=collection,
+            parent_id=parent_id
+        )
 
     def _get_by(self, collection: str, **requirements: dict) -> dict:
         """get document from the database by requirements
@@ -158,6 +203,23 @@ class CmdbManagerBase(ABC):
         return self.dbm.update(
             collection=collection,
             filter={'public_id': public_id},
+            data=data
+        )
+    
+    def _update_for_object(self, collection: str, object_id: int, data: dict) -> object:
+        """
+        update document/object in database
+        Args:
+            collection (str): name of the database collection
+            public_id (int): public id of object
+            data: changed data/object
+
+        Returns:
+            acknowledgment of database
+        """
+        return self.dbm.update(
+            collection=collection,
+            filter={'object_id': object_id},
             data=data
         )
 

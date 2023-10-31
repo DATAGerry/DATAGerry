@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,24 +11,29 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, HostListener, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import { ObjectService } from '../../services/object.service';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+
+import { ObjectService } from '../../services/object.service';
+import { ToastService } from '../../../layout/toast/toast.service';
+import { TypeService } from '../../services/type.service';
+import { SidebarService } from 'src/app/layout/services/sidebar.service';
+import { LocationService } from '../../services/location.service';
+
+
 import { CmdbMode } from '../../modes.enum';
 import { CmdbObject } from '../../models/cmdb-object';
-import { FormControl, FormGroup } from '@angular/forms';
-import { ToastService } from '../../../layout/toast/toast.service';
 import { RenderResult } from '../../models/cmdb-render';
-import { TypeService } from '../../services/type.service';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
-import {text} from "@fortawesome/fontawesome-svg-core";
+/* -------------------------------------------------------------------------- */
+
 
 @Component({
   selector: 'cmdb-object-edit',
@@ -41,35 +46,53 @@ export class ObjectEditComponent implements OnInit {
   public objectInstance: CmdbObject;
   public typeInstance: CmdbType;
   public renderResult: RenderResult;
-  public renderForm: FormGroup;
-  public commitForm: FormGroup;
+  public renderForm: UntypedFormGroup;
+  public commitForm: UntypedFormGroup;
   private objectID: number;
+  public activeState : boolean;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private toastService: ToastService) {
-    this.route.params.subscribe((params) => {
-      this.objectID = params.publicID;
-    });
-    this.renderForm = new FormGroup({});
-    this.commitForm = new FormGroup({
-      comment: new FormControl('')
-    });
+
+  public selectedLocation: number = -1;
+  public locationTreeName: string;
+  public locationForObjectExists: boolean = false;
+
+/* -------------------------------------------------------------------------- */
+/*                                 LIFE CYCLE                                 */
+/* -------------------------------------------------------------------------- */
+
+  constructor(private objectService: ObjectService,
+              private typeService: TypeService,
+              private route: ActivatedRoute,
+              private router: Router,
+              private toastService: ToastService,
+              private locationService: LocationService,
+              private sidebarService : SidebarService){
+      this.route.params.subscribe((params) => {
+          this.objectID = params.publicID;
+      });
+
+      this.renderForm = new UntypedFormGroup({});
+      this.commitForm = new UntypedFormGroup({
+          comment: new UntypedFormControl('')
+      });
   }
 
   public ngOnInit(): void {
-    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-        this.renderResult = rr;
+      this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+          this.renderResult = rr;
+          this.activeState = this.renderResult.object_information.active;
       },
       error => {
-        console.error(error);
+          console.error(error);
       },
       () => {
-        this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
-          this.objectInstance = ob;
-        });
-        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-          this.typeInstance = value;
-        });
+          this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
+              this.objectInstance = ob;
+          });
+
+          this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+              this.typeInstance = value;
+          });
       });
   }
 
@@ -90,19 +113,48 @@ export class ObjectEditComponent implements OnInit {
 
       Object.keys(this.renderForm.value).forEach((key: string) => {
         let val = this.renderForm.value[key];
-        if (val === undefined || val == null) { val = ''; }
-        patchValue.push({
-          name: key,
-          value: val
-        });
+
+        if(key == 'dg_location'){
+          this.selectedLocation = val; 
+        }
+        else if(key == 'locationTreeName'){
+          this.locationTreeName = val; 
+          return;
+        } else if(key == 'locationForObjectExists'){
+          this.locationForObjectExists = String(val).toLowerCase() === 'true' ? true : false;
+          return;
+        }
+
+        if (val === undefined || val == null) { 
+          val = ''; 
+          
+          if(key == "dg_location"){
+            patchValue.push({
+              name: key,
+              value: null
+            });
+          }
+
+        } else {
+          patchValue.push({
+            name: key,
+            value: val
+          });
+        }
       });
+
+      this.handleLocation(this.objectInstance.public_id, this.selectedLocation, this.locationTreeName, this.objectInstance.type_id);
 
       this.objectInstance.fields = patchValue;
       this.objectInstance.comment = this.commitForm.get('comment').value;
+      this.objectInstance.active = this.activeState;
       this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: APIUpdateMultiResponse) => {
         if (res.failed.length === 0) {
-          this.toastService.success('Object was successfully updated!');
-          this.router.navigate(['/framework/object/view/' + this.objectID]);
+          this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
+            this.sidebarService.ReloadSideBarData();
+            this.toastService.success('Object was successfully updated!');
+            this.router.navigate(['/framework/object/view/' + this.objectID]);
+          });
         } else {
           for (const err of res.failed) {
             this.toastService.error(err.error_message);
@@ -116,4 +168,44 @@ export class ObjectEditComponent implements OnInit {
     }
   }
 
+  public toggleChange() {
+    this.activeState = this.activeState !== true;
+    this.renderForm.markAsDirty();
+    }
+
+  private handleLocation(object_id: number, parent: number, name: string = "", type_id: number){
+      let params = {
+        "object_id": object_id,
+        "parent": parent,
+        "name": name,
+        "type_id": type_id 
+      }
+
+    //a parent is selected and there is no existing location for this object => create it
+    if(parent && parent > 0 && !this.locationForObjectExists){
+      this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+    
+    //a parent is selected and location for this object exists => update existing location
+    if(parent && parent > 0 && this.locationForObjectExists) {
+      this.locationService.updateLocationForObject(params).subscribe((res: APIUpdateMultiResponse) => {
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+
+    //parent is removed but location still exists => delete location
+    if(!parent && this.locationForObjectExists){
+      this.locationService.deleteLocationForObject(object_id).subscribe((res: APIUpdateMultiResponse) => {
+      }, error => {
+        this.toastService.error(error);
+      });
+      return;
+    }
+  }
 }

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { ObjectService } from '../../../services/object.service';
 import { RenderResult } from '../../../models/cmdb-render';
-import { HttpBackend, HttpResponse } from '@angular/common/http';
+import { HttpBackend } from '@angular/common/http';
 import { AuthService } from '../../../../auth/services/auth.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ObjectPreviewModalComponent } from '../../../object/modals/object-preview-modal/object-preview-modal.component';
@@ -49,7 +49,6 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
   }
 
   public ngOnInit(): void {
-
     this.data.default = parseInt(this.data.default, 10);
     if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
       if (this.data.ref_types) {

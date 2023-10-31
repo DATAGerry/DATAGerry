@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,34 +11,30 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
+import { HttpParams, HttpResponse } from '@angular/common/http';
+import { UntypedFormControl } from '@angular/forms';
 
-import {
-  HttpInterceptorHandler,
-  ApiCallService,
-  ApiService,
-  httpFileOptions,
-  httpObserveOptions
-} from '../services/api-call.service';
-import { HttpBackend, HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
-import { FormControl } from '@angular/forms';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
+
+import { ApiCallService, ApiServicePrefix, httpFileOptions, httpObserveOptions } from '../services/api-call.service';
+
 import { DocTemplate } from './models/cmdb-doctemplate';
-import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { APIGetMultiResponse } from '../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 
 @Injectable({
   providedIn: 'root'
 })
-export class DocapiService<T = DocTemplate> implements ApiService {
+export class DocapiService<T = DocTemplate> implements ApiServicePrefix {
 
   public readonly servicePrefix: string = 'docapi/template';
   public readonly newServicePrefix: string = 'docs/template';
@@ -138,7 +134,7 @@ export class DocapiService<T = DocTemplate> implements ApiService {
 
 // Form Validators
 export const checkDocTemplateExistsValidator = (docApiService: DocapiService<DocTemplate>, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return docApiService.checkDocTemplateExists(control.value).pipe(
         map(() => {

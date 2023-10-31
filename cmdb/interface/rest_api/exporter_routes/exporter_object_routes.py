@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -51,11 +51,11 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
         exporter = BaseExportWriter(exporter_class, _config)
         exporter.from_database(database_manager=current_app.database_manager, user=request_user,
                                permission=AccessControlPermission.READ)
-    except TypeNotFoundError as e:
-        return abort(400, e.message)
-    except ModuleNotFoundError as e:
-        return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
+    except TypeNotFoundError as error:
+        return abort(400, error.message)
+    except ModuleNotFoundError as error:
+        return abort(400, error)
+    except CMDBError as error:
+        return abort(404, jsonify(message='Not Found', error='Export objects CMDBError'))
 
     return exporter.export()

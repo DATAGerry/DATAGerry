@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -25,8 +25,9 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { ReplaySubject } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import {ToastService} from "../../../../../layout/toast/toast.service";
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { ToastService } from "../../../../../layout/toast/toast.service";
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -43,32 +44,32 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   /**
    * Name form control.
    */
-  public nameControl: FormControl = new FormControl('', Validators.required);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Label form control.
    */
-  public labelControl: FormControl = new FormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
   /**
    * Type form control.
    */
-  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Type form control.
    */
-  public sectionNameControl: FormControl = new FormControl(undefined, Validators.required);
+  public sectionNameControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   /**
    * Type form control.
    */
-  public selectedFieldsControl: FormControl = new FormControl([], Validators.required);
+  public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([], Validators.required);
 
   /**
    * Reference form control.
    */
-  public referenceGroup: FormGroup = new FormGroup({
+  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
     type_id: this.typeControl,
     section_name: this.sectionNameControl,
     selected_fields: this.selectedFieldsControl
@@ -110,7 +111,10 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public selectDisabled: boolean = false;
 
-  constructor(private typeService: TypeService, private toast: ToastService) {
+  private previousNameControlValue: string = '';
+  private initialValue: string;
+
+  constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService) {
     super();
   }
 
@@ -141,6 +145,9 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     this.patchData(this.data, this.form);
 
     this.triggerAPICall();
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
   }
 
   private loadPresetType(publicID: number): void {
@@ -241,10 +248,24 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    */
   public onNameChange(name: string) {
     const oldName = this.data.name;
-    const fieldIdx = this.data.fields.indexOf(`${ oldName }-field`);
-    const field = this.fields.find(x => x.name === `${ oldName }-field`);
-    this.data.fields[fieldIdx] = `${ name }-field`;
-    field.name = `${ name }-field`;
+    const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
+    const field = this.fields.find(x => x.name === `${oldName}-field`);
+    this.data.fields[fieldIdx] = `${name}-field`;
+    field.name = `${name}-field`;
+  }
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
   }
 
   /**

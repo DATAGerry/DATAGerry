@@ -1,4 +1,4 @@
-@import '~src/scss/variables';
+@import 'src/scss/variables';
 
 a {
   color: #000000;
@@ -10,4 +10,8 @@ a {
       color: theme-color('primary');
     }
   }
+}
+
+::ng-deep ngb-modal-backdrop {
+  z-index: 100 !important;
 }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -21,10 +21,10 @@ from enum import Enum
 from math import ceil
 from typing import List
 from flask import make_response as flask_response
-from werkzeug.wrappers import BaseResponse
+from werkzeug.wrappers import Response
 
 from cmdb.framework.utils import PublicID, Model
-from cmdb.interface import DEFAULT_MIME_TYPE
+from cmdb.interface import DEFAULT_MIME_TYPE, API_VERSION
 from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
 
@@ -32,7 +32,7 @@ from cmdb.interface.api_pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
 
 
-def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> BaseResponse:
+def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
     """
     Make a valid http response.
 
@@ -43,10 +43,8 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
         indent: display indent
 
     Returns:
-        BaseResponse
+        Response
     """
-    from cmdb.interface import API_VERSION
-
     response = flask_response(dumps(body, default=default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     response.headers['X-API-Version'] = API_VERSION
@@ -134,12 +132,12 @@ class BaseAPIResponse:
         self.body = body or True
         self.time: str = datetime.now(timezone.utc).isoformat()
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Abstract method for http response
 
         Returns:
-            http BaseResponse
+            http Response
         """
         raise NotImplementedError
 
@@ -183,7 +181,7 @@ class GetSingleResponse(BaseAPIResponse):
         super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
                                                 body=body)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -192,7 +190,7 @@ class GetSingleResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with a HTTP 200 status code.
+            Instance of Response with a HTTP 200 status code.
         """
         if self.body:
             response = make_api_response(self.export(*args, **kwargs))
@@ -246,7 +244,7 @@ class GetMultiResponse(BaseAPIResponse):
         super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
                                                body=body)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -255,7 +253,7 @@ class GetMultiResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse.
+            Instance of Response.
         """
         if self.body:
             response = make_api_response(self.export(*args, **kwargs))
@@ -312,7 +310,7 @@ class InsertSingleResponse(BaseAPIResponse):
         self.result_id: PublicID = result_id
         super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
-    def make_response(self, prefix: str = '', *args, **kwargs) -> BaseResponse:
+    def make_response(self, prefix: str = '', *args, **kwargs) -> Response:
         """
         Make a vaid http response.
 
@@ -322,7 +320,7 @@ class InsertSingleResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with http status code 201.
+            Instance of Response with http status code 201.
         """
         response = make_api_response(self.export(), 201)
         response.headers['Location'] = f'{self.url}{self.result_id}'
@@ -357,7 +355,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         self.failed: ResponseFailedMessage = failed
         super(UpdateSingleResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -366,7 +364,7 @@ class UpdateSingleResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with http status code 202
+            Instance of Response with http status code 202
         """
         response = make_api_response(self.export(), 202)
         response.headers['Location'] = f'{self.url}'
@@ -404,7 +402,7 @@ class UpdateMultiResponse(BaseAPIResponse):
         self.failed: List[ResponseFailedMessage] = failed or []
         super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -413,7 +411,7 @@ class UpdateMultiResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with http status code 202
+            Instance of Response with http status code 202
         """
         response = make_api_response(self.export(), 202)
         return response
@@ -446,7 +444,7 @@ class DeleteSingleResponse(BaseAPIResponse):
         self.raw = raw
         super(DeleteSingleResponse, self).__init__(operation_type=OperationType.DELETE, url=url, model=model)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -455,7 +453,7 @@ class DeleteSingleResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with 204 if raw content was set else 202
+            Instance of Response with 204 if raw content was set else 202
         """
         status_code = 204 if not self.raw else 202
         return make_api_response(self.export(*args, **kwargs), status_code)
@@ -486,7 +484,7 @@ class GetListResponse(BaseAPIResponse):
             self.results: List[dict] = results
         super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
 
-    def make_response(self, *args, **kwargs) -> BaseResponse:
+    def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
 
@@ -495,7 +493,7 @@ class GetListResponse(BaseAPIResponse):
             **kwargs:
 
         Returns:
-            Instance of BaseResponse with a HTTP 200 status code.
+            Instance of Response with a HTTP 200 status code.
         """
         if self.body:
             response = make_api_response(self.export(*args, **kwargs))

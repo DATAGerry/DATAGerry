@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -48,7 +48,7 @@ export class RefSimpleComponent extends RenderFieldComponent implements OnInit {
     if (this.data && this.data.value && this.data.value !== 0) {
       if (!this.data.reference) {
         this.objectService.getObject(this.data.value).subscribe((res: RenderResult) => {
-          console.log(res);
+          console.log("RSC: ",res);
           this.refData = {
             reference: new TypeReference({
               type_id: res.type_information.type_id,

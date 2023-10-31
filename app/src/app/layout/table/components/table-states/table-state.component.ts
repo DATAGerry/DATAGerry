@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,8 +16,8 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { Component, ElementRef, EventEmitter, Input, Output, Renderer2, ViewChild } from '@angular/core';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TableState } from '../../table.types';
 
 @Component({
@@ -65,21 +65,37 @@ export class TableStateComponent {
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
   /**
+   * Toggle button element reference.
+   */
+  @ViewChild('toggleButton') toggleButton: ElementRef;
+
+  /**
    * Name form validation
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
-  constructor() {
-    this.form = new FormGroup({
-      name: new FormControl('', Validators.required)
+  constructor(private renderer: Renderer2) {
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required)
+    });
+  }
+
+  ngAfterViewInit(): void {
+    this.renderer.listen('window', 'click',(e:Event)=>{
+      /**
+       * Only run when toggleButton is not clicked
+       */
+     if(e.target !== this.toggleButton.nativeElement){
+      this.form.reset();
+      }
     });
   }
 
   /**
    * Get the control of the settings.
    */
-  public get nameControl(): FormControl {
-    return this.form.get('name') as FormControl;
+  public get nameControl(): UntypedFormControl {
+    return this.form.get('name') as UntypedFormControl;
   }
 
   /**
@@ -105,7 +121,7 @@ export class TableStateComponent {
   public saveState(name: string, event: Event) {
     event.stopPropagation();
     this.stateSave.emit(name);
-    this.nameControl.setValue('');
+    this.form.reset();
   }
 
   /**

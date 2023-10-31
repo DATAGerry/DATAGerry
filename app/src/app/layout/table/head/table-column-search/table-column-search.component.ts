@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ import {
   ViewEncapsulation
 } from '@angular/core';
 import { Column } from '../../table.types';
-import { FormArray, FormBuilder, FormGroup } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
@@ -57,7 +57,7 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
   /**
    * Column search form group.
    */
-  @Input() form: FormGroup;
+  @Input() form: UntypedFormGroup;
 
   /**
    * Is row selected enabled.
@@ -76,7 +76,7 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
    */
   @Output() public columnSearchChange: EventEmitter<any[]> = new EventEmitter<any[]>();
 
-  public constructor(private fb: FormBuilder) {
+  public constructor(private fb: UntypedFormBuilder) {
   }
 
   /**
@@ -135,7 +135,7 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
    * Generate form controller from columns (dynamic)
    * @private
    */
-  private createItemFormGroup(): FormGroup {
+  private createItemFormGroup(): UntypedFormGroup {
     const group: any = {};
     for (const c of this.columns) {
       if (c.hidden) { continue; }
@@ -148,7 +148,7 @@ export class TableColumnSearchComponent<T> implements OnInit, OnDestroy {
    * Get FormArray
    */
   public get rows() {
-    return this.form.get('rows') as FormArray;
+    return this.form.get('rows') as UntypedFormArray;
   }
 
   /**

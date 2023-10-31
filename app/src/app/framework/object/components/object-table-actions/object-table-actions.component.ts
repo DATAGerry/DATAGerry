@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,18 +11,27 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
-import { RenderResult } from '../../../models/cmdb-render';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+
+import { ReplaySubject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
+
+import { LocationService } from 'src/app/framework/services/location.service';
+import { ObjectService } from 'src/app/framework/services/object.service';
+
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
-import { ReplaySubject } from 'rxjs';
+
+import { RenderResult } from '../../../models/cmdb-render';
 import { AccessControlList } from '../../../../acl/acl.types';
+/* -------------------------------------------------------------------------- */
+
 
 @Component({
   selector: 'cmdb-object-table-actions',
@@ -57,38 +66,91 @@ export class ObjectTableActionsComponent implements OnDestroy {
    */
   @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
 
+  /**
+   * Emitters when element was deleted with required location handling.
+   */
+  @Output() public deleteObjectsEmitter: EventEmitter<number> = new EventEmitter<number>();
+  @Output() public deleteLocationsEmitter: EventEmitter<number> = new EventEmitter<number>();
+
   private modalRef: NgbModalRef;
 
-  constructor(private modalService: NgbModal) {
-  }
+  private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Open the preview modal.
-   */
-  public openPreviewModal(): void {
-    this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
-    this.modalRef.componentInstance.renderResult = this.result;
-  }
+  /* -------------------------------------------------------------------------- */
+  /*                                 LIFE CYCLE                                 */
+  /* -------------------------------------------------------------------------- */
 
-  /**
-   * Open the delete modal.
-   */
-  public openDeleteModal(): void {
-    this.modalRef = this.modalService.open(ObjectDeleteModalComponent, { size: 'lg' });
-    this.modalRef.componentInstance.publicID = this.result.object_information.object_id;
-    this.modalRef.result.then((response: any) => {
-      if (!isNaN(+response)) {
-        this.deleteEmitter.emit(+response);
+    constructor(private locationService: LocationService, 
+                private objectService: ObjectService, 
+                private modalService: NgbModal) {}
+
+                
+    public ngOnDestroy(): void {
+      this.subscriber.next();
+      this.subscriber.complete();
+
+      if (this.modalRef) {
+        this.modalRef.close();
       }
-    });
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-    if (this.modalRef) {
-      this.modalRef.close();
     }
-  }
 
+  /* -------------------------------------------------------------------------- */
+  /*                                MODAL SECTION                               */
+  /* -------------------------------------------------------------------------- */
+
+    /**
+     * Open the preview modal.
+     */
+    public openPreviewModal(): void {
+      this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
+      this.modalRef.componentInstance.renderResult = this.result;
+    }
+
+
+    public handleDelete(publicID: number){
+        // first check if the object has a location which is parent to child locations
+        this.locationService.getChildren(publicID).pipe(takeUntil(this.locationSubscription))
+        .subscribe((children: RenderResult[]) => {
+            if(children && children.length > 0){
+              this.deleteWithLocations(publicID);
+            } else {
+              this.deleteObject(publicID);
+            }
+        },
+        (error) => {
+            console.error("Error:", error);
+        });
+    }
+
+
+    public deleteObject(publicID: number) {
+        this.modalRef = this.modalService.open(ObjectDeleteModalComponent, { size: 'lg' });
+        this.modalRef.componentInstance.publicID = this.result.object_information.object_id;
+
+        this.modalRef.result.then((response: any) => {
+            if(response > 0){
+              this.deleteEmitter.emit(response);
+            }
+        });
+    }
+
+    /**
+     * TODO: implementation
+     * @param publicID 
+     */
+    private deleteWithLocations(publicID: number){
+        this.modalRef = this.objectService.openLocationModalComponent();
+
+        this.modalRef.result.then((result) => {
+            //delete all child objects with their locations
+            if(result == 'objects'){
+              this.deleteObjectsEmitter.emit(publicID);
+            }
+
+            //delete only locations of children
+            if(result == 'locations'){
+              this.deleteLocationsEmitter.emit(publicID);
+            }
+        });
+    }
 }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,11 +23,11 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from cmdb.database.utils import object_hook
-from bson import json_util
-from typing import List
+from typing import List, Union
 from queue import Queue
+from bson import json_util
 
+from cmdb.database.utils import object_hook
 from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
@@ -44,7 +44,7 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
-from cmdb.utils.wraps import deprecated
+#from cmdb.utils.wraps import deprecated
 
 LOGGER = logging.getLogger(__name__)
 
@@ -68,13 +68,21 @@ def verify_access(model: TypeModel, user: UserModel = None, permission: AccessCo
 
 
 class CmdbObjectManager(CmdbManagerBase):
-
+    """
+    class CmdbObjectManager
+    """
     def __init__(self, database_manager=None, event_queue: Queue = None):
         self._event_queue = event_queue
         self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
 
     def is_ready(self) -> bool:
+        """
+        function 'is_ready' returns the current database connector status
+
+        Returns:
+            bool: Connector is connected to database
+        """
         return self.dbm.status()
 
     def get_new_id(self, collection: str) -> int:
@@ -83,8 +91,8 @@ class CmdbObjectManager(CmdbManagerBase):
     def aggregate(self, collection, pipeline: Pipeline, **kwargs):
         try:
             return self._aggregate(collection=collection, pipeline=pipeline, **kwargs)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
     def get_object(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbObject:
@@ -92,8 +100,8 @@ class CmdbObjectManager(CmdbManagerBase):
             resource = CmdbObject(**self._get(
                 collection=CmdbObject.COLLECTION,
                 public_id=public_id))
-        except Exception as err:
-            raise ObjectManagerGetError(str(err))
+        except Exception as error:
+            raise ObjectManagerGetError(str(error)) from error
 
         type_ = self._type_manager.get(resource.type_id)
         verify_access(type_, user, permission)
@@ -114,6 +122,15 @@ class CmdbObjectManager(CmdbManagerBase):
         return ack
 
     def get_objects_by_type(self, type_id: int):
+        """
+        function 'get_objects_by_type' gets all objects with the given type_id
+
+        Args: 
+            type_id (int): ID of the type
+
+        Returns:
+            list: All objects with the given ID (empty list if none found) 
+        """
         return self.get_objects_by(type_id=type_id)
 
     def count_objects_by_type(self, public_id: int):
@@ -220,7 +237,7 @@ class CmdbObjectManager(CmdbManagerBase):
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
 
-    def insert_object(self, data: (CmdbObject, dict), user: UserModel = None,
+    def insert_object(self, data: Union[CmdbObject, dict], user: UserModel = None,
                       permission: AccessControlPermission = None) -> int:
         """
         Insert new CMDB Object
@@ -235,9 +252,9 @@ class CmdbObjectManager(CmdbManagerBase):
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
-            except CMDBError as e:
-                LOGGER.debug(f'Error while inserting object - error: {e.message}')
-                raise ObjectManagerInsertError(e)
+            except CMDBError as error:
+                LOGGER.debug('Error while inserting object - error: %s', error)
+                raise ObjectManagerInsertError(error) from error
         elif isinstance(data, CmdbObject):
             new_object = data
 
@@ -258,8 +275,8 @@ class CmdbObjectManager(CmdbManagerBase):
                                                          "user_id": new_object.author_id,
                                                          "event": 'insert'})
                 self._event_queue.put(event)
-        except (CMDBError, PublicIDAlreadyExists) as e:
-            raise ObjectInsertError(e)
+        except (CMDBError, PublicIDAlreadyExists) as error:
+            raise ObjectInsertError(error) from error
         return ack
 
     def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
@@ -323,8 +340,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
-        except (CMDBError, Exception):
-            raise ObjectDeleteError(msg=public_id)
+        except (CMDBError, Exception) as error:
+            raise ObjectDeleteError(msg=public_id) from error
 
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
@@ -335,38 +352,38 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
-    @deprecated
+    #@deprecated
     def get_all_types(self) -> List[TypeModel]:
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except Exception as error:
+            raise ObjectManagerGetError(err=error) from error
         try:
             return [TypeModel.from_data(type) for type in raw_types]
-        except Exception as err:
-            raise ObjectManagerInitError(err=err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
-    @deprecated
+    #@deprecated
     def get_type(self, public_id: int):
         try:
             return TypeModel.from_data(self.dbm.find_one(
                 collection=TypeModel.COLLECTION,
                 public_id=public_id)
             )
-        except RequiredInitKeyNotFoundError as err:
-            raise ObjectManagerInitError(err=err.message)
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except RequiredInitKeyNotFoundError as error:
+            raise ObjectManagerInitError(err=error.message)  from error
+        except Exception as error:
+            raise ObjectManagerGetError(err=error) from error
 
-    @deprecated
+    #@deprecated
     def get_types_by(self, sort='public_id', **requirements):
         try:
             return [TypeModel.from_data(data) for data in
                     self._get_many(collection=TypeModel.COLLECTION, sort=sort, **requirements)]
-        except Exception as err:
-            raise ObjectManagerGetError(err=err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
-    @deprecated
+    #@deprecated
     def get_type_aggregate(self, arguments):
         """This method does not actually
            performs the find() operation
@@ -385,23 +402,23 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeModel.from_data(put_data))
         return type_list
 
-    @deprecated
+    #@deprecated
     def count_types(self):
         return self.dbm.count(collection=TypeModel.COLLECTION)
 
-    @deprecated
+    #@deprecated
     def get_categories(self) -> List[CategoryModel]:
         """Get all categories as nested list"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort='public_id')
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
         try:
             return [CategoryModel.from_data(category) for category in raw_categories]
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
-    @deprecated
+    #@deprecated
     def get_category_by(self, **requirements) -> CategoryModel:
         """Get a single category by requirements
         Notes:
@@ -409,30 +426,30 @@ class CmdbObjectManager(CmdbManagerBase):
         """
         try:
             raw_category = self._get_by(collection=CategoryModel.COLLECTION, **requirements)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
 
         try:
             return CategoryModel.from_data(raw_category)
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
-    @deprecated
+    #@deprecated
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort=sort, **requirements)
-        except Exception as err:
-            raise ObjectManagerGetError(err)
+        except Exception as error:
+            raise ObjectManagerGetError(error) from error
         try:
             return [CategoryModel.from_data(category) for category in raw_categories]
-        except Exception as err:
-            raise ObjectManagerInitError(err)
+        except Exception as error:
+            raise ObjectManagerInitError(error) from error
 
-    @deprecated
+    #@deprecated
     def insert_category(self, category: CategoryModel):
         """Add a new category into the database or add the children list an existing category"""
         try:
             return self._insert(collection=CategoryModel.COLLECTION, data=CategoryModel.to_json(category))
-        except Exception as err:
-            raise ObjectManagerInsertError(err=err)
+        except Exception as error:
+            raise ObjectManagerInsertError(error) from error

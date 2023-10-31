@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { CmdbType} from '../../framework/models/cmdb-type';
-import { FormControl, FormGroup, Validators} from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
 import { DatePipe } from '@angular/common';
 import { TypeService } from '../../framework/services/type.service';
 import { FileSaverService } from 'ngx-filesaver';
@@ -35,14 +35,14 @@ export class ExportObjectsComponent implements OnInit {
 
   public typeList: CmdbType[];
   public formatList: SupportedExporterExtension[] = [];
-  public formExport: FormGroup;
-  public isSubmitted = false;
+  public formExport: UntypedFormGroup;
+  public isVisible: boolean;
 
   constructor(private exportService: FileService, private datePipe: DatePipe, private typeService: TypeService,
               private fileSaverService: FileSaverService ) {
-    this.formExport = new FormGroup({
-      type: new FormControl( null, Validators.required),
-      format: new FormControl(null, Validators.required)
+    this.formExport = new UntypedFormGroup({
+      type: new UntypedFormControl( null, Validators.required),
+      format: new UntypedFormControl(null, Validators.required)
     });
   }
 
@@ -72,7 +72,6 @@ export class ExportObjectsComponent implements OnInit {
   }
 
   public exportObjectByTypeID() {
-    this.isSubmitted = true;
     if (!this.formExport.valid) {
       return false;
     }
@@ -93,6 +92,7 @@ export class ExportObjectsComponent implements OnInit {
   }
 
   public downLoadFile(data: any, exportType: any) {
+    this.isVisible = false;
     const timestamp = this.datePipe.transform(new Date(), 'MM_dd_yyyy_hh_mm_ss');
     const extension = this.formatList.find(x => x.extension === exportType);
     this.fileSaverService.save(data.body, timestamp + '.' + extension.label);

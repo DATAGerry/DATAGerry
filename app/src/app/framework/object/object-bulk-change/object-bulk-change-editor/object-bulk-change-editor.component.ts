@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
 import { CmdbType } from '../../../models/cmdb-type';
 
@@ -37,8 +37,8 @@ export class ObjectBulkChangeEditorComponent {
   /**
    * Form control
    */
-  @Input() public changeForm: FormGroup = new FormGroup({});
-  @Input() public renderForm: FormGroup = new FormGroup({});
+  @Input() public changeForm: UntypedFormGroup = new UntypedFormGroup({});
+  @Input() public renderForm: UntypedFormGroup = new UntypedFormGroup({});
 
   /**
    * Bulk deactivation.

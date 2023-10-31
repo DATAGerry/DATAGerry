@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -109,6 +109,10 @@ export class CleanButtonComponent implements OnChanges, OnDestroy {
       if (result === 'Clean') {
         this.toastService.success(`Objects of ${ this.type.label } were cleaned up!`);
         this.loadObjectCleanStatus();
+        //TODO : reload is done for now but should be replaced 
+        // apparantely a delay of 1500ms between this.objectService.cleanObjects and 
+        //  this.objectService.getObjectCleanStatus gets the updated data
+        window.location.reload();
       }
     });
   }

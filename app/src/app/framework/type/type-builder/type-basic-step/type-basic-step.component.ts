@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
 import { CmdbMode } from '../../../modes.enum';
 import { ReplaySubject } from 'rxjs';
@@ -37,7 +37,7 @@ import { CmdbType } from '../../../models/cmdb-type';
 export class TypeBasicStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
@@ -55,12 +55,12 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
 
   constructor(private typeService: TypeService) {
     super();
-    this.form = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      description: new FormControl(''),
-      active: new FormControl(true),
-      icon: new FormControl('fa fa-cube')
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required),
+      label: new UntypedFormControl('', Validators.required),
+      description: new UntypedFormControl(''),
+      active: new UntypedFormControl(true),
+      icon: new UntypedFormControl('fa fa-cube')
     });
   }
 
@@ -87,20 +87,20 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
     this.typeInstance.render_meta.icon = changes.icon;
   }
 
-  public get icon(): FormControl {
-    return this.form.get('icon') as FormControl;
+  public get icon(): UntypedFormControl {
+    return this.form.get('icon') as UntypedFormControl;
   }
 
-  public get name(): FormControl {
-    return this.form.get('name') as FormControl;
+  public get name(): UntypedFormControl {
+    return this.form.get('name') as UntypedFormControl;
   }
 
-  public get label(): FormControl {
-    return this.form.get('label') as FormControl;
+  public get label(): UntypedFormControl {
+    return this.form.get('label') as UntypedFormControl;
   }
 
-  public get description(): FormControl {
-    return this.form.get('description') as FormControl;
+  public get description(): UntypedFormControl {
+    return this.form.get('description') as UntypedFormControl;
   }
 
   public ngOnDestroy(): void {

@@ -4,7 +4,7 @@
       <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" data-toggle="dropdown">
         <i class="fas fa-list"></i> Show Tabs
       </button>
-      <div class="dropdown-menu dropdown-menu-right" *ngIf="referencedTypes.length > 0">
+      <div class="dropdown-menu dropdown-menu-right">
         <button *ngFor="let item of referencedTypes" type="button" class="dropdown-item"
                 (click)="onSelect(item)">
           <span class="form-check">

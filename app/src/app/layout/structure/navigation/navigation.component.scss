@@ -1,4 +1,4 @@
-@import '~src/scss/variables';
+@import 'src/scss/variables';
 /**
  * Navbar
  */
@@ -169,6 +169,10 @@ $navbar-dropdown-header-background: theme-color('primary');
       white-space: nowrap;
       font-size: 14px;
       line-height: initial;
+    }
+
+    .dropdown-icon-item:hover{
+      cursor: pointer;
     }
 
     .dropdown-lg {

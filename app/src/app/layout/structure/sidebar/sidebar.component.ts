@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,23 +11,26 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
-import { CategoryService } from '../../../framework/services/category.service';
+import { UntypedFormControl } from '@angular/forms';
+
 import { ReplaySubject, Subscription } from 'rxjs';
-import { CmdbType } from '../../../framework/models/cmdb-type';
+import { takeUntil } from 'rxjs/operators';
+
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
+
+import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
+import { CmdbType } from '../../../framework/models/cmdb-type';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import { takeUntil } from 'rxjs/operators';
 import {AccessControlPermission} from "../../../acl/acl.types";
+/* -------------------------------------------------------------------------- */
 
 @Component({
   selector: 'cmdb-sidebar',
@@ -64,39 +67,63 @@ export class SidebarComponent implements OnInit, OnDestroy {
   /**
    * Filter
    */
-  public filterTerm: FormControl = new FormControl('');
+  public filterTerm: UntypedFormControl = new UntypedFormControl('');
   private filterTermSubscription: Subscription;
 
-  constructor(private sidebarService: SidebarService, private categoryService: CategoryService,
-              private typeService: TypeService, private renderer: Renderer2) {
-    this.categoryTreeSubscription = new Subscription();
-    this.unCategorizedTypesSubscription = new Subscription();
-    this.filterTermSubscription = new Subscription();
-  }
+  /**
+   * String representation of currently selected tab menu in sidebar (Default is Categories)
+   */
+  selectedMenu: string;
 
-  public ngOnInit(): void {
-    this.renderer.addClass(document.body, 'sidebar-fixed');
-    this.sidebarService.loadCategoryTree();
-    this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
-      this.categoryTree = categoryTree;
-      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ,
-        false).subscribe(
-          (apiResponse: APIGetMultiResponse<CmdbType>) => {
-            this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-          });
+/* -------------------------------------------------------------------------- */
+/*                                 LIFE CYCLE                                 */
+/* -------------------------------------------------------------------------- */
 
-      this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
-        (apiResponse: APIGetMultiResponse<CmdbType>) => {
-          this.typeList = apiResponse.results as Array<CmdbType>;
+    constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
+        this.categoryTreeSubscription = new Subscription();
+        this.unCategorizedTypesSubscription = new Subscription();
+        this.filterTermSubscription = new Subscription();
+    }
+  
+    public ngOnInit(): void {
+        this.renderer.addClass(document.body, 'sidebar-fixed');
+        this.sidebarService.loadCategoryTree();
+        this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
+            this.categoryTree = categoryTree;
+            this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false).subscribe(
+              (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+            });
+
+            this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
+              (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.typeList = apiResponse.results as Array<CmdbType>;
+            });
         });
-    });
-  }
 
-  public ngOnDestroy(): void {
-    this.categoryTreeSubscription.unsubscribe();
-    this.unCategorizedTypesSubscription.unsubscribe();
-    this.filterTermSubscription.unsubscribe();
-    this.renderer.removeClass(document.body, 'sidebar-fixed');
-  }
+      this.selectedMenu = this.sidebarService.selectedMenu;
+    }
 
+
+    public ngOnDestroy(): void {
+        this.categoryTreeSubscription.unsubscribe();
+        this.unCategorizedTypesSubscription.unsubscribe();
+        this.filterTermSubscription.unsubscribe();
+        this.renderer.removeClass(document.body, 'sidebar-fixed');
+    }
+
+/* -------------------------------------------------------------------------- */
+/*                              SIDEBAR HANDLING                              */
+/* -------------------------------------------------------------------------- */
+
+    /**
+     * Toggles the activated menu tabs (categories and locations)
+     * 
+     * @param selection :string = String representation of the selected menu
+     */
+    onSidebarMenuClicked(selection: HTMLDivElement){
+        let newValue = selection.getAttribute('value');
+        this.selectedMenu = newValue;
+        this.sidebarService.selectedMenu = newValue; 
+    }
 }

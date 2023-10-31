@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from functools import wraps
+import logging
 
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
@@ -26,6 +27,7 @@ from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 
+LOGGER = logging.getLogger(__name__)
 
 class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
@@ -130,6 +132,20 @@ class APIBlueprint(Blueprint):
         return _parse
 
     @classmethod
+    def parse_location_parameters(cls, **optional):
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+
+                try:
+                    locationArgs = request.args.to_dict()
+                except Exception as error:
+                    return abort(400, str(error))
+                return f(locationArgs)
+            return _decorate
+        return _parse
+
+    @classmethod
     def parse_collection_parameters(cls, **optional):
         """
         Wrapper function for the flask routes.
@@ -171,6 +187,19 @@ class RootBlueprint(Blueprint):
             nested_blueprint (NestedBlueprint): Blueprint for sub routes
         """
         self.nested_blueprints.append(nested_blueprint)
+
+    @classmethod
+    def parse_assistant_parameters(cls, **optional):
+        def _parse(f):
+            @wraps(f)
+            def _decorate(*args, **kwargs):
+                try:
+                    locationArgs = request.args.to_dict()
+                except Exception as error:
+                    return abort(400, str(error))
+                return f(locationArgs)
+            return _decorate
+        return _parse
 
 
 class NestedBlueprint:

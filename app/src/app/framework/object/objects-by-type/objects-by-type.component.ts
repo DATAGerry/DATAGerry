@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -148,11 +148,15 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   private deleteManyModalRef: NgbModalRef;
 
+  /* ---------------------------------------------------------------------------------------------- */
+  /*                                           LIFE CYCLE                                           */
+  /* ---------------------------------------------------------------------------------------------- */
+
   constructor(private router: Router, private route: ActivatedRoute, private objectService: ObjectService,
-              private fileService: FileService, private fileSaverService: FileSaverService,
-              private toastService: ToastService, private sidebarService: SidebarService,
-              private modalService: NgbModal, private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
+    private fileService: FileService, private fileSaverService: FileSaverService,
+    private toastService: ToastService, private sidebarService: SidebarService,
+    private modalService: NgbModal, private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
@@ -165,7 +169,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
         const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
         const resource: string = convertResourceURL(this.router.url.toString());
-        const userSetting = userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
+        const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
         this.indexDB.addSetting(userSetting);
       }
       this.typeSubject.next(data.type as CmdbType);
@@ -240,7 +244,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     for (const field of fields) {
       columns.push({
         display: field.label,
-        name: `fields.${ field.name }`,
+        name: `fields.${field.name}`,
         data: field.name,
         type: field.type,
         sortable: true,
@@ -330,6 +334,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       filter: this.collectionFilterParameter, limit: this.limit,
       sort: this.sort.name, order: this.sort.order, page: this.page
     };
+
     this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
         this.results = apiResponse.results as Array<RenderResult>;
@@ -345,6 +350,10 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param columns {@link Array<Column>} are taken into account in the query.
    */
   private filterBuilder(columns: Array<Column>) {
+    this.loading = true;
+    let query;
+    const numericValue = Number(this.search_term);
+
     this.collectionFilterParameter = [];
     this.collectionFilterParameter.push({
       $match: {
@@ -352,27 +361,171 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       }
     });
     if (this.search_term) {
+
+      query = [];
       const or = [];
       for (const column of columns) {
         const regex: any = {};
-        if ('checkbox' === column.type) {
-          try {
-            regex['fields.name'] = column.name.slice(7);
-            regex['fields.value'] = Boolean(JSON.parse(this.search_term));
-            or.push(regex);
-          } catch (e) {}
+        regex[column.name] = {
+          $regex: String(this.search_term),
+          $options: 'ismx'
+        };
+        or.push(regex);
+      }
+
+      // Add a separate condition for numeric search
+      if (!isNaN(numericValue)) {
+        or.push({
+          'fields.value': numericValue
+        });
+      }
+
+      //Reference Field
+
+      query.push(
+        {
+          $lookup: {
+            from: 'framework.objects',
+            localField: 'fields.value',
+            foreignField: 'public_id',
+            as: 'data'
+          }
+        });
+
+
+      query.push({
+        $project: {
+          _id: 1,
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          simple: {
+            $reduce: {
+              input: '$data.fields',
+              initialValue: [],
+              in: { $setUnion: ['$$value', '$$this'] }
+            }
+          },
+        }
+      },
+
+      );
+
+      query.push({
+        $group: {
+          _id: '$_id',
+          public_id: { $first: '$public_id' },
+          type_id: { $first: '$type_id' },
+          active: { $first: '$active' },
+          author_id: { $first: '$author_id' },
+          creation_time: { $first: '$creation_time' },
+          last_edit_time: { $first: '$last_edit_time' },
+          fields: { $first: '$fields' },
+          simple: { $first: '$simple' },
+        }
+      });
+
+      query.push({
+        $project:
+        {
+          _id: '$_id',
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          references: { $setUnion: ['$fields', '$simple'] },
         }
       }
-      this.referenceFieldQuery(this.collectionFilterParameter);
-      this.addFieldsCreationTime(this.collectionFilterParameter);
-      this.addFieldsLastEditTime(this.collectionFilterParameter);
-      this.dateFieldValuesQuery(this.collectionFilterParameter);
-      this.publicIdQuery(this.collectionFilterParameter);
+      );
 
-      // Search Fields
-      or.push(this.elementMatchFields(this.search_term));
-      this.collectionFilterParameter.push({ $match: { $or: or } });
+
+      query.push({ $addFields: { public_id: { $toString: '$public_id' } } });
+
+
+      or.push({
+        public_id: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.search_term),
+              $options: 'ismx'
+            }
+          }
+        }
+      });
+
+
+      // Search for creation_time
+      query.push(
+        {
+          $addFields: {
+            creationString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$creation_time' } }
+          }
+        },
+      );
+
+      // Search for last_edit_time
+      query.push(
+        {
+          $addFields: {
+            editString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$last_edit_time' } }
+          }
+        },
+      );
+
+
+      or.push({
+        references: {
+          $elemMatch: {
+            value: {
+              $regex: String(this.search_term),
+              $options: 'ism'
+            }
+          }
+        }
+      });
+      query.push({
+        $match: {
+          type_id: this.type.public_id
+        }
+      });
+      or.push({ creationString: { $regex: String(this.search_term), $options: 'ims' } });
+      or.push({ editString: { $regex: String(this.search_term), $options: 'ims' } });
+      query.push({ $match: { $or: or } });
     }
+
+
+    let params: CollectionParameters
+    if (!this.search_term) {
+      params = {
+        filter: this.collectionFilterParameter,
+        limit: this.limit,
+        sort: this.sort.name,
+        order: this.sort.order,
+        page: this.page
+      };
+    } else {
+      params = {
+        filter: query,
+        limit: this.limit,
+        sort: this.sort.name,
+        order: this.sort.order,
+        page: this.page
+      };
+    }
+
+    this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
+      .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+        this.results = apiResponse.results as Array<RenderResult>;
+        this.totalResults = apiResponse.total;
+        this.loading = false;
+      });
   }
 
   /**
@@ -392,7 +545,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param value search term
    */
   private searchRegexProperty(property: string, value: string) {
-    return {[property]: { $regex: String(value), $options: 'ims' } };
+    return { [property]: { $regex: String(value), $options: 'ims' } };
   }
 
   /**
@@ -417,46 +570,49 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
       },
       {
         $project: {
-        _id: 1,
-        public_id: 1,
-        type_id: 1,
-        active: 1,
-        author_id: 1,
-        creation_time: 1,
-        last_edit_time: 1,
-        fields: 1,
-        simple: {
-          $reduce: {
-            input: '$data.fields',
-            initialValue: [],
-            in: { $setUnion: ['$$value', '$$this'] }
-          }}
-        }},
-      {
-      $group: {
-        _id: '$_id',
-        public_id : { $first: '$public_id' },
-        type_id: { $first: '$type_id' },
-        active: { $first: '$active' },
-        author_id: { $first: '$author_id' },
-        creation_time: { $first: '$creation_time' },
-        last_edit_time: { $first: '$last_edit_time' },
-        fields : { $first: '$fields' },
-        simple: { $first: '$simple' },
-      }
-    },
-      { $project:
-          {
-            _id: '$_id',
-            public_id: 1,
-            type_id: 1,
-            active: 1,
-            author_id: 1,
-            creation_time: 1,
-            last_edit_time: 1,
-            fields: 1,
-            references : { $concatArrays: ['$fields', '$simple'] },
+          _id: 1,
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          simple: {
+            $reduce: {
+              input: '$data.fields',
+              initialValue: [],
+              in: { $setUnion: ['$$value', '$$this'] }
+            }
           }
+        }
+      },
+      {
+        $group: {
+          _id: '$_id',
+          public_id: { $first: '$public_id' },
+          type_id: { $first: '$type_id' },
+          active: { $first: '$active' },
+          author_id: { $first: '$author_id' },
+          creation_time: { $first: '$creation_time' },
+          last_edit_time: { $first: '$last_edit_time' },
+          fields: { $first: '$fields' },
+          simple: { $first: '$simple' },
+        }
+      },
+      {
+        $project:
+        {
+          _id: '$_id',
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          references: { $concatArrays: ['$fields', '$simple'] },
+        }
       }
     );
   }
@@ -468,9 +624,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private addFieldsCreationTime(query: any[]) {
     return query.push(
-      { $addFields: {
+      {
+        $addFields: {
           creationString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$creation_time' } }
-        }},
+        }
+      },
     );
   }
 
@@ -481,9 +639,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private addFieldsLastEditTime(query: any[]) {
     return query.push(
-      { $addFields: {
+      {
+        $addFields: {
           editString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$last_edit_time' } }
-        }},
+        }
+      },
     );
   }
 
@@ -495,7 +655,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    */
   private dateFieldValuesQuery(query: any[], input: string = 'references') {
     return query.push(
-      { $addFields: {
+      {
+        $addFields: {
           references: {
             $map: {
               input: '$' + input,
@@ -503,10 +664,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
               in: {
                 $cond: [
                   { $eq: [{ $type: '$$new_fields.value' }, 'date'] },
-                  { name: '$$new_fields.name', value: {
-                      $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' } }
+                  {
+                    name: '$$new_fields.name', value: {
+                      $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' }
+                    }
                   },
-                  { name: '$$new_fields.name', value: '$$new_fields.value'}
+                  { name: '$$new_fields.name', value: '$$new_fields.value' }
                 ]
               }
             }
@@ -521,7 +684,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @private
    */
   private publicIdQuery(query: any[]) {
-    return query.push({ $addFields: { public_id: { $toString: '$public_id' }}});
+    return query.push({ $addFields: { public_id: { $toString: '$public_id' } } });
   }
 
   /**
@@ -529,7 +692,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @private
    */
   private activeStateQuery(query: any[]) {
-    return query.push({ $addFields: { active: { $toString: '$active' }}});
+    return query.push({ $addFields: { active: { $toString: '$active' } } });
   }
 
   /**
@@ -581,7 +744,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     }
     const searchableColumns = this.columns.filter(c => c.searchable);
     this.filterBuilder(searchableColumns);
-    this.loadObjects();
+    // this.filterBuilder1(searchableColumns);
+    // this.loadObjects();
   }
 
   /**
@@ -591,7 +755,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
    * @param changes
    */
   public onColumnSearchChange(changes: any[]): void {
-    if ( changes.length === 0 && this.objectsTableComponent && !this.objectsTableComponent.columnSearchIconHidden) {
+    if (changes.length === 0 && this.objectsTableComponent && !this.objectsTableComponent.columnSearchIconHidden) {
       this.onSearchChange(this.search_term);
     }
     else {
@@ -601,11 +765,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
           type_id: this.type.public_id
         }
       });
-      if (changes.length > 0 ) {
+      if (changes.length > 0) {
         const or: any[] = [];
         for (const change of changes) {
           const and: any[] = [];
-          for ( const column of change) {
+          for (const column of change) {
             const prefix = column.name.slice(0, 6);
             const name = 'fields' === prefix ? column.name.slice(7) : column.name;
             switch (column.type) {
@@ -626,20 +790,19 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                 }
                 if ('last_edit_time' === name) {
                   this.addFieldsLastEditTime(this.collectionFilterParameter);
-                  and.push( { editString: { $regex: String(column.data), $options: 'ims' } } );
+                  and.push({ editString: { $regex: String(column.data), $options: 'ims' } });
                 }
                 break;
               case 'checkbox':
                 try {
                   if ('active' === name) {
-                    and.push({active: column.data});
+                    and.push({ active: column.data });
                   } else {
                     and.push(this.elementMatchFields(Boolean(JSON.parse(column.data)), column.name.slice(7), 'fields'));
                   }
-                } catch (e) {}
+                } catch (e) { }
                 break;
               default:
-                console.log(name);
                 if ('public_id' === name) {
                   this.publicIdQuery(this.collectionFilterParameter);
                   and.push(this.searchRegexProperty('public_id', column.data));
@@ -691,25 +854,27 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
   }
 
   public exportingFiles(see: SupportedExporterExtension) {
-    const optional = {classname: see.extension, zip: false, metadata: undefined};
+    const optional = { classname: see.extension, zip: false, metadata: undefined };
     const columns = this.columns.filter(c => !c.hidden && !c.fixed);
 
     const properties = [];
     const fields = [];
     for (const col of columns) {
-      const {name} = (col as any);
+      const { name } = (col as any);
       if (name && name.startsWith('fields.')) {
         fields.push(name.replace('fields.', ''));
       } else {
         properties.push(name);
       }
     }
-    optional.metadata = {header: properties, columns: fields};
+    optional.metadata = { header: properties, columns: fields };
 
-    const exportAPI: CollectionParameters = {filter: this.collectionFilterParameter, optional,
-      order: this.sort.order, sort: this.sort.name};
+    const exportAPI: CollectionParameters = {
+      filter: this.collectionFilterParameter, optional,
+      order: this.sort.order, sort: this.sort.name
+    };
     if (this.selectedObjectsIDs.length > 0) {
-      exportAPI.filter = [{$match: {public_id: {$in: this.selectedObjectsIDs}}}, ...this.collectionFilterParameter] ;
+      exportAPI.filter = [{ $match: { public_id: { $in: this.selectedObjectsIDs } } }, ...this.collectionFilterParameter];
     }
     this.fileService.callExportRoute(exportAPI, see.view)
       .subscribe(res => {
@@ -719,12 +884,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
   public onObjectDelete(publicID: number) {
     this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
-        this.toastService.success(`Object ${ publicID } was deleted successfully`);
-        this.sidebarService.updateTypeCounter(this.type.public_id);
-        this.loadObjects();
-      },
+      this.toastService.success(`Object ${publicID} was deleted successfully`);
+      this.sidebarService.updateTypeCounter(this.type.public_id);
+      this.loadObjects();
+    },
       (error) => {
-        this.toastService.error(`Error while deleting object ${ publicID } | Error: ${ error }`);
+        this.toastService.error(`Error while deleting object ${publicID} | Error: ${error}`);
       });
   }
 
@@ -735,12 +900,12 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         if (response === 'delete') {
           this.objectService.deleteManyObjects(this.selectedObjectsIDs.toString())
             .pipe(takeUntil(this.subscriber)).subscribe(() => {
-            this.toastService.success(`Deleted ${ this.selectedObjects.length } objects successfully`);
-            this.sidebarService.updateTypeCounter(this.type.public_id);
-            this.selectedObjects = [];
-            this.objectsTableComponent.selectedItems = [];
-            this.loadObjects();
-          });
+              this.toastService.success(`Deleted ${this.selectedObjects.length} objects successfully`);
+              this.sidebarService.updateTypeCounter(this.type.public_id);
+              this.selectedObjects = [];
+              this.objectsTableComponent.selectedItems = [];
+              this.loadObjects();
+            });
         }
       });
     }

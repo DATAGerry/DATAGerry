@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnInit } from '@angular/core';
-import { FormGroup} from '@angular/forms';
+import { UntypedFormGroup} from '@angular/forms';
 
 @Component({
   selector: 'cmdb-select-file-drag-drop',
@@ -26,7 +26,7 @@ import { FormGroup} from '@angular/forms';
 })
 export class SelectFileDragDropComponent implements OnInit {
 
-  @Input() formGroup: FormGroup;
+  @Input() formGroup: UntypedFormGroup;
   public syntaxError: boolean = false;
 
   ngOnInit() {

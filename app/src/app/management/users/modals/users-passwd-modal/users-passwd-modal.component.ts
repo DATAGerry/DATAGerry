@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, ElementRef, Input, ViewChild } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { User } from '../../../models/user';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { UserService } from '../../../services/user.service';
 import { ToastService } from '../../../../layout/toast/toast.service';
 
@@ -32,12 +32,12 @@ export class UsersPasswdModalComponent {
   @ViewChild('passWordInput') public passWordToggle: ElementRef;
   @Input() public user: User;
 
-  public passwdForm: FormGroup;
+  public passwdForm: UntypedFormGroup;
 
   constructor(private userService: UserService, public activeModal: NgbActiveModal, private toast: ToastService) {
-    this.passwdForm = new FormGroup({
-      public_id: new FormControl(null),
-      password: new FormControl('', Validators.required)
+    this.passwdForm = new UntypedFormGroup({
+      public_id: new UntypedFormControl(null),
+      password: new UntypedFormControl('', Validators.required)
     });
   }
 

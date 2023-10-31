@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, OnInit, Input } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { DocapiService, checkDocTemplateExistsValidator } from '../../docapi.service';
 import { CmdbMode } from '../../../framework/modes.enum';
 
@@ -37,14 +37,14 @@ export class DocapiBuilderSettingsStepComponent implements OnInit {
 
   @Input() public mode: CmdbMode;
   public modes = CmdbMode;
-  public settingsForm: FormGroup;
+  public settingsForm: UntypedFormGroup;
 
   constructor(private docapiService: DocapiService) {
-    this.settingsForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      description: new FormControl(''),
-      active: new FormControl(true)
+    this.settingsForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required),
+      label: new UntypedFormControl('', Validators.required),
+      description: new UntypedFormControl(''),
+      active: new UntypedFormControl(true)
     });
   }
 

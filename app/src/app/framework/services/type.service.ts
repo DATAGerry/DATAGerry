@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,13 +20,13 @@ import { Injectable } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   HttpProtocolHelper,
   resp
 } from '../../services/api-call.service';
 import { Observable, timer } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import {
   APIDeleteSingleResponse,
@@ -39,10 +39,11 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 import { ValidatorService } from '../../services/validator.service';
 import { UserService } from '../../management/services/user.service';
 import { AccessControlPermission } from '../../acl/acl.types';
+import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 
 export const checkTypeExistsValidator = (typeService: TypeService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return typeService.getTypeByName(control.value).pipe(
         map((response) => {
@@ -65,7 +66,7 @@ export const checkTypeExistsValidator = (typeService: TypeService, time: number 
 @Injectable({
   providedIn: 'root'
 })
-export class TypeService<T = CmdbType> implements ApiService {
+export class TypeService<T = CmdbType> implements ApiServicePrefix {
 
   public servicePrefix: string = 'types';
   public options = {
@@ -76,7 +77,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     observe: resp
   };
 
-  constructor(private api: ApiCallService, private userService: UserService) {
+  constructor(private api: ApiCallService, private userService: UserService, private sideBarService: SidebarService) {
   }
 
   /**
@@ -245,6 +246,7 @@ export class TypeService<T = CmdbType> implements ApiService {
     options.params = new HttpParams();
     return this.api.callDelete<number>(this.servicePrefix + '/' + publicID, options).pipe(
       map((apiResponse: HttpResponse<APIDeleteSingleResponse<T>>) => {
+        this.sideBarService.loadCategoryTree()
         return apiResponse.body.raw as T;
       })
     );
@@ -316,6 +318,20 @@ export class TypeService<T = CmdbType> implements ApiService {
     return this.api.callHead<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return +apiResponse.headers.get('X-Total-Count');
+      })
+    );
+  }
+
+  /**
+   * Retrieves the number of objects with the given type_id
+   * 
+   * @param typeID (number): type_id for which the objects should be counted
+   * @returns (Observable<number>): Number of objects with the given type_id
+   */
+  public countTypeObjects(typeID: number): Observable<number> {
+    return this.api.callGet<number>(this.servicePrefix + '/' + typeID + '/count_objects', this.options).pipe(
+      map((apiResponse: HttpResponse<number>) => {
+        return apiResponse.body;
       })
     );
   }

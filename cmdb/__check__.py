@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,26 +12,47 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+"""
+This module contains logics for database validation and setup
+"""
 
 import logging
 from enum import Enum
+
+from cmdb.framework.cmdb_location import CmdbLocation
 
 LOGGER = logging.getLogger(__name__)
 
 
 class CheckRoutine:
+    """
+    This class holds checks for the database check routines
+    """
+
     class CheckStatus(Enum):
+        """
+        Enumeration of the status options for checks
+        """
         NOT = 0
         RUNNING = 1
         HAS_UPDATES = 2
         FINISHED = 3
 
+
     def __init__(self, dbm):
-        self.status = CheckRoutine.CheckStatus.NOT
+        self.status: int = CheckRoutine.CheckStatus.NOT
         self.setup_database_manager = dbm
 
-    def get_check_status(self):
+
+    def get_check_status(self) -> int:
+        """
+        Returns the CheckStatus of the current CheckRoutine
+
+        Returns:
+            (int): Current CheckStatus
+        """
         return self.status
 
     def checker(self):
@@ -49,6 +70,12 @@ class CheckRoutine:
         return self.status
 
     def __is_database_empty(self) -> bool:
+        """
+        Checks if there are any collections in the initialised database
+
+        Returns:
+            (bool): Returns bool if there are any collection in the initialised database
+        """
         return not self.setup_database_manager.connector.database.list_collection_names()
 
     def __check_database_collection_valid(self) -> bool:
@@ -63,6 +90,23 @@ class CheckRoutine:
             # framework collections
             for collection in FRAMEWORK_CLASSES:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
+
+                # setup locations if valid test
+                if collection == CmdbLocation and collection_test:
+                    root_location: CmdbLocation = self.setup_database_manager.find_one(collection.COLLECTION, 1)
+
+                    if root_location:
+                        if self.setup_database_manager.validate_root_location(CmdbLocation.to_data(root_location)):
+                            LOGGER.info("CHECK ROUTINE: Root Location valid")
+                        else:
+                            LOGGER.info("CHECK ROUTINE: Root Location invalalid => Fixing the Issue!")
+                            self.setup_database_manager.set_root_location(collection.COLLECTION, create=False)
+
+                    else:
+                        LOGGER.info("CHECK ROUTINE: No Root Location => Creating a new Root Location!")
+                        self.setup_database_manager.set_root_location(collection.COLLECTION, create=True)
+                        
+
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
@@ -80,10 +124,11 @@ class CheckRoutine:
 
     def has_updates(self) -> bool:
         """
-        check if updates are available
-        Returns: True else raise error
+        Check if updates are available
 
-            """
+        Returns:
+            (bool): True if updates are available else raises an error
+        """
         from cmdb.updater import UpdaterModule
         from cmdb.utils.system_reader import SystemSettingsReader, SectionError
 
@@ -102,8 +147,10 @@ class CheckRoutine:
                     f'Newest Update Version: {new_version}'
                 )
                 return False
+
         except SectionError as err:
             LOGGER.error(err.message)
             return False
-        return True
 
+        return True
+    

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,12 +31,12 @@ from cmdb.interface.response import GetSingleResponse, GetMultiResponse, InsertS
 from cmdb.interface.blueprint import APIBlueprint
 
 LOGGER = logging.getLogger(__name__)
-categories_blueprint = APIBlueprint('categories', __name__)
+category_blueprint = APIBlueprint('category', __name__)
 
 
-@categories_blueprint.route('/', methods=['GET', 'HEAD'])
-@categories_blueprint.protect(auth=True, right='base.framework.category.view')
-@categories_blueprint.parse_collection_parameters(view='list')
+@category_blueprint.route('/', methods=['GET', 'HEAD'])
+@category_blueprint.protect(auth=True, right='base.framework.category.view')
+@category_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -80,8 +80,8 @@ def get_categories(params: CollectionParameters):
     return api_response.make_response()
 
 
-@categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@categories_blueprint.protect(auth=True, right='base.framework.category.view')
+@category_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@category_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single category resource.
@@ -107,9 +107,9 @@ def get_category(public_id: int):
     return api_response.make_response()
 
 
-@categories_blueprint.route('/', methods=['POST'])
-@categories_blueprint.protect(auth=True, right='base.framework.category.add')
-@categories_blueprint.validate(CategoryModel.SCHEMA)
+@category_blueprint.route('/', methods=['POST'])
+@category_blueprint.protect(auth=True, right='base.framework.category.add')
+@category_blueprint.validate(CategoryModel.SCHEMA)
 def insert_category(data: dict):
     """
     HTTP `POST` route for insert a single category resource.
@@ -138,9 +138,9 @@ def insert_category(data: dict):
     return api_response.make_response(prefix='categories')
 
 
-@categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@categories_blueprint.protect(auth=True, right='base.framework.category.edit')
-@categories_blueprint.validate(CategoryModel.SCHEMA)
+@category_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@category_blueprint.protect(auth=True, right='base.framework.category.edit')
+@category_blueprint.validate(CategoryModel.SCHEMA)
 def update_category(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single category resource.
@@ -169,8 +169,8 @@ def update_category(public_id: int, data: dict):
     return api_response.make_response()
 
 
-@categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@categories_blueprint.protect(auth=True, right='base.framework.category.delete')
+@category_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@category_blueprint.protect(auth=True, right='base.framework.category.delete')
 def delete_category(public_id: int):
     """
     HTTP `DELETE` route for delete a single category resource.

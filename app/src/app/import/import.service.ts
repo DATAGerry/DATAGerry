@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService } from '../services/api-call.service';
+import { ApiCallService, ApiServicePrefix } from '../services/api-call.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { HttpHeaders } from '@angular/common/http';
@@ -35,7 +35,7 @@ export const httpImportFileOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class ImportService implements ApiService {
+export class ImportService implements ApiServicePrefix {
 
   public servicePrefix: string = 'import';
   private objectPrefix: string = 'object';

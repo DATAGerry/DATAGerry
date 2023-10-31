@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -27,24 +27,26 @@ import { RadioComponent } from './choice/radio.component';
 import { SelectComponent } from './choice/select.component';
 import { DummyComponent } from './dummy/dummy.component';
 import { RefComponent } from './special/ref.component';
+import { LocationComponent } from './special/location.component';
 import { DateComponent } from './date/date.component';
 import { NumberComponent } from './math/number.component';
 import { RefSectionComponent } from './section/ref-section.component';
 
 
 export const fieldComponents: { [type: string]: any } = {
-  text: TextComponent,
-  password: PasswordComponent,
-  email: EmailComponent,
-  tel: PhoneComponent,
-  textarea: TextareaComponent,
-  number: NumberComponent,
-  href: HrefComponent,
-  checkbox: CheckboxComponent,
-  radio: RadioComponent,
-  select: SelectComponent,
-  ref: RefComponent,
-  date: DateComponent,
-  debug: DummyComponent,
+  'text': TextComponent,
+  'password': PasswordComponent,
+  'email': EmailComponent,
+  'tel': PhoneComponent,
+  'textarea': TextareaComponent,
+  'number': NumberComponent,
+  'href': HrefComponent,
+  'checkbox': CheckboxComponent,
+  'radio': RadioComponent,
+  'select': SelectComponent,
+  'ref': RefComponent,
+  'location': LocationComponent,
+  'date': DateComponent,
+  'debug': DummyComponent,
   'ref-section-field': RefSectionComponent
 };

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from authlib.jose import JWT
-from werkzeug.wrappers import BaseResponse
+from werkzeug.wrappers import Response
 
 from cmdb.interface.response import make_api_response
 from cmdb.user_management import UserModel
@@ -40,12 +39,12 @@ class LoginResponse:
         self.token_issued_at = token_issued_at
         self.token_expire = token_expire
 
-    def make_response(self) -> BaseResponse:
+    def make_response(self) -> Response:
         """
         Make a valid http response.
 
         Returns:
-            Instance of BaseResponse
+            Instance of Response
         """
         return make_api_response(LoginResponse.to_dict(self))
 

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import {ApiCallService, ApiService, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
+import {ApiCallService, ApiServicePrefix, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
 import { Observable } from 'rxjs';
 import {filter, map} from 'rxjs/operators';
 import { CmdbLog } from '../models/cmdb-log';
@@ -28,7 +28,7 @@ import { HttpParams, HttpResponse } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class LogService<T = CmdbLog> implements ApiService {
+export class LogService<T = CmdbLog> implements ApiServicePrefix {
 
   constructor(private api: ApiCallService) {
   }

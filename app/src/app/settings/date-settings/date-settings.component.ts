@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import * as moment from 'moment';
 import 'moment-timezone';
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { DateSettingsService } from '../services/date-settings.service';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
@@ -64,12 +64,12 @@ export class DateSettingsComponent implements OnInit, OnDestroy {
   /**
    * FromGroup Regional Settings
    */
-  public regionalForm: FormGroup;
+  public regionalForm: UntypedFormGroup;
 
   constructor(private dateSettingsService: DateSettingsService, private toast: ToastService) {
-    this.regionalForm = new FormGroup({
-      date_format: new FormControl('YYYY-MM-DD', Validators.required),
-      timezone: new FormControl(moment.tz.guess(true)),
+    this.regionalForm = new UntypedFormGroup({
+      date_format: new UntypedFormControl('YYYY-MM-DD', Validators.required),
+      timezone: new UntypedFormControl(moment.tz.guess(true)),
     });
   }
 

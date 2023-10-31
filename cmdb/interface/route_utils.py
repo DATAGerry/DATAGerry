@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,12 +19,13 @@ import json
 from functools import wraps
 from datetime import datetime
 
-from werkzeug._compat import to_unicode
-from werkzeug.http import wsgi_to_bytes
+from werkzeug._internal import _to_str, _wsgi_decoding_dance
+from flask import request, abort, current_app
 
 from cmdb.manager.errors import ManagerGetError
 from cmdb.security.auth import AuthModule
 from cmdb.security.security import SecurityManager
+from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
@@ -34,10 +35,6 @@ from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
-
-from flask import request, abort, current_app
-
-from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.utils.wraps import deprecated
 from cmdb.utils import json_encoding
 
@@ -51,7 +48,7 @@ def default(obj):
     return str(obj)
 
 
-@deprecated
+#@deprecated
 def make_response(instance, status_code=200, indent=2):
     """
     make json http response with indent settings and auto encoding
@@ -71,7 +68,7 @@ def make_response(instance, status_code=200, indent=2):
     return resp
 
 
-@deprecated
+#@deprecated
 def login_required(f):
     """wraps function for routes which requires an authentication
     """
@@ -89,7 +86,7 @@ def login_required(f):
     return decorated
 
 
-@deprecated
+#@deprecated
 def auth_is_valid() -> bool:
     try:
         parse_authorization_header(request.headers['Authorization'])
@@ -123,7 +120,7 @@ def user_has_right(required_right: str) -> bool:
         return False
 
 
-@deprecated
+#@deprecated
 def insert_request_user(func):
     """helper function which auto injects the user from the token request
     requires: login_required
@@ -152,7 +149,7 @@ def insert_request_user(func):
     return get_request_user
 
 
-@deprecated
+#@deprecated
 def right_required(required_right: str, excepted: dict = None):
     """wraps function for routes which requires a special user right
     requires: insert_request_user
@@ -194,7 +191,7 @@ def parse_authorization_header(header):
     """
     if not header:
         return None
-    value = wsgi_to_bytes(header)
+    value = _wsgi_decoding_dance(header)
     try:
         auth_type, auth_info = value.split(None, 1)
         auth_type = auth_type.lower()
@@ -208,8 +205,8 @@ def parse_authorization_header(header):
             username, password = base64.b64decode(auth_info).split(b":", 1)
 
             with current_app.app_context():
-                username = to_unicode(username, "utf-8")
-                password = to_unicode(password, "utf-8")
+                username = _to_str(username, "utf-8")
+                password = _to_str(password, "utf-8")
 
                 user_manager: UserManager = UserManager(current_app.database_manager)
                 group_manager: GroupManager = GroupManager(current_app.database_manager,
@@ -234,7 +231,7 @@ def parse_authorization_header(header):
         except Exception:
             return None
 
-    if auth_type == b"bearer":
+    if auth_type == "bearer" or b"bearer":
         try:
             with current_app.app_context():
                 tv = TokenValidator(current_app.database_manager)

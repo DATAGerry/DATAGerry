@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { AbstractControl, FormControl, FormGroup } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-object-bulk-input-appends',
@@ -30,8 +30,8 @@ export class ObjectBulkInputAppendsComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() public changeForm: FormGroup;
-  @Input() public controller: FormControl;
+  @Input() public changeForm: UntypedFormGroup;
+  @Input() public controller: UntypedFormControl;
   @Input() public data: any;
 
   public checkedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
@@ -54,7 +54,7 @@ export class ObjectBulkInputAppendsComponent implements OnInit, OnDestroy {
 
   public changeCheckBox(checked: boolean) {
     if (checked) {
-      this.changeForm.addControl(this.data.name, new FormControl(this.controller.value));
+      this.changeForm.addControl(this.data.name, new UntypedFormControl(this.controller.value));
     } else {
       this.changeForm.removeControl(this.data.name);
     }

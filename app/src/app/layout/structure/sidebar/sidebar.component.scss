@@ -1,0 +1,30 @@
+@import 'src/scss/variables';
+
+.input-wrapper-search {
+  position: relative;
+  i.fa-times.input-icon-clear {
+    &:hover {
+        cursor: pointer;
+    }
+    position: absolute;
+    color: black;
+    opacity: 0.8;
+    top: calc(50% - 0.5em);
+    right: 10%;
+  }
+}
+
+.sidebar-menu-item:hover {
+  background-color: $dg-hover-background-color;
+  cursor: pointer;
+}
+
+#category-filter {
+  margin-right: 10px;
+  min-width: 90%;
+}
+
+.selectedMenu {
+  background-color: $dg-selected-background-color;
+}
+

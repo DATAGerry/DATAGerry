@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,21 +11,18 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-dialog.component';
-import { RenameDialogComponent } from './modal/rename-dialog/rename-dialog.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MoveDialogComponent } from './modal/move-dialog/move-dialog.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+
 import { TypeService } from '../../../framework/services/type.service';
-import { ObjectService} from '../../../framework/services/object.service';
-import { MetadataInfoComponent } from './modal/metadata-info/metadata-info.component';
+
 
 @NgModule({
     declarations: [
@@ -40,8 +37,7 @@ import { MetadataInfoComponent } from './modal/metadata-info/metadata-info.compo
     exports: [
     ],
     providers: [
-      TypeService,
-      ObjectService
+      TypeService
     ]
 })
 export class FileexplorerModule { }

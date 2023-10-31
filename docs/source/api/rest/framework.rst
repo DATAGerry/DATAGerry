@@ -1413,6 +1413,7 @@ Create / Update (POST / PUT) - Operation
 **Validation Schema**
 
 .. code-block::
+    
         {
             'public_id': {
                 'type': 'integer'

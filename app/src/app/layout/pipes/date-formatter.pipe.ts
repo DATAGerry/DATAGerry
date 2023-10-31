@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -36,6 +36,12 @@ export class DateFormatterPipe implements PipeTransform {
       data = new Date(data.$date).toUTCString();
     }
     if (isNaN(data) && !isNaN(Date.parse(data))) {
+
+      if(!this.dateSettingsService.currentDateSettings) {
+        const defaultDate = moment.utc(data);
+        return defaultDate.isValid() ? moment.tz(defaultDate, "UTC").format("YYYY-MM-DDThh:mm:ssZ") : data;
+      }
+
       const { timezone, date_format } = this.dateSettingsService.currentDateSettings;
       const date = moment.utc(data);
       return date.isValid() ? moment.tz(date, timezone).format(date_format) : data;

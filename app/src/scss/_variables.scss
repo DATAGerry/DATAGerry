@@ -1,6 +1,6 @@
 @import 'bootstrap_variables';
-@import '~bootstrap/scss/functions';
-@import '~bootstrap/scss/variables';
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
 @import 'mixins';
 
 $navbar-height: calc(80px + #{$navbar-padding-y});
@@ -28,3 +28,15 @@ $footer-color: $body-color !default;
 $footer-borders: (
   top: (size: 2px, style: solid, color: theme-color('primary'))
 ) !default;
+
+
+/* -------------------------------------------------------------------------- */
+/*                                GLOBAL COLORS                               */
+/* -------------------------------------------------------------------------- */
+$dg-primary-color: #e94d18;
+
+$dg-selected-background-color: #cccccc;
+$dg-hover-background-color: #bfbfbf;
+
+$dg-error-message-color: #dc3545;
+$dg-warning-message-color: #ffc107;

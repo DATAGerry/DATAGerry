@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ import { Component, Input } from '@angular/core';
 import { CmdbMode } from '../../../modes.enum';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbObject } from '../../../models/cmdb-object';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { RenderResult } from '../../../models/cmdb-render';
 
 @Component({
@@ -33,12 +33,12 @@ export class ObjectViewRenderComponent {
   @Input() public mode: CmdbMode = CmdbMode.View;
   @Input() public renderResult: RenderResult;
 
-  public renderForm: FormGroup;
-  public fieldsGroups: FormGroup;
+  public renderForm: UntypedFormGroup;
+  public fieldsGroups: UntypedFormGroup;
 
   public constructor() {
-    this.renderForm = new FormGroup({});
-    this.fieldsGroups = new FormGroup({});
+    this.renderForm = new UntypedFormGroup({});
+    this.fieldsGroups = new UntypedFormGroup({});
   }
 
 

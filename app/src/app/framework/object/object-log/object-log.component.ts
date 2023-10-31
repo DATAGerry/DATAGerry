@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,7 @@ import { ActivatedRoute } from '@angular/router';
 import { CmdbLog } from '../../models/cmdb-log';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbMode } from '../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-object-log',
@@ -35,14 +35,14 @@ export class ObjectLogComponent implements OnInit {
   public log: CmdbLog;
   public completeLogList: CmdbLog[];
   public mode: CmdbMode.View;
-  public renderForm: FormGroup;
-  public compareForm: FormGroup;
+  public renderForm: UntypedFormGroup;
+  public compareForm: UntypedFormGroup;
   public renderResult: RenderResult;
   public compareResult: RenderResult;
 
   constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2) {
-    this.renderForm = new FormGroup({});
-    this.compareForm = new FormGroup({});
+    this.renderForm = new UntypedFormGroup({});
+    this.compareForm = new UntypedFormGroup({});
     this.activateRoute.params.subscribe((params) => {
       this.logID = params.publicID;
     });
@@ -67,7 +67,7 @@ export class ObjectLogComponent implements OnInit {
     // tslint:disable-next-line:triple-equals
     const selectedCompareLog: CmdbLog = this.completeLogList.filter(compareLog => compareLog.public_id == logID)[0];
     if (selectedCompareLog.render_state !== undefined) {
-      this.compareForm = new FormGroup({});
+      this.compareForm = new UntypedFormGroup({});
       this.compareResult = JSON.parse(selectedCompareLog.render_state);
     }
     this.markDifferences();

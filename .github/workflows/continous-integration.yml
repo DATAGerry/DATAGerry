@@ -13,17 +13,17 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ 3.6, 3.7, 3.8, 3.9, pypy3 ]
-        mongodb-version: [ 3.6, 4.0, 4.2, 4.4 ]
+        python-version: ['3.9' ]
+        mongodb-version: ['4.4', '5.0', '6.0' ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Start MongoDB
-        uses: supercharge/mongodb-github-action@1.3.0
+        uses: supercharge/mongodb-github-action@1.7.0
         with:
           mongodb-version: ${{ matrix.mongodb-version }}
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -36,7 +36,7 @@ jobs:
       - name: Test with pytest
         run: pytest tests --html=pytest_report_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}.html --self-contained-html
       - name: Archive pytest reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pytest-reports
           path: pytest_report_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}.html
@@ -44,7 +44,7 @@ jobs:
       - name: Coverage pytest
         run: pytest tests --cov=cmdb --cov-config=.coveragerc --cov-report=html:cov-html_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}
       - name: Archive pytest coverage reports
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pytest-coverate-reports
           path: cov-html_py${{ matrix.python-version }}-modb-${{ matrix.mongodb-version }}
@@ -54,11 +54,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ 3.6, 3.7, 3.8, 3.9, pypy3 ]
+        python-version: [ '3.9' ]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -74,7 +74,7 @@ jobs:
           FAIL_THRESHOLD: 5.0
           CONFIG_FILE: .pylintrc
       - name: Archive pylint results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: pylint-reports
           path: pylint-report_python-${{ matrix.python-version }}.txt
@@ -95,12 +95,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [ 3.6, 3.7, 3.8, 3.9, pypy3 ]
+        python-version: [ '3.9' ]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Display Python version
@@ -116,74 +116,74 @@ jobs:
           coverage report -m
           coverage html -d coverage-report_python-${{ matrix.python-version }}
       - name: Archive coverage results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: coverage-reports
           path: coverage-report_python-${{ matrix.python-version }}
         continue-on-error: true
 
-  build:
-    needs: [ coverage, lint ]
-    runs-on: ubuntu-latest
-    container: nethinks/datagerry_ci
-    steps:
-    - name: checkout the source code
-      uses: actions/checkout@v2
+  # build:
+  #   needs: [ coverage, lint ]
+  #   runs-on: ubuntu-latest
+  #   container: nethinks/datagerry_ci
+  #   steps:
+  #   - name: checkout the source code
+  #     uses: actions/checkout@v3
 
-    # extract <branchname> from refs/heads/<branchname> and replace "/" characters 
-    - name: extract Github branch name
-      run: echo "BRANCH=$(BRANCH_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${BRANCH_EXTRACTED//\//-})" >> $GITHUB_ENV
+  #   # extract <branchname> from refs/heads/<branchname> and replace "/" characters 
+  #   - name: extract Github branch name
+  #     run: echo "BRANCH=$(BRANCH_EXTRACTED=${GITHUB_REF#refs/heads/}; echo ${BRANCH_EXTRACTED//\//-})" >> $GITHUB_ENV
 
-    - name: setup version strings
-      run: |
-        echo "VERSION_STRING=$(echo ${BRANCH})" >> $GITHUB_ENV
-        echo "VERSION_ID=$(echo ${BRANCH}-${GITHUB_SHA})" >> $GITHUB_ENV
-        echo "VERSION_PATH=$(echo branches/${BRANCH})" >> $GITHUB_ENV
-        echo "VERSION_DOCKER_TAG=$(echo branches_${BRANCH})" >> $GITHUB_ENV
+  #   - name: setup version strings
+  #     run: |
+  #       echo "VERSION_STRING=$(echo ${BRANCH})" >> $GITHUB_ENV
+  #       echo "VERSION_ID=$(echo ${BRANCH}-${GITHUB_SHA})" >> $GITHUB_ENV
+  #       echo "VERSION_PATH=$(echo branches/${BRANCH})" >> $GITHUB_ENV
+  #       echo "VERSION_DOCKER_TAG=$(echo branches_${BRANCH})" >> $GITHUB_ENV
 
-    - name: setup build cache for node_modules and python packages
-      uses: actions/cache@v2
-      with:
-        path: |
-          app/node_modules
-          ~/.cache/pip
-        key: ${{ runner.os }}-buildcache
+  #   - name: setup build cache for node_modules and python packages
+  #     uses: actions/cache@v3
+  #     with:
+  #       path: |
+  #         app/node_modules
+  #         ~/.cache/pip
+  #       key: ${{ runner.os }}-buildcache
 
-    - name: Upgrade pip
-      run: /usr/bin/pip install --upgrade pip
+  #   - name: Upgrade pip
+  #     run: /usr/bin/pip install --upgrade pip
 
-    - name: build DATAGERRY
-      run:  BUILDVAR_VERSION=${VERSION_STRING} BUILDVAR_VERSION_EXT=${VERSION_ID} BUILDVAR_DOCKER_TAG=${VERSION_DOCKER_TAG} make -e
+  #   - name: build DATAGERRY
+  #     run:  BUILDVAR_VERSION=${VERSION_STRING} BUILDVAR_VERSION_EXT=${VERSION_ID} BUILDVAR_DOCKER_TAG=${VERSION_DOCKER_TAG} make -e
 
-    - name: copy artifacts to files.datagerry.com
-      run: |
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/bin"
-        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/bin
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/rpm"
-        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/rpm
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/targz"
-        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/targz
-      env:
-        SCP_HOST: ${{ secrets.SCP_HOST }}
-        SCP_USER: ${{ secrets.SCP_USER }}
-        SCP_PASS: ${{ secrets.SCP_PASS }}
-        SCP_PATH: ${{ secrets.SCP_PATH_FILES }}
+  #   - name: copy artifacts to files.datagerry.com
+  #     run: |
+  #       sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/bin"
+  #       sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/bin/datagerry $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/bin
+  #       sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/rpm"
+  #       sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/rpm/RPMS/x86_64/DATAGERRY-*.rpm  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/rpm
+  #       sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH/targz"
+  #       sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null target/targz/datagerry-*.tar.gz  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH/targz
+  #     env:
+  #       SCP_HOST: ${{ secrets.SCP_HOST }}
+  #       SCP_USER: ${{ secrets.SCP_USER }}
+  #       SCP_PASS: ${{ secrets.SCP_PASS }}
+  #       SCP_PATH: ${{ secrets.SCP_PATH_FILES }}
 
-    - name: copy documentation to docs.datagerry.com
-      run: |
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH"
-        sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH/$VERSION_PATH/*"
-        sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH
-      env:
-        SCP_HOST: ${{ secrets.SCP_HOST }}
-        SCP_USER: ${{ secrets.SCP_USER }}
-        SCP_PASS: ${{ secrets.SCP_PASS }}
-        SCP_PATH: ${{ secrets.SCP_PATH_DOCS }}
+  #   - name: copy documentation to docs.datagerry.com
+  #     run: |
+  #       sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "mkdir -p $SCP_PATH/$VERSION_PATH"
+  #       sshpass -p "$SCP_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null $SCP_USER@$SCP_HOST "rm -Rf $SCP_PATH/$VERSION_PATH/*"
+  #       sshpass -p "$SCP_PASS" scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r target/docs/*  $SCP_USER@$SCP_HOST:$SCP_PATH/$VERSION_PATH
+  #     env:
+  #       SCP_HOST: ${{ secrets.SCP_HOST }}
+  #       SCP_USER: ${{ secrets.SCP_USER }}
+  #       SCP_PASS: ${{ secrets.SCP_PASS }}
+  #       SCP_PATH: ${{ secrets.SCP_PATH_DOCS }}
 
-    - name: publish docker image to hub.docker.com
-      run: |
-        echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
-        docker push nethinks/datagerry:$VERSION_DOCKER_TAG
-      env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+  #   - name: publish docker image to hub.docker.com
+  #     run: |
+  #       echo "$DOCKER_TOKEN" | docker login --username $DOCKER_USER --password-stdin
+  #       docker push nethinks/datagerry:$VERSION_DOCKER_TAG
+  #     env:
+  #       DOCKER_USER: ${{ secrets.DOCKER_USER }}
+  #       DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}

@@ -164,7 +164,7 @@ If you want to see inactive Objects in the WebUI, click on the switch under the 
     Figure 8: Active / Inactive objects switch
 
 Object tables search / filter
----------------------------
+-----------------------------
 
 Searching a table is one of the most common user interactions with a DATAGERRY table, and DATAGERRY provides a number
 of methods for you to control this interaction. There are tools for the table search(search) and for each individual
@@ -216,12 +216,14 @@ Only the filtered objects are available for exporting the values from the curren
     Figure 13: Filtering by AND expression
 
 |
+
 .. note::
     Date values must be searched according to the following format:
 
     **Format**: *YYYY-MM-DDThh:mmZ*
 
     **Example**: *2019-12-19T11:02*
+    
 |
 
 Bulk change of Objects

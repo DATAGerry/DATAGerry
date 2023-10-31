@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
 import { ProgressSpinnerService } from '../../../../../layout/progress/progress-spinner.service';
 
@@ -29,12 +29,12 @@ import { ProgressSpinnerService } from '../../../../../layout/progress/progress-
 })
 export class AddCategoryModalComponent implements OnInit {
 
-  public catAddForm: FormGroup;
+  public catAddForm: UntypedFormGroup;
 
   constructor(public activeModal: NgbActiveModal, private categoryService: CategoryService) {
-    this.catAddForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('')
+    this.catAddForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required),
+      label: new UntypedFormControl('')
     });
   }
 
@@ -42,12 +42,12 @@ export class AddCategoryModalComponent implements OnInit {
     this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
   }
 
-  public get name(): FormControl {
-    return this.catAddForm.get('name') as FormControl;
+  public get name(): UntypedFormControl {
+    return this.catAddForm.get('name') as UntypedFormControl;
   }
 
-  public get label(): FormControl {
-    return this.catAddForm.get('label') as FormControl;
+  public get label(): UntypedFormControl {
+    return this.catAddForm.get('label') as UntypedFormControl;
   }
 
 }

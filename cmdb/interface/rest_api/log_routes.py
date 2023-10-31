@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -141,8 +141,8 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
 
     except ManagerIterationError as err:
         return abort(400, err.message)
-    except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
+    except ObjectManagerGetError as error:
+        LOGGER.error('Error in get_logs_with_existing_objects: %s', error)
         return abort(404)
     return api_response.make_response()
 
@@ -185,10 +185,10 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
 
-    except ManagerIterationError as err:
-        return abort(400, err.message)
-    except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_logs_with_deleted_objects: {err}')
+    except ManagerIterationError as error:
+        return abort(400, error.message)
+    except ObjectManagerGetError as error:
+        LOGGER.error('Error in get_logs_with_deleted_objects: %s', error)
         return abort(404)
     return api_response.make_response()
 
@@ -210,10 +210,10 @@ def get_object_delete_logs(params: CollectionParameters):
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
 
-    except ManagerIterationError as err:
-        return abort(400, err.message)
-    except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_object_delete_logs: {err}')
+    except ManagerIterationError as error:
+        return abort(400, error.message)
+    except ObjectManagerGetError as error:
+        LOGGER.error('Error in get_object_delete_logs: %s', error)
         return abort(404)
     return api_response.make_response()
 

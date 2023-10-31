@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { BehaviorSubject, Observable, ReplaySubject, Subject } from 'rxjs';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TypeService } from '../../../framework/services/type.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
@@ -58,10 +58,10 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   /**
    * Type control.
    */
-  public typeControl: FormControl = new FormControl(undefined, Validators.required);
+  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
   @Input('typeControl')
-  public set TypeControl(control: FormControl) {
+  public set TypeControl(control: UntypedFormControl) {
     this.typeControl = control;
     this.typeControl.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(changes => {
       this.valueChange.emit(changes);
@@ -71,10 +71,10 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   /**
    * Reactive form group.
    */
-  public formGroup: FormGroup;
+  public formGroup: UntypedFormGroup;
 
   @Input('formGroup')
-  public set FormGroup(group: FormGroup) {
+  public set FormGroup(group: UntypedFormGroup) {
     this.formGroup = group;
     if (!this.formGroup.contains('type_id')) {
       this.formGroup.addControl('type_id', this.typeControl);
@@ -153,8 +153,8 @@ export class TypeSelectComponent<T = CmdbType> implements OnInit, OnDestroy {
   @Input() public currentPage: number = 0;
 
   constructor(private typeService: TypeService, private toast: ToastService) {
-    this.formGroup = new FormGroup({
-      type: new FormControl('')
+    this.formGroup = new UntypedFormGroup({
+      type: new UntypedFormControl('')
     });
   }
 

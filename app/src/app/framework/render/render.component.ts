@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,10 +16,10 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CmdbType } from '../models/cmdb-type';
 import { CmdbMode } from '../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { CmdbObject } from '../models/cmdb-object';
 import { RenderResult } from '../models/cmdb-render';
 
@@ -28,15 +28,15 @@ import { RenderResult } from '../models/cmdb-render';
   templateUrl: './render.component.html',
   styleUrls: ['./render.component.scss']
 })
-export class RenderComponent {
+export class RenderComponent implements OnInit {
 
   private typeInstanceBack: CmdbType;
   private objectInstanceBack: CmdbObject;
   private renderResultBack: RenderResult = undefined;
 
-  @Input() public renderForm: FormGroup;
-  @Input() public changeForm: FormGroup;
-
+  @Input() public renderForm: UntypedFormGroup;
+  @Input() public changeForm: UntypedFormGroup;
+  public objectID: number;
   @Input() public mode: CmdbMode;
   private field: any;
 
@@ -88,6 +88,14 @@ export class RenderComponent {
     if (this.mode === CmdbMode.View) {
       this.renderForm.disable();
     }
+    
+  }
+
+  public ngOnInit(): void {
+    if(this.renderResult){
+      this.objectID = this.renderResult.object_information.object_id;
+    }
+    
   }
 
   public getFieldByName(name: string) {

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { GroupService } from '../../services/group.service';
 import { Group } from '../../models/group';
 import { CollectionParameters } from '../../../services/models/api-parameter';
@@ -42,7 +42,7 @@ export class GroupAclComponent implements OnInit, OnDestroy {
   /**
    * Group form selector.
    */
-  public objectsACLGroupForm: FormGroup;
+  public objectsACLGroupForm: UntypedFormGroup;
 
   /**
    * Chosen group.
@@ -75,13 +75,13 @@ export class GroupAclComponent implements OnInit, OnDestroy {
   };
 
   constructor(private groupService: GroupService, private toast: ToastService) {
-    this.objectsACLGroupForm = new FormGroup({
-      group: new FormControl(undefined)
+    this.objectsACLGroupForm = new UntypedFormGroup({
+      group: new UntypedFormControl(undefined)
     });
   }
 
-  public get groupControl(): FormControl {
-    return this.objectsACLGroupForm.get('group') as FormControl;
+  public get groupControl(): UntypedFormControl {
+    return this.objectsACLGroupForm.get('group') as UntypedFormControl;
   }
 
   public ngOnInit(): void {

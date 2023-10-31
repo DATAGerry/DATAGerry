@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
    */
   private newSettings: Subject<UserSetting> = new Subject<UserSetting>();
 
-  constructor(private dbService: NgxIndexedDBService<UserSetting<P>>,
+  constructor(private dbService: NgxIndexedDBService,
               private userSettingsService: UserSettingsService<UserSetting<P>>) {
     this.newSettings.asObservable().pipe(takeUntil(this.subscriber)).subscribe();
     this.userSettingsService.currentUserObservable.subscribe((user: User) => {
@@ -71,7 +71,7 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
     try {
       this.userSettingsService.getUserSettings()
         .subscribe(async (userSettings: Array<UserSetting<P>>) => {
-            await this.dbService.clear(this.storeName);
+            this.dbService.clear(this.storeName).subscribe(() => {});
 
             for (const setting of userSettings) {
               this.dbService.add(this.storeName, setting).subscribe();

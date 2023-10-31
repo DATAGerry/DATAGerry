@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output, SimpleChange, SimpleChanges } from '@angular/core';
 import { Controller } from './controls/controls.common';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { SectionControl } from './controls/section.control';
@@ -26,6 +26,7 @@ import { TextControl } from './controls/text/text.control';
 import { PasswordControl } from './controls/text/password.control';
 import { TextAreaControl } from './controls/text/textarea.control';
 import { ReferenceControl } from './controls/specials/ref.control';
+import { LocationControl } from './controls/specials/location.control';
 import { RadioControl } from './controls/choice/radio.control';
 import { SelectControl } from './controls/choice/select.control';
 import { CheckboxControl } from './controls/choice/checkbox.control';
@@ -37,6 +38,7 @@ import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { ValidationService } from '../services/validation.service';
 
 declare var $: any;
 
@@ -102,11 +104,12 @@ export class BuilderComponent implements OnDestroy {
   ];
 
   public specialControls = [
-    new Controller('ref', new ReferenceControl())
+    new Controller('ref', new ReferenceControl()),
+    new Controller('location', new LocationControl())
   ];
 
 
-  public constructor(private modalService: NgbModal) {
+  public constructor(private modalService: NgbModal, private validationService: ValidationService) {
     this.typeInstance = new CmdbType();
   }
 
@@ -198,6 +201,7 @@ export class BuilderComponent implements OnDestroy {
       this.typeInstance.render_meta.sections = [...this.sections];
       this.typeInstance.fields.push(fieldData);
       this.typeInstance.fields = [...this.typeInstance.fields];
+      this.validationService.initializeData(fieldData.name)
     }
   }
 
@@ -210,7 +214,6 @@ export class BuilderComponent implements OnDestroy {
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
-
     if (effect === 'move') {
       const index = list.indexOf(item);
       list.splice(index, 1);
@@ -246,6 +249,7 @@ export class BuilderComponent implements OnDestroy {
     if (indexField > -1) {
       this.typeInstance.fields.splice(indexField, 1);
       this.typeInstance.fields = [...this.typeInstance.fields];
+      this.validationService.updatelabelValidationStatusMaponDeletion(this.typeInstance.fields)
     }
 
     const sectionFieldIndex = section.fields.indexOf(item);
@@ -285,6 +289,8 @@ export class BuilderComponent implements OnDestroy {
         return 'list';
       case 'ref':
         return 'retweet';
+      case 'location':
+        return 'globe';
       case 'date':
         return 'calendar-alt';
       default:

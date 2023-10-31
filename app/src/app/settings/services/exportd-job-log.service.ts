@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../../services/api-call.service';
 import { ExportdJob } from '../models/exportd-job';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
@@ -29,7 +29,7 @@ import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 @Injectable({
   providedIn: 'root'
 })
-export class ExportdJobLogService<T = any> implements ApiService {
+export class ExportdJobLogService<T = any> implements ApiServicePrefix {
 
   public servicePrefix: string = 'exportdlog';
   public newServicePrefix: string = 'exportd/logs';

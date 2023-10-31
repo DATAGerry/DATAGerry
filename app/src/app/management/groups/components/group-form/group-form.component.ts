@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges } from '@angular/core';
 import { Group } from '../../../models/group';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { groupNameExistsValidator, GroupService } from '../../../services/group.service';
@@ -35,7 +35,7 @@ import { CollectionParameters } from '../../../../services/models/api-parameter'
 export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
 
   private subscriber: Subject<void>;
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * Passable group data if there are pre data.
@@ -55,7 +55,7 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Validation status event emitter.
    */
-  @Output() public validation: EventEmitter<boolean>;
+  @Output() public validation: EventEmitter<string>;
 
   /**
    * Form submit event emitter.
@@ -64,13 +64,13 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
 
   constructor(private groupService: GroupService) {
     this.subscriber = new Subject<void>();
-    this.validation = new EventEmitter<boolean>();
+    this.validation = new EventEmitter<string>();
     this.submit = new EventEmitter<Group>();
-    this.form = new FormGroup({
-      name: new FormControl('', [Validators.required],
+    this.form = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required],
         [groupNameExistsValidator(this.groupService)]),
-      label: new FormControl('', [Validators.required]),
-      rights: new FormControl([])
+      label: new UntypedFormControl('', [Validators.required]),
+      rights: new UntypedFormControl([])
     });
   }
 
@@ -105,22 +105,22 @@ export class GroupFormComponent implements OnInit, OnChanges, OnDestroy {
   /**
    * Get the form control for name.
    */
-  public get nameControl(): FormControl {
-    return this.form.get('name') as FormControl;
+  public get nameControl(): UntypedFormControl {
+    return this.form.get('name') as UntypedFormControl;
   }
 
   /**
    * Get the form control for label.
    */
-  public get labelControl(): FormControl {
-    return this.form.get('label') as FormControl;
+  public get labelControl(): UntypedFormControl {
+    return this.form.get('label') as UntypedFormControl;
   }
 
   /**
    * Get the rights array control.
    */
-  public get rightsControl(): FormControl {
-    return this.form.get('rights') as FormControl;
+  public get rightsControl(): UntypedFormControl {
+    return this.form.get('rights') as UntypedFormControl;
   }
 
   /**

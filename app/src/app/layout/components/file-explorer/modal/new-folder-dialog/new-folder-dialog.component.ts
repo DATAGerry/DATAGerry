@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -21,7 +21,7 @@ import { Component, Input, OnInit } from '@angular/core';
 import { FileMetadata } from '../../model/metadata';
 import { checkFolderExistsValidator, FileService } from '../../service/file.service';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { BehaviorSubject } from 'rxjs';
 import { ToastService } from '../../../../toast/toast.service';
 
@@ -43,7 +43,7 @@ export class NewFolderDialogComponent implements OnInit {
     return this.selectedFileElement;
   }
 
-  public basicForm: FormGroup;
+  public basicForm: UntypedFormGroup;
 
   static generateMetaData(parent: BehaviorSubject<any> ): FileMetadata {
     return new FileMetadata(
@@ -54,8 +54,8 @@ export class NewFolderDialogComponent implements OnInit {
   constructor(private fileService: FileService, public activeModal: NgbActiveModal, private toast: ToastService) {}
 
   public ngOnInit(): void {
-    this.basicForm = new FormGroup({
-      name: new FormControl('', Validators.required)
+    this.basicForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required)
     });
     this.basicForm.get('name').setAsyncValidators(checkFolderExistsValidator(this.fileService,
       NewFolderDialogComponent.generateMetaData(this.selectedFileFolder)));

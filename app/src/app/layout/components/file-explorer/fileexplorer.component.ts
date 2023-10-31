@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,7 @@ import { NewFolderDialogComponent } from './modal/new-folder-dialog/new-folder-d
 import { BehaviorSubject } from 'rxjs';
 import { FileElement, SelectedFileArray} from './model/file-element';
 import { FileMetadata } from './model/metadata';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { InfiniteScrollService } from '../../services/infinite-scroll.service';
 import { ToastService } from '../../toast/toast.service';
 import { CollectionParameters } from '../../../services/models/api-parameter';
@@ -74,8 +74,8 @@ export class FileExplorerComponent implements OnInit, OnDestroy {
   /**
    * FormController
    */
-  public searchForm: FormGroup = new FormGroup({
-    search: new FormControl('', Validators.required)
+  public searchForm: UntypedFormGroup = new UntypedFormGroup({
+    search: new UntypedFormControl('', Validators.required)
   });
 
   /**

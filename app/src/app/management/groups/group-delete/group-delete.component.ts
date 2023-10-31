@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { Group } from '../../models/group';
 import { ActivatedRoute, Router } from '@angular/router';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { GroupService } from '../../services/group.service';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
@@ -34,7 +34,7 @@ export class GroupDeleteComponent implements OnDestroy{
 
   public group: Group;
   public groups: Array<Group> = [];
-  public deleteForm: FormGroup;
+  public deleteForm: UntypedFormGroup;
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
@@ -43,9 +43,9 @@ export class GroupDeleteComponent implements OnDestroy{
     this.group = this.route.snapshot.data.group as Group;
     this.groups = this.route.snapshot.data.groups as Array<Group>;
 
-    this.deleteForm = new FormGroup({
-      deleteGroupAction: new FormControl('', Validators.required),
-      deleteGroupOption: new FormControl(2)
+    this.deleteForm = new UntypedFormGroup({
+      deleteGroupAction: new UntypedFormControl('', Validators.required),
+      deleteGroupOption: new UntypedFormControl(2)
     });
   }
 

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 
 import { Component, Injectable, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { checkJobExistsValidator, ExportdJobService } from '../../exportd-job.service';
 import { ExportdType } from '../../../settings/models/modes_job.enum';
 import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
@@ -42,7 +42,7 @@ export class ExportdJobBasicStepComponent extends ExportdJobBaseStepComponent im
     }
   }
 
-  public basicForm: FormGroup;
+  public basicForm: UntypedFormGroup;
   public readonly typeSelect: Array<any> = [
     { label: 'PUSH', content: ExportdType.PUSH, description: 'Run job directly.' },
     { label: 'PULL', content: ExportdType.PULL, description: 'Get the output of a job directly via REST.' }
@@ -50,12 +50,12 @@ export class ExportdJobBasicStepComponent extends ExportdJobBaseStepComponent im
 
   constructor(private exportdService: ExportdJobService) {
     super();
-    this.basicForm = new FormGroup({
-      name: new FormControl('', Validators.required),
-      label: new FormControl('', Validators.required),
-      description: new FormControl(''),
-      active: new FormControl(true),
-      exportd_type: new FormControl(ExportdType.PUSH)
+    this.basicForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', Validators.required),
+      label: new UntypedFormControl('', Validators.required),
+      description: new UntypedFormControl(''),
+      active: new UntypedFormControl(true),
+      exportd_type: new UntypedFormControl(ExportdType.PUSH)
     });
   }
 
@@ -77,7 +77,7 @@ export class ExportdJobBasicStepComponent extends ExportdJobBaseStepComponent im
         this.basicForm.get('name').markAsTouched({ onlySelf: true });
       });
     } else if (CmdbMode.Edit) {
-      this.basicForm.get('name').disable();
+      // this.basicForm.get('name').disable();
       this.basicForm.markAllAsTouched();
     }
   }

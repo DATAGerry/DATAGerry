@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -21,23 +21,25 @@ import { TextFieldEditComponent } from './text/text-field-edit.component';
 import { SectionFieldEditComponent } from './section/section-field-edit.component';
 import { TextareaEditComponent } from './text/textarea-edit.component';
 import { RefFieldEditComponent } from './special/ref-field-edit.component';
+import { LocationFieldEditComponent } from './special/location-field-edit.component';
 import { ChoiceFieldEditComponent } from './choice/choice-field-edit.component';
 import { CheckFieldEditComponent } from './choice/check-field-edit.component';
 import { DateFieldEditComponent } from './date-time/date-field-edit.component';
 import { SectionRefFieldEditComponent } from './section/section-ref-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {
-  text: TextFieldEditComponent,
-  password: TextFieldEditComponent,
-  email: TextFieldEditComponent,
-  href: TextFieldEditComponent,
-  tel: TextFieldEditComponent,
-  section: SectionFieldEditComponent,
-  textarea: TextareaEditComponent,
-  ref: RefFieldEditComponent,
-  checkbox: CheckFieldEditComponent,
-  radio: ChoiceFieldEditComponent,
-  select: ChoiceFieldEditComponent,
-  date: DateFieldEditComponent,
+  'text': TextFieldEditComponent,
+  'password': TextFieldEditComponent,
+  'email': TextFieldEditComponent,
+  'href': TextFieldEditComponent,
+  'tel': TextFieldEditComponent,
+  'section': SectionFieldEditComponent,
+  'textarea': TextareaEditComponent,
+  'ref': RefFieldEditComponent,
+  'location': LocationFieldEditComponent,
+  'checkbox': CheckFieldEditComponent,
+  'radio': ChoiceFieldEditComponent,
+  'select': ChoiceFieldEditComponent,
+  'date': DateFieldEditComponent,
   'ref-section': SectionRefFieldEditComponent,
 };

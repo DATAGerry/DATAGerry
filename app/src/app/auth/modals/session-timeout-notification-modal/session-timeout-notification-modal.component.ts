@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,7 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
@@ -49,7 +49,7 @@ export class SessionTimeoutNotificationModalComponent implements OnInit, OnDestr
   /**
    * Renew session password form group.
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * Error
@@ -57,8 +57,8 @@ export class SessionTimeoutNotificationModalComponent implements OnInit, OnDestr
   public error: string;
 
   constructor(public activeModal: NgbActiveModal, private authService: AuthService) {
-    this.form = new FormGroup({
-      password: new FormControl('', Validators.required)
+    this.form = new UntypedFormGroup({
+      password: new UntypedFormControl('', Validators.required)
     });
   }
 

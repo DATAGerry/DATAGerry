@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { RenderResult } from '../../../models/cmdb-render';
 import { ObjectService } from '../../../services/object.service';
 import { ToastService } from '../../../../layout/toast/toast.service';
+import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 @Component({
   selector: 'cmdb-object-header',
@@ -47,7 +48,7 @@ export class ObjectHeaderComponent {
     return this.result;
   }
 
-  public constructor(private objectService: ObjectService, private toastService: ToastService) {
+  public constructor(private objectService: ObjectService, private toastService: ToastService, private sidebarService : SidebarService) {
 
   }
 
@@ -57,6 +58,7 @@ export class ObjectHeaderComponent {
       this.toastService.info(`Changed active state to ${ this.activeState }`);
       this.stateChange.emit(true);
     });
+    this.sidebarService.ReloadSideBarData();
   }
 
 

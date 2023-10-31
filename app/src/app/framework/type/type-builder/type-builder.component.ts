@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,7 @@ import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { AccessControlList } from '../../../acl/acl.types';
 import { SidebarService } from '../../../layout/services/sidebar.service';
+import { ValidationService, ValidationStatus } from '../services/validation.service';
 
 @Component({
   selector: 'cmdb-type-builder',
@@ -101,9 +102,12 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
    */
   public accessValid: boolean = true;
 
+  isNameValid = true;
+  isLabelValid = true;
+
   public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
-                     private userService: UserService, private groupService: GroupService,
-                     private sidebarService: SidebarService) {
+    private userService: UserService, private groupService: GroupService,
+    private sidebarService: SidebarService, private validationService: ValidationService) {
   }
 
   /**
@@ -152,6 +156,19 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       .subscribe((response: APIGetMultiResponse) => {
         this.types = response.results as Array<CmdbType>;
       });
+
+    this.validationService.labelValidationStatus$.subscribe((validationStatusMap) => {
+      this.isLabelValid = true;
+
+      validationStatusMap.forEach((value: ValidationStatus, key: string) => {
+        if (key == "" || !value.isValid) {
+          this.isLabelValid = false;
+          return;
+        }
+      });
+    });
+
+
   }
 
   /**

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, OnDestroy, ViewChild } from '@angular/core';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 import { ObjectService } from '../../services/object.service';
 import { TypeService } from '../../services/type.service';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -59,8 +59,8 @@ export class ObjectBulkChangeComponent implements OnDestroy {
   /**
    * Form for bulk change editor.
    */
-  public changeForm: FormGroup = new FormGroup({});
-  public renderForm: FormGroup = new FormGroup({});
+  public changeForm: UntypedFormGroup = new UntypedFormGroup({});
+  public renderForm: UntypedFormGroup = new UntypedFormGroup({});
 
   /**
    * Active status changed.

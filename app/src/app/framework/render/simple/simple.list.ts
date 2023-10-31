@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -22,22 +22,24 @@ import { CheckboxSimpleComponent } from './choice/checkbox-simple.component';
 import { RadioSimpleComponent } from './choice/radio-simple.component';
 import { SelectSimpleComponent } from './choice/select-simple.component';
 import { RefSimpleComponent } from './special/ref-simple.component';
+import { LocationSimpleComponent } from './special/location-simple.component';
 import { DateSimpleComponent } from './date/date-simple.component';
 import { RefSectionSimpleComponent } from './special/ref-section-simple.component';
 
 export const simpleComponents: { [type: string]: any } = {
-  text: TextSimpleComponent,
-  password: PasswordSimpleComponent,
-  email: TextSimpleComponent,
-  tel: TextSimpleComponent,
-  textarea: TextSimpleComponent,
-  number: TextSimpleComponent,
-  href: TextSimpleComponent,
-  checkbox: CheckboxSimpleComponent,
-  radio: RadioSimpleComponent,
-  select: SelectSimpleComponent,
-  ref: RefSimpleComponent,
-  date: DateSimpleComponent,
-  debug: TextSimpleComponent,
+  'text': TextSimpleComponent,
+  'password': PasswordSimpleComponent,
+  'email': TextSimpleComponent,
+  'tel': TextSimpleComponent,
+  'textarea': TextSimpleComponent,
+  'number': TextSimpleComponent,
+  'href': TextSimpleComponent,
+  'checkbox': CheckboxSimpleComponent,
+  'radio': RadioSimpleComponent,
+  'select': SelectSimpleComponent,
+  'ref': RefSimpleComponent,
+  'location': LocationSimpleComponent,
+  'date': DateSimpleComponent,
+  'debug': TextSimpleComponent,
   'ref-section-field': RefSectionSimpleComponent
 };

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,14 +16,14 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 export class FileConfig {
   public defaultParserConfig: any = {};
-  public configForm: FormGroup;
+  public configForm: UntypedFormGroup;
 
   public constructor() {
-    this.configForm = new FormGroup({});
+    this.configForm = new UntypedFormGroup({});
 
   }
 

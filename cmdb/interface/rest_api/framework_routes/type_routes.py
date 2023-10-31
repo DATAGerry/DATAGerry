@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,25 +19,31 @@ from datetime import datetime, timezone
 
 from flask import abort, request, current_app
 
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
-from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
+from cmdb.framework.cmdb_location import CmdbLocation
+
 
 LOGGER = logging.getLogger(__name__)
-types_blueprint = APIBlueprint('types', __name__)
+type_blueprint = APIBlueprint('type', __name__)
 
+with current_app.app_context():
+    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
 
-@types_blueprint.route('/', methods=['GET', 'HEAD'])
-@types_blueprint.protect(auth=True, right='base.framework.type.view')
-@types_blueprint.parse_parameters(TypeIterationParameters)
+@type_blueprint.route('/', methods=['GET', 'HEAD'])
+@type_blueprint.protect(auth=True, right='base.framework.type.view')
+@type_blueprint.parse_parameters(TypeIterationParameters)
 def get_types(params: TypeIterationParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -81,8 +87,8 @@ def get_types(params: TypeIterationParameters):
     return api_response.make_response()
 
 
-@types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@types_blueprint.protect(auth=True, right='base.framework.type.view')
+@type_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@type_blueprint.protect(auth=True, right='base.framework.type.view')
 def get_type(public_id: int):
     """
     HTTP `GET`/`HEAD` route for a single type resource.
@@ -108,9 +114,9 @@ def get_type(public_id: int):
     return api_response.make_response()
 
 
-@types_blueprint.route('/', methods=['POST'])
-@types_blueprint.protect(auth=True, right='base.framework.type.add')
-@types_blueprint.validate(TypeModel.SCHEMA)
+@type_blueprint.route('/', methods=['POST'])
+@type_blueprint.protect(auth=True, right='base.framework.type.add')
+@type_blueprint.validate(TypeModel.SCHEMA)
 def insert_type(data: dict):
     """
     HTTP `POST` route for insert a single type resource.
@@ -148,9 +154,9 @@ def insert_type(data: dict):
     return api_response.make_response(prefix='types')
 
 
-@types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@types_blueprint.protect(auth=True, right='base.framework.type.edit')
-@types_blueprint.validate(TypeModel.SCHEMA)
+@type_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@type_blueprint.protect(auth=True, right='base.framework.type.edit')
+@type_blueprint.validate(TypeModel.SCHEMA)
 def update_type(public_id: int, data: dict):
     """
     HTTP `PUT`/`PATCH` route for update a single type resource.
@@ -167,23 +173,38 @@ def update_type(public_id: int, data: dict):
         UpdateSingleResponse: With update result of the new updated type.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
+    location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     try:
 
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
 
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
+
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
         return abort(400, err.message)
 
+    # when types are updated, update all locations with relevant data from this type
+    updated_type = type_manager.get(public_id)
+    locations_with_type = location_manager.get_locations_by_type(public_id)
+
+    data = {
+        'type_label': updated_type.label,
+        'type_icon': updated_type.render_meta.icon,
+        'type_selectable': updated_type.selectable_as_parent
+    }
+
+    for location in locations_with_type:
+        location_manager._update(CmdbLocation.COLLECTION, location.public_id, data)
+
     return api_response.make_response()
 
 
-@types_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@types_blueprint.protect(auth=True, right='base.framework.type.delete')
+@type_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@type_blueprint.protect(auth=True, right='base.framework.type.delete')
 def delete_type(public_id: int):
     """
     HTTP `DELETE` route for delete a single type resource.
@@ -202,7 +223,7 @@ def delete_type(public_id: int):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+    #from cmdb.framework.cmdb_object_manager import CmdbObjectManager
     deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
 
     try:

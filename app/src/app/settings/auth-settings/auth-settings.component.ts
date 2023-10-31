@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { FormArray, FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ToastService } from '../../layout/toast/toast.service';
 import { ProgressSpinnerService } from '../../layout/progress/progress-spinner.service';
 import { takeUntil } from 'rxjs/operators';
@@ -44,7 +44,7 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
    */
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public authConfigForm: FormGroup;
+  public authConfigForm: UntypedFormGroup;
   public authSettings: AuthSettings;
   public installedProviderList: Array<AuthProvider>;
 
@@ -53,11 +53,11 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
   public constructor(private authSettingsService: AuthService, private activateRoute: ActivatedRoute,
                      private groupService: GroupService, private spinner: ProgressSpinnerService,
                      private toast: ToastService) {
-    this.authConfigForm = new FormGroup({
-      _id: new FormControl('auth'),
-      enable_external: new FormControl(false),
-      token_lifetime: new FormControl(null),
-      providers: new FormArray([])
+    this.authConfigForm = new UntypedFormGroup({
+      _id: new UntypedFormControl('auth'),
+      enable_external: new UntypedFormControl(false),
+      token_lifetime: new UntypedFormControl(null),
+      providers: new UntypedFormArray([])
     });
     this.activateRoute.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       this.installedProviderList = data.providers;
@@ -78,8 +78,8 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
     }, (error) => this.toast.error(error));
   }
 
-  public get providersArray(): FormArray {
-    return this.authConfigForm.get('providers') as FormArray;
+  public get providersArray(): UntypedFormArray {
+    return this.authConfigForm.get('providers') as UntypedFormArray;
   }
 
   public onSave(): void {

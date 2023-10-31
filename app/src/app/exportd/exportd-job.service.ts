@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,30 +11,28 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
-import {
-  ApiCallService,
-  ApiService,
-  HttpInterceptorHandler,
-  httpObserveOptions, resp
-} from '../services/api-call.service';
-import { ExportdJob } from '../settings/models/exportd-job';
+import { UntypedFormControl } from '@angular/forms';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+
 import { Observable, timer} from 'rxjs';
-import { FormControl } from '@angular/forms';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { HttpBackend, HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { BasicAuthInterceptor } from '../auth/interceptors/basic-auth.interceptor';
-import { AuthService } from '../auth/services/auth.service';
+
+import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../services/api-call.service';
+
+import { ExportdJob } from '../settings/models/exportd-job';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { APIGetMultiResponse } from '../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 
 export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob>, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return jobService.checkJobExists(control.value).pipe(
         map(() => {
@@ -50,10 +48,11 @@ export const checkJobExistsValidator = (jobService: ExportdJobService<ExportdJob
   };
 };
 
+
 @Injectable({
   providedIn: 'root'
 })
-export class ExportdJobService<T = ExportdJob> implements ApiService {
+export class ExportdJobService<T = ExportdJob> implements ApiServicePrefix {
 
   public servicePrefix: string = 'exportdjob';
   public newServicePrefix: string = 'exportd/jobs';

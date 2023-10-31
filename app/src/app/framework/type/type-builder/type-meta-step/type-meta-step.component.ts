@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,7 @@ import {
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { AbstractControl, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../../models/cmdb-type';
@@ -61,8 +61,8 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public summaryForm: FormGroup;
-  public externalsForm: FormGroup;
+  public summaryForm: UntypedFormGroup;
+  public externalsForm: UntypedFormGroup;
 
   public hasInter: boolean = false;
 
@@ -85,16 +85,16 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     super();
     this.iterableDiffer = iterableDiffers.find([]).create(null);
 
-    this.summaryForm = new FormGroup({
-      fields: new FormControl('', Validators.required)
+    this.summaryForm = new UntypedFormGroup({
+      fields: new UntypedFormControl('', Validators.required)
     });
 
-    this.externalsForm = new FormGroup({
-      name: new FormControl('', [Validators.required]),
-      label: new FormControl('', Validators.required),
-      icon: new FormControl(''),
-      href: new FormControl('', [Validators.required]),
-      fields: new FormControl('')
+    this.externalsForm = new UntypedFormGroup({
+      name: new UntypedFormControl('', [Validators.required]),
+      label: new UntypedFormControl('', Validators.required),
+      icon: new UntypedFormControl(''),
+      href: new UntypedFormControl('', [Validators.required]),
+      fields: new UntypedFormControl('')
     });
   }
 
@@ -131,10 +131,12 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     this.externalsForm.get('href').valueChanges.pipe(takeUntil(this.subscriber)).subscribe((href: string) => {
       this.hasInter = occurrences(href, '{}') > 0;
     });
+
+
   }
 
-  public get summaryFields(): FormControl {
-    return this.summaryForm.get('fields') as FormControl;
+  public get summaryFields(): UntypedFormControl {
+    return this.summaryForm.get('fields') as UntypedFormControl;
   }
 
   public addExternal() {
@@ -173,5 +175,6 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
 
   public onSummaryChange(fields: Array<any>) {
     this.typeInstance.render_meta.summary.fields = fields.map(f => f.name);
+
   }
 }

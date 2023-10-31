@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,27 +11,36 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
+import { HttpBackend, HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import { Router } from '@angular/router';
+
 import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { HttpBackend, HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { ConnectionService } from '../../connect/connection.service';
-import { User } from '../../management/models/user';
+
+import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
+import { NgxIndexedDBService } from 'ngx-indexed-db';
+
+
 import { PermissionService } from './permission.service';
-import { ApiCallService, ApiService, httpObserveOptions } from '../../services/api-call.service';
+import { ConnectionService } from '../../connect/connection.service';
+import { ApiCallService, ApiServicePrefix, httpObserveOptions } from '../../services/api-call.service';
+import { SpecialService } from '../../framework/services/special.service';
+
+import { User } from '../../management/models/user';
 import { IntroComponent } from '../../layout/intro/intro.component';
 import { StepByStepIntroComponent } from '../../layout/intro/step-by-step-intro/step-by-step-intro.component';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { SpecialService } from '../../framework/services/special.service';
-import { Router } from '@angular/router';
 import { LoginResponse } from '../models/responses';
 import { Token } from '../models/token';
-import { NgxIndexedDBService } from 'ngx-indexed-db';
+import { BranchInfoModalComponent } from 'src/app/layout/intro/branch-info-modal/branch-info-modal.component';
+import { ProfileInfoModalComponent } from 'src/app/layout/intro/profile-info-modal/profile-info-modal.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 
 const httpOptions = {
   headers: new HttpHeaders({
@@ -43,7 +52,7 @@ const httpOptions = {
 @Injectable({
   providedIn: 'root'
 })
-export class AuthService<T = any> implements ApiService {
+export class AuthService<T = any> implements ApiServicePrefix {
 
   // Rest backend
   private restPrefix: string = 'rest';
@@ -60,9 +69,18 @@ export class AuthService<T = any> implements ApiService {
   private startIntroModal: any = undefined;
   private stepByStepModal: any = undefined;
 
-  constructor(private backend: HttpBackend, private connectionService: ConnectionService, private api: ApiCallService,
-              private permissionService: PermissionService, private router: Router, private introService: NgbModal,
-              private specialService: SpecialService, private indexDB: NgxIndexedDBService) {
+  private branchInfoModal: any = undefined;
+  private profileInfoModal: any = undefined;
+
+  constructor(public backend: HttpBackend, 
+              private connectionService: ConnectionService, 
+              private api: ApiCallService,
+              private permissionService: PermissionService, 
+              private router: Router, 
+              private introService: NgbModal,
+              private specialService: SpecialService, 
+              private indexDB: NgxIndexedDBService) {
+
     this.http = new HttpClient(backend);
     this.currentUserSubject = new BehaviorSubject<User>(
       JSON.parse(localStorage.getItem('current-user')));
@@ -103,6 +121,7 @@ export class AuthService<T = any> implements ApiService {
     );
   }
 
+
   public postSettings(data: T): Observable<T> {
     const options = httpObserveOptions;
     options.params = new HttpParams();
@@ -113,6 +132,9 @@ export class AuthService<T = any> implements ApiService {
     );
   }
 
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                   LOGIN / LOGOUT                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
   public login(username: string, password: string) {
     const data = {
       user_name: username,
@@ -153,35 +175,109 @@ export class AuthService<T = any> implements ApiService {
     this.router.navigate(['/auth']);
   }
 
-
-  private showIntro() {
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                    INTRO SECTION                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
+  public showIntro(triggered: boolean = false) {
     this.specialService.getIntroStarter().subscribe(value => {
+      const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
       const RUN = 'execute';
+      // if (!value[RUN]) {
       if (!value[RUN]) {
-        const options = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
-        // @ts-ignore
+        
+        
         this.startIntroModal = this.introService.open(IntroComponent, options);
         this.startIntroModal.result.then((result) => {
           if (result) {
-            this.router.navigate(['/framework/category/add']);
-            this.showSteps();
+            // this.router.navigate(['/framework/category/add']);
+            // this.showSteps();
+            this.showBranchInfoModal();
           }
-        }, (reason) => {
-          console.log(reason);
+        }, 
+        (error) => {
+          console.log(error);
         });
+      } else {
+        //display assistant not usable
+        if(triggered){
+            this.startIntroModal = this.introService.open(IntroComponent, options);
+            this.startIntroModal.componentInstance.isUsable = false;
+        }
       }
     });
   }
 
-  private showSteps() {
-    const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step' };
-    this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
-    this.stepByStepModal.result.then((resp) => {
-      if (resp) {
-        this.router.navigate(['/']);
+  // private showSteps() {
+  //   const options = { backdrop: false, keyboard: true, windowClass: 'step-by-step' };
+  //   this.stepByStepModal = this.introService.open(StepByStepIntroComponent, options);
+  //   this.stepByStepModal.result.then((resp) => {
+  //     if (resp) {
+  //       this.router.navigate(['/']);
+  //     }
+  //   }, 
+  //   (error) => {
+  //     console.log(error);
+  //   });
+  // }
+
+
+  /**
+   * Modal for branch selection
+   */
+  private showBranchInfoModal(selectedBranches = {}){
+    const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
+
+    this.branchInfoModal = this.introService.open(BranchInfoModalComponent, options);
+    this.branchInfoModal.componentInstance.selectedBranches = selectedBranches;
+    this.branchInfoModal.componentInstance.setBranchState(selectedBranches);
+    this.branchInfoModal.result.then((result: any) => {
+      if(result){
+        this.showProfileInfoModal(result);
       }
-    }, (reason) => {
-      console.log(reason);
+    },
+    () => {
     });
   }
+
+  
+  /**
+   * Modal for profile selection
+   * 
+   * @param selectedBranches (dict): selected branches from branch modal
+   */
+  private showProfileInfoModal(selectedBranches){
+    const options: NgbModalOptions = { centered: true, backdrop: 'static', keyboard: true, windowClass: 'intro-tour', size: 'lg' };
+
+    this.profileInfoModal = this.introService.open(ProfileInfoModalComponent, options);
+    this.profileInfoModal.componentInstance.selectedBranches = selectedBranches;
+    this.profileInfoModal.componentInstance.setProfiles(selectedBranches);
+    this.profileInfoModal.result.then((result: any) => {
+      if(result == 'back'){
+        this.showBranchInfoModal(selectedBranches);
+      } else {
+        
+        let selectedProfiles: string = "";
+
+        //filter selected profiles
+        for(let profile of Object.keys(result)){
+          if(result[profile]){
+            selectedProfiles += profile + "#";
+          }
+        }
+        selectedProfiles = selectedProfiles.slice(0,-1);
+
+        this.specialService.createProfiles(selectedProfiles).subscribe((response) => {
+          this.router.navigate(['/framework/type/']);
+          window.location.reload();
+        },
+        (error) => {
+          console.log(error);
+        });
+      }
+ 
+    },
+    () => {
+    });
+  }
+
 }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,12 +27,12 @@ from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
 from cmdb.user_management.models.right import _nameToLevel
 
-rights_blueprint = APIBlueprint('rights', __name__)
+right_blueprint = APIBlueprint('right', __name__)
 
 
-@rights_blueprint.route('/', methods=['GET', 'HEAD'])
-@rights_blueprint.protect(auth=False, right=None)
-@rights_blueprint.parse_collection_parameters(sort='name', view='list')
+@right_blueprint.route('/', methods=['GET', 'HEAD'])
+@right_blueprint.protect(auth=False, right=None)
+@right_blueprint.parse_collection_parameters(sort='name', view='list')
 def get_rights(params: CollectionParameters):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -71,8 +71,8 @@ def get_rights(params: CollectionParameters):
         return abort(404, err.message)
 
 
-@rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
-@rights_blueprint.protect(auth=False, right='None')
+@right_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
+@right_blueprint.protect(auth=False, right='None')
 def get_right(name: str):
     """
     HTTP `GET`/`HEAD` route for a single right resource.
@@ -100,8 +100,8 @@ def get_right(name: str):
     return api_response.make_response()
 
 
-@rights_blueprint.route('/levels', methods=['GET', 'HEAD'])
-@rights_blueprint.protect(auth=False, right='None')
+@right_blueprint.route('/levels', methods=['GET', 'HEAD'])
+@right_blueprint.protect(auth=False, right='None')
 def get_levels():
     """
     HTTP `GET`/`HEAD` route for a static collection of levels.

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,19 +11,29 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+
+import * as jQuery from 'jquery';
+
 import { AuthService } from '../../../auth/services/auth.service';
 import { UserService } from '../../../management/services/user.service';
-import { User } from '../../../management/models/user';
 import { GroupService } from '../../../management/services/group.service';
+
+import { User } from '../../../management/models/user';
 import { Group } from '../../../management/models/group';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { FeedbackModalComponent } from '../../helpers/modals/feedback-modal/feedback-modal.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+
+declare global {
+  interface Window { ATL_JQ_PAGE_PROPS: any; }
+}
+
+window.ATL_JQ_PAGE_PROPS = window.ATL_JQ_PAGE_PROPS || {};
 
 @Component({
   selector: 'cmdb-navigation',
@@ -36,8 +46,11 @@ export class NavigationComponent implements OnInit, OnDestroy {
   public user: User;
   public group: Group;
 
-  constructor(private renderer: Renderer2, public authService: AuthService, private userService: UserService,
-              private groupService: GroupService, private modalService: NgbModal) {
+  constructor(private renderer: Renderer2, 
+              public authService: AuthService, 
+              private userService: UserService,
+              private groupService: GroupService) {
+
     this.user = this.userService.getCurrentUser();
   }
 
@@ -64,7 +77,7 @@ export class NavigationComponent implements OnInit, OnDestroy {
       }
       const $subMenu = $(this).next('.dropdown-menu');
       $subMenu.toggleClass('show');
-      // tslint:disable-next-line:only-arrow-functions
+
       $(this).parents('li.nav-item.dropdown.show').on('hidden.bs.dropdown', () => {
         $('.dropdown-submenu .show').removeClass('show');
       });
@@ -78,7 +91,24 @@ export class NavigationComponent implements OnInit, OnDestroy {
   }
 
   public feedback() {
-    const modalComponent = this.modalService.open(FeedbackModalComponent, {size: 'xl'});
-    return modalComponent.result;
+
+    jQuery.ajax({
+      url: "https://becon88.atlassian.net/s/d41d8cd98f00b204e9800998ecf8427e-T/6i46lu/b/8/b0105d975e9e59f24a3230a22972a71a/_/download/batch/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector-embededjs/com.atlassian.jira.collector.plugin.jira-issue-collector-plugin:issuecollector-embededjs.js?locale=de-DE&collectorId=f2da5b6f",
+      type: 'get',
+      cache: true,
+      dataType: 'script'
+    });
+
+    window.ATL_JQ_PAGE_PROPS =  {
+      "triggerFunction": function(showCollectorDialog) {
+        showCollectorDialog();
+      }
+    };
   }
+
+
+  public openIntroModal(){
+    this.authService.showIntro(true);
+  }
+
 }

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Injectable } from '@angular/core';
 import {
   ApiCallService,
-  ApiService,
+  ApiServicePrefix,
   httpObserveOptions, resp
 } from '../../services/api-call.service';
 import { User } from '../models/user';
@@ -27,7 +27,7 @@ import { AuthService } from '../../auth/services/auth.service';
 import { switchMap, map, catchError } from 'rxjs/operators';
 import { Observable, timer } from 'rxjs';
 import { HttpBackend, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { FormControl } from '@angular/forms';
+import { UntypedFormControl } from '@angular/forms';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import {
   APIDeleteSingleResponse,
@@ -38,7 +38,7 @@ import {
 } from '../../services/models/api-response';
 
 export const userExistsValidator = (userService: UserService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return userService.getUserByName(control.value).pipe(
         map((response) => {
@@ -61,7 +61,7 @@ export const userExistsValidator = (userService: UserService, time: number = 500
 @Injectable({
   providedIn: 'root'
 })
-export class UserService<T = User> implements ApiService {
+export class UserService<T = User> implements ApiServicePrefix {
 
   public readonly servicePrefix: string = 'users';
 

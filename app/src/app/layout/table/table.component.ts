@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -27,13 +27,13 @@ import {
   Output, TemplateRef, ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import { Observable, ReplaySubject, merge } from 'rxjs';
+import { Observable, ReplaySubject, Subscription, merge } from 'rxjs';
 import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
 import { takeUntil } from 'rxjs/operators';
 import { TableService } from './table.service';
-import { Router } from '@angular/router';
-import { FormGroup } from '@angular/forms';
+import { Router, NavigationEnd } from '@angular/router';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-table',
@@ -108,13 +108,12 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Input('columns')
   public set Columns(columns: Array<Column>) {
     this.columns = columns;
-    this.items = [];
   }
 
   /**
    * Column search form group.
    */
-  public columnSearchForm: FormGroup;
+  public columnSearchForm: UntypedFormGroup;
 
   /**
    * Column search columnSearchForm group.
@@ -265,7 +264,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * Table sort value.
    */
-  public sort: Sort = { name: null, order: SortDirection.NONE };
+  public sort: Sort = { name: null, order: SortDirection.ASCENDING };
 
   /**
    * Sort input setter.
@@ -305,13 +304,29 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
   @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
+  ASC: number = SortDirection.ASCENDING;
+  DSC: number = SortDirection.DESCENDING;
+  routerSubscription: Subscription | undefined;
+
   public constructor(private tableService: TableService, private router: Router) {
+    this.resetSelectedItems()
+  }
+
+  /**
+   * Reseting the selected Items
+   */
+  private resetSelectedItems(): void {
+    this.routerSubscription = this.router.events.subscribe((event) => {
+      if (event instanceof NavigationEnd) {
+        this.selectedItems = []
+      }
+    });
   }
 
   public ngOnInit(): void {
     this.configChangeObservable.pipe(takeUntil(this.subscriber)).subscribe(() => {
       this.tableState = {
-        name,
+        name: '',
         page: this.page,
         pageSize: this.pageSize,
         sort: this.sort,
@@ -423,8 +438,13 @@ export class TableComponent<T> implements OnInit, OnDestroy {
    * @param sort
    */
   public onSortChange(sort: Sort): void {
-    this.sort = sort;
-    this.sortChange.emit(sort);
+    if (this.sort.name === sort.name && this.sort.order === sort.order) {
+      this.sort.order = this.sort.order === this.ASC ? this.DSC : this.ASC;
+    } else {
+      this.sort.name = sort.name;
+      this.sort.order = sort.order
+    }
+    this.sortChange.emit(this.sort);
   }
 
   /**
@@ -508,5 +528,6 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+    this.routerSubscription.unsubscribe();
   }
 }

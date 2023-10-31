@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 
@@ -38,7 +38,7 @@ export class TableSearchComponent implements OnInit, OnDestroy {
   /**
    * Search input form group.
    */
-  public form: FormGroup;
+  public form: UntypedFormGroup;
 
   /**
    * Default time slot for change emits.
@@ -69,8 +69,8 @@ export class TableSearchComponent implements OnInit, OnDestroy {
    * Constructor of `TableSearchComponent`.
    */
   constructor() {
-    this.form = new FormGroup({
-      search: new FormControl()
+    this.form = new UntypedFormGroup({
+      search: new UntypedFormControl()
     });
   }
 
@@ -95,8 +95,8 @@ export class TableSearchComponent implements OnInit, OnDestroy {
   /**
    * Get the search form control.
    */
-  public get search(): FormControl {
-    return this.form.get('search') as FormControl;
+  public get search(): UntypedFormControl {
+    return this.form.get('search') as UntypedFormControl;
   }
 
   /**

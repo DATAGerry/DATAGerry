@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter} from '@angular/core';
 import { LogService } from '../../../framework/services/log.service';
 import { CmdbLog } from '../../../framework/models/cmdb-log';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -29,7 +29,7 @@ import { takeUntil } from 'rxjs/operators';
   template: `
       <div class="modal-header">
           <h4 class="modal-title" id="modal-basic-title">Delete Log</h4>
-          <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+          <button type="button" class="close" aria-label="Close" (click)=" handleModalDismiss()">
               <span aria-hidden="true">&times;</span>
           </button>
       </div>
@@ -43,8 +43,14 @@ import { takeUntil } from 'rxjs/operators';
 })
 export class DeleteModalComponent {
   @Input() publicID: number;
+  @Output() isDismissClicked = new EventEmitter <boolean> ();
 
   constructor(public activeModal: NgbActiveModal) {
+  }
+
+  handleModalDismiss() {
+    this.activeModal.dismiss('Cross click')
+    this.isDismissClicked.emit(true)
   }
 }
 
@@ -66,6 +72,7 @@ export class LogObjectSettingsComponent {
   public deleteLogLength: number = 0;
   public cleanupInProgress: boolean = false;
   public cleanupProgress: number = 0;
+  isDismissClicked: boolean = false;
 
   /**
    * Component un-subscriber.
@@ -79,6 +86,9 @@ export class LogObjectSettingsComponent {
   public deleteLog(publicID: number, reloadList: string) {
     const deleteModalRef = this.modalService.open(DeleteModalComponent);
     deleteModalRef.componentInstance.publicID = publicID;
+    deleteModalRef.componentInstance.isDismissClicked.subscribe((dismissed: boolean) => {
+    this.isDismissClicked = dismissed
+    });
     deleteModalRef.result.then(result => {
         this.logService.deleteLog(result).pipe(takeUntil(this.subscriber)).subscribe(() => {
             this.toastService.success('Log was deleted!');
@@ -101,7 +111,9 @@ export class LogObjectSettingsComponent {
         );
       },
       (error) => {
-        console.error(error);
+        if (!this.isDismissClicked && error !== 'Cross click') {
+          console.error(error);
+        }
       });
   }
 

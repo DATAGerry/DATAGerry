@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,12 +11,13 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, } from '@angular/core';
+
 import { BaseSectionComponent } from '../base-section/base-section.component';
 
 @Component({
@@ -24,13 +25,11 @@ import { BaseSectionComponent } from '../base-section/base-section.component';
   templateUrl: './field-section.component.html',
   styleUrls: ['./field-section.component.scss']
 })
-export class FieldSectionComponent extends BaseSectionComponent implements OnInit {
+export class FieldSectionComponent extends BaseSectionComponent {
+
+  @Input() objectID: number;
 
   constructor() {
     super();
   }
-
-  ngOnInit(): void {
-  }
-
 }

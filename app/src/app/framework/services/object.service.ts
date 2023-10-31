@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,31 +11,33 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObserveOptions, resp } from '../../services/api-call.service';
-import { CmdbObject } from '../models/cmdb-object';
-import { Observable, timer } from 'rxjs';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
+import { UntypedFormControl } from '@angular/forms';
+
+import { Observable, Subject, timer } from 'rxjs';
+import { catchError, map, switchMap, finalize } from 'rxjs/operators';
+
+import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../../services/api-call.service';
+
+import { CmdbObject } from '../models/cmdb-object';
 import { RenderResult } from '../models/cmdb-render';
-import { HttpClient, HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { GeneralModalComponent } from '../../layout/helpers/modals/general-modal/general-modal.component';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import {
-  APIGetListResponse,
-  APIGetMultiResponse,
-  APIUpdateMultiResponse,
-} from '../../services/models/api-response';
+import { APIGetListResponse, APIGetMultiResponse, APIUpdateMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
-import { FormControl } from '@angular/forms';
+import { LocationsModalComponent } from 'src/app/layout/helpers/modals/locations-modal/locations-modal.component';
+/* -------------------------------------------------------------------------- */
+
 
 export const checkObjectExistsValidator = (objectService: ObjectService, time: number = 500) => {
-  return (control: FormControl) => {
+  return (control: UntypedFormControl) => {
     return timer(time).pipe(switchMap(() => {
       return objectService.getObject(+control.value).pipe(
         map((response) => {
@@ -71,10 +73,10 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 @Injectable({
   providedIn: 'root'
 })
-export class ObjectService<T = CmdbObject | RenderResult> implements ApiService {
-
-  public servicePrefix: string = 'object';
-  public newServicePrefix: string = 'objects';
+export class ObjectService<T = CmdbObject | RenderResult> implements ApiServicePrefix {
+  
+  public objectActionSource = new Subject();
+  public servicePrefix: string = 'objects';
 
   public readonly options = {
     headers: new HttpHeaders({
@@ -84,8 +86,37 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     observe: resp
   };
 
-  constructor(private api: ApiCallService, private http: HttpClient, private modalService: NgbModal) {
+  constructor(private api: ApiCallService, private modalService: NgbModal) {
+
   }
+
+/* -------------------------------------------------------------------------- */
+/*                                 CRUD CALLS                                 */
+/* -------------------------------------------------------------------------- */
+
+/* ------------------------------ CRUD - CREATE ----------------------------- */
+    public postObject(objectInstance: CmdbObject): Observable<any> {
+        const options = this.options;
+        options.params = new HttpParams();
+        return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
+          map((apiResponse) => {
+            return apiResponse.body;
+          }),
+          finalize(() => this.executedAction('create'))
+        );
+    }
+
+/* ------------------------------ CRUD - UPDATE ----------------------------- */
+    public putObject(publicID: number, objectInstance: CmdbObject, httpOptions = httpObserveOptions): Observable<any> {
+        return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
+            map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
+                return apiResponse.body;
+            }),
+            finalize(() => this.executedAction('update'))
+        );
+    }
+
+/* ------------------------------- CRUD - READ ------------------------------ */
 
   public getObjects(
     params: CollectionParameters = {
@@ -117,7 +148,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     options.params = httpParams;
 
-    return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
@@ -136,7 +167,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     httpParams = httpParams.set('view', 'render');
     httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     options.params = httpParams;
-    return this.api.callGet<Array<T>>(this.newServicePrefix + '/', options).pipe(
+    return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })
@@ -186,25 +217,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     return this.getObjects(params, view);
   }
 
-  // CRUD calls
-  public postObject(objectInstance: CmdbObject): Observable<any> {
-    const options = this.options;
-    options.params = new HttpParams();
-    return this.api.callPost<CmdbObject>(this.servicePrefix + '/', objectInstance, options).pipe(
-      map((apiResponse) => {
-        return apiResponse.body;
-      })
-    );
-  }
 
-  public putObject(publicID: number, objectInstance: CmdbObject,
-                   httpOptions = httpObserveOptions): Observable<any> {
-    return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
-      map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
-        return apiResponse.body;
-      })
-    );
-  }
 
   public changeState(publicID: number, status: boolean) {
     const options = this.options;
@@ -212,9 +225,13 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state`, status, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
-      })
+      }),
+      finalize(() => this.executedAction('update'))
+      
     );
   }
+
+/* ---------------------------------------- CRUD - DELETE --------------------------------------- */
 
   public deleteManyObjects(publicID: any) {
     const options = this.options;
@@ -225,21 +242,49 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
           return [];
         }
         return apiResponse.body;
-      })
+      }),
+      finalize(() => this.executedAction('delete'))
     );
   }
 
   public deleteObject(publicID: any): Observable<any> {
     const options = this.options;
     options.params = new HttpParams();
+
     return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`, options).pipe(
       map((apiResponse) => {
         return apiResponse.body;
-      })
+      }),
+      finalize(() => this.executedAction('delete'))
     );
   }
 
-  // Count calls
+
+    public deleteObjectWithLocations(publicID: any): Observable<any>{
+        const options = this.options;
+        options.params = new HttpParams();
+        return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/locations`, options).pipe(
+          map((apiResponse) => {
+            return apiResponse.body;
+          }),
+          finalize(() => this.executedAction('delete'))
+        );
+    }
+
+    public deleteObjectWithChildren(publicID: any): Observable<any>{
+      const options = this.options;
+      options.params = new HttpParams();
+      return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/children`, options).pipe(
+        map((apiResponse) => {
+          return apiResponse.body;
+        }),
+        finalize(() => this.executedAction('delete'))
+      );
+  }
+
+/* ---------------------------------------------------------------------------------------------- */
+/*                                          COUNT OBJECTS                                         */
+/* ---------------------------------------------------------------------------------------------- */
 
   public countObjectsByType(typeID: number | Array<number>): Observable<number> {
     if (!Array.isArray(typeID)) {
@@ -252,7 +297,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     httpParams = httpParams.set('limit', '0');
     httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     options.params = httpParams;
-    return this.api.callHead<Array<T>>(this.newServicePrefix + '/', options).pipe(
+    return this.api.callHead<Array<T>>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return +apiResponse.headers.get('X-Total-Count');
       })
@@ -274,14 +319,17 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
   public countObjects(): Observable<number> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callHead<T[]>(this.newServicePrefix + '/', options).pipe(
+    return this.api.callHead<T[]>(this.servicePrefix + '/', options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return +apiResponse.headers.get('X-Total-Count');
       })
     );
   }
 
-  // Custom calls
+/* -------------------------------------------------------------------------- */
+/*                                CUSTOM CALLS                                */
+/* -------------------------------------------------------------------------- */
+
   /**
    * API call to get iterable objects which referer to a object.
    * @param publicID of the referenced object.
@@ -310,12 +358,16 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     httpParams = httpParams.set('onlyActiveObjCookie', this.api.readCookies(COOCKIENAME));
     httpParams = httpParams.set('view', view);
     options.params = httpParams;
-    return this.api.callGet<Array<R>>(`${ this.newServicePrefix }/${ publicID }/references`, options).pipe(
+    return this.api.callGet<Array<R>>(`${ this.servicePrefix }/${ publicID }/references`, options).pipe(
       map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
         return apiResponse.body;
       })
     );
   }
+
+/* -------------------------------------------------------------------------- */
+/*                               UNCLEAN OBJECTS                              */
+/* -------------------------------------------------------------------------- */
 
   public countUncleanObjects(typeID: number): Observable<number> {
     const options = this.options;
@@ -357,6 +409,10 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     );
   }
 
+/* -------------------------------------------------------------------------- */
+/*                                MODAL SECTION                               */
+/* -------------------------------------------------------------------------- */
+
   public openModalComponent(title: string,
                             modalMessage: string,
                             buttonDeny: string,
@@ -368,5 +424,28 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiService 
     modalComponent.componentInstance.buttonDeny = buttonDeny;
     modalComponent.componentInstance.buttonAccept = buttonAccept;
     return modalComponent;
+  }
+
+  /**
+   * Open a modal confirmation for deletion when the object has a location which is
+   * parent to other locations
+   * 
+   * @returns 
+   */
+  public openLocationModalComponent(){
+    return this.modalService.open(LocationsModalComponent);
+  }
+
+/* -------------------------------------------------------------------------- */
+/*                               HELPER SECTION                               */
+/* -------------------------------------------------------------------------- */
+  
+/**
+ * Notifies subscribers that an operation was executed by the ObjectService
+ * 
+ * @param action (string): Which operation was executed (create, update, delete)
+ */
+  executedAction(action: string){
+    this.objectActionSource.next(action);
   }
 }

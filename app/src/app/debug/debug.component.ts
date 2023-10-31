@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { DebugService } from './debug.service';
 import { BackendHttpError } from '../error/models/custom.error';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -33,7 +33,7 @@ export class DebugComponent implements OnInit, OnDestroy {
   private customHttpResponseSubscription: Subscription;
 
   public customResponse: BackendHttpError = null;
-  public customResponseForm: FormGroup;
+  public customResponseForm: UntypedFormGroup;
 
   public constructor(private debugService: DebugService) {
     this.httpResponseSubscription = new Subscription();
@@ -41,9 +41,9 @@ export class DebugComponent implements OnInit, OnDestroy {
   }
 
   public ngOnInit(): void {
-    this.customResponseForm = new FormGroup({
-      customStatus: new FormControl(400, Validators.required),
-      customMessage: new FormControl('')
+    this.customResponseForm = new UntypedFormGroup({
+      customStatus: new UntypedFormControl(400, Validators.required),
+      customMessage: new UntypedFormControl('')
     });
   }
 

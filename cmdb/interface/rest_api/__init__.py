@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -59,55 +59,105 @@ def register_converters(app):
 
 
 def register_blueprints(app):
-    from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.object_routes import objects_blueprint
-    from cmdb.interface.rest_api.framework_routes.type_routes import types_blueprint
+    import cmdb
+
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
-    from cmdb.interface.rest_api.framework_routes.category_routes import categories_blueprint
 
-    from cmdb.interface.rest_api.user_management_routes.user_routes import users_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
+    from cmdb.interface.rest_api.framework_routes.objects_routes import objects_blueprint
+
+    from cmdb.interface.rest_api.framework_routes.object_link_routes import link_blueprint
+    from cmdb.interface.rest_api.framework_routes.object_links_routes import links_blueprint
+
+    from cmdb.interface.rest_api.framework_routes.type_routes import type_blueprint
+    from cmdb.interface.rest_api.framework_routes.types_routes import types_blueprint
+
+    from cmdb.interface.rest_api.connection import connection_routes
+
+    from cmdb.interface.rest_api.framework_routes.category_routes import category_blueprint
+    from cmdb.interface.rest_api.framework_routes.categories_routes import categories_blueprint
+
+    from cmdb.interface.rest_api.framework_routes.location_routes import location_blueprint
+
+    from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
+    from cmdb.interface.rest_api.user_management_routes.users_routes import users_blueprint
+
     from cmdb.interface.rest_api.user_management_routes.user_settings_routes import user_settings_blueprint
-    from cmdb.interface.rest_api.user_management_routes.right_routes import rights_blueprint
-    from cmdb.interface.rest_api.user_management_routes.group_routes import groups_blueprint
+
+    from cmdb.interface.rest_api.user_management_routes.group_routes import group_blueprint
+    from cmdb.interface.rest_api.user_management_routes.groups_routes import groups_blueprint
+
+    from cmdb.interface.rest_api.user_management_routes.right_routes import right_blueprint
+    from cmdb.interface.rest_api.user_management_routes.rights_routes import rights_blueprint
 
     from cmdb.interface.rest_api.search_routes import search_blueprint
+
+    from cmdb.interface.rest_api.exporter_routes.export_object_routes import export_blueprint
     from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
+
     from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
+
     from cmdb.interface.rest_api.log_routes import log_blueprint
+    from cmdb.interface.rest_api.logs_routes import logs_blueprint
+
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
     from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
-
     from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
 
     from cmdb.interface.rest_api.external_systems_routes import external_system
+
+    from cmdb.interface.rest_api.doc_routes import doc_blueprint
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
+
+
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
-    from cmdb.interface.rest_api.framework_routes.object_link_routes import links_blueprint
-
+    
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_multi_blueprint(date_blueprint, multi_prefix=['/date'])
-    app.register_multi_blueprint(objects_blueprint, multi_prefix=['/object', '/objects'])
-    app.register_multi_blueprint(links_blueprint, multi_prefix=['/object/link', '/objects/links'])
-    app.register_multi_blueprint(types_blueprint, multi_prefix=['/type', '/types'])
+    #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
+    # needs to be refactored for blueprints with multiple routes
+    app.register_blueprint(objects_blueprint, url_prefix='/objects')
+    app.register_blueprint(object_blueprint, url_prefix='/object')
+
+    app.register_blueprint(link_blueprint, url_prefix='/object/link')
+    app.register_blueprint(links_blueprint, url_prefix='/objects/links')
+    
+    app.register_blueprint(type_blueprint, url_prefix='/type')
+    app.register_blueprint(types_blueprint, url_prefix='/types')
+
     app.register_blueprint(connection_routes)
 
-    app.register_multi_blueprint(categories_blueprint, multi_prefix=['/category', '/categories'])
-    app.register_multi_blueprint(users_blueprint, multi_prefix=['/user', '/users'])
+    app.register_blueprint(category_blueprint, url_prefix='/category')
+    app.register_blueprint(categories_blueprint, url_prefix='/categories')
+    
+    app.register_blueprint(location_blueprint, url_prefix='/locations')
+
+    app.register_blueprint(user_blueprint, url_prefix='/user')
+    app.register_blueprint(users_blueprint, url_prefix='/users')
+
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
 
-    app.register_multi_blueprint(groups_blueprint, multi_prefix=['/group', '/groups'])
-    app.register_multi_blueprint(rights_blueprint, multi_prefix=['/right', '/rights'])
+    app.register_blueprint(group_blueprint, url_prefix='/group')
+    app.register_blueprint(groups_blueprint, url_prefix='/groups') 
+
+    app.register_blueprint(right_blueprint, url_prefix='/right')
+    app.register_blueprint(rights_blueprint, url_prefix='/rights')
+
     app.register_blueprint(search_blueprint)
-    app.register_multi_blueprint(exporter_blueprint, multi_prefix=['/exporter', '/exporter/'])
+
+    app.register_blueprint(export_blueprint, url_prefix='/exporter')
+    app.register_blueprint(exporter_blueprint, url_prefix='/exporter/')
+    
     app.register_blueprint(type_export_blueprint)
-    app.register_multi_blueprint(log_blueprint, multi_prefix=['/log', '/logs'])
+
+    app.register_blueprint(log_blueprint, url_prefix='/log')
+    app.register_blueprint(logs_blueprint, url_prefix='/logs')   
+
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
     app.register_multi_blueprint(exportd_blueprint, multi_prefix=['/exportd'])
@@ -115,17 +165,25 @@ def register_blueprints(app):
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
-    app.register_multi_blueprint(docs_blueprint, multi_prefix=['/docs', '/doc'])
+
+    app.register_blueprint(doc_blueprint, url_prefix='/doc')
+    app.register_blueprint(docs_blueprint, url_prefix='/docs')
+    
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 
-    import cmdb
     if cmdb.__MODE__ == 'DEBUG':
         from cmdb.interface.rest_api.debug_routes import debug_blueprint
         app.register_blueprint(debug_blueprint)
 
 
 def register_error_pages(app):
+    """
+    Registers error handlers for the app
+
+    Params:
+        app (BaseCmdbApp): app where to register the error handlers
+    """
     from cmdb.interface.error_handlers import not_implemented
     from cmdb.interface.error_handlers import internal_server_error
     from cmdb.interface.error_handlers import page_gone

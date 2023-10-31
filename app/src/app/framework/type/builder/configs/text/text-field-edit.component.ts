@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,11 +16,12 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
 import { ConfigEditBaseComponent } from '../config.edit';
-import { FormControl, Validators } from '@angular/forms';
+import { UntypedFormControl, Validators } from '@angular/forms';
 import { ReplaySubject } from 'rxjs';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-text-field-edit',
@@ -35,16 +36,18 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
    */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: FormControl = new FormControl(false);
-  public nameControl: FormControl = new FormControl('', Validators.required);
-  public labelControl: FormControl = new FormControl('', Validators.required);
-  public descriptionControl: FormControl = new FormControl(undefined);
-  public regexControl: FormControl = new FormControl(undefined, ValidRegexValidator);
-  public placeholderControl: FormControl = new FormControl(undefined);
-  public valueControl: FormControl = new FormControl(undefined);
-  public helperTextControl: FormControl = new FormControl(undefined);
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public regexControl: UntypedFormControl = new UntypedFormControl(undefined, ValidRegexValidator);
+  public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+  private previousNameControlValue: string = '';
+  private initialValue: string;
 
-  constructor() {
+  constructor(private validationService: ValidationService) {
     super();
   }
 
@@ -60,6 +63,25 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
 
     this.disableControlOnEdit(this.nameControl);
     this.patchData(this.data, this.form);
+
+    this.initialValue = this.nameControl.value;
+    this.previousNameControlValue = this.nameControl.value;
+    // call service to initialize the data
+  }
+
+
+  onInputChange(event: any, type: string) {
+    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
+    const fieldName = 'label';
+    const fieldValue = this.nameControl.value;
+
+    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
+
+    if (fieldValue.length === 0) {
+      this.previousNameControlValue = this.initialValue;
+    } else {
+      this.previousNameControlValue = fieldValue;
+    }
   }
 
   public ngOnDestroy(): void {

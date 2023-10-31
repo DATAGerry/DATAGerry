@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -21,6 +21,7 @@ Object/Type render
 import logging
 from typing import List, Union
 
+from datetime import datetime, timezone
 from cmdb.database.managers import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, \
     TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
@@ -29,11 +30,8 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager import ManagerGetError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.utils.wraps import timing
 
 from cmdb.utils.error import CMDBError
-
-from datetime import datetime, timezone
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference, \
@@ -132,6 +130,7 @@ class CmdbRender:
 
     def _generate_result(self, level: int) -> RenderResult:
         render_result = RenderResult()
+
         try:
             render_result = self.__generate_object_information(render_result)
             render_result = self.__generate_type_information(render_result)
@@ -139,10 +138,10 @@ class CmdbRender:
             render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
-        except CMDBError as err:
+        except CMDBError as error:
             import traceback
             traceback.print_exc()
-            raise RenderError(f'Error while generating a CMDBResult: {str(err)}')
+            raise RenderError(f'Error while generating a CMDBResult: {str(error)}') from error
         return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
@@ -175,7 +174,7 @@ class CmdbRender:
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.user_manager.get(self.type_instance.author_id).get_display_name()
-        except CMDBError as err:
+        except CMDBError:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
         try:
             self.type_instance.render_meta.icon
@@ -217,7 +216,7 @@ class CmdbRender:
         if field['type'] == 'date' and isinstance(field['value'], str) and field['value']:
             field['value'] = parse(field['value'], fuzzy=True)
 
-        if self.ref_render and field['type'] == 'ref' and field['value']:
+        if self.ref_render and (field['type'] == 'ref' or field['type'] == 'location') and field['value']:
             field['reference'] = self.__merge_references(field)
         return field
 
@@ -227,10 +226,10 @@ class CmdbRender:
         Fields with references are extended by the property 'references'.
         All reference values are stored in the new property.
         """
-
         field_map = []
         if level == 0:
             return field_map
+
         for idx, section in enumerate(self.type_instance.render_meta.sections):
             if type(section) is TypeFieldSection and isinstance(section, TypeFieldSection):
                 for section_field in section.fields:
@@ -238,28 +237,39 @@ class CmdbRender:
                     try:
                         field = self.type_instance.get_field(section_field)
                         field = self.__merge_field_content_section(field, self.object_instance)
-
-                        if field['type'] == 'ref' and (not self.ref_render or 'summaries' not in field):
+                        if (field['type'] == 'ref' or field['type'] == 'location') and (not self.ref_render or 'summaries' not in field):
                             ref_field_name: str = field['name']
                             field = self.type_instance.get_field(ref_field_name)
                             reference_id: int = self.object_instance.get_value(ref_field_name)
                             field['value'] = reference_id
-                            reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
-                            ref_type: TypeModel = self.type_manager.get(reference_object.get_type_id())
-                            field['reference'] = {
-                                'type_id': ref_type.public_id,
-                                'type_name': ref_type.name,
-                                'type_label': ref_type.label,
-                                'object_id': reference_id,
-                                'summaries': []
-                            }
-                            for ref_section_field_name in ref_type.get_fields():
-                                try:
-                                    ref_section_field = ref_type.get_field(ref_section_field_name['name'])
-                                    ref_field = self.__merge_field_content_section(ref_section_field, reference_object)
-                                except (FileNotFoundError, ValueError, IndexError, FieldNotFoundError, FieldInitError):
-                                    continue
-                                field['reference']['summaries'].append(ref_field)
+
+                            if field['type'] == 'ref':
+                                reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                                ref_type: TypeModel = self.type_manager.get(reference_object.get_type_id())
+                                field['reference'] = {
+                                    'type_id': ref_type.public_id,
+                                    'type_name': ref_type.name,
+                                    'type_label': ref_type.label,
+                                    'object_id': reference_id,
+                                    'summaries': []
+                                }
+
+                                for ref_section_field_name in ref_type.get_fields():
+                                    try:
+                                        ref_section_field = ref_type.get_field(ref_section_field_name['name'])
+                                        ref_field = self.__merge_field_content_section(ref_section_field, reference_object)
+                                    except (FileNotFoundError, ValueError, IndexError, FieldNotFoundError, FieldInitError):
+                                        continue
+                                    field['reference']['summaries'].append(ref_field)
+
+                            if field['type'] == 'location':
+                                field['reference'] = {
+                                    'type_id': '',
+                                    'type_name': '',
+                                    'type_label': '',
+                                    'object_id': reference_id,
+                                    'summaries': []
+                                }
 
                     except (ValueError, IndexError, FileNotFoundError,
                             ObjectManagerGetError, FieldNotFoundError, FieldInitError):
@@ -272,7 +282,7 @@ class CmdbRender:
                     ref_field_name: str = f'{section.name}-field'
                     ref_field = self.type_instance.get_field(ref_field_name)
                 except (FieldInitError, FieldNotFoundError) as err:
-                    LOGGER.warning(f'{err.message}')
+                    LOGGER.warning("%s",err.message)
                     continue
 
                 try:
@@ -292,8 +302,8 @@ class CmdbRender:
                         'type_icon': ref_type.get_icon(),
                         'fields': []
                     }
-                except (ManagerGetError, Exception) as err:
-                    LOGGER.warning(f'{err.message}')
+                except (ManagerGetError, Exception) as error:
+                    LOGGER.warning("%s",error.message)
                     continue
 
                 if not ref_section:
@@ -346,7 +356,6 @@ class CmdbRender:
         return ref_section_fields
 
     def __merge_references(self, current_field):
-
         # Initialise TypeReference
         reference = TypeReference(type_id=0, object_id=0, type_label='', line='')
 
@@ -370,10 +379,10 @@ class CmdbRender:
 
                 try:
                     _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
-                except (FieldInitError, FieldNotFoundError) as e:
+                except (FieldInitError, FieldNotFoundError) as error:
                     LOGGER.warning(f'Type #{self.type_instance.public_id} '
                                    f'Summary setting refers to non-existent field(s).'
-                                   f'{e.message}')
+                                   f'{error.message}')
 
                 reference.type_id = ref_type.get_public_id()
                 reference.object_id = int(current_field['value'])
@@ -499,9 +508,8 @@ class RenderList:
         self.type_manager = TypeManager(database_manager=database_manager)
         self.user_manager = UserManager(database_manager=database_manager)
 
-    @timing('RenderList')
+    #@timing('RenderList')
     def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
-
         preparation_objects: List[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
@@ -514,6 +522,7 @@ class RenderList:
             else:
                 current_render_result = tmp_render.result()
             preparation_objects.append(current_render_result)
+
         return preparation_objects
 
 

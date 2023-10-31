@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,7 @@
 import { Component, Input } from '@angular/core';
 import { CmdbTypeSection } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { FormGroup } from '@angular/forms';
+import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
   selector: 'cmdb-base-section',
@@ -36,12 +36,12 @@ export class BaseSectionComponent {
   /**
    * Form for every object create or edit.
    */
-  @Input() public form: FormGroup;
+  @Input() public form: UntypedFormGroup;
 
   /**
    * Separated form for things like bulk change. Saves changes.
    */
-  @Input() public changeForm: FormGroup;
+  @Input() public changeForm: UntypedFormGroup;
 
   @Input() public fields: Array<any> = [];
 

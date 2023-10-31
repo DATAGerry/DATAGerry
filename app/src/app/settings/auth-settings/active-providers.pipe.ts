@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2020 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Pipe, PipeTransform } from '@angular/core';
-import { FormArray } from '@angular/forms';
+import { UntypedFormArray } from '@angular/forms';
 
 @Pipe({
   name: 'activeProviders',
@@ -25,7 +25,7 @@ import { FormArray } from '@angular/forms';
 })
 export class ActiveProvidersPipe implements PipeTransform {
 
-  transform(value: FormArray, ...args: any[]): any {
+  transform(value: UntypedFormArray, ...args: any[]): any {
     const activeProviderList: any[] = [];
     for (const provider of value.getRawValue()) {
       if (provider.config && provider.config.active) {

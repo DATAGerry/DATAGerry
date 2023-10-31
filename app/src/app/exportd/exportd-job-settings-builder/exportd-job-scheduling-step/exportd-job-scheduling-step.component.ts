@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@
 
 import { Component, Input, OnInit } from '@angular/core';
 import { CmdbMode } from '../../../framework/modes.enum';
-import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ExportdJob } from '../../../settings/models/exportd-job';
 import { ExportdJobBaseStepComponent } from '../exportd-job-base-step.component';
 
@@ -37,7 +37,7 @@ export class ExportdJobSchedulingStepComponent extends ExportdJobBaseStepCompone
     }
   }
 
-  public eventForm: FormGroup;
+  public eventForm: UntypedFormGroup;
 
   /**
    * Type of execution (PULL or PUSH)
@@ -50,11 +50,11 @@ export class ExportdJobSchedulingStepComponent extends ExportdJobBaseStepCompone
   public info: string = 'Excludes jobs that have been executed manually ' +
     'and jobs that are executed automatically after they have been created.';
 
-  constructor(private formBuilder: FormBuilder) {
+  constructor(private formBuilder: UntypedFormBuilder) {
     super();
     this.eventForm = this.formBuilder.group({
-      active: new FormControl(false, Validators.required),
-      subset: new FormControl(false, Validators.required),
+      active: new UntypedFormControl(false, Validators.required),
+      subset: new UntypedFormControl(false, Validators.required),
     });
   }
 

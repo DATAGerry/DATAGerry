@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,6 +19,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -29,23 +30,25 @@ import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component
 import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
 import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
+import { BranchInfoModalComponent } from './intro/branch-info-modal/branch-info-modal.component';
+import { ProfileInfoModalComponent } from './intro/profile-info-modal/profile-info-modal.component';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
 import { TypeLabelComponent } from './helpers/type-label/type-label.component';
 import { FooterComponent } from './structure/footer/footer.component';
 import { SidebarComponent } from './structure/sidebar/sidebar.component';
+import { LocationTreeComponent } from './structure/sidebar/location-tree/location-tree.component';
 import { SidebarCategoryComponent } from './structure/sidebar/sidebar-category.component';
 import { ContentHeaderComponent } from './components/content-header/content-header.component';
 import { ActiveBadgeComponent } from './helpers/active-badge/active-badge.component';
 import { AddAttachmentsModalComponent } from './helpers/modals/add-attachments-modal/add-attachments-modal.component';
 import { GeneralModalComponent } from './helpers/modals/general-modal/general-modal.component';
+import { LocationsModalComponent } from './helpers/modals/locations-modal/locations-modal.component';
 import { ObjectPreviewModalComponent } from '../framework/object/modals/object-preview-modal/object-preview-modal.component';
 import { InfoBoxComponent } from './components/info-box/info-box.component';
 import { FilemanagerModalComponent } from './helpers/modals/filemanager-modal/filemanager-modal.component';
 import { FileExplorerComponent } from './components/file-explorer/fileexplorer.component';
 import { FolderTreeComponent } from './components/file-explorer/components/folder-tree/folder-tree.component';
-import {
-  FileViewListComponent,
-} from './components/file-explorer/components/file-view-list/file-view-list.component';
+import { FileViewListComponent } from './components/file-explorer/components/file-view-list/file-view-list.component';
 import { NewFolderDialogComponent } from './components/file-explorer/modal/new-folder-dialog/new-folder-dialog.component';
 import { RenameDialogComponent } from './components/file-explorer/modal/rename-dialog/rename-dialog.component';
 import { ContextmenuComponent } from './components/file-explorer/components/contextmenu/contextmenu.component';
@@ -83,11 +86,18 @@ import { LowercaseDirective } from './directives/lowercase.directive';
 import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
 import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.directive';
 
+//tree imports - start
+import {MatTreeModule} from '@angular/material/tree';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+//tree imports - ned
+
 @NgModule({
   declarations: [
     BreadcrumbComponent,
     NavigationComponent,
     SidebarComponent,
+    LocationTreeComponent,
     SidebarCategoryComponent,
     ContentHeaderComponent,
     ActiveBadgeComponent,
@@ -97,6 +107,8 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     IconPickerComponent,
     ChartsComponent,
     StepByStepIntroComponent,
+    BranchInfoModalComponent,
+    ProfileInfoModalComponent,
     FileSizePipe,
     SidebarTypeComponent,
     CategoryTreeFilterPipe,
@@ -105,6 +117,7 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     AddAttachmentsModalComponent,
     FilemanagerModalComponent,
     GeneralModalComponent,
+    LocationsModalComponent,
     ObjectPreviewModalComponent,
     InfoBoxComponent,
     FileExplorerComponent,
@@ -151,7 +164,7 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     NameGuidePipe,
     LowercaseDirective,
     FileDragDropDirective,
-    PreventDoubleSubmitDirective
+    PreventDoubleSubmitDirective,
   ],
   imports: [
     CommonModule,
@@ -169,7 +182,10 @@ import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.d
     RenderModule,
     FileexplorerModule,
     QRCodeModule,
-    JwPaginationModule
+    JwPaginationModule,
+    MatTreeModule,
+    MatButtonModule,
+    MatIconModule,
   ],
   providers: [
     BreadcrumbService,

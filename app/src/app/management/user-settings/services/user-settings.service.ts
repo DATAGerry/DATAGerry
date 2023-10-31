@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, resp } from '../../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, resp } from '../../../services/api-call.service';
 import { UserSetting, UserSettingPayload } from '../models/user-setting';
 import { AuthService } from '../../../auth/services/auth.service';
 import { User } from '../../models/user';
@@ -41,7 +41,7 @@ export function convertResourceURL(url: string): string {
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implements ApiService {
+export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implements ApiServicePrefix {
 
   /**
    * Default REST URL Prefix.
@@ -74,7 +74,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
     this.currentUserObservable = this.authService.currentUser;
     this.currentUserObservable.subscribe((user: User) => {
       this.currentUser = user;
-      this.servicePrefix = `users/${ this.authService.currentUserValue.public_id }/settings`;
+      this.servicePrefix = `users/${ this.authService.currentUserValue?.public_id }/settings`;
     });
   }
 
@@ -93,7 +93,7 @@ export class UserSettingsService<T = UserSetting, P = UserSettingPayload> implem
   public getUserSettings(): Observable<Array<T>> {
     const options = this.options;
     options.params = new HttpParams();
-    return this.api.callGet<T>(`users/${ this.authService.currentUserValue.public_id }/settings/`, options).pipe(
+    return this.api.callGet<T>(`users/${ this.authService.currentUserValue?.public_id }/settings/`, options).pipe(
       map((apiResponse: HttpResponse<APIGetListResponse<T>>) => {
         return apiResponse.body.results as Array<T>;
       })

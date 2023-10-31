@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Injectable } from '@angular/core';
-import { ApiCallService, ApiService, httpObservePostOptions } from '../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, httpObservePostOptions } from '../services/api-call.service';
 import { ValidatorService } from '../services/validator.service';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -30,7 +30,7 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
   providedIn: 'root'
 })
 
-export class SearchService<T = SearchResultList> implements ApiService {
+export class SearchService<T = SearchResultList> implements ApiServicePrefix {
 
   public servicePrefix: string = 'search';
 

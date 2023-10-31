@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 - 2021 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FormArray, FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms';
+import { UntypedFormArray, UntypedFormBuilder, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../../framework/modes.enum';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { TypeService } from '../../../framework/services/type.service';
@@ -41,13 +41,13 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
       if (data.sources) {
         // Create sources
         this.sourcesForm = this.formBuilder.group({
-          sources: new FormArray([])
+          sources: new UntypedFormArray([])
         });
         this.sourcesForm.removeControl('sources');
-        const forArray: FormArray = this.formBuilder.array([]);
+        const forArray: UntypedFormArray = this.formBuilder.array([]);
         for (const source of data.sources) {
           forArray.push(this.formBuilder.group({
-            type_id: new FormControl('', Validators.required),
+            type_id: new UntypedFormControl('', Validators.required),
             condition: this.formBuilder.array([])
           }));
         }
@@ -56,7 +56,7 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
         let i = 0;
         while (i < forArray.controls.length) {
           for (const item of data.sources[i].condition) {
-            const control = forArray.controls[i].get('condition') as FormArray;
+            const control = forArray.controls[i].get('condition') as UntypedFormArray;
             control.push(this.createCondition());
           }
           i++;
@@ -69,10 +69,10 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
   }
 
   public operators: any[] = ['!=', '=='];
-  public sourcesForm: FormGroup;
+  public sourcesForm: UntypedFormGroup;
   readonly SOURCES = 'sources';
 
-  constructor(private formBuilder: FormBuilder, private typeService: TypeService) {
+  constructor(private formBuilder: UntypedFormBuilder, private typeService: TypeService) {
     super();
   }
 
@@ -102,23 +102,23 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
     }
   }
 
-  private createSource(): FormGroup {
+  private createSource(): UntypedFormGroup {
     return this.formBuilder.group({
-      type_id: new FormControl(null, Validators.required),
+      type_id: new UntypedFormControl(null, Validators.required),
       condition: this.formBuilder.array([this.createCondition()])
     });
   }
 
-  private createCondition(): FormGroup {
+  private createCondition(): UntypedFormGroup {
     return this.formBuilder.group({
-      name: new FormControl('', Validators.required),
-      value: new FormControl('', Validators.required),
-      operator: new FormControl('', Validators.required)
+      name: new UntypedFormControl('', Validators.required),
+      value: new UntypedFormControl('', Validators.required),
+      operator: new UntypedFormControl('', Validators.required)
     });
   }
 
   private getSourceAsFormArray(): any {
-    return this.sourcesForm.controls[this.SOURCES] as FormArray;
+    return this.sourcesForm.controls[this.SOURCES] as UntypedFormArray;
   }
 
   public addSource(): void {
@@ -127,7 +127,7 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
   }
 
   public addCondition(event): void {
-    const control = this.getSourceAsFormArray().at(event).get('condition') as FormArray;
+    const control = this.getSourceAsFormArray().at(event).get('condition') as UntypedFormArray;
     control.push(this.createCondition());
   }
 
@@ -137,7 +137,7 @@ export class ExportdJobSourcesStepComponent extends ExportdJobBaseStepComponent 
   }
 
   public delCondition(index, event): void {
-    const control = this.getSourceAsFormArray().at(event).get('condition') as FormArray;
+    const control = this.getSourceAsFormArray().at(event).get('condition') as UntypedFormArray;
     control.removeAt(index);
   }
 

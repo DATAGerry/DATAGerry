@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 - 2021 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 import logging
-
+from typing import List
 from datetime import datetime, timezone
 from dateutil.parser import parse
-from typing import List
 
 from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldNotFoundError, TypeReferenceLineFillError
@@ -75,8 +74,8 @@ class TypeReference:
             line=data.get('line'),
             type_label=data.get('type_label', None),
             summaries=data.get('summaries', None),
-            icon=data.get('prefix', False),
-            prefix=data.get('icon', None)
+            icon=data.get('icon', False),
+            prefix=data.get('prefix', None)
         )
 
     @classmethod
@@ -103,7 +102,7 @@ class TypeReference:
         """
         check if reference has a icon
         """
-        if self.prefix:
+        if self.icon:
             return True
         return False
 
@@ -327,7 +326,8 @@ class TypeRenderMeta:
         self.sections: List[TypeSection] = sections or []
         self.externals: List[TypeExternalLink] = externals or []
         self.summary: TypeSummary = summary or TypeSummary(fields=None)
-
+        #LOGGER.info("TypeRenderMeta => __init__")
+        #LOGGER.info(f"__init__ => self.sections: \n {sections}")
     @classmethod
     def from_data(cls, data: dict) -> "TypeRenderMeta":
         sections: List[TypeSection] = []
@@ -339,7 +339,6 @@ class TypeRenderMeta:
                 sections.append(TypeReferenceSection.from_data(section))
             else:
                 sections.append(TypeFieldSection.from_data(section))
-
 
         return cls(
             icon=data.get('icon', None),
@@ -396,6 +395,10 @@ class TypeModel(CmdbDAO):
             'nullable': True,
             'required': False
         },
+        'selectable_as_parent': {
+                'type': 'boolean',
+                'default': True
+        },
         'active': {
             'type': 'boolean',
             'required': False,
@@ -437,8 +440,8 @@ class TypeModel(CmdbDAO):
                         'required': False,
                     },
                     "value": {
-                        'type': 'string',
                         'required': False,
+                        'nullable': True,
                     },
                     "helperText": {
                         'type': 'string',
@@ -497,10 +500,6 @@ class TypeModel(CmdbDAO):
                                 "fields": {  # List of field names
                                     'type': 'list',
                                     'empty': True,
-                                    'schema': {
-                                        'type': 'string',
-                                        'required': False
-                                    },
                                 },
                                 "icon": {
                                     'type': 'string',  # Free Font Awesome example: 'fa fa-cube'
@@ -571,10 +570,6 @@ class TypeModel(CmdbDAO):
                             },
                             'fields': {
                                 'type': 'list',
-                                'schema': {
-                                    'type': 'string',
-                                    'required': False
-                                },
                                 'empty': True,
                             }
                         }
@@ -641,17 +636,20 @@ class TypeModel(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'active', 'author_id', \
+    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'selectable_as_parent' , 'active', 'author_id', \
                 'creation_time', 'render_meta', 'fields', 'acl'
+
+    
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
                  creation_time: datetime = None, last_edit_time: datetime = None, editor_id: int = None,
-                 active: bool = True, fields: list = None, version: str = None,
+                 active: bool = True,  selectable_as_parent: bool = True, fields: list = None, version: str = None,
                  label: str = None, description: str = None, acl: AccessControlList = None):
         self.name: str = name
         self.label: str = label or self.name.title()
         self.description: str = description
         self.version: str = version or TypeModel.DEFAULT_VERSION
+        self.selectable_as_parent: bool = selectable_as_parent
         self.active: bool = active
         self.author_id: int = author_id
         self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
@@ -660,7 +658,7 @@ class TypeModel(CmdbDAO):
         self.render_meta: TypeRenderMeta = render_meta
         self.fields: list = fields or []
         self.acl: AccessControlList = acl
-        super(TypeModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeModel":
@@ -676,6 +674,7 @@ class TypeModel(CmdbDAO):
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
+            selectable_as_parent=data.get('selectable_as_parent', True),
             active=data.get('active', True),
             author_id=data.get('author_id'),
             creation_time=creation_time,
@@ -695,6 +694,7 @@ class TypeModel(CmdbDAO):
         return {
             'public_id': instance.get_public_id(),
             'name': instance.name,
+            'selectable_as_parent': instance.selectable_as_parent,
             'active': instance.active,
             'author_id': instance.author_id,
             'creation_time': instance.creation_time,
@@ -733,6 +733,7 @@ class TypeModel(CmdbDAO):
         return self.render_meta.summary.has_fields()
 
     def get_nested_summaries(self):
+        LOGGER.info("get_nested_summaries() => CHECK")
         return next((x['summaries'] for x in self.get_fields() if x['type'] == 'ref' and 'summaries' in x), [])
 
     def has_nested_prefix(self, nested_summaries):
@@ -743,6 +744,7 @@ class TypeModel(CmdbDAO):
         complete_field_list = []
         for field_name in _fields:
             complete_field_list.append(self.get_field(field_name))
+
         return TypeSummary(fields=complete_field_list).fields
 
     def get_nested_summary_line(self, nested_summaries):

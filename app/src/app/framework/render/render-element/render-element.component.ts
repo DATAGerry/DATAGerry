@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,12 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, ComponentFactoryResolver, ComponentRef, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { Component, ComponentFactoryResolver, ComponentRef, Input, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
 import { fieldComponents } from '../fields/fields.list';
 import { simpleComponents } from '../simple/simple.list';
 import { RenderFieldComponent } from '../fields/components.fields';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { FormArray, FormControl, FormGroup, Validators } from '@angular/forms';
+import { FormArray, UntypedFormControl, FormGroup, Validators } from '@angular/forms';
 import { CmdbMode } from '../../modes.enum';
 
 @Component({
@@ -32,6 +32,8 @@ import { CmdbMode } from '../../modes.enum';
 export class RenderElementComponent extends RenderFieldComponent implements OnInit {
 
   @ViewChild('fieldContainer', { read: ViewContainerRef, static: true }) containerField;
+
+  @Input() objectID: number;
 
   public simpleRender: boolean = false;
   private component: any;
@@ -57,8 +59,9 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         this.componentRef.instance.data = this.data;
         this.componentRef.instance.mode = this.mode;
         this.componentRef.instance.section = this.section;
+        this.componentRef.instance.objectID = this.objectID;
         this.componentRef.instance.toast = this.toast;
-        const fieldControl = new FormControl('');
+        const fieldControl = new UntypedFormControl('');
         const validators = [];
         if (this.mode === CmdbMode.View || CmdbMode.Edit) {
           fieldControl.patchValue(this.value);
@@ -87,6 +90,8 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         break;
       }
       case CmdbMode.Simple: {
+        if(!this.data) break;
+  
         this.data.value = this.value;
         this.component = simpleComponents[this.data.type];
         const factory = this.resolver.resolveComponentFactory(this.component);
@@ -97,6 +102,5 @@ export class RenderElementComponent extends RenderFieldComponent implements OnIn
         break;
       }
     }
-
   }
 }

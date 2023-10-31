@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -17,7 +17,7 @@
 */
 
 import { Component, EventEmitter, OnDestroy, OnInit, Output } from '@angular/core';
-import { FormControl, FormGroup } from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
 @Component({
@@ -29,15 +29,15 @@ export class ImportConfigComponent implements OnInit, OnDestroy {
 
   @Output() public configChange: EventEmitter<any>;
   private configChangeSubscription: Subscription;
-  public configForm: FormGroup;
+  public configForm: UntypedFormGroup;
 
   constructor() {
     this.configChange = new EventEmitter<any>();
     this.configChangeSubscription = new Subscription();
-    this.configForm = new FormGroup({
-      start_element: new FormControl(0),
-      max_elements: new FormControl(0),
-      overwrite_public: new FormControl(true)
+    this.configForm = new UntypedFormGroup({
+      start_element: new UntypedFormControl(0),
+      max_elements: new UntypedFormControl(0),
+      overwrite_public: new UntypedFormControl(true)
     });
   }
 

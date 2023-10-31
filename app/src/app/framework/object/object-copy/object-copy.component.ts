@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2019 NETHINKS GmbH
+* Copyright (C) 2023 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,74 +11,98 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, HostListener, OnInit } from '@angular/core';
-import { ApiCallService } from '../../../services/api-call.service';
-import { ObjectService } from '../../services/object.service';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { CmdbMode } from '../../modes.enum';
-import { CmdbObject } from '../../models/cmdb-object';
-import { FormGroup } from '@angular/forms';
+
+import { ObjectService } from '../../services/object.service';
 import { UserService } from '../../../management/services/user.service';
-import { RenderResult } from '../../models/cmdb-render';
-import { CmdbType } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { ToastService } from '../../../layout/toast/toast.service';
+import { LocationService } from '../../services/location.service';
+
+import { CmdbMode } from '../../modes.enum';
+import { CmdbObject } from '../../models/cmdb-object';
+import { RenderResult } from '../../models/cmdb-render';
+import { CmdbType } from '../../models/cmdb-type';
+import { APIUpdateMultiResponse } from '../../../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-object-copy',
   templateUrl: './object-copy.component.html',
   styleUrls: ['./object-copy.component.scss']
 })
-export class ObjectCopyComponent implements OnInit {
+export class ObjectCopyComponent implements OnInit, OnDestroy {
 
   public mode: CmdbMode = CmdbMode.Edit;
   private objectID: number;
   public typeInstance: CmdbType;
   public renderResult: RenderResult;
-  public renderForm: FormGroup;
+  public renderForm: UntypedFormGroup;
 
-  constructor(private api: ApiCallService, private objectService: ObjectService, private typeService: TypeService,
-              private route: ActivatedRoute, private router: Router, private userService: UserService,
-              private sidebarService: SidebarService, private toastService: ToastService) {
-    this.route.params.subscribe((params) => {
-      this.objectID = params.publicID;
-    });
-    this.renderForm = new FormGroup({
-    });
-  }
+  private originalLocationData: RenderResult;
+  private newLocationParentID: number = 0;
 
-  public ngOnInit(): void {
-    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-        this.renderResult = rr;
-      },
-      error => {
-        console.error(error);
-      },
-      () => {
-        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-          this.typeInstance = value;
-        });
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+    constructor(private objectService: ObjectService, 
+                private typeService: TypeService,
+                private route: ActivatedRoute, 
+                private router: Router, 
+                private userService: UserService,
+                private sidebarService: SidebarService, 
+                private toastService: ToastService,
+                private locationService: LocationService) {
+
+      this.route.params.subscribe((params) => {
+        this.objectID = params.publicID;
       });
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    const dialog = document.getElementById('object-form-action');
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.visibility = 'visible';
-    } else {
-      dialog.style.visibility = 'hidden';
+      this.renderForm = new UntypedFormGroup({
+      });
     }
-  }
+
+
+    public ngOnInit(): void {
+      console.log("copy object");
+      this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+          this.renderResult = rr;
+          for (let field of this.renderResult.fields){
+            if (field['name'] == 'dg_location' && field['value'] > 0){
+              this.getOriginalObjectLocation();
+            }
+          }
+
+        },
+        error => {
+          console.error(error);
+        },
+        () => {
+          this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+            this.typeInstance = value;
+          });
+        });
+    }
+
+    public ngOnDestroy(): void {
+      this.locationService.locationTreeName = "";
+    }
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                      API CALLS                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
   public copyObject(): void {
+    console.log("copyObject")
     this.renderForm.markAllAsTouched();
+
     if (this.renderForm.valid) {
       const newObjectInstance = new CmdbObject();
       newObjectInstance.type_id = this.renderResult.type_information.type_id;
@@ -87,6 +111,10 @@ export class ObjectCopyComponent implements OnInit {
       newObjectInstance.author_id = this.userService.getCurrentUser().public_id;
       newObjectInstance.fields = [];
       Object.keys(this.renderForm.controls).forEach(field => {
+        if(field == 'dg_location' && this.renderForm.get(field).value > 0){
+          this.newLocationParentID = this.renderForm.get(field).value;
+        }
+
         newObjectInstance.fields.push({
           name: field,
           value: this.renderForm.get(field).value
@@ -95,6 +123,10 @@ export class ObjectCopyComponent implements OnInit {
       let ack = null;
       this.objectService.postObject(newObjectInstance).subscribe(newObjectID => {
           ack = newObjectID;
+
+          if(this.newLocationParentID > 0){
+            this.createNewObjectLocation(ack);
+          }
         },
         (e) => {
           console.error(e);
@@ -104,6 +136,45 @@ export class ObjectCopyComponent implements OnInit {
           this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
           this.toastService.success(`Object ${ this.objectID } was successfully copied into ${ ack }!`);
         });
+    }
+  }
+
+  private getOriginalObjectLocation(){
+    this.locationService.getLocationForObject(this.renderResult.object_information.object_id).subscribe((response: RenderResult) => {
+      this.originalLocationData = response;
+      
+      /** Set the inital name for the location for copying and creating a new one */
+      this.locationService.locationTreeName = this.originalLocationData['name'];
+    });
+  }
+
+  private createNewObjectLocation(newObjectID: number){
+
+    let params = {
+      "object_id": newObjectID,
+      "parent": this.newLocationParentID,
+      "name": this.locationService.locationTreeName,
+      "type_id": this.typeInstance.public_id 
+    }
+
+    this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
+      this.locationService.locationTreeName = "";
+    }, error => {
+      this.toastService.error(error);
+    });
+  }
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                   HELPER SECTION                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+  @HostListener('window:scroll')
+  onWindowScroll() {
+    const dialog = document.getElementById('object-form-action');
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+      dialog.style.visibility = 'visible';
+    } else {
+      dialog.style.visibility = 'hidden';
     }
   }
 }
