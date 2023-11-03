@@ -4,7 +4,7 @@ GIT Repository
 
 The source code of DATAGERRY is managed in a GIT repository on GitHub:
 
-    https://github.com/NETHINKS/DATAGERRY
+    https://github.com/DATAGerry/DATAGerry
 
 
 Branches

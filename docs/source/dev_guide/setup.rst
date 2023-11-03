@@ -11,13 +11,13 @@ process management independently of the development environment.
 
 Install Python
 ==============
-DataGerry is written in Python 3.6+. This is also the only dependency which is absolutely
-necessary to start the program. Python 2 is not supported. Older versions than Python 3.6 may run,
+DataGerry is written in Python 3.9+. This is also the only dependency which is absolutely
+necessary to start the program. Python 2 is not supported. Older versions than Python 3.9 may run,
 but are not officially supported. The installation of Python 3 is different depending on the operating system.
 Please see at the official documentation for details: `Download Python | Python.org <https://www.python.org/downloads/>`_
 
 .. note::
-    We are using Python 3.6.x or higher, which is not compatible with Python 2.x.
+    We are using Python 3.9.x or higher, which is not compatible with Python 2.x.
 
 Clone repository
 ================
@@ -25,7 +25,7 @@ Clone the git repository from our official mirror:
 
 .. code:: bash
 
-    git clone https://github.com/NETHINKS/DATAGERRY
+    git clone https://github.com/DATAGerry/DATAGerry
 
 Install requirements
 --------------------
@@ -129,7 +129,7 @@ Optionally DATAGERRY can be filled with fictitious test data.
 
 Starting angular frontend
 -------------------------
-This frontend was generated with [Angular CLI](https://github.com/angular/angular-cli) version 7.3.8.
+This frontend was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.4.
 
 Installation
 ^^^^^^^^^^^^
