@@ -4,10 +4,14 @@ Setup
 
 Requirements
 ============
+
+.. note::
+    This section will be updated in the near future since some changes took place
+
 DATAGERRY has the following system requirements:
 
  * Linux Operating System
- * MongoDB 4.2+
+ * MongoDB 4.4+
  * RabbitMQ
 
 Although, DATAGERRY comes with an own webserver, we recomend Nginx as a reverse proxy for performance reasons.
@@ -84,12 +88,12 @@ To use a specific Docker tag, just replace the following line of the docker-comp
 .. code-block:: console
 
     # replace this line
-    image: nethinks/datagerry:latest
+    image: datagerry/datagerry:latest
 
     # by the following:
-    image: nethinks/datagerry:<tagname>
+    image: datagerry/datagerry:<tagname>
     # example:
-    image: nethinks/datagerry:1.0.2
+    image: datagerry/datagerry:1.0.2
 
 
 RPM setup
@@ -100,7 +104,6 @@ installing DATAGERRY.
 
 The following RHEL/CentOS versions are supported and tested:
 
- * RHEL/CentOS 7
  * RHEL/CentOS 8
 
 
@@ -109,7 +112,7 @@ Before we can install DATAGERRY, we need to install the required dependencies Mo
 Setup MongoDB
 -------------
 
-MongoDB 4.2+ is required as database for DATAGERRY.
+MongoDB 4.4+ is required as database for DATAGERRY.
 
 .. note::
     The setup of MongoDB is described in detail on the MongoDB website: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/
@@ -122,10 +125,10 @@ To setup MongoDB, place the follwing file under /etc/yum.repos.d/mongodb.repo:
 
     [MongoDB]
     name=MongoDB Repository
-    baseurl=http://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.2/$basearch/
+    baseurl=http://repo.mongodb.org/yum/redhat/$releasever/mongodb-org/4.4/$basearch/
     gpgcheck=1
     enabled=1
-    gpgkey=https://www.mongodb.org/static/pgp/server-4.2.asc
+    gpgkey=https://www.mongodb.org/static/pgp/server-4.4.asc
 
 
 After that, install the mongodb-org package and start the server with SystemD:
@@ -214,7 +217,8 @@ tar.gz archive setup
 For all non rpm based Linux distributions, we provide a tar.gz archive with a setup shell script. Systemd is a
 requirement for that setup. This should work on most distributions, and is tested with the following distributions:
 
- * Ubuntu 18.04
+ * Ubuntu 20.04
+ * Ubuntu 22.04
 
 
 Before we can install DATAGERRY, we need to install the required dependencies MongoDB and Rabbit MQ.
@@ -222,7 +226,7 @@ Before we can install DATAGERRY, we need to install the required dependencies Mo
 Setup MongoDB
 -------------
 
-MongoDB 4.2+ is required as database for DATAGERRY.
+MongoDB 4.4+ is required as database for DATAGERRY.
 
 Please follow the offical `MongoDB documentation <https://docs.mongodb.com/manual/administration/install-on-linux/>` to
 setup MongoDB for your distribution.

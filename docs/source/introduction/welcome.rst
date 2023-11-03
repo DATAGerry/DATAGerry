@@ -10,7 +10,7 @@ user.
 If you need help, please have a look at the following resources:
 
  * `DATAGERRY Website <https://datagerry.com>`_
- * `Professional Services <https://datagerry.com>`_
+ * `Professional Services <https://datagerry.com/professional-services/>`_
  * `Community Support <https://community.datagerry.com>`_
  * `Issue Tracker <https://issues.datagerry.com>`_
- * `Source Code <https://source.datagerry.com>`_
+ * `Source Code <https://github.com/DATAGerry/DATAGerry/>`_
