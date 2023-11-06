@@ -61,6 +61,6 @@ uploaded agaign.
 
 .. code-block:: console
 
-    docker pull nethinks/datagerry:1.0.2
-    docker tag nethinks/datagerry:1.0.2 nethinks/datagerry
-    docker push nethinks/datagerry:latest
+    docker pull becongmbh/datagerry:2.0.0
+    docker tag becongmbh/datagerry:1.0.2 becongmbh/datagerry
+    docker push becongmbh/datagerry:latest

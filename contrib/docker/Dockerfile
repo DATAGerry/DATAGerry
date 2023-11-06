@@ -1,5 +1,5 @@
 FROM centos:8
-LABEL maintainer="monitoring@nethinks.com"
+LABEL maintainer="adnan.smajic@becon.de"
 
 # set locale
 ARG build_locale=en_US

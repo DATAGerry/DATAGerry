@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2023 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,7 +12,7 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
 BUILDVAR_VERSION = 2.0.0
@@ -141,7 +141,7 @@ docker: rpm
 	mkdir -p ${DIR_DOCKER_BUILD}/src/files
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
-	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_DOCKER_TAG} ${DIR_DOCKER_BUILD}/src
+	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t becongmbh/datagerry:${BUILDVAR_DOCKER_TAG} ${DIR_DOCKER_BUILD}/src
 
 
 # execute tests
