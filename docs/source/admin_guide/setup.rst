@@ -66,7 +66,7 @@ To access the DATAGERRY frontend, use the following parameters:
     password: admin
 
 
-We provide Docker images for every version of DATAGERRY in `Docker Hub <https://hub.docker.com/r/nethinks/datagerry>`_.
+We provide Docker images for every version of DATAGERRY in `Docker Hub <https://hub.docker.com/r/becongmbh/datagerry>`_.
 You can use one of the following Docker tags:
 
 latest
@@ -88,12 +88,12 @@ To use a specific Docker tag, just replace the following line of the docker-comp
 .. code-block:: console
 
     # replace this line
-    image: datagerry/datagerry:latest
+    image: becongmbh/datagerry:latest
 
     # by the following:
-    image: datagerry/datagerry:<tagname>
+    image: becongmbh/datagerry:<tagname>
     # example:
-    image: datagerry/datagerry:1.0.2
+    image: becongmbh/datagerry:2.0.0
 
 
 RPM setup
