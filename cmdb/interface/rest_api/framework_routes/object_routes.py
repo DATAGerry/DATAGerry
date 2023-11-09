@@ -67,15 +67,15 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 
     if _fetch_only_active_objs():
         if isinstance(params.filter, dict):
-            filter_ = params.filter
-            params.filter = [{'$match': filter_}]
+            filter = params.filter
+            params.filter = [{'$match': filter}]
             params.filter.append({'$match': {'active': {"$eq": True}}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
-            filter_=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
             user=request_user, permission=AccessControlPermission.READ
         )
 
@@ -196,7 +196,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
-                                                                           filter_=params.filter,
+                                                                           filter=params.filter,
                                                                            limit=params.limit,
                                                                            skip=params.skip,
                                                                            sort=params.sort,

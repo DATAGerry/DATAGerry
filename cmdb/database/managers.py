@@ -273,7 +273,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return list(found_documents)
 
 
-    def count(self, collection: str, filter_: dict = None, *args, **kwargs):
+    def count(self, collection: str, filter: dict = None, *args, **kwargs):
         """Count documents based on filter parameters.
 
         Args:
@@ -285,8 +285,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             returns the count of the documents
         """
-        filter_ = filter_ or {}
-        return self.connector.get_collection(collection).count_documents(filter=filter_, *args, **kwargs)
+        filter = filter or {}
+        return self.connector.get_collection(collection).count_documents(filter=filter, *args, **kwargs)
 
 
     def aggregate(self, collection: str, *args, **kwargs):
@@ -333,7 +333,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return data['public_id']
 
 
-    def update(self, collection: str, filter_: dict, data: dict, *args, **kwargs):
+    def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
         """
         Update document inside database
 
@@ -347,10 +347,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         formatted_data = {'$set': data}
 
-        return self.connector.get_collection(collection).update_one(filter_, formatted_data, *args, **kwargs)
+        return self.connector.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
 
 
-    def unset_update_many(self, collection: str, filter_: dict, data: str, *args, **kwargs):
+    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
         """update document inside database
 
         Args:
@@ -363,7 +363,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         formatted_data = {'$unset': {data: 1}}
 
-        return self.connector.get_collection(collection).update_many(filter_, formatted_data, *args, **kwargs)
+        return self.connector.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
 
 
     def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
@@ -410,7 +410,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         return self.connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
-    def delete(self, collection: str, filter_: dict, *args, **kwargs) -> DeleteResult:
+    def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
         """delete document inside database
 
         Args:
@@ -420,10 +420,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             acknowledged
         """
-        result = self.connector.get_collection(collection).delete_one(filter_)
+        result = self.connector.get_collection(collection).delete_one(filter)
 
         if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection, filter_)
+            raise DocumentCouldNotBeDeleted(collection, filter)
 
         return result
 

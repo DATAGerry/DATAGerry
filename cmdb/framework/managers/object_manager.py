@@ -55,7 +55,7 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         super().__init__()
 
 
-    def build(self, filter_: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         """
@@ -86,10 +86,10 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         ]
         self.query = Pipeline(loading_dep_preset)
 
-        if isinstance(filter_, dict):
-            self.query.append(self.match_(filter_))
-        elif isinstance(filter_, list):
-            for pipe in filter_:
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
                 self.query.append(pipe)
 
         if user and permission:
@@ -120,7 +120,7 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         return self.query
 
 
-    def count(self, filter_: Union[List[dict], dict], user: UserModel = None,
+    def count(self, filter: Union[List[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
         """
         Count the number of documents in the stages
@@ -135,10 +135,10 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         self.clear()
         self.query = Pipeline([])
 
-        if isinstance(filter_, dict):
-            self.query.append(self.match_(filter_))
-        elif isinstance(filter_, list):
-            for pipe in filter_:
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
                 self.query.append(pipe)
 
         if user and permission:
@@ -192,14 +192,14 @@ class ObjectManager(ManagerBase):
             raise ManagerGetError(f'Object with ID: {public_id} not found!')
 
 
-    def iterate(self, filter_: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+    def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
         """TODO: document"""
         try:
-            query: Pipeline = self.object_builder.build(filter_=filter_, limit=limit, skip=skip, sort=sort, order=order,
+            query: Pipeline = self.object_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
                                                         user=user, permission=permission)
-            count_query: Pipeline = self.object_builder.count(filter_=filter_, user=user, permission=permission)
+            count_query: Pipeline = self.object_builder.count(filter=filter, user=user, permission=permission)
             aggregation_result = list(self._aggregate(self.collection, query))
             total_cursor = self._aggregate(self.collection, count_query)
             total = 0
@@ -269,15 +269,15 @@ class ObjectManager(ManagerBase):
         return update_result
 
 
-    def references(self, object_: CmdbObject, filter_: dict, limit: int, skip: int, sort: str, order: int,
+    def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
                    user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
         """TODO: document"""
         query = []
-        if isinstance(filter_, dict):
-            query.append(filter_)
-        elif isinstance(filter_, list):
-            query += filter_
+        if isinstance(filter, dict):
+            query.append(filter)
+        elif isinstance(filter, list):
+            query += filter
 
         query.append(Builder.lookup_(_from='framework.types', _local='type_id', _foreign='public_id', _as='type'))
         query.append(Builder.unwind_({'path': '$type'}))
@@ -298,7 +298,7 @@ class ObjectManager(ManagerBase):
         query.append(Builder.match_(Builder.or_([field_ref_query, section_ref_query])))
         query.append(Builder.match_({'fields.value': object_.public_id}))
 
-        return self.iterate(filter_=query, limit=limit, skip=skip, sort=sort, order=order,
+        return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
                             user=user, permission=permission)
 
 

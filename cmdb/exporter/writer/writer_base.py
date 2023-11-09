@@ -94,7 +94,7 @@ class BaseExportWriter:
 
         try:
             _params = self.export_config.parameters
-            _result: List[CmdbObject] = manager.iterate(filter_=_params.filter,
+            _result: List[CmdbObject] = manager.iterate(filter=_params.filter,
                                                         sort=_params.sort,
                                                         order=_params.order,
                                                         limit=0, skip=0,

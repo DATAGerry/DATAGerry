@@ -137,7 +137,7 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
         query.append({'$match': {'object': {'$exists': True}}})
 
         body = request.method == 'HEAD'
-        object_logs = log_manager.iterate(filter_=query, limit=params.limit,
+        object_logs = log_manager.iterate(filter=query, limit=params.limit,
                                           skip=params.skip, sort=params.sort, order=params.order, user=request_user,
                                           permission=AccessControlPermission.READ)
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
@@ -184,7 +184,7 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
         query.append({'$match': {'object': {'$exists': False}}})
 
         body = request.method == 'HEAD'
-        object_logs = manager.iterate(filter_=query, limit=params.limit,
+        object_logs = manager.iterate(filter=query, limit=params.limit,
                                           skip=params.skip, sort=params.sort, order=params.order)
 
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
@@ -211,7 +211,7 @@ def get_object_delete_logs(params: CollectionParameters):
             'action': LogAction.DELETE.value
         }
         body = request.method == 'HEAD'
-        object_logs = manager.iterate(filter_=query, limit=params.limit, skip=params.skip,
+        object_logs = manager.iterate(filter=query, limit=params.limit, skip=params.skip,
                                           sort=params.sort, order=params.order)
         logs = [CmdbObjectLog.to_json(_) for _ in object_logs.results]
         api_response = GetMultiResponse(logs, total=object_logs.total, params=params,
@@ -236,7 +236,7 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
         ObjectManager(database_manager=database_manager).get(object_id, user=request_user,
                                                              permission=AccessControlPermission.READ)
         body = request.method == 'HEAD'
-        iteration_result = manager.iterate(public_id=object_id, filter_=params.filter, limit=params.limit,
+        iteration_result = manager.iterate(public_id=object_id, filter=params.filter, limit=params.limit,
                                            skip=params.skip, sort=params.sort, order=params.order)
         logs = [CmdbObjectLog.to_json(_) for _ in iteration_result.results]
         api_response = GetMultiResponse(logs, total=iteration_result.total, params=params,
@@ -268,7 +268,7 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
                 'public_id': public_id
             }]
         }
-        logs = log_manager.iterate(filter_=query, limit=0, skip=0, order=1, sort='public_id')
+        logs = log_manager.iterate(filter=query, limit=0, skip=0, order=1, sort='public_id')
         corresponding_logs = [CmdbObjectLog.to_json(_) for _ in logs.results]
     except ManagerGetError as err:
         return abort(404, err.message)

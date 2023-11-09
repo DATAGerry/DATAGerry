@@ -45,7 +45,7 @@ class LogQueryBuilder(ManagerQueryBuilder):
         super().__init__()
 
 
-    def build(self, filter_: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         """
@@ -67,10 +67,10 @@ class LogQueryBuilder(ManagerQueryBuilder):
         self.clear()
         self.query = Pipeline([])
 
-        if isinstance(filter_, dict):
-            self.query.append(self.match_(filter_))
-        elif isinstance(filter_, list):
-            for pipe in filter_:
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
                 self.query.append(pipe)
 
         if user and permission:
@@ -87,7 +87,7 @@ class LogQueryBuilder(ManagerQueryBuilder):
         return self.query
 
 
-    def count(self, filter_: Union[List[dict], dict], user: UserModel = None,
+    def count(self, filter: Union[List[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
         """
         Count the number of documents in the stages
@@ -102,10 +102,10 @@ class LogQueryBuilder(ManagerQueryBuilder):
         self.clear()
         self.query = Pipeline([])
 
-        if isinstance(filter_, dict):
-            self.query.append(self.match_(filter_))
-        elif isinstance(filter_, list):
-            for pipe in filter_:
+        if isinstance(filter, dict):
+            self.query.append(self.match_(filter))
+        elif isinstance(filter, list):
+            for pipe in filter:
                 self.query.append(pipe)
 
         if user and permission:
@@ -143,7 +143,7 @@ class CmdbLogManager(ManagerBase):
         raise ManagerGetError(f'Log with ID: {public_id} not found!')
 
 
-    def iterate(self, filter_: dict, limit: int, skip: int, sort: str, order: int,
+    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs):
         """
         Iterate over a collection of object logs resources.
@@ -159,9 +159,9 @@ class CmdbLogManager(ManagerBase):
             IterationResult: Instance of IterationResult with generic CmdbObjectLog.
         """
         try:
-            query: Query = self.log_builder.build(filter_=filter_, limit=limit, skip=skip, sort=sort, order=order,
+            query: Query = self.log_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
                                                   user=user, permission=permission)
-            count_query: Pipeline = self.log_builder.count(filter_=filter_, user=user, permission=permission)
+            count_query: Pipeline = self.log_builder.count(filter=filter, user=user, permission=permission)
             aggregation_result = list(self._aggregate(self.collection, query))
             total_cursor = self._aggregate(self.collection, count_query)
             total = 0
