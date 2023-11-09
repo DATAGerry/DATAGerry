@@ -7,10 +7,10 @@ Babel==2.13.1
 blinker==1.7.0
 Cerberus==1.3.5
 certifi==2023.7.22
-cffi==1.15.1
-chardet==5.1.0
-click==8.1.3
-coverage==7.2.7
+cffi==1.16.0
+chardet==5.2.0
+click==8.1.7
+coverage==7.3.2
 cryptography==41.0.5
 docutils==0.20.1
 et-xmlfile==1.1.0
