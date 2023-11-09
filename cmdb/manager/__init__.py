@@ -13,6 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
+import logging
 
 from typing import Any
 
@@ -21,12 +23,15 @@ from cmdb.framework.utils import Collection
 
 from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError
 
+LOGGER = logging.getLogger(__name__)
 
 class AbstractManagerBase:
     """
     Manager base class for all core CRUD function.
     Will be replacing `CmdbManagerBase` in the future.
     """
+
+
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
@@ -37,9 +42,13 @@ class AbstractManagerBase:
         """
         self._database_manager: DatabaseManagerMongo = database_manager
 
+
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Auto disconnect the database connection when the Manager get destroyed."""
         self._database_manager.connector.disconnect()
+
+
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
         """
@@ -55,7 +64,9 @@ class AbstractManagerBase:
         try:
             return self._database_manager.aggregate(collection, *args, **kwargs)
         except Exception as err:
-            raise ManagerIterationError(err)
+            raise ManagerIterationError(err) from err
+
+
 
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
         """
@@ -72,7 +83,26 @@ class AbstractManagerBase:
         try:
             return self._database_manager.find(collection, filter=filter, *args, **kwargs)
         except Exception as err:
-            raise ManagerGetError(err)
+            raise ManagerGetError(err) from err
+
+
+
+    def _count_documents(self, collection: Collection, *args, **kwargs):
+        """
+        Calls mongodb count_documents operation
+        Args:
+            collection: Name of the collection
+            filter: Match dictionary
+
+        Returns:
+            int: Number of found documents with given filter 
+        """
+        try:
+            return self._database_manager.count_documents(collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
+
 
     def _insert(self, collection: Collection, resource: Any, skip_public: bool = False):
         """
@@ -85,7 +115,9 @@ class AbstractManagerBase:
         try:
             return self._database_manager.insert(collection, data=resource, skip_public=skip_public)
         except Exception as err:
-            raise ManagerInsertError(err)
+            raise ManagerInsertError(err) from err
+
+
 
     def _update(self, collection: Collection, filter: dict, resource: Any, *args, **kwargs):
         """
@@ -101,7 +133,9 @@ class AbstractManagerBase:
         try:
             return self._database_manager.update(collection, filter=filter, data=resource, *args, **kwargs)
         except Exception as err:
-            raise ManagerUpdateError(err)
+            raise ManagerUpdateError(err) from err
+
+
 
     def _update_many(self, collection: Collection, query: dict, update: dict):
         """
@@ -117,7 +151,9 @@ class AbstractManagerBase:
         try:
             return self._database_manager.update_many(collection=collection, query=query, update=update)
         except Exception as err:
-            raise ManagerUpdateError(err)
+            raise ManagerUpdateError(err) from err
+
+
 
     def _delete(self, collection: Collection, filter: dict, *args, **kwargs):
         """
@@ -129,4 +165,4 @@ class AbstractManagerBase:
         try:
             return self._database_manager.delete(collection, filter=filter, *args, **kwargs)
         except Exception as err:
-            raise ManagerDeleteError(err)
+            raise ManagerDeleteError(err) from err

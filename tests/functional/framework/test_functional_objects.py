@@ -96,7 +96,7 @@ class TestFrameworkObjects:
 
     OBJECT_COLLECTION: str = CmdbObject.COLLECTION
     TYPE_COLLECTION: str = TypeModel.COLLECTION
-    ROUTE_URL: str = '/object'
+    ROUTE_URL: str = '/objects'
 
     def test_insert_object(self, rest_api, example_object, full_access_user, none_access_user):
         # Test default

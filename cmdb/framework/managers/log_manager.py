@@ -13,8 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""
+Manager of logs
+"""
 from typing import Union, List
 from datetime import datetime, timezone
 
@@ -32,12 +33,17 @@ from cmdb.security.acl.builder import LookedAccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                LogQueryBuilder - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LogQueryBuilder(ManagerQueryBuilder):
-
+    """TODO: document"""
     def __init__(self):
-        super(LogQueryBuilder, self).__init__()
+        super().__init__()
+
 
     def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
@@ -68,8 +74,7 @@ class LogQueryBuilder(ManagerQueryBuilder):
                 self.query.append(pipe)
 
         if user and permission:
-            self.query += (
-                LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+            self.query += (LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
 
         if limit == 0:
             results_query = [self.skip_(limit)]
@@ -77,9 +82,10 @@ class LogQueryBuilder(ManagerQueryBuilder):
             results_query = [self.skip_(skip), self.limit_(limit)]
 
         self.query.append(self.sort_(sort=sort, order=order))
-
         self.query += results_query
+
         return self.query
+
 
     def count(self, filter: Union[List[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
@@ -103,17 +109,20 @@ class LogQueryBuilder(ManagerQueryBuilder):
                 self.query.append(pipe)
 
         if user and permission:
-            self.query += (
-                LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+            self.query += (LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
 
         self.query.append(self.count_('total'))
+
         return self.query
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                CmdbLogManager - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbLogManager(ManagerBase):
     """
-        Manager for the CmdbLog module. Manages the CRUD functions of the logs and the iteration over the collection.
-        """
+    Manager for the CmdbLog module. Manages the CRUD functions of the logs and the iteration over the collection.
+    """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
@@ -123,7 +132,8 @@ class CmdbLogManager(ManagerBase):
             database_manager: Connection to the database class.
         """
         self.log_builder = LogQueryBuilder()
-        super(CmdbLogManager, self).__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
+        super().__init__(CmdbMetaLog.COLLECTION, database_manager=database_manager)
+
 
     def get(self, public_id: Union[PublicID, int]) -> Union[CmdbMetaLog, CmdbObjectLog]:
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
@@ -131,6 +141,7 @@ class CmdbLogManager(ManagerBase):
             return CmdbLog.from_data(resource_result)
 
         raise ManagerGetError(f'Log with ID: {public_id} not found!')
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs):
@@ -157,16 +168,18 @@ class CmdbLogManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
 
         try:
             iteration_result: IterationResult[CmdbMetaLog] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CmdbObjectLog)
         except ManagerGetError as err:
-            raise ManagerGetError(err)
+            raise ManagerGetError(err) from err
         return iteration_result
 
+
     def insert(self, action: LogAction, log_type: str, *args, **kwargs) -> int:
+        """TODO: document"""
         # Get possible public id
         log_init = {}
         available_id = self._database_manager.get_next_public_id(collection=CmdbMetaLog.COLLECTION)
@@ -177,19 +190,20 @@ class CmdbLogManager(ManagerBase):
         log_init['action_name'] = action.name
         log_init['log_type'] = log_type
         log_init['log_time'] = datetime.now(timezone.utc)
-
         log_data = {**log_init, **kwargs}
 
         try:
             new_log = CmdbLog(**log_data)
-            ack = self._insert(CmdbMetaLog.COLLECTION, new_log.to_database())
+            ack = self._insert(CmdbMetaLog.COLLECTION, new_log) #new_log.to_database(), but it is error
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
-            raise LogManagerInsertError(err)
+            raise LogManagerInsertError(err) from err
         return ack
+
 
     def update(self, data) -> int:
         raise NotImplementedError
+
 
     def delete(self, public_id: Union[PublicID, int]) -> Union[CmdbMetaLog, CmdbObjectLog]:
         """
@@ -209,24 +223,24 @@ class CmdbLogManager(ManagerBase):
 
 
 class LogManagerGetError(ManagerGetError):
-
+    """TODO:document"""
     def __init__(self, err):
         super(LogManagerGetError, self).__init__(err)
 
 
 class LogManagerInsertError(ManagerInsertError):
-
+    """TODO:document"""
     def __init__(self, err):
         super(LogManagerInsertError, self).__init__(err)
 
 
 class LogManagerUpdateError(ManagerUpdateError):
-
+    """TODO:document"""
     def __init__(self, err):
         super(LogManagerUpdateError, self).__init__(err)
 
 
 class LogManagerDeleteError(ManagerDeleteError):
-
+    """TODO:document"""
     def __init__(self, err):
         super(LogManagerDeleteError, self).__init__(err)

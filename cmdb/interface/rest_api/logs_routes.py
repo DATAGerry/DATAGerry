@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from werkzeug.exceptions import abort
@@ -48,6 +48,7 @@ with current_app.app_context():
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @insert_request_user
 def get_log(public_id: int, request_user: UserModel):
+    """TODO: document"""
     manager = CmdbLogManager(database_manager=database_manager)
     try:
         selected_log: CmdbObjectLog = manager.get(public_id=public_id)
@@ -85,6 +86,7 @@ def update_log(public_id, *args, **kwargs):
 @logs_blueprint.protect(auth=True, right='base.framework.log.delete')
 @insert_request_user
 def delete_log(public_id: int, request_user: UserModel):
+    """TODO: document"""
     manager = CmdbLogManager(database_manager=database_manager)
     try:
         selected_log: CmdbObjectLog = manager.get(public_id=public_id)
@@ -106,6 +108,7 @@ def delete_log(public_id: int, request_user: UserModel):
 @logs_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_logs_with_existing_objects(params: CollectionParameters, request_user: UserModel):
+    """TODO: document"""
     try:
         query = []
 
@@ -151,6 +154,7 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @logs_blueprint.parse_collection_parameters()
 def get_logs_with_deleted_objects(params: CollectionParameters):
+    """TODO: document"""
     manager = CmdbLogManager(database_manager=database_manager)
     try:
         query = []
@@ -197,6 +201,7 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @logs_blueprint.parse_collection_parameters()
 def get_object_delete_logs(params: CollectionParameters):
+    """TODO: document"""
     manager = CmdbLogManager(database_manager=database_manager)
     try:
         query = {
@@ -223,6 +228,7 @@ def get_object_delete_logs(params: CollectionParameters):
 @logs_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_logs_by_object(object_id: int, params: CollectionParameters, request_user: UserModel):
+    """TODO: document"""
     manager = CmdbLogManager(database_manager=database_manager)
     try:
         ObjectManager(database_manager=database_manager).get(object_id, user=request_user,
@@ -247,6 +253,7 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @insert_request_user
 def get_corresponding_object_logs(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         selected_log = log_manager.get(public_id=public_id)
         ObjectManager(database_manager=database_manager).get(selected_log.object_id, user=request_user,

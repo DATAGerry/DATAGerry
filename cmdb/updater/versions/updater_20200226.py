@@ -46,7 +46,7 @@ class Update20200226(Updater):
             # to root category public ID
             if len(category):
                 self.database_manager.update_many(TypeModel.COLLECTION, query={'category_id': 0},
-                                                  update={'$set': {'category_id': category[0].get_public_id()}})
+                                                  update={'category_id': category[0].get_public_id()})
 
             # Remove the property root from category collection
             self.database_manager.unset_update_many(CategoryModel.COLLECTION, 'root')

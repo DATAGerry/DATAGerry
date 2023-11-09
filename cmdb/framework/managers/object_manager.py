@@ -13,6 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+Manages Objects in Datagerry
+"""
 
 import json
 import logging
@@ -40,10 +43,17 @@ from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              ObjectQueryBuilder - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+
 class ObjectQueryBuilder(ManagerQueryBuilder):
+    """TODO: document"""
 
     def __init__(self):
-        super(ObjectQueryBuilder, self).__init__()
+        super().__init__()
+
 
     def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
@@ -109,6 +119,7 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         self.query += results_query
         return self.query
 
+
     def count(self, filter: Union[List[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
         """
@@ -137,7 +148,12 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         return self.query
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 ObjectManager - Class                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+
 class ObjectManager(ManagerBase):
+    """TODO: document"""
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue: Union[Queue, Event] = None):
         """
@@ -150,7 +166,8 @@ class ObjectManager(ManagerBase):
         self.event_queue = event_queue
         self.object_builder = ObjectQueryBuilder()
         self.type_manager = TypeManager(database_manager)
-        super(ObjectManager, self).__init__(CmdbObject.COLLECTION, database_manager=database_manager)
+        super().__init__(CmdbObject.COLLECTION, database_manager=database_manager)
+
 
     def get(self, public_id: Union[PublicID, int], user: UserModel = None,
             permission: AccessControlPermission = None) -> CmdbObject:
@@ -174,9 +191,11 @@ class ObjectManager(ManagerBase):
         else:
             raise ManagerGetError(f'Object with ID: {public_id} not found!')
 
+
     def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
+        """TODO: document"""
         try:
             query: Pipeline = self.object_builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order,
                                                         user=user, permission=permission)
@@ -191,6 +210,7 @@ class ObjectManager(ManagerBase):
         iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
+
 
     def update(self, public_id: Union[PublicID, int], data: Union[CmdbObject, dict], user: UserModel = None,
                permission: AccessControlPermission = None):
@@ -221,7 +241,7 @@ class ObjectManager(ManagerBase):
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=instance)
 
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
 
         if self.event_queue and user:
             event = Event("cmdb.core.object.updated", {"id": public_id, "type_id": instance.get('type_id'),
@@ -229,6 +249,7 @@ class ObjectManager(ManagerBase):
             self.event_queue.put(event)
 
         return update_result
+
 
     def update_many(self, query: dict, update: dict):
         """
@@ -244,11 +265,14 @@ class ObjectManager(ManagerBase):
             update_result = self._update_many(self.collection, query=query, update=update)
         except (ManagerUpdateError, AccessDeniedError) as err:
             raise err
+
         return update_result
+
 
     def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
                    user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
+        """TODO: document"""
         query = []
         if isinstance(filter, dict):
             query.append(filter)
@@ -265,14 +289,18 @@ class ObjectManager(ManagerBase):
                     {'type.fields.ref_types': object_.type_id}
                 ]
         }
+
         section_ref_query = {
                 'type.render_meta.sections.type': 'ref-section',
                 'type.render_meta.sections.reference.type_id': object_.type_id
         }
+
         query.append(Builder.match_(Builder.or_([field_ref_query, section_ref_query])))
         query.append(Builder.match_({'fields.value': object_.public_id}))
+
         return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
                             user=user, permission=permission)
+
 
     def count_objects(self, type_id: int):
         """
@@ -285,8 +313,9 @@ class ObjectManager(ManagerBase):
             (int): Returns the number of documents with the given type_id
         """
         try:
-            cursor_result = self._get(self.collection, filter={'type_id': type_id}, limit=0).limit(0).count()
+            object_count = self._count_documents(self.collection, filter={'type_id': type_id})
+
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 
-        return cursor_result
+        return object_count

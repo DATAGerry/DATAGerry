@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime, timezone
 
@@ -83,6 +83,7 @@ def get_types(params: TypeIterationParameters):
     return api_response.make_response()
 
 
+
 @types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
 def get_type(public_id: int):
@@ -108,6 +109,7 @@ def get_type(public_id: int):
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
                                      model=TypeModel.MODEL, body=body)
     return api_response.make_response()
+
 
 
 @types_blueprint.route('/', methods=['POST'])
@@ -150,6 +152,7 @@ def insert_type(data: dict):
     return api_response.make_response(prefix='types')
 
 
+
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @types_blueprint.protect(auth=True, right='base.framework.type.edit')
 @types_blueprint.validate(TypeModel.SCHEMA)
@@ -171,17 +174,15 @@ def update_type(public_id: int, data: dict):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     try:
-
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
-
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerUpdateError as err:
         return abort(400, err.message)
-    
+
     # when types are updated, update all locations with relevant data from this type
     updated_type = type_manager.get(public_id)
     locations_with_type = location_manager.get_locations_by_type(public_id)
@@ -196,6 +197,7 @@ def update_type(public_id: int, data: dict):
         location_manager._update(CmdbLocation.COLLECTION, location.public_id, data)
 
     return api_response.make_response()
+
 
 
 @types_blueprint.route('/<int:public_id>', methods=['DELETE'])
@@ -218,19 +220,14 @@ def delete_type(public_id: int):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    
     object_manager = ObjectManager(current_app.database_manager)
 
     try:
-        #objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
-        # deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
-        # deleted_type = type_manager.delete(public_id=PublicID(public_id))
-        # api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
         objects_count = object_manager.count_objects(public_id)
 
         if objects_count > 0:
             raise ManagerDeleteError('Delete not possible if objects of this type exist')
-        
+
         from cmdb.framework.cmdb_object_manager import CmdbObjectManager
         deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
         objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
@@ -238,14 +235,15 @@ def delete_type(public_id: int):
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
 
-
     except ManagerGetError as err:
         return abort(404, err.message)
     except ManagerDeleteError as err:
         return abort(400, err.message)
     except Exception as err:
         return abort(400, str(err))
+
     return api_response.make_response()
+
 
 
 @types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
@@ -258,12 +256,10 @@ def count_objects(public_id: int):
         public_id (int): public_id of the type
     """
     object_manager = ObjectManager(current_app.database_manager)
-    #body = request.method == 'HEAD'
 
     try:
         objects_count = object_manager.count_objects(public_id)
     except ManagerGetError as err:
         return abort(404, err.message)
-    # api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
-    #                                  model=TypeModel.MODEL, body=body)
+
     return make_api_response(objects_count)
