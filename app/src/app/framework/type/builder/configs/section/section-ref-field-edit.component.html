@@ -2,7 +2,7 @@
   <div class="form-row">
     <div class="form-group col-md-12">
       <label>Name: <span class="required">*</span></label>
-      <input [formControl]="nameControl" (ngModelChange)="onNameChange($event); onInputChange($event, 'name')"
+      <input [formControl]="nameControl" (ngModelChange)="onNameChange($event)"
              type="text" class="form-control" name-guideline required
              [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
                  'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}">

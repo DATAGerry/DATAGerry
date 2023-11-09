@@ -32,6 +32,7 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { nameConvention } from '../../../../../layout/directives/name.directive';
 import { ChangeDetectorRef } from '@angular/core';
 import { ValidationService } from '../../../services/validation.service';
+import { faL } from '@fortawesome/free-solid-svg-icons';
 
 
 @Component({
@@ -71,7 +72,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
   /**
    * Summary form control.
    */
-  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
 
   public requiredControl: UntypedFormControl = new UntypedFormControl(false);
   /**
@@ -114,8 +115,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    */
   public objectList: RenderResult[];
 
-  private previousNameControlValue: string = '';
-  private initialValue: string;
 
   /**
    * Types params
@@ -131,6 +130,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     type_id: this.typeControl,
   });
 
+  private initialValue: string;
+  isValid$ = true;
+
   public ngOnInit(): void {
 
     this.form.addControl('required', this.requiredControl);
@@ -144,7 +146,21 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     this.triggerAPICall();
 
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
+
+
+    if (this.form.get('ref_types').invalid) {
+      this.isValid$ = false
+    }
+
+    this.onInputChange('')
+
+  }
+
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+    }
   }
 
   public triggerAPICall() {
@@ -187,6 +203,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
   public onChange() {
     const { ref_types } = this.data;
+    this.onInputChange('')
     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
       this.objectList = [];
       this.filteredTypeList = [];
@@ -242,22 +259,20 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
    * @param name
    */
   public onNameChange(name: string) {
-    this.nameControl.setValue(name); // Set the value of the nameControl
-    this.nameControl.updateValueAndValidity(); // Update the validity of the nameControl
-
-    const isValid = this.nameControl.valid;
-    const fieldName = 'name';
-    const fieldValue = this.nameControl.value;
-    const fieldsToValidate = ['label'];
-
-    this.validationService.updateValidationStatus('name', isValid, fieldName, name, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
-    }
+    this.onInputChange(name)
     this.data.name = nameConvention(name);
+  }
+
+  onInputChange(event: any) {
+
+    for (let item in this.form.controls) {
+      this.hasValidator(item);
+    }
+
+    // this.validationService.setIsValid(this.isValid$);
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
   /**

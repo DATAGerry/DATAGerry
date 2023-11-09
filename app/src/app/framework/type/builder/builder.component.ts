@@ -129,17 +129,17 @@ export class BuilderComponent implements OnDestroy {
 
   private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
     refSection.fields = [];
-    refSection.fields.push(`${ refSection.name }-field`);
+    refSection.fields.push(`${refSection.name}-field`);
     this.typeInstance.fields.push({
       type: 'ref-section-field',
-      name: `${ refSection.name }-field`,
+      name: `${refSection.name}-field`,
       label: refSection.label
     });
     this.typeInstance.fields = [...this.typeInstance.fields];
   }
 
   private removeRefSectionSelectionField(refSection: CmdbTypeSection): void {
-    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${ refSection.name }-field`);
+    const index = this.typeInstance.fields.map(x => x.name).indexOf(`${refSection.name}-field`);
     this.typeInstance.fields.splice(index, 1);
     this.typeInstance.fields = [...this.typeInstance.fields];
   }
@@ -171,7 +171,7 @@ export class BuilderComponent implements OnDestroy {
    * @param field
    */
   public externalField(field) {
-    const include = {links: [], total: 0};
+    const include = { links: [], total: 0 };
     for (const external of this.typeInstance.render_meta.externals) {
       const fields = external.hasOwnProperty('fields') ? Array.isArray(external.fields) ? external.fields : [] : [];
       const found = fields.find(f => f === field.name);
@@ -201,16 +201,27 @@ export class BuilderComponent implements OnDestroy {
       this.typeInstance.render_meta.sections = [...this.sections];
       this.typeInstance.fields.push(fieldData);
       this.typeInstance.fields = [...this.typeInstance.fields];
-      this.validationService.initializeData(fieldData.name)
+      // this.validationService.initializeData(fieldData.name)
     }
   }
 
   public onFieldDragged(item: any, section: CmdbTypeSection) {
     const sectionIndex = section.fields.indexOf(item);
+    // let updatedDraggedFieldName = this.typeInstance.fields[sectionIndex].name;
+    console.log('onFieldDragged Section Index', this.typeInstance.fields[sectionIndex].name)
     section.fields.splice(sectionIndex, 1);
     const fieldIndex = this.typeInstance.fields.indexOf(item);
+    let updatedDraggedFieldName = this.typeInstance.fields[fieldIndex].name;
+
+    console.log('onFieldDragged field Index', this.typeInstance.fields[fieldIndex].name)
+
     this.typeInstance.fields.splice(fieldIndex, 1);
     this.typeInstance.fields = [...this.typeInstance.fields];
+
+    console.log('map onFieldDragged', this.validationService.fieldValidity)
+    console.log('setting true this field name', updatedDraggedFieldName)
+    this.validationService.setIsValid(updatedDraggedFieldName, true)
+
   }
 
   public onDragged(item: any, list: any[], effect: DropEffect) {
@@ -246,10 +257,15 @@ export class BuilderComponent implements OnDestroy {
 
   public removeField(item: any, section: CmdbTypeSection) {
     const indexField: number = this.typeInstance.fields.indexOf(item);
+    console.log('index field delete before', this.typeInstance.fields[indexField], indexField)
+
+    let removedFieldName = this.typeInstance.fields[indexField].name;
     if (indexField > -1) {
       this.typeInstance.fields.splice(indexField, 1);
+      console.log('index field after delete', this.typeInstance.fields, indexField)
       this.typeInstance.fields = [...this.typeInstance.fields];
-      this.validationService.updatelabelValidationStatusMaponDeletion(this.typeInstance.fields)
+      this.validationService.updateFieldValidityOnDeletion(removedFieldName);
+
     }
 
     const sectionFieldIndex = section.fields.indexOf(item);
@@ -266,12 +282,12 @@ export class BuilderComponent implements OnDestroy {
   }
 
   public openPreview() {
-    const previewModal = this.modalService.open(PreviewModalComponent, {scrollable: true});
+    const previewModal = this.modalService.open(PreviewModalComponent, { scrollable: true });
     previewModal.componentInstance.sections = this.sections;
   }
 
   public openDiagnostic() {
-    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, {scrollable: true});
+    const diagnosticModal = this.modalService.open(DiagnosticModalComponent, { scrollable: true });
     diagnosticModal.componentInstance.data = this.sections;
   }
 

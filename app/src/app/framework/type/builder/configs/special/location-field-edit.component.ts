@@ -18,25 +18,24 @@
 
 import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-
 import { ReplaySubject } from 'rxjs';
-import { takeUntil, tap } from 'rxjs/operators';
-
-import { ToastService } from '../../../../../layout/toast/toast.service';
-import { TypeService } from '../../../../services/type.service';
-import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { RenderResult } from '../../../../models/cmdb-render';
 import { CmdbType } from '../../../../models/cmdb-type';
+import { takeUntil, tap } from 'rxjs/operators';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
+
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
 
+import { ToastService } from '../../../../../layout/toast/toast.service';
+import { ObjectService } from '../../../../services/object.service';
+import { TypeService } from '../../../../services/type.service';
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-
+import { ActivatedRoute } from '@angular/router';
+import { ValidationService } from '../../../services/validation.service';
 
 @Component({
   selector: 'cmdb-location-field-edit',
@@ -45,14 +44,41 @@ import { nameConvention } from '../../../../../layout/directives/name.directive'
 })
 export class LocationFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
+  constructor(private typeService: TypeService, private objectService: ObjectService,
+    private toast: ToastService, private cd: ChangeDetectorRef, private activeRoute: ActivatedRoute, private validationService: ValidationService) {
+    super();
+  }
+
+  /**
+   * Component un-subscriber.
+   * @protected
+   */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
-  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+  /**
+   * Name form control.
+   */
+  public nameControl: UntypedFormControl = new UntypedFormControl('');
 
-  public selectable_as_parent: boolean = true;
+  /**
+   * Label form control.
+   */
+  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+
+  /**
+   * Type form control.
+   */
+  public typeControl: UntypedFormControl = new UntypedFormControl(undefined);
+
+  /**
+   * Summary form control.
+   */
+  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
+
+  /**
+   * Type list for reference selection
+   */
+  public selectable_as_parent: boolean = false;
   public currentTypeID: number;
 
   /**
@@ -98,133 +124,111 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
    */
   public referenceGroup: UntypedFormGroup = new UntypedFormGroup({ type_id: this.typeControl });
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                LIFE CYCLE - SECTION                                                */
-/* ------------------------------------------------------------------------------------------------------------------ */
+  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
 
 
-    constructor(private typeService: TypeService, 
-                private toast: ToastService, 
-                private cd: ChangeDetectorRef, 
-                private activeRoute: ActivatedRoute, 
-                private validationService: ValidationService) {
-        super();
+  private initialValue: string;
+  isValid$ = true;
+
+  /** LIFE CYCLE - SECTION **/
+  public ngOnInit(): void {
+    this.setDraggable("false");
+    this.form.addControl('required', this.requiredControl);
+    this.form.addControl('name', this.nameControl);
+    this.form.addControl('label', this.labelControl);
+
+    this.currentTypeID = this.activeRoute.data['_value'].type.public_id;
+    this.disableControlOnEdit(this.nameControl);
+    this.patchData(this.data, this.form);
+    this.triggerAPICall();
+
+    this.initialValue = this.nameControl.value;
+
+    if (this.form.controls['label'].invalid) {
+      this.isValid$ = false;
     }
 
+    // if (this.form.get('label').invalid) {
+    //   console.log('invalid')
+    //   this.isValid$ = false
+    // }
 
+    // this.onInputChange('')
+  }
 
-    public ngOnInit(): void {
-        this.setDraggable("false");
-        this.form.addControl('name', this.nameControl);
-        this.form.addControl('label', this.labelControl);
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
 
-        this.currentTypeID = this.activeRoute.data['_value'].type?.public_id;
-        this.disableControlOnEdit(this.nameControl);
-        this.patchData(this.data, this.form);
-        this.triggerAPICall();
-
-        this.validationService.initializeData('dg_location');
+      let valid = this.form.controls[control].valid;
+      console.log('valid', valid, control)
+      this.isValid$ = this.isValid$ && valid;
     }
+  }
 
 
+  onInputChange(event: any) {
 
-    public ngOnDestroy(): void {
-        this.setDraggable("true");
-        this.subscriber.next();
-        this.subscriber.complete();
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
     }
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
 
+  }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                  HELPER - SECTION                                                  */
-/* ------------------------------------------------------------------------------------------------------------------ */
+  /**
+   * Destroy subscriptions after closed.
+   */
+  public ngOnDestroy(): void {
+    this.setDraggable("true");
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
 
-    /**
-     * Retrieves the current type from db
-     */
-    public triggerAPICall() {
-        if(this.currentTypeID){
-            this.typeLoading = true;
-            this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
-              .pipe(tap(() => this.typeLoading = false))
-              .subscribe(
-                (apiResponse: CmdbType) => {
-                  this.typeLoading = false;
-                  this.selectable_as_parent = apiResponse.selectable_as_parent;
-                  this.cd.markForCheck();
-                },
-                (err) => this.toast.error(err));
-        }
-    }
+  /** HELPER - SECTION **/
 
+  public triggerAPICall() {
+    this.typeLoading = true;
+    this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
+      .pipe(tap(() => this.typeLoading = false))
+      .subscribe(
+        (apiResponse: CmdbType) => {
+          this.typeLoading = false;
+          this.selectable_as_parent = apiResponse.selectable_as_parent;
+          console.log("getType.apiResponse: ", apiResponse);
+          this.cd.markForCheck();
+        },
+        (err) => this.toast.error(err));
+  }
 
+  //  /**
+  //  * Name converter on ng model change.
+  //  * @param name
+  //  */
+  public onNameChange(name: string) {
+    this.data.name = nameConvention(name);
+  }
 
-    /**
-     * Name converter on ng model change.
-     * @param name
-     */
-    public onNameChange(name: string){
-        this.data.name = nameConvention(name);
-    }
+  public updateSelectableAsParent() {
+    this.selectable_as_parent = !this.selectable_as_parent;
+    this.setSelectableAsParent(this.selectable_as_parent);
+    this.cd.markForCheck();
+  }
 
+  //TODO: this is just a work around and need to be set with proper angular code 
+  //sets the special control location to not draggable when there is already a location present
+  private setDraggable(isDraggable: string): void {
+    let opacity: string = isDraggable == "true" ? "1.0" : "0.5";
 
+    //this only works if the special control "location" is the 2nd element
+    let specialControlLocation: Element = document.getElementById('specialControls').getElementsByClassName('list-group-item')[1];
+    specialControlLocation.setAttribute('draggable', isDraggable);
+    (specialControlLocation as HTMLElement).style.opacity = opacity;
+  }
 
-    //TODO: this is just a work around and need to be set with proper angular code
-    /**
-     * Sets the special control location to not draggable when 
-     * there is already a special control location
-     * 
-     * @param isDraggable (boolean): Control is draggable if true, else not
-     */
-    private setDraggable(isDraggable: string): void{
-        let opacity: string = isDraggable == "true" ? "1.0" : "0.5";
-
-        //this only works if the special control "location" is the 2nd element
-        let specialControlLocation: Element = document.getElementById('specialControls').getElementsByClassName('list-group-item')[1];
-        specialControlLocation.setAttribute('draggable', isDraggable);
-        (specialControlLocation as HTMLElement).style.opacity = opacity;
-    }
-
-
-
-    onInputChange(event: any, type: string) {
-        const fieldValue = this.labelControl.value;
-        const fieldName = 'dg_location'; // Fixed key for 'label'
-
-        let isValid = type === 'label' ? fieldValue.length > 0 : true; // Adjust as needed
-
-        // If type is 'label' and fieldValue.length > 0, set isValid to true
-        if (type === 'label' && fieldValue.length > 0) {
-          isValid = true;
-        }
-
-        // Update the validation status using the service
-        this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, fieldValue, fieldValue);
-    }
-
-
-
-    /**
-     * Toggles the 'selectable_as_parent'-attribute for the type
-     */
-      public updateSelectableAsParent(){
-        this.selectable_as_parent = !this.selectable_as_parent;
-        this.setSelectableAsParent(this.selectable_as_parent);
-        this.cd.markForCheck();
-    }
-
-
-
-    /**
-     * Sets the selectable_as_parent in current snapshot if type exists
-     * 
-     * @param value (boolean): The new value for 'selectable_as_parent'
-     */
-    private setSelectableAsParent(value: boolean): void {
-        if(this.currentTypeID){
-            this.activeRoute.snapshot.data.type.selectable_as_parent = value;
-        }
-    }
+  private setSelectableAsParent(value: boolean): void {
+    this.activeRoute.snapshot.data.type.selectable_as_parent = value;
+  }
 }
 
 
