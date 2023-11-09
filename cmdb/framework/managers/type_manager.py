@@ -13,11 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""
+TODO: document
+"""
 import json
+import logging
+from typing import Union, List
 
 from bson import json_util
-from typing import Union, List
 
 from cmdb.database.utils import object_hook
 from cmdb.database.managers import DatabaseManagerMongo
@@ -29,6 +32,11 @@ from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Pipeline
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  TypeManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class TypeManager(ManagerBase):
     """
@@ -43,6 +51,7 @@ class TypeManager(ManagerBase):
             database_manager: Connection to the database class.
         """
         super(TypeManager, self).__init__(TypeModel.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[TypeModel]:
@@ -122,6 +131,7 @@ class TypeManager(ManagerBase):
 
         return self._insert(self.collection, resource=type)
 
+
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
         """
         Update a existing type in the system.
@@ -140,8 +150,10 @@ class TypeManager(ManagerBase):
 
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=type)
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
+
         return update_result
+
 
     def delete(self, public_id: Union[PublicID, int]) -> TypeModel:
         """

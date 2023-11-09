@@ -75,7 +75,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
+            filter_=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
             user=request_user, permission=AccessControlPermission.READ
         )
 
@@ -196,7 +196,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
-                                                                           filter=params.filter,
+                                                                           filter_=params.filter,
                                                                            limit=params.limit,
                                                                            skip=params.skip,
                                                                            sort=params.sort,
@@ -229,6 +229,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 @object_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_object(request_user: UserModel):
+    LOGGER.info("Object: insert_object")
     add_data_dump = json.dumps(request.json)
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)

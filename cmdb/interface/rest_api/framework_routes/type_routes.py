@@ -175,7 +175,7 @@ def update_type(public_id: int, data: dict):
     type_manager = TypeManager(database_manager=current_app.database_manager)
     location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     try:
-
+        LOGGER.info("[type] => update_type")
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
 

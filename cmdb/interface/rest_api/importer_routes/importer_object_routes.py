@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -87,12 +87,11 @@ def get_parser():
     return make_response(parser)
 
 
-# @importer_object_blueprint.route('/parser/default', defaults={'importer_type': 'json'}, methods=['GET'])
-# @importer_object_blueprint.route('/parser/default/', defaults={'importer_type': 'json'}, methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>', methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>/', methods=['GET'])
 @login_required
 def get_default_parser_config(parser_type: str):
+    """TODO: document"""
     try:
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
@@ -106,17 +105,21 @@ def get_default_parser_config(parser_type: str):
 @insert_request_user
 @right_required('base.import.object.*')
 def parse_objects(request_user: UserModel):
+    """TODO: document"""
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
     # Load file format
     file_format = request.form.get('file_format', None)
+
     try:
         parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
     except ParserRuntimeError as pre:
         return abort(500, pre.message)
+
     return make_response(parsed_output)
+
 
 
 @importer_object_blueprint.route('/', methods=['POST'])
@@ -124,6 +127,7 @@ def parse_objects(request_user: UserModel):
 @insert_request_user
 @right_required('base.import.object.*')
 def import_objects(request_user: UserModel):
+    """TODO: document"""
     # Check if file exists
     if not request.files:
         return abort(400, 'No import file was provided')
@@ -202,21 +206,24 @@ def import_objects(request_user: UserModel):
             # get object state of every imported object
             current_type_instance = object_manager.get_type(importer_config_request.get('type_id'))
             current_object = object_manager.get_object(message.public_id)
-            current_object_render_result = CmdbRender(object_instance=current_object,
-                                                      type_instance=current_type_instance,
-                                                      render_user=request_user,
-                                                      object_manager=object_manager).result()
 
-            # insert object create log
-            log_params = {
-                'object_id': message.public_id,
-                'user_id': request_user.get_public_id(),
-                'user_name': request_user.get_display_name(),
-                'comment': 'Object was imported',
-                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-                'version': current_object.version
-            }
-            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            # pymongo 4.6.0
+            # current_object_render_result = CmdbRender(object_instance=current_object,
+            #                                           type_instance=current_type_instance,
+            #                                           render_user=request_user,
+            #                                           object_manager=object_manager).result()
+
+            
+            # # insert object create log
+            # log_params = {
+            #     'object_id': message.public_id,
+            #     'user_id': request_user.get_public_id(),
+            #     'user_name': request_user.get_display_name(),
+            #     'comment': 'Object was imported',
+            #     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+            #     'version': current_object.version
+            # }
+            # log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)
@@ -224,7 +231,7 @@ def import_objects(request_user: UserModel):
         except RenderError as err:
             LOGGER.error(err)
             return abort(500)
-        except LogManagerInsertError as err:
-            LOGGER.error(err)
+        # except LogManagerInsertError as err: #pymongo 4.6.0
+        #     LOGGER.error(err)
 
     return make_response(import_response)

@@ -80,7 +80,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): The objects from db fitting the params
     """
-    
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
@@ -94,7 +93,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
+            filter_=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
             user=request_user, permission=AccessControlPermission.READ
         )
 
@@ -128,6 +127,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_object(public_id, request_user: UserModel):
+    """TODO: document"""
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
                                                     permission=AccessControlPermission.READ)
@@ -157,6 +157,7 @@ def get_object(public_id, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_native_object(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         object_instance = object_manager.get_object(public_id, user=request_user,
                                                     permission=AccessControlPermission.READ)
@@ -172,6 +173,7 @@ def get_native_object(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def group_objects_by_type_id(value, request_user: UserModel):
+    """TODO: document"""
     try:
         filter_state = None
         if _fetch_only_active_objs():
@@ -196,6 +198,7 @@ def group_objects_by_type_id(value, request_user: UserModel):
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
+    """TODO: document"""
     manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
@@ -220,7 +223,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
-                                                                           filter=params.filter,
+                                                                           filter_=params.filter,
                                                                            limit=params.limit,
                                                                            skip=params.skip,
                                                                            sort=params.sort,
@@ -254,6 +257,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 @objects_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_object(request_user: UserModel):
+    """TODO: document"""
     add_data_dump = json.dumps(request.json)
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -270,6 +274,7 @@ def insert_object(request_user: UserModel):
 
         if 'active' not in new_object_data:
             new_object_data['active'] = True
+
         new_object_data['creation_time'] = datetime.now(timezone.utc)
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
@@ -279,24 +284,27 @@ def insert_object(request_user: UserModel):
         # get current object state
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
         current_object = object_manager.get_object(new_object_id)
-        current_object_render_result = CmdbRender(object_instance=current_object,
-                                                  object_manager=object_manager,
-                                                  type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+        # TODO: pymongo 4.6.0 issue
+        # current_object_render_result = CmdbRender(object_instance=current_object,
+        #                                           object_manager=object_manager,
+        #                                           type_instance=current_type_instance,
+        #                                           render_user=request_user).result()
 
+        
         # Generate new insert log
-        try:
-            log_params = {
-                'object_id': new_object_id,
-                'user_id': request_user.get_public_id(),
-                'user_name': request_user.get_display_name(),
-                'comment': 'Object was created',
-                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-                'version': current_object.version
-            }
-            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
-        except LogManagerInsertError as err:
-            LOGGER.error(err)
+        # try:
+        #     log_params = {
+        #         'object_id': new_object_id,
+        #         'user_id': request_user.get_public_id(),
+        #         'user_name': request_user.get_display_name(),
+        #         'comment': 'Object was created',
+        #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+        #         'version': current_object.version
+        #     }
+
+        #     log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        # except LogManagerInsertError as err:
+        #     LOGGER.error(err)
 
     except (TypeError, ObjectInsertError) as err:
         LOGGER.error(err)
@@ -320,6 +328,7 @@ def insert_object(request_user: UserModel):
 @objects_blueprint.validate(CmdbObject.SCHEMA)
 @insert_request_user
 def update_object(public_id: int, data: dict, request_user: UserModel):
+    """TODO: document"""
     object_ids = request.args.getlist('objectIDs')
 
     if len(object_ids) > 0:
@@ -395,20 +404,20 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             manager.update(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
             results.append(new_data)
 
-            # Generate log entry
-            try:
-                log_data = {
-                    'object_id': obj_id,
-                    'version': update_object_instance.get_version(),
-                    'user_id': request_user.get_public_id(),
-                    'user_name': request_user.get_display_name(),
-                    'comment': update_comment,
-                    'changes': changes,
-                    'render_state': json.dumps(update_object_instance, default=default).encode('UTF-8')
-                }
-                log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
-            except (CMDBError, LogManagerInsertError) as err:
-                LOGGER.error(err)
+            # Generate log entry # TODO: pymongo 4.6.0 issue
+            # try:
+            #     log_data = {
+            #         'object_id': obj_id,
+            #         'version': update_object_instance.get_version(),
+            #         'user_id': request_user.get_public_id(),
+            #         'user_name': request_user.get_display_name(),
+            #         'comment': update_comment,
+            #         'changes': changes,
+            #         'render_state': json.dumps(update_object_instance, default=default).encode('UTF-8')
+            #     }
+            #     log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+            # except (CMDBError, LogManagerInsertError) as err:
+            #     LOGGER.error(err)
 
         except AccessDeniedError as err:
             LOGGER.error(err)
@@ -486,19 +495,20 @@ def delete_object(public_id: int, request_user: UserModel):
     except CMDBError:
         return abort(500)
 
-    try:
-        # generate log
-        log_data = {
-            'object_id': public_id,
-            'version': current_object_render_result.object_information['version'],
-            'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_display_name(),
-            'comment': 'Object was deleted',
-            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
-        }
-        log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-    except (CMDBError, LogManagerInsertError) as err:
-        LOGGER.error(err)
+    # TODO: pymongo 4.6.0 issue
+    # try:
+    #     # generate log
+    #     log_data = {
+    #         'object_id': public_id,
+    #         'version': current_object_render_result.object_information['version'],
+    #         'user_id': request_user.get_public_id(),
+    #         'user_name': request_user.get_display_name(),
+    #         'comment': 'Object was deleted',
+    #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+    #     }
+    #     log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+    # except (CMDBError, LogManagerInsertError) as err:
+    #     LOGGER.error(err)
 
     resp = make_response(ack)
     return resp
@@ -507,6 +517,7 @@ def delete_object(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_object_with_child_locations(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         # check if object exists
         current_object_instance = object_manager.get_object(public_id)
@@ -639,6 +650,7 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_many_objects(public_ids, request_user: UserModel):
+    """TODO: document"""
     try:
         ids = []
         operator_in = {'$in': []}
@@ -687,19 +699,20 @@ def delete_many_objects(public_ids, request_user: UserModel):
             except CMDBError:
                 return abort(500)
 
-            try:
-                # generate log
-                log_data = {
-                    'object_id': current_object_instance.get_public_id(),
-                    'version': current_object_render_result.object_information['version'],
-                    'user_id': request_user.get_public_id(),
-                    'user_name': request_user.get_display_name(),
-                    'comment': 'Object was deleted',
-                    'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
-                }
-                log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-            except (CMDBError, LogManagerInsertError) as err:
-                LOGGER.error(err)
+            # TODO: pymongo 4.6.0 issue 
+            # try:
+            #     # generate log
+            #     log_data = {
+            #         'object_id': current_object_instance.get_public_id(),
+            #         'version': current_object_render_result.object_information['version'],
+            #         'user_id': request_user.get_public_id(),
+            #         'user_name': request_user.get_display_name(),
+            #         'comment': 'Object was deleted',
+            #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+            #     }
+            #     log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+            # except (CMDBError, LogManagerInsertError) as err:
+            #     LOGGER.error(err)
 
         resp = make_response({'successfully': ack})
         return resp
@@ -715,6 +728,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
 def get_object_state(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         founded_object = object_manager.get_object(public_id=public_id, user=request_user,
                                                    permission=AccessControlPermission.READ)
@@ -724,10 +738,12 @@ def get_object_state(public_id: int, request_user: UserModel):
     return make_response(founded_object.active)
 
 
+
 @objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
 def update_object_state(public_id: int, request_user: UserModel):
+    """TODO: document"""
     if isinstance(request.json, bool):
         state = request.json
     else:
@@ -762,27 +778,31 @@ def update_object_state(public_id: int, request_user: UserModel):
     except RenderError as err:
         LOGGER.error(err)
         return abort(500)
-    try:
-        # generate log
-        change = {
-            'old': not state,
-            'new': state
-        }
-        log_data = {
-            'object_id': public_id,
-            'version': founded_object.version,
-            'user_id': request_user.get_public_id(),
-            'user_name': request_user.get_display_name(),
-            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-            'comment': 'Active status has changed',
-            'changes': change,
-        }
-        log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
-    except (CMDBError, LogManagerInsertError) as err:
-        LOGGER.error(err)
+
+    # TODO: pymongo 4.6.0 issue
+    # try:
+    #     # generate log
+    #     change = {
+    #         'old': not state,
+    #         'new': state
+    #     }
+    #     log_data = {
+    #         'object_id': public_id,
+    #         'version': founded_object.version,
+    #         'user_id': request_user.get_public_id(),
+    #         'user_name': request_user.get_display_name(),
+    #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+    #         'comment': 'Active status has changed',
+    #         'changes': change,
+    #     }
+    #     log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+    # except (CMDBError, LogManagerInsertError) as err:
+    #     LOGGER.error(err)
 
     api_response = UpdateSingleResponse(result=founded_object.__dict__, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
+
+
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.type.clean')
@@ -814,6 +834,8 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 
     api_response = GetListResponse(unstructured, url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
+
+
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
 @objects_blueprint.protect(auth=True, right='base.framework.type.clean')
@@ -874,20 +896,6 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
 
     return api_response.make_response()
 
-
-def _build_query(args, q_operator='$and'):
-    query_list = []
-    try:
-        for key, value in args.items():
-            for v in value.split(","):
-                try:
-                    query_list.append({key: int(v)})
-                except (ValueError, TypeError):
-                    return abort(400)
-        return {q_operator: query_list}
-
-    except CMDBError:
-        pass
 
 
 def _fetch_only_active_objs() -> bool:
