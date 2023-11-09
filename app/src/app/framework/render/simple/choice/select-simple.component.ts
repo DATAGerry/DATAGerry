@@ -29,4 +29,14 @@ export class SelectSimpleComponent extends RenderFieldComponent {
     super();
   }
 
+  // Function to retrieve the label corresponding to a given value from the options array
+  getLabelForValue(value: string): string {
+
+    // Find the option in the options array where the name property matches the given value
+    const matchingOption = this.data.options.find(option => option.name === value);
+
+    // If a matching option is found, return its label; otherwise, return an empty string
+    return matchingOption ? matchingOption.label : '';
+  }
+
 }
