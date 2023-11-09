@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime, timezone
 from typing import List
@@ -46,15 +46,18 @@ with current_app.app_context():
 @auth_blueprint.route('/settings', methods=['GET'])
 @auth_blueprint.protect(auth=True, right='base.system.view')
 def get_auth_settings():
+    """TODO: document"""
     auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
     return make_response(auth_module.settings)
+
 
 
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
 @auth_blueprint.protect(auth=True, right='base.system.edit')
 @insert_request_user
 def update_auth_settings(request_user: UserModel):
+    """TODO: document"""
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
@@ -72,6 +75,7 @@ def update_auth_settings(request_user: UserModel):
 @auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
 def get_installed_providers(request_user: UserModel):
+    """TODO: document"""
     provider_names: List[dict] = []
     auth_module = AuthModule(
         system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
@@ -80,10 +84,12 @@ def get_installed_providers(request_user: UserModel):
     return make_response(provider_names)
 
 
+
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
 @auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
 def get_provider_config(provider_class: str, request_user: UserModel):
+    """TODO: document"""
     auth_module = AuthModule(
         system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
     try:
@@ -93,8 +99,10 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     return make_response(provider_class_config)
 
 
+
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
+    """TODO: document"""
     user_manager: UserManager = UserManager(current_app.database_manager)
     group_manager: GroupManager = GroupManager(current_app.database_manager, right_manager=RightManager(rights))
     security_manager: SecurityManager = SecurityManager(current_app.database_manager)
@@ -114,8 +122,8 @@ def post_login():
         user_instance = auth_module.login(request_user_name, request_password)
     except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
         return abort(503, err.message)
-    except Exception as e:
-        return abort(401)
+    except Exception as err:
+        return abort(401, err)
     finally:
         # If login success generate user instance with token
         if user_instance:
@@ -127,9 +135,7 @@ def post_login():
             token_expire = int(tg.get_expire_time().timestamp())
 
             login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
-
             return login_response.make_response()
 
         # Login not success
-        else:
-            return abort(401, 'Could not login')
+        return abort(401, 'Could not login')

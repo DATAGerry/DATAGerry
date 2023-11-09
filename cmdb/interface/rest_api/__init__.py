@@ -64,13 +64,11 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
 
-    from cmdb.interface.rest_api.framework_routes.object_routes import object_blueprint
     from cmdb.interface.rest_api.framework_routes.objects_routes import objects_blueprint
 
     from cmdb.interface.rest_api.framework_routes.object_link_routes import link_blueprint
     from cmdb.interface.rest_api.framework_routes.object_links_routes import links_blueprint
 
-    from cmdb.interface.rest_api.framework_routes.type_routes import type_blueprint
     from cmdb.interface.rest_api.framework_routes.types_routes import types_blueprint
 
     from cmdb.interface.rest_api.connection import connection_routes
@@ -116,25 +114,23 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
-    
+
     app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
     app.register_multi_blueprint(date_blueprint, multi_prefix=['/date'])
     #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
     # needs to be refactored for blueprints with multiple routes
     app.register_blueprint(objects_blueprint, url_prefix='/objects')
-    app.register_blueprint(object_blueprint, url_prefix='/object')
 
     app.register_blueprint(link_blueprint, url_prefix='/object/link')
     app.register_blueprint(links_blueprint, url_prefix='/objects/links')
-    
-    app.register_blueprint(type_blueprint, url_prefix='/type')
+
     app.register_blueprint(types_blueprint, url_prefix='/types')
 
     app.register_blueprint(connection_routes)
 
     app.register_blueprint(category_blueprint, url_prefix='/category')
     app.register_blueprint(categories_blueprint, url_prefix='/categories')
-    
+
     app.register_blueprint(location_blueprint, url_prefix='/locations')
 
     app.register_blueprint(user_blueprint, url_prefix='/user')
@@ -143,7 +139,7 @@ def register_blueprints(app):
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
 
     app.register_blueprint(group_blueprint, url_prefix='/group')
-    app.register_blueprint(groups_blueprint, url_prefix='/groups') 
+    app.register_blueprint(groups_blueprint, url_prefix='/groups')
 
     app.register_blueprint(right_blueprint, url_prefix='/right')
     app.register_blueprint(rights_blueprint, url_prefix='/rights')
@@ -152,11 +148,11 @@ def register_blueprints(app):
 
     app.register_blueprint(export_blueprint, url_prefix='/exporter')
     app.register_blueprint(exporter_blueprint, url_prefix='/exporter/')
-    
+
     app.register_blueprint(type_export_blueprint)
 
     app.register_blueprint(log_blueprint, url_prefix='/log')
-    app.register_blueprint(logs_blueprint, url_prefix='/logs')   
+    app.register_blueprint(logs_blueprint, url_prefix='/logs')
 
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
@@ -168,7 +164,7 @@ def register_blueprints(app):
 
     app.register_blueprint(doc_blueprint, url_prefix='/doc')
     app.register_blueprint(docs_blueprint, url_prefix='/docs')
-    
+
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
 

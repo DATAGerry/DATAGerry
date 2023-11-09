@@ -603,7 +603,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         # update counter only, if value is higher than counter
         if value > counter_doc['counter']:
             counter_doc['counter'] = value
-            self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, counter_doc)
+
+            formatted_data = {'$set':counter_doc}
+
+            self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
 
 
     def get_root_location_data(self) -> dict:
