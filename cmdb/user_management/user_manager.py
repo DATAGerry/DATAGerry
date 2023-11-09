@@ -154,7 +154,7 @@ class UserManager(CmdbManagerBase):
                 if not options.get('group_id'):
                     raise UserManagerDeleteError(f'Not move group was provided!')
                 self.update_users_by(query={'group_id': delete_group.get_public_id()},
-                                     update={'$set': {'group_id': int(options.get('group_id'))}})
+                                     update={'group_id': int(options.get('group_id'))})
             elif user_action == 'delete':
                 self.delete_users_by({'group_id': delete_group.get_public_id()})
             else:

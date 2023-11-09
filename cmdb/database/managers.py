@@ -378,7 +378,9 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             A boolean acknowledged as true if the operation ran with write
             concern or false if write concern was disabled
         """
-        result = self.connector.get_collection(collection).update_many(filter=query, update=update)
+        formatted_data = {'$set':update}
+
+        result = self.connector.get_collection(collection).update_many(filter=query, update=formatted_data)
 
         if not result.acknowledged:
             raise DocumentCouldNotBeDeleted(collection, None)
@@ -584,7 +586,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         counter_doc['counter'] = counter_doc['counter'] + 1
 
         try:
-            self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, {"$set":{"counter":counter_doc['counter']}})
+            self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, {'$set':{'counter':counter_doc['counter']}})
         except Exception as error:
             LOGGER.info(f'Public ID Counter not increased: reason => {error}')
 
@@ -607,6 +609,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             formatted_data = {'$set':counter_doc}
 
             self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
+
 
 
     def get_root_location_data(self) -> dict:
