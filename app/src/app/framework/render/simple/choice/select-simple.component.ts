@@ -29,7 +29,12 @@ export class SelectSimpleComponent extends RenderFieldComponent {
     super();
   }
 
-  // Function to retrieve the label corresponding to a given value from the options array
+  /**
+   * Retrieves the label corresponding to a given value from the options array.
+   * 
+   * @param value - The value for which to find the corresponding label.
+   * @returns The label of the option with the matching value, or an empty string if no match is found.
+   */
   getLabelForValue(value: string): string {
 
     // Find the option in the options array where the name property matches the given value
