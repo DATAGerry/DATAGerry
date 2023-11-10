@@ -366,7 +366,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
 
 
-    def update_many(self, collection: str, query: dict, update: dict) -> UpdateResult:
+    def update_many(self, collection: str, query: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
         """update all documents that match the filter from a collection.
 
         Args:
@@ -378,7 +378,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             A boolean acknowledged as true if the operation ran with write
             concern or false if write concern was disabled
         """
-        formatted_data = {'$set':update}
+        if not add_to_set:
+            formatted_data = {'$set':update}
+        else:
+            formatted_data = update
 
         result = self.connector.get_collection(collection).update_many(filter=query, update=formatted_data)
 
@@ -557,7 +560,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
                 '_id': collection
             })
             new_id = founded_counter['counter'] + 1
-        except (NoDocumentFound, Exception) as err:
+        except (NoDocumentFound, Exception):
             docs_count = self._init_public_id_counter(collection)
             new_id = docs_count + 1
         finally:
@@ -588,7 +591,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         try:
             self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, {'$set':{'counter':counter_doc['counter']}})
         except Exception as error:
-            LOGGER.info(f'Public ID Counter not increased: reason => {error}')
+            LOGGER.info('Public ID Counter not increased: reason => %s',error)
 
 
     def update_public_id_counter(self, collection: str, value: int):

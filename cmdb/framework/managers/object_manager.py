@@ -251,7 +251,7 @@ class ObjectManager(ManagerBase):
         return update_result
 
 
-    def update_many(self, query: dict, update: dict):
+    def update_many(self, query: dict, update: dict, add_to_set: bool = False):
         """
         update all documents that match the filter from a collection.
         Args:
@@ -262,7 +262,7 @@ class ObjectManager(ManagerBase):
             acknowledgment of database
         """
         try:
-            update_result = self._update_many(self.collection, query=query, update=update)
+            update_result = self._update_many(self.collection, query=query, update=update, add_to_set=add_to_set)
         except (ManagerUpdateError, AccessDeniedError) as err:
             raise err
 

@@ -137,7 +137,7 @@ class AbstractManagerBase:
 
 
 
-    def _update_many(self, collection: Collection, query: dict, update: dict):
+    def _update_many(self, collection: Collection, query: dict, update: dict, add_to_set: bool = False):
         """
         update all documents that match the filter from a collection.
         Args:
@@ -149,7 +149,7 @@ class AbstractManagerBase:
             acknowledgment of database
         """
         try:
-            return self._database_manager.update_many(collection=collection, query=query, update=update)
+            return self._database_manager.update_many(collection=collection, query=query, update=update, add_to_set=add_to_set)
         except Exception as err:
             raise ManagerUpdateError(err) from err
 
