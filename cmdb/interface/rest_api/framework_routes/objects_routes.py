@@ -502,7 +502,6 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 @insert_request_user
 def update_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
-    LOGGER.info("[objects_routes] => update_object_state")
     if isinstance(request.json, bool):
         state = request.json
     else:
@@ -514,13 +513,10 @@ def update_object_state(public_id: int, request_user: UserModel):
         LOGGER.error(err)
         return abort(404, err.message)
     if found_object.active == state:
-        LOGGER.info("if found_object.active == state")
         return make_response(False, 204)
     try:
-        LOGGER.info("[objects_routes] => try")
         found_object.active = state
         manager.update(public_id, found_object, user=request_user, permission=AccessControlPermission.UPDATE)
-        LOGGER.info("[objects_routes] => updated")
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
@@ -560,7 +556,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     #     log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
     # except (CMDBError, LogManagerInsertError) as err:
     #     LOGGER.error(err)
-    LOGGER.info("[objects_routes] api_response")
+
     api_response = UpdateSingleResponse(result=found_object.__dict__, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
 
@@ -581,10 +577,11 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
     manager = ObjectManager(database_manager=current_app.database_manager)
-
     try:
         update_type_instance = type_manager.get(public_id)
+
         type_fields = update_type_instance.fields
+
         objects_by_type = manager.iterate({'type_id': public_id}, limit=0, skip=0,
                                           sort='public_id', order=1, user=request_user).results
 
@@ -606,6 +603,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
 
         objects_by_type = manager.iterate({'type_id': public_id}, limit=0, skip=0,
                                           sort='public_id', order=1, user=request_user).results
+
         for obj in objects_by_type:
             for t_field in type_fields:
                 name = t_field["name"]
@@ -616,8 +614,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                     value = t_field["value"]
 
                 manager.update_many(query={'public_id': obj.public_id},
-                                    update={'$addToSet': {'fields': {"name": name, "value": value}}})
-
+                                    update={'$addToSet': {'fields': {"name": name, "value": value}}}, add_to_set=True)
     except ManagerUpdateError as err:
         return abort(400, err.message)
 
