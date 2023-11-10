@@ -42,8 +42,8 @@ pycparser==2.21
 pycryptodome==3.19.0
 pyflakes==3.1.0
 Pygments==2.16.1
-pyinstaller==5.13.0
-pyinstaller-hooks-contrib==2023.4
+pyinstaller==6.1.0
+pyinstaller-hooks-contrib==2023.10
 pylint==3.0.2
 pymongo==4.6.0
 PyMySQL==1.1.0
