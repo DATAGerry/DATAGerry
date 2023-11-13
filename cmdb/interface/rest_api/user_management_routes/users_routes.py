@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from datetime import datetime, timezone
 from flask import abort, request, current_app
 
@@ -28,6 +28,7 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 users_blueprint = APIBlueprint('users', __name__)
 
@@ -67,6 +68,7 @@ def get_users(params: CollectionParameters):
     return api_response.make_response()
 
 
+
 @users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @users_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
 def get_user(public_id: int):
@@ -94,6 +96,7 @@ def get_user(public_id: int):
     api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
                                      model=UserModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
+
 
 
 @users_blueprint.route('/', methods=['POST'])
@@ -129,6 +132,7 @@ def insert_user(data: dict):
     return api_response.make_response(prefix='users')
 
 
+
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 @users_blueprint.validate(UserModel.SCHEMA)
@@ -159,6 +163,7 @@ def update_user(public_id: int, data: dict):
     return api_response.make_response()
 
 
+
 @users_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @users_blueprint.protect(auth=True, right='base.user-management.user.delete')
 def delete_user(public_id: int):
@@ -184,6 +189,7 @@ def delete_user(public_id: int):
     except ManagerDeleteError as err:
         return abort(404, err.message)
     return api_response.make_response()
+
 
 
 @users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])

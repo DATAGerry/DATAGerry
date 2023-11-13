@@ -13,15 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import pytest
 
 from cmdb.interface.rest_api import create_rest_api
 from tests.utils.flask_test_client import RestAPITestClient
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @pytest.fixture(scope="session")
 def rest_api(database_manager, full_access_user):
+    """TODO: document"""
     api = create_rest_api(database_manager, None)
     api.test_client_class = RestAPITestClient
 

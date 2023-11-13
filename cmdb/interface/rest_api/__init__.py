@@ -81,7 +81,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exporter_routes.export_object_routes import export_blueprint
     from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
     from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.log_routes import log_blueprint
     from cmdb.interface.rest_api.logs_routes import logs_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
@@ -94,8 +93,8 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
-    app.register_multi_blueprint(auth_blueprint, multi_prefix=['/auth'])
-    app.register_multi_blueprint(date_blueprint, multi_prefix=['/date'])
+    app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    app.register_blueprint(date_blueprint, url_prefix='/date')
     #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
     # needs to be refactored for blueprints with multiple routes
     app.register_blueprint(objects_blueprint, url_prefix='/objects')
@@ -116,11 +115,10 @@ def register_blueprints(app):
     app.register_blueprint(export_blueprint, url_prefix='/exporter')
     app.register_blueprint(exporter_blueprint, url_prefix='/exporter/')
     app.register_blueprint(type_export_blueprint)
-    app.register_blueprint(log_blueprint, url_prefix='/log')
     app.register_blueprint(logs_blueprint, url_prefix='/logs')
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
-    app.register_multi_blueprint(exportd_blueprint, multi_prefix=['/exportd'])
+    app.register_blueprint(exportd_blueprint, url_prefix='/exportd')
     app.register_blueprint(exportd_job_blueprint)
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)

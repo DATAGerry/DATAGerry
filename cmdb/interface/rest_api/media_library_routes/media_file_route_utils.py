@@ -27,6 +27,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 def get_file_in_request(file_name: str) -> FileStorage:
+    """TODO: document"""
     try:
         return request.files.get(file_name)
     except (KeyError, Exception):
@@ -35,6 +36,7 @@ def get_file_in_request(file_name: str) -> FileStorage:
 
 
 def get_element_from_data_request(element, _request: Request) -> (dict, None):
+    """TODO: document"""
     try:
         metadata = json.loads(_request.form.to_dict()[element])
         return metadata
@@ -43,6 +45,7 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
 
 
 def generate_metadata_filter(element, _request=None, params=None):
+    """TODO: document"""
     filter_metadata = {}
     try:
         data = params
@@ -67,7 +70,7 @@ def generate_metadata_filter(element, _request=None, params=None):
 
 
 def generate_collection_parameters(params: CollectionParameters):
-
+    """TODO: document"""
     builder = Builder()
     search = params.optional.get('searchTerm')
     param = json.loads(params.optional['metadata'])

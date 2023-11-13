@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from flask import Response
 
 def default_response_tests(response: Response):
+    """TODO: document"""
     assert response.status_code == 200
     assert response.content_type == 'application/json'

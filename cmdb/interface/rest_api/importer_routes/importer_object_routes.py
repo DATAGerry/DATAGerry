@@ -57,6 +57,7 @@ importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/obj
 @importer_object_blueprint.route('/importer', methods=['GET'])
 @login_required
 def get_importer():
+    """TODO: document"""
     importer_response = []
     for importer in __OBJECT_IMPORTER__:
         importer_response.append({
@@ -72,6 +73,7 @@ def get_importer():
 @importer_object_blueprint.route('/importer/config<string:importer_type>', methods=['GET'])
 @login_required
 def get_default_importer_config(importer_type):
+    """TODO: document"""
     try:
         importer: ObjectImporterConfig = __OBJECT_IMPORTER_CONFIG__[importer_type]
     except IndexError:
@@ -83,6 +85,7 @@ def get_default_importer_config(importer_type):
 @importer_object_blueprint.route('/parser', methods=['GET'])
 @login_required
 def get_parser():
+    """TODO: document"""
     parser = [parser for parser in __OBJECT_PARSER__]
     return make_response(parser)
 
@@ -213,7 +216,6 @@ def import_objects(request_user: UserModel):
             #                                           render_user=request_user,
             #                                           object_manager=object_manager).result()
 
-            
             # # insert object create log
             # log_params = {
             #     'object_id': message.public_id,
