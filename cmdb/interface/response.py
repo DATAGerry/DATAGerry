@@ -30,7 +30,7 @@ from cmdb.interface.api_project import APIProjection, APIProjector
 
 from cmdb.interface.api_pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
     """
@@ -51,6 +51,7 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     return response
 
 
+
 class OperationType(Enum):
     """
     Enum for different response operations.
@@ -63,11 +64,13 @@ class OperationType(Enum):
     DELETE = 'DELETE'
 
 
+
 class ResponseMessage:
     """Simple class wrapper for json encoding"""
 
     def __init__(self, obj: dict = None):
         self.obj = obj
+
 
 
 class ResponseSuccessMessage(ResponseMessage):
@@ -82,7 +85,8 @@ class ResponseSuccessMessage(ResponseMessage):
         """
         self.status = status
         self.public_id = public_id
-        super(ResponseSuccessMessage, self).__init__(obj=obj)
+        super().__init__(obj=obj)
+
 
 
 class ResponseFailedMessage(ResponseMessage):
@@ -99,15 +103,19 @@ class ResponseFailedMessage(ResponseMessage):
         self.status = status
         self.public_id = public_id
         self.error_message = error_message
-        super(ResponseFailedMessage, self).__init__(obj=obj)
+        super().__init__(obj=obj)
+
+
 
     def to_dict(self) -> dict:
+        """TODO: document"""
         return {
             'status': self.status,
             'public_id': self.public_id,
             'error_message': self.error_message,
             'obj': self.obj,
         }
+
 
 
 class BaseAPIResponse:
@@ -132,6 +140,8 @@ class BaseAPIResponse:
         self.body = body or True
         self.time: str = datetime.now(timezone.utc).isoformat()
 
+
+
     def make_response(self, *args, **kwargs) -> Response:
         """
         Abstract method for http response
@@ -140,6 +150,8 @@ class BaseAPIResponse:
             http Response
         """
         raise NotImplementedError
+
+
 
     def export(self, text: str = 'json') -> dict:
         """
@@ -156,6 +168,7 @@ class BaseAPIResponse:
             'model': self.model,
             'time': self.time
         }
+
 
 
 class GetSingleResponse(BaseAPIResponse):
@@ -178,7 +191,7 @@ class GetSingleResponse(BaseAPIResponse):
             self.result = APIProjector(result, projection).project
         else:
             self.result: dict = result
-        super(GetSingleResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
+        super().__init__(operation_type=OperationType.GET, url=url, model=model,
                                                 body=body)
 
     def make_response(self, *args, **kwargs) -> Response:
@@ -202,7 +215,8 @@ class GetSingleResponse(BaseAPIResponse):
         """Get content of the response as dict."""
         return {**{
             'result': self.result
-        }, **super(GetSingleResponse, self).export()}
+        }, **super().export()}
+
 
 
 class GetMultiResponse(BaseAPIResponse):
@@ -241,7 +255,7 @@ class GetMultiResponse(BaseAPIResponse):
         self.pager: APIPager = APIPager(page=params.page, page_size=params.limit,
                                         total_pages=total_pages)
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
-        super(GetMultiResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model,
+        super().__init__(operation_type=OperationType.GET, url=url, model=model,
                                                body=body)
 
     def make_response(self, *args, **kwargs) -> Response:
@@ -286,7 +300,8 @@ class GetMultiResponse(BaseAPIResponse):
             'count': self.count,
             'total': self.total,
             **extra
-        }, **super(GetMultiResponse, self).export()}
+        }, **super().export()}
+
 
 
 class InsertSingleResponse(BaseAPIResponse):
@@ -308,7 +323,9 @@ class InsertSingleResponse(BaseAPIResponse):
 
         self.raw: dict = raw
         self.result_id: PublicID = result_id
-        super(InsertSingleResponse, self).__init__(operation_type=OperationType.INSERT, url=url, model=model)
+        super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
+
+
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> Response:
         """
@@ -331,7 +348,8 @@ class InsertSingleResponse(BaseAPIResponse):
         return {**{
             'result_id': self.result_id,
             'raw': self.raw
-        }, **super(InsertSingleResponse, self).export(*args, **kwargs)}
+        }, **super().export(*args, **kwargs)}
+
 
 
 class UpdateSingleResponse(BaseAPIResponse):
@@ -353,7 +371,8 @@ class UpdateSingleResponse(BaseAPIResponse):
         """
         self.result: dict = result
         self.failed: ResponseFailedMessage = failed
-        super(UpdateSingleResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+        super().__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
 
     def make_response(self, *args, **kwargs) -> Response:
         """
@@ -370,6 +389,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         response.headers['Location'] = f'{self.url}'
         return response
 
+
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
         """
         Get the update instance as dict.
@@ -377,7 +397,8 @@ class UpdateSingleResponse(BaseAPIResponse):
         return {**{
             'result': self.result,
             'failed': self.failed.to_dict() if self.failed else None,
-        }, **super(UpdateSingleResponse, self).export(*args, **kwargs)}
+        }, **super().export(*args, **kwargs)}
+
 
 
 class UpdateMultiResponse(BaseAPIResponse):
@@ -400,7 +421,8 @@ class UpdateMultiResponse(BaseAPIResponse):
         """
         self.results: List[dict] = results
         self.failed: List[ResponseFailedMessage] = failed or []
-        super(UpdateMultiResponse, self).__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+        super().__init__(operation_type=OperationType.UPDATE, url=url, model=model)
+
 
     def make_response(self, *args, **kwargs) -> Response:
         """
@@ -416,6 +438,7 @@ class UpdateMultiResponse(BaseAPIResponse):
         response = make_api_response(self.export(), 202)
         return response
 
+
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
         """
         Get the update instance as dict.
@@ -423,7 +446,7 @@ class UpdateMultiResponse(BaseAPIResponse):
         return {**{
             'results': self.results,
             'failed': self.failed,
-        }, **super(UpdateMultiResponse, self).export(*args, **kwargs)}
+        }, **super().export(*args, **kwargs)}
 
 
 class DeleteSingleResponse(BaseAPIResponse):
@@ -442,7 +465,8 @@ class DeleteSingleResponse(BaseAPIResponse):
             model: Data model of deleted resource.
         """
         self.raw = raw
-        super(DeleteSingleResponse, self).__init__(operation_type=OperationType.DELETE, url=url, model=model)
+        super().__init__(operation_type=OperationType.DELETE, url=url, model=model)
+
 
     def make_response(self, *args, **kwargs) -> Response:
         """
@@ -464,7 +488,7 @@ class DeleteSingleResponse(BaseAPIResponse):
         """
         return {**{
             'raw': self.raw
-        }, **super(DeleteSingleResponse, self).export()}
+        }, **super().export()}
 
 
 class GetListResponse(BaseAPIResponse):
@@ -482,7 +506,8 @@ class GetListResponse(BaseAPIResponse):
             self.results = APIProjector(results, projection).project
         else:
             self.results: List[dict] = results
-        super(GetListResponse, self).__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
+        super().__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
+
 
     def make_response(self, *args, **kwargs) -> Response:
         """
@@ -502,10 +527,11 @@ class GetListResponse(BaseAPIResponse):
         response.headers['X-Total-Count'] = len(self.results)
         return response
 
+
     def export(self, text: str = 'json') -> dict:
         """
         Get the list response
         """
         return {**{
             'results': self.results
-        }, **super(GetListResponse, self).export()}
+        }, **super().export()}

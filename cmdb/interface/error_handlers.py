@@ -36,7 +36,7 @@ LOGGER = logging.getLogger(__name__)
 
 
 class ErrorResponse:
-
+    """TODO: documentation"""
     def __init__(self, status: int, prefix: str, description: str, message: str, joke: str = None):
         self.status: int = status
         self.response: str = f'{prefix}: {request.url}'

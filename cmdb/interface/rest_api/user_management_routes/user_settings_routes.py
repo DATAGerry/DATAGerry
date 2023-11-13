@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from typing import List
 
 from flask import current_app, abort, request
@@ -23,6 +24,7 @@ from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSi
 from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
 from cmdb.user_management.managers.setting_manager import UserSettingsManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 user_settings_blueprint = APIBlueprint('user_settings', __name__)
 
@@ -55,6 +57,7 @@ def get_user_settings(user_id: int):
     return api_response.make_response()
 
 
+
 @user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
 def get_user_setting(user_id: int, resource: str):
     """
@@ -81,6 +84,7 @@ def get_user_setting(user_id: int, resource: str):
     except ManagerGetError as err:
         return abort(404, err.message)
     return api_response.make_response()
+
 
 
 @user_settings_blueprint.route('/', methods=['POST'])
@@ -114,6 +118,7 @@ def insert_setting(user_id: int, data: dict):
     return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
 
 
+
 @user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def update_setting(user_id: int, resource: str, data: dict):
@@ -143,6 +148,7 @@ def update_setting(user_id: int, resource: str, data: dict):
         return abort(400, err.message)
 
     return api_response.make_response()
+
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['DELETE'])

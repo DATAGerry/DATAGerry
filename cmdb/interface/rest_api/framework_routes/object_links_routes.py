@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from flask import abort, request, current_app
 
 from cmdb.framework.models.link import ObjectLinkModel
@@ -28,6 +28,7 @@ from cmdb.manager.errors import ManagerGetError, ManagerDeleteError, ManagerInse
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 links_blueprint = APIBlueprint('links', __name__)
 
@@ -37,6 +38,7 @@ links_blueprint = APIBlueprint('links', __name__)
 @links_blueprint.parse_collection_parameters()
 @insert_request_user
 def get_links(params: CollectionParameters, request_user: UserModel):
+    """TODO: document"""
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
 
@@ -54,10 +56,12 @@ def get_links(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
+
 @links_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @links_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_link(public_id: int, request_user: UserModel):
+    """TODO: document"""
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
     try:
@@ -71,10 +75,12 @@ def get_link(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
+
 @links_blueprint.route('/', methods=['POST'])
 @links_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_link(request_user: UserModel):
+    """TODO: document"""
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
     data = request.json
 
@@ -90,16 +96,20 @@ def insert_link(request_user: UserModel):
     return api_response.make_response(prefix='objects/links')
 
 
+
 @links_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @links_blueprint.protect(auth=True, right='base.framework.object.edit')
 def update_link(public_id: int):
+    """TODO: document"""
     return abort(501, 'Links must could not be changed!')
+
 
 
 @links_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @links_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_link(public_id: int, request_user: UserModel):
+    """TODO: document"""
     link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
     try:
         deleted_type = link_manager.delete(public_id=PublicID(public_id), user=request_user,

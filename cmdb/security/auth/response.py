@@ -50,6 +50,7 @@ class LoginResponse:
 
     @classmethod
     def to_dict(cls, instance: 'LoginResponse') -> dict:
+        """TODO: document"""
         return {
             'user': UserModel.to_dict(instance.user),
             'token': instance.token.decode('UTF-8'),

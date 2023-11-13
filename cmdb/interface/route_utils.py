@@ -13,13 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 import base64
 import functools
 import json
 from functools import wraps
 from datetime import datetime
 
-from werkzeug._internal import _to_str, _wsgi_decoding_dance
+from werkzeug._internal import _wsgi_decoding_dance
 from flask import request, abort, current_app
 
 from cmdb.manager.errors import ManagerGetError
@@ -35,7 +36,6 @@ from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
-from cmdb.utils.wraps import deprecated
 from cmdb.utils import json_encoding
 
 DEFAULT_MIME_TYPE = 'application/json'
@@ -80,14 +80,15 @@ def login_required(f):
         valid = auth_is_valid()
         if valid:
             return f(*args, **kwargs)
-        else:
-            return abort(401)
+
+        return abort(401)
 
     return decorated
 
 
 #@deprecated
 def auth_is_valid() -> bool:
+    """TODO: document"""
     try:
         parse_authorization_header(request.headers['Authorization'])
         return True
@@ -191,7 +192,9 @@ def parse_authorization_header(header):
     """
     if not header:
         return None
+
     value = _wsgi_decoding_dance(header)
+
     try:
         auth_type, auth_info = value.split(None, 1)
         auth_type = auth_type.lower()
@@ -205,8 +208,10 @@ def parse_authorization_header(header):
             username, password = base64.b64decode(auth_info).split(b":", 1)
 
             with current_app.app_context():
-                username = _to_str(username, "utf-8")
-                password = _to_str(password, "utf-8")
+                # username = _to_str(username, "utf-8") #from werkzeug
+                username = username.decode("utf-8")
+                # password = _to_str(password, "utf-8") #from werkzeug
+                password = password.decode("utf-8")
 
                 user_manager: UserManager = UserManager(current_app.database_manager)
                 group_manager: GroupManager = GroupManager(current_app.database_manager,
@@ -219,19 +224,22 @@ def parse_authorization_header(header):
 
                 try:
                     user_instance = auth_module.login(username, password)
-                except Exception as e:
+                except Exception:
                     return None
+
                 if user_instance:
                     tg = TokenGenerator(current_app.database_manager)
+
                     return tg.generate_token(payload={'user': {
                         'public_id': user_instance.get_public_id()
                     }})
-                else:
-                    return None
+
+                return None
+
         except Exception:
             return None
 
-    if auth_type == "bearer" or b"bearer":
+    if auth_type in ("bearer", b"bearer"):
         try:
             with current_app.app_context():
                 tv = TokenValidator(current_app.database_manager)
