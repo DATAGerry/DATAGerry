@@ -23,7 +23,6 @@ import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../.
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { DatePipe } from '@angular/common';
 import { TableComponent } from '../../../../layout/table/table.component';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -33,8 +32,6 @@ import {
   convertResourceURL,
   UserSettingsService
 } from '../../../../management/user-settings/services/user-settings.service';
-import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../export/export.service';
 import { UserSettingsDBService } from '../../../../management/user-settings/services/user-settings-db.service';
 
 @Component({
@@ -57,13 +54,13 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
    */
   @ViewChild(TableComponent) objectsTableComponent: TableComponent<CmdbLog>;
 
-  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
-  @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
+  @ViewChild('dataTemplate', { static: true }) dataTemplate: TemplateRef<any>;
 
-  @ViewChild('changeTemplate', {static: true}) changeTemplate: TemplateRef<any>;
+  @ViewChild('changeTemplate', { static: true }) changeTemplate: TemplateRef<any>;
 
-  @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
 
   @Input() set reloadLogs(value: boolean) {
     if (value) {
@@ -91,7 +88,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
   public total: number = 0;
   public loading: boolean = false;
 
-  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1};
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1 };
 
   /**
    * The Id used for the table
@@ -106,17 +103,18 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
     return this.tableStateSubject.getValue() as TableState;
   }
 
-  constructor(private logService: LogService, private datePipe: DatePipe,
-              private fileSaverService: FileSaverService, private fileService: FileService,
-              private route: ActivatedRoute, private router: Router,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+  constructor(private logService: LogService,
+    private route: ActivatedRoute, private router: Router,
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+    private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
           .find(payloads => payloads.id === this.id);
-        this.tableStates = userSettingPayloads.tableStates;
-        this.tableStateSubject.next(userSettingPayloads.currentState);
+        if (userSettingPayloads) {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
       } else {
         this.tableStates = [];
         this.tableStateSubject.next(undefined);
@@ -138,12 +136,12 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
 
   private loadDeleted() {
     const filter = JSON.stringify(this.filterBuilder());
-    this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
+    this.apiParameters = { filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page };
     this.logService.getDeleteLogs(this.apiParameters).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
         this.deleteLogList = apiResponse.results;
         this.total = apiResponse.total;
-    });
+      });
   }
 
   /**
@@ -158,7 +156,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
   }
 
   private resetCollectionParameters(): void {
-    this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1};
+    this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1 };
   }
 
   private setColumns(): void {
@@ -307,9 +305,9 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
           public_id: { $toString: '$public_id' }
         }
       });
-      query.push({ $match: { $and: [{log_type: 'CmdbObjectLog'}, {$or: or}]}});
+      query.push({ $match: { $and: [{ log_type: 'CmdbObjectLog' }, { $or: or }] } });
     } else {
-      query.push({$match: {log_type: 'CmdbObjectLog'}});
+      query.push({ $match: { log_type: 'CmdbObjectLog' } });
     }
     return query;
   }
