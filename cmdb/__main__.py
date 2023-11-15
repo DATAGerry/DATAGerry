@@ -23,71 +23,81 @@ import logging.config
 import signal
 from time import sleep
 from argparse import ArgumentParser, Namespace
+import os
+import sys
+
+import cmdb
+from cmdb import __title__
+from cmdb.__check__ import CheckRoutine
+from cmdb.__update__ import UpdateRoutine
+
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.wraps import timing
 from cmdb.utils.termcolor import colored
-from sys import exit
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
-
+from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
+
 from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.errors.connection_errors import ServerTimeoutError, DatabaseConnectionError
+
+import cmdb.process_management.process_manager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
 LOGGER = logging.getLogger(__name__)
 
 
+
 def _activate_debug():
     """
     Activate the debug mode
     """
-    import cmdb
     cmdb.__MODE__ = 'DEBUG'
     LOGGER.warning("DEBUG mode enabled")
+
 
 
 def _check_database():
     """
     Checks whether the specified connection of the configuration is reachable.
     Returns: Datebase if response
-
     """
-    from cmdb.database.errors.connection_errors import ServerTimeoutError
     ssc = SystemConfigReader()
-    LOGGER.info(f'Checking database connection with {ssc.config_name} data')
+    LOGGER.info('Checking database connection with %s data',ssc.config_name)
     database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(
-        **database_options
-    )
+    dbm = DatabaseManagerMongo(**database_options)
+
     try:
         connection_test = dbm.connector.is_connected()
     except ServerTimeoutError:
         connection_test = False
-    LOGGER.debug(f'Database status is {connection_test}')
+    LOGGER.debug('Database status is %s',connection_test)
+
     if connection_test is True:
         return dbm
+
     retries = 0
+
     while retries < 3:
         retries += 1
         LOGGER.warning(
-            f'Retry {retries}: Checking database connection with {SystemConfigReader.DEFAULT_CONFIG_NAME} data')
+            'Retry %i: Checking database connection with %s data', retries, SystemConfigReader.DEFAULT_CONFIG_NAME
+        )
 
         connection_test = dbm.connector.is_connected()
+
         if connection_test:
             return dbm
+
     return None
+
 
 
 def _start_app():
     """
     Starting the services
     """
-    import cmdb.process_management.process_manager
-
     global app_manager
 
     # install signal handler
@@ -96,51 +106,64 @@ def _start_app():
     # start app
     app_manager = cmdb.process_management.process_manager.ProcessManager()
     app_status = app_manager.start_app()
-    LOGGER.info(f'Process manager started: {app_status}')
+    LOGGER.info('Process manager started: %s',app_status)
+
 
 
 def _stop_app(signum, frame):
+    """TODO: document"""
     global app_manager
+
     app_manager.stop_app()
 
 
-def _init_config_reader(config_file):
-    import os
 
+def _init_config_reader(config_file):
+    """TODO: document"""
     path, filename = os.path.split(config_file)
     if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
         SystemConfigReader.RUNNING_CONFIG_NAME = filename
         SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
-    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME,
-                       SystemConfigReader.RUNNING_CONFIG_LOCATION)
+
+    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
+
 
 
 def build_arg_parser() -> Namespace:
     """
     Generate application parameter parser
     Returns: instance of OptionParser
-
     """
+    _parser = ArgumentParser(prog='DATAGERRY', usage=f"usage: {__title__} [options]")
 
-    from cmdb import __title__
-    _parser = ArgumentParser(
-        prog='DATAGERRY',
-        usage="usage: {} [options]".format(__title__),
-    )
-
-    _parser.add_argument('--keys', action='store_true', default=False, dest='keys',
+    _parser.add_argument('--keys',
+                         action='store_true',
+                         default=False,
+                         dest='keys',
                          help="init keys")
 
-    _parser.add_argument('-d', '--debug', action='store_true', default=False, dest='debug',
+    _parser.add_argument('-d',
+                         '--debug',
+                         action='store_true',
+                         default=False,
+                         dest='debug',
                          help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
 
-    _parser.add_argument('-s', '--start', action='store_true', default=False, dest='start',
+    _parser.add_argument('-s',
+                         '--start',
+                         action='store_true',
+                         default=False,
+                         dest='start',
                          help="starting cmdb core system - enables services")
 
-    _parser.add_argument('-c', '--config', default='./etc/cmdb.conf', dest='config_file',
+    _parser.add_argument('-c',
+                         '--config',
+                         default='./etc/cmdb.conf',
+                         dest='config_file',
                          help="optional path to config file")
 
     return _parser.parse_args()
+
 
 
 @timing('CMDB start')
@@ -151,78 +174,91 @@ def main(args):
         args: start-options
     """
     LOGGER.info("DATAGERRY starting...")
+
+# --------------------------------------------------- DEBUG - PART --------------------------------------------------- #
     if args.debug:
         _activate_debug()
-    _init_config_reader(args.config_file)
-    from cmdb.database.errors.connection_errors import DatabaseConnectionError
 
-    # create / check connection database managers
+    _init_config_reader(args.config_file)
+
     dbm = None
 
+# --------------------------------------------------- START - PART --------------------------------------------------- #
     # check db-settings and run update if needed
     if args.start:
         try:
             dbm = _check_database()
             if not dbm:
-                raise DatabaseConnectionError('')
+                raise DatabaseConnectionError('Could not establish connection to db')
+
             LOGGER.info("Database connection established.")
-        except CMDBError as conn_error:
-            LOGGER.critical(conn_error.message)
-            exit(1)
-        from cmdb.__check__ import CheckRoutine
+
+        except CMDBError as error:
+            LOGGER.critical(error)
+            sys.exit(1)
+
         check_routine = CheckRoutine(dbm)
         # check db-settings
         try:
             check_status = check_routine.checker()
-        except Exception as err:
-            LOGGER.error(err)
+        except Exception as error:
+            LOGGER.error(error)
             check_status = check_routine.get_check_status()
-            LOGGER.error(f'The check did not go through as expected. Please run an update. \n Error: {err}')
+            LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
+
         if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
             # run update
-            from cmdb.__update__ import UpdateRoutine
             update_routine = UpdateRoutine()
+
             try:
                 update_status = update_routine.start_update()
-            except RuntimeError as err:
-                LOGGER.error(err)
+            except RuntimeError as error:
+                LOGGER.error(error)
                 update_status = update_routine.get_updater_status()
-                LOGGER.warning(f'The update did not go through as expected - Status {update_status}')
+                LOGGER.warning('The update did not go through as expected - Status %s', update_status)
+
             if update_status == UpdateRoutine.UpateStatus.FINISHED:
                 check_status = CheckRoutine.CheckStatus.FINISHED
             else:
-                exit(1)
+                sys.exit(1)
+
         if check_status == CheckRoutine.CheckStatus.FINISHED:
             # run setup if needed
             from cmdb.__setup__ import SetupRoutine
             setup_routine = SetupRoutine(dbm)
+
             try:
                 setup_status = setup_routine.setup()
-            except RuntimeError as err:
-                LOGGER.error(err)
+            except RuntimeError as error:
+                LOGGER.error(error)
                 setup_status = setup_routine.get_setup_status()
-                LOGGER.warning(f'The setup did not go through as expected - Status {setup_status}')
+                LOGGER.warning('The setup did not go through as expected - Status %s', setup_status)
+
             if setup_status == SetupRoutine.SetupStatus.FINISHED:
                 pass
             else:
-                exit(1)
+                sys.exit(1)
+
         else:
             pass
 
+# ---------------------------------------------------- KEYS - PART --------------------------------------------------- #
     if args.keys:
         from cmdb.__setup__ import SetupRoutine
         setup_routine = SetupRoutine(dbm)
         setup_status = None
+
         try:
             setup_routine.init_keys()
-        except RuntimeError as err:
-            LOGGER.error(err)
+        except RuntimeError as error:
+            LOGGER.error(error)
             setup_status = setup_routine.get_setup_status()
-            LOGGER.warning(f'The key generation did not go through as expected - Status {setup_status}')
+            LOGGER.warning('The key generation did not go through as expected - Status %s', setup_status)
+
         if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            exit(0)
+            sys.exit(0)
         else:
-            exit(1)
+            sys.exit(1)
 
     if args.start:
         _start_app()
@@ -230,8 +266,8 @@ def main(args):
     LOGGER.info("DATAGERRY successfully started")
 
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     welcome_string = colored('Welcome to DATAGERRY \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
     ########################################################################                                  
@@ -257,13 +293,11 @@ licensed under the terms of the GNU Affero General Public License version 3\n'''
         print(license_string)
         sleep(0.2)  # prevent logger output
         main(options)
-    except Exception as e:
-        import cmdb
-
+    except Exception as err:
         if cmdb.__MODE__ == 'DEBUG':
             import traceback
-
             traceback.print_exc()
-        LOGGER.critical("There was an unforeseen error {}".format(e))
+
+        LOGGER.critical("There was an unforeseen error %s",err)
         LOGGER.info("DATAGERRY stopped!")
-        exit(1)
+        sys.exit(1)

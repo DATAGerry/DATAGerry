@@ -13,18 +13,21 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 This module contains logics for database validation and setup
 """
-
 import logging
 from enum import Enum
 
 from cmdb.framework.cmdb_location import CmdbLocation
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 CheckRoutine - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CheckRoutine:
     """
@@ -41,9 +44,11 @@ class CheckRoutine:
         FINISHED = 3
 
 
+
     def __init__(self, dbm):
         self.status: int = CheckRoutine.CheckStatus.NOT
         self.setup_database_manager = dbm
+
 
 
     def get_check_status(self) -> int:
@@ -55,7 +60,10 @@ class CheckRoutine:
         """
         return self.status
 
+
+
     def checker(self):
+        """TODO: document"""
         LOGGER.info('CHECK ROUTINE: STARTED...')
         self.status = CheckRoutine.CheckStatus.FINISHED
 
@@ -67,7 +75,10 @@ class CheckRoutine:
                 )
                 self.status = CheckRoutine.CheckStatus.HAS_UPDATES
         LOGGER.info('CHECK ROUTINE: FINISHED!')
+
         return self.status
+
+
 
     def __is_database_empty(self) -> bool:
         """
@@ -77,6 +88,8 @@ class CheckRoutine:
             (bool): Returns bool if there are any collection in the initialised database
         """
         return not self.setup_database_manager.connector.database.list_collection_names()
+
+
 
     def __check_database_collection_valid(self) -> bool:
         LOGGER.info('CHECK ROUTINE: Checking database collection validation')
@@ -101,11 +114,9 @@ class CheckRoutine:
                         else:
                             LOGGER.info("CHECK ROUTINE: Root Location invalalid => Fixing the Issue!")
                             self.setup_database_manager.set_root_location(collection.COLLECTION, create=False)
-
                     else:
                         LOGGER.info("CHECK ROUTINE: No Root Location => Creating a new Root Location!")
                         self.setup_database_manager.set_root_location(collection.COLLECTION, create=True)
-                        
 
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
@@ -115,12 +126,13 @@ class CheckRoutine:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)[
                     'valid']
         except Exception as ex:
-            LOGGER.info(f'CHECK ROUTINE: Database collection validation for "{collection.COLLECTION}" failed. '
-                        f'msgerror: {ex}')
+            LOGGER.info(f'CHECK ROUTINE: Database collection validation for "{collection.COLLECTION}" failed, msgerror: {ex}')
             collection_test = False
 
         LOGGER.info(f'CHECK ROUTINE: Database collection validation status {collection_test}')
         return collection_test
+
+
 
     def has_updates(self) -> bool:
         """
@@ -153,4 +165,3 @@ class CheckRoutine:
             return False
 
         return True
-    
