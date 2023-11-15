@@ -13,21 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""
+This module contains the implementation of CmdbObject, which is representing
+an object in Datagarry.
+"""
 import logging
+from dateutil.parser import parse
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_errors import FieldNotFoundError
 from cmdb.framework.utils import Collection, Model
-from dateutil.parser import parse
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  CmdbObject - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbObject(CmdbDAO):
     """
@@ -40,7 +44,6 @@ class CmdbObject(CmdbDAO):
         DEFAULT_VERSION (str):      The default "starting" version number.
         SCHEMA (dict):              The validation schema for this DAO.
         INDEX_KEYS (list):          List of index keys for the database.
-
     """
 
     COLLECTION: Collection = 'framework.objects'
@@ -89,8 +92,18 @@ class CmdbObject(CmdbDAO):
         }
     }
 
-    def __init__(self, type_id, creation_time, author_id, active, fields, last_edit_time=None, editor_id: int = None,
-                 status: int = None, version: str = '1.0.0', **kwargs):
+
+    def __init__(self,
+                 type_id,
+                 creation_time,
+                 author_id,
+                 active,
+                 fields: list,
+                 last_edit_time=None,
+                 editor_id: int = None,
+                 status: int = None,
+                 version: str = '1.0.0',
+                 **kwargs):
         """init of object
 
         Args:
@@ -113,7 +126,9 @@ class CmdbObject(CmdbDAO):
         self.editor_id = editor_id
         self.active = active
         self.fields = fields
-        super(CmdbObject, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+
+
 
     def __truediv__(self, other):
         if not isinstance(other, self.__class__):
@@ -121,14 +136,19 @@ class CmdbObject(CmdbDAO):
         return {**{'old': [i for i in self.fields if i not in other.fields]},
                 **{'new': [j for j in other.fields if j not in self.fields]}}
 
+
+
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObject":
         creation_time = data.get('creation_time', None)
         last_edit_time = data.get('last_edit_time', None)
+
         if creation_time and isinstance(creation_time, str):
             creation_time = parse(creation_time, fuzzy=True)
+
         if last_edit_time and isinstance(last_edit_time, str):
             last_edit_time = parse(last_edit_time, fuzzy=True)
+
         return cls(
             public_id=data.get('public_id'),
             type_id=data.get('type_id'),
@@ -141,6 +161,8 @@ class CmdbObject(CmdbDAO):
             active=data.get('active'),
             fields=data.get('fields', [])
         )
+
+
 
     @classmethod
     def to_json(cls, instance: "CmdbObject") -> dict:
@@ -158,50 +180,52 @@ class CmdbObject(CmdbDAO):
             'fields': instance.fields,
         }
 
+
+
     def get_type_id(self) -> int:
         """get input_type if of this object
 
         Returns:
             int: public id of input_type
-
         """
         if self.type_id == 0 or self.type_id is None:
             raise TypeNotSetError(self.get_public_id())
+
         return int(self.type_id)
 
-    def update_view_counter(self) -> int:
-        """update the number of times this object was viewed
 
-        Returns:
-            int: number of views
-
-        """
-        self.views += 1
-        return self.views
 
     def get_all_fields(self) -> list:
-        """ get all fields with key value pair
+        """ Get all fields with key value pair
 
         Returns:
             all fields
-
         """
-
         return self.fields
 
+
+
     def has_field(self, name) -> bool:
+        """TODO: document"""
         field = next(iter([x for x in self.fields if x.get('name') == name]), None)
         if field is None:
             return False
+
         return True
 
+
+
     def set_new_value(self, field, value):
+        """TODO: document"""
         self.fields.append({
             'name': field,
             'value': value
         })
 
+
+
     def set_value(self, field, value) -> str:
+        """TODO: document"""
         for f in self.fields:
             if f['name'] == field:
                 if value.isdigit():
@@ -211,14 +235,16 @@ class CmdbObject(CmdbDAO):
             continue
         raise FieldNotFoundError
 
+
+
     def get_value(self, field) -> (str, None):
-        """get value of an field
+        """Get value of a field
 
         Args:
-            field: field_name
+            field: Name of field
 
         Returns:
-            value of field
+            Value of field
         """
         for f in self.fields:
             if f['name'] == field:
@@ -226,14 +252,20 @@ class CmdbObject(CmdbDAO):
             continue
         raise ValueError(field)
 
+
+
     def get_values(self, fields: list) -> list:
+        """TODO: document"""
         list_of_values = []
         for field in self.fields:
             if field['name'] in fields:
                 list_of_values.append(field['value'])
         return list_of_values
 
+
+
     def to_value_strings(self, field_names: list) -> str:
+        """TODO: document"""
         value_string = ''
         for field_name in field_names:
             try:
@@ -249,27 +281,16 @@ class TypeNotSetError(CMDBError):
     """
     @deprecated
     """
-
     def __init__(self, public_id):
-        self.message = 'The object (ID: {}) is not connected with a input_type'.format(public_id)
+        self.message = f'The object (ID: {public_id}) is not connected with a input_type'
         super(CMDBError, self).__init__(self.message)
+
 
 
 class NoFoundFieldValueError(CMDBError):
     """
     Error when field does not exists
     """
-
     def __init__(self, field_name):
-        self.message = "Field value does not exists {}".format(field_name)
-        super(CMDBError, self).__init__(self.message)
-
-
-class NoLinksAvailableError(CMDBError):
-    """
-    @deprecated
-    """
-
-    def __init__(self, public_id):
-        self.message = 'The object (ID: {}) has no links'.format(public_id)
+        self.message = f"Field value does not exists {field_name}"
         super(CMDBError, self).__init__(self.message)

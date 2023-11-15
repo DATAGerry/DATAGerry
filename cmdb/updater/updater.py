@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from abc import abstractmethod
@@ -29,11 +29,14 @@ from cmdb.framework.managers.category_manager import CategoryManager
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Updater(CmdbManagerBase):
+    """TODO: document"""
+
 
     def __init__(self):
         scr = SystemConfigReader()
@@ -44,15 +47,16 @@ class Updater(CmdbManagerBase):
         self.log_manager = ExportdLogManager(database_manager=self.database_manager)
         super().__init__(self.database_manager)
 
+
     @property
     @abstractmethod
     def author(self):
         """
         Name of the creator
         Returns: name
-
         """
         return NotImplementedError
+
 
     @property
     @abstractmethod
@@ -60,9 +64,9 @@ class Updater(CmdbManagerBase):
         """
         When was the file created
         Returns: date
-
         """
         return NotImplementedError
+
 
     @property
     @abstractmethod
@@ -70,16 +74,20 @@ class Updater(CmdbManagerBase):
         """
         What does the update
         Returns: name
-
         """
         return NotImplementedError
 
+
     @abstractmethod
     def start_update(self):
-        pass
+        """TODO: document"""
+        return NotImplementedError
+
+
 
     @abstractmethod
     def increase_updater_version(self, value: int):
+        """TODO: document"""
         ssr = SystemSettingsReader(self.database_manager)
         system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.database_manager)
         updater_settings_values = ssr.get_all_values_from_section('updater')
@@ -87,10 +95,15 @@ class Updater(CmdbManagerBase):
         updater_setting_instance.version = value
         system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
+
+
     def error(self, msg):
+        """TODO: document"""
         raise UpdaterException(msg)
 
 
-class UpdaterException(CMDBError):
+
+class UpdaterException(Exception):
+    """TODO: document"""
     def __init__(self, *args, **kwargs):
-        Exception.__init__(self, *args, **kwargs)
+        super().__init__(self, *args, **kwargs)
