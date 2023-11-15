@@ -211,7 +211,7 @@ class CmdbDAO:
         else:
             updater_version.update_patch()
 
-        return updater_version
+        return repr(updater_version)
 
 
 
