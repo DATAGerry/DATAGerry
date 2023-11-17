@@ -78,20 +78,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public readonly maxChartValue: number = 4;
 
   // Chart Objects
-  public labelsObject: string [] = [];
-  public itemsObject: number [] = [];
-  public colorsObject: any [] = [];
+  public labelsObject: string[] = [];
+  public itemsObject: number[] = [];
+  public colorsObject: any[] = [];
   public optionsObject: {} = {};
 
   // Chart Types
-  public labelsCategory: string [] = [];
-  public itemsCategory: number [] = [];
-  public colorsCategory: any [] = [];
+  public labelsCategory: string[] = [];
+  public itemsCategory: number[] = [];
+  public colorsCategory: any[] = [];
 
   // Chart Users
-  public labelsGroup: string [] = [];
-  public itemsGroup: number [] = [];
-  public colorsGroup: any [] = [];
+  public labelsGroup: string[] = [];
+  public itemsGroup: number[] = [];
+  public colorsGroup: any[] = [];
 
   public newestObjects: Array<RenderResult> = [];
   public newestTableColumns: Array<Column> = [];
@@ -107,17 +107,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public latestPage: number = this.latestInnitPage;
   public latestLoading: boolean = false;
 
-/* -------------------------------------------------------------------------- */
-/*                                 LIFE CYCLE                                 */
-/* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                 LIFE CYCLE                                 */
+  /* -------------------------------------------------------------------------- */
 
   constructor(private typeService: TypeService,
-              private objectService: ObjectService, 
-              private categoryService: CategoryService,
-              private toastService: ToastService, 
-              private sidebarService: SidebarService,
-              private userService: UserService, 
-              private groupService: GroupService) {
+    private objectService: ObjectService,
+    private categoryService: CategoryService,
+    private toastService: ToastService,
+    private sidebarService: SidebarService,
+    private userService: UserService,
+    private groupService: GroupService) {
   }
 
   public ngOnInit(): void {
@@ -235,17 +235,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.unSubscribe.complete();
   }
 
-/* -------------------------------------------------------------------------- */
-/*                                 OBJECTS API                                */
-/* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                 OBJECTS API                                */
+  /* -------------------------------------------------------------------------- */
 
 
   /**
    * Returns the number of objects
    */
   private countObjects(): void {
-    const apiParameters: CollectionParameters = { limit: 1, sort: 'public_id', order: 1, page: 1,
-      filter: [{ $match: { } }]};
+    const apiParameters: CollectionParameters = {
+      limit: 1, sort: 'public_id', order: 1, page: 1,
+      filter: [{ $match: {} }]
+    };
     this.objectService.getObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
       .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
         this.objectCount = apiResponse.total;
@@ -415,6 +417,20 @@ public  onLatestPageChange(event) {
           }
         }
       });
+
+    this.typeService.getUncategorizedTypes().subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+      const uncategorizedTypes = apiResponse.results as Array<CmdbType>;
+
+      // Add one portion for uncategorized
+      if (uncategorizedTypes.length !== 0) {
+        this.itemsCategory.push(uncategorizedTypes.length);
+        this.labelsCategory.push('UNCATEGORIZED');
+        this.colorsCategory.push(this.getRandomColor());
+      } else {
+        this.itemsCategory.push(null);
+        this.labelsCategory.push(null);
+      }
+    });
   }
 
   private generateGroupChar() {
