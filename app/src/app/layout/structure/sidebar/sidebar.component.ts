@@ -15,7 +15,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
@@ -39,52 +38,46 @@ import {AccessControlPermission} from "../../../acl/acl.types";
 })
 export class SidebarComponent implements OnInit, OnDestroy {
 
-  /**
-   * Global un-subscriber for http calls to the rest backend.
-   */
+  // Global un-subscriber for http calls to the rest backend.
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Category data
-   */
+  //Category data
   public categoryTree: CmdbCategoryTree;
   private categoryTreeSubscription: Subscription;
 
-  /**
-   * Types params
-   */
+  //Types params
   public typesParams: CollectionParameters = {
     filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
   };
 
-  /**
-   * Type data
-   */
+  //Type data
   public typeList: CmdbType[] = [];
   public unCategorizedTypes: CmdbType[] = [];
   private unCategorizedTypesSubscription: Subscription;
 
-  /**
-   * Filter
-   */
+  //Filter
   public filterTerm: UntypedFormControl = new UntypedFormControl('');
   private filterTermSubscription: Subscription;
 
-  /**
-   * String representation of currently selected tab menu in sidebar (Default is Categories)
-   */
+  // String representation of currently selected tab menu in sidebar (Default is Categories)
   selectedMenu: string;
 
-/* -------------------------------------------------------------------------- */
-/*                                 LIFE CYCLE                                 */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private sidebarService: SidebarService, private typeService: TypeService, private renderer: Renderer2) {
+    constructor(private sidebarService: SidebarService,
+                private typeService: TypeService,
+                private renderer: Renderer2) {
+
         this.categoryTreeSubscription = new Subscription();
         this.unCategorizedTypesSubscription = new Subscription();
         this.filterTermSubscription = new Subscription();
+
     }
-  
+
+
+
     public ngOnInit(): void {
         this.renderer.addClass(document.body, 'sidebar-fixed');
         this.sidebarService.loadCategoryTree();
@@ -105,6 +98,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
     }
 
 
+
     public ngOnDestroy(): void {
         this.categoryTreeSubscription.unsubscribe();
         this.unCategorizedTypesSubscription.unsubscribe();
@@ -112,9 +106,9 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.renderer.removeClass(document.body, 'sidebar-fixed');
     }
 
-/* -------------------------------------------------------------------------- */
-/*                              SIDEBAR HANDLING                              */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                  SIDEBAR HANDLING                                                  */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
     /**
      * Toggles the activated menu tabs (categories and locations)

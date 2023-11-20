@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Database-Connection
 Real connection to database over a given connector
@@ -27,14 +26,16 @@ from pymongo.errors import ConnectionFailure
 
 from cmdb.database import CLIENT
 from cmdb.database.errors.connection_errors import DatabaseConnectionError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ConnectionStatus:
+    """TODO: document"""
 
-    def __init__(self, connected: bool, message: str = None, time_alive: datetime = None):
-        self.connected: bool = connected  # Connected = True, Disconnected = False
-        self.message: str = message or 'No message given'
+    def __init__(self, connected: bool, message: str = 'No message given', time_alive: datetime = None):
+        self.connected: bool = connected
+        self.message: str = message
         self.time_alive = time_alive
+
 
 
 class Connector(Generic[CLIENT]):
@@ -56,12 +57,16 @@ class Connector(Generic[CLIENT]):
         self.host: str = host
         self.port: int = port
 
+
+
     def connect(self, *args, **kwargs) -> ConnectionStatus:
         """
         Connect to database
         Returns: connections status
         """
         raise NotImplementedError
+
+
 
     def disconnect(self, *args, **kwargs) -> ConnectionStatus:
         """
@@ -70,6 +75,8 @@ class Connector(Generic[CLIENT]):
         """
         raise NotImplementedError
 
+
+
     def is_connected(self) -> bool:
         """
         Check if client is connected successfully
@@ -77,11 +84,14 @@ class Connector(Generic[CLIENT]):
         """
         raise NotImplementedError
 
+
+
     def __exit__(self, *err):
         """auto close client on exit
         Notes: IT IS IMPORTANT TO AUTO DISCONNECT
         """
         raise NotImplementedError
+
 
 
 class MongoConnector(Connector[MongoClient]):
@@ -95,9 +105,11 @@ class MongoConnector(Connector[MongoClient]):
         else:
             client = MongoClient(host=host, port=int(port), connect=False)
         self.database: Database = client.get_database(database_name)
-        super(MongoConnector, self).__init__(client, host, port)
+        super().__init__(client, host, port)
 
-    def connect(self) -> ConnectionStatus:
+
+
+    def connect(self, *args, **kwargs) -> ConnectionStatus:
         """
         Connect to database
         Returns: connections status
@@ -105,16 +117,20 @@ class MongoConnector(Connector[MongoClient]):
         try:
             status = self.client.admin.command('ismaster')
             return ConnectionStatus(connected=True, message=str(status))
-        except ConnectionFailure as mcf:
-            raise DatabaseConnectionError(message=str(mcf))
+        except ConnectionFailure as err:
+            raise DatabaseConnectionError(message=str(err)) from err
 
-    def disconnect(self) -> ConnectionStatus:
+
+
+    def disconnect(self, *args, **kwargs) -> ConnectionStatus:
         """
         Disconnect from database
         Returns: connection status
         """
         self.client.close()
         return ConnectionStatus(connected=False)
+
+
 
     def is_connected(self) -> bool:
         """
@@ -123,6 +139,8 @@ class MongoConnector(Connector[MongoClient]):
         """
         return self.connect().connected
 
+
+
     def create_collection(self, collection_name) -> Collection:
         """
         Creation collection in database
@@ -130,6 +148,8 @@ class MongoConnector(Connector[MongoClient]):
             collection_name
         """
         return self.database.create_collection(collection_name)
+
+
 
     def delete_collection(self, collection_name):
         """
@@ -143,6 +163,8 @@ class MongoConnector(Connector[MongoClient]):
         """
         self.database.drop_collection(collection_name)
 
+
+
     def get_collection(self, name) -> Collection:
         """
         Get a collection inside database
@@ -151,6 +173,8 @@ class MongoConnector(Connector[MongoClient]):
             name: Collection name
         """
         return self.database[name]
+
+
 
     def __exit__(self, *err):
         """auto close mongo client on exit"""

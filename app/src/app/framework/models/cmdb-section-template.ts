@@ -16,15 +16,21 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { CmdbDao } from './cmdb-dao';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
+export interface Field{
+  type:string;
+  name: string;
+  label: string;
+}
 
-export class CmdbLocation implements CmdbDao {
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+export class CmdbSectionTemplate implements CmdbDao {
   public public_id: number;
   public name: string;
-  public parent: number;
-  public object_id: number;
-  public type_id: number;
-  public type_label: string;
-  public type_icon: string = 'fas fa-globe';
-  public type_selectable: boolean = true;
+  public label: number;
+  public fields: Field[];
+  public is_global: boolean = false;
+  public type: string = 'Section' //don't change this, it is required due compability
 }

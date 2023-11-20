@@ -187,7 +187,7 @@ def main(args):
     # check db-settings and run update if needed
     if args.start:
         try:
-            dbm = _check_database()
+            dbm: DatabaseManagerMongo = _check_database()
             if not dbm:
                 raise DatabaseConnectionError('Could not establish connection to db')
 

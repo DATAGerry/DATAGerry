@@ -20,6 +20,7 @@ import logging
 from typing import Generic, List
 
 from pymongo import IndexModel
+from pymongo.errors import CollectionInvalid
 from pymongo.database import Database
 from pymongo.results import DeleteResult, UpdateResult
 from gridfs import GridFS
@@ -127,10 +128,13 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         collection = FRAMEWORK_COLLECTIONS + USER_MANAGEMENT_COLLECTIONS
 
         def _gen_default_tables(collection_class):
-            self.create_collection(collection_class.COLLECTION)
-            self.create_indexes(collection_class.COLLECTION, collection_class._SUPER_INDEX_KEYS)
-            if len(collection_class.INDEX_KEYS) > 0:
-                self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
+            all_collections = self.connector.list_collection_names()
+
+            if collection_class not in all_collections:
+                self.create_collection(collection_class.COLLECTION)
+                self.create_indexes(collection_class.COLLECTION, collection_class._SUPER_INDEX_KEYS)
+                if len(collection_class.INDEX_KEYS) > 0:
+                    self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
 
         for coll in collection:
             # generating the default database "tables"
@@ -141,9 +145,11 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return True
 
 
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Auto disconnect the database connection when the Manager get destroyed"""
         self.connector.disconnect()
+
 
 
     def create_indexes(self, collection: str, indexes: List[IndexModel]) -> List[str]:
@@ -151,9 +157,11 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).create_indexes(indexes)
 
 
+
     def get_index_info(self, collection: str):
         """get the max index value"""
         return self.connector.get_collection(collection).index_information()
+
 
 
     def __find(self, collection: str, *args, **kwargs):
@@ -173,9 +181,11 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).find(*args, **kwargs)
 
 
+
     def find(self, collection: str, *args, **kwargs):
         """General find function"""
         return self.connector.get_collection(collection).find(*args, **kwargs)
+
 
 
     def count_documents(self, collection: str, *args, **kwargs):
@@ -189,6 +199,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             int: Number of documents
         """
         return  self.connector.get_collection(collection).count_documents(*args, **kwargs)
+
 
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
@@ -209,6 +220,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return result
 
 
+
     def find_one_by_object(self, collection: str, object_id: int, *args, **kwargs):
         """
         Retrieves a single document with the given object_id from the given collection
@@ -225,6 +237,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return result
 
 
+
     def find_one_child(self, collection: str, parent_id: int, *args, **kwargs):
         """
         Retrieves a single child location of given parent
@@ -239,6 +252,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         cursor_result = self.__find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
+
 
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
@@ -258,6 +272,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         raise NoDocumentFound(collection, args)
 
 
+
     def find_all(self, collection, *args, **kwargs) -> list:
         """calls __find with all returns
 
@@ -271,6 +286,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         """
         found_documents = self.__find(collection=collection, *args, **kwargs)
         return list(found_documents)
+
 
 
     def count(self, collection: str, filter: dict = None, *args, **kwargs):
@@ -289,6 +305,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).count_documents(filter=filter, *args, **kwargs)
 
 
+
     def aggregate(self, collection: str, *args, **kwargs):
         """
         Aggregation on mongodb.
@@ -304,9 +321,11 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
 
 
+
     def search(self, collection: str, *args, **kwargs):
         """TODO: document"""
         return self.find(collection, *args, **kwargs)
+
 
 
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
@@ -333,6 +352,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return data['public_id']
 
 
+
     def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
         """
         Update document inside database
@@ -350,6 +370,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
 
 
+
     def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
         """update document inside database
 
@@ -364,6 +385,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_data = {'$unset': {data: 1}}
 
         return self.connector.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
+
 
 
     def update_many(self, collection: str, query: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
@@ -391,11 +413,13 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return result
 
 
+
     def insert_with_internal(self, collection: str, _id: int or str, data: dict):
         """TODO: document"""
         formatted_id = {'_id': _id}
         formatted_data = {'$set': data}
         return self.connector.get_collection(collection).insert_one(formatted_id, formatted_data)
+
 
 
     def update_with_internal(self, collection: str, _id: int or str, data: dict):
@@ -415,6 +439,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
 
         return self.connector.get_collection(collection).update_one(formatted_id, formatted_data)
 
+
+
     def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
         """delete document inside database
 
@@ -431,6 +457,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             raise DocumentCouldNotBeDeleted(collection, filter)
 
         return result
+
 
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
@@ -456,6 +483,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return result
 
 
+
     def create_database(self, name: str) -> Database:
         """Create a new empty database.
 
@@ -472,6 +500,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             raise DatabaseAlreadyExists(name)
 
         return self.connector.client[name]
+
 
 
     def drop_database(self, database):
@@ -492,6 +521,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         self.connector.client.drop_database(database)
 
 
+
     def create_collection(self, collection_name):
         """
         Creation empty MongoDB collection
@@ -501,14 +531,16 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         Returns:
             collection name
         """
-        from pymongo.errors import CollectionInvalid
-
         try:
-            self.connector.create_collection(collection_name)
-        except CollectionInvalid:
-            raise CollectionAlreadyExists(collection_name)
+            all_collections = self.connector.list_collection_names()
+
+            if collection_name not in all_collections:
+                self.connector.create_collection(collection_name)
+        except CollectionInvalid as err:
+            raise CollectionAlreadyExists(collection_name) from err
 
         return collection_name
+
 
 
     def delete_collection(self, collection):
@@ -523,6 +555,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return self.connector.delete_collection(collection)
 
 
+
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -535,6 +568,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         formatted_sort = [('public_id', DESCENDING)]
 
         return self.find_one_by(collection=collection, sort=formatted_sort)
+
 
 
     def get_highest_id(self, collection: str) -> int:
@@ -554,7 +588,10 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             return 0
         return highest
 
+
+
     def get_next_public_id(self, collection: str) -> int:
+        """TODO: document"""
         try:
             founded_counter = self.connector.get_collection(PublicIDCounter.COLLECTION).find_one(filter={
                 '_id': collection
@@ -569,6 +606,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         return new_id
 
 
+
     def _init_public_id_counter(self, collection: str):
         """TODO:document"""
         docs_count = self.get_highest_id(collection)
@@ -578,6 +616,8 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         })
 
         return docs_count
+
+
 
     def increment_public_id_counter(self, collection: str):
         """TODO: document"""
@@ -592,6 +632,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             self.connector.get_collection(PublicIDCounter.COLLECTION).update_one(query, {'$set':{'counter':counter_doc['counter']}})
         except Exception as error:
             LOGGER.info('Public ID Counter not increased: reason => %s',error)
+
 
 
     def update_public_id_counter(self, collection: str, value: int):
@@ -634,6 +675,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
         }
 
 
+
     def validate_root_location(self, tested_location: dict) -> bool:
         """
         Checks if a given location holds valid root location data
@@ -655,6 +697,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
                 return False
 
         return True
+
 
 
     def set_root_location(self, collection: str, create: bool = False):
@@ -682,6 +725,7 @@ class DatabaseManagerMongo(DatabaseManager[MongoConnector]):
             status = self.update(collection,{'public_id':1},self.get_root_location_data())
 
         return status
+
 
 
 class DatabaseGridFS(GridFS):

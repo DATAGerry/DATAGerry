@@ -18,8 +18,16 @@ This module contains logics for database validation and setup
 """
 import logging
 from enum import Enum
+from pymongo.errors import OperationFailure
 
+from cmdb.updater import UpdaterModule
+from cmdb.utils.system_reader import SystemSettingsReader, SectionError
 from cmdb.framework.cmdb_location import CmdbLocation
+from cmdb.database.managers import DatabaseManagerMongo
+
+from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -45,7 +53,7 @@ class CheckRoutine:
 
 
 
-    def __init__(self, dbm):
+    def __init__(self, dbm: DatabaseManagerMongo):
         self.status: int = CheckRoutine.CheckStatus.NOT
         self.setup_database_manager = dbm
 
@@ -64,7 +72,7 @@ class CheckRoutine:
 
     def checker(self):
         """TODO: document"""
-        LOGGER.info('CHECK ROUTINE: STARTED...')
+        LOGGER.info('STARTED Checks...')
         self.status = CheckRoutine.CheckStatus.FINISHED
 
         # check database
@@ -74,7 +82,7 @@ class CheckRoutine:
                     'The current database version does not match the valid database version.'
                 )
                 self.status = CheckRoutine.CheckStatus.HAS_UPDATES
-        LOGGER.info('CHECK ROUTINE: FINISHED!')
+        LOGGER.info('FINISHED Checks!')
 
         return self.status
 
@@ -92,16 +100,21 @@ class CheckRoutine:
 
 
     def __check_database_collection_valid(self) -> bool:
-        LOGGER.info('CHECK ROUTINE: Checking database collection validation')
-        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-        from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+        LOGGER.info('CHECK: Checking database collection validation')
         detected_database = self.setup_database_manager.connector.database
         collection_test = True
+
+        all_collections = detected_database.list_collection_names()
 
         try:
             # framework collections
             for collection in FRAMEWORK_CLASSES:
+                #first check if collection exists, else create it
+                if collection.COLLECTION not in all_collections:
+                    created_collection = self.setup_database_manager.create_collection(collection.COLLECTION)
+                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    LOGGER.info("CKECK: Created missing Collection => %s", created_collection)
+
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
 
                 # setup locations if valid test
@@ -110,26 +123,27 @@ class CheckRoutine:
 
                     if root_location:
                         if self.setup_database_manager.validate_root_location(CmdbLocation.to_data(root_location)):
-                            LOGGER.info("CHECK ROUTINE: Root Location valid")
+                            LOGGER.info("CHECK: Root Location valid")
                         else:
-                            LOGGER.info("CHECK ROUTINE: Root Location invalalid => Fixing the Issue!")
+                            LOGGER.info("CHECK: Root Location invalalid => Fixing the Issue!")
                             self.setup_database_manager.set_root_location(collection.COLLECTION, create=False)
                     else:
-                        LOGGER.info("CHECK ROUTINE: No Root Location => Creating a new Root Location!")
+                        LOGGER.info("CHECK: No Root Location => Creating a new Root Location!")
                         self.setup_database_manager.set_root_location(collection.COLLECTION, create=True)
 
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
+
             # exportdJob management collections
             for collection in JOB_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)[
                     'valid']
-        except Exception as ex:
-            LOGGER.info(f'CHECK ROUTINE: Database collection validation for "{collection.COLLECTION}" failed, msgerror: {ex}')
+        except OperationFailure as err:
+            LOGGER.info('CHECK: Database collection validation for "%s" failed, error: %s', collection.COLLECTION, err)
             collection_test = False
 
-        LOGGER.info(f'CHECK ROUTINE: Database collection validation status {collection_test}')
+        LOGGER.info('CHECK: Database collection validation status %s',collection_test)
         return collection_test
 
 
@@ -141,9 +155,6 @@ class CheckRoutine:
         Returns:
             (bool): True if updates are available else raises an error
         """
-        from cmdb.updater import UpdaterModule
-        from cmdb.utils.system_reader import SystemSettingsReader, SectionError
-
         try:
             ssr = SystemSettingsReader(self.setup_database_manager)
             ssr.get_all_values_from_section('updater')
@@ -154,10 +165,12 @@ class CheckRoutine:
 
             if new_version > current_version:
                 LOGGER.error(
-                    f'Please run an update. There are new updates available.'
-                    f'Current Updater Version: {current_version} '
-                    f'Newest Update Version: {new_version}'
-                )
+                    """
+                    Please run an update. There are new updates available.
+                    Current Updater Version: %s
+                    Newest Update Version: %s
+                    """,current_version, new_version)
+
                 return False
 
         except SectionError as err:
