@@ -41,7 +41,7 @@
     "angularx-qrcode": "^15.0.1",
     "bootstrap": "^4.6.2",
     "chart.js": "^2.9.4",
-    "chartjs-plugin-datalabels": "^0.7.0",
+    "chartjs-plugin-datalabels": "^1.0.0",
     "core-js": "^3.33.2",
     "file-saver": "^2.0.5",
     "jquery": "^3.7.1",
