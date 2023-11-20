@@ -103,7 +103,7 @@ class LocationProfile(ProfileBase):
         """
         return {
             "name": "country",
-            "selectable_as_parent": None,
+            "selectable_as_parent": True,
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
