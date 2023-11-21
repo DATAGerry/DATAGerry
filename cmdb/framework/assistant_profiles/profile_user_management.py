@@ -16,7 +16,6 @@
 """
 This module manages the 'User Management'-Profile for the DATAGERRY assistant
 """
-
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
@@ -31,6 +30,7 @@ class UserManagementProfile(ProfileBase):
     This class cointains all types and logics for the 'User management'-Profile
     """
     def __init__(self, created_type_ids: dict):
+        self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
 

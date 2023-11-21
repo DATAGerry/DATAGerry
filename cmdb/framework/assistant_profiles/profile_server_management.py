@@ -16,7 +16,6 @@
 """
 This module manages the 'Server Management'-Profile for the DATAGERRY assistant
 """
-
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
@@ -32,6 +31,7 @@ class ServerManagementProfile(ProfileBase):
     """
 
     def __init__(self, created_type_ids: dict):
+        self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
 
@@ -126,42 +126,23 @@ class ServerManagementProfile(ProfileBase):
                         "fields": [
                             "text-60836",
                             "text-30849",
-                            # "ref-33320" #network
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-54364",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-38286"
-                    #     ]
-                    # },
                     {
                         "type": "section",
                         "name": "section-77142",
                         "label": "Location",
                         "fields": [
-                            # "ref-94753", #locations
                             "text-44118",
-                            "text-79176"
+                            "text-79176",
+                            "dg_location"
                         ]
                     },
-                    # { #users
-                    #     "type": "section",
-                    #     "name": "section-69534",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-47089"
-                    #     ]
-                    # }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-23531",
-                        # "ref-33320", #network
-                        # "ref-94753" #locations
                     ]
                 }
             },
@@ -207,37 +188,6 @@ class ServerManagementProfile(ProfileBase):
                     "name": "text-60836",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-33320",
-                #     "label": "Network",
-                #     "ref_types": [
-                #         network_type_id
-                #     ],
-                #     "summaries": []
-                # },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-38286",
-                #     "label": "OS",
-                #     "ref_types": [
-                #         operating_system_id
-                #     ],
-                #     "summaries": []
-                # },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-94753",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17,
-                #     16
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-44118",
@@ -248,16 +198,11 @@ class ServerManagementProfile(ProfileBase):
                     "name": "text-79176",
                     "label": "Rack position"
                 },
-                # { #users
-                #     "type": "ref",
-                #     "name": "ref-47089",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -322,36 +267,6 @@ class ServerManagementProfile(ProfileBase):
                     ]
                 }
             )
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-94753'
-
-            server_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            self.set_type_section_field('server','section-77142',locations_field_name)
-            self.set_type_summary_field('server', locations_field_name)
 
 
         # Add the user management profile dependencies
@@ -435,42 +350,23 @@ class ServerManagementProfile(ProfileBase):
                         "fields": [
                             "text-15804",
                             "text-40334",
-                            # "ref-36028" #network
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-33112",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-72670"
-                    #     ]
-                    # },
                     {
                         "type": "section",
                         "name": "section-21475",
                         "label": "Location",
                         "fields": [
-                            # "ref-62068", #locations
                             "text-23325",
-                            "text-26343"
+                            "text-26343",
+                            "dg_location"
                         ]
                     },
-                    # { #users
-                    #     "type": "section",
-                    #     "name": "section-62843",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-98369"
-                    #     ]
-                    # }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-16979",
-                        # "ref-36028", #network
-                        # "ref-62068", #locations
                         "text-26343"
                     ]
                 }
@@ -501,42 +397,11 @@ class ServerManagementProfile(ProfileBase):
                     "name": "text-15804",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-36028",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-40334",
                     "label": "Hostname"
                 },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-72670",
-                #     "label": "OS",
-                #     "ref_types": [
-                #     24
-                #     ],
-                #     "summaries": []
-                # },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-62068",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17,
-                #     16
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-23325",
@@ -547,16 +412,11 @@ class ServerManagementProfile(ProfileBase):
                     "name": "text-26343",
                     "label": "Rack position"
                 },
-                # { #users
-                #     "type": "ref",
-                #     "name": "ref-98369",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -621,36 +481,6 @@ class ServerManagementProfile(ProfileBase):
                     ]
                 }
             )
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-62068'
-
-            appliance_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            self.set_type_section_field('appliance','section-21475',locations_field_name)
-            self.set_type_summary_field('appliance', locations_field_name)
 
 
         # Add the user management profile dependencies
@@ -724,17 +554,8 @@ class ServerManagementProfile(ProfileBase):
                         "fields": [
                             "text-30341",
                             "text-23028",
-                            # "ref-50238" #netowrk
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-21793",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-43625"
-                    #     ]
-                    # },
                     {
                         "type": "section",
                         "name": "section-28198",
@@ -743,20 +564,11 @@ class ServerManagementProfile(ProfileBase):
                             "ref-65439"
                         ]
                     },
-                    # { #users
-                    #     "type": "section",
-                    #     "name": "section-29427",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-63703"
-                    #     ]
-                    # }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-70141",
-                        # "ref-50238", #network
                         "ref-65439"
                     ]
                 }
@@ -777,24 +589,6 @@ class ServerManagementProfile(ProfileBase):
                     "name": "text-30341",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-50238",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-43625",
-                #     "label": "OS",
-                #     "ref_types": [
-                #     24
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "ref",
                     "name": "ref-65439",
@@ -804,16 +598,6 @@ class ServerManagementProfile(ProfileBase):
                     ],
                     "summaries": []
                 },
-                # { #users
-                #     "type": "ref",
-                #     "name": "ref-63703",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
             ],
             "acl": {
                 "activated": False,

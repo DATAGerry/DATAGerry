@@ -16,7 +16,6 @@
 """
 This module manages the 'Network Infrastructure'-Profile for the DATAGERRY assistant
 """
-
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
@@ -30,6 +29,7 @@ class NetworkInfrastructureProfile(ProfileBase):
     This class cointains all types and logics for the 'Network Infrastructure'-Profile
     """
     def __init__(self, created_type_ids: dict):
+        self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
 
@@ -54,19 +54,15 @@ class NetworkInfrastructureProfile(ProfileBase):
         """
         Creates all types which are a dependancy for other types
         """
-        # network_type_data = self.get_network_type()
-        # self.create_basic_type('network_id',network_type_data)
-
+        #switch type
+        switch_type_data = self.get_switch_type()
+        self.create_basic_type('switch_id', switch_type_data)
 
 
     def _create_remaining_types(self):
         """
         Creates all remaining types of this profile
         """
-        #switch type
-        switch_type_data = self.get_switch_type()
-        self.create_basic_type('switch_id', switch_type_data)
-
         # router type
         router_type_data = self.get_router_type()
         self.create_basic_type('router_id', router_type_data)
@@ -130,35 +126,18 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "fields": [
                             "text-64937",
                             "text-93057",
-                            # "ref-47742" #network
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-13463",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-71899"
-                    #     ]
-                    # },
                     {
                         "type": "section",
                         "name": "section-78906",
                         "label": "Location",
                         "fields": [
-                            # "ref-97620", #location
                             "text-63030",
-                            "text-45199"
+                            "text-45199",
+                            "dg_location"
                         ]
                     },
-                    # { #user
-                    #     "type": "section",
-                    #     "name": "section-73669",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-41420"
-                    #     ]
-                    # }
                 ],
                 "externals": [],
                 "summary": {
@@ -166,7 +145,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "text-60980",
                         "text-73474",
                         "text-45199",
-                        # "ref-97620" #location
                     ]
                 }
             },
@@ -201,24 +179,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-64937",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-47742",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-71899",
-                #     "label": "OS",
-                #     "ref_types": [
-                #     24
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-45199",
@@ -229,29 +189,11 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-63030",
                     "label": "Height unit"
                 },
-                # { #location
-                #     "type": "ref",
-                #     "name": "ref-97620",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17,
-                #     16
-                #     ],
-                #     "summaries": []
-                # },
-                # { #user
-                #     "type": "ref",
-                #     "name": "ref-41420",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -316,36 +258,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     ]
                 }
             )
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-97620'
-
-            switch_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            self.set_type_section_field(type_prefix,'section-78906',locations_field_name)
-            self.set_type_summary_field(type_prefix, locations_field_name)
 
 
         # Add the user management profile dependencies
@@ -431,35 +343,18 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "fields": [
                             "text-70642",
                             "text-98052",
-                            # "ref-12104" #network
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-68634",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-68233"
-                    #     ]
-                    # },
                     {
                         "type": "section",
                         "name": "section-98615",
                         "label": "Location",
                         "fields": [
-                            # "ref-19360", #location
                             "text-65711",
-                            "text-19482"
+                            "text-19482",
+                            "dg_location"
                         ]
                     },
-                    # {
-                    #     "type": "section",
-                    #     "name": "section-27633",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-58400"
-                    #     ]
-                    # }
                 ],
                 "externals": [],
                 "summary": {
@@ -467,7 +362,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "text-60624",
                         "text-99041",
                         "text-19482",
-                        # "ref-19360" #location
                     ]
                 }
             },
@@ -502,37 +396,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-70642",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-12104",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-68233",
-                #     "label": "OS",
-                #     "ref_types": [
-                #     24
-                #     ],
-                #     "summaries": []
-                # },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-19360",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     16,
-                #     17,
-                #     18,
-                #     19,
-                #     20
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-19482",
@@ -543,16 +406,11 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-65711",
                     "label": "Height unit"
                 },
-                # { #users
-                #     "type": "ref",
-                #     "name": "ref-58400",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -619,36 +477,6 @@ class NetworkInfrastructureProfile(ProfileBase):
             )
 
 
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-19360'
-
-            router_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            self.set_type_section_field(type_prefix,'section-98615',locations_field_name)
-            self.set_type_summary_field(type_prefix, locations_field_name)
-
-
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
         customer_user_id = self.created_type_ids['customer_user_id']
@@ -679,7 +507,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     ]
                 }
             )
-
 
         return self.type_dict[type_prefix]
 
@@ -729,9 +556,9 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "name": "section-99357",
                         "label": "Location",
                         "fields": [
-                            # "ref-14097", #locations
                             "text-68993",
-                            "text-18143"
+                            "text-18143",
+                            "dg_location"
                         ]
                     }
                 ],
@@ -741,7 +568,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "text-89632",
                         "text-23594",
                         "text-18143",
-                        # "ref-14097" #locations
                     ]
                 }
             },
@@ -771,19 +597,11 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-18143",
                     "label": "Rack position"
                 },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-14097",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     16,
-                #     17,
-                #     18,
-                #     19,
-                #     20
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -792,41 +610,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                 }
             }
         }
-
-
-        # get the fields and sections of router type
-        patch_panel_type_fields: list = self.type_dict[type_prefix]['fields']
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-14097'
-
-            patch_panel_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            self.set_type_section_field(type_prefix,'section-99357',locations_field_name)
-            self.set_type_summary_field(type_prefix, locations_field_name)
-
 
         return self.type_dict[type_prefix]
 
@@ -880,7 +663,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                         "fields": [
                             "text-83225",
                             "text-91633",
-                            # "ref-54236" #network
                         ]
                     },
                     {
@@ -895,29 +677,20 @@ class NetworkInfrastructureProfile(ProfileBase):
                             "text-35494"
                         ]
                     },
-                    # {
-                    #     "type": "section",
-                    #     "name": "section-67101",
-                    #     "label": "Location",
-                    #     "fields": [
-                    #         "ref-47435"
-                    #     ]
-                    # },
-                    # {
-                    #     "type": "section",
-                    #     "name": "section-89120",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-36834"
-                    #     ]
-                    # }
+                    {
+                        "type": "section",
+                        "name": "section-67101",
+                        "label": "Location",
+                        "fields": [
+                            "dg_location"
+                        ]
+                    }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-83971",
                         "text-97978",
-                        # "ref-47435" #location
                     ]
                 }
             },
@@ -957,15 +730,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-83225",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-54236",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
                 {
                     "type": "text",
                     "name": "text-97978",
@@ -991,29 +755,11 @@ class NetworkInfrastructureProfile(ProfileBase):
                     "name": "text-60846",
                     "label": "Standard"
                 },
-                # { #location
-                #     "type": "ref",
-                #     "name": "ref-47435",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17,
-                #     16
-                #     ],
-                #     "summaries": []
-                # },
-                # {
-                #     "type": "ref",
-                #     "name": "ref-36834",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -1048,46 +794,6 @@ class NetworkInfrastructureProfile(ProfileBase):
             )
 
             self.set_type_section_field(type_prefix,'section-99636',network_field_name)
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-47435'
-
-            wap_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            wap_type_sections.append(
-                {
-                    "type": "section",
-                    "name": "section-67101",
-                    "label": "Location",
-                    "fields": [
-                        locations_field_name
-                    ]
-                }
-            )
-
-            self.set_type_summary_field(type_prefix, locations_field_name)
 
 
         # Add the user management profile dependencies

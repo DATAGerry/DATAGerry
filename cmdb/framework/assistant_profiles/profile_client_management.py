@@ -16,7 +16,6 @@
 """
 This module manages the 'Client Management'-Profile for the DATAGERRY assistant
 """
-
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
@@ -32,6 +31,7 @@ class ClientManagementProfile(ProfileBase):
     """
 
     def __init__(self, created_type_ids: dict):
+        self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
 
@@ -131,40 +131,22 @@ class ClientManagementProfile(ProfileBase):
                         "fields": [
                             "text-10453",
                             "text-26209",
-                            # "ref-40300" #network
                         ]
                     },
-                    # { #os
-                    #     "type": "section",
-                    #     "name": "section-44174",
-                    #     "label": "Operating system",
-                    #     "fields": [
-                    #         "ref-47570"
-                    #     ]
-                    # },
-                    # {
-                    #     "type": "section",
-                    #     "name": "section-11686",
-                    #     "label": "Location",
-                    #     "fields": [
-                    #         "ref-67470"
-                    #     ]
-                    # },
-                    # {
-                    #     "type": "section",
-                    #     "name": "section-16359",
-                    #     "label": "User assignment",
-                    #     "fields": [
-                    #         "ref-58324"
-                    #     ]
-                    # }
+                    {
+                        "type": "section",
+                        "name": "section-11686",
+                        "label": "Location",
+                        "fields": [
+                            "dg_location"
+                        ]
+                    }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-98758",
                         "select-74684",
-                        # "ref-67470" #locations
                     ]
                 }
             },
@@ -214,47 +196,11 @@ class ClientManagementProfile(ProfileBase):
                     "name": "text-26209",
                     "label": "Hostname"
                 },
-                # { #client
-                #     "type": "ref",
-                #     "name": "ref-40300",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
-                # { #os
-                #     "type": "ref",
-                #     "name": "ref-47570",
-                #     "label": "OS",
-                #     "ref_types": [
-                #     24
-                #     ],
-                #     "summaries": []
-                # },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-67470",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17,
-                #     16
-                #     ],
-                #     "summaries": []
-                # },
-                # { #users
-                #     "type": "ref",
-                #     "name": "ref-58324",
-                #     "label": "User",
-                #     "ref_types": [
-                #     14,
-                #     15
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -317,46 +263,6 @@ class ClientManagementProfile(ProfileBase):
                     ]
                 }
             )
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-67470'
-
-            client_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            client_type_sections.append(
-                {
-                    "type": "section",
-                    "name": "section-11686",
-                    "label": "Location",
-                    "fields": [
-                        locations_field_name
-                    ]
-                }
-            )
-
-            self.set_type_summary_field(type_prefix, locations_field_name)
 
 
         # Add the user management profile dependencies
@@ -516,21 +422,20 @@ class ClientManagementProfile(ProfileBase):
                             "ref-12314"
                         ]
                     },
-                    # { #locations
-                    #     "type": "section",
-                    #     "name": "section-39684",
-                    #     "label": "Location",
-                    #     "fields": [
-                    #         "ref-98114"
-                    #     ]
-                    # }
+                    {
+                        "type": "section",
+                        "name": "section-39684",
+                        "label": "Location",
+                        "fields": [
+                            "dg_location"
+                        ]
+                    }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-39536",
                         "text-94163",
-                        # "ref-98114" #locations
                     ]
                 }
             },
@@ -564,18 +469,11 @@ class ClientManagementProfile(ProfileBase):
                     ],
                     "summaries": []
                 },
-                # { #locations
-                #     "type": "ref",
-                #     "name": "ref-98114",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
                 "activated": False,
@@ -584,50 +482,6 @@ class ClientManagementProfile(ProfileBase):
                 }
             }
         }
-
-        # get the fields and sections of client type
-        monitor_type_fields: list = self.type_dict[type_prefix]['fields']
-        monitor_type_sections: list = self.type_dict[type_prefix]['render_meta']['sections']
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-98114'
-
-            monitor_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            monitor_type_sections.append(
-                {
-                    "type": "section",
-                    "name": "section-39684",
-                    "label": "Location",
-                    "fields": [
-                        locations_field_name
-                    ]
-                }
-            )
-
-            self.set_type_summary_field(type_prefix, locations_field_name)
-
 
         return self.type_dict[type_prefix]
 
@@ -680,24 +534,22 @@ class ClientManagementProfile(ProfileBase):
                         "fields": [
                             "text-73582",
                             "text-97953",
-                            # "ref-90293" #network
                         ]
                     },
-                    # { #location
-                    #     "type": "section",
-                    #     "name": "section-88306",
-                    #     "label": "Location",
-                    #     "fields": [
-                    #         "ref-45614"
-                    #     ]
-                    # }
+                    {
+                        "type": "section",
+                        "name": "section-88306",
+                        "label": "Location",
+                        "fields": [
+                            "dg_location"
+                        ]
+                    }
                 ],
                 "externals": [],
                 "summary": {
                     "fields": [
                         "text-78614",
                         "text-66585",
-                        # "ref-45614" #location
                     ]
                 }
             },
@@ -732,27 +584,11 @@ class ClientManagementProfile(ProfileBase):
                     "name": "text-73582",
                     "label": "IP"
                 },
-                # { #network
-                #     "type": "ref",
-                #     "name": "ref-90293",
-                #     "label": "Network",
-                #     "ref_types": [
-                #     25
-                #     ],
-                #     "summaries": []
-                # },
-                # { #location
-                #     "type": "ref",
-                #     "name": "ref-45614",
-                #     "label": "Location",
-                #     "ref_types": [
-                #     20,
-                #     19,
-                #     18,
-                #     17
-                #     ],
-                #     "summaries": []
-                # }
+                {
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
+                }
             ],
             "acl": {
             "activated": False,
@@ -764,7 +600,6 @@ class ClientManagementProfile(ProfileBase):
 
         # get the fields and sections of client type
         printer_type_fields: list = self.type_dict[type_prefix]['fields']
-        printer_type_sections: list = self.type_dict[type_prefix]['render_meta']['sections']
 
         # Add the network profile dependencies
         network_type_id = self.created_type_ids['network_id']
@@ -785,45 +620,5 @@ class ClientManagementProfile(ProfileBase):
             )
 
             self.set_type_section_field(type_prefix,'section-36988',network_field_name)
-
-
-        # Add the location profile dependencies
-        country_id = self.created_type_ids['country_id']
-        city_id = self.created_type_ids['city_id']
-        building_id = self.created_type_ids['building_id']
-        room_id = self.created_type_ids['room_id']
-        rack_id = self.created_type_ids['rack_id']
-
-        if country_id and city_id and building_id and room_id and rack_id:
-            locations_field_name = 'ref-45614'
-
-            printer_type_fields.append(
-                {
-                    "type": "ref",
-                    "name": locations_field_name,
-                    "label": "Location",
-                    "ref_types": [
-                        country_id,
-                        city_id,
-                        building_id,
-                        room_id,
-                        rack_id
-                    ],
-                    "summaries": []
-                }
-            )
-
-            printer_type_sections.append(
-                {
-                    "type": "section",
-                    "name": "section-88306",
-                    "label": "Location",
-                    "fields": [
-                        locations_field_name
-                    ]
-                }
-            )
-
-            self.set_type_summary_field(type_prefix, locations_field_name)
 
         return self.type_dict[type_prefix]
