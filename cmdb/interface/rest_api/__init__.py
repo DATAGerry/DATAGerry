@@ -67,15 +67,11 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.framework_routes.object_links_routes import links_blueprint
     from cmdb.interface.rest_api.framework_routes.types_routes import types_blueprint
     from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.category_routes import category_blueprint
     from cmdb.interface.rest_api.framework_routes.categories_routes import categories_blueprint
     from cmdb.interface.rest_api.framework_routes.location_routes import location_blueprint
-    from cmdb.interface.rest_api.user_management_routes.user_routes import user_blueprint
     from cmdb.interface.rest_api.user_management_routes.users_routes import users_blueprint
     from cmdb.interface.rest_api.user_management_routes.user_settings_routes import user_settings_blueprint
-    from cmdb.interface.rest_api.user_management_routes.group_routes import group_blueprint
     from cmdb.interface.rest_api.user_management_routes.groups_routes import groups_blueprint
-    from cmdb.interface.rest_api.user_management_routes.right_routes import right_blueprint
     from cmdb.interface.rest_api.user_management_routes.rights_routes import rights_blueprint
     from cmdb.interface.rest_api.search_routes import search_blueprint
     from cmdb.interface.rest_api.exporter_routes.export_object_routes import export_blueprint
@@ -95,21 +91,15 @@ def register_blueprints(app):
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(date_blueprint, url_prefix='/date')
-    #TODO: this is just a workaround for new flask version where the name of a blueprint has to be unique, \
-    # needs to be refactored for blueprints with multiple routes
     app.register_blueprint(objects_blueprint, url_prefix='/objects')
     app.register_blueprint(links_blueprint, url_prefix='/objects/links')
     app.register_blueprint(types_blueprint, url_prefix='/types')
     app.register_blueprint(connection_routes)
-    app.register_blueprint(category_blueprint, url_prefix='/category')
     app.register_blueprint(categories_blueprint, url_prefix='/categories')
     app.register_blueprint(location_blueprint, url_prefix='/locations')
-    app.register_blueprint(user_blueprint, url_prefix='/user')
     app.register_blueprint(users_blueprint, url_prefix='/users')
     app.register_blueprint(user_settings_blueprint, url_prefix='/users/<int:user_id>/settings')
-    app.register_blueprint(group_blueprint, url_prefix='/group')
     app.register_blueprint(groups_blueprint, url_prefix='/groups')
-    app.register_blueprint(right_blueprint, url_prefix='/right')
     app.register_blueprint(rights_blueprint, url_prefix='/rights')
     app.register_blueprint(search_blueprint)
     app.register_blueprint(export_blueprint, url_prefix='/exporter')

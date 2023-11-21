@@ -16,7 +16,6 @@
 """
 This module manages the 'Location'-Profile for the DATAGERRY assistant
 """
-
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
@@ -31,6 +30,7 @@ class LocationProfile(ProfileBase):
     This class cointains all types and logics for the 'Location'-Profile
     """
     def __init__(self, created_type_ids: dict):
+        self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
 
@@ -67,28 +67,19 @@ class LocationProfile(ProfileBase):
         Creates all remaining types of this profile
         """
         # city type
-        city_type_data = self.get_city_type(self.created_type_ids['country_id'])
+        city_type_data = self.get_city_type()
         self.create_basic_type('city_id', city_type_data)
 
         # building type
-        building_type_data = self.get_building_type(self.created_type_ids['country_id'],
-                                                    self.created_type_ids['city_id'])
-
+        building_type_data = self.get_building_type()
         self.create_basic_type('building_id', building_type_data)
 
         # room type
-        room_type_data = self.get_room_type(self.created_type_ids['country_id'],
-                                            self.created_type_ids['city_id'],
-                                            self.created_type_ids['building_id'])
-
+        room_type_data = self.get_room_type()
         self.create_basic_type('room_id', room_type_data)
 
         # rack type
-        rack_type_data = self.get_rack_type(self.created_type_ids['country_id'],
-                                            self.created_type_ids['city_id'],
-                                            self.created_type_ids['building_id'],
-                                            self.created_type_ids['room_id'])
-
+        rack_type_data = self.get_rack_type()
         self.create_basic_type('rack_id', rack_type_data)
 
 
@@ -163,7 +154,7 @@ class LocationProfile(ProfileBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 
-    def get_city_type(self, country_type_id: int) -> dict:
+    def get_city_type(self) -> dict:
         """
         Returns the 'City'-Type for the 'Location'-Profile
 
@@ -197,7 +188,7 @@ class LocationProfile(ProfileBase):
                         "name": "section-88673",
                         "label": "Location",
                         "fields": [
-                            "ref-14628"
+                            "dg_location"
                         ]
                     }
                 ],
@@ -205,7 +196,6 @@ class LocationProfile(ProfileBase):
                 "summary": {
                     "fields": [
                         "text-31555",
-                        "ref-14628"
                     ]
                 }
             },
@@ -216,13 +206,9 @@ class LocationProfile(ProfileBase):
                     "label": "Name"
                 },
                 {
-                    "type": "ref",
-                    "name": "ref-14628",
-                    "label": "Location",
-                    "ref_types": [
-                        country_type_id
-                    ],
-                    "summaries": []
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
                 }
             ],
             "acl": {
@@ -237,7 +223,7 @@ class LocationProfile(ProfileBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 
-    def get_building_type(self, country_type_id: int, city_type_id: int) -> dict:
+    def get_building_type(self) -> dict:
         """
         Returns the 'Building'-Type for the 'Location'-Profile
 
@@ -251,7 +237,7 @@ class LocationProfile(ProfileBase):
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
-            "editor_id": 1,
+            "editor_id": None,
             "last_edit_time": None,
             "label": "Building",
             "version": "1.0.0",
@@ -282,7 +268,7 @@ class LocationProfile(ProfileBase):
                         "name": "section-14059",
                         "label": "Location",
                         "fields": [
-                            "ref-39962"
+                            "dg_location"
                         ]
                     }
                 ],
@@ -292,7 +278,6 @@ class LocationProfile(ProfileBase):
                         "text-56569",
                         "text-28009",
                         "text-24247",
-                        "ref-39962"
                     ]
                 }
             },
@@ -318,14 +303,9 @@ class LocationProfile(ProfileBase):
                     "label": "House number"
                 },
                 {
-                    "type": "ref",
-                    "name": "ref-39962",
-                    "label": "Location",
-                    "ref_types": [
-                        country_type_id,
-                        city_type_id
-                    ],
-                    "summaries": []
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
                 }
             ],
             "acl": {
@@ -340,7 +320,7 @@ class LocationProfile(ProfileBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 
-    def get_room_type(self, country_type_id: int, city_type_id: int, building_type_id: int) -> dict:
+    def get_room_type(self) -> dict:
         """
         Returns the 'Room'-Type for the 'Location'-Profile
 
@@ -378,7 +358,7 @@ class LocationProfile(ProfileBase):
                         "fields": [
                             "text-30789",
                             "text-59951",
-                            "ref-35180"
+                            "dg_location"
                         ]
                     }
                 ],
@@ -388,7 +368,6 @@ class LocationProfile(ProfileBase):
                         "text-72385",
                         "text-30789",
                         "text-59951",
-                        "ref-35180"
                     ]
                 }
             },
@@ -409,15 +388,9 @@ class LocationProfile(ProfileBase):
                     "label": "Floor"
                 },
                 {
-                    "type": "ref",
-                    "name": "ref-35180",
-                    "label": "Location",
-                    "ref_types": [
-                        country_type_id,
-                        city_type_id,
-                        building_type_id
-                    ],
-                    "summaries": []
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
                 }
             ],
             "acl": {
@@ -432,7 +405,7 @@ class LocationProfile(ProfileBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 
-    def get_rack_type(self, country_type_id: int, city_type_id: int, building_type_id: int, room_type_id: int) -> dict:
+    def get_rack_type(self) -> dict:
         """
         Returns the 'Rack'-Type for the 'Location'-Profile
 
@@ -478,7 +451,7 @@ class LocationProfile(ProfileBase):
                         "name": "section-55832",
                         "label": "Location",
                         "fields": [
-                            "ref-66941"
+                            "dg_location"
                         ]
                     }
                 ],
@@ -507,16 +480,9 @@ class LocationProfile(ProfileBase):
                     "label": "Form factor"
                 },
                 {
-                    "type": "ref",
-                    "name": "ref-66941",
-                    "label": "Location",
-                    "ref_types": [
-                        country_type_id,
-                        city_type_id,
-                        building_type_id,
-                        room_type_id
-                    ],
-                    "summaries": []
+                    "type": "location",
+                    "name": "dg_location",
+                    "label": "Location"
                 }
             ],
             "acl": {
