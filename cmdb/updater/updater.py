@@ -18,7 +18,7 @@ import logging
 
 from abc import abstractmethod
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader

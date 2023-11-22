@@ -26,7 +26,7 @@ from bson import Regex, json_util
 
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
 from cmdb.security.acl.errors import AccessDeniedError

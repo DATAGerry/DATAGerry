@@ -37,7 +37,7 @@ from cmdb.utils.termcolor import colored
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.database.errors.connection_errors import ServerTimeoutError, DatabaseConnectionError
 
 import cmdb.process_management.process_manager

@@ -16,9 +16,13 @@
 
 import logging
 from typing import List, Any, Union
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    Builder - CLASS                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class Builder:
     """Base builder prototype"""
@@ -26,11 +30,17 @@ class Builder:
     def __len__(self):
         raise NotImplementedError()
 
-    def clear(self):
-        raise NotImplementedError()
 
     def build(self, *args, **kwargs):
+        """TODO: document"""
         raise NotImplementedError()
+
+
+    def clear(self):
+        """TODO: document"""
+        raise NotImplementedError()
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
     # Logical Query Operators
     @classmethod
@@ -38,20 +48,29 @@ class Builder:
         """Joins query clauses with a logical AND."""
         return {'$and': expressions}
 
+
+
+
     @classmethod
     def or_(cls, expressions: List[dict]) -> dict:
         """Joins query clauses with a logical OR."""
         return {'$or': expressions}
+
+
 
     @classmethod
     def not_(cls, expression: dict) -> dict:
         """Inverts the effect of a query expression."""
         return {'$not': expression}
 
+
+
     @classmethod
     def nor_(cls, expressions: List[dict]) -> dict:
         """Joins query clauses with a logical NOR."""
         return {'$nor': expressions}
+
+
 
     # Comparison
     @classmethod
@@ -59,46 +78,64 @@ class Builder:
         """Matches values that are equal to a specified value."""
         return {field: {'$eq': value}}
 
+
+
     @classmethod
     def gt_(cls, field: str, value: Any) -> dict:
         """Matches values that are greater than a specified value."""
         return {field: {'$gt': value}}
+
+
 
     @classmethod
     def gte_(cls, field: str, value: Any) -> dict:
         """Matches values that are greater than or equal to a specified value."""
         return {field: {'$gte': value}}
 
+
+
     @classmethod
     def in_(cls, field: str, values: List[Any]) -> dict:
         """Matches any of the values specified in an array."""
         return {field: {'$in': values}}
+
+
 
     @classmethod
     def lt_(cls, field: str, value: Any) -> dict:
         """Matches values that are less than a specified value."""
         return {field: {'$lt': value}}
 
+
+
     @classmethod
     def lte_(cls, field: str, value: Any) -> dict:
         """Matches values that are less than or equal to a specified value."""
         return {field: {'$lte': value}}
+
+
 
     @classmethod
     def ne_(cls, field: str, value: Any) -> dict:
         """Matches all values that are not equal to a specified value."""
         return {field: {'$ne': value}}
 
+
+
     @classmethod
     def nin_(cls, field: str, values: List[Any]) -> dict:
         """Matches none of the values specified in an array."""
         return {field: {'$nin': values}}
+
+
 
     # Element
     @classmethod
     def exists_(cls, field: str, exist: bool = True) -> dict:
         """Matches documents that have the specified field."""
         return {field: {'$exists': exist}}
+
+
 
     @classmethod
     def element_match_(cls, field: str, criteria: dict) -> dict:
@@ -111,10 +148,14 @@ class Builder:
         """Where values match a specified regular expression"""
         return {field: {'$regex': regex, '$options': options}}
 
+
+
     @classmethod
     def expr_(cls, expression) -> dict:
         """Allows the use of aggregation expressions within the query language."""
         return {'$expr': expression}
+
+
 
     # Aggregations
     @classmethod
@@ -123,25 +164,35 @@ class Builder:
         unmodified into the next pipeline stage."""
         return {'$match': query}
 
+
+
     @classmethod
     def count_(cls, name: str) -> dict:
         """Returns a count of the number of documents at this stage of the aggregation pipeline."""
         return {'$count': name}
+
+
 
     @classmethod
     def skip_(cls, value: int) -> dict:
         """Skips over the specified number of documents that pass into the stage."""
         return {'$skip': value}
 
+
+
     @classmethod
     def limit_(cls, value: int) -> dict:
         """Limits the number of documents passed to the next stage in the pipeline."""
         return {'$limit': value}
 
+
+
     @classmethod
     def facet_(cls, stages: dict) -> dict:
         """Processes multiple aggregation pipelines within a single stage on the same set of input documents."""
         return {'$facet': stages}
+
+
 
     @classmethod
     def group_(cls, _id: str, value: dict = None) -> dict:
@@ -150,6 +201,8 @@ class Builder:
         if value:
             statement.update(value)
         return {'$group': statement}
+
+
 
     @classmethod
     def lookup_(cls, _from: str, _local: str, _foreign: str, _as: str) -> dict:
@@ -163,6 +216,8 @@ class Builder:
             """
         return {'$lookup': {'from': _from, 'localField': _local, 'foreignField': _foreign, 'as': _as}}
 
+
+
     @classmethod
     def lookup_sub_(cls, from_: str, let_: dict, pipeline_: list, as_: str) -> dict:
         """ Performs uncorrelated subqueries between two collections as well as allow other join conditions besides a
@@ -175,15 +230,21 @@ class Builder:
             """
         return {'$lookup': {'from': from_, 'let': let_, 'pipeline': pipeline_, 'as': as_}}
 
+
+
     @classmethod
     def unwind_(cls, path: Union[str, dict]):
         """Duplicates each document in the pipeline, once per array element."""
         return {'$unwind': path}
 
+
+
     @classmethod
     def project_(cls, specification: dict):
         """Passes along the documents with the requested fields to the next stage in the pipeline."""
         return {'$project': specification}
+
+
 
     @classmethod
     def sort_(cls, sort: str, order: int) -> dict:
@@ -191,6 +252,8 @@ class Builder:
         if order != 1 and order != -1:
             raise ValueError('Order value must be 1 (ascending) or -1 (descending)')
         return {'$sort': {sort: order}}
+
+
 
     # Type Expression Operators
     @classmethod

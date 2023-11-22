@@ -216,14 +216,14 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 
     try:
         iteration_result: IterationResult[CmdbLocation] = manager.iterate(
-            filter=params.filter,
-            limit=params.limit,
-            skip=params.skip,
-            sort=params.sort,
-            order=params.order,
-            user=request_user,
-            permission=AccessControlPermission.READ
-        )
+                                                                filter=params.filter,
+                                                                limit=params.limit,
+                                                                skip=params.skip,
+                                                                sort=params.sort,
+                                                                order=params.order,
+                                                                user=request_user,
+                                                                permission=AccessControlPermission.READ
+                                                            )
 
         location_list: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
 

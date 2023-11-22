@@ -23,7 +23,7 @@ from cmdb.interface.blueprint import RootBlueprint
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 
 with current_app.app_context():
-    from cmdb.database.managers import DatabaseManagerMongo
+    from cmdb.database.database_manager_mongo import DatabaseManagerMongo
     database_manager: DatabaseManagerMongo = current_app.database_manager
 
 

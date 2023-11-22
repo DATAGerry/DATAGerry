@@ -17,7 +17,7 @@
 from queue import Queue
 from flask import Flask
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class BaseCmdbApp(Flask):

@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 from Crypto import Random
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.system_writer import SystemSettingsWriter
 
 

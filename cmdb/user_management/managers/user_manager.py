@@ -16,7 +16,7 @@
 
 from typing import Union, List
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID

@@ -20,7 +20,7 @@ from flask import current_app
 
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 
 connection_routes = RootBlueprint('connection_routes', __name__)

@@ -13,22 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: comment"""
-from cmdb.database.errors import DataBaseError
+"""TODO: document"""
+from gridfs import GridFS
+from pymongo.database import Database
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseConnectionError(DataBaseError):
+class DatabaseGridFS(GridFS):
     """
-    Error if connection to database broke up
+    Creation a GridFSBucket instance to use
     """
-    def __init__(self, message):
-        super().__init__(f'Connection error - No connection with the database: {message}')
 
-
-
-class ServerTimeoutError(DataBaseError):
-    """
-    Server timeout error if connection is lost
-    """
-    def __init__(self, host):
-        super().__init__(f'Server Timeout - No connection to database at {host}')
+    def __init__(self, database: Database, collection_name: str):
+        super().__init__(database, collection_name)
+        self.message = f"Collection {collection_name} already exists"

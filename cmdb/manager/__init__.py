@@ -18,20 +18,25 @@ import logging
 
 from typing import Any
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.utils import Collection
 
-from .errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, ManagerIterationError
+from cmdb.manager.errors import ManagerGetError,\
+                                ManagerInsertError,\
+                                ManagerUpdateError,\
+                                ManagerDeleteError,\
+                                ManagerIterationError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
+
 
 class AbstractManagerBase:
     """
     Manager base class for all core CRUD function.
     Will be replacing `CmdbManagerBase` in the future.
     """
-
-
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
@@ -48,23 +53,20 @@ class AbstractManagerBase:
         """Auto disconnect the database connection when the Manager get destroyed."""
         self._database_manager.connector.disconnect()
 
+# ----------------------------------------------------- FUNCTIONS ---------------------------------------------------- #
 
-
-    def _aggregate(self, collection: Collection, *args, **kwargs):
+    def _insert(self, collection: Collection, resource: Any, skip_public: bool = False):
         """
-        Calls mongodb aggregation
+        Calls mongodb insert operation
         Args:
-            collection: Name of the collection
-            *args:
-            **kwargs:
-
-        Returns:
-            - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
+            collection (Collection): Name of the collection
+            resource (Any): Insert data (normally a dict)
+            skip_public (bool): Skip the public id creation and counter increment.
         """
         try:
-            return self._database_manager.aggregate(collection, *args, **kwargs)
+            return self._database_manager.insert(collection, data=resource, skip_public=skip_public)
         except Exception as err:
-            raise ManagerIterationError(err) from err
+            raise ManagerInsertError(err) from err
 
 
 
@@ -84,38 +86,6 @@ class AbstractManagerBase:
             return self._database_manager.find(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err) from err
-
-
-
-    def _count_documents(self, collection: Collection, *args, **kwargs):
-        """
-        Calls mongodb count_documents operation
-        Args:
-            collection: Name of the collection
-            filter: Match dictionary
-
-        Returns:
-            int: Number of found documents with given filter 
-        """
-        try:
-            return self._database_manager.count_documents(collection, *args, **kwargs)
-        except Exception as err:
-            raise ManagerGetError(err) from err
-
-
-
-    def _insert(self, collection: Collection, resource: Any, skip_public: bool = False):
-        """
-        Calls mongodb insert operation
-        Args:
-            collection (Collection): Name of the collection
-            resource (Any): Insert data (normally a dict)
-            skip_public (bool): Skip the public id creation and counter increment.
-        """
-        try:
-            return self._database_manager.insert(collection, data=resource, skip_public=skip_public)
-        except Exception as err:
-            raise ManagerInsertError(err) from err
 
 
 
@@ -149,7 +119,10 @@ class AbstractManagerBase:
             acknowledgment of database
         """
         try:
-            return self._database_manager.update_many(collection=collection, query=query, update=update, add_to_set=add_to_set)
+            return self._database_manager.update_many(collection=collection,
+                                                      query=query,
+                                                      update=update,
+                                                      add_to_set=add_to_set)
         except Exception as err:
             raise ManagerUpdateError(err) from err
 
@@ -166,3 +139,38 @@ class AbstractManagerBase:
             return self._database_manager.delete(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerDeleteError(err) from err
+
+
+
+    def _aggregate(self, collection: Collection, *args, **kwargs):
+        """
+        Calls mongodb aggregation
+        Args:
+            collection: Name of the collection
+            *args:
+            **kwargs:
+
+        Returns:
+            - A :class:`~pymongo.command_cursor.CommandCursor` over the result set.
+        """
+        try:
+            return self._database_manager.aggregate(collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerIterationError(err) from err
+
+
+
+    def _count_documents(self, collection: Collection, *args, **kwargs):
+        """
+        Calls mongodb count_documents operation
+        Args:
+            collection: Name of the collection
+            filter: Match dictionary
+
+        Returns:
+            int: Number of found documents with given filter 
+        """
+        try:
+            return self._database_manager.count_documents(collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err) from err

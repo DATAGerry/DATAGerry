@@ -26,7 +26,7 @@ from datetime import datetime, timezone
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog

@@ -19,11 +19,9 @@
 This module controls the connection and access to the database
 
 Attributes:
-    CLIENT: generic type variable for `Client` class implementation
     CONNECTOR: generic type variable for `Connector` class implementation
 
 """
 from typing import TypeVar
 
-CLIENT = TypeVar('CLIENT')
 CONNECTOR = TypeVar('CONNECTOR')

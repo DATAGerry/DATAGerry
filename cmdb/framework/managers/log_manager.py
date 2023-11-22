@@ -20,7 +20,7 @@ from typing import Union, List
 from datetime import datetime, timezone
 
 from cmdb.framework import CmdbLog, CmdbMetaLog
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
 from cmdb.framework.utils import PublicID
 

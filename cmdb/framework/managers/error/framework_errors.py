@@ -13,37 +13,39 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from typing import Union
 
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class FrameworkGetError(ManagerGetError):
     """Generic or basic framework error for managers get operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
-        super(FrameworkGetError, self).__init__(err=err)
+        super().__init__(err=err)
+
 
 
 class FrameworkInsertError(ManagerInsertError):
     """Generic or basic framework error for managers insert operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
-        super(FrameworkInsertError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class FrameworkUpdateError(ManagerUpdateError):
     """Generic or basic framework error for managers update operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
-        super(FrameworkUpdateError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class FrameworkDeleteError(ManagerDeleteError):
     """Generic or basic framework error for managers delete operations."""
 
     def __init__(self, err: Union[Exception, str] = None):
-        super(FrameworkDeleteError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class FrameworkNotFoundError(FrameworkGetError):
@@ -51,7 +53,7 @@ class FrameworkNotFoundError(FrameworkGetError):
 
     def __init__(self, message):
         self.message = message
-        super(FrameworkNotFoundError, self).__init__()
+        super().__init__()
 
 
 class FrameworkQueryEmptyError(FrameworkGetError):
@@ -59,14 +61,14 @@ class FrameworkQueryEmptyError(FrameworkGetError):
 
     def __init__(self, message):
         self.message = message
-        super(FrameworkQueryEmptyError, self).__init__()
+        super().__init__()
 
 
 class FrameworkIterationError(FrameworkGetError):
     """Framework error if the iteration over the collection throws an error"""
 
     def __init__(self, err: Union[Exception, str] = None):
-        super(FrameworkIterationError, self).__init__(err=err)
+        super().__init__(err=err)
 
 
 class FrameworkIterationOutOfBoundsError(FrameworkGetError):
@@ -74,4 +76,4 @@ class FrameworkIterationOutOfBoundsError(FrameworkGetError):
 
     def __init__(self, message: str = '', err: Union[Exception, str] = None):
         self.message = message
-        super(FrameworkIterationOutOfBoundsError, self).__init__(err=err)
+        super().__init__(err=err)
