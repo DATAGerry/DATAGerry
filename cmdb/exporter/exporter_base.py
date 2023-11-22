@@ -29,7 +29,7 @@ from typing import List
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exporter.exporter_utils import ExperterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.exporter.config.config_type import ExporterConfigType

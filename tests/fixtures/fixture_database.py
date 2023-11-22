@@ -16,7 +16,7 @@
 import pytest
 
 from cmdb.database.connection import MongoConnector
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 
 @pytest.fixture(scope="session")

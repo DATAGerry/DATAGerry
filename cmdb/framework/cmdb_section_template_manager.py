@@ -13,22 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: comment"""
-from cmdb.database.errors import DataBaseError
+"""
+This managers represents the core functionalities for the use of CMDB section templates.
+All communication with the section templates is controlled by this manager.
+The implementation of the manager used is always realized using the respective superclass.
+
+"""
+import logging
+from queue import Queue
+
+from cmdb.framework.cmdb_base import CmdbManagerBase
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseConnectionError(DataBaseError):
-    """
-    Error if connection to database broke up
-    """
-    def __init__(self, message):
-        super().__init__(f'Connection error - No connection with the database: {message}')
+LOGGER = logging.getLogger(__name__)
 
 
-
-class ServerTimeoutError(DataBaseError):
+class CmdbSectionTemplateManager(CmdbManagerBase):
     """
-    Server timeout error if connection is lost
+    class CmdbSectionTemplateManager
     """
-    def __init__(self, host):
-        super().__init__(f'Server Timeout - No connection to database at {host}')
+    def __init__(self, database_manager=None, event_queue: Queue = None):
+        self._event_queue = event_queue
+        super().__init__(database_manager)

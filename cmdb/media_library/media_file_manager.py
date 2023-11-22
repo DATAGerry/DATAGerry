@@ -19,7 +19,8 @@ import logging
 from datetime import datetime, timezone
 from gridfs.grid_file import GridOutCursor, GridOut
 
-from cmdb.database.managers import DatabaseManagerMongo, DatabaseGridFS
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.media_library.media_file import MediaFile
 from cmdb.media_library.media_file import FileMetadata
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \

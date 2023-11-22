@@ -22,7 +22,7 @@ import logging
 from typing import List, Union
 
 from datetime import datetime, timezone
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, \
     TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager

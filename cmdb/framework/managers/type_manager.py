@@ -23,7 +23,7 @@ from typing import Union, List
 from bson import json_util
 
 from cmdb.database.utils import object_hook
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import TypeModel
 from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult

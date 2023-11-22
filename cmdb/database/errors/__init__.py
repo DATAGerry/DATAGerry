@@ -13,11 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""Base Database Error Class"""
 from cmdb.utils.error import CMDBError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class DataBaseError(CMDBError):
-
+    """Base Database Error"""
     def __init__(self, message: str = None):
         self.message = message

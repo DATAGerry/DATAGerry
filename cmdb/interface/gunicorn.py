@@ -21,7 +21,7 @@ import logging
 import multiprocessing
 from cmdb import __MODE__
 import cmdb.process_management.service
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api

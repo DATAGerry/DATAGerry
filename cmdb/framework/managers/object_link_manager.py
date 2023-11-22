@@ -18,7 +18,7 @@
 from datetime import datetime, timezone
 from typing import Union, List
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.managers import ManagerBase

@@ -53,7 +53,7 @@ class CmdbDAO:
     __SUPER_INIT_KEYS = [
         'public_id'
     ]
-    __SUPER_INDEX_KEYS = [
+    SUPER_INDEX_KEYS = [
         {'keys': [('public_id', DAO_ASCENDING)], 'name': 'public_id', 'unique': True}
     ]
     IGNORED_INIT_KEYS = []
@@ -152,7 +152,7 @@ class CmdbDAO:
         """TODO: document"""
         index_list = list()
 
-        for index in cls.INDEX_KEYS + cls.__SUPER_INDEX_KEYS:
+        for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
 
         return index_list

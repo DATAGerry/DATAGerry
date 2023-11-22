@@ -20,7 +20,7 @@ from enum import Enum
 
 from cmdb.database.errors.connection_errors import ServerTimeoutError
 from cmdb.database.errors.database_errors import DatabaseNotExists
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_writer import SystemSettingsWriter

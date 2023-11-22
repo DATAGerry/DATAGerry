@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_config import SystemConfigReader

@@ -18,7 +18,7 @@ from typing import Union
 
 from .right_manager import RightManager
 from .. import UserGroupModel
-from ...database.managers import DatabaseManagerMongo
+from ...database.database_manager_mongo import DatabaseManagerMongo
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError

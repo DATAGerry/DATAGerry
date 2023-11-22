@@ -23,7 +23,7 @@ from pymongo.errors import OperationFailure
 from cmdb.updater import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader, SectionError
 from cmdb.framework.cmdb_location import CmdbLocation
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION

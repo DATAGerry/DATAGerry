@@ -20,7 +20,7 @@ from typing import Union
 from authlib.jose import jwt, JsonWebToken
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.key.holder import KeyHolder
 
 try:

@@ -13,13 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 This module contains the implementation of LocationQueryBuilder and
 LocationManager which are responsible to interact with the Database 
 regarding locations.
 """
-
 import json
 import logging
 
@@ -29,7 +27,7 @@ from bson import json_util
 
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import CmdbLocation
 from cmdb.framework.cmdb_object_manager import verify_access
 from cmdb.security.acl.errors import AccessDeniedError
@@ -42,6 +40,7 @@ from cmdb.search import Query, Pipeline
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -114,13 +113,13 @@ class LocationQueryBuilder(ManagerQueryBuilder):
         self.query.append(self.count_('total'))
         return self.query
 
-# ---------------------------------------------------------------------------- #
-#                               LOCATION MANAGER                               #
-# ---------------------------------------------------------------------------- #
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                LocationManager - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LocationManager(ManagerBase):
     """
-    Locationmanager
+    The Locationmanager interacts between API functions and database
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue: Union[Queue, Event] = None):

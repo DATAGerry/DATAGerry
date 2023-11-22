@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from typing import Union
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import CategoryModel
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryTree
@@ -25,10 +26,10 @@ from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CategoryManager(ManagerBase):
-
+    """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.__type_manager = TypeManager(database_manager=database_manager)
         super(CategoryManager, self).__init__(CategoryModel.COLLECTION, database_manager=database_manager)
@@ -58,7 +59,7 @@ class CategoryManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
 
         iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CategoryModel)

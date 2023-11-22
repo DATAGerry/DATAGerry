@@ -20,7 +20,7 @@ from datetime import datetime, timedelta, timezone
 from authlib.jose import jwt
 
 from cmdb import __title__
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.auth import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME

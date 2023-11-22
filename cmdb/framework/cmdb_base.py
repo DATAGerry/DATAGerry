@@ -18,7 +18,7 @@ from abc import ABC
 from typing import List
 
 from cmdb.utils.error import CMDBError
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 LOGGER = logging.getLogger(__name__)
 
