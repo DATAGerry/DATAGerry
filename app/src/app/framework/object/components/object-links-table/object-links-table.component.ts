@@ -149,6 +149,18 @@ export class ObjectLinksTableComponent implements OnInit, OnDestroy {
   }
 
   /**
+ * Unsubscribe all on component destroy.
+ */
+  public ngOnDestroy(): void {
+    if (this.modalRef) {
+      this.modalRef.close();
+    }
+    this.subscriber.next();
+    this.subscriber.complete();
+  }
+
+
+  /**
    * On table sort change.
    * Reload all links.
    *
@@ -205,15 +217,29 @@ export class ObjectLinksTableComponent implements OnInit, OnDestroy {
   public onShowAddModal(): void {
     this.modalRef = this.modalService.open(ObjectLinkAddModalComponent);
     this.modalRef.componentInstance.primaryRenderResult = this.object;
-    this.modalRef.result.then((formData: any) => {
-      this.linkService.postLink(formData).pipe(takeUntil(this.subscriber)).subscribe(() => {
-          this.toast.success(`Object #${ formData.primary } linked with #${ formData.secondary }.`);
-          this.loadLinksFromAPI();
-        },
-        (e) => {
-          this.toast.error(`${ e.message }`);
-        });
-    });
+
+    this.modalRef.result.then(
+      (formData: any) => {
+        if (formData) {
+          this.linkService.postLink(formData).pipe(takeUntil(this.subscriber)).subscribe(
+            () => {
+              this.toast.success(`Object #${formData.primary} linked with #${formData.secondary}.`);
+              this.loadLinksFromAPI();
+            },
+            (e) => {
+              this.toast.error(`${e.message}`);
+            }
+          );
+        } else {
+          // Handle dismissal without result
+          console.log('Modal dismissed without providing a result.');
+        }
+      },
+      (reason: any) => {
+        // Handle modal dismissal rejection
+        console.log('Modal dismissed with reason:', reason);
+      }
+    );
   }
 
 
@@ -227,15 +253,5 @@ export class ObjectLinksTableComponent implements OnInit, OnDestroy {
     });
   }
 
-  /**
-   * Unsubscribe all on component destroy.
-   */
-  public ngOnDestroy(): void {
-    if (this.modalRef) {
-      this.modalRef.close();
-    }
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
 
 }
