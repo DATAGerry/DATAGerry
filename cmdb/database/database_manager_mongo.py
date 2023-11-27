@@ -76,11 +76,10 @@ class DatabaseManagerMongo(DatabaseManager):
             except Exception:
                 return False
         return True
+# -------------------------------------------------------------------------------------------------------------------- #
 
-
-
-    def __find(self, collection: str, *args, **kwargs):
-        """general find function for database search
+    def find_all(self, collection, *args, **kwargs) -> list:
+        """calls find with all returns
 
         Args:
             collection (str): name of database collection
@@ -88,8 +87,15 @@ class DatabaseManagerMongo(DatabaseManager):
             **kwargs: key arguments
 
         Returns:
-            found document
+            list: list of founded documents
         """
+        found_documents = self.find(collection=collection, *args, **kwargs)
+        return list(found_documents)
+
+
+
+    def find(self, collection: str, *args, **kwargs):
+        """General find function"""
         if 'projection' not in kwargs:
             kwargs.update({'projection': {'_id': 0}})
 
@@ -97,23 +103,18 @@ class DatabaseManagerMongo(DatabaseManager):
 
 
 
-    def find(self, collection: str, *args, **kwargs):
-        """General find function"""
-        return self.get_collection(collection).find(*args, **kwargs)
-
-
-
-    def count_documents(self, collection: str, *args, **kwargs):
-        """
-        Returns the number of documents
-
+    def find_one_by(self, collection: str, *args, **kwargs) -> dict:
+        """find one specific document by special requirements
         Args:
-            collection (str): name of collection
-
+            collection (str): name of database collection
         Returns:
-            int: Number of documents
+            found document
         """
-        return  self.get_collection(collection).count_documents(*args, **kwargs)
+        cursor_result = self.find(collection, limit=1, *args, **kwargs)
+        for result in cursor_result.limit(-1):
+            return result
+
+        raise NoDocumentFound(collection, args)
 
 
 
@@ -124,13 +125,11 @@ class DatabaseManagerMongo(DatabaseManager):
         Args:
             collection (str): name of database collection
             public_id (int): public_id of document
-            *args: arguments for search operation
-            **kwargs:
 
         Returns:
             document with given public_id
         """
-        cursor_result = self.__find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
+        cursor_result = self.find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
 
@@ -147,7 +146,7 @@ class DatabaseManagerMongo(DatabaseManager):
         Returns:
             document with given object_id
         """
-        cursor_result = self.__find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
+        cursor_result = self.find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
 
@@ -164,43 +163,9 @@ class DatabaseManagerMongo(DatabaseManager):
         Returns:
             document with given parent
         """
-        cursor_result = self.__find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
+        cursor_result = self.find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
-
-
-
-    def find_one_by(self, collection: str, *args, **kwargs) -> dict:
-        """find one specific document by special requirements
-
-        Args:
-            collection (str): name of database collection
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            found document
-        """
-        cursor_result = self.__find(collection, limit=1, *args, **kwargs)
-        for result in cursor_result.limit(-1):
-            return result
-        raise NoDocumentFound(collection, args)
-
-
-
-    def find_all(self, collection, *args, **kwargs) -> list:
-        """calls __find with all returns
-
-        Args:
-            collection (str): name of database collection
-            *args: arguments for search operation
-            **kwargs: key arguments
-
-        Returns:
-            list: list of founded documents
-        """
-        found_documents = self.__find(collection=collection, *args, **kwargs)
-        return list(found_documents)
 
 
 
@@ -237,20 +202,13 @@ class DatabaseManagerMongo(DatabaseManager):
 
 
 
-    def search(self, collection: str, *args, **kwargs):
-        """TODO: document"""
-        return self.find(collection, *args, **kwargs)
-
-
-
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
-        """adds document to database
+        """Adds document to database
 
         Args:
             collection (str): name of database collection
             data (dict): insert data
             skip_public (bool): Skip the public id creation and counter increment
-
         Returns:
             int: new public id of the document
         """
@@ -326,33 +284,6 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, None)
 
         return result
-
-
-
-    def insert_with_internal(self, collection: str, _id: int or str, data: dict):
-        """TODO: document"""
-        formatted_id = {'_id': _id}
-        formatted_data = {'$set': data}
-        return self.get_collection(collection).insert_one(formatted_id, formatted_data)
-
-
-
-    def update_with_internal(self, collection: str, _id: int or str, data: dict):
-        """update function for database elements without public id
-
-        Args:
-            collection (str): name of database collection
-            _id (int): mongodb id of document
-            data: data to update
-
-        Returns:
-            acknowledged
-
-        """
-        formatted_id = {'_id': _id}
-        formatted_data = {'$set': data}
-
-        return self.get_collection(collection).update_one(formatted_id, formatted_data)
 
 
 

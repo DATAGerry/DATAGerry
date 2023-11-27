@@ -1,4 +1,3 @@
-
 # DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2023 becon GmbH
 #
@@ -14,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Definition of all routes for locations
 """
@@ -41,9 +39,8 @@ from cmdb.user_management import UserModel, UserManager
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.location_manager import LocationManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
-
-# get required managers
 with current_app.app_context():
     location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     type_manager = TypeManager(database_manager=current_app.database_manager)
@@ -189,12 +186,14 @@ def create_location(params: dict, request_user: UserModel):
 
     location_creation_params['name'] =  params['name'] if params['name'] not in ['', None] else f"ObjectID: {location_creation_params['object_id']}"
 
-    created_location_id = location_manager.insert_location(location_creation_params, request_user, AccessControlPermission.CREATE)
+    created_location_id = location_manager.insert_location(location_creation_params,
+                                                           request_user,
+                                                           AccessControlPermission.CREATE)
 
     return make_response(created_location_id)
 
 
-# -------------------------------- CRUD - READ ------------------------------- #
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 
 @location_blueprint.route('/', methods=['GET', 'HEAD'])
@@ -302,6 +301,7 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
         return abort(404, err.message)
 
     return api_response.make_response()
+
 
 
 @location_blueprint.route('/<int:public_id>', methods=['GET'])

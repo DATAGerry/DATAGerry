@@ -140,36 +140,3 @@ class DatabaseManager:
     def status(self):
         """Check if connector has connection."""
         return self.connector.is_connected()
-
-# -------------------------------------------------- CRUD FUNCTIONS -------------------------------------------------- #
-
-    def insert(self, *args, **kwargs):
-        """Insert resource to database."""
-        raise NotImplementedError
-
-
-    def find(self, *args, **kwargs):
-        """Find resource by requirements."""
-        raise NotImplementedError
-
-
-    def update(self, *args, **kwargs):
-        """Update resource inside database."""
-        raise NotImplementedError
-
-
-    def delete(self, *args, **kwargs):
-        """Delete resource inside database."""
-        raise NotImplementedError
-
-
-# ----------------------------------------------- ADVANCED INTERACTIONS ---------------------------------------------- #
-
-    def count(self, *args, **kwargs):
-        """General count method."""
-        raise NotImplementedError
-
-
-    def aggregate(self, *args, **kwargs):
-        """General count method."""
-        raise NotImplementedError

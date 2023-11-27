@@ -19,7 +19,6 @@ Real connection to database over a given connector
 """
 from datetime import datetime
 from pymongo import MongoClient
-from pymongo.collection import Collection
 from pymongo.database import Database
 from pymongo.errors import ConnectionFailure
 
