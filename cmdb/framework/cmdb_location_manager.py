@@ -45,6 +45,7 @@ from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ def has_access_control(model: TypeModel, user: UserModel, permission: AccessCont
     if acl and acl.activated:
         return acl.verify_access(user.group_id, permission)
     return True
+
 
 
 def verify_access(model: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
@@ -91,8 +93,10 @@ class CmdbLocationManager(CmdbManagerBase):
         super().__init__(database_manager)
 
 
+
     def get_location_for_object(self, object_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
+        """TODO: document"""
         try:
             resource = self.get_location_by_object(collection=CmdbLocation.COLLECTION, object_id=object_id)
             if resource:
@@ -105,6 +109,7 @@ class CmdbLocationManager(CmdbManagerBase):
         #     type_ = self._type_manager.get(resource.type_id)
         #     verify_access(type_, user, permission)
         return resource
+
 
 
     def get_all_children(self, public_id: int, all_locations: dict):
@@ -138,8 +143,10 @@ class CmdbLocationManager(CmdbManagerBase):
         return found_children
 
 
+
     def get_location(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
+        """TODO: document"""
         try:
             resource = []
             location = self._get(collection=CmdbLocation.COLLECTION, public_id=public_id)
@@ -155,6 +162,7 @@ class CmdbLocationManager(CmdbManagerBase):
 
     def get_locations_by(self, sort='public_id', direction=-1, user: UserModel = None,
                        permission: AccessControlPermission = None, **requirements):
+        """TODO: document"""
         ack = []
         locations = self._get_many(collection=CmdbLocation.COLLECTION, sort=sort, direction=direction, **requirements)
 
@@ -169,6 +177,8 @@ class CmdbLocationManager(CmdbManagerBase):
             ack.append(CmdbLocation(**location))
         return ack
 
+
+
     def get_locations_by_type(self, type_id: int):
         """
         function 'get_objects_by_type' gets all objects with the given type_id
@@ -181,6 +191,8 @@ class CmdbLocationManager(CmdbManagerBase):
         """
         return self.get_locations_by(type_id=type_id)
 
+
+
     def count_locations_by_type(self, public_id: int):
         """This method does not actually
                performs the find() operation
@@ -192,11 +204,14 @@ class CmdbLocationManager(CmdbManagerBase):
                Returns:
                    returns the count of the documents
                """
-
         formatted_type_id = {'type_id': public_id}
+
         return self.dbm.count(CmdbLocation.COLLECTION, formatted_type_id)
 
+
+
     def count_locations(self):
+        """TODO: document"""
         return self.dbm.count(collection=CmdbLocation.COLLECTION)
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -245,6 +260,7 @@ class CmdbLocationManager(CmdbManagerBase):
             #     self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as error:
             raise ObjectInsertError(error) from error
+
         return ack
 
 
@@ -253,6 +269,7 @@ class CmdbLocationManager(CmdbManagerBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
     def delete_location(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
+        """TODO: document"""
         current_location_instance: CmdbLocation = self.get_location(public_id=public_id)
         type_ = self._type_manager.get(current_location_instance.type_id)
 
@@ -298,6 +315,8 @@ class CmdbLocationManager(CmdbManagerBase):
         """
         return self.dbm.status()
 
+
+
     def get_new_id(self, collection: str) -> int:
         """
         Retrieves next publicID
@@ -310,20 +329,24 @@ class CmdbLocationManager(CmdbManagerBase):
         return self.dbm.get_next_public_id(collection)
 
 
+
     def has_children(self, public_id: int):
+        """Checks if a child location exists for the given public_id"""
         try:
             has_child = False
             a_child = self._get_child(CmdbLocation.COLLECTION,public_id)
 
             if a_child:
                 has_child = True
-        except Exception as error:
-            raise LocationManagerError(str(error)) from error
+        except Exception as err:
+            raise LocationManagerError(str(err)) from err
 
         return has_child
 
 
+
     def aggregate(self, collection, pipeline: Pipeline, **kwargs):
+        """TODO: document"""
         try:
             return self._aggregate(collection=collection, pipeline=pipeline, **kwargs)
         except Exception as error:

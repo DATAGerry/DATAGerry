@@ -162,7 +162,7 @@ class AbstractManagerBase:
 
     def _count_documents(self, collection: Collection, *args, **kwargs):
         """
-        Calls mongodb count_documents operation
+        Calls mongodb count operation
         Args:
             collection: Name of the collection
             filter: Match dictionary
@@ -171,6 +171,6 @@ class AbstractManagerBase:
             int: Number of found documents with given filter 
         """
         try:
-            return self._database_manager.count_documents(collection, *args, **kwargs)
+            return self._database_manager.count(collection, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err) from err
