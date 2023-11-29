@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdJobLog
+# -------------------------------------------------------------------------------------------------------------------- #
 
 ExportdLog.register_log_type(ExportdJobLog.__name__, ExportdJobLog)

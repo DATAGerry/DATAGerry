@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from cmdb.event_management.event import Event
@@ -28,12 +28,13 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError,
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class ExportdManagerBase(ExportdJobManagement):
-
+    """TODO: document"""
     def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager,
                  log_manager: ExportdLogManager, event: Event):
         self.job = job
@@ -43,7 +44,9 @@ class ExportdManagerBase(ExportdJobManagement):
         self.object_manager = object_manager
         self.log_manager = log_manager
         self.sources = self.__get_sources()
-        super(ExportdManagerBase, self).__init__(object_manager.dbm)
+        super().__init__(object_manager.dbm)
+
+
 
     def __get_exportvars(self):
         exportvars = {}
@@ -52,10 +55,14 @@ class ExportdManagerBase(ExportdJobManagement):
                 {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["templates"])})
         return exportvars
 
+
+
     def __get_sources(self):
         sources = []
         sources.append(ExportSource(self.job, object_manager=self.object_manager, event=self.event))
         return sources
+
+
 
     def __get__destinations(self):
         destinations = []
@@ -65,7 +72,7 @@ class ExportdManagerBase(ExportdJobManagement):
                 destination_params.update({param["name"]: param["value"]})
 
             export_destination = ExportDestination(
-                "cmdb.exportd.externals.external_systems.{}".format(destination["className"]),
+                f"cmdb.exportd.externals.external_systems.{destination['className']}",
                 destination_params,
                 self.variables,
                 self.event
@@ -74,7 +81,10 @@ class ExportdManagerBase(ExportdJobManagement):
 
         return destinations
 
+
+
     def execute(self, user_id: int, user_name: str, log_flag: bool = True) -> ExportdHeader:
+        """TODO. document"""
         # get cmdb objects from all sources
         cmdb_objects = set()
         exportd_header = ExportdHeader()
@@ -108,14 +118,18 @@ class ExportdManagerBase(ExportdJobManagement):
         return exportd_header
 
 
-class ExportVariable:
 
+class ExportVariable:
+    """TODO: document"""
     def __init__(self, name, value_tpl_default, value_tpl_types: dict = None):
         self.__name = name
         self.__value_tpl_default = value_tpl_default
         self.__value_tpl_types = value_tpl_types or {}
 
+
+
     def get_value(self, cmdb_object, template_data):
+        """TODO: document"""
         # get value template
         value_template = self.__value_tpl_default
         object_type_id = cmdb_object.type_information['type_id']
@@ -137,17 +151,21 @@ class ExportVariable:
 
 
 class ExportSource:
-
+    """TODO: document"""
     def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager, event: Event):
         self.__job = job
         self.event = event
         self.__obm = object_manager
         self.__objects = self.__fetch_objects()
 
+
+
     def get_objects(self):
+        """TODO: document"""
         return self.__objects
 
     def __fetch_objects(self):
+        """TODO: document"""
         query = []
         result = []
         condition = []
@@ -188,7 +206,7 @@ class ExportSource:
 
 
 class ExportDestination:
-
+    """TODO: document"""
     def __init__(self, class_external_system, destination_parms, export_vars, event=None):
         self.__destination_parms = destination_parms
         self.__export_vars = export_vars
@@ -196,10 +214,13 @@ class ExportDestination:
         self.__external_system = external_system_class(self.__destination_parms, self.__export_vars, event)
 
     def get_external_system(self):
+        """TODO: document"""
         return self.__external_system
 
 
+
 class ExternalSystem:
+    """TODO: document"""
     parameters = {}
     variables = {}
 
@@ -219,21 +240,27 @@ class ExternalSystem:
         self.msg_string = ""
 
     def prepare_export(self):
+        """TODO: document"""
         pass
 
     def add_object(self, cmdb_object, template_data):
+        """TODO: document"""
         pass
 
     def finish_export(self) -> ExportdHeader:
+        """TODO: document"""
         pass
 
     def error(self, msg):
+        """TODO: document"""
         raise ExportJobConfigException(msg)
 
     def set_msg(self, msg):
+        """TODO: document"""
         self.msg_string = msg
 
 
 class ExportJobConfigException(CMDBError):
+    """TODO: document"""
     def __init__(self, *args, **kwargs):
         Exception.__init__(self, *args, **kwargs)

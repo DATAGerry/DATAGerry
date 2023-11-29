@@ -13,31 +13,39 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO. document"""
 import ipaddress
 import xml.etree.ElementTree as ET
-import requests
+
 import json
 import re
 import os
-import pymysql
 import subprocess
+
+import requests
+
+import pymysql
+
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExternalSystemDummy(ExternalSystem):
-
+    """TODO. document"""
     parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__rows = []
+
+
 
     def prepare_export(self):
         pass
+
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -49,6 +57,8 @@ class ExternalSystemDummy(ExternalSystem):
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
         self.__rows.append(row)
 
+
+
     def finish_export(self):
         json_data = json.dumps(self.__rows)
         print(json_data)
@@ -56,8 +66,9 @@ class ExternalSystemDummy(ExternalSystem):
         return header
 
 
-class ExternalSystemOpenNMS(ExternalSystem):
 
+class ExternalSystemOpenNMS(ExternalSystem):
+    """TODO. document"""
     parameters = [
         {"name": "resturl", "required": True, "description": "OpenNMS REST URL", "default": "http://127.0.0.1:8980/opennms/rest"},
         {"name": "restuser", "required": True, "description": "OpenNMS REST user", "default": "admin"},
@@ -138,8 +149,10 @@ class ExternalSystemOpenNMS(ExternalSystem):
         "longitude": 32
     }
 
+
+
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__services = self._destination_parms.get("services").split()
         self.__snmp_export = False
@@ -152,6 +165,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         self.__timeout = 10
         self.__xml = None
 
+
+
     def prepare_export(self):
         # check connection to OpenNMS
         self.__onms_check_connection()
@@ -159,6 +174,8 @@ class ExternalSystemOpenNMS(ExternalSystem):
         attributes = {}
         attributes["foreign-source"] = self._destination_parms["requisition"]
         self.__xml = ET.Element("model-import", attributes)
+
+
 
     def add_object(self, cmdb_object, template_data):
         # init error handling
@@ -242,24 +259,30 @@ class ExternalSystemOpenNMS(ExternalSystem):
         if warning:
             self.__obj_warning.append(cmdb_object.object_information['object_id'])
 
+
+
     def finish_export(self):
         self.__onms_update_requisition()
         self.__onms_sync_requisition()
         # create result message
         msg = "Export to OpenNMS finished. "
-        msg += "{} objects exported. ".format(len(self.__obj_successful))
-        msg += "The following objects were exported with warnings: {}".format(self.__obj_warning)
+        msg += f"{len(self.__obj_successful)} objects exported. "
+        msg += f"The following objects were exported with warnings: {self.__obj_warning}"
         self.set_msg(msg)
 
+
+
     def __onms_check_connection(self):
-        url = "{}/info".format(self._destination_parms["resturl"])
+        url = f"{self._destination_parms['resturl']}/info"
         try:
             response = requests.get(url, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
+
+
 
     def __onms_update_requisition(self):
         url = "{}/requisitions".format(self._destination_parms["resturl"])
@@ -271,20 +294,24 @@ class ExternalSystemOpenNMS(ExternalSystem):
             response = requests.post(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
                                      verify=False, timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
+
+
     def __onms_sync_requisition(self):
-        url = "{}/requisitions/{}/import".format(self._destination_parms["resturl"], self._destination_parms["requisition"])
+        url = f"{self._destination_parms['resturl']}/requisitions/{self._destination_parms['requisition']}/import"
         try:
             response = requests.put(url, data="", auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
+
+
 
     def __onms_update_snmpconf_v12(self, ip, community, version="v2c", port="161"):
         # create XML
@@ -301,16 +328,20 @@ class ExternalSystemOpenNMS(ExternalSystem):
         snmp_version.text = version
 
         # send XML to OpenNMS
-        url = "{}/snmpConfig/{}".format(self._destination_parms["resturl"], ip)
+        url = f"{self._destination_parms['resturl']}/snmpConfig/{ip}"
         data = ET.tostring(snmp_config_xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
         try:
-            response = requests.put(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
-                                    verify=False, timeout=self.__timeout)
+            response = requests.put(url,
+                                    data=data,
+                                    headers=headers,
+                                    auth=(self._destination_parms["restuser"],self._destination_parms["restpassword"]),
+                                    verify=False,
+                                    timeout=self.__timeout)
             if response.status_code > 204:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
@@ -333,7 +364,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
 
 class ExternalSystemCpanelDns(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
         {"name": "cpanelApiUrl",        "required": True,   "description": "cPanel API base URL", "default": "https://1.2.3.4:2083/json-api"},
         {"name": "cpanelApiUser",       "required": True,   "description": "cPanel username", "default": "admin"},
@@ -349,7 +380,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
     ]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemCpanelDns, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
 
         self.__variables = export_vars
 
@@ -359,7 +390,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
         self.__cpanel_api_token = self._destination_parms.get("cpanelApiToken")
         self.__domain_name = self._destination_parms.get("domainName")
         self.__cpanel_api_url = self._destination_parms.get("cpanelApiUrl")
-        self.__cpanel_api_url += "/cpanel?cpanel_jsonapi_user={}".format(self.__cpanel_api_user)
+        self.__cpanel_api_url += f"/cpanel?cpanel_jsonapi_user={self.__cpanel_api_user}"
         self.__cpanel_api_url += "&cpanel_jsonapi_apiversion=2&"
 
         if not (self.__cpanel_api_user and self.__cpanel_api_password and self.__domain_name and self.__cpanel_api_url):
@@ -372,6 +403,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
         self.__existing_records = self.get_a_records(self.__domain_name)
         self.__created_records = {}
 
+
+
     def add_object(self, cmdb_object, template_data):
         # get variables from object
         hostname = self.format_hostname(str(self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)))
@@ -379,7 +412,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         # ignore CmdbObject,
         if ip == "" or hostname == "":
-            self.set_msg('Ignore CmdbObject ID:%s. IP and/or hostname is invalid' % cmdb_object.object_information['object_id'])
+            self.set_msg(f"Ignore CmdbObject ID:{cmdb_object.object_information['object_id']}. IP and/or hostname is invalid")
 
         # check if a DNS record exist for object
         if hostname in self.__existing_records.keys():
@@ -400,10 +433,14 @@ class ExternalSystemCpanelDns(ExternalSystem):
         # save to created records
         self.__created_records[hostname] = ip
 
+
+
     def finish_export(self):
         # delete all DNS A records that does not exist in DATAGERRY
         for hostname in self.__existing_records:
             self.delete_a_records(self.__domain_name, hostname)
+
+
 
     def get_a_records(self, cur_domain: str):
         """
@@ -413,7 +450,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
         Returns:
             A records with hostname -> IP
         """
-        url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone&domain={}{}".format(cur_domain, "&type=A")
+        url_parameters = f"cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone&domain={cur_domain}&type=A"
         json_result = self.get_data(url_parameters)
 
         if json_result['cpanelresult']['data'][0]['status'] == 0:
@@ -444,6 +481,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         return output
 
+
+
     def get_data(self, url: str):
         """
         Sends an HTTP request to cPanel and returns result
@@ -467,7 +506,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
             response = requests.get(url,
                                     headers=headers,
                                     auth=(self.__cpanel_api_user, self.__cpanel_api_password),
-                                    )
+                                    timeout=10)
 
             # If the response was successful, no Exception will be raised
             response.raise_for_status()
@@ -481,6 +520,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         return json_result
 
+
+
     def add_a_record(self, cur_domain, cur_hostname, cur_ip):
         """
         Adds an A record to the given domain in cPanel
@@ -493,10 +534,12 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         """
         url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=add_zone_record"
-        url_parameters += "&domain={}".format(cur_domain)
-        url_parameters += "&name={}".format(cur_hostname)
-        url_parameters += "&type=A&address={}".format(cur_ip)
+        url_parameters += f"&domain={cur_domain}"
+        url_parameters += f"&name={cur_hostname}"
+        url_parameters += f"&type=A&address={cur_ip}"
         self.get_data(url_parameters)
+
+
 
     def delete_a_records(self, cur_domain, cur_hostname):
         """
@@ -518,6 +561,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
                 url_parameters += "&domain={}&line={}".format(cur_domain, str(records[r_name]['line']))
                 self.get_data(url_parameters)
 
+
+
     def format_hostname(self, value: str) -> str:
         """
     Checks, if a hostname has the correct format.
@@ -529,6 +574,8 @@ class ExternalSystemCpanelDns(ExternalSystem):
         value = re.sub(r' ', "", value)
         value = re.sub(r'[^A-Za-z0-9\-\.]', "", value)
         return value
+
+
 
     def format_ip(self, value) -> str:
         """
@@ -542,13 +589,14 @@ class ExternalSystemCpanelDns(ExternalSystem):
         try:
             if ipaddress.IPv4Address(value) or ipaddress.IPv6Address(value):
                 return value
-        except:
+        except Exception:
             return ""
+
         return ""
 
 
 class ExternalSystemCsv(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
         {"name": "csv_filename", "required": False, "description": "name of the output CSV file. Default: stdout",
          "default": "/tmp/testfile.csv"},
@@ -559,7 +607,7 @@ class ExternalSystemCsv(ExternalSystem):
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemCsv, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # get parameters for cPanel access
@@ -569,8 +617,12 @@ class ExternalSystemCsv(ExternalSystem):
         self.header = []
         self.rows = []
 
+
+
     def prepare_export(self):
         pass
+
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -579,6 +631,8 @@ class ExternalSystemCsv(ExternalSystem):
                 self.header.append(key)
             row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))})
         self.rows.append(row)
+
+
 
     def finish_export(self):
         import csv
@@ -590,7 +644,7 @@ class ExternalSystemCsv(ExternalSystem):
 
 
 class ExternalSystemAnsible(ExternalSystem):
-
+    """TODO: document"""
     parameters = []
 
     variables = [
@@ -611,8 +665,9 @@ class ExternalSystemAnsible(ExternalSystem):
         }
     ]
 
+
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # initialize store for created ansible groups
@@ -623,6 +678,8 @@ class ExternalSystemAnsible(ExternalSystem):
 
         # initialize store for hostname
         self.host_list = []
+
+
 
     def add_object(self, cmdb_object, template_data):
         # get hostname for ansible inventory
@@ -674,17 +731,28 @@ class ExternalSystemAnsible(ExternalSystem):
         return header
 
 
-class ExternalSystemExecuteScript(ExternalSystem):
 
+class ExternalSystemExecuteScript(ExternalSystem):
+    """TODO: document"""
     parameters = [
-        {"name": "script", "required": True, "description": "The script or binary to execute", "default": "/opt/scripts/export"},
-        {"name": "timeout", "required": True, "description": "Timeout for executing the script in seconds", "default": "30"}
+        {
+            "name": "script",
+            "required": True,
+            "description": "The script or binary to execute",
+            "default": "/opt/scripts/export"
+        },
+        {
+            "name": "timeout",
+            "required": True,
+            "description": "Timeout for executing the script in seconds",
+            "default": "30"
+        }
     ]
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__script = self._destination_parms.get("script")
         self.__timeout = int(self._destination_parms.get("timeout"))
@@ -736,18 +804,38 @@ class ExternalSystemExecuteScript(ExternalSystem):
 
 
 class ExternalSystemGenericRestCall(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "url", "required": True, "description": "URL for HTTP POST", "default": "https://localhost:8443/dg_export"},
-        {"name": "timeout", "required": True, "description": "Timeout for executing the REST call in seconds", "default": "30"},
-        {"name": "username", "required": False, "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.", "default": ""},
-        {"name": "password", "required": False, "description": "Password for a HTTP basic authentication.", "default": ""}
+        {
+            "name": "url",
+            "required": True,
+            "description": "URL for HTTP POST",
+            "default": "https://localhost:8443/dg_export"
+        },
+        {
+            "name": "timeout",
+            "required": True,
+            "description": "Timeout for executing the REST call in seconds",
+            "default": "30"
+        },
+        {
+            "name": "username",
+            "required": False,
+            "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.",
+            "default": ""
+        },
+        {
+            "name": "password",
+            "required": False,
+            "description": "Password for a HTTP basic authentication.",
+            "default": ""
+        }
     ]
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__url = self._destination_parms.get("url")
         self.__timeout = int(self._destination_parms.get("timeout"))
@@ -757,8 +845,12 @@ class ExternalSystemGenericRestCall(ExternalSystem):
         if not (self.__url and self.__timeout):
             self.error("missing parameters")
 
+
+
     def prepare_export(self):
         pass
+
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -769,6 +861,8 @@ class ExternalSystemGenericRestCall(ExternalSystem):
         for key in self._export_vars:
             row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
         self.__rows.append(row)
+
+
 
     def finish_export(self):
         # create json data
@@ -785,21 +879,22 @@ class ExternalSystemGenericRestCall(ExternalSystem):
             response = requests.post(self.__url, data=json_data, headers=headers, auth=auth, verify=False,
                                      timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to REST endpoint: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to REST endpoint: HTTP/{str(response.status_code)}")
         except requests.exceptions.ConnectionError:
             self.error("Can't connect to REST endpoint")
         except requests.exceptions.Timeout:
             self.error("Timeout connecting to REST endpoint")
 
 
-class ExternalSystemGenericPullJson(ExternalSystem):
 
+class ExternalSystemGenericPullJson(ExternalSystem):
+    """TODO: document"""
     parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemGenericPullJson, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__rows = []
 
     def prepare_export(self):
@@ -821,8 +916,9 @@ class ExternalSystemGenericPullJson(ExternalSystem):
         return header
 
 
-class ExternalSystemMySQLDB(ExternalSystem):
 
+class ExternalSystemMySQLDB(ExternalSystem):
+    """TODO: document"""
     parameters = [
         {"name": "dbserver", "required": True, "description": "database server", "default": "localhost"},
         {"name": "database", "required": True, "description": "database name", "default": "db"},
@@ -839,7 +935,7 @@ class ExternalSystemMySQLDB(ExternalSystem):
     ]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemMySQLDB, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
 
 
         # get table names for sync
@@ -851,14 +947,20 @@ class ExternalSystemMySQLDB(ExternalSystem):
                 self.__tables.append(table_name)
                 self.__table_data[table_name] = []
 
+
+
     def prepare_export(self):
         pass
+
+
 
     def add_object(self, cmdb_object, template_data):
         # add data for insert statement
         for table in self.__tables:
             varname = "table_" + table
             self.__table_data[table].append(str(self._export_vars.get(varname, ExportVariable(varname, "")).get_value(cmdb_object, template_data)))
+
+
 
     def finish_export(self):
         # connect to database
@@ -878,14 +980,14 @@ class ExternalSystemMySQLDB(ExternalSystem):
             # remove all data from existing tables
             for table in self.__tables:
                 with db_connection.cursor() as cursor:
-                    sql = "DELETE FROM {}".format(table)
+                    sql = f"DELETE FROM {table}"
                     cursor.execute(sql)
 
             # insert new data in all tables
             for table in self.__tables:
                 for data in self.__table_data[table]:
                     with db_connection.cursor() as cursor:
-                        sql = "INSERT INTO {} VALUES({})".format(table, data)
+                        sql = f"INSERT INTO {table} VALUES({data})"
                         cursor.execute(sql)
 
             # close transaction
