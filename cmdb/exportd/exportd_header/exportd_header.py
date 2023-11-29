@@ -13,15 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+"""TODO: document"""
 
 
 class ExportdHeader(object):
-    def __init__(self, data: str = '', mimetype: str = 'application/json', charset: str = 'utf-8', status: int = 200, **kwargs):
+    """TODO: document"""
+    def __init__(self,
+                 data: str = '',
+                 mimetype: str = 'application/json',
+                 charset: str = 'utf-8',
+                 status: int = 200,
+                 **kwargs):
         """
         Args:
             data: name of this job
@@ -34,4 +36,4 @@ class ExportdHeader(object):
         self.mimetype = mimetype
         self.charset = charset
         self.status = status
-        super(ExportdHeader, self).__init__(**kwargs)
+        super().__init__(**kwargs)

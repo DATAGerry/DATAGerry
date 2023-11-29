@@ -13,19 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import Enum
+
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 from cmdb.framework.utils import Model
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 
 class DocapiTemplateType(Enum):
+    """TODO: document"""
     OBJECT = 0
 
 
@@ -63,10 +62,13 @@ class DocapiTemplate(TemplateManagementBase):
         self.template_style = template_style
         self.template_type = template_type or DocapiTemplateType.OBJECT.name
         self.template_parameters = template_parameters
-        super(DocapiTemplate, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+
+
 
     @classmethod
     def from_data(cls, data: dict) -> "DocapiTemplate":
+        """TODO: document"""
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
@@ -80,8 +82,11 @@ class DocapiTemplate(TemplateManagementBase):
             template_parameters=data.get('template_parameters', None),
         )
 
+
+
     @classmethod
     def to_json(cls, instance: "DocapiTemplate", *args, **kwargs) -> dict:
+        """TODO: document"""
         return {
             'public_id': instance.public_id,
             'name': instance.name,
@@ -95,6 +100,8 @@ class DocapiTemplate(TemplateManagementBase):
             'template_parameters': instance.template_parameters
         }
 
+
+
     def get_public_id(self) -> int:
         """
         get the public id of current element
@@ -103,17 +110,16 @@ class DocapiTemplate(TemplateManagementBase):
             Since the models object is not initializable
             the child class object will inherit this function
             SHOULD NOT BE OVERWRITTEN!
-
         Returns:
             int: public id
-
         Raises:
             NoPublicIDError: if `public_id` is zero or not set
-
         """
         if self.public_id == 0 or self.public_id is None:
             raise NoPublicIDError()
         return self.public_id
+
+
 
     def get_name(self) -> str:
         """
@@ -126,6 +132,8 @@ class DocapiTemplate(TemplateManagementBase):
         else:
             return self.name
 
+
+
     def get_label(self) -> str:
         """
         Get the label of the template
@@ -134,8 +142,10 @@ class DocapiTemplate(TemplateManagementBase):
         """
         if self.label is None:
             return ""
-        else:
-            return self.label
+
+        return self.label
+
+
 
     def get_description(self) -> str:
         """
@@ -145,8 +155,10 @@ class DocapiTemplate(TemplateManagementBase):
         """
         if self.description is None:
             return ""
-        else:
-            return self.description
+
+        return self.description
+
+
 
     def get_active(self) -> bool:
         """
@@ -156,11 +168,14 @@ class DocapiTemplate(TemplateManagementBase):
         """
         if self.active is None:
             return ""
-        else:
-            return self.active
+
+        return self.active
 
     def get_author_id(self):
+        """TODO: document"""
         return self.author_id
+
+
 
     def get_template_data(self):
         """
@@ -170,6 +185,8 @@ class DocapiTemplate(TemplateManagementBase):
         """
         return self.template_data
 
+
+
     def get_template_style(self):
         """
         Get style of this template
@@ -177,6 +194,8 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_style
+
+
 
     def get_template_type(self):
         """
@@ -186,6 +205,8 @@ class DocapiTemplate(TemplateManagementBase):
         """
         return self.template_type
 
+
+
     def get_template_parameters(self):
         """
         Get parameters of this template
@@ -193,6 +214,7 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_parameters
+
 
 
 class NoPublicIDError(CMDBError):

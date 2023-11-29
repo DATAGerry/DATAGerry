@@ -13,17 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd import ExportdJob
 from cmdb.manager.managers import ManagerBase as ExportDManager
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.search import Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportDJobManager(ExportDManager):
-
+    """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
         Constructor of `ExportDJobManager`
@@ -58,7 +58,7 @@ class ExportDJobManager(ExportDManager):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[ExportdJob] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJob)
         return iteration_result

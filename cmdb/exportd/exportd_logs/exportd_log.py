@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime
 from enum import Enum
@@ -21,16 +21,13 @@ from enum import Enum
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from cmdb.framework import CmdbLog
 from cmdb.framework.utils import Model, Collection
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class LogAction(Enum):
+    """TODO: document"""
     CREATE = 0
     EDIT = 1
     EXECUTE = 2
@@ -38,6 +35,7 @@ class LogAction(Enum):
 
 
 class ExportdMetaLog(JobManagementBase):
+    """TODO: document"""
     COLLECTION: Collection = 'exportd.logs'
     MODEL: Model = 'ExportdLog'
 
@@ -46,10 +44,11 @@ class ExportdMetaLog(JobManagementBase):
         self.log_time: datetime = log_time
         self.action: LogAction = action
         self.action_name = action_name
-        super(ExportdMetaLog, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
 
 class ExportdJobLog(ExportdMetaLog):
+    """TODO: document"""
     UNKNOWN_USER_STRING = 'Unknown'
 
     def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction, action_name: str,
@@ -61,8 +60,10 @@ class ExportdJobLog(ExportdMetaLog):
         self.user_name = user_name or self.UNKNOWN_USER_STRING
         self.event = event
         self.message = message
-        super(ExportdJobLog, self).__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action,
+        super().__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action,
                                             action_name=action_name)
+
+
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "ExportdJobLog":
@@ -80,6 +81,8 @@ class ExportdJobLog(ExportdMetaLog):
             action=data.get('action', None),
             action_name=data.get('action_name', None)
         )
+
+
 
     @classmethod
     def to_json(cls, instance: "ExportdJobLog") -> dict:
@@ -100,5 +103,6 @@ class ExportdJobLog(ExportdMetaLog):
 
 
 class ExportdLog(CmdbLog):
+    """TODO: document"""
     REGISTERED_LOG_TYPE = {}
     DEFAULT_LOG_TYPE = ExportdJobLog
