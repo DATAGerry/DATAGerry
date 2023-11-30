@@ -13,10 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.updater.updater_settings import UpdateSettings
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UpdaterModule:
     """Updater module class"""
@@ -34,17 +34,24 @@ class UpdaterModule:
         self.__settings: UpdateSettings = self.__init_settings(auth_settings_values)
         self.system_settings_reader = system_settings_reader
 
+
+
     def __init_settings(self, auth_settings_values: dict) -> UpdateSettings:
         """Merge default values with database entries"""
         return UpdateSettings(**auth_settings_values)
+
+
 
     @property
     def settings(self) -> UpdateSettings:
         """Get the current auth settings"""
         return self.__settings
 
+
+
     @staticmethod
     def get_last_version() -> dict:
+        """TODO: document"""
         arr_versions = sorted(UpdaterModule.__UPDATER_VERSIONS_POOL__)
         return {'_id': 'updater',
                 'version': arr_versions[len(arr_versions)-1]}

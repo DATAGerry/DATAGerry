@@ -13,10 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import IntEnum
 
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 GLOBAL_RIGHT_IDENTIFIER = '*'
 
@@ -53,6 +54,7 @@ _nameToLevel = {
 
 
 class BaseRight:
+    """TODO: document"""
     MIN_LEVEL = Levels.NOTSET
     MAX_LEVEL = Levels.CRITICAL
 
@@ -63,15 +65,17 @@ class BaseRight:
 
     def __init__(self, level: Levels, name: str, label: str = None, description: str = None):
         self.level = level
-        self.name = '{}.{}'.format(self.PREFIX, name)
+        self.name = f'{self.PREFIX}.{name}'
         self.label = label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
         self.description = description
         self.is_master = name == GLOBAL_RIGHT_IDENTIFIER
 
     def get_prefix(self):
+        """TODO: document"""
         return self.PREFIX.split('.')[-1]
 
     def get_label(self):
+        """TODO: document"""
         return self.label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
 
     def __getitem__(self, item):
@@ -79,10 +83,12 @@ class BaseRight:
 
     @classmethod
     def get_levels(cls):
+        """TODO: document"""
         return _levelToName
 
     @property
     def level(self):
+        """TODO: document"""
         return self._level
 
     @level.setter
@@ -97,6 +103,7 @@ class BaseRight:
 
     @classmethod
     def to_dict(cls, instance: "BaseRight") -> dict:
+        """TODO: document"""
         return {
             'level': instance.level,
             'name': instance.name,
@@ -105,26 +112,31 @@ class BaseRight:
             'is_master': instance.is_master
         }
 
+# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
 
 class InvalidLevelRightError(CMDBError):
+    """TODO: document"""
     def __init__(self, level):
         self.message = f'Invalid right level - Level {level} does not exist.'
-        super(InvalidLevelRightError, self).__init__()
+        super().__init__()
 
 
 class PoorlyLevelRightError(CMDBError):
+    """TODO: document"""
     def __init__(self, level, min_level):
-        self.message = f'The minimum level for the right has been violated. Level was {level}, expected at least {min_level}'
-        super(PoorlyLevelRightError, self).__init__()
+        self.message = f'Min level for the right has been violated. Level was {level}, expected at least {min_level}'
+        super().__init__()
 
 
 class MaxLevelRightError(CMDBError):
+    """TODO: document"""
     def __init__(self, level, max_level):
-        self.message = f'The maximum level for the right has been violated. Level was {level}, expected at most {max_level}'
-        super(MaxLevelRightError, self).__init__()
+        self.message = f'Max level for the right has been violated. Level was {level}, expected at most {max_level}'
+        super().__init__()
 
 
 class NoParentPrefixError(CMDBError):
+    """TODO: document"""
     def __init__(self):
         self.message = 'Right dont has a parent prefix.'
-        super(NoParentPrefixError, self).__init__()
+        super().__init__()

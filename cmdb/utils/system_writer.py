@@ -13,15 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Configuration module for settings in file format and in the database
 """
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.database.errors.database_errors import NoDocumentFound
-from cmdb.utils.error import CMDBError
-
 import logging
+
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
 
@@ -30,7 +30,6 @@ class SystemWriter:
     Superclass for general write permissions
     Watch out with the collection constants. In Mongo the Settings Collection is pre-defined
     """
-
     COLLECTION = 'settings.*'
 
     def __init__(self, writer: DatabaseManagerMongo):
@@ -40,6 +39,8 @@ class SystemWriter:
             writer: Database managers instance
         """
         self.writer = writer
+
+
 
     def write(self, _id: str, data: dict):
         """
@@ -54,6 +55,8 @@ class SystemWriter:
         """
         raise NotImplementedError
 
+
+
     def verify(self, _id: int, data: dict) -> bool:
         """
         Checks if configuration entry exists
@@ -64,7 +67,7 @@ class SystemWriter:
 
 
 class SystemSettingsWriter(SystemWriter):
-    """"""
+    """TODO: document"""
     COLLECTION = 'settings.conf'
 
     def __init__(self, database_manager: DatabaseManagerMongo):
@@ -73,14 +76,17 @@ class SystemSettingsWriter(SystemWriter):
         Args:
             database_manager: Database connection
         """
-        super(SystemSettingsWriter, self).__init__(database_manager)
+        super().__init__(database_manager)
+
+
 
     def write(self, _id: str, data: dict):
         """
         Write new settings in database
         """
-
         return self.writer.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
+
+
 
     def verify(self, _id: str, data: dict = None) -> bool:
         """
@@ -103,11 +109,11 @@ class SystemSettingsWriter(SystemWriter):
         return True
 
 
+
 class NoEntryFoundError(CMDBError):
     """
     Error if no entry exists
     """
-
     def __init__(self, _id):
         super().__init__()
-        self.message = "Entry with the id {} was not found".format(_id)
+        self.message = f"Entry with the id {_id} was not found"

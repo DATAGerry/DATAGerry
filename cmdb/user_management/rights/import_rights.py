@@ -13,30 +13,34 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from cmdb.user_management.models.right import BaseRight, Levels
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ImportRight(BaseRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
-    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'import')
+    PREFIX = f'{BaseRight.PREFIX}.import'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(ImportRight, self).__init__(level, name, description=description)
+        super().__init__(level, name, description=description)
+
 
 
 class ImportObjectRight(ImportRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
-    PREFIX = '{}.{}'.format(ImportRight.PREFIX, 'object')
+    PREFIX = f'{ImportRight.PREFIX}.object'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(ImportObjectRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)
+
 
 
 class ImportTypeRight(ImportRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.SECURE
-    PREFIX = '{}.{}'.format(ImportRight.PREFIX, 'type')
+    PREFIX = f'{ImportRight.PREFIX}.type'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(ImportTypeRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)

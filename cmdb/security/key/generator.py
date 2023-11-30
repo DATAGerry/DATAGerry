@@ -13,18 +13,21 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from Crypto import Random
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.system_writer import SystemSettingsWriter
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class KeyGenerator:
-
+    """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.ssw = SystemSettingsWriter(database_manager)
 
+
+
     def generate_rsa_keypair(self):
+        """TODO: document"""
         from Crypto.PublicKey import RSA
         key = RSA.generate(2048)
         private_key = key.export_key()
@@ -37,4 +40,5 @@ class KeyGenerator:
         self.ssw.write('security', {'asymmetric_key': asymmetric_key})
 
     def generate_symmetric_aes_key(self):
+        """TODO: document"""
         self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})

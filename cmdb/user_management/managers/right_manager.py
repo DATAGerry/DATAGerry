@@ -13,7 +13,8 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
+import logging
 from typing import List
 
 from ..models.right import BaseRight
@@ -21,13 +22,16 @@ from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerIterationError, ManagerGetError
 from ...manager.managers import ManagerBase
-
+# -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
 class RightManager(ManagerBase):
-
+    """TODO: document"""
     def __init__(self, right_tree):
         self.rights = RightManager.flat_tree(right_tree)
-        super(RightManager, self).__init__(None, None)
+        super().__init__(None, None)
+
+
 
     @staticmethod
     def flat_tree(right_tree) -> List[BaseRight]:
@@ -42,11 +46,13 @@ class RightManager(ManagerBase):
         """
         rights: List[BaseRight] = []
         for right in right_tree:
-            if isinstance(right, tuple) or isinstance(right, list):
+            if isinstance(right, (tuple, list)):
                 rights = rights + RightManager.flat_tree(right)
             else:
                 rights.append(right)
         return rights
+
+
 
     @staticmethod
     def tree_to_json(right_tree) -> list:
@@ -61,6 +67,8 @@ class RightManager(ManagerBase):
                 raw_tree.append(BaseRight.to_dict(node))
         return raw_tree
 
+
+
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[
         BaseRight]:
         try:
@@ -71,9 +79,11 @@ class RightManager(ManagerBase):
             else:
                 spliced_rights = sorted_rights
         except (AttributeError, ValueError, IndexError) as err:
-            raise ManagerIterationError(err)
+            raise ManagerIterationError(err) from err
         result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
         return result
+
+
 
     def get(self, name: str) -> BaseRight:
         """
@@ -88,13 +98,19 @@ class RightManager(ManagerBase):
         try:
             return next(right for right in self.rights if right.name == name)
         except Exception as err:
-            raise ManagerGetError(err)
+            raise ManagerGetError(err) from err
+
+
 
     def insert(self, resource: dict) -> PublicID:
         raise NotImplementedError
 
+
+
     def update(self, public_id: PublicID, resource: dict):
         raise NotImplementedError
+
+
 
     def delete(self, public_id: PublicID):
         raise NotImplementedError

@@ -13,18 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.type import TypeModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Update20200226(Updater):
+    """TODO: document"""
 
     def author(self):
         return 'sdu'
@@ -36,7 +37,9 @@ class Update20200226(Updater):
         return 'Update all types where category ID is 0, to root category public ID.'
 
     def increase_updater_version(self, value):
-        super(Update20200226, self).increase_updater_version(value)
+        super().increase_updater_version(value)
+
+
 
     def start_update(self):
         try:
@@ -49,7 +52,8 @@ class Update20200226(Updater):
                                                   update={'category_id': category[0].get_public_id()})
 
             # Remove the property root from category collection
-            self.database_manager.unset_update_many(CategoryModel.COLLECTION, 'root')
+            self.database_manager.unset_update_many(CategoryModel.COLLECTION, {}, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             raise Exception(err.message)
+
         self.increase_updater_version(20200226)

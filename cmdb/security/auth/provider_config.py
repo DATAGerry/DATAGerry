@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 
 class AuthProviderConfig:
     """Base provider config"""
@@ -30,8 +30,11 @@ class AuthProviderConfig:
         """
         self.active: bool = active
         # auto set parameters as attribute
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
+
 
     def is_active(self) -> bool:
+        """TODO: document"""
         return self.active

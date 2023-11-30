@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import Union
 
 from .right_manager import RightManager
@@ -24,13 +24,16 @@ from ...framework.utils import PublicID
 from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError
 from ...manager.managers import ManagerBase
 from ...search import Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class GroupManager(ManagerBase):
+    """TODO: document"""
 
     def __init__(self, database_manager: DatabaseManagerMongo = None, right_manager: RightManager = None):
         self.right_manager: RightManager = right_manager
-        super(GroupManager, self).__init__(UserGroupModel.COLLECTION, database_manager=database_manager)
+        super().__init__(UserGroupModel.COLLECTION, database_manager=database_manager)
+
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[UserGroupModel]:
@@ -47,7 +50,6 @@ class GroupManager(ManagerBase):
         Returns:
             IterationResult: Instance of IterationResult with generic CategoryModel.
         """
-
         try:
             query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
             count_query: Pipeline = self.builder.count(filter=filter)
@@ -57,10 +59,13 @@ class GroupManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[UserGroupModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(UserGroupModel)
+
         return iteration_result
+
+
 
     def get(self, public_id: Union[PublicID, int]) -> UserGroupModel:
         """
@@ -77,6 +82,8 @@ class GroupManager(ManagerBase):
             return UserGroupModel.from_data(resource_result, rights=self.right_manager.rights)
         raise ManagerGetError(f'Group with ID: {public_id} not found!')
 
+
+
     def insert(self, group: Union[UserGroupModel, dict]) -> PublicID:
         """
         Insert a single group into the system.
@@ -92,7 +99,10 @@ class GroupManager(ManagerBase):
         """
         if isinstance(group, UserGroupModel):
             group = UserGroupModel.to_data(group)
+
         return self._insert(self.collection, resource=group)
+
+
 
     def update(self, public_id: Union[PublicID, int], group: Union[UserGroupModel, dict]):
         """
@@ -105,8 +115,10 @@ class GroupManager(ManagerBase):
 
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=group)
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
         return update_result
+
+
 
     def delete(self, public_id: Union[PublicID, int]) -> UserGroupModel:
         """
@@ -129,4 +141,5 @@ class GroupManager(ManagerBase):
 
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No group matched this public id')
+
         return group

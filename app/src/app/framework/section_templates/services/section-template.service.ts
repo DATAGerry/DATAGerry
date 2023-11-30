@@ -22,9 +22,9 @@ import { HttpHeaders, HttpParams } from '@angular/common/http';
 import { map } from 'rxjs/operators';
 import { Observable } from 'rxjs';
 
-import { ApiCallService, ApiServicePrefix, resp } from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, resp } from 'src/app/services/api-call.service';
 
-import { CmdbSectionTemplate } from '../../framework/models/cmdb-section-template';
+import { CmdbSectionTemplate } from '../../models/cmdb-section-template';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable({

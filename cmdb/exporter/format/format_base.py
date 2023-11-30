@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 
 class BaseExporterFormat:
+    """TODO: document"""
     FILE_EXTENSION = None
     LABEL = None
     MULTITYPE_SUPPORT = False
@@ -27,4 +28,5 @@ class BaseExporterFormat:
         self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
 
     def export(self, data, *args):
+        """TODO: document"""
         pass

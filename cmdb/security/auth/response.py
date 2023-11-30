@@ -13,11 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from werkzeug.wrappers import Response
 
 from cmdb.interface.response import make_api_response
 from cmdb.user_management import UserModel
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LoginResponse:
     """Basic login instance for returning a login data"""
@@ -39,6 +40,8 @@ class LoginResponse:
         self.token_issued_at = token_issued_at
         self.token_expire = token_expire
 
+
+
     def make_response(self) -> Response:
         """
         Make a valid http response.
@@ -47,6 +50,8 @@ class LoginResponse:
             Instance of Response
         """
         return make_api_response(LoginResponse.to_dict(self))
+
+
 
     @classmethod
     def to_dict(cls, instance: 'LoginResponse') -> dict:

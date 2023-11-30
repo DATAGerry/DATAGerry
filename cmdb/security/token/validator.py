@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import Union
 
@@ -23,10 +23,8 @@ from authlib.jose.errors import BadSignatureError, InvalidClaimError
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.key.holder import KeyHolder
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -38,6 +36,8 @@ class TokenValidator:
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.key_holder = KeyHolder(database_manager)
+
+
 
     def decode_token(self, token: Union[JsonWebToken, str, dict]):
         """
@@ -53,6 +53,7 @@ class TokenValidator:
         except (BadSignatureError, Exception) as err:
             raise ValidationError(err) from err
         return decoded_token
+
 
 
     def validate_token(self, token: Union[JsonWebToken, str, dict]):
@@ -71,7 +72,9 @@ class TokenValidator:
             raise ValidationError(err) from err
 
 
+
 class ValidationError(CMDBError):
+    """TODO: document"""
 
     def __init__(self, message):
         self.message = f'Error while decode the token operation - E: ${message}'

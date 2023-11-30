@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import Union, List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -22,7 +22,7 @@ from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerDeleteError
 from cmdb.manager.managers import ManagerBase
 from cmdb.user_management.models.settings import UserSettingModel, UserSettingType
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UserSettingsManager(ManagerBase):
     """
@@ -35,14 +35,17 @@ class UserSettingsManager(ManagerBase):
         Args:
             database_manager: Active database connection manager
         """
-        super(UserSettingsManager, self).__init__(collection=UserSettingModel.COLLECTION,
-                                                  database_manager=database_manager)
+        super().__init__(collection=UserSettingModel.COLLECTION, database_manager=database_manager)
+
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[UserSettingModel]:
         raise NotImplementedError(
             'Because only a restricted number of settings per user is possible, \
              a limitation and iteration of the query is not necessary.')
+
+
 
     def get_user_setting(self, user_id: int, resource: str) -> UserSettingModel:
         """
@@ -55,11 +58,12 @@ class UserSettingsManager(ManagerBase):
         Returns:
             UserSettingModel: Instance of UserSettingModel with data.
         """
-
         result = self._get(self.collection, filter={'user_id': user_id, 'resource': resource}, limit=1)
         for resource_result in result.limit(-1):
             return UserSettingModel.from_data(resource_result)
         raise ManagerGetError(f'No setting with the name: {resource} was found!')
+
+
 
     def get_user_settings(self, user_id: PublicID, setting_type: UserSettingType = None) -> List[UserSettingModel]:
         """
@@ -78,6 +82,8 @@ class UserSettingsManager(ManagerBase):
         user_settings = self._get(self.collection, filter=query)
         return [UserSettingModel.from_data(setting) for setting in user_settings]
 
+
+
     def insert(self, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
         Insert a single setting into the database.
@@ -88,6 +94,8 @@ class UserSettingsManager(ManagerBase):
         if isinstance(setting, UserSettingModel):
             setting = UserSettingModel.to_data(setting)
         return self._insert(self.collection, resource=setting, skip_public=True)
+
+
 
     def update(self, user_id: int, resource: str, setting: Union[dict, UserSettingModel], *args, **kwargs):
         """
@@ -106,6 +114,8 @@ class UserSettingsManager(ManagerBase):
             setting = UserSettingModel.to_dict(setting)
         return self._update(self.collection, filter={'resource': resource,
                                                      'user_id': user_id}, resource=setting)
+
+
 
     def delete(self, user_id: PublicID, resource: str, *args, **kwargs):
         """

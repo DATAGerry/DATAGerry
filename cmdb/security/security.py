@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import base64
 import logging
 from Crypto import Random
@@ -21,12 +21,13 @@ from Crypto.Cipher import AES
 from cmdb.database.errors.database_errors import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class SecurityManager:
+    """TODO: document"""
     DEFAULT_BLOCK_SIZE = 32
     DEFAULT_ALG = 'HS512'
     DEFAULT_EXPIRES = int(10)
@@ -36,7 +37,10 @@ class SecurityManager:
         self.ssw = SystemSettingsWriter(database_manager)
         self.salt = "cmdb"
 
+
+
     def generate_hmac(self, data):
+        """TODO: document"""
         import hashlib
         import hmac
 
@@ -50,13 +54,15 @@ class SecurityManager:
 
         return base64.b64encode(generated_hash.digest()).decode("utf-8")
 
+
+
     def encrypt_aes(self, raw):
         """
         see https://stackoverflow.com/questions/12524994/encrypt-decrypt-using-pycrypto-aes-256
         :param raw: unencrypted data
         :return:
         """
-        if type(raw) == list:
+        if isinstance(raw, list):
             import json
             from bson import json_util
             raw = json.dumps(raw, default=json_util.default)
@@ -65,25 +71,38 @@ class SecurityManager:
         cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
         return base64.b64encode(iv + cipher.encrypt(raw))
 
+
+
     def decrypt_aes(self, enc):
+        """TODO: document"""
         enc = base64.b64decode(enc)
         iv = enc[:AES.block_size]
         cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
         return SecurityManager._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
+
+
 
     @staticmethod
     def _pad(s):
         return s + (SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE) * \
                chr(SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE)
 
+
+
     @staticmethod
     def _unpad(s):
         return s[:-ord(s[len(s) - 1:])]
 
+
+
     def generate_symmetric_aes_key(self):
+        """TODO: document"""
         return self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
 
+
+
     def get_symmetric_aes_key(self):
+        """TODO: document"""
         try:
             symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
         except NoDocumentFound:
@@ -91,7 +110,10 @@ class SecurityManager:
             symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
         return symmetric_key
 
+
+
     @staticmethod
     def encode_object_base_64(data: object):
+        """TODO: document"""
         from bson.json_util import dumps
         return base64.b64encode(dumps(data).encode('utf-8')).decode("utf-8")

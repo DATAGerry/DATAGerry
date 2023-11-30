@@ -13,14 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from enum import Enum
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExporterConfigType(Enum):
     """
-        Type of exported data (native = CmdbObject, render = RenderResult)
+    Type of exported data (native = CmdbObject, render = RenderResult)
     """
     native = 2
     render = 3
@@ -30,6 +29,7 @@ class ExporterConfigType(Enum):
 
 
 class BaseExporterConfig:
+    """TODO: document"""
 
     def __init__(self, config_type: ExporterConfigType):
         """

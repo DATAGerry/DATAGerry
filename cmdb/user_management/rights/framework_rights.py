@@ -13,49 +13,54 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.user_management.models.right import BaseRight, Levels
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class FrameworkRight(BaseRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PERMISSION
-    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'framework')
+    PREFIX = f'{BaseRight.PREFIX}.framework'
 
     def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
-        super(FrameworkRight, self).__init__(level, name, description=description)
+        super().__init__(level, name, description=description)
 
 
 class ObjectRight(FrameworkRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PERMISSION
     MAX_LEVEL = Levels.SECURE
-    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'object')
+    PREFIX = f'{FrameworkRight.PREFIX}.object'
 
     def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
-        super(ObjectRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)
 
 
 class TypeRight(FrameworkRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
     MAX_LEVEL = Levels.CRITICAL
-    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'type')
+    PREFIX = f'{FrameworkRight.PREFIX}.type'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(TypeRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)
 
 
 class CategoryRight(FrameworkRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
     MAX_LEVEL = Levels.SECURE
-    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'category')
+    PREFIX = f'{FrameworkRight.PREFIX}.category'
 
     def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
-        super(CategoryRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)
 
 
 class LogRight(FrameworkRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
     MAX_LEVEL = Levels.DANGER
-    PREFIX = '{}.{}'.format(FrameworkRight.PREFIX, 'log')
+    PREFIX = f'{FrameworkRight.PREFIX}.log'
 
     def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
-        super(LogRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)

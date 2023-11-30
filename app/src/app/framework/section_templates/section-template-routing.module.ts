@@ -1,3 +1,4 @@
+
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2023 becon GmbH
@@ -13,25 +14,30 @@
 * GNU Affero General Public License for more details.
 *
 * You should have received a copy of the GNU Affero General Public License
-* along with this program.  If not, see <https://www.gnu.org/licenses/>.
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { Routes, RouterModule } from '@angular/router';
+import { SectionTemplateComponent } from './section-template.component';
+import { UserSettingsResolver } from 'src/app/management/user-settings/resolvers/user-settings-resolver.service';
 
-import { SectionTemplateService } from './services/section-template.service';
-/* ------------------------------------------------------------------------------------------------------------------ */
+const routes: Routes = [
+    {
+      path: '',
+      pathMatch: 'full',
+      data: {
+        breadcrumb: '',
+        right: 'base.framework.type.view'
+      },
+      resolve: {
+        userSetting: UserSettingsResolver
+      },
+      component: SectionTemplateComponent
+    },
+  ];
 
 @NgModule({
-    imports: [
-      BrowserModule
-    ],
-    exports: [
-      BrowserModule
-    ],
-    providers:[
-      SectionTemplateService
-    ]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class SectionTemplateModule {
-    
-}
+export class SectionTemplateRoutingModule { }

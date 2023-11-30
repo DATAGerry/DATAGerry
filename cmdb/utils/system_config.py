@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 import os
 from typing import Any
 
@@ -20,14 +21,15 @@ from cmdb.utils.cast import auto_cast
 from cmdb.utils.system_env_reader import SystemEnvironmentReader
 from cmdb.utils.system_errors import ConfigFileSetError, ConfigFileNotFound, ConfigNotLoaded, SectionError, \
     KeySectionError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemConfigReader:
-    from cmdb.utils.system_reader import SystemReader
     """
     System reader for local config file
     Options from config file can be overwritten by environment vars
     """
+    from cmdb.utils.system_reader import SystemReader
+
     DEFAULT_CONFIG_LOCATION = os.path.join(os.path.dirname(__file__), '../../etc/')
     DEFAULT_CONFIG_NAME = 'cmdb.conf'
     RUNNING_CONFIG_LOCATION = DEFAULT_CONFIG_LOCATION
@@ -36,27 +38,34 @@ class SystemConfigReader:
     CONFIG_NOT_LOADED = False
     instance = None
 
+
     def __new__(cls, config_name=None, config_location=None):
         if not SystemConfigReader.instance:
             SystemConfigReader.instance = SystemConfigReader.__SystemConfigReader(config_name, config_location)
         return SystemConfigReader.instance
 
+
     def __getattr__(self, name):
         return getattr(self.instance, name)
+
 
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
 
+
+
     @classmethod
     def from_full_path(cls, full_path: str):
+        """TODO: document"""
         split = full_path.rsplit('/', 1)
         return cls(split[1], f'{split[0]}/')
 
     class __SystemConfigReader(SystemReader):
-
+        """TODO: document"""
         DEFAULT_CONFIG_FILE_LESS = False
         CONFIG_LOADED = True
         CONFIG_NOT_LOADED = False
+
 
         def __init__(self, config_name, config_location):
             """
@@ -66,6 +75,7 @@ class SystemConfigReader:
                 config_location: directory of config file
             """
             import configparser
+
             self.config = configparser.ConfigParser()
             if config_name is None:
                 self.config_file_less = True
@@ -82,6 +92,8 @@ class SystemConfigReader:
             # load environment variables
             self.__envvars = SystemEnvironmentReader()
 
+
+
         def add_section(self, section):
             """
             Add a section to the config parser
@@ -95,6 +107,7 @@ class SystemConfigReader:
             self.config.add_section(section)
 
         def get_section(self, section):
+            """TODO: document"""
             return self.config.sections(section)
 
         def set(self, section, option, value):
@@ -111,6 +124,8 @@ class SystemConfigReader:
                 raise ConfigFileSetError(self.config_file)
             self.config.set(section, option, value)
 
+
+
         def setup(self):
             """
             init configuration file
@@ -123,6 +138,8 @@ class SystemConfigReader:
             except ConfigFileNotFound:
                 return SystemConfigReader.CONFIG_NOT_LOADED
 
+
+
         def read_config_file(self, file):
             """
             helper function for file reading sets the path directly inside the config attribute
@@ -134,6 +151,8 @@ class SystemConfigReader:
                 self.config.read(file)
             else:
                 raise ConfigFileNotFound(self.config_name)
+
+
 
         def get_value(self, name: str, section: str, default: Any = None):
             """
@@ -165,6 +184,8 @@ class SystemConfigReader:
             else:
                 raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
+
+
         def get_sections(self):
             """
             get all sections from config
@@ -173,8 +194,10 @@ class SystemConfigReader:
             """
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 return self.config.sections()
-            else:
-                raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
+
+            raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
+
+
 
         def get_all_values_from_section(self, section):
             """
@@ -189,7 +212,7 @@ class SystemConfigReader:
             section_envvars = {}
             try:
                 section_envvars = self.__envvars.get_all_values_from_section(section)
-            except:
+            except Exception:
                 pass
 
             # get section from config
@@ -200,8 +223,8 @@ class SystemConfigReader:
                         section_conffile = dict(self.config.items(section))
                     else:
                         raise SectionError(section)
-                except KeyError:
-                    raise KeySectionError(section)
+                except KeyError as err:
+                    raise KeySectionError(section) from err
             else:
                 raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
@@ -209,6 +232,8 @@ class SystemConfigReader:
             section_merged = section_conffile.copy()
             section_merged.update(section_envvars)
             return section_merged
+
+
 
         def status(self):
             """
@@ -224,7 +249,7 @@ class SystemConfigReader:
             """
             Helper function for debugging
             """
-
             from pprint import pprint
+
             for names in self.get_sections():
-                pprint(names + ": {}".format(self.config.items(names)))
+                pprint(names + f": {self.config.items(names)}")

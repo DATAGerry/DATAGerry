@@ -13,11 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import List
 
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class AuthSettingsDAO:
     """Authentication data access object"""
@@ -32,9 +32,13 @@ class AuthSettingsDAO:
         self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
 
+
+
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
+
+
 
     def get_token_lifetime(self, default: int = DEFAULT_TOKEN_LIFETIME) -> int:
         """Get the lifetime parameter for tokens"""
@@ -42,9 +46,13 @@ class AuthSettingsDAO:
             self.token_lifetime = default
         return self.token_lifetime
 
+
+
     def get_provider_list(self) -> List[dict]:
         """Get the list of providers with config"""
         return self.providers
+
+
 
     def get_provider_settings(self, class_name: str) -> dict:
         """Get a specific provider list element by name"""

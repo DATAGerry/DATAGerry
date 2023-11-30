@@ -17,7 +17,6 @@
 This managers represents the core functionalities for the use of CMDB section templates.
 All communication with the section templates is controlled by this manager.
 The implementation of the manager used is always realized using the respective superclass.
-
 """
 import logging
 from queue import Queue
