@@ -104,9 +104,12 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
    * @param setting UserSetting data.
    */
   public addSetting(setting: UserSetting<P>): void {
-    this.dbService.add(this.storeName, setting).subscribe(key => {
-      this.userSettingsService.addUserSetting(setting).pipe(takeUntil(this.subscriber)).subscribe();
-    });
+
+    if (!this.dbService.getByKey(this.storeName, setting as any)) {
+      this.dbService.add(this.storeName, setting).subscribe(key => {
+        this.userSettingsService.addUserSetting(setting).pipe(takeUntil(this.subscriber)).subscribe();
+      });
+    }
   }
 
   /**
