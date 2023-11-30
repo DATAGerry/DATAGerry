@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-TODO: document
-"""
+"""TODO: document"""
 from typing import List
 
 from flask import Response, abort
@@ -28,14 +26,10 @@ from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
 
 from cmdb.utils.helpers import load_class
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SupportedExporterExtension:
     """Supported export extensions for exporting (csv, json, xlsx, xml)"""
@@ -51,9 +45,11 @@ class SupportedExporterExtension:
         self.extensions = [*["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"], *arguments]
 
 
+
     def get_extensions(self):
         """Get list of supported export extension"""
         return self.extensions
+
 
 
     def convert_to(self):
@@ -72,6 +68,7 @@ class SupportedExporterExtension:
         return _list
 
 
+
 class BaseExportWriter:
     """TODO: document"""
 
@@ -85,6 +82,7 @@ class BaseExportWriter:
         self.export_format = export_format
         self.export_config = export_config
         self.data: List[RenderResult] = []
+
 
 
     def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
@@ -107,6 +105,7 @@ class BaseExportWriter:
             return abort(400, err)
 
 
+
     def export(self):
         """TODO: document"""
         import datetime
@@ -121,6 +120,6 @@ class BaseExportWriter:
             mimetype="text/" + self.export_format.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":
-                    "attachment; filename=%s.%s" % (timestamp, self.export_format.__class__.FILE_EXTENSION)
+                    f"attachment; filename={timestamp}.{self.export_format.__class__.FILE_EXTENSION}"
             }
         )

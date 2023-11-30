@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import os
 import re
 
 from cmdb.utils.system_reader import SystemReader
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemEnvironmentReader(SystemReader):
     """
@@ -39,16 +39,28 @@ class SystemEnvironmentReader(SystemReader):
                 if section not in self.__config:
                     self.__config[section] = {}
                 self.__config[section][name] = value
-        super(SystemEnvironmentReader, self).__init__()
+        super().__init__()
+
+
 
     def get_value(self, name, section):
+        """TODO: document"""
         return self.__config[section][name]
 
+
+
     def get_sections(self):
+        """TODO: document"""
         return self.__config.keys()
 
+
+
     def get_all_values_from_section(self, section):
+        """TODO: document"""
         return self.__config[section]
 
+
+
     def setup(self):
+        """TODO: document"""
         raise NotImplementedError

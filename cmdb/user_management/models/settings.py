@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from datetime import datetime
+"""TODO: document"""
 from enum import Enum
 from json import dumps
 from typing import Any, List
@@ -22,7 +21,7 @@ from pymongo import IndexModel
 
 from cmdb.database.utils import default
 from cmdb.framework.utils import Collection, Model
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UserSettingType(Enum):
     """
@@ -33,6 +32,7 @@ class UserSettingType(Enum):
     GLOBAL = 'GLOBAL'
     APPLICATION = 'APPLICATION'
     SERVER = 'SERVER'
+
 
 
 class UserSettingPayload:
@@ -50,6 +50,8 @@ class UserSettingPayload:
         """
         self.payload: Any = payload
 
+
+
     @classmethod
     def from_data(cls, data: dict) -> "UserSettingPayload":
         """
@@ -65,6 +67,8 @@ class UserSettingPayload:
             payload=data
         )
 
+
+
     @classmethod
     def to_data(cls, instance: "UserSettingPayload") -> str:
         """
@@ -77,6 +81,8 @@ class UserSettingPayload:
             str: JSON dump data of `UserSettingPayload`.
         """
         return dumps(UserSettingPayload.to_dict(instance), default=default)
+
+
 
     @classmethod
     def to_dict(cls, instance: "UserSettingPayload") -> dict:
@@ -144,7 +150,10 @@ class UserSettingModel:
 
     @classmethod
     def get_index_keys(cls):
+        """TODO: document"""
         return [IndexModel(**index) for index in cls.INDEX_KEYS]
+
+
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "UserSettingModel":
@@ -165,6 +174,8 @@ class UserSettingModel:
             setting_type=UserSettingType(data.get('setting_type'))
         )
 
+
+
     @classmethod
     def to_data(cls, instance: "UserSettingModel") -> str:
         """
@@ -176,8 +187,9 @@ class UserSettingModel:
         Returns:
             str: JSON dump data of `UserSettingsModel`.
         """
-
         return dumps(UserSettingModel.to_dict(instance), default=default)
+
+
 
     @classmethod
     def to_dict(cls, instance: "UserSettingModel") -> dict:

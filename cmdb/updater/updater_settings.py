@@ -13,11 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from cmdb.utils.helpers import process_bar, load_class
 from cmdb.utils.system_reader import SystemSettingsReader
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -31,15 +32,22 @@ class UpdateSettings:
         self._id: str = UpdateSettings.__DOCUMENT_IDENTIFIER
         self.version = version
 
+
+
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
+
+
 
     def get_version(self) -> int:
         """Get the current version"""
         return self.version
 
+
+
     def run_updates(self, version: int, ssr: SystemSettingsReader):
+        """TODO: document"""
         from cmdb.updater import UpdaterModule
         ssr.get_all_values_from_section('updater')
         updater_instance = UpdaterModule(ssr)

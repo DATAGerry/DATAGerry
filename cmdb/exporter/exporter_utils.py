@@ -13,9 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: ducoment"""
 from cmdb.exporter.config.config_type import ExporterConfigType
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExperterUtils:
     """
@@ -24,6 +24,7 @@ class ExperterUtils:
     """
     @staticmethod
     def summary_renderer(obj, field, view: str = 'native') -> str:
+        """TODO: ducoment"""
         # Export only the shown fields chosen by the user
         if view == ExporterConfigType.render.name and field.get('type') == 'ref':
             summary_line = f'{obj.type_information["type_label"]} #{obj.type_information["type_id"]}  '
@@ -37,5 +38,5 @@ class ExperterUtils:
                 else:
                     summary_line += f' | {line["value"]}'
             return summary_line
-        else:
-            return field.get('value', None)
+
+        return field.get('value', None)

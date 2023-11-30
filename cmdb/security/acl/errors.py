@@ -13,16 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.utils.error import CMDBError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class AccessControlError(CMDBError):
+    """TODO: document"""
     def __init__(self):
-        super(AccessControlError, self).__init__()
+        super().__init__()
 
 
 class AccessDeniedError(AccessControlError):
     """Error when access was denied"""
-    def __init__(self, message: str = None):
-        self.message = message or ''
+    def __init__(self, message: str = ''):
+        self.message = message
+        super().__init__()

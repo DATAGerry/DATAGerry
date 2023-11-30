@@ -13,19 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 import sys
 import time
 import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class Update20200214(Updater):
+    """TODO: document"""
 
     def author(self):
         return 'sdu'
@@ -37,10 +38,13 @@ class Update20200214(Updater):
         return 'Update the fieldtype date of CMDB objects: From string to date.'
 
     def increase_updater_version(self, value):
-        super(Update20200214, self).increase_updater_version(value)
+        """TODO: document"""
+        super().increase_updater_version(value)
+
+
 
     def start_update(self):
-
+        """TODO: document"""
         types = self.get_types_by_field_date()
         lenx = len(types)
         for i, curr_type in enumerate(types):
@@ -59,12 +63,15 @@ class Update20200214(Updater):
         sys.stdout.write('\b\b\b\bDone!\n\n')
         self.increase_updater_version(20200214)
 
-    def worker(self, type):
+
+
+    def worker(self, type_):
+        """TODO: document"""
         try:
             from datetime import datetime
             manager = ObjectManager(database_manager=self.database_manager)  # TODO: Replace when object api is updated
-            object_list = self.object_manager.get_objects_by_type(type.public_id)
-            matches = type.matches
+            object_list = self.object_manager.get_objects_by_type(type_.public_id)
+            matches = type_.matches
 
             for obj in object_list:
                 for field in obj.fields:
@@ -80,7 +87,10 @@ class Update20200214(Updater):
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             LOGGER.error(err.message)
 
+
+
     def get_types_by_field_date(self):
+        """TODO: document"""
         argument = []
         argument.append({'$match': {'fields.type': {'$regex': 'date'}}})
         argument.append({"$addFields": {

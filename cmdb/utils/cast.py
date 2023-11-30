@@ -13,28 +13,34 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-import ast
+"""TODO: ducoment"""
 
 
 def boolify(s):
-    if s == 'True' or s == 'true':
+    """TODO: ducoment"""
+    if s in ('True', 'true'):
         return True
-    if s == 'False' or s == 'false':
+
+    if s in ('False', 'false'):
         return False
+
     raise ValueError('Not Boolean Value!')
 
 
 def noneify(s):
-    if s == 'None' or s == 'null':
+    """TODO: ducoment"""
+    if s in ('None', 'null'):
         return None
+
     raise ValueError('Not None Value!')
 
 
 def auto_cast(val):
+    """TODO: ducoment"""
     for caster in (boolify, int, noneify, float, str):
         try:
             return caster(val)
         except ValueError:
             pass
+
     return val

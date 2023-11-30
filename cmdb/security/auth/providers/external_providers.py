@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 import re
 
@@ -31,11 +31,14 @@ from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.security import SecurityManager
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserModel, UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class LdapAuthenticationProviderConfig(AuthProviderConfig):
+    """TODO: document"""
+
     DEFAULT_CONFIG_VALUES = {
         'active': False,
         'default_group': 2,
@@ -73,7 +76,9 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
             DEFAULT_CONFIG_VALUES.get('search')
         self.groups: dict = groups or LdapAuthenticationProviderConfig. \
             DEFAULT_CONFIG_VALUES.get('groups')
-        super(LdapAuthenticationProviderConfig, self).__init__(active)
+        super().__init__(active)
+
+
 
     def mapping(self, group_dn: str) -> int:
         """Get a group mapping by the group_dn"""
@@ -81,10 +86,12 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
             return next(int(group['group_id']) for group in self.groups['mapping'] if
                         group['group_dn'].lower() == group_dn.lower())
         except StopIteration as err:
-            raise GroupMappingError(str(err))
+            raise GroupMappingError(str(err)) from err
+
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
+    """TODO: document"""
     PASSWORD_ABLE: bool = False
     EXTERNAL_PROVIDER: bool = True
     PROVIDER_CONFIG_CLASS = LdapAuthenticationProviderConfig
@@ -102,8 +109,13 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         if self.__ldap_connection:
             self.__ldap_connection.unbind()
 
+
+
     def connect(self) -> bool:
+        """TODO: document"""
         return self.__ldap_connection.bind()
+
+
 
     def __map_group(self, possible_user_groups: List[str]) -> int:
         """Get the user group for this user by the ldap user list"""
@@ -123,13 +135,16 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                     continue
         return user_group
 
+
+
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
+        """TODO: document"""
         try:
             ldap_connection_status = self.connect()
             if not ldap_connection_status:
                 raise AuthenticationError('Could not connection to ldap server.')
         except LDAPExceptionError as err:
-            raise AuthenticationError(LdapAuthenticationProvider.get_name(), str(err))
+            raise AuthenticationError(LdapAuthenticationProvider.get_name(), str(err)) from err
 
         user_search_filter = self.config.search['searchfilter'].replace("%username%", user_name)
         user_search_result = self.__ldap_connection.search(self.config.search['basedn'], user_search_filter)
@@ -157,8 +172,8 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             try:
                 Connection(self.__ldap_server, entry_dn, password,
                            auto_bind=True)
-            except Exception as e:
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
+            except Exception as err:
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
 
         try:
             user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
@@ -168,10 +183,10 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                     self.user_manager.update(user_instance.public_id, user_instance)
                     user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
                 except ManagerUpdateError as err:
-                    raise AuthenticationError(LdapAuthenticationProvider.get_name(), err)
+                    raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
         except ManagerGetError as umge:
-            LOGGER.warning(f'[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: {umge}')
-            LOGGER.debug(f'[LdapAuthenticationProvider] Try creating user: {user_name}')
+            LOGGER.warning('[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: %s', umge)
+            LOGGER.debug('[LdapAuthenticationProvider] Try creating user: %s', user_name)
             try:
                 new_user_data = dict()
                 new_user_data['user_name'] = user_name
@@ -180,21 +195,24 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 new_user_data['registration_time'] = datetime.now(timezone.utc)
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
 
-            except Exception as e:
-                LOGGER.debug(f'[LdapAuthenticationProvider] {e}')
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), e)
-            LOGGER.debug(f'[LdapAuthenticationProvider] New user was init')
+            except Exception as err:
+                LOGGER.debug('[LdapAuthenticationProvider] %s',err)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
+            LOGGER.debug('[LdapAuthenticationProvider] New user was init')
             try:
                 user_id = self.user_manager.insert(new_user_data)
             except ManagerInsertError as umie:
-                LOGGER.debug(f'[LdapAuthenticationProvider] {umie}')
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), umie)
+                LOGGER.debug('[LdapAuthenticationProvider] %s', umie)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), umie) from umie
             try:
                 user_instance: UserModel = self.user_manager.get(public_id=user_id)
-            except ManagerGetError as umge:
-                LOGGER.debug(f'[LdapAuthenticationProvider] {umge}')
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), umge)
+            except ManagerGetError as err:
+                LOGGER.debug('[LdapAuthenticationProvider] %s', err)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
         return user_instance
 
+
+
     def is_active(self) -> bool:
+        """TODO: document"""
         return self.config.active

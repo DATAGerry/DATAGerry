@@ -13,15 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.user_management.models.right import BaseRight, Levels
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemRight(BaseRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.SECURE
-    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'system')
+    PREFIX = f'{BaseRight.PREFIX}.system'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(SystemRight, self).__init__(level, name, description=description)
-
-
+        super().__init__(level, name, description=description)

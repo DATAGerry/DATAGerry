@@ -13,14 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExporterConfig(BaseExporterConfig):
-
+    """TODO: document"""
     def __init__(self, parameters: CollectionParameters, options: dict = None):
         """
         Args:
@@ -29,4 +28,4 @@ class ExporterConfig(BaseExporterConfig):
         """
         self.parameters = parameters
         self.options = options or None
-        super(ExporterConfig, self).__init__(config_type=ExporterConfigType.native)
+        super().__init__(config_type=ExporterConfigType.native)

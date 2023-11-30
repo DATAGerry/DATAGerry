@@ -20,7 +20,6 @@ from abc import abstractmethod
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
@@ -37,7 +36,6 @@ LOGGER = logging.getLogger(__name__)
 class Updater(CmdbManagerBase):
     """TODO: document"""
 
-
     def __init__(self):
         scr = SystemConfigReader()
         self.database_manager = DatabaseManagerMongo(**scr.get_all_values_from_section('Database'))
@@ -46,6 +44,7 @@ class Updater(CmdbManagerBase):
         self.type_manager = TypeManager(database_manager=self.database_manager)
         self.log_manager = ExportdLogManager(database_manager=self.database_manager)
         super().__init__(self.database_manager)
+
 
 
     @property
@@ -58,6 +57,7 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
+
     @property
     @abstractmethod
     def creation_date(self):
@@ -68,6 +68,7 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
+
     @property
     @abstractmethod
     def description(self):
@@ -76,6 +77,7 @@ class Updater(CmdbManagerBase):
         Returns: name
         """
         return NotImplementedError
+
 
 
     @abstractmethod

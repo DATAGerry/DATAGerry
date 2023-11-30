@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Collection of system readers which loads configuration files and settings
 """
@@ -22,12 +21,13 @@ from typing import Any, Union, List
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.database.errors.database_errors import NoDocumentFound
 from cmdb.utils.system_errors import SectionError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemReader:
     """
     Reader super class
     """
+
 
     def get_value(self, name: str, section: str, default: Any = None) -> Any:
         """
@@ -41,6 +41,8 @@ class SystemReader:
         """
         raise NotImplementedError
 
+
+
     def get_sections(self) -> List[str]:
         """
         get all sections from config
@@ -48,6 +50,8 @@ class SystemReader:
             list of config names
         """
         raise NotImplementedError
+
+
 
     def get_all_values_from_section(self, section: str) -> dict:
         """
@@ -58,6 +62,7 @@ class SystemReader:
             key/value list of all values inside a section
         """
         raise NotImplementedError
+
 
 
 class SystemSettingsReader(SystemReader):
@@ -73,7 +78,9 @@ class SystemSettingsReader(SystemReader):
             database_manager: database managers
         """
         self.dbm: DatabaseManagerMongo = database_manager
-        super(SystemSettingsReader, self).__init__()
+        super().__init__()
+
+
 
     def get_value(self, name, section) -> Union[dict, list]:
         """
@@ -90,9 +97,14 @@ class SystemSettingsReader(SystemReader):
             filter={'_id': section}
         )[name]
 
+
+
     def get_section(self, section_name: str) -> dict:
+        """TODO: document"""
         query_filter = {'_id': section_name}
         return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter=query_filter)
+
+
 
     def get_sections(self):
         """
@@ -104,6 +116,8 @@ class SystemSettingsReader(SystemReader):
             collection=SystemSettingsReader.COLLECTION,
             projection={'_id': 1}
         )
+
+
 
     def get_all_values_from_section(self, section, default=None) -> dict:
         """
@@ -120,19 +134,14 @@ class SystemSettingsReader(SystemReader):
                 collection=SystemSettingsReader.COLLECTION,
                 filter={'_id': section}
             )
-        except NoDocumentFound:
+        except NoDocumentFound as err:
             if default:
                 return default
-            raise SectionError(section)
+            raise SectionError(section) from err
+
         return section_values
 
-    def get_all(self) -> list:
-        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)
 
-    def setup(self):
-        """
-        get setup data
-        Returns:
-            setup dict
-        """
-        return SystemSettingsReader.SETUP_INITS
+    def get_all(self) -> list:
+        """TODO: document"""
+        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)

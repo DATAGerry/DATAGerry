@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import List
 
@@ -21,11 +21,13 @@ from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class UserGroupModel(CmdbDAO):
+    """TODO: document"""
     COLLECTION: Collection = 'management.groups'
     MODEL: Model = 'Group'
     INDEX_KEYS = [
@@ -58,21 +60,24 @@ class UserGroupModel(CmdbDAO):
         self.name: str = name
         self.label: str = label or name.title()
         self.rights: list = rights or []
-        super(UserGroupModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
     @classmethod
     def from_data(cls, data: dict, rights: List[BaseRight] = None) -> "UserGroupModel":
-
+        """TODO: document"""
         if rights:
             rights = [right for right in rights if right['name'] in data.get('rights', [])]
         else:
             rights = []
+
         return cls(
             public_id=data.get('public_id'),
             name=data.get('name'),
             label=data.get('label', None),
             rights=rights
         )
+
+
 
     @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
@@ -83,6 +88,8 @@ class UserGroupModel(CmdbDAO):
             'rights': [BaseRight.to_dict(right) for right in instance.rights]
         }
 
+
+
     @classmethod
     def to_data(cls, instance: "UserGroupModel") -> dict:
         return {
@@ -92,19 +99,29 @@ class UserGroupModel(CmdbDAO):
             'rights': [right.name for right in instance.rights]
         }
 
+
+
     def set_rights(self, rights: list):
+        """TODO: document"""
         self.rights = rights
 
+
+
     def get_rights(self) -> list:
+        """TODO: document"""
         return self.rights
 
+
+
     def get_right(self, name) -> str:
+        """TODO: document"""
         try:
             return next(right for right in self.rights if right.name == name)
-        except Exception:
-            raise RightNotFoundError(self.name, name)
+        except Exception as exc:
+            raise RightNotFoundError(self.name, name) from exc
 
     def has_right(self, right_name) -> bool:
+        """TODO: document"""
         try:
             self.get_right(right_name)
         except RightNotFoundError:
@@ -112,15 +129,20 @@ class UserGroupModel(CmdbDAO):
         return True
 
     def has_extended_right(self, right_name: str) -> bool:
+        """TODO: document"""
         parent_right_name: str = right_name.rsplit(".", 1)[0]
         if self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}'):
             return True
         if parent_right_name == 'base':
             return self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}')
+
         return self.has_extended_right(right_name=parent_right_name)
 
 
+
 class RightNotFoundError(CMDBError):
+    """TODO: document"""
+
     def __init__(self, group, right):
-        self.message = "Right was not found inside this group Groupname: {} | Rightname: {}".format(group, right)
-        super(RightNotFoundError, self).__init__()
+        self.message = f"Right was not found inside this group Groupname: {group} | Rightname: {right}"
+        super().__init__()

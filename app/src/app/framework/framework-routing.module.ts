@@ -11,15 +11,15 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { FrameworkComponent } from './framework.component';
 import { PermissionGuard } from '../auth/guards/permission.guard';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
   {
@@ -57,6 +57,15 @@ const routes: Routes = [
       right: 'base.framework.category.view'
     },
     loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
+  },
+  {
+    path: 'section_templates',
+    canActivateChild: [PermissionGuard],
+    data: {
+      breadcrumb: 'Section Templates',
+      right: 'base.framework.type.view'
+    },
+    loadChildren: () => import('./section_templates/section-template.module').then(m => m.SectionTemplateModule),
   }
 ];
 

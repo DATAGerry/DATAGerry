@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LookedAccessControlQueryBuilder(PipelineBuilder):
     """Query builder for looked objects in aggregation calls."""
