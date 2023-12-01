@@ -37,6 +37,7 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.wraps import LOGGER
 from cmdb.utils import json_encoding
+# -------------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_MIME_TYPE = 'application/json'
 
@@ -137,7 +138,7 @@ def insert_request_user(func):
         try:
             with current_app.app_context():
                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
-        except ValidationError as err:
+        except ValidationError:
             return abort(401)
         try:
             user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']

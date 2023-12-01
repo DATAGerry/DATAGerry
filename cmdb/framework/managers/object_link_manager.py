@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from datetime import datetime, timezone
 from typing import Union, List
 
@@ -29,14 +28,16 @@ from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerDeleteEr
 from cmdb.search import Pipeline
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectLinkManager(ManagerBase):
+    """TODO: document"""
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.query_builder = ObjectQueryBuilder()
         self.object_manager = CmdbObjectManager(database_manager)  # TODO: Replace when object api is updated
-        super(ObjectLinkManager, self).__init__(ObjectLinkModel.COLLECTION, database_manager=database_manager)
+        super().__init__(ObjectLinkModel.COLLECTION, database_manager=database_manager)
+
 
     def get(self, public_id: Union[PublicID, int], user: UserModel = None,
             permission: AccessControlPermission = None) -> ObjectLinkModel:
@@ -59,6 +60,7 @@ class ObjectLinkManager(ManagerBase):
                 self.object_manager.get_object(public_id=link.secondary, user=user, permission=permission)
             return link
         raise ManagerGetError(f'ObjectLinkModel with ID: {public_id} not found!')
+
 
     def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
@@ -87,10 +89,11 @@ class ObjectLinkManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[ObjectLinkModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ObjectLinkModel)
         return iteration_result
+
 
     def insert(self, link: Union[dict, ObjectLinkModel], user: UserModel = None,
                permission: AccessControlPermission = AccessControlPermission.CREATE) -> PublicID:
@@ -118,8 +121,10 @@ class ObjectLinkManager(ManagerBase):
 
         return self._insert(self.collection, resource=link)
 
+
     def update(self, public_id: PublicID, link: Union[ObjectLinkModel, dict]):
         raise NotImplementedError
+
 
     def delete(self, public_id: PublicID, user: UserModel = None,
                permission: AccessControlPermission = AccessControlPermission.DELETE) -> ObjectLinkModel:

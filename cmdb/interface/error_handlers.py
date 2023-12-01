@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """Error handling routines for all HTTP based errors.
 
 These are executed automatically during an abort().
@@ -24,13 +23,13 @@ Notes:
     the description field of the respective class is used.
     This field is used normally again after the message has been saved.
 """
-
 import logging
 from typing import Optional
 
 from flask import request, jsonify
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest, Unauthorized, Forbidden, MethodNotAllowed, \
     NotAcceptable, Gone, InternalServerError, NotImplemented, ServiceUnavailable
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -45,6 +44,7 @@ class ErrorResponse:
         if joke:
             self.joke: str = joke
 
+
     @staticmethod
     def _validate_message(message, description) -> Optional[str]:
         """Checks if description and message are the same"""
@@ -52,9 +52,11 @@ class ErrorResponse:
             return message
         return None
 
+
     def get_status_code(self) -> int:
         """Get the HTTP status code of this error"""
         return self.status
+
 
     def make_error(self, error: HTTPException) -> dict:
         """make a flask valid error response"""

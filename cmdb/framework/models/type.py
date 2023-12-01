@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import List
 from datetime import datetime, timezone
@@ -24,36 +24,44 @@ from cmdb.framework.cmdb_errors import ExternalFillError, FieldInitError, FieldN
 from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class TypeSummary:
+    """TODO: document"""
+
     __slots__ = 'fields'
 
     def __init__(self, fields: list = None):
         self.fields = fields or []
 
     def has_fields(self):
-        if len(self.fields) > 0:
-            return True
-        return False
+        """TODO: document"""
+        return len(self.fields) > 0
+
 
     def set_fields(self, fields):
+        """TODO: document"""
         self.fields = fields
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeSummary":
+        """TODO: document"""
         return cls(fields=data.get('fields', []))
 
     @classmethod
     def to_json(cls, instance: "TypeSummary") -> dict:
+        """TODO: document"""
         return {
             'fields': instance.fields
         }
 
 
 class TypeReference:
+    """TODO: document"""
+
     __slots__ = 'type_id', 'object_id', 'type_label', 'summaries', 'line', 'prefix', 'icon'
 
     def __init__(self, type_id: int, object_id: int, type_label: str, line: str = None,
@@ -68,6 +76,7 @@ class TypeReference:
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeReference":
+        """TODO: document"""
         return cls(
             type_id=data.get('type_id'),
             object_id=data.get('object_id'),
@@ -78,8 +87,10 @@ class TypeReference:
             prefix=data.get('prefix', None)
         )
 
+
     @classmethod
     def to_json(cls, instance: "TypeReference") -> dict:
+        """TODO: document"""
         return {
             'type_id': instance.type_id,
             'object_id': instance.object_id,
@@ -90,6 +101,7 @@ class TypeReference:
             'prefix': instance.prefix
         }
 
+
     def has_prefix(self):
         """
         check if reference has a prefix
@@ -98,6 +110,7 @@ class TypeReference:
             return True
         return False
 
+
     def has_icon(self):
         """
         check if reference has a icon
@@ -105,6 +118,7 @@ class TypeReference:
         if self.icon:
             return True
         return False
+
 
     def line_requires_fields(self):
         """
@@ -121,23 +135,25 @@ class TypeReference:
             return True
         return False
 
+
     def has_summaries(self):
         """
         check if type references has summaries definitions
         """
-        if len(self.summaries) > 0:
-            return True
-        return False
+        return len(self.summaries) > 0
+
 
     def fill_line(self, inputs):
         """fills the line brackets with data"""
         try:
             self.line = self.line.format(*inputs)
-        except Exception as e:
-            raise TypeReferenceLineFillError(inputs, e)
+        except Exception as err:
+            raise TypeReferenceLineFillError(inputs, err) from err
 
 
 class TypeExternalLink:
+    """TODO: document"""
+
     __slots__ = 'name', 'href', 'label', 'icon', 'fields'
 
     def __init__(self, name: str, href: str, label: str = None, icon: str = None, fields: list = None):
@@ -147,8 +163,10 @@ class TypeExternalLink:
         self.icon = icon
         self.fields = fields or []
 
+
     @classmethod
     def from_data(cls, data: dict) -> "TypeExternalLink":
+        """TODO: document"""
         return cls(
             name=data.get('name'),
             href=data.get('href'),
@@ -157,8 +175,10 @@ class TypeExternalLink:
             fields=data.get('fields', None)
         )
 
+
     @classmethod
     def to_json(cls, instance: "TypeExternalLink") -> dict:
+        """TODO: document"""
         return {
             'name': instance.name,
             'href': instance.href,
@@ -167,6 +187,7 @@ class TypeExternalLink:
             'fields': instance.fields
         }
 
+
     def has_icon(self):
         """
         check if external link has a icon
@@ -174,6 +195,7 @@ class TypeExternalLink:
         if self.icon:
             return True
         return False
+
 
     def link_requires_fields(self):
         """
@@ -190,6 +212,7 @@ class TypeExternalLink:
             return True
         return False
 
+
     def has_fields(self):
         """
         check if external link has field definitions
@@ -198,15 +221,18 @@ class TypeExternalLink:
             return True
         return False
 
+
     def fill_href(self, inputs):
         """fills the href brackets with data"""
         try:
             self.href = self.href.format(*inputs)
-        except Exception as e:
-            raise ExternalFillError(inputs, e)
+        except Exception as err:
+            raise ExternalFillError(inputs, err) from err
 
 
 class TypeSection:
+    """TODO: document"""
+
     __slots__ = 'type', 'name', 'label'
 
     def __init__(self, type: str, name: str, label: str = None):
@@ -216,6 +242,7 @@ class TypeSection:
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeSection":
+        """TODO: document"""
         return cls(
             type=data.get('type'),
             name=data.get('name'),
@@ -224,6 +251,7 @@ class TypeSection:
 
     @classmethod
     def to_json(cls, instance: "TypeSection") -> dict:
+        """TODO: document"""
         return {
             'type': instance.type,
             'name': instance.name,
@@ -232,11 +260,14 @@ class TypeSection:
 
 
 class TypeFieldSection(TypeSection):
+    """TODO: document"""
+
     __slots__ = 'fields'
 
     def __init__(self, type: str, name: str, label: str = None, fields: list = None):
         self.fields = fields or []
-        super(TypeFieldSection, self).__init__(type=type, name=name, label=label)
+        super().__init__(type=type, name=name, label=label)
+
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeFieldSection":
@@ -258,6 +289,8 @@ class TypeFieldSection(TypeSection):
 
 
 class TypeReferenceSectionEntry:
+    """TODO: document"""
+
     __slots__ = 'type_id', 'section_name', 'selected_fields'
 
     def __init__(self, type_id: int, section_name: str, selected_fields: List[str] = None):
@@ -265,15 +298,19 @@ class TypeReferenceSectionEntry:
         self.section_name: str = section_name
         self.selected_fields: List[str] = selected_fields or []
 
+
     @classmethod
     def from_data(cls, data: dict) -> "TypeReferenceSectionEntry":
+        """TODO: document"""
         return cls(
             type_id=data.get('type_id'),
             section_name=data.get('section_name'),
             selected_fields=data.get('selected_fields', None))
 
+
     @classmethod
     def to_json(cls, instance: "TypeReferenceSectionEntry") -> dict:
+        """TODO: document"""
         return {
             'type_id': instance.type_id,
             'section_name': instance.section_name,
@@ -282,13 +319,16 @@ class TypeReferenceSectionEntry:
 
 
 class TypeReferenceSection(TypeSection):
+    """TODO: document"""
+
     __slots__ = 'reference', 'fields'
 
     def __init__(self, type: str, name: str, label: str = None, reference: TypeReferenceSectionEntry = None,
                  fields: list = None):
         self.reference: reference = reference or {}
         self.fields = fields or []
-        super(TypeReferenceSection, self).__init__(type=type, name=name, label=label)
+        super().__init__(type=type, name=name, label=label)
+
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeReferenceSection":
@@ -302,6 +342,7 @@ class TypeReferenceSection(TypeSection):
             reference=reference,
             fields=data.get('fields', None)
         )
+
 
     @classmethod
     def to_json(cls, instance: "TypeReferenceSection") -> dict:
@@ -326,10 +367,11 @@ class TypeRenderMeta:
         self.sections: List[TypeSection] = sections or []
         self.externals: List[TypeExternalLink] = externals or []
         self.summary: TypeSummary = summary or TypeSummary(fields=None)
-        #LOGGER.info("TypeRenderMeta => __init__")
-        #LOGGER.info(f"__init__ => self.sections: \n {sections}")
+
+
     @classmethod
     def from_data(cls, data: dict) -> "TypeRenderMeta":
+        """TODO: document"""
         sections: List[TypeSection] = []
         for section in data.get('sections', []):
             section_type = section.get('type', 'section')
@@ -348,8 +390,10 @@ class TypeRenderMeta:
             summary=TypeSummary.from_data(data.get('summary', {}))
         )
 
+
     @classmethod
     def to_json(cls, instance: "TypeRenderMeta") -> dict:
+        """TODO: document"""
         return {
             'icon': instance.icon,
             'sections': [section.to_json(section) for section in instance.sections],
@@ -636,10 +680,9 @@ class TypeModel(CmdbDAO):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'selectable_as_parent' , 'active', 'author_id', \
-                'creation_time', 'render_meta', 'fields', 'acl'
+    __slots__ = 'public_id', 'name', 'label', 'description', 'version', 'selectable_as_parent' , 'active', \
+                'author_id', 'creation_time', 'render_meta', 'fields', 'acl'
 
-    
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
                  creation_time: datetime = None, last_edit_time: datetime = None, editor_id: int = None,
@@ -659,6 +702,7 @@ class TypeModel(CmdbDAO):
         self.fields: list = fields or []
         self.acl: AccessControlList = acl
         super().__init__(public_id=public_id)
+
 
     @classmethod
     def from_data(cls, data: dict) -> "TypeModel":
@@ -688,6 +732,7 @@ class TypeModel(CmdbDAO):
             acl=AccessControlList.from_data(data.get('acl', {}))
         )
 
+
     @classmethod
     def to_json(cls, instance: "TypeModel") -> dict:
         """Convert a type instance to json conform data"""
@@ -708,9 +753,11 @@ class TypeModel(CmdbDAO):
             'acl': AccessControlList.to_json(instance.acl)
         }
 
+
     def get_name(self) -> str:
         """Get the name of the type"""
         return self.name
+
 
     def get_label(self) -> str:
         """Get the display name"""
@@ -718,28 +765,39 @@ class TypeModel(CmdbDAO):
             self.label = self.name.title()
         return self.label
 
+
     def get_externals(self) -> List[TypeExternalLink]:
         """Get the render meta values of externals"""
         return self.render_meta.externals
+
 
     def has_externals(self) -> bool:
         """Check if type has external links"""
         return True if len(self.get_externals()) > 0 else False
 
+
     def get_external(self, name) -> TypeExternalLink:
+        """TODO: document"""
         return next((external for external in self.get_externals() if external.name == name), None)
 
+
     def has_summaries(self):
+        """TODO: document"""
         return self.render_meta.summary.has_fields()
 
+
     def get_nested_summaries(self):
-        LOGGER.info("get_nested_summaries() => CHECK")
+        """TODO: document"""
         return next((x['summaries'] for x in self.get_fields() if x['type'] == 'ref' and 'summaries' in x), [])
 
+
     def has_nested_prefix(self, nested_summaries):
+        """TODO: document"""
         return next((x['prefix'] for x in nested_summaries if x['type_id'] == self.public_id), False)
 
+
     def get_nested_summary_fields(self, nested_summaries):
+        """TODO: document"""
         _fields = next((x['fields'] for x in nested_summaries if x['type_id'] == self.public_id), [])
         complete_field_list = []
         for field_name in _fields:
@@ -747,59 +805,79 @@ class TypeModel(CmdbDAO):
 
         return TypeSummary(fields=complete_field_list).fields
 
+
     def get_nested_summary_line(self, nested_summaries):
+        """TODO: document"""
         return next((x['line'] for x in nested_summaries if x['type_id'] == self.public_id), None)
 
+
     def get_summary(self):
+        """TODO: document"""
         complete_field_list = []
         for field_name in self.render_meta.summary.fields:
             complete_field_list.append(self.get_field(field_name))
         return TypeSummary(fields=complete_field_list)
 
+
     def get_sections(self) -> List[TypeSection]:
+        """TODO: document"""
         return self.render_meta.sections
 
+
     def get_section(self, name):
+        """TODO: document"""
         try:
             return next((section for section in self.get_sections() if section.name == name), None)
         except IndexError:
             return None
 
+
     def get_icon(self):
+        """TODO: document"""
         try:
             return self.render_meta.icon
         except IndexError:
             return None
 
+
     def has_sections(self):
+        """TODO: document"""
         if len(self.get_sections()) == 0:
             return False
         return True
 
+
     def get_fields(self) -> list:
+        """TODO: document"""
         return self.fields
 
+
     def count_fields(self) -> int:
+        """TODO: document"""
         return len(self.fields)
 
+
     def get_fields_of_type_with_value(self, input_type: str, _filter: str, value) -> list:
+        """TODO: document"""
         fields = [x for x in self.fields if
                   x['type'] == input_type and (value in x.get(_filter, None) if isinstance(x.get(_filter, None), list)
                                                else x.get(_filter, None) == value)]
         if fields:
             try:
                 return fields
-            except (RequiredInitKeyNotFoundError, CMDBError) as e:
-                raise FieldInitError(value)
+            except (RequiredInitKeyNotFoundError, CMDBError) as err:
+                raise FieldInitError(value) from err
         else:
             raise FieldNotFoundError(value, self.name)
 
+
     def get_field(self, name) -> dict:
+        """TODO: document"""
         field = [x for x in self.fields if x['name'] == name]
         if field:
             try:
                 return field[0]
-            except (RequiredInitKeyNotFoundError, CMDBError) as e:
-                LOGGER.warning(e.message)
-                raise FieldInitError(name)
+            except (RequiredInitKeyNotFoundError, CMDBError) as err:
+                LOGGER.warning(err.message)
+                raise FieldInitError(name) from err
         raise FieldNotFoundError(name, self.name)

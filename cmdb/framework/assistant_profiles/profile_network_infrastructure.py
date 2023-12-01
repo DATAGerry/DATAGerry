@@ -19,9 +19,10 @@ This module manages the 'Network Infrastructure'-Profile for the DATAGERRY assis
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-# -------------------------------------------------------------------------------------------------------------------- #
+
 
 
 class NetworkInfrastructureProfile(ProfileBase):

@@ -13,11 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import List, Union
 
 from cmdb.utils.error import CMDBError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class APIProjection:
     """
@@ -33,6 +33,7 @@ class APIProjection:
         self.__has_includes = None
         self.__excludes = None
         self.__has_excludes = None
+
 
     @staticmethod
     def __validate_inclusion(projection: dict, match: int = 1) -> list:
@@ -53,6 +54,7 @@ class APIProjection:
         else:
             raise ValueError('Projection parameter must be 0 or 1.')
 
+
     @property
     def includes(self) -> List[str]:
         """Get all keys which includes (value set to 1)"""
@@ -60,11 +62,13 @@ class APIProjection:
             self.__includes = APIProjection.__validate_inclusion(self.projection)
         return self.__includes
 
+
     def has_includes(self) -> bool:
         """Has include values"""
         if not self.__has_includes:
             self.__has_includes = len(self.includes) > 0
         return self.__has_includes
+
 
     @property
     def excludes(self) -> List[str]:
@@ -72,6 +76,7 @@ class APIProjection:
         if not self.__excludes:
             self.__excludes = APIProjection.__validate_inclusion(self.projection, match=0)
         return self.__excludes
+
 
     def has_excludes(self) -> bool:
         """Has excludes values"""
@@ -91,12 +96,14 @@ class APIProjector:
         self.__data = data
         self.__projection = projection
 
+
     @property
     def project(self) -> dict:
         """Outputs the projected data."""
         if not self._output:
             self._output = self.__project_output()
         return self._output
+
 
     def __project_output(self) -> Union[dict, List[dict]]:
         """Generate the output from the the api result or results"""
@@ -112,6 +119,7 @@ class APIProjector:
 
         return output
 
+
     @staticmethod
     def element_includes(include_key: str, element: dict) -> dict:
         """Get the dict value if an elements has the include key"""
@@ -120,13 +128,14 @@ class APIProjector:
                 return {include_key: element[include_key]}
             except (KeyError, ValueError, TypeError) as err:
                 raise APIProjectionInclusionError(
-                    f'Projected element does not include the key: {include_key} | Error: {err}')
+                    f'Projected element does not include the key: {include_key} | Error: {err}') from err
 
         key, rest = include_key.split('.', 1)
         if isinstance(element[key], list):
             return {key: [APIProjector.element_includes(rest, e) for e in element[key]]}
-        else:
-            return {key: APIProjector.element_includes(rest, element[key])}
+
+        return {key: APIProjector.element_includes(rest, element[key])}
+
 
     def __parse_element(self, data: dict) -> dict:
         """Converts a single resource based on projection."""
@@ -152,14 +161,14 @@ class APIProjector:
 
 
 class APIProjectionError(CMDBError):
-
+    """TODO: document"""
     def __init__(self, message: str = None):
         self.message = message
-        super(APIProjectionError, self).__init__()
+        super().__init__()
 
 
 class APIProjectionInclusionError(APIProjectionError):
-
+    """TODO: document"""
     def __init__(self, message: str):
         message = f'Error while inclusion projection: err {message}'
-        super(APIProjectionInclusionError, self).__init__(message)
+        super().__init__(message)

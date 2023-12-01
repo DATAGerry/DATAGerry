@@ -13,12 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 This managers represents the core functionalities for the use of CMDB objects.
 All communication with the objects is controlled by this managers.
 The implementation of the managers used is always realized using the respective superclass.
-
 """
 import logging
 import json
@@ -44,7 +42,7 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
-#from cmdb.utils.wraps import deprecated
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -76,6 +74,7 @@ class CmdbObjectManager(CmdbManagerBase):
         self._type_manager = TypeManager(database_manager)
         super(CmdbObjectManager, self).__init__(database_manager)
 
+
     def is_ready(self) -> bool:
         """
         function 'is_ready' returns the current database connector status
@@ -85,17 +84,23 @@ class CmdbObjectManager(CmdbManagerBase):
         """
         return self.dbm.status()
 
+
     def get_new_id(self, collection: str) -> int:
+        """TODO: document"""
         return self.dbm.get_next_public_id(collection)
 
+
     def aggregate(self, collection, pipeline: Pipeline, **kwargs):
+        """TODO: document"""
         try:
             return self._aggregate(collection=collection, pipeline=pipeline, **kwargs)
         except Exception as error:
             raise ObjectManagerGetError(error) from error
 
+
     def get_object(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbObject:
+        """TODO: document"""
         try:
             resource = CmdbObject(**self._get(
                 collection=CmdbObject.COLLECTION,
@@ -107,8 +112,10 @@ class CmdbObjectManager(CmdbManagerBase):
         verify_access(type_, user, permission)
         return resource
 
+
     def get_objects_by(self, sort='public_id', direction=-1, user: UserModel = None,
                        permission: AccessControlPermission = None, **requirements):
+        """TODO: document"""
         ack = []
         objects = self._get_many(collection=CmdbObject.COLLECTION, sort=sort, direction=direction, **requirements)
         for obj in objects:
@@ -121,6 +128,7 @@ class CmdbObjectManager(CmdbManagerBase):
             ack.append(CmdbObject(**obj))
         return ack
 
+
     def get_objects_by_type(self, type_id: int):
         """
         function 'get_objects_by_type' gets all objects with the given type_id
@@ -132,6 +140,7 @@ class CmdbObjectManager(CmdbManagerBase):
             list: All objects with the given ID (empty list if none found) 
         """
         return self.get_objects_by(type_id=type_id)
+
 
     def count_objects_by_type(self, public_id: int):
         """This method does not actually
@@ -147,6 +156,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         formatted_type_id = {'type_id': public_id}
         return self.dbm.count(CmdbObject.COLLECTION, formatted_type_id)
+
 
     def group_objects_by_value(self, value: str, match=None, user: UserModel = None,
                                permission: AccessControlPermission = None):
@@ -187,6 +197,7 @@ class CmdbObjectManager(CmdbManagerBase):
             ack.append(obj)
         return ack
 
+
     def sort_objects_by_field_value(self, value: str, order=-1, match=None):
         """This method does not actually
            performs the find() operation
@@ -222,11 +233,14 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return object_list
 
+
     def count_objects(self):
+        """TODO: document"""
         return self.dbm.count(collection=CmdbObject.COLLECTION)
 
-    def _find_query_fields(self, query, match_fields=None):
 
+    def _find_query_fields(self, query, match_fields=None):
+        """TODO: document"""
         match_fields = match_fields or list()
         for key, items in query.items():
             if isinstance(items, dict):
@@ -236,6 +250,7 @@ class CmdbObjectManager(CmdbManagerBase):
                     for item in items:
                         self._find_query_fields(item, match_fields=match_fields)
         return match_fields
+
 
     def insert_object(self, data: Union[CmdbObject, dict], user: UserModel = None,
                       permission: AccessControlPermission = None) -> int:
@@ -279,8 +294,10 @@ class CmdbObjectManager(CmdbManagerBase):
             raise ObjectInsertError(error) from error
         return ack
 
+
     def get_object_references(self, public_id: int, active_flag=None, user: UserModel = None,
                               permission: AccessControlPermission = None) -> list:
+        """TODO: document"""
         # Type of given object id
         type_id = self.get_object(public_id=public_id, user=user, permission=permission).type_id
 
@@ -324,7 +341,9 @@ class CmdbObjectManager(CmdbManagerBase):
 
         return referenced_by_objects
 
+
     def delete_object(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
+        """TODO: document"""
         type_id = self.get_object(public_id=public_id).type_id
         type_ = self._type_manager.get(type_id)
         if not type_.active:
@@ -343,7 +362,9 @@ class CmdbObjectManager(CmdbManagerBase):
         except (CMDBError, Exception) as error:
             raise ObjectDeleteError(msg=public_id) from error
 
+
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
+        """TODO: document"""
         ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
@@ -352,8 +373,10 @@ class CmdbObjectManager(CmdbManagerBase):
             self._event_queue.put(event)
         return ack
 
+
     #@deprecated
     def get_all_types(self) -> List[TypeModel]:
+        """TODO: document"""
         try:
             raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
         except Exception as error:
@@ -363,8 +386,10 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as error:
             raise ObjectManagerInitError(error) from error
 
+
     #@deprecated
     def get_type(self, public_id: int):
+        """TODO: document"""
         try:
             return TypeModel.from_data(self.dbm.find_one(
                 collection=TypeModel.COLLECTION,
@@ -375,13 +400,16 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as error:
             raise ObjectManagerGetError(err=error) from error
 
+
     #@deprecated
     def get_types_by(self, sort='public_id', **requirements):
+        """TODO: document"""
         try:
             return [TypeModel.from_data(data) for data in
                     self._get_many(collection=TypeModel.COLLECTION, sort=sort, **requirements)]
         except Exception as error:
             raise ObjectManagerGetError(error) from error
+
 
     #@deprecated
     def get_type_aggregate(self, arguments):
@@ -402,9 +430,12 @@ class CmdbObjectManager(CmdbManagerBase):
             type_list.append(TypeModel.from_data(put_data))
         return type_list
 
+
     #@deprecated
     def count_types(self):
+        """TODO: document"""
         return self.dbm.count(collection=TypeModel.COLLECTION)
+
 
     #@deprecated
     def get_categories(self) -> List[CategoryModel]:
@@ -417,6 +448,7 @@ class CmdbObjectManager(CmdbManagerBase):
             return [CategoryModel.from_data(category) for category in raw_categories]
         except Exception as error:
             raise ObjectManagerInitError(error) from error
+
 
     #@deprecated
     def get_category_by(self, **requirements) -> CategoryModel:
@@ -434,6 +466,7 @@ class CmdbObjectManager(CmdbManagerBase):
         except Exception as error:
             raise ObjectManagerInitError(error) from error
 
+
     #@deprecated
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
@@ -445,6 +478,7 @@ class CmdbObjectManager(CmdbManagerBase):
             return [CategoryModel.from_data(category) for category in raw_categories]
         except Exception as error:
             raise ObjectManagerInitError(error) from error
+
 
     #@deprecated
     def insert_category(self, category: CategoryModel):

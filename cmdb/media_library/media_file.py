@@ -13,26 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
+from datetime import date
 
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 from cmdb.media_library.media_file_metadata import FileMetadata
 from cmdb.framework.cmdb_dao import CmdbDAO
-from datetime import date
+from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+
+
+
 
 
 class MediaFile(MediaFileManagementBase):
-    """
-        Media Libary File
-    """
+    """Media Libary File"""
+
     COLLECTION = 'media.libary'
-    REQUIRED_INIT_KEYS = [
-        'name',
-    ]
+    REQUIRED_INIT_KEYS = ['name']
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
@@ -54,7 +53,9 @@ class MediaFile(MediaFileManagementBase):
         self.metadata = metadata
         self.size = length
 
-        super(MediaFile, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+
+
 
     def get_public_id(self) -> int:
         """
@@ -76,6 +77,8 @@ class MediaFile(MediaFileManagementBase):
             raise NoPublicIDError()
         return self.public_id
 
+
+
     def get_filename(self) -> str:
         """
         Get the name of file
@@ -86,6 +89,8 @@ class MediaFile(MediaFileManagementBase):
             return ""
         else:
             return self.filename
+
+
 
     def get_chunk_size(self) -> bytes:
         """
@@ -98,6 +103,8 @@ class MediaFile(MediaFileManagementBase):
         """
         return self.chunk_size
 
+
+
     def get_upload_date(self) -> date:
         """
         Get the date the document was first stored by GridFS.
@@ -106,6 +113,8 @@ class MediaFile(MediaFileManagementBase):
             bytes: display upload Date
         """
         return self.upload_date
+
+
 
     def get_metadata(self) -> FileMetadata:
         """
@@ -120,6 +129,8 @@ class MediaFile(MediaFileManagementBase):
         """
         return self.metadata
 
+
+
     def get_size(self) -> bytes:
         """
         Get the size of the document in bytes.
@@ -127,6 +138,8 @@ class MediaFile(MediaFileManagementBase):
             bytes: size of the document
         """
         return self.size
+
+
 
     @classmethod
     def to_json(cls, instance) -> dict:
@@ -140,11 +153,11 @@ class MediaFile(MediaFileManagementBase):
         }
 
 
+
 class NoPublicIDError(CMDBError):
     """
     Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
     """
-
     def __init__(self):
         super().__init__()
         self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'

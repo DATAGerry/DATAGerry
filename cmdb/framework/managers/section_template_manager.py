@@ -48,4 +48,3 @@ class SectionTemplateManager(ManagerBase):
         self.event_queue = event_queue
         self.query_builder = DefaultQueryBuilder()
         super().__init__(CmdbSectionTemplate.COLLECTION, database_manager)
-

@@ -13,19 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from cmdb.importer.parser_response import ParserResponse, ObjectParserResponse
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
 
 
 class BaseParser:
+    """TODO: document"""
     DEFAULT_CONFIG = {}
 
     def __new__(cls, *args, **kwargs):
@@ -35,28 +33,36 @@ class BaseParser:
         _parser_config = parser_config or self.DEFAULT_CONFIG
         self.parser_config: dict = {**self.DEFAULT_CONFIG, **_parser_config}
 
+
     def get_config(self) -> dict:
+        """TODO: document"""
         return self.parser_config
 
     def parse(self, file) -> ParserResponse:
+        """TODO: document"""
         raise NotImplementedError
 
 
 class BaseObjectParser(BaseParser):
+    """TODO: document"""
+
     DEFAULT_CONFIG = {}
 
     def __init__(self, parser_config: dict):
-        super(BaseObjectParser, self).__init__(parser_config)
+        super().__init__(parser_config)
+
 
     def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError
 
 
 class BaseTypeParser(BaseParser):
+    """TODO: document"""
+
     DEFAULT_CONFIG = {}
 
     def __init__(self, parser_config: dict):
-        super(BaseTypeParser, self).__init__(parser_config)
+        super().__init__(parser_config)
 
     def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError

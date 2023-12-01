@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """Response classes. These include already parsed data and additional information based on their types."""
 
 
@@ -23,7 +22,9 @@ class ParserResponse:
     def __init__(self, count: int):
         self.count: int = count
 
+
     def output(self) -> dict:
+        """TODO: document"""
         raise NotImplementedError
 
 
@@ -32,7 +33,8 @@ class ObjectParserResponse(ParserResponse):
 
     def __init__(self, count: int, entries: list = None):
         self.entries: list = entries or []
-        super(ObjectParserResponse, self).__init__(count=count)
+        super().__init__(count=count)
+
 
     def output(self) -> dict:
         return self.__dict__
@@ -42,8 +44,9 @@ class TypeParserResponse(ParserResponse):
     """Response for type imports"""
 
     def __init__(self, count: int):
-        super(TypeParserResponse, self).__init__(count)
+        super().__init__(count)
         raise NotImplementedError
+
 
     def output(self) -> dict:
         raise NotImplementedError

@@ -17,7 +17,6 @@
 This managers represents the core functionalities for the use of CMDB objects.
 All communication with the objects is controlled by this managers.
 The implementation of the managers used is always realized using the respective superclass.
-
 """
 import logging
 import json

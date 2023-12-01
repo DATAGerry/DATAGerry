@@ -26,6 +26,7 @@ from cmdb.media_library.media_file import FileMetadata
 from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -116,8 +117,8 @@ class MediaFileManagement(CmdbManagerBase):
         try:
             file_id = self.fs.get_last_version(**{'public_id': public_id})._id
             self.fs.delete(file_id)
-        except Exception:
-            raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}')
+        except Exception as exc:
+            raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from exc
 
         return True
 

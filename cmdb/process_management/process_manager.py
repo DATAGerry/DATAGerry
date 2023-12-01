@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Process Manager
 Manager for handling CMDB processes
@@ -22,6 +21,7 @@ import logging
 import multiprocessing
 import threading
 from cmdb.utils.helpers import load_class
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,6 +51,8 @@ class ProcessManager:
         self.__flag_shutdown = threading.Event()
         self._loaded = False
 
+
+
     def start_app(self) -> bool:
         """start all services from service definitions"""
         for service_def in self.__service_defs:
@@ -65,6 +67,8 @@ class ProcessManager:
             self.__process_controllers.append(proc_controller)
         return True
 
+
+
     def stop_app(self):
         """stop all services"""
         self.__flag_shutdown.set()
@@ -72,7 +76,10 @@ class ProcessManager:
         for process in reversed(self.__process_list):
             process.terminate()
 
+
+
     def get_loading_status(self):
+        """TODO: document"""
         return self._loaded
 
 
@@ -89,6 +96,8 @@ class CmdbProcess:
         self.__name = name
         self.__classname = classname
 
+
+
     def get_name(self):
         """return the process name
 
@@ -96,6 +105,8 @@ class CmdbProcess:
             str: name of the process
         """
         return self.__name
+
+
 
     def get_class(self):
         """return the class name
@@ -117,10 +128,12 @@ class ProcessController(threading.Thread):
             flag_shutdown(threading.Event): shutdown flag
             cb_shutdown(func): callback function if a process crashed
         """
-        super(ProcessController, self).__init__()
+        super().__init__()
         self.__process = process
         self.__flag_shutdown = flag_shutdown
         self.__cb_shutdown = cb_shutdown
+
+
 
     def run(self):
         self.__process.join()

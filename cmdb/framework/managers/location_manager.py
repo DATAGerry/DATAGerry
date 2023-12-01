@@ -86,6 +86,7 @@ class LocationQueryBuilder(ManagerQueryBuilder):
         self.query += results_query
         return self.query
 
+
     def count(self, filter: Union[List[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
         """
@@ -135,6 +136,7 @@ class LocationManager(ManagerBase):
         self.type_manager = TypeManager(database_manager)
         super().__init__(CmdbLocation.COLLECTION, database_manager=database_manager)
 
+
     def get(self, public_id: Union[PublicID, int], user: UserModel = None,
             permission: AccessControlPermission = None) -> CmdbLocation:
         """
@@ -153,6 +155,7 @@ class LocationManager(ManagerBase):
             type_ = TypeManager(database_manager=self._database_manager).get(resource.type_id)
             verify_access(type_, user, permission)
             return resource
+
 
     def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
@@ -176,6 +179,7 @@ class LocationManager(ManagerBase):
         iteration_result: IterationResult[CmdbLocation] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbLocation)
         return iteration_result
+
 
     def update(self, public_id: Union[PublicID, int], data: Union[CmdbLocation, dict], user: UserModel = None,
                permission: AccessControlPermission = None):
@@ -213,6 +217,7 @@ class LocationManager(ManagerBase):
             self.event_queue.put(event)
 
         return update_result
+
 
     def update_many(self, query: dict, update: dict):
         """

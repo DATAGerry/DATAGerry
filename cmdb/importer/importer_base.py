@@ -13,11 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Module of basic importers
 """
-
 from datetime import datetime, timezone
 import logging
 from typing import Optional
@@ -32,6 +30,7 @@ from cmdb.importer.importer_response import BaseImporterResponse, ImporterObject
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -51,21 +50,26 @@ class BaseImporter:
         self.file_type: str = file_type
         self.config = config
 
+
     def get_file_type(self) -> str:
         """Get the name of the file-type"""
         return self.file_type
+
 
     def get_file(self):
         """Get the loaded file"""
         return self.file
 
+
     def get_config(self) -> Optional[BaseImporterConfig]:
         """Get the configuration object"""
         return self.config
 
+
     def has_config(self) -> bool:
         """Check if importer has a config"""
         return True if self.config else False
+
 
     def start_import(self) -> BaseImporterResponse:
         """Starting the import process"""
@@ -75,8 +79,13 @@ class BaseImporter:
 class ObjectImporter(BaseImporter):
     """Superclass for object importers"""
 
-    def __init__(self, file, file_type, config: ObjectImporterConfig = None,
-                 parser: BaseObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
+    def __init__(self,
+                 file,
+                 file_type,
+                 config: ObjectImporterConfig = None,
+                 parser: BaseObjectParser = None,
+                 object_manager: CmdbObjectManager = None,
+                 request_user: UserModel = None):
         """
         Basic importer super class for object imports
         Normally should be started by start_import
@@ -99,7 +108,8 @@ class ObjectImporter(BaseImporter):
             ))
             self.object_manager = object_manager
         self.request_user = request_user
-        super(ObjectImporter, self).__init__(file=file, file_type=file_type, config=config)
+        super().__init__(file=file, file_type=file_type, config=config)
+
 
     def _generate_objects(self, parsed: ObjectParserResponse, *args, **kwargs) -> list:
         """Generate a list of all data from the parser.
@@ -109,10 +119,12 @@ class ObjectImporter(BaseImporter):
             object_instance_list.append(self.generate_object(entry, *args, **kwargs))
         return object_instance_list
 
+
     def generate_object(self, entry, *args, **kwargs) -> dict:
         """Generation of the CMDB-Objects based on the parser response
         and the imported fields"""
         raise NotImplementedError
+
 
     def _import(self, import_objects: list) -> ImporterObjectResponse:
         """Basic import wrapper - starting the import process
@@ -128,14 +140,14 @@ class ObjectImporter(BaseImporter):
         importer_counter = 0
         import_objects_length: int = len(import_objects)
 
-        LOGGER.info(f'Starting import of {import_objects_length} objects')
+        LOGGER.info('Starting import of %s objects', import_objects_length)
         while current_import_index < import_objects_length:
 
             current_import_object: dict = import_objects[current_import_index]
-            LOGGER.debug(f'Current working object: {current_import_object}')
+            LOGGER.debug('Current working object: %s', current_import_object)
 
             current_public_id: (int, None) = current_import_object.get('public_id')
-            LOGGER.debug(f'Current working public id: {current_public_id}')
+            LOGGER.debug('Current working public id: %s', current_public_id)
 
             # Object has PublicID and can not overwrite
             if current_public_id is not None and not run_config.overwrite_public:
@@ -146,14 +158,14 @@ class ObjectImporter(BaseImporter):
                 continue
 
             # Object has no PublicID <- assign new
-            elif not current_public_id:
+            if not current_public_id:
                 current_public_id = self.object_manager.get_new_id(CmdbObject.COLLECTION)
-                LOGGER.debug(f'Assign new PublicID: {current_public_id}')
+                LOGGER.debug('Assign new PublicID: %s', current_public_id)
                 current_import_object.update({'public_id': current_public_id})
             # else assign given PublicID
             else:
                 current_public_id = current_import_object.get('public_id')
-                LOGGER.debug(f'Assign given PublicID: {current_public_id}')
+                LOGGER.debug('Assign given PublicID: %s', current_public_id)
 
             # Insert data
             try:
@@ -198,6 +210,7 @@ class ObjectImporter(BaseImporter):
             failed_imports=failed_imports
         )
 
+
     def start_import(self) -> ImporterObjectResponse:
         """Starting the import process.
         Should call the _import method"""
@@ -213,6 +226,7 @@ class TypeImporter(BaseImporter):
     def __init__(self, file, file_type, config: dict = None):
         self.config = config
         super(TypeImporter, self).__init__(file=file, file_type=file_type, config=config)
+
 
     def start_import(self) -> BaseImporterResponse:
         raise NotImplementedError

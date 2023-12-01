@@ -13,11 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from bson import objectid
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class FileMetadata:
+    """TODO: document"""
+
     def __init__(self, author_id, permissions=None, reference=None, reference_type=None,
                  folder: bool = False, parent: int = None, mime_type="application/json"):
         self.reference = reference
@@ -28,28 +30,41 @@ class FileMetadata:
         self.parent = parent
         self.permission = permissions
 
+
+
     def get_ref_to(self) -> objectid:
+        """TODO: document"""
         if self.reference is None:
             return None
         return self.reference
 
+
+
     def get_ref_to_type(self) -> str:
+        """TODO: document"""
         if self.reference_type is None:
             return ""
         return self.reference_type
 
+
+
     def get_mime_type(self) -> str:
+        """TODO: document"""
         if self.mime_type is None:
             return "application/json"
         return self.mime_type
 
+
+
     def get_permission(self):
+        """TODO: document"""
         # TODO implement this method later
         #  The action of officially allowing someone to do a particular thing
-
         if self.permission is None:
             return None
         return self.permission
+
+
 
     @classmethod
     def to_json(cls, instance) -> dict:

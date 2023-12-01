@@ -13,12 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Server module for web-based services
 """
 import logging
 import multiprocessing
+
+from gunicorn.app.base import BaseApplication
+
 from cmdb import __MODE__
 import cmdb.process_management.service
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -27,7 +29,7 @@ from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.logger import get_logging_conf
-from gunicorn.app.base import BaseApplication
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -36,12 +38,13 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
     """CmdbService: Webapp"""
 
     def __init__(self):
-        super(WebCmdbService, self).__init__()
+        super().__init__()
         self._name = "webapp"
         self._eventtypes = ["cmdb.webapp.#"]
         self._threaded_service = False
         self._multiprocessing = True
         self.__webserver_proc = None
+
 
     def _run(self):
         # get queue for sending events
@@ -49,6 +52,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
+
 
         # get WSGI app
         app = DispatcherMiddleware(
@@ -68,13 +72,14 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         self.__webserver_proc.start()
         self.__webserver_proc.join()
 
+
     def _shutdown(self, signam, frame):
         self.__webserver_proc.terminate()
         self.stop()
 
+
     def _handle_event(self, event):
         """ignore incomming events"""
-        pass
 
 
 class HTTPServer(BaseApplication):
@@ -91,13 +96,14 @@ class HTTPServer(BaseApplication):
         self.options['logconfig_dict'] = get_logging_conf()
         self.options['timeout'] = 120
         self.options['daemon'] = True
-        if __MODE__ == 'DEBUG' or 'TESTING':
+        if __MODE__ in ('DEBUG','TESTING'):
             self.options['reload'] = True
             self.options['check_config'] = True
             LOGGER.debug("Gunicorn starting with auto reload option")
-        LOGGER.info("Interfaces started @ http://{}:{}".format(self.options['host'], self.options['port']))
+        LOGGER.info("Interfaces started @ http://%s:%s",self.options['host'], self.options['port'])
         self.application = app
-        super(HTTPServer, self).__init__()
+        super().__init__()
+
 
     def load_config(self):
         config = dict([(key, value) for key, value in self.options.items()
@@ -105,19 +111,24 @@ class HTTPServer(BaseApplication):
         for key, value in config.items():
             self.cfg.set(key.lower(), value)
 
+
     def load(self):
         return self.application
 
+
     @staticmethod
     def number_of_workers() -> int:
+        """TODO: document"""
         return (multiprocessing.cpu_count() * 2) + 1
 
 
 class DispatcherMiddleware:
+    """TODO: document"""
 
     def __init__(self, app, mounts=None):
         self.app = app
         self.mounts = mounts or {}
+
 
     def __call__(self, environ, start_response):
         script = environ.get('PATH_INFO', '')
@@ -127,7 +138,7 @@ class DispatcherMiddleware:
                 app = self.mounts[script]
                 break
             script, last_item = script.rsplit('/', 1)
-            path_info = '/%s%s' % (last_item, path_info)
+            path_info = f'/{last_item}{path_info}'
         else:
             app = self.mounts.get(script, self.app)
         original_script_name = environ.get('SCRIPT_NAME', '')

@@ -13,15 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-TODO: document
-"""
+"""TODO: document"""
 import logging
 from datetime import datetime
 from enum import Enum
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -35,9 +34,7 @@ class LogAction(Enum):
 
 
 class CmdbMetaLog(CmdbDAO):
-    """
-    CmdbLog
-    """
+    """CmdbMetaLog"""
     COLLECTION: Collection = 'framework.logs'
     MODEL: Model = 'CmdbLog'
 
@@ -46,13 +43,12 @@ class CmdbMetaLog(CmdbDAO):
         self.log_time: datetime = log_time
         self.action: LogAction = action
         self.action_name = action_name
-        super(CmdbMetaLog, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
 
 class CmdbObjectLog(CmdbMetaLog):
-    """
-    TODO:document
-    """
+    """TODO:document"""
+
     DEFAULT_VERSION: str = '1.0.0'
     SCHEMA: dict = {
         'object_id': {
@@ -178,11 +174,13 @@ class CmdbLog:
 
     @classmethod
     def register_log_type(cls, log_name, log_class):
+        """TODO: document"""
         cls.REGISTERED_LOG_TYPE[log_name] = log_class
 
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs):
+        """TODO: document"""
         return cls.__get_log_class(**data).from_data(data, *args, **kwargs)
 
 

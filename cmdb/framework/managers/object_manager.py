@@ -16,7 +16,6 @@
 """
 Manages Objects in Datagerry
 """
-
 import json
 import logging
 
@@ -40,6 +39,7 @@ from cmdb.search.query.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -188,8 +188,8 @@ class ObjectManager(ManagerBase):
             type_ = TypeManager(database_manager=self._database_manager).get(resource.type_id)
             verify_access(type_, user, permission)
             return resource
-        else:
-            raise ManagerGetError(f'Object with ID: {public_id} not found!')
+
+        raise ManagerGetError(f'Object with ID: {public_id} not found!')
 
 
     def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
@@ -206,7 +206,7 @@ class ObjectManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
         return iteration_result
