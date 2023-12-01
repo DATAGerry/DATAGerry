@@ -19,10 +19,9 @@ This module manages the 'Location'-Profile for the DATAGERRY assistant
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-# -------------------------------------------------------------------------------------------------------------------- #
 
 
 class LocationProfile(ProfileBase):

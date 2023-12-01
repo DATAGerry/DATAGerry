@@ -16,8 +16,6 @@
 """
 This module is the base class for the profiles of DATAGERRY assistant
 """
-
-
 import logging
 from datetime import datetime, timezone
 
@@ -25,6 +23,7 @@ from flask import current_app
 from cmdb.framework import TypeModel
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 

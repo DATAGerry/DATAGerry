@@ -65,6 +65,7 @@ class CategoryManager(ManagerBase):
         iteration_result.convert_to(CategoryModel)
         return iteration_result
 
+
     def get(self, public_id: Union[PublicID, int]) -> CategoryModel:
         """
         Get a single type by its id.
@@ -79,6 +80,7 @@ class CategoryManager(ManagerBase):
         for resource_result in cursor_result.limit(-1):
             return CategoryModel.from_data(resource_result)
         raise ManagerGetError(f'Category with ID: {public_id} not found!')
+
 
     def insert(self, category: dict) -> PublicID:
         """
@@ -97,6 +99,7 @@ class CategoryManager(ManagerBase):
             category = CategoryModel.to_json(category)
         return self._insert(self.collection, resource=category)
 
+
     def update(self, public_id: Union[PublicID, int], category: Union[CategoryModel, dict]):
         """
         Update a existing category in the system.
@@ -113,8 +116,9 @@ class CategoryManager(ManagerBase):
             category = CategoryModel.to_json(category)
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=category)
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
         return update_result
+
 
     def delete(self, public_id: Union[PublicID, int]) -> CategoryModel:
         """
@@ -131,6 +135,7 @@ class CategoryManager(ManagerBase):
         if delete_result.deleted_count == 0:
             raise FrameworkDeleteError(err='No category matched this public id')
         return raw_category
+
 
     @property
     def tree(self) -> CategoryTree:

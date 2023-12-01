@@ -85,7 +85,7 @@ class CmdbLocation(CmdbDAO):
                  type_id: int,
                  type_label: str,
                  type_icon: str = "fas fa-cube",
-                 type_selectable = True, 
+                 type_selectable = True,
                  **kwargs):
         """
         Initialisation of location
@@ -135,6 +135,7 @@ class CmdbLocation(CmdbDAO):
             type_selectable = data.get('type_selectable', True),
         )
 
+
     @classmethod
     def to_json(cls, instance: "CmdbLocation") -> dict:
         """
@@ -156,6 +157,7 @@ class CmdbLocation(CmdbDAO):
             'type_icon': instance.type_icon,
             'type_selectable': instance.type_selectable,
         }
+
 
     @classmethod
     def to_data(cls, instance: "CmdbLocation") -> dict:

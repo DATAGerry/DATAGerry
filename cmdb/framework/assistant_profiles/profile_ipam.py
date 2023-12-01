@@ -19,9 +19,10 @@ This module manages the 'IPAM'-Profile for the DATAGERRY assistant
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-# -------------------------------------------------------------------------------------------------------------------- #
+
 
 
 class IPAMProfile(ProfileBase):

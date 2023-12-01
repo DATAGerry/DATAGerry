@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 This file contans all profile data and logics for the initial assistant
 """
@@ -30,6 +29,7 @@ from cmdb.framework.assistant_profiles.profile_ipam import IPAMProfile
 from cmdb.framework.assistant_profiles.profile_client_management import ClientManagementProfile
 from cmdb.framework.assistant_profiles.profile_server_management import ServerManagementProfile
 from cmdb.framework.assistant_profiles.profile_network_infrastructure import NetworkInfrastructureProfile
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 

@@ -19,10 +19,9 @@ This module manages the 'Server Management'-Profile for the DATAGERRY assistant
 import logging
 
 from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-# -------------------------------------------------------------------------------------------------------------------- #
 
 
 class ServerManagementProfile(ProfileBase):

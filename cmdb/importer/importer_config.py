@@ -13,14 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from enum import Enum
-from typing import List
-
-from cmdb.importer.mapper import Mapping, MapEntry
+"""TODO: document"""
+from cmdb.importer.mapper import Mapping
+# -------------------------------------------------------------------------------------------------------------------- #
 
 
 class BaseImporterConfig:
+    """TODO: document"""
+
     DEFAULT_MAPPING: Mapping = Mapping()
     MANUALLY_MAPPING: bool = True
 
@@ -29,11 +29,14 @@ class BaseImporterConfig:
             mapping = Mapping.generate_mapping_from_list(mapping)
         self.mapping: Mapping = mapping or self.DEFAULT_MAPPING
 
+
     def get_mapping(self) -> Mapping:
+        """TODO: document"""
         return self.mapping
 
 
 class ObjectImporterConfig(BaseImporterConfig):
+    """TODO: document"""
 
     def __init__(self, type_id: int, mapping: list = None, start_element: int = 0, max_elements: int = 0,
                  overwrite_public: bool = True, *args, **kwargs):
@@ -41,7 +44,9 @@ class ObjectImporterConfig(BaseImporterConfig):
         self.start_element: int = start_element
         self.max_elements: int = max_elements
         self.overwrite_public: bool = overwrite_public
-        super(ObjectImporterConfig, self).__init__(mapping=mapping)
+        super().__init__(mapping=mapping)
+
 
     def get_type_id(self):
+        """TODO: document"""
         return self.type_id

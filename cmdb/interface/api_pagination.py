@@ -13,10 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import Any
 from urllib import parse
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class APIPager:
     """
@@ -40,6 +40,7 @@ class APIPager:
         self.total_pages = total_pages
 
     def to_dict(self) -> dict:
+        """TODO: document"""
         return {
             'page': self.page,
             'page_size': self.page_size,
@@ -60,6 +61,7 @@ class APIPagination:
         self.next = next_
         self.last = last
 
+
     @staticmethod
     def __update_query(query: str, key: str, value: Any) -> str:
         """
@@ -77,6 +79,7 @@ class APIPagination:
         url_dict.update(**{key: value})
         return parse.urlencode(url_dict)
 
+
     @staticmethod
     def __set_page(query: str, page: int):
         """
@@ -91,6 +94,7 @@ class APIPagination:
         """
         return APIPagination.__update_query(query, 'page', page)
 
+
     @staticmethod
     def __first_url(parsed_url: parse.ParseResult, first_page: int = 1) -> parse.ParseResult:
         """Set the page parameter of a url to the first page"""
@@ -98,12 +102,14 @@ class APIPagination:
         new_query = APIPagination.__set_page(query, first_page)
         return parsed_url._replace(query=new_query)
 
+
     @staticmethod
     def __last_url(parsed_url: parse.ParseResult, total_pages: int) -> parse.ParseResult:
         """Set the page parameter of a url to the last page"""
         query = parsed_url.query
         new_query = APIPagination.__set_page(query, total_pages)
         return parsed_url._replace(query=new_query)
+
 
     @staticmethod
     def __pre_url(parsed_url: parse.ParseResult, page: int):
@@ -115,6 +121,7 @@ class APIPagination:
             new_query = APIPagination.__set_page(query, page - 1)
         return parsed_url._replace(query=new_query)
 
+
     @staticmethod
     def __next_url(parsed_url: parse.ParseResult, page: int, total_pages: int):
         """Set the page parameter of a url to the last page"""
@@ -124,6 +131,7 @@ class APIPagination:
         else:
             new_query = APIPagination.__set_page(query, page + 1)
         return parsed_url._replace(query=new_query)
+
 
     @classmethod
     def create(cls, url: str, page: int, total_pages: int):
@@ -145,7 +153,9 @@ class APIPagination:
         next_url = parse.urlunparse(cls.__next_url(parsed_url, page, total_pages))
         return cls(current=url, first=first_url, prev=prev_url, next_=next_url, last=last_url)
 
+
     def to_dict(self) -> dict:
+        """TODO: document"""
         return {
             'current': self.current,
             'first': self.first,

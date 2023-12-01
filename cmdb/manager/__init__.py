@@ -31,7 +31,6 @@ from cmdb.manager.errors import ManagerGetError,\
 LOGGER = logging.getLogger(__name__)
 
 
-
 class AbstractManagerBase:
     """
     Manager base class for all core CRUD function.

@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from json import dumps
 from datetime import datetime, timezone
 from enum import Enum
@@ -194,6 +193,7 @@ class GetSingleResponse(BaseAPIResponse):
         super().__init__(operation_type=OperationType.GET, url=url, model=model,
                                                 body=body)
 
+
     def make_response(self, *args, **kwargs) -> Response:
         """
         Make a valid http response.
@@ -210,6 +210,7 @@ class GetSingleResponse(BaseAPIResponse):
         else:
             response = make_api_response(None)
         return response
+
 
     def export(self, text: str = 'json') -> dict:
         """Get content of the response as dict."""
@@ -237,7 +238,6 @@ class GetMultiResponse(BaseAPIResponse):
             url: Requested url.
             model: Data-Model of the results.
             body: If http response should not have a body.
-
         """
         self.parameters = params
         if self.parameters.projection:
@@ -255,8 +255,8 @@ class GetMultiResponse(BaseAPIResponse):
         self.pager: APIPager = APIPager(page=params.page, page_size=params.limit,
                                         total_pages=total_pages)
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
-        super().__init__(operation_type=OperationType.GET, url=url, model=model,
-                                               body=body)
+        super().__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
+
 
     def make_response(self, *args, **kwargs) -> Response:
         """
@@ -275,6 +275,7 @@ class GetMultiResponse(BaseAPIResponse):
             response = make_api_response(None)
         response.headers['X-Total-Count'] = self.total
         return response
+
 
     def export(self, text: str = 'json', pagination: bool = True) -> dict:
         """
@@ -342,6 +343,7 @@ class InsertSingleResponse(BaseAPIResponse):
         response = make_api_response(self.export(), 201)
         response.headers['Location'] = f'{self.url}{self.result_id}'
         return response
+
 
     def export(self, text: str = 'json', *args, **kwargs) -> dict:
         """Get the data response payload as dict"""

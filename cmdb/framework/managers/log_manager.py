@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Manager of logs
-"""
+"""Manager of logs"""
 from typing import Union, List
 from datetime import datetime, timezone
 

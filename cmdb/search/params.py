@@ -13,14 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import List
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class SearchParam:
+    """TODO: document"""
     POSSIBLE_FORM_TYPES = [
         'text',
         'regex',
@@ -45,8 +47,11 @@ class SearchParam:
         self.settings: dict = settings or {}
         self.disjunction: bool = disjunction
 
+
     def __repr__(self):
         return f'[SearchParam] {self.search_text} - {self.search_form}'
+
+
 
     @classmethod
     def from_request(cls, request) -> List['SearchParam']:
@@ -62,6 +67,6 @@ class SearchParam:
                     )
                 )
             except Exception as err:
-                LOGGER.error(f'[SearchParamDAO](from_request): {err}')
+                LOGGER.error('[SearchParamDAO](from_request): %s',err)
                 continue
         return param_list
