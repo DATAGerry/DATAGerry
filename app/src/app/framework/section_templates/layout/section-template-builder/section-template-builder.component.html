@@ -1,0 +1,148 @@
+<div class="actions-div">
+    <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
+    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0">Create</button>
+</div>
+
+<div class="row">
+    <div id="builder-controls" class="col-3">
+        <div id="controlWrapper" ui-block>
+            <div class="accordion" id="controlsPanel">
+                <div class="card">
+                    <div class="card-header">
+                        <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#basicControls">
+                            Basic Controls
+                        </a>
+                    </div>
+                    <div id="basicControls" class="collapse show" data-parent="#controlsPanel">
+                        <div class="card-body">
+                            <div class="list-group">
+                                <div 
+                                    *ngFor="let control of basicControls"
+                                    [dndType]="control.typeController.dndType"
+                                    [dndDraggable]="control.typeController.content()"
+                                    class="list-group-item list-group-item-action"
+                                >
+                                    <span>
+                                        <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
+                                    </span>
+                                    <button type="button" class="btn btn-primary btn-sm float-right">
+                                        <fa-icon icon="bars"></fa-icon>
+                                    </button>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- basicControls-->
+                </div> <!--basic card-->
+                <div class="card">
+                    <div class="card-header">
+                      <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#specialControls">
+                        Special Controls
+                      </a>
+                    </div>
+                    <div id="specialControls" class="collapse" data-parent="#controlsPanel">
+                        <div class="card-body">
+                            <div class="list-group">
+                                <div 
+                                    *ngFor="let control of specialControls"
+                                    [dndType]="control.typeController.dndType"
+                                    [dndDraggable]="control.typeController.content()"
+                                    class="list-group-item list-group-item-action"
+                                >
+                                    <span>
+                                        <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
+                                    </span>
+                                    <button type="button" class="btn btn-primary btn-sm float-right">
+                                        <fa-icon icon="bars"></fa-icon>
+                                    </button>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- special-card-->
+            </div><!--controlsPanel-->
+        </div> <!--controls-wrapper-->
+    </div> <!--builder-controls-->
+
+    <div id="form-container" class="col-9">
+        <section>
+            <div class="card">
+                <div class="card-header">
+                    <fa-icon [icon]="['far', 'object-group']"></fa-icon>
+                        {{initialSection.label}}
+                </div>
+                <div class="collapse show" id="{{initialSection.name}}">
+                    <div class="card-body">
+                        <cmdb-section-field-edit [data]="initialSection" #sectionComponent></cmdb-section-field-edit>
+                        <form [formGroup]="formGroup">
+                            <div class="form-group is-global">
+                                <!-- <input id="is-global-checkbox" formControlName="isGlobalControl" type="checkbox"> -->
+                                <!-- <label id="is-global-label" for="is-global-checkbox">Test</label> -->
+                                <mat-checkbox formControlName="isGlobalControl">
+                                    <label id="is-global-label">Global Template</label>
+                                </mat-checkbox>
+                            </div>
+                        </form>
+                        <hr>
+                        <p>Fields:</p>
+                        <div [dndDropzone]="['inputs']" (dndDrop)="onFieldDrop($event)">
+                            <div *ngIf="initialSection.fields.length == 0" class="empty-section" data-content="Drop controls here">
+                            </div>
+                            <div style="border: 1px green solid; border-radius: 5px; padding: 15px;" dndPlaceholderRef>
+                                Drop field here
+                            </div>
+                            <ng-container *ngFor="let field of initialSection.fields; let y = index">
+                                <div 
+                                    dndEffectAllowed="move"
+                                    dndType="inputs"
+                                    [dndDraggable]="field"
+                                    (dndMoved)="onFieldDragged(field)"
+                                >
+                                    <div class="fields card">
+                                        <div class="card-header d-flex justify-content-between align-items-center">
+                                            <span>
+                                                <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
+                                            </span>
+                                            <span>
+                                                <button
+                                                    class="btn btn-link mr-1"
+                                                    type="button"
+                                                    data-toggle="collapse"
+                                                    [attr.data-target]="'#field-'+ y + field.name"
+                                                >
+                                                    <fa-icon [icon]="['far', 'edit']"></fa-icon>
+                                                </button>
+                                                <button class="btn btn-link mr-1" type="button" dndHandle>
+                                                    <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
+                                                </button>
+                                                <button class="btn btn-link" type="button" (click)="removeField(field)">
+                                                    <fa-icon [icon]="['far', 'window-close']"></fa-icon>
+                                                </button>
+                                            </span><!-- buttons span-->
+                                        </div><!-- card-header -->
+                                        <div class="card-body collapse" id="field-{{y}}{{field.name}}">
+                                            <cmdb-config-edit
+                                                [mode]="isNewField(field) ? MODES.Create : mode"
+                                                [types]="types"
+                                                [sections]="initialSection"
+                                                [data]="field"
+                                            ></cmdb-config-edit>
+                                        </div>
+                                    </div><!-- fields-card-->
+                                </div>
+                            </ng-container><!-- inner container-->
+                        </div><!-- onFieldDrop-->
+                    </div><!-- card-body-->
+                </div><!-- id-section-->
+            </div><!-- card-->
+      </section> <!-- section-->
+    </div> <!--form-container-->
+</div>
+
+<div class="actions-div">
+    <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
+    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0">Create</button>
+</div>
+
+
