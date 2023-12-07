@@ -150,9 +150,10 @@ class LocationManagerDeleteError(ManagerDeleteError):
     def __init__(self, err):
         super().__init__(err=err)
 
-# ---------------------------------------------------------------------------- #
-#                               OBJECT EXCEPTIONS                              #
-# ---------------------------------------------------------------------------- #
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   OBJECT EXCEPTIONS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectManagerInitError(ManagerInitError):
     """TODO: document"""
@@ -178,6 +179,45 @@ class ObjectManagerUpdateError(ManagerUpdateError):
 
 
 class ObjectManagerDeleteError(ManagerDeleteError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              SECTION TEMPLATE EXCEPTIONS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+class SectionTemplateManagerError(ManagerGetError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class SectionTemplateManagerInitError(ManagerInitError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class SectionTemplateManagerGetError(ManagerGetError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+
+class SectionTemplateManagerInsertError(ManagerInsertError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+class SectionTemplateManagerUpdateError(ManagerUpdateError):
+    """TODO: document"""
+    def __init__(self, err):
+        super().__init__(err=err)
+
+class SectionTemplateManagerDeleteError(ManagerDeleteError):
     """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)

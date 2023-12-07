@@ -15,7 +15,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpParams } from '@angular/common/http';
 
@@ -53,7 +52,7 @@ export class SectionTemplateService implements ApiServicePrefix {
      * @param objectInstance (CmdbLocation): location which should be crated
      * @returns Observable<any>
      */
-    public postSectionTemplate(params): Observable<any> {
+    public postSectionTemplate(params: any): Observable<any> {
 
             let httpParams = new HttpParams();
       
