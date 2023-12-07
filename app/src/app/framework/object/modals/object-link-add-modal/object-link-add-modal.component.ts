@@ -71,7 +71,9 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
   public async onSave() {
     const formData = this.form.getRawValue();
-    this.activeModal.close(formData);
+    if (this.secondary.errors.objectExists) {
+      this.activeModal.close(formData);
+    }
   }
 
   public ngOnDestroy(): void {
