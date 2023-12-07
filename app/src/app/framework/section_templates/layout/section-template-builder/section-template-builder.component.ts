@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
+import { FormControl, FormGroup } from '@angular/forms';
 import { } from '@angular/material/checkbox';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { Observable } from 'rxjs';
@@ -33,6 +33,10 @@ import { PasswordControl } from 'src/app/framework/type/builder/controls/text/pa
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
 import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/textarea.control';
 import { ValidationService } from 'src/app/framework/type/services/validation.service';
+import { SectionTemplateService } from '../../services/section-template.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
+import { APIInsertSingleResponse } from 'src/app/services/models/api-response';
+import { Router } from '@angular/router';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -45,7 +49,9 @@ export class SectionTemplateBuilderComponent implements OnInit {
     public types = [];
 
     public formGroup: FormGroup;
-    public isGlobal: boolean = false;
+    isNameValid = true;
+    isLabelValid = true;
+    isValid$: Observable<boolean>;
 
     public initialSection: any = {
         'name': this.randomName(),
@@ -68,41 +74,75 @@ export class SectionTemplateBuilderComponent implements OnInit {
         new Controller('ref', new ReferenceControl()),
         new Controller('location', new LocationControl())
     ];
-    isNameValid = true;
-    isLabelValid = true;
-    isValid$: Observable<boolean>;
+
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    constructor(private validationService: ValidationService) {
-        this.formGroup = new FormGroup({
-            'isGlobalControl': new FormControl(this.isGlobal)
-        });
+    constructor(
+        private validationService: ValidationService,
+        private sectionTemplatesService: SectionTemplateService,
+        private toastService: ToastService,
+        private router: Router) {
+
+            this.formGroup = new FormGroup({
+                'isGlobal': new FormControl(false)
+            });
     }
 
     ngOnInit(): void {
         this.isValid$ = this.validationService.getIsValid();
     }
-    /* ----------------------------------------------------- METHODS ---------------------------------------------------- */
 
+/* ---------------------------------------------------- API Calls --------------------------------------------------- */
 
+    /**
+     * Sends the section template data to backend
+     */
+    public createSectionTemplate(){
+        let params = {
+            "name": this.initialSection.name,
+            "label": this.initialSection.label,
+            "is_global": this.formGroup.value.isGlobal,
+            "fields": JSON.stringify(this.initialSection.fields) 
+          }
+
+          this.sectionTemplatesService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
+            this.toastService.success("Section Template created!");
+            this.router.navigate(['/framework/section_templates']);
+          }, error => {
+            console.log("error in create section template response");
+            this.toastService.error(error);
+          });
+    }
+
+/* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
+
+    /**
+     * Handels dropping fields in Fieldzone
+     * 
+     * @param event triggered when a field is dropped in the Fieldszone
+     */
     public onFieldDrop(event: DndDropEvent) {
-        const fieldData = event.data;
         if (event.dropEffect === 'copy' || event.dropEffect === 'move') {
-
-            if (event.dropEffect === 'copy') {
-                this.initialSection.fields.push(fieldData);
-            }
-            if (event.dropEffect === 'move') {
-                this.initialSection.fields.splice(event.index, 0, fieldData);
-            }
+            this.initialSection.fields.splice(event.index, 0, event.data);
         }
     }
 
 
+    /**
+     * Checks if the field already exists in the section
+     * 
+     * @param field fieldData
+     * @returns True if it a new field
+     */
     public isNewField(field: any): boolean {
         return this.initialSection.fields.indexOf(field) > -1;
     }
 
 
+    /**
+     * Triggered when an existing field is moved inside the section
+     * 
+     * @param item field data
+     */
     public onFieldDragged(item: any) {
         const fieldIndex = this.initialSection.fields.indexOf(item);
         let updatedDraggedFieldName = this.initialSection.fields[fieldIndex].name;
@@ -112,6 +152,11 @@ export class SectionTemplateBuilderComponent implements OnInit {
     }
 
 
+    /**
+     * Triggered when a field is removed
+     * 
+     * @param item field which should be removed
+     */
     public removeField(item: any) {
         const indexField: number = this.initialSection.fields.indexOf(item);
         let removedFieldName = this.initialSection.fields[indexField].name;
@@ -123,7 +168,14 @@ export class SectionTemplateBuilderComponent implements OnInit {
         }
     }
 
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
+    /**
+     * Sets the icon for the different controls
+     * 
+     * @param value string of field type
+     * @returns Icon string
+     */
     public matchedType(value: string) {
         switch (value) {
             case 'textarea':
@@ -148,6 +200,11 @@ export class SectionTemplateBuilderComponent implements OnInit {
     }
 
 
+    /**
+     * Generates a random name for the section
+     * 
+     * @returns (string): random name for section
+     */
     private randomName() {
         return `section_template-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
     }

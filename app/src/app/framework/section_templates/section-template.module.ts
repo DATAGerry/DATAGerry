@@ -30,6 +30,7 @@ import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { DndModule } from 'ngx-drag-drop';
 import { BuilderModule } from '../type/builder/builder.module';
 import { MatCheckboxModule } from '@angular/material/checkbox';
+import { ToastModule } from 'src/app/layout/toast/toast.module';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -48,7 +49,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
       NgbDatepickerModule,
       DndModule,
       BuilderModule,
-      MatCheckboxModule
+      MatCheckboxModule,
+      ToastModule
     ],
     exports: [
 

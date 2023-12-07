@@ -1,6 +1,13 @@
 <div class="actions-div">
-    <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
-    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
+    <button
+        id="add-section-template-button"
+        class="btn btn-light btn-sm mr-1"
+        [routerLink]="['/framework/section_templates']">Cancel</button>
+
+    <button id="add-section-template-button"
+        class="btn btn-success btn-sm mr-1"
+        (click)="createSectionTemplate()"
+        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
 </div>
 
 <div class="row">
@@ -77,9 +84,7 @@
                         <cmdb-section-field-edit [data]="initialSection" #sectionComponent></cmdb-section-field-edit>
                         <form [formGroup]="formGroup">
                             <div class="form-group is-global">
-                                <!-- <input id="is-global-checkbox" formControlName="isGlobalControl" type="checkbox"> -->
-                                <!-- <label id="is-global-label" for="is-global-checkbox">Test</label> -->
-                                <mat-checkbox formControlName="isGlobalControl">
+                                <mat-checkbox formControlName="isGlobal">
                                     <label id="is-global-label">Global Template</label>
                                 </mat-checkbox>
                             </div>
@@ -141,8 +146,15 @@
 </div>
 
 <div class="actions-div">
-    <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
-    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
+    <button
+        id="add-section-template-button"
+        class="btn btn-light btn-sm mr-1"
+        [routerLink]="['/framework/section_templates']">Cancel</button>
+
+    <button id="add-section-template-button"
+        class="btn btn-success btn-sm mr-1"
+        (click)="createSectionTemplate()"
+        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
 </div>
 
 
