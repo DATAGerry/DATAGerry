@@ -15,22 +15,24 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import {
-  Component,
-  ComponentFactoryResolver,
-  ComponentRef, EventEmitter,
-  Input, OnDestroy,
-  OnInit, Output,
-  ViewChild,
-  ViewContainerRef
+    Component,
+    ComponentFactoryResolver,
+    ComponentRef,
+    Input, OnDestroy,
+    OnInit,
+    ViewChild,
+    ViewContainerRef
 } from '@angular/core';
+import { UntypedFormGroup } from '@angular/forms';
+
+import { ReplaySubject } from 'rxjs';
+
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { UntypedFormGroup } from '@angular/forms';
 import { ConfigEditBaseComponent } from './config.edit';
-import { ReplaySubject } from 'rxjs';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -57,25 +59,28 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
   private component: any;
   private componentRef: ComponentRef<any>;
 
-  constructor(private resolver: ComponentFactoryResolver) {
-    this.form = new UntypedFormGroup({});
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    constructor(private resolver: ComponentFactoryResolver) {
+        this.form = new UntypedFormGroup({});
+    }
 
-  public ngOnInit(): void {
-    this.container.clear();
-    this.component = configComponents[this.data.type];
 
-    const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
-    this.componentRef = this.container.createComponent(factory);
-    this.componentRef.instance.mode = this.mode;
-    this.componentRef.instance.data = this.data;
-    this.componentRef.instance.form = this.form;
-    this.componentRef.instance.sections = this.sections;
-    this.componentRef.instance.fields = this.fields;
-  }
+    public ngOnInit(): void {
+        this.container.clear();
+        this.component = configComponents[this.data.type];
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+        const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
+        this.componentRef = this.container.createComponent(factory);
+        this.componentRef.instance.mode = this.mode;
+        this.componentRef.instance.data = this.data;
+        this.componentRef.instance.form = this.form;
+        this.componentRef.instance.sections = this.sections;
+        this.componentRef.instance.fields = this.fields;
+    }
+
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
 }

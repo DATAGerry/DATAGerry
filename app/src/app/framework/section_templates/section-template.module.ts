@@ -20,16 +20,38 @@ import { NgModule } from '@angular/core';
 import { SectionTemplateService } from './services/section-template.service';
 import { SectionTemplateComponent } from './section-template.component';
 import { SectionTemplateRoutingModule } from './section-template-routing.module';
+import { SectionTemplateBuilderComponent } from './layout/section-template-builder/section-template-builder.component';
+import { SectionTemplateAddComponent } from './layout/section-template-add/section-template-add.component';
+import { CommonModule } from '@angular/common';
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
+import { DndModule } from 'ngx-drag-drop';
+import { BuilderModule } from '../type/builder/builder.module';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
     declarations:[
-      SectionTemplateComponent
+      SectionTemplateComponent,
+      SectionTemplateBuilderComponent,
+      SectionTemplateAddComponent
     ],
     imports: [
-      SectionTemplateRoutingModule
+      SectionTemplateRoutingModule,
+      CommonModule,
+      FontAwesomeModule,
+      FormsModule,
+      ReactiveFormsModule,
+      NgSelectModule,
+      NgbDatepickerModule,
+      DndModule,
+      BuilderModule,
+      MatCheckboxModule
     ],
     exports: [
+
     ],
     providers:[
       SectionTemplateService

@@ -29,7 +29,7 @@ export interface Field{
 export class CmdbSectionTemplate implements CmdbDao {
   public public_id: number;
   public name: string;
-  public label: number;
+  public label: string;
   public fields: Field[];
   public is_global: boolean = false;
   public type: string = 'Section' //don't change this, it is required due compability

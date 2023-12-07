@@ -19,10 +19,10 @@ import { Component } from '@angular/core';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-    selector:'cmdb-section-template',
-    templateUrl: './section-template.component.html',
-    styleUrls: ['./section-template.component.scss']
+    selector:'section-template-add',
+    templateUrl: './section-template-add.component.html',
+    styleUrls: ['./section-template-add.component.scss']
 })
-export class SectionTemplateComponent  {
+export class SectionTemplateAddComponent {
 
 }
