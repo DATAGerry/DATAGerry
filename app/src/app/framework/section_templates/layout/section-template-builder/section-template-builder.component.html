@@ -1,6 +1,6 @@
 <div class="actions-div">
     <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
-    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0">Create</button>
+    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]=" !(isValid$ | async)">Create</button>
 </div>
 
 <div class="row">
@@ -142,7 +142,7 @@
 
 <div class="actions-div">
     <button id="add-section-template-button" class="btn btn-light btn-sm mr-1" [routerLink]="['/framework/section_templates']">Cancel</button>
-    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]="initialSection.fields.length == 0">Create</button>
+    <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [disabled]=" !(isValid$ | async)">Create</button>
 </div>
 
 
