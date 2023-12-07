@@ -22,7 +22,6 @@ import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Val
 import { RenderResult } from '../../../models/cmdb-render';
 import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 @Component({
   templateUrl: './object-link-add-modal.component.html',
@@ -42,12 +41,6 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
   public form: UntypedFormGroup;
 
-  private sameIDValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const same = control.value === this.primary.value;
-      return same ? { sameID: { value: control.value } } : null;
-    };
-  }
 
   constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
     this.form = new UntypedFormGroup({
@@ -55,6 +48,15 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
       secondary: new UntypedFormControl('', [Validators.required, this.sameIDValidator],
         [checkObjectExistsValidator(objectService)])
     });
+  }
+
+  public ngOnInit(): void {
+    this.form.get('secondary').updateValueAndValidity();
+  }
+
+  public ngOnDestroy(): void {
+    this.subscriber.next();
+    this.subscriber.complete();
   }
 
   public get primary(): UntypedFormControl {
@@ -65,20 +67,19 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     return this.form.get('secondary') as UntypedFormControl;
   }
 
-  public ngOnInit(): void {
-    this.form.get('secondary').updateValueAndValidity();
+  private sameIDValidator(): ValidatorFn {
+    return (control: AbstractControl): { [key: string]: any } | null => {
+      const same = control.value === this.primary.value;
+      return same ? { sameID: { value: control.value } } : null;
+    };
   }
 
   public async onSave() {
     const formData = this.form.getRawValue();
-    if (this.secondary.errors.objectExists) {
+    if (this.secondary.invalid) {
       this.activeModal.close(formData);
     }
   }
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
 
 }
