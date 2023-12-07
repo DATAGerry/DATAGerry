@@ -17,7 +17,7 @@
 */
 import { Component, OnInit } from '@angular/core';
 import { FormControl, FormGroup, UntypedFormControl, Validators } from '@angular/forms';
-import {} from '@angular/material/checkbox';
+import { } from '@angular/material/checkbox';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { Observable } from 'rxjs';
 
@@ -36,11 +36,11 @@ import { ValidationService } from 'src/app/framework/type/services/validation.se
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-    selector:'section-template-builder',
+    selector: 'section-template-builder',
     templateUrl: './section-template-builder.component.html',
     styleUrls: ['./section-template-builder.component.scss']
 })
-export class SectionTemplateBuilderComponent implements OnInit{
+export class SectionTemplateBuilderComponent implements OnInit {
     public MODES: typeof CmdbMode = CmdbMode;
     public types = [];
 
@@ -63,28 +63,31 @@ export class SectionTemplateBuilderComponent implements OnInit{
         new Controller('select', new SelectControl()),
         new Controller('date', new DateControl())
     ];
-    
+
     public specialControls = [
         new Controller('ref', new ReferenceControl()),
         new Controller('location', new LocationControl())
     ];
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    constructor(private validationService: ValidationService){
+    isNameValid = true;
+    isLabelValid = true;
+    isValid$: Observable<boolean>;
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    constructor(private validationService: ValidationService) {
         this.formGroup = new FormGroup({
             'isGlobalControl': new FormControl(this.isGlobal)
         });
     }
 
     ngOnInit(): void {
-
+        this.isValid$ = this.validationService.getIsValid();
     }
-/* ----------------------------------------------------- METHODS ---------------------------------------------------- */
+    /* ----------------------------------------------------- METHODS ---------------------------------------------------- */
 
 
     public onFieldDrop(event: DndDropEvent) {
         const fieldData = event.data;
         if (event.dropEffect === 'copy' || event.dropEffect === 'move') {
-    
+
             if (event.dropEffect === 'copy') {
                 this.initialSection.fields.push(fieldData);
             }
