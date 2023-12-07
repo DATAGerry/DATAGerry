@@ -20,6 +20,7 @@ import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 import { SectionTemplateComponent } from './section-template.component';
 import { UserSettingsResolver } from 'src/app/management/user-settings/resolvers/user-settings-resolver.service';
+import { SectionTemplateAddComponent } from './layout/section-template-add/section-template-add.component';
 
 const routes: Routes = [
     {
@@ -33,6 +34,14 @@ const routes: Routes = [
         userSetting: UserSettingsResolver
       },
       component: SectionTemplateComponent
+    },
+    {
+      path: 'add',
+      data: {
+        breadcrumb: 'Add',
+        right: 'base.framework.type.add'
+      },
+      component: SectionTemplateAddComponent
     },
   ];
 

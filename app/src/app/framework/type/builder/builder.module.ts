@@ -71,7 +71,9 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
     DiagnosticModalComponent
   ],
   exports: [
-    BuilderComponent
+    BuilderComponent,
+    SectionFieldEditComponent,
+    ConfigEditComponent
   ]
 })
 export class BuilderModule {
