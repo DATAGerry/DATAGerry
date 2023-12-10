@@ -76,7 +76,7 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
   public async onSave() {
     const formData = this.form.getRawValue();
-    if (this.secondary.invalid) {
+    if (!this.secondary.invalid) {
       this.activeModal.close(formData);
     }
   }
