@@ -15,9 +15,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { } from '@angular/material/checkbox';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { Observable } from 'rxjs';
 
@@ -35,8 +34,9 @@ import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/te
 import { ValidationService } from 'src/app/framework/type/services/validation.service';
 import { SectionTemplateService } from '../../services/section-template.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
-import { APIInsertSingleResponse } from 'src/app/services/models/api-response';
+import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { Router } from '@angular/router';
+import { RenderResult } from 'src/app/framework/models/cmdb-render';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -45,6 +45,18 @@ import { Router } from '@angular/router';
     styleUrls: ['./section-template-builder.component.scss']
 })
 export class SectionTemplateBuilderComponent implements OnInit {
+
+    @Input()
+    public sectionTemplateID: number;
+
+    public initialSection: any = {
+        'name': this.randomName(),
+        'label': 'Section',
+        'type': 'section',
+        'fields': []
+    };
+
+
     public MODES: typeof CmdbMode = CmdbMode;
     public types = [];
 
@@ -53,12 +65,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     isLabelValid = true;
     isValid$: Observable<boolean>;
 
-    public initialSection: any = {
-        'name': this.randomName(),
-        'label': 'Section',
-        'type': 'section',
-        'fields': []
-    };
+
 
     public basicControls = [
         new Controller('text', new TextControl()),
@@ -78,7 +85,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
     constructor(
         private validationService: ValidationService,
-        private sectionTemplatesService: SectionTemplateService,
+        private sectionTemplateService: SectionTemplateService,
         private toastService: ToastService,
         private router: Router) {
 
@@ -88,13 +95,32 @@ export class SectionTemplateBuilderComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
+        //EDIT MODE
+        if(this.sectionTemplateID > 0){
+            this.getSectionTemplate(this.sectionTemplateID);
+        }
+
         this.isValid$ = this.validationService.getIsValid();
     }
 
+
 /* ---------------------------------------------------- API Calls --------------------------------------------------- */
+    /**
+     * Decides if a section template should be crated or updated
+     */
+    public handleSectionTemplate(){
+
+
+        if(this.sectionTemplateID > 0){
+            this.updateSectionTemplate();
+        } else {
+            this.createSectionTemplate();
+        }
+    }
 
     /**
-     * Sends the section template data to backend
+     * Send section template data to backend for creation
      */
     public createSectionTemplate(){
         let params = {
@@ -102,17 +128,52 @@ export class SectionTemplateBuilderComponent implements OnInit {
             "label": this.initialSection.label,
             "is_global": this.formGroup.value.isGlobal,
             "fields": JSON.stringify(this.initialSection.fields) 
-          }
+        }
 
-          this.sectionTemplatesService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
+        this.sectionTemplateService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
             this.toastService.success("Section Template created!");
             this.router.navigate(['/framework/section_templates']);
-          }, error => {
+        }, error => {
             console.log("error in create section template response");
             this.toastService.error(error);
-          });
+        });
     }
 
+
+    /**
+     * Send section template data to backend to update the existing section template
+     */
+    public updateSectionTemplate(){
+
+        let params = {
+            'name': this.initialSection.name,
+            'label': this.initialSection.label,
+            'type': 'section',
+            'is_global': this.formGroup.value.isGlobal,
+            'fields': JSON.stringify(this.initialSection.fields),
+            'public_id': this.initialSection.public_id
+        }
+
+        this.sectionTemplateService.updateSectionTemplate(params).subscribe((res: APIUpdateSingleResponse) => {
+            this.toastService.success("Section Template updated!");
+            this.router.navigate(['/framework/section_templates']);
+        }, error => {
+          this.toastService.error(error);
+        });
+    }
+
+
+    /**
+     * Retrieves a section template with the given publicID
+     * 
+     * @param publicID publicID of section template which should be edited
+     */
+    private getSectionTemplate(publicID: number){
+        this.sectionTemplateService.getSectionTemplate(publicID).subscribe((response: RenderResult) => {
+            this.initialSection = response;
+            this.formGroup.controls.isGlobal.setValue(this.initialSection.is_global);
+          });
+    }
 /* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
 
     /**

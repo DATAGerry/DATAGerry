@@ -18,15 +18,23 @@ This module contains the implementation of QueryBuilder and
 LocationManager which are responsible to interact with the Database 
 regarding locations.
 """
-from typing import Union
+import logging
 from queue import Queue
+from typing import Union, List
 
+from cmdb.search import Pipeline
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.event_management.event import Event
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.managers import ManagerBase
 from cmdb.framework.managers.query_builders.default_query_builder import DefaultQueryBuilder
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.user_management import UserModel
+from cmdb.framework.results import IterationResult
+from cmdb.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                            SectionTemplateManager - CLASS                                            #
@@ -48,3 +56,24 @@ class SectionTemplateManager(ManagerBase):
         self.event_queue = event_queue
         self.query_builder = DefaultQueryBuilder()
         super().__init__(CmdbSectionTemplate.COLLECTION, database_manager)
+
+
+    def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+                user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
+            -> IterationResult[CmdbSectionTemplate]:
+        """TODO: document"""
+        try:
+            query: Pipeline = self.query_builder.build(filter_=filter, limit=limit, skip=skip, sort=sort, order=order,
+                                                        user=user, permission=permission)
+            count_query: Pipeline = self.query_builder.count(filter_=filter)
+            aggregation_result = list(self._aggregate(CmdbSectionTemplate.COLLECTION, query))
+            total_cursor = self._aggregate(CmdbSectionTemplate.COLLECTION, count_query)
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
+        except ManagerGetError as err:
+            raise ManagerIterationError(err=err) from err
+
+        iteration_result: IterationResult[CmdbSectionTemplate] = IterationResult(aggregation_result, total)
+        iteration_result.convert_to(CmdbSectionTemplate)
+        return iteration_result

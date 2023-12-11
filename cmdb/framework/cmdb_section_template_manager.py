@@ -47,6 +47,7 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
     def insert_section_template(
             self,
             data: dict,
@@ -63,8 +64,6 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
         """
         new_section_template = None
         try:
-            LOGGER.info("insert_section_template()")
-            LOGGER.info(f"insert_section_template() => data: {data}")
             new_section_template = CmdbSectionTemplate(**data)
         except CMDBError as error:
             LOGGER.debug('Error while inserting section template - error: %s', error)
@@ -80,6 +79,36 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
             raise ObjectInsertError(error) from error
 
         return ack
+
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def get_section_template(self,
+                             public_id: int,
+                             user: UserModel = None,
+                             permission: AccessControlPermission = None) -> CmdbSectionTemplate:
+        """TODO: document"""
+        try:
+            resource = []
+            section_template = self._get(collection=CmdbSectionTemplate.COLLECTION, public_id=public_id)
+            if section_template:
+                resource = CmdbSectionTemplate(**section_template)
+        except Exception as error:
+            raise SectionTemplateManagerError(str(error)) from error
+
+        return resource
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
+
+    def delete_section_template(self, public_id: int, user: UserModel, permission: AccessControlPermission = None):
+        """TODO: document"""
+        try:
+            # then delete the location itself
+            ack = self._delete(CmdbSectionTemplate.COLLECTION, public_id)
+            return ack
+        except (CMDBError, Exception) as error:
+            raise SectionTemplateManagerDeleteError(error) from error
+
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 

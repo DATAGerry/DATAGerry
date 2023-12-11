@@ -15,7 +15,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -23,6 +24,21 @@ import { Component } from '@angular/core';
     templateUrl: './section-template-add.component.html',
     styleUrls: ['./section-template-add.component.scss']
 })
-export class SectionTemplateAddComponent {
+export class SectionTemplateAddComponent implements OnInit {
 
+    public sectionTemplateID: number = 0;
+
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
+    constructor(private activeRoute: ActivatedRoute){
+
+    }
+
+
+    ngOnInit(): void {
+        //only editing has a sectionTemplateID 
+        if(this.activeRoute.snapshot.params.sectionTemplateID){
+            this.sectionTemplateID = this.activeRoute.snapshot.params.sectionTemplateID;
+        }
+    }
 }

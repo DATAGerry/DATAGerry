@@ -6,8 +6,8 @@
 
     <button id="add-section-template-button"
         class="btn btn-success btn-sm mr-1"
-        (click)="createSectionTemplate()"
-        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
+        (click)="handleSectionTemplate()"
+        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)" >Save</button>
 </div>
 
 <div class="row">
@@ -153,8 +153,8 @@
 
     <button id="add-section-template-button"
         class="btn btn-success btn-sm mr-1"
-        (click)="createSectionTemplate()"
-        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Create</button>
+        (click)="handleSectionTemplate()"
+        [disabled]="initialSection.fields.length == 0 || !(isValid$ | async)">Save</button>
 </div>
 
 

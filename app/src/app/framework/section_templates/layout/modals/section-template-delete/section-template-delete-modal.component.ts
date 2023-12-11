@@ -17,17 +17,18 @@
 */
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-delete-modal',
-  templateUrl: './object-delete-modal.component.html',
-  styleUrls: ['./object-delete-modal.component.scss']
+  selector: 'cmdb-section-template-delete-modal',
+  templateUrl: './section-template-delete-modal.component.html',
+  styleUrls: ['./section-template-delete-modal.component.scss']
 })
-export class ObjectDeleteModalComponent {
+export class SectionTemplateDeleteModalComponent {
 
-  @Input() public publicID: number = null;
-  @Output() public closeEmitter: EventEmitter<number> = new EventEmitter<number>();
+  @Input() 
+  public sectionTemplate: CmdbSectionTemplate;
 
   constructor(public activeModal: NgbActiveModal) {
   }

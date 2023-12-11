@@ -62,8 +62,8 @@ class DefaultQueryBuilder(ManagerQueryBuilder):
 
         self.query.append(self.sort_(sort=sort, order=order))
 
-        if user and permission:
-            self.query += (AccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+        # if user and permission:
+        #     self.query += (AccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
 
         if limit == 0:
             results_query = [self.skip_(limit)]
