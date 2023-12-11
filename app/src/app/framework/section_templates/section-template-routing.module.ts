@@ -43,6 +43,14 @@ const routes: Routes = [
       },
       component: SectionTemplateAddComponent
     },
+    {
+      path: 'edit/:sectionTemplateID',
+      data: {
+        breadcrumb: 'Edit',
+        right: 'base.framework.type.edit'
+      },
+      component: SectionTemplateAddComponent
+    },
   ];
 
 @NgModule({

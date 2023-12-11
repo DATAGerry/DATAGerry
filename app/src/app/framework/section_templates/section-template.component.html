@@ -13,9 +13,27 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td class="centered-text" colspan="4">No section templates created</td>
-                </tr>
+                <ng-container *ngIf="sectionTemplates.length > 0; else noSectionTemplatesMessage">
+                    <tr *ngFor="let sectionTemplate of sectionTemplates">
+                        <td class="centered-text small-cell">{{sectionTemplate.public_id}}</td>
+                        <td class="centered-text">{{sectionTemplate.label}}</td>
+                        <td class="centered-text medium-cell">{{sectionTemplate.is_global}}</td>
+                        <td class="centered-text big-cell">
+                            <button class="btn btn-sm btn-link" 
+                                    [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-sm btn-link" (click)="showDeleteModal(sectionTemplate)">
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </ng-container>
+                <ng-template #noSectionTemplatesMessage>
+                    <tr>
+                        <td class="centered-text" colspan="4">No section templates created</td>
+                    </tr>
+                </ng-template>
             </tbody>
         </table>
     </div>

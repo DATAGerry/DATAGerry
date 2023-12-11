@@ -31,13 +31,15 @@ import { DndModule } from 'ngx-drag-drop';
 import { BuilderModule } from '../type/builder/builder.module';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastModule } from 'src/app/layout/toast/toast.module';
+import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
     declarations:[
       SectionTemplateComponent,
       SectionTemplateBuilderComponent,
-      SectionTemplateAddComponent
+      SectionTemplateAddComponent,
+      SectionTemplateDeleteModalComponent
     ],
     imports: [
       SectionTemplateRoutingModule,

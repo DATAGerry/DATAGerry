@@ -15,7 +15,17 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { SectionTemplateService } from './services/section-template.service';
+import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject } from 'rxjs';
+import { RenderResult } from '../models/cmdb-render';
+import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
+import { CmdbSectionTemplate } from '../models/cmdb-section-template';
+import { ToastService } from 'src/app/layout/toast/toast.service';
+import { Router } from '@angular/router';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -23,6 +33,64 @@ import { Component } from '@angular/core';
     templateUrl: './section-template.component.html',
     styleUrls: ['./section-template.component.scss']
 })
-export class SectionTemplateComponent  {
+export class SectionTemplateComponent implements OnInit, OnDestroy {
+    public sectionTemplates: any = [];
+    private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
 
+    private modalRef: NgbModalRef;
+
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
+    constructor(private sectionTemplateService: SectionTemplateService,
+                private modalService: NgbModal,
+                private toastService: ToastService,
+                private router: Router){
+
+    }
+
+    ngOnInit(): void {
+        this.getAllSectionTemplates();
+    }
+
+
+    ngOnDestroy(): void {
+      if (this.modalRef) {
+        this.modalRef.close();
+      }
+    }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /**
+     * Retrieves all section templates from database
+     */
+    getAllSectionTemplates(){
+        this.sectionTemplateService.getSectionTemplates().pipe(takeUntil(this.unsubscribe))
+        .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+            this.sectionTemplates = apiResponse.results;
+        });
+    }
+
+
+    /**
+     * Displays a modal view for user to confirm deletion of section template
+     * @param sectionTemplate instance of section template which should be deleted
+     */
+    showDeleteModal(sectionTemplate: CmdbSectionTemplate){
+        this.modalRef = this.modalService.open(SectionTemplateDeleteModalComponent, { size: 'lg' });
+        this.modalRef.componentInstance.sectionTemplate = sectionTemplate;
+
+        this.modalRef.result.then((sectionTemplateID: number) => {
+            //Delete the section template
+            if(sectionTemplateID > 0){
+                this.sectionTemplateService.deleteSectionTemplate(sectionTemplateID).subscribe((res: any) => {
+                    this.toastService.success("Section Template with ID " + sectionTemplateID  + " deleted!");
+                    this.getAllSectionTemplates();
+                }, error => {
+                  this.toastService.error(error);
+                });
+                return;
+
+            }
+        });
+    }
 }
