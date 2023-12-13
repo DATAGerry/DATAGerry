@@ -1,1 +1,7 @@
-<cmdb-builder [typeInstance]="typeInstance" [mode]="mode" [types]="types" (validChange)="onBuilderValidChange($event)"></cmdb-builder>
+<cmdb-builder 
+    [typeInstance]="typeInstance"
+    [mode]="mode"
+    [types]="types"
+    [sectionTemplates] = "sectionTemplates"
+    (validChange)="onBuilderValidChange($event)">
+</cmdb-builder>

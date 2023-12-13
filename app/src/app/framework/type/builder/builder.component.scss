@@ -79,8 +79,14 @@
   }
 }
 
+
 .card-header {
   button {
     padding: 0;
   }
+}
+
+
+.section-template-item:hover{
+    cursor: grab;
 }

@@ -11,27 +11,22 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+import { Component, DoCheck, Input, KeyValueDiffer, KeyValueDiffers, OnDestroy, OnInit } from '@angular/core';
 
-import {
-  AfterContentInit,
-  ChangeDetectorRef,
-  Component, DoCheck,
-  Input,
-  KeyValueDiffer, KeyValueDiffers,
-  OnDestroy,
-  OnInit,
-  ViewChild
-} from '@angular/core';
-import { BuilderComponent } from '../../builder/builder.component';
-import { CmdbMode } from '../../../modes.enum';
-import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { SectionTemplateService } from 'src/app/framework/section_templates/services/section-template.service';
+
+import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
+import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
+import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-type-fields-step',
@@ -41,7 +36,10 @@ import { CmdbType } from '../../../models/cmdb-type';
 export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements OnInit, DoCheck, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+  private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
   private typeInstanceDiffer: KeyValueDiffer<string, any>;
+
+  public sectionTemplates: Array<CmdbSectionTemplate> = [];
 
   public builderValid: boolean = true;
 
@@ -53,40 +51,54 @@ export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements
     }
   }
 
-  public constructor(private differs: KeyValueDiffers) {
-    super();
-  }
-
-  public ngOnInit(): void {
-    this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
-  }
-
-  public get status(): boolean{
-    const hasFields: boolean = this.typeInstance.fields.length > 0;
-    const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
-    return hasFields && hasSections && this.builderValid;
-  }
-
-  public ngDoCheck(): void {
-    const changes = this.typeInstanceDiffer.diff(this.typeInstance);
-    if (changes) {
-      this.valid = this.status;
-      this.validateChange.emit(this.valid);
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    public constructor(private differs: KeyValueDiffers, private sectionTemplateService: SectionTemplateService) {
+        super();
     }
-  }
-
-  public onBuilderValidChange(status: boolean): void{
-    this.builderValid = status;
-    this.valid = this.status;
-    this.validateChange.emit(this.valid);
-  }
 
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+    public ngOnInit(): void {
+        this.typeInstanceDiffer = this.differs.find(this.typeInstance).create();
+          this.getAllSectionTemplates();
+
+    }
 
 
+    public ngDoCheck(): void {
+        const changes = this.typeInstanceDiffer.diff(this.typeInstance);
+        if (changes) {
+            this.valid = this.status;
+            this.validateChange.emit(this.valid);
+        }
+      }
 
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+/* ---------------------------------------------------- FUCNTIONS --------------------------------------------------- */
+
+    public get status(): boolean{
+        const hasFields: boolean = this.typeInstance.fields.length > 0;
+        const hasSections: boolean = this.typeInstance.render_meta.sections.length > 0;
+
+        return hasFields && hasSections && this.builderValid;
+    }
+
+
+    public onBuilderValidChange(status: boolean): void{
+        this.builderValid = status;
+        this.valid = this.status;
+        this.validateChange.emit(this.valid);
+    }
+
+
+    private getAllSectionTemplates(){
+        this.sectionTemplateService.getSectionTemplates().pipe(takeUntil(this.unsubscribe))
+        .subscribe((apiResponse: APIGetMultiResponse<CmdbSectionTemplate>) => {
+            this.sectionTemplates = apiResponse.results;
+        });
+    }
 }

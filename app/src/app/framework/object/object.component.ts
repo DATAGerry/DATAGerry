@@ -451,7 +451,6 @@ export class ObjectComponent implements OnInit, OnDestroy {
   }
 
   public onObjectDeleteWithLocations(objectID: number){
-    console.log("object.component => delete with locations");
     this.objectService.deleteObjectWithLocations(objectID).pipe(takeUntil(this.subscriber))
     .subscribe(() => {
         this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
@@ -463,7 +462,6 @@ export class ObjectComponent implements OnInit, OnDestroy {
   }
 
   public onObjectDeleteWithObjects(objectID: number){
-    console.log("object.component => delete with objects");
     this.objectService.deleteObjectWithChildren(objectID).pipe(takeUntil(this.subscriber))
     .subscribe(() => {
         this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);

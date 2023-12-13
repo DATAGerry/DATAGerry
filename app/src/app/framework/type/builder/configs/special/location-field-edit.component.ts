@@ -147,20 +147,12 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
     if (this.form.controls['label'].invalid) {
       this.isValid$ = false;
     }
-
-    // if (this.form.get('label').invalid) {
-    //   console.log('invalid')
-    //   this.isValid$ = false
-    // }
-
-    // this.onInputChange('')
   }
 
   public hasValidator(control: string): void {
     if (this.form.controls[control].hasValidator(Validators.required)) {
 
       let valid = this.form.controls[control].valid;
-      console.log('valid', valid, control)
       this.isValid$ = this.isValid$ && valid;
     }
   }
