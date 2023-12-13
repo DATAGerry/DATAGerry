@@ -16,7 +16,7 @@
                     (click)="
                         sum.value.$date
                             ? clipBoardFormattedSummary(sum.value)
-                            : clipBoardSummary(sum.value)
+                            : clipBoardSummary( sum, sum.value)
                     "
                 >
                     <fa-icon [icon]="['far', 'clipboard']"></fa-icon>

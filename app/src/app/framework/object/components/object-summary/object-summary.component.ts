@@ -37,22 +37,43 @@ export class ObjectSummaryComponent {
         private toast: ToastService,
         private dateSettingsService: DateSettingsService,
         private dateFormatterPipe: DateFormatterPipe
-    ) {}
+    ) { }
 
-    public clipBoardSummary(data) {
+    /**
+     * Retrieves the label corresponding to a given value from the options array.
+     */
+    getLabelForValue(value: string, data: any): string {
+        // Locate the option within the options array where the 'name' property corresponds to the provided value.
+        const matchingOption = data.options.find(option => option.name === value);
+
+
+        //If a corresponding option is discovered, retrieve its label; otherwise, provide an empty string.
+        return matchingOption.label ? matchingOption.label : '';
+    }
+
+
+    public async clipBoardSummary(data: any, value: string) {
+
+
         const selBox = document.createElement("textarea");
         selBox.style.position = "fixed";
         selBox.style.left = "0";
         selBox.style.top = "0";
         selBox.style.opacity = "0";
-        selBox.value = data;
+        selBox.value = data.options ? this.getLabelForValue(value, data) : value;
         document.body.appendChild(selBox);
         selBox.focus();
         selBox.select();
-        document.execCommand("copy");
-        document.body.removeChild(selBox);
-        this.toast.info("Summary was copied to clipboard");
+        try {
+            await navigator.clipboard.writeText(selBox.value);
+            this.toast.info("Summary was copied to clipboard");
+        } catch (err) {
+            console.error('Unable to copy to clipboard', err);
+        } finally {
+            document.body.removeChild(selBox);
+        }
     }
+
 
     formatDate(date: any): string {
         return this.dateFormatterPipe.transform(date);
@@ -60,6 +81,6 @@ export class ObjectSummaryComponent {
 
     clipBoardFormattedSummary(value: any) {
         const formattedValue = this.formatDate(value);
-        this.clipBoardSummary(formattedValue);
+        this.clipBoardSummary('date', formattedValue);
     }
 }
