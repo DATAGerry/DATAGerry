@@ -20,12 +20,13 @@ import { SectionTemplateService } from './services/section-template.service';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { RenderResult } from '../models/cmdb-render';
-import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { APIGetMultiResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 import { CmdbSectionTemplate } from '../models/cmdb-section-template';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { Router } from '@angular/router';
+import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -88,8 +89,40 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                 }, error => {
                   this.toastService.error(error);
                 });
-                return;
+            }
+        });
+    }
 
+    /**
+     * Displays a modal view for user to confirm transformation of 
+     * section template to a global section template
+     * 
+     * @param sectionTemplate instance of section template which should be transformed
+     */
+    showTransformModal(sectionTemplate: CmdbSectionTemplate){
+        this.modalRef = this.modalService.open(SectionTemplateTransformModalComponent, { size: 'lg' });
+        this.modalRef.componentInstance.sectionTemplate = sectionTemplate;
+
+        this.modalRef.result.then((sectionTemplateID: number) => {
+            //Delete the section template
+            if(sectionTemplateID > 0){
+                let params = {
+                    'name': sectionTemplate.name,
+                    'label': sectionTemplate.label,
+                    'type': 'section',
+                    'is_global': true,
+                    'fields': JSON.stringify(sectionTemplate.fields),
+                    'public_id': sectionTemplate.public_id
+                }
+
+
+                this.sectionTemplateService.updateSectionTemplate(params).subscribe((res: APIUpdateSingleResponse) => {
+                    this.toastService.success(`Section Template with ID: ${sectionTemplate.public_id} transformed 
+                                            to a Global Section Template!`);
+                    this.getAllSectionTemplates();
+                }, error => {
+                  this.toastService.error(error);
+                });
             }
         });
     }

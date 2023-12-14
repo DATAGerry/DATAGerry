@@ -67,6 +67,12 @@ export abstract class ConfigEditBaseComponent {
     }
   }
 
+  protected disableControlsOnGlobal(control: UntypedFormControl): void {
+    if (this.mode === CmdbMode.Global) {
+      control.disable({ onlySelf: false, emitEvent: false });
+    }
+  }
+
   public onInputChange(change: any, idx: string): void {
     this.data[idx] = change;
   }

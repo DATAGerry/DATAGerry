@@ -144,7 +144,6 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * Send section template data to backend to update the existing section template
      */
     public updateSectionTemplate(){
-
         let params = {
             'name': this.initialSection.name,
             'label': this.initialSection.label,

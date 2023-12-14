@@ -19,11 +19,20 @@
                         <td class="centered-text">{{sectionTemplate.label}}</td>
                         <td class="centered-text medium-cell">{{sectionTemplate.is_global}}</td>
                         <td class="centered-text big-cell">
-                            <button class="btn btn-sm btn-link" 
+                            <button class="btn btn-sm btn-link"
+                                    title="Edit"
                                     [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button class="btn btn-sm btn-link" (click)="showDeleteModal(sectionTemplate)">
+                            <button *ngIf="!sectionTemplate.is_global"
+                                    title="Transform to Global Template"
+                                    class="btn btn-sm btn-link" (click)="showTransformModal(sectionTemplate)">
+                                <i class="fas fa-recycle"></i>
+                            </button>
+                            <button class="btn btn-sm btn-link"
+                                    title="Delete"
+                                    (click)="showDeleteModal(sectionTemplate)"
+                            >
                                 <i class="fas fa-trash-alt"></i>
                             </button>
                         </td>

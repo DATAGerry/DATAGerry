@@ -1,0 +1,15 @@
+<div class="modal-header bg-primary text-white">
+    <h4 class="modal-title">Section Template ID: {{sectionTemplate.public_id}}</h4>
+    <button type="button" class="close" (click)="activeModal.close(0)"><span>&times;</span></button>
+  </div>
+  <div class="modal-body">
+        Do you want to <b>transform</b> the section template <b>"{{sectionTemplate.label}}"</b> into a <b>Global Section Template</b>?
+        <br>
+        <br>
+        <div class="warning-text">This action can't be undone!</div>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close(0)">Close</button>
+    <button type="submit" class="btn btn-success" (click)="activeModal.close(sectionTemplate.public_id)">Confirm</button>
+</div>
