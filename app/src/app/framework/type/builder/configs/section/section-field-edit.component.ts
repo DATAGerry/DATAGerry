@@ -55,8 +55,6 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     this.form.addControl('label', this.labelControl);
 
     this.disableControlOnEdit(this.nameControl);
-    this.disableControlsOnGlobal(this.nameControl);
-    this.disableControlsOnGlobal(this.labelControl);
     this.patchData(this.data, this.form);
     this.initialValue = this.nameControl.value;
   }
