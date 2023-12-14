@@ -21,11 +21,11 @@ import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-templ
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-section-template-delete-modal',
-  templateUrl: './section-template-delete-modal.component.html',
-  styleUrls: ['./section-template-delete-modal.component.scss']
+  selector: 'cmdb-section-template-transform-modal',
+  templateUrl: './section-template-transform-modal.component.html',
+  styleUrls: ['./section-template-transform-modal.component.scss']
 })
-export class SectionTemplateDeleteModalComponent {
+export class SectionTemplateTransformModalComponent {
 
   @Input() 
   public sectionTemplate: CmdbSectionTemplate;

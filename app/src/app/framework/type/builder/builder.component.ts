@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
 
 import { ReplaySubject } from 'rxjs';
 
@@ -52,7 +52,7 @@ declare var $: any;
   styleUrls: ['./builder.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BuilderComponent implements OnDestroy {
+export class BuilderComponent implements OnChanges, OnDestroy {
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
     public MODES: typeof CmdbMode = CmdbMode;
 
@@ -65,6 +65,11 @@ export class BuilderComponent implements OnDestroy {
     @Input()
     public sectionTemplates: Array<CmdbSectionTemplate> = [];
 
+    @Input()
+    public globalSectionTemplates: Array<CmdbSectionTemplate> = [];
+
+    public selectedGlobalSectionTemplates: Array<CmdbSectionTemplate> = [];
+    public globalSectionTemplateFields: Array<string> = [];
 
     @Input() public mode = CmdbMode.View;
     @Input() public groups: Array<Group> = [];
@@ -124,7 +129,14 @@ export class BuilderComponent implements OnDestroy {
     }
 
 
-    public ngOnDestroy(): void {
+    ngOnChanges(changes: SimpleChanges): void {
+        if(this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0){
+            this.initGlobalFieldsList();
+        }
+    }
+
+
+    ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
     }
@@ -153,11 +165,24 @@ export class BuilderComponent implements OnDestroy {
     }
 
 
+    /**
+     * Handels dropping any kind of section in the drop area
+     * 
+     * @param event DropEvent containing the section as data
+     */
     public onSectionDrop(event: DndDropEvent): void {
         let sectionData = event.data;
 
         //check if it is a section template
         if('is_global' in sectionData){
+
+            if(sectionData.is_global){
+                this.selectedGlobalSectionTemplates.push(sectionData);
+
+                const index = this.globalSectionTemplates.indexOf(sectionData);
+                this.globalSectionTemplates.splice(index, 1);
+            }
+
             sectionData = this.extractSectionData(event.data);
         }
 
@@ -187,10 +212,8 @@ export class BuilderComponent implements OnDestroy {
 
             //add fields of section template after the section was added
             if('is_global' in event.data){
-                this.setSectionTemplateFields(event.data.fields);
+                this.setSectionTemplateFields(event.data);
             }
-
-            console.log("this.typeInstance",this.typeInstance);
         }
     }
 
@@ -264,6 +287,9 @@ export class BuilderComponent implements OnDestroy {
 
 
     public removeSection(item: CmdbTypeSection) {
+        console.log("item:", item);
+        this.handleGlobalTemplates(item);
+
         const index: number = this.typeInstance.render_meta.sections.indexOf(item);
 
         if (index !== -1) {
@@ -319,6 +345,44 @@ export class BuilderComponent implements OnDestroy {
     }
 
 /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
+
+    public isGlobalField(fieldName: string){
+        return this.globalSectionTemplateFields.indexOf(fieldName) > -1;
+    }
+
+
+    private initGlobalFieldsList(){
+        for(let templateIndex in this.globalSectionTemplates){
+            let aTemplate = this.globalSectionTemplates[templateIndex];
+
+            for(let fieldIndex in aTemplate.fields){
+                let aField = aTemplate.fields[fieldIndex];
+                this.globalSectionTemplateFields.push(aField.name);
+            }
+
+        }
+        console.log("this.globalSectionTemplateFields", this.globalSectionTemplateFields);
+    }
+
+
+    private handleGlobalTemplates(sectionData: CmdbTypeSection){
+        let isGlobalTemplate = false;
+        let globalTemplateIndex: number = -1;
+
+        for(let index in this.selectedGlobalSectionTemplates){
+            const aSection = this.selectedGlobalSectionTemplates[index];
+            if(aSection.name == sectionData.name){
+                isGlobalTemplate = true;
+                globalTemplateIndex = parseInt(index);
+                this.globalSectionTemplates.push(aSection);
+            }
+        }
+
+        if(isGlobalTemplate){
+            this.selectedGlobalSectionTemplates.splice(globalTemplateIndex, 1);
+        }
+    }
+
     /**
      * 
      * @param data Extracts the section properties from the section template
@@ -344,7 +408,8 @@ export class BuilderComponent implements OnDestroy {
      * Sets the fields from the section template to the type instance
      * @param sectionTemplateFields 
      */
-    public setSectionTemplateFields(sectionTemplateFields: any){
+    public setSectionTemplateFields(sectionTemplate: CmdbSectionTemplate){
+        let sectionTemplateFields = sectionTemplate.fields;
 
         for (let fieldIndex in sectionTemplateFields){
             let aField = sectionTemplateFields[fieldIndex];

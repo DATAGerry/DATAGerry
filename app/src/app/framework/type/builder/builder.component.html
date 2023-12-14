@@ -2,13 +2,37 @@
     <div id="builder-controls" class="col-3">
         <div id="controlWrapper" ui-block [blocked]="!valid">
             <div class="accordion" id="controlsPanel">
-                <div class="card">
+                <div class="card" *ngIf="globalSectionTemplates.length > 0">
+                    <div class="card-header">
+                        <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#globalSectionTemplates">
+                            Global Section Templates
+                        </a>
+                    </div>
+                    <div id="globalSectionTemplates" class="collapse show" data-parent="#controlsPanel">
+                        <div class="card-body">
+                            <div class="list-group section-template-item">
+                                <div 
+                                    *ngFor="let globalSectionTemplate of globalSectionTemplates"
+                                    [dndType]="'sections'"
+                                    [dndDraggable]="globalSectionTemplate"
+                                    class="list-group-item list-group-item-action"
+                                >
+                                    <span>
+                                        #{{ globalSectionTemplate.public_id }} - <b>{{ globalSectionTemplate.label }}</b>
+                                    </span>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card" *ngIf="sectionTemplates.length > 0">
                     <div class="card-header">
                         <a href="#" class="btn btn-link" data-toggle="collapse" data-target="#sectionTemplates">
                             Section Templates
                         </a>
                     </div>
-                    <div id="sectionTemplates" class="collapse show" data-parent="#controlsPanel">
+                    <div id="sectionTemplates" class="collapse" data-parent="#controlsPanel">
                         <div class="card-body">
                             <div class="list-group section-template-item">
                                 <div 
@@ -20,9 +44,6 @@
                                     <span>
                                         #{{ sectionTemplate.public_id }} - <b>{{ sectionTemplate.label }}</b>
                                     </span>
-                                    <!-- <button type="button" class="btn btn-primary btn-sm float-right">
-                                        <fa-icon icon="bars"></fa-icon>
-                                    </button> -->
                                     <div class="clearfix"></div>
                                 </div>
                             </div>
@@ -37,7 +58,7 @@
                     </div>
                     <div id="structureControls" class="collapse" data-parent="#controlsPanel">
                         <div class="card-body">
-                            <div class="list-group">
+                            <div class="list-group section-template-item">
                                 <div 
                                     *ngFor="let control of structureControls" 
                                     [dndType]="control.typeController.dndType"
@@ -47,9 +68,6 @@
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                                     </span>
-                                    <button type="button" class="btn btn-primary btn-sm float-right">
-                                        <fa-icon icon="bars"></fa-icon>
-                                    </button>
                                     <div class="clearfix"></div>
                                 </div>
                             </div>
@@ -64,7 +82,7 @@
                     </div>
                     <div id="basicControls" class="collapse" data-parent="#controlsPanel">
                         <div class="card-body">
-                            <div class="list-group">
+                            <div class="list-group section-template-item">
                                 <div 
                                     *ngFor="let control of basicControls" 
                                     [dndType]="control.typeController.dndType"
@@ -74,9 +92,6 @@
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                                     </span>
-                                    <button type="button" class="btn btn-primary btn-sm float-right">
-                                        <fa-icon icon="bars"></fa-icon>
-                                    </button>
                                     <div class="clearfix"></div>
                                 </div>
                             </div>
@@ -91,7 +106,7 @@
                     </div>
                     <div id="specialControls" class="collapse" data-parent="#controlsPanel">
                         <div class="card-body">
-                            <div class="list-group">
+                            <div class="list-group section-template-item">
                                 <div 
                                     *ngFor="let control of specialControls"
                                     [dndType]="control.typeController.dndType"
@@ -101,9 +116,6 @@
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                                     </span>
-                                    <button type="button" class="btn btn-primary btn-sm float-right">
-                                        <fa-icon icon="bars"></fa-icon>
-                                    </button>
                                     <div class="clearfix"></div>
                                 </div>
                             </div>
@@ -195,7 +207,7 @@
                                                     <span>
                                                         <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
                                                     </span>
-                                                    <span>
+                                                    <span *ngIf="!isGlobalField(field.name)">
                                                         <button
                                                             class="btn btn-link mr-1"
                                                             type="button"
