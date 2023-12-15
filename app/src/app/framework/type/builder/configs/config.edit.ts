@@ -69,6 +69,8 @@ export abstract class ConfigEditBaseComponent {
 
   protected disableControlsOnGlobal(control: UntypedFormControl): void {
     if (this.mode === CmdbMode.Global) {
+      control.clearValidators();
+      control.updateValueAndValidity();
       control.disable({ onlySelf: false, emitEvent: false });
     }
   }
