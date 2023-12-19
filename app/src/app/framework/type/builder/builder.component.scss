@@ -90,3 +90,15 @@
 .section-template-item:hover{
     cursor: grab;
 }
+
+
+.global-section-item{
+  background-color: $dg-selected-background-color;
+}
+
+
+.field-drop-placeholder{
+  border: 1px green solid;
+  border-radius: 5px;
+  padding: 15px;
+}

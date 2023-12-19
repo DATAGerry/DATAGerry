@@ -20,13 +20,13 @@ import { SectionTemplateService } from './services/section-template.service';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { RenderResult } from '../models/cmdb-render';
-import { APIGetMultiResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
+import { APIGetMultiResponse, APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 import { CmdbSectionTemplate } from '../models/cmdb-section-template';
 import { ToastService } from 'src/app/layout/toast/toast.service';
-import { Router } from '@angular/router';
 import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
+import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -44,10 +44,10 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
 
     constructor(private sectionTemplateService: SectionTemplateService,
                 private modalService: NgbModal,
-                private toastService: ToastService,
-                private router: Router){
+                private toastService: ToastService){
 
     }
+
 
     ngOnInit(): void {
         this.getAllSectionTemplates();
@@ -60,7 +60,8 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
       }
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+/* -------------------------------------------------- API FUNCTIONS ------------------------------------------------- */
+
     /**
      * Retrieves all section templates from database
      */
@@ -71,6 +72,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         });
     }
 
+/* ------------------------------------------------- MODAL HANDLING ------------------------------------------------- */
 
     /**
      * Displays a modal view for user to confirm deletion of section template
@@ -125,5 +127,67 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                 });
             }
         });
+    }
+
+
+    /**
+     * Displays a modal view for user to clone a section template
+     * 
+     * @param sectionTemplate instance of section template which should be cloned
+     */
+    public showCloneModal(sectionTemplate: CmdbSectionTemplate){
+        this.modalRef = this.modalService.open(SectionTemplateCloneModalComponent, { size: 'lg' });
+        this.modalRef.componentInstance.sectionTemplate = sectionTemplate;
+
+        this.modalRef.result.then((values: any) => {
+            if(values){
+
+                let params = {
+                    'name': sectionTemplate.name,
+                    'label': values.templateLabel,
+                    'type': 'section',
+                    'is_global': values.isGlobal,
+                    'fields': JSON.stringify(sectionTemplate.fields)
+                }
+
+                if(values.isGlobal){
+                    params.name = this.generateGlobalSectionTemplateName();
+                } 
+                else {
+                    params.name = this.randomSectionTemplateName();
+                }
+
+
+                this.sectionTemplateService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
+                    this.toastService.success("Section Template cloned!");
+                    this.getAllSectionTemplates();
+                }, error => {
+                    console.log("error in clone section template response");
+                    this.toastService.error(error);
+                });
+
+            }
+        });
+    }
+
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /**
+     * Generates a random name for the section
+     * 
+     * @returns (string): random name for section
+     */
+    public randomSectionTemplateName() {
+        return `section_template-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
+    }
+
+
+    /**
+     * Generates a unique name for global section templates
+     * 
+     * @returns unique name for global section templates
+     */
+    public generateGlobalSectionTemplateName(){
+        const timestamp = new Date().getTime();
+        return `dg_gst-${timestamp}`;
     }
 }

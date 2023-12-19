@@ -33,6 +33,7 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastModule } from 'src/app/layout/toast/toast.module';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
+import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -41,7 +42,8 @@ import { SectionTemplateTransformModalComponent } from './layout/modals/section-
       SectionTemplateBuilderComponent,
       SectionTemplateAddComponent,
       SectionTemplateDeleteModalComponent,
-      SectionTemplateTransformModalComponent
+      SectionTemplateTransformModalComponent,
+      SectionTemplateCloneModalComponent
     ],
     imports: [
       SectionTemplateRoutingModule,

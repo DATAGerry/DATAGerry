@@ -24,14 +24,25 @@
                                     [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]">
                                 <i class="fas fa-edit"></i>
                             </button>
-                            <button *ngIf="!sectionTemplate.is_global"
-                                    title="Transform to Global Template"
-                                    class="btn btn-sm btn-link" (click)="showTransformModal(sectionTemplate)">
+                            <button
+                                class="btn btn-sm btn-link"
+                                title="Clone Section Template"
+                                (click)="showCloneModal(sectionTemplate)"
+                            >
+                                <i class="far fa-clone"></i>
+                            </button>
+                            <button
+                                *ngIf="!sectionTemplate.is_global"
+                                title="Transform to Global Template"
+                                class="btn btn-sm btn-link"
+                                (click)="showTransformModal(sectionTemplate)"
+                            >
                                 <i class="fas fa-recycle"></i>
                             </button>
-                            <button class="btn btn-sm btn-link"
-                                    title="Delete"
-                                    (click)="showDeleteModal(sectionTemplate)"
+                            <button
+                                class="btn btn-sm btn-link"
+                                title="Delete"
+                                (click)="showDeleteModal(sectionTemplate)"
                             >
                                 <i class="fas fa-trash-alt"></i>
                             </button>

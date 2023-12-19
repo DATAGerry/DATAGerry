@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
 import { DndDropEvent } from 'ngx-drag-drop';
 import { Observable } from 'rxjs';
@@ -37,6 +37,7 @@ import { ToastService } from 'src/app/layout/toast/toast.service';
 import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { Router } from '@angular/router';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
+import { SectionFieldEditComponent } from 'src/app/framework/type/builder/configs/section/section-field-edit.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -48,6 +49,8 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
     @Input()
     public sectionTemplateID: number;
+
+    @ViewChild('sectionComponent') public sectionComponent: SectionFieldEditComponent;
 
     public initialSection: any = {
         'name': this.randomName(),
@@ -66,7 +69,6 @@ export class SectionTemplateBuilderComponent implements OnInit {
     isValid$: Observable<boolean>;
 
 
-
     public basicControls = [
         new Controller('text', new TextControl()),
         new Controller('password', new PasswordControl()),
@@ -82,17 +84,19 @@ export class SectionTemplateBuilderComponent implements OnInit {
         new Controller('location', new LocationControl())
     ];
 
-    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
     constructor(
         private validationService: ValidationService,
         private sectionTemplateService: SectionTemplateService,
         private toastService: ToastService,
         private router: Router) {
 
-            this.formGroup = new FormGroup({
-                'isGlobal': new FormControl(false)
-            });
+        this.formGroup = new FormGroup({
+            'isGlobal': new FormControl(false)
+        });
     }
+
 
     ngOnInit(): void {
 
@@ -102,15 +106,23 @@ export class SectionTemplateBuilderComponent implements OnInit {
         }
 
         this.isValid$ = this.validationService.getIsValid();
+
+        this.formGroup.controls['isGlobal'].valueChanges.subscribe(isGlobal => {
+            if(isGlobal){
+                this.sectionComponent.form.controls['name'].setValue(this.generateGlobalSectionTemplateName());
+            } 
+            else {
+                this.sectionComponent.form.controls['name'].setValue(this.randomName());
+            }
+        });
     }
 
-
 /* ---------------------------------------------------- API Calls --------------------------------------------------- */
+
     /**
      * Decides if a section template should be crated or updated
      */
     public handleSectionTemplate(){
-
 
         if(this.sectionTemplateID > 0){
             this.updateSectionTemplate();
@@ -119,12 +131,13 @@ export class SectionTemplateBuilderComponent implements OnInit {
         }
     }
 
+
     /**
      * Send section template data to backend for creation
      */
     public createSectionTemplate(){
         let params = {
-            "name": this.initialSection.name,
+            "name": this.sectionComponent.form.controls['name'].value,
             "label": this.initialSection.label,
             "is_global": this.formGroup.value.isGlobal,
             "fields": JSON.stringify(this.initialSection.fields) 
@@ -265,7 +278,18 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * 
      * @returns (string): random name for section
      */
-    private randomName() {
+    public randomName() {
         return `section_template-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
+    }
+
+
+    /**
+     * Generates unique name for global sections
+     * 
+     * @returns unique name for global section
+     */
+    public generateGlobalSectionTemplateName(){
+        const timestamp = new Date().getTime();
+        return `dg_gst-${timestamp}`;
     }
 }
