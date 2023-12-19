@@ -37,7 +37,6 @@ class ProcessManager:
     def __init__(self):
         """Create a new instance of the ProcessManager"""
         # service definitions (in correct order)
-        multiprocessing.set_start_method("fork")
         self.__service_defs = []
         self.__service_defs.append(CmdbProcess("exportd", "cmdb.exportd.service.ExportdService"))
         self.__service_defs.append(CmdbProcess("webapp", "cmdb.interface.gunicorn.WebCmdbService"))
