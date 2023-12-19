@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
@@ -106,12 +106,9 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
   isLabelValid = true;
   isValid$: Observable<boolean>;
 
-  // isValid$: Observable<boolean> = new Observable<boolean>();
-
-
   public constructor(private router: Router, private typeService: TypeService, private toast: ToastService,
     private userService: UserService, private groupService: GroupService,
-    private sidebarService: SidebarService, private validationService: ValidationService) {
+    private sidebarService: SidebarService, private validationService: ValidationService, private changeDetector: ChangeDetectorRef) {
   }
 
   /**
@@ -119,9 +116,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
    */
   public ngOnInit(): void {
     this.isValid$ = this.validationService.getIsValid();
-
-    // this.isValid$ = this.validationService.getIsValid() as Observable<boolean>;
-
+    this.changeDetector.detectChanges();
 
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
@@ -165,18 +160,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
       .subscribe((response: APIGetMultiResponse) => {
         this.types = response.results as Array<CmdbType>;
       });
-
-    // this.validationService.labelValidationStatus$.subscribe((validationStatusMap) => {
-    //   this.isLabelValid = true;
-
-    //   validationStatusMap.forEach((value: ValidationStatus, key: string) => {
-    //     if (key == "" || !value.isValid) {
-    //       this.isLabelValid = false;
-    //       return;
-    //     }
-    //   });
-    // });
-
 
   }
 
@@ -246,6 +229,5 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
     this.sidebarService.loadCategoryTree();
   }
-
 
 }
