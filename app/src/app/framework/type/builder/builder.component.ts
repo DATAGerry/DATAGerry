@@ -179,7 +179,16 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             if(sectionData.is_global){
                 this.selectedGlobalSectionTemplates.push(sectionData);
 
-                const index = this.globalSectionTemplates.indexOf(sectionData);
+                let index = 0;
+                for(let sectionIndex in this.globalSectionTemplates){
+                    const aTemplate = this.globalSectionTemplates[sectionIndex];
+
+                    if(aTemplate.name == sectionData.name){
+                        index = parseInt(sectionIndex);
+                        break;
+                    }
+                }
+
                 this.globalSectionTemplates.splice(index, 1);
             }
 
@@ -243,6 +252,12 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+        console.log("onFieldDrop() - is global:",this.isGlobalSection(section));
+        if(this.isGlobalSection(section)){
+            return;
+        }
+
+
         const fieldData = event.data;
 
         if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
@@ -265,6 +280,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public onFieldDragged(item: any, section: CmdbTypeSection) {
+        if(this.isGlobalSection(section)){
+            return;
+        }
+
         const sectionIndex = section.fields.indexOf(item);
         section.fields.splice(sectionIndex, 1);
         const fieldIndex = this.typeInstance.fields.indexOf(item);
@@ -287,7 +306,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public removeSection(item: CmdbTypeSection) {
-        console.log("item:", item);
         this.handleGlobalTemplates(item);
 
         const index: number = this.typeInstance.render_meta.sections.indexOf(item);
@@ -346,6 +364,50 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
+    public getDnDEffectAllowedForField(field: any){
+        return this.isGlobalField(field.name) ? "none" : "move";
+    }
+
+
+    public getSectionMode(section: CmdbTypeSection, mode: CmdbMode){
+        if(this.isGlobalSection(section)){
+            return CmdbMode.Global
+        }
+
+        if(this.isNewSection(section)){
+            return CmdbMode.Create
+        }
+
+        return mode;
+    }
+
+
+    public getSectionCollapseIcon(section: CmdbTypeSection){
+        return this.isGlobalSection(section) ? ['far', 'eye'] : ['far', 'edit'];
+    }
+
+
+    public isGlobalSection(section: CmdbTypeSection){
+        for(let sectionIndex in this.globalSectionTemplates){
+            const aTemplate = this.globalSectionTemplates[sectionIndex];
+
+            if(aTemplate.name == section.name){
+                return true;
+            }
+        }
+
+        for(let sectionIndex in this.selectedGlobalSectionTemplates){
+            const aTemplate = this.selectedGlobalSectionTemplates[sectionIndex];
+
+            if(aTemplate.name == section.name){
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
     public isGlobalField(fieldName: string){
         return this.globalSectionTemplateFields.indexOf(fieldName) > -1;
     }
@@ -361,7 +423,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             }
 
         }
-        console.log("this.globalSectionTemplateFields", this.globalSectionTemplateFields);
     }
 
 
@@ -375,6 +436,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 isGlobalTemplate = true;
                 globalTemplateIndex = parseInt(index);
                 this.globalSectionTemplates.push(aSection);
+                this.globalSectionTemplates.sort((a, b) => a.public_id - b.public_id);
             }
         }
 
