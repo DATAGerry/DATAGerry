@@ -34,10 +34,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
       transition(':enter', [
         style({opacity: 0}),
         animate(500)
-      ]),
-
-      transition(':leave',
-        animate('0.5s 3s', style({opacity: 0})))
+      ])
     ])
   ]
 })
