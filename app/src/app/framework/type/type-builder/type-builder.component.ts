@@ -116,7 +116,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
    */
   public ngOnInit(): void {
     this.isValid$ = this.validationService.getIsValid();
-    this.changeDetector.detectChanges();
+
 
     if (this.mode === CmdbMode.Create) {
       this.typeInstance = new CmdbType();
@@ -161,6 +161,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         this.types = response.results as Array<CmdbType>;
       });
 
+    this.changeDetector.detectChanges();
   }
 
   /**

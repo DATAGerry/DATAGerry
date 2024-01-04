@@ -63,14 +63,14 @@ export abstract class ConfigEditBaseComponent {
 
   protected disableControlOnEdit(control: UntypedFormControl): void {
     if (this.mode === CmdbMode.Edit) {
+      this.updateAndClearValidators(control);
       control.disable({ onlySelf: false, emitEvent: false });
     }
   }
 
   protected disableControlsOnGlobal(control: UntypedFormControl): void {
     if (this.mode === CmdbMode.Global) {
-      control.clearValidators();
-      control.updateValueAndValidity();
+      this.updateAndClearValidators(control)
       control.disable({ onlySelf: false, emitEvent: false });
     }
   }
@@ -119,5 +119,10 @@ export abstract class ConfigEditBaseComponent {
         });
         return count <= 1;
     }
+  }
+
+  private updateAndClearValidators(control: UntypedFormControl) {
+    control.clearValidators();
+    control.updateValueAndValidity();
   }
 }
