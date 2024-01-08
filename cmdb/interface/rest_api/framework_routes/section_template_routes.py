@@ -196,7 +196,10 @@ def update_section_template(params: dict, request_user: UserModel):
 def delete_section_template(public_id: int, request_user: UserModel):
     """TODO: document"""
     try:
-        current_section_template_instance = section_template_manager.get_section_template(public_id)
+        template_instance: CmdbSectionTemplate = section_template_manager.get_section_template(public_id)
+
+        if template_instance.is_global:
+             section_template_manager.cleanup_global_section_templates(template_instance.name)
 
         ack = section_template_manager.delete_section_template(public_id=public_id,
                                                user=request_user,

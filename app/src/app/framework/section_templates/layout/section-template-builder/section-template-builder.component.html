@@ -81,7 +81,11 @@
                 </div>
                 <div class="collapse show" id="{{initialSection.name}}">
                     <div class="card-body">
-                        <cmdb-section-field-edit [data]="initialSection" [mode]="sectionTemplateID > 0 ? MODES.Global : MODES.Create" #sectionComponent></cmdb-section-field-edit>
+                        <cmdb-section-field-edit
+                            [data]="initialSection"
+                            [mode]="sectionTemplateID > 0 ? MODES.Global : MODES.Edit"
+                            #sectionComponent
+                        ></cmdb-section-field-edit>
                         <form [formGroup]="formGroup">
                             <div class="form-group is-global" *ngIf="sectionTemplateID <= 0">
                                 <mat-checkbox formControlName="isGlobal">

@@ -29,8 +29,8 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference, \
-    TypeReferenceSection
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
 from cmdb.user_management.user_manager import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -544,7 +544,7 @@ class RenderList:
 
         return preparation_objects
 
-
+# TODO: transfer errors to seperate class
 class RenderError(CMDBError):
     """
     Error class raised when an error occurs during rendering.

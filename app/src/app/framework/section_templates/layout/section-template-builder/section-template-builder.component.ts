@@ -17,8 +17,14 @@
 */
 import { Component, Input, OnInit, ViewChild } from '@angular/core';
 import { FormControl, FormGroup } from '@angular/forms';
-import { DndDropEvent } from 'ngx-drag-drop';
+import { Router } from '@angular/router';
+
 import { Observable } from 'rxjs';
+import { DndDropEvent } from 'ngx-drag-drop';
+
+import { ValidationService } from 'src/app/framework/type/services/validation.service';
+import { SectionTemplateService } from '../../services/section-template.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 
 import { CmdbMode } from 'src/app/framework/modes.enum';
 import { CheckboxControl } from 'src/app/framework/type/builder/controls/choice/checkbox.control';
@@ -31,11 +37,7 @@ import { ReferenceControl } from 'src/app/framework/type/builder/controls/specia
 import { PasswordControl } from 'src/app/framework/type/builder/controls/text/password.control';
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
 import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/textarea.control';
-import { ValidationService } from 'src/app/framework/type/services/validation.service';
-import { SectionTemplateService } from '../../services/section-template.service';
-import { ToastService } from 'src/app/layout/toast/toast.service';
 import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
-import { Router } from '@angular/router';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
 import { SectionFieldEditComponent } from 'src/app/framework/type/builder/configs/section/section-field-edit.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -50,7 +52,8 @@ export class SectionTemplateBuilderComponent implements OnInit {
     @Input()
     public sectionTemplateID: number;
 
-    @ViewChild('sectionComponent') public sectionComponent: SectionFieldEditComponent;
+    @ViewChild('sectionComponent')
+    public sectionComponent: SectionFieldEditComponent;
 
     public initialSection: any = {
         'name': this.randomName(),
@@ -58,7 +61,6 @@ export class SectionTemplateBuilderComponent implements OnInit {
         'type': 'section',
         'fields': []
     };
-
 
     public MODES: typeof CmdbMode = CmdbMode;
     public types = [];
@@ -99,7 +101,6 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
 
     ngOnInit(): void {
-
         //EDIT MODE
         if(this.sectionTemplateID > 0){
             this.getSectionTemplate(this.sectionTemplateID);
@@ -109,10 +110,18 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
         this.formGroup.controls['isGlobal'].valueChanges.subscribe(isGlobal => {
             if(isGlobal){
-                this.sectionComponent.form.controls['name'].setValue(this.generateGlobalSectionTemplateName());
+                if(this.initialSection.name.includes('dg_gst')){
+                    this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
+                } else {
+                    this.sectionComponent.form.controls['name'].setValue(this.generateGlobalSectionTemplateName());
+                }
             } 
             else {
-                this.sectionComponent.form.controls['name'].setValue(this.randomName());
+                if(this.initialSection.name.includes('section_template')){
+                    this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
+                } else {
+                    this.sectionComponent.form.controls['name'].setValue(this.randomName());
+                }
             }
         });
     }
@@ -186,6 +195,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
             this.formGroup.controls.isGlobal.setValue(this.initialSection.is_global);
           });
     }
+
 /* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
 
     /**
