@@ -13,21 +13,23 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from json import dumps
 from datetime import datetime, timezone
 from http import HTTPStatus
 
 from pytest import fixture
 
+from cmdb.framework.models.type_model import TypeSummary
 from cmdb.framework import TypeModel, CmdbObject
-from cmdb.framework.models.type import TypeRenderMeta, TypeFieldSection, TypeSummary
+from cmdb.framework.models.type_model import TypeFieldSection, TypeRenderMeta
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @fixture(scope='module')
 def example_type():
+    """TODO: document"""
     return TypeModel(
         public_id=1, name='test', label='Test', author_id=1, creation_time=datetime.now(),
         active=True, version=None, description='Test type',
@@ -48,6 +50,7 @@ def example_type():
 
 @fixture(scope='module')
 def example_object():
+    "TODO: document"
     return CmdbObject(
         public_id=1, type_id=1, status=True, creation_time=datetime.now(timezone.utc),
         author_id=1, active=True, fields=[], version='1.0.0'
@@ -56,6 +59,7 @@ def example_object():
 
 @fixture(scope='module')
 def collection(connector, database_name):
+    """TODO: document"""
     from pymongo.mongo_client import MongoClient
     from pymongo.collection import Collection
     mongo_client: MongoClient = connector.client
@@ -65,6 +69,7 @@ def collection(connector, database_name):
 
 @fixture(scope='module', autouse=True)
 def setup(request, collection, example_type):
+    """TODO: document"""
     collection.insert_one(document=TypeModel.to_json(example_type))
     dummy_type = example_type
     dummy_type.public_id = 2
@@ -93,12 +98,13 @@ def setup(request, collection, example_type):
 
 
 class TestFrameworkObjects:
-
+    """TODO: document"""
     OBJECT_COLLECTION: str = CmdbObject.COLLECTION
     TYPE_COLLECTION: str = TypeModel.COLLECTION
     ROUTE_URL: str = '/objects'
 
     def test_insert_object(self, rest_api, example_object, full_access_user, none_access_user):
+        """TODO: document"""
         # Test default
         default_response = rest_api.post(f'{self.ROUTE_URL}/', json=CmdbObject.to_json(example_object))
         assert default_response.status_code == HTTPStatus.OK
@@ -150,7 +156,9 @@ class TestFrameworkObjects:
         assert validate_response.status_code == HTTPStatus.NOT_FOUND
         example_object.public_id = 1
 
+
     def test_get_objects(self, rest_api, full_access_user, none_access_user):
+        """TODO: document"""
         default_response = rest_api.get(f'{self.ROUTE_URL}/')
         assert default_response.status_code == HTTPStatus.OK
 
@@ -189,7 +197,9 @@ class TestFrameworkObjects:
         none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/', unauthorized=True)
         assert none_get_types_response.status_code == HTTPStatus.UNAUTHORIZED
 
+
     def test_get_object(self, rest_api, example_object, full_access_user, none_access_user):
+        """TODO: document"""
         default_response = rest_api.get(f'{self.ROUTE_URL}/{example_object.public_id}/{"native"}')
         assert default_response.status_code == HTTPStatus.OK
 
@@ -214,7 +224,9 @@ class TestFrameworkObjects:
         none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/{example_object.public_id}', unauthorized=True)
         assert none_get_types_response.status_code == HTTPStatus.UNAUTHORIZED
 
+
     def test_update_object(self, rest_api, example_object, full_access_user, none_access_user):
+        """TODO: document"""
         example_object.editor_id = 1
         example_object.creation_time = None
 
@@ -251,7 +263,9 @@ class TestFrameworkObjects:
         example_object.public_id = 1
         example_object.name = 'test'
 
+
     def test_delete_object(self, rest_api, example_object, full_access_user, none_access_user):
+        """TODO: document"""
         # Test default route
         rest_api.post(f'{self.ROUTE_URL}/', json=CmdbObject.to_json(example_object))
 

@@ -15,7 +15,14 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { ChangeDetectionStrategy, Component, EventEmitter, Input, OnChanges, OnDestroy, Output, SimpleChanges } from '@angular/core';
+import { ChangeDetectionStrategy,
+         Component,
+         EventEmitter,
+         Input,
+         OnChanges,
+         OnDestroy,
+         Output,
+         SimpleChanges } from '@angular/core';
 
 import { ReplaySubject } from 'rxjs';
 
@@ -132,6 +139,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     ngOnChanges(changes: SimpleChanges): void {
         if(this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0){
             this.initGlobalFieldsList();
+            this.setSelectedGlobalTemplates();
         }
     }
 
@@ -172,7 +180,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      */
     public onSectionDrop(event: DndDropEvent): void {
         let sectionData = event.data;
-
         //check if it is a section template
         if('is_global' in sectionData){
 
@@ -190,11 +197,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 }
 
                 this.globalSectionTemplates.splice(index, 1);
+                this.typeInstance.global_template_ids.push(sectionData.name);
             }
 
             sectionData = this.extractSectionData(event.data);
         }
-
 
         if (this.sections && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
 
@@ -252,11 +259,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
-        console.log("onFieldDrop() - is global:",this.isGlobalSection(section));
         if(this.isGlobalSection(section)){
             return;
         }
-
 
         const fieldData = event.data;
 
@@ -354,14 +359,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
 
-
-    public replaceAt(array, index, value) {
-        const ret = array.slice(0);
-        ret[index] = value;
-
-        return ret;
-    }
-
 /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any){
@@ -408,6 +405,28 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    public setSelectedGlobalTemplates(){
+        if(this.typeInstance.global_template_ids.length > 0){
+            // iterate global_template_ids
+            this.typeInstance.global_template_ids.forEach((globalTemplateName) => {
+                
+                let index: number = -1;
+
+                for(let templateIndex in this.globalSectionTemplates){
+                    let aTemplate = this.globalSectionTemplates[templateIndex];
+
+                    if(aTemplate.name == globalTemplateName){
+                        this.selectedGlobalSectionTemplates.push(aTemplate);
+                        index = Number(templateIndex);
+                    }
+                }
+
+                this.globalSectionTemplates.splice(index, 1);
+            })
+        }
+    }
+
+
     public isGlobalField(fieldName: string){
         return this.globalSectionTemplateFields.indexOf(fieldName) > -1;
     }
@@ -441,9 +460,12 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         }
 
         if(isGlobalTemplate){
+            const nameIndex = this.typeInstance.global_template_ids.indexOf(sectionData.name, 0);
+            this.typeInstance.global_template_ids.splice(nameIndex,1);
             this.selectedGlobalSectionTemplates.splice(globalTemplateIndex, 1);
         }
     }
+
 
     /**
      * 

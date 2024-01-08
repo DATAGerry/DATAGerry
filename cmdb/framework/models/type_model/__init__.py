@@ -14,15 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains all models used by DATAGERRY
+This module contains all classes regarding the Cmdb-Type 'Type'
 """
-from .type import TypeModel
-from .category import CategoryModel
-from .link import ObjectLinkModel
+from .type_summary import TypeSummary
+from .type_reference import TypeReference
+from .type_external_link import TypeExternalLink
+from .type_section import TypeSection
+from .type_field_section import TypeFieldSection
+from .type_reference_section_entry import TypeReferenceSectionEntry
+from .type_reference_section import TypeReferenceSection
+from.type_render_meta import TypeRenderMeta
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
-    'CategoryModel',
-    'TypeModel',
-    'ObjectLinkModel'
+    'TypeSummary',
+    'TypeReference',
+    'TypeExternalLink',
+    'TypeSection',
+    'TypeFieldSection',
+    'TypeReferenceSectionEntry',
+    'TypeReferenceSection',
+    'TypeRenderMeta'
 ]
