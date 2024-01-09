@@ -1,29 +1,29 @@
 <div id="sidebar">
   <nav class="sidebar-nav">
     <ul class="nav">
-      <li class="nav-title">General</li>
-      <li class="nav-item">
+      <li class="nav-title" *ngIf="!isExpanded">General</li>
+      <li class="nav-item" *ngIf="!isExpanded">
         <a class="nav-link" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
           <fa-icon icon="tachometer-alt"></fa-icon>
           Dashboard</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" *ngIf="!isExpanded">
         <a *permissionLink="['base.framework.object.add']"
            class="nav-link" routerLink="/framework/object/add" routerLinkActive="active">
           <fa-icon icon="plus"></fa-icon>
           Add Object</a>
       </li>
       <li id="sidebar-categories" class="category-tree" *ngIf="categoryTree">
-        <div>
-            <label class="nav-title sidebar-menu-item" 
-                  [class.selectedMenu]="this.selectedMenu == 'categories'" 
-                  value="categories" 
-                  (click)="onSidebarMenuClicked(selectedCategories)" 
+        <div *ngIf="!isExpanded">
+            <label class="nav-title sidebar-menu-item"
+                  [class.selectedMenu]="this.selectedMenu == 'categories'"
+                  value="categories"
+                  (click)="onSidebarMenuClicked(selectedCategories)"
                   #selectedCategories>Categories</label>
-            <label class="nav-title sidebar-menu-item" 
-                    [class.selectedMenu]="this.selectedMenu == 'locations'" 
-                    value="locations" 
-                    (click)="onSidebarMenuClicked(selectedLocations)" 
+            <label class="nav-title sidebar-menu-item"
+                    [class.selectedMenu]="this.selectedMenu == 'locations'"
+                    value="locations"
+                    (click)="onSidebarMenuClicked(selectedLocations)"
                     #selectedLocations>Locations</label>
         </div>
         <div class="sidebar-menu-categories" *ngIf="this.selectedMenu == 'categories'">
@@ -50,9 +50,10 @@
               </ng-container>
         </div>
         <div class="sidebar-menu-categories" *ngIf="this.selectedMenu == 'locations'">
+          <button id="expand-button" (click)="onExpandClicked()"> {{!isExpanded ? 'Expand View' : 'Default View'}}</button>
           <location-tree></location-tree>
         </div>
       </li>
     </ul>
   </nav>
-</div>
+ </div>

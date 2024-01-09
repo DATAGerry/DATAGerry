@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -28,7 +28,7 @@ import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import {AccessControlPermission} from "../../../acl/acl.types";
+import { AccessControlPermission } from "../../../acl/acl.types";
 /* -------------------------------------------------------------------------- */
 
 @Component({
@@ -62,62 +62,120 @@ export class SidebarComponent implements OnInit, OnDestroy {
   // String representation of currently selected tab menu in sidebar (Default is Categories)
   selectedMenu: string;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+  isExpanded: boolean = false
 
-    constructor(private sidebarService: SidebarService,
-                private typeService: TypeService,
-                private renderer: Renderer2) {
+  /* ------------------------------------------------------------------------------------------------------------------ */
+  /*                                                     LIFE CYCLE                                                     */
+  /* ------------------------------------------------------------------------------------------------------------------ */
 
-        this.categoryTreeSubscription = new Subscription();
-        this.unCategorizedTypesSubscription = new Subscription();
-        this.filterTermSubscription = new Subscription();
+  constructor(private sidebarService: SidebarService,
+    private typeService: TypeService,
+    private renderer: Renderer2,
+    private elementRef: ElementRef) {
 
-    }
+    this.categoryTreeSubscription = new Subscription();
+    this.unCategorizedTypesSubscription = new Subscription();
+    this.filterTermSubscription = new Subscription();
+
+  }
 
 
 
-    public ngOnInit(): void {
-        this.renderer.addClass(document.body, 'sidebar-fixed');
-        this.sidebarService.loadCategoryTree();
-        this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
-            this.categoryTree = categoryTree;
-            this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false).subscribe(
-              (apiResponse: APIGetMultiResponse<CmdbType>) => {
-                this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-            });
-
-            this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
-              (apiResponse: APIGetMultiResponse<CmdbType>) => {
-                this.typeList = apiResponse.results as Array<CmdbType>;
-            });
+  public ngOnInit(): void {
+    this.renderer.addClass(document.body, 'sidebar-fixed');
+    this.sidebarService.loadCategoryTree();
+    this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
+      this.categoryTree = categoryTree;
+      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false).subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
         });
 
-      this.selectedMenu = this.sidebarService.selectedMenu;
+      this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
+        (apiResponse: APIGetMultiResponse<CmdbType>) => {
+          this.typeList = apiResponse.results as Array<CmdbType>;
+        });
+    });
+
+    this.selectedMenu = this.sidebarService.selectedMenu;
+  }
+
+
+
+  public ngOnDestroy(): void {
+    this.categoryTreeSubscription.unsubscribe();
+    this.unCategorizedTypesSubscription.unsubscribe();
+    this.filterTermSubscription.unsubscribe();
+    this.renderer.removeClass(document.body, 'sidebar-fixed');
+  }
+
+  /* ------------------------------------------------------------------------------------------------------------------ */
+  /*                                                  SIDEBAR HANDLING                                                  */
+  /* ------------------------------------------------------------------------------------------------------------------ */
+
+  /**
+   * Toggles the activated menu tabs (categories and locations)
+   * 
+   * @param selection :string = String representation of the selected menu
+   */
+  onSidebarMenuClicked(selection: HTMLDivElement) {
+    let newValue = selection.getAttribute('value');
+    this.selectedMenu = newValue;
+    this.sidebarService.selectedMenu = newValue;
+  }
+
+  /**
+ * Toggle the expansion state of the sidebar and dynamically update its width and related styles.
+ * This function is called when the user clicks on the expand/collapse button.
+ */
+
+  onExpandClicked() {
+
+    // Toggle the expansion state
+    this.isExpanded = !this.isExpanded;
+
+    // Dynamically set the width of the sidebar
+    const newWidth = this.isExpanded ? '500px' : '230px';
+    this.setSidebarWidth(newWidth);
+
+    // Update dynamic styles based on the new width
+    this.updateDynamicStyles(newWidth);
+  }
+
+
+  private setSidebarWidth(newWidth: string) {
+    const sidebar = this.elementRef.nativeElement.querySelector('#sidebar');
+    this.renderer.setStyle(sidebar, 'width', newWidth);
+  }
+
+
+  private updateDynamicStyles(newWidth: string) {
+    const styles = `
+      .sidebar-fixed #main {
+        margin-left: ${newWidth};
+        margin-top: $navbar-height;
+      }
+  
+      @media (max-width: 767.98px) {
+        .sidebar-fixed #main {
+          margin-left: 0;
+        }
+      }
+    `;
+
+    let styleElement = document.getElementById('custom-styles') as HTMLStyleElement;
+    if (!styleElement) {
+      styleElement = document.createElement('style');
+      styleElement.id = 'custom-styles';
+      document.head.appendChild(styleElement);
     }
+    styleElement.textContent = styles;
 
-
-
-    public ngOnDestroy(): void {
-        this.categoryTreeSubscription.unsubscribe();
-        this.unCategorizedTypesSubscription.unsubscribe();
-        this.filterTermSubscription.unsubscribe();
-        this.renderer.removeClass(document.body, 'sidebar-fixed');
+    const main = this.elementRef.nativeElement.querySelector('.sidebar-fixed #main');
+    if (main) {
+      this.renderer.setStyle(main, 'margin-left', newWidth);
     }
+  }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                  SIDEBAR HANDLING                                                  */
-/* ------------------------------------------------------------------------------------------------------------------ */
 
-    /**
-     * Toggles the activated menu tabs (categories and locations)
-     * 
-     * @param selection :string = String representation of the selected menu
-     */
-    onSidebarMenuClicked(selection: HTMLDivElement){
-        let newValue = selection.getAttribute('value');
-        this.selectedMenu = newValue;
-        this.sidebarService.selectedMenu = newValue; 
-    }
 }
