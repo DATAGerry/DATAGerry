@@ -2,10 +2,12 @@
 
 .input-wrapper-search {
   position: relative;
+
   i.fa-times.input-icon-clear {
     &:hover {
-        cursor: pointer;
+      cursor: pointer;
     }
+
     position: absolute;
     color: black;
     opacity: 0.8;
@@ -28,3 +30,11 @@
   background-color: $dg-selected-background-color;
 }
 
+#expand-button {
+  background-color: rgb(233, 77, 24);
+  padding: 0 15px 0 15px;
+  margin: 10px 0 10px 5px;
+  color: #FFFFFF;
+  border: none;
+  font-size: 18px;
+}
