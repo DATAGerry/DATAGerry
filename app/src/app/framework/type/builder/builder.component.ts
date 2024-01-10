@@ -180,6 +180,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      */
     public onSectionDrop(event: DndDropEvent): void {
         let sectionData = event.data;
+
         //check if it is a section template
         if('is_global' in sectionData){
 
@@ -367,10 +368,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public getSectionMode(section: CmdbTypeSection, mode: CmdbMode){
-        if(this.isGlobalSection(section)){
+
+        if(this.isGlobalSection(section) || section.name.includes("dg_gst-")){
             return CmdbMode.Global
         }
-
+        
         if(this.isNewSection(section)){
             return CmdbMode.Create
         }

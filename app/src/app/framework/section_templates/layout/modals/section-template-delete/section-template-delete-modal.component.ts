@@ -18,6 +18,7 @@
 import { Component, Input } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
+import { GlobalTemplateCounts } from '../../../section-template.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -29,6 +30,9 @@ export class SectionTemplateDeleteModalComponent {
 
   @Input() 
   public sectionTemplate: CmdbSectionTemplate;
+
+  @Input()
+  public templateCounts: GlobalTemplateCounts;
 
   constructor(public activeModal: NgbActiveModal) {
   }

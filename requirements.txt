@@ -12,6 +12,7 @@ chardet==5.2.0
 click==8.1.7
 coverage==7.3.2
 cryptography==41.0.5
+deepdiff==6.7.1
 docutils==0.20.1
 et-xmlfile==1.1.0
 flake8==6.1.0

@@ -151,6 +151,28 @@ def get_section_template(public_id: int, request_user: UserModel):
     return make_response(section_template_instance)
 
 
+@section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
+@section_template_blueprint.protect(auth=True, right='base.framework.object.view')
+@insert_request_user
+def get_global_section_template_count(public_id: int, request_user: UserModel):
+    """Retrives the count of types and objects using this global template"""
+    try:
+        instance: CmdbSectionTemplate = section_template_manager.get_section_template(
+                                                                                    public_id,
+                                                                                    request_user,
+                                                                                    AccessControlPermission.READ
+                                                                                  )
+
+        counts: dict = section_template_manager.get_global_template_usage_count(instance.name, instance.is_global)
+
+    except (SectionTemplateManagerGetError, ManagerGetError) as err:
+        return abort(404, err.message)
+
+    except AccessDeniedError as err:
+        return abort(403, err.message)
+
+    return make_response(counts)
+
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
@@ -176,7 +198,13 @@ def update_section_template(params: dict, request_user: UserModel):
     failed: ResponseFailedMessage = []
 
     try:
+        # get the current state
+        current_template: CmdbSectionTemplate = section_template_manager.get_section_template(params['public_id'])
+
         result = section_template_manager._update(CmdbSectionTemplate.COLLECTION, params['public_id'], params)
+
+        # Apply changes to all types and objects using the template
+        section_template_manager.handle_section_template_changes(params, current_template)
 
     except (SectionTemplateManagerGetError, ManagerGetError, ObjectManagerUpdateError) as error:
         failed.append(ResponseFailedMessage(error_message=error.message, status=404,
@@ -199,7 +227,7 @@ def delete_section_template(public_id: int, request_user: UserModel):
         template_instance: CmdbSectionTemplate = section_template_manager.get_section_template(public_id)
 
         if template_instance.is_global:
-             section_template_manager.cleanup_global_section_templates(template_instance.name)
+            section_template_manager.cleanup_global_section_templates(template_instance.name)
 
         ack = section_template_manager.delete_section_template(public_id=public_id,
                                                user=request_user,

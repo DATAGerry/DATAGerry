@@ -29,6 +29,11 @@ import { SectionTemplateTransformModalComponent } from './layout/modals/section-
 import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+export interface GlobalTemplateCounts {
+    'types': number,
+    'objects': number
+}
+
 @Component({
     selector:'cmdb-section-template',
     templateUrl: './section-template.component.html',
@@ -79,19 +84,25 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
      * @param sectionTemplate instance of section template which should be deleted
      */
     showDeleteModal(sectionTemplate: CmdbSectionTemplate){
-        this.modalRef = this.modalService.open(SectionTemplateDeleteModalComponent, { size: 'lg' });
-        this.modalRef.componentInstance.sectionTemplate = sectionTemplate;
 
-        this.modalRef.result.then((sectionTemplateID: number) => {
-            //Delete the section template
-            if(sectionTemplateID > 0){
-                this.sectionTemplateService.deleteSectionTemplate(sectionTemplateID).subscribe((res: any) => {
-                    this.toastService.success("Section Template with ID " + sectionTemplateID  + " deleted!");
-                    this.getAllSectionTemplates();
-                }, error => {
-                  this.toastService.error(error);
-                });
-            }
+        this.sectionTemplateService.getGlobalSectionTemplateCount(sectionTemplate.public_id).subscribe((response: GlobalTemplateCounts) => {
+            let counts: GlobalTemplateCounts = response
+
+            this.modalRef = this.modalService.open(SectionTemplateDeleteModalComponent, { size: 'lg' });
+            this.modalRef.componentInstance.sectionTemplate = sectionTemplate;
+            this.modalRef.componentInstance.templateCounts = counts;
+    
+            this.modalRef.result.then((sectionTemplateID: number) => {
+                //Delete the section template
+                if(sectionTemplateID > 0){
+                    this.sectionTemplateService.deleteSectionTemplate(sectionTemplateID).subscribe((res: any) => {
+                        this.toastService.success("Section Template with ID " + sectionTemplateID  + " deleted!");
+                        this.getAllSectionTemplates();
+                    }, error => {
+                      this.toastService.error(error);
+                    });
+                }
+            });
         });
     }
 

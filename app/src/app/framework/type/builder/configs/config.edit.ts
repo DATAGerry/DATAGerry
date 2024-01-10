@@ -90,6 +90,7 @@ export abstract class ConfigEditBaseComponent {
     }
   }
 
+
   protected patchData(data: any, form: UntypedFormGroup): void {
     form.patchValue(data);
     if (this.mode === CmdbMode.Edit) {
@@ -97,29 +98,29 @@ export abstract class ConfigEditBaseComponent {
     }
   }
 
-  public calculateName(value) {
-    if (this.mode !== CmdbMode.Edit) {
-      this.data.name = value.replace(/ /g, '-').toLowerCase();
-      this.data.name = this.data.name.replace(/[^a-z0-9 \-]/gi, '').toLowerCase();
-    }
-    if (!this.checkNameUniqueness()) {
-      this.calculateName(this.data.name += '-1');
-    }
-  }
+  // public calculateName(value) {
+  //   if (this.mode !== CmdbMode.Edit) {
+  //     this.data.name = value.replace(/ /g, '-').toLowerCase();
+  //     this.data.name = this.data.name.replace(/[^a-z0-9 \-]/gi, '').toLowerCase();
+  //   }
+  //   if (!this.checkNameUniqueness()) {
+  //     this.calculateName(this.data.name += '-1');
+  //   }
+  // }
 
-  private checkNameUniqueness() {
-    const { type, name } = this.data;
-    switch (type) {
-      case 'section':
-        return this.sections.filter(el => el.name === name).length <= 1;
-      default:
-        let count = 0;
-        this.sections.forEach((sec) => {
-          count += sec.fields.filter(el => el.name === name).length;
-        });
-        return count <= 1;
-    }
-  }
+  // private checkNameUniqueness() {
+  //   const { type, name } = this.data;
+  //   switch (type) {
+  //     case 'section':
+  //       return this.sections.filter(el => el.name === name).length <= 1;
+  //     default:
+  //       let count = 0;
+  //       this.sections.forEach((sec) => {
+  //         count += sec.fields.filter(el => el.name === name).length;
+  //       });
+  //       return count <= 1;
+  //   }
+  // }
 
   private updateAndClearValidators(control: UntypedFormControl) {
     control.clearValidators();
