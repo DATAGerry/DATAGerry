@@ -8,7 +8,6 @@
                 <tr class="table-head">
                     <th>PublicID</th>
                     <th>Name</th>
-                    <th>Is Global</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -17,7 +16,6 @@
                     <tr *ngFor="let sectionTemplate of sectionTemplates">
                         <td class="centered-text small-cell">{{sectionTemplate.public_id}}</td>
                         <td class="centered-text">{{sectionTemplate.label}}</td>
-                        <td class="centered-text medium-cell">{{sectionTemplate.is_global}}</td>
                         <td class="centered-text big-cell">
                             <button class="btn btn-sm btn-link"
                                     title="Edit"
@@ -30,6 +28,14 @@
                                 (click)="showCloneModal(sectionTemplate)"
                             >
                                 <i class="far fa-clone"></i>
+                            </button>
+                            <button
+                                *ngIf="sectionTemplate.is_global"
+                                title="Global Template"
+                                class="btn btn-sm btn-link"
+                                disabled
+                            >
+                                <i class="fas fa-globe"></i>
                             </button>
                             <button
                                 *ngIf="!sectionTemplate.is_global"
@@ -51,7 +57,7 @@
                 </ng-container>
                 <ng-template #noSectionTemplatesMessage>
                     <tr>
-                        <td class="centered-text" colspan="4">No section templates created</td>
+                        <td class="centered-text" colspan="3">No section templates created</td>
                     </tr>
                 </ng-template>
             </tbody>

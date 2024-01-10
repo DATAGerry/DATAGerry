@@ -136,6 +136,18 @@ export class SectionTemplateService<T = CmdbSectionTemplate | RenderResult> impl
         );
     }
 
+
+    public getGlobalSectionTemplateCount<R>(publicID: number): Observable<R>{
+        const options = this.options;
+        options.params = new HttpParams();
+
+        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/count`, options).pipe(
+            map((apiResponse) => {
+                return apiResponse.body;
+            })
+        );
+    }
+
 /* -------------------------------------------------- CRUD - UPDATE ------------------------------------------------- */
 
     /**
@@ -158,11 +170,8 @@ export class SectionTemplateService<T = CmdbSectionTemplate | RenderResult> impl
 
         putOptions.params = httpParams;
 
-        console.log("send params:", putOptions.params);
-
         return this.api.callPut<T>(`${ this.servicePrefix }/`, params, putOptions).pipe(
             map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => {
-                console.log("updateResponse:", apiResponse.body);
                 return apiResponse.body;
             })
         );

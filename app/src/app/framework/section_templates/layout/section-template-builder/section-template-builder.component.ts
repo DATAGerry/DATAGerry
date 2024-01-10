@@ -56,7 +56,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     public sectionComponent: SectionFieldEditComponent;
 
     public initialSection: any = {
-        'name': this.randomName(),
+        'name': this.randomSectionName(),
         'label': 'Section',
         'type': 'section',
         'fields': []
@@ -110,7 +110,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
         this.formGroup.controls['isGlobal'].valueChanges.subscribe(isGlobal => {
             if(isGlobal){
-                if(this.initialSection.name.includes('dg_gst')){
+                if(this.initialSection.name.includes('dg_gst-')){
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
                     this.sectionComponent.form.controls['name'].setValue(this.generateGlobalSectionTemplateName());
@@ -120,7 +120,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
                 if(this.initialSection.name.includes('section_template')){
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
-                    this.sectionComponent.form.controls['name'].setValue(this.randomName());
+                    this.sectionComponent.form.controls['name'].setValue(this.randomSectionName());
                 }
             }
         });
@@ -288,8 +288,9 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * 
      * @returns (string): random name for section
      */
-    public randomName() {
-        return `section_template-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
+    public randomSectionName() {
+        const timestamp = new Date().getTime();
+        return `section_template-${timestamp}`;
     }
 
 

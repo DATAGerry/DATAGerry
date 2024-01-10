@@ -6,6 +6,11 @@
 <div class="modal-body">
     <div id="delete-message">
         Do you want to <b>delete</b> the section template <b>"{{sectionTemplate.label}}"</b>?
+        <br>
+        <br>
+        <ng-container *ngIf="sectionTemplate.is_global">
+            This action affects <b>{{templateCounts.types}} types</b> and <b>{{templateCounts.objects}} objects</b>!
+        </ng-container>
     </div>
     <ng-container *ngIf="sectionTemplate.is_global">
         <br>

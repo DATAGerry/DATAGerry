@@ -83,7 +83,7 @@
                     <div class="card-body">
                         <cmdb-section-field-edit
                             [data]="initialSection"
-                            [mode]="sectionTemplateID > 0 ? MODES.Global : MODES.Edit"
+                            [mode]="MODES.Edit"
                             #sectionComponent
                         ></cmdb-section-field-edit>
                         <form [formGroup]="formGroup">
