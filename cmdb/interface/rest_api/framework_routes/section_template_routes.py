@@ -67,6 +67,7 @@ def create_section_template(params: dict, request_user: UserModel):
     try:
         params['public_id'] = section_template_manager.get_new_id(CmdbSectionTemplate.COLLECTION)
         params['is_global'] = params['is_global'] in ('true', 'True')
+        params['predefined'] = params['predefined'] in ('true', 'True')
         params['fields'] = json.loads(params['fields'])
         params['type'] = 'section'
 
@@ -191,6 +192,7 @@ def update_section_template(params: dict, request_user: UserModel):
         _type_: _description_
     """
     params['is_global'] = params['is_global'] in ('true', 'True')
+    params['predefined'] = params['predefined'] in ('true', 'True')
     params['fields'] = json.loads(params['fields'])
     params['public_id'] = int(params['public_id'])
     params['type'] = 'section'

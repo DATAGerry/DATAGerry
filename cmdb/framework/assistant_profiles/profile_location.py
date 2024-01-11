@@ -94,6 +94,7 @@ class LocationProfile(ProfileBase):
         return {
             "name": "country",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -163,6 +164,7 @@ class LocationProfile(ProfileBase):
         return {
             "name": "city",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -233,6 +235,7 @@ class LocationProfile(ProfileBase):
         return {
             "name": "building",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -331,6 +334,7 @@ class LocationProfile(ProfileBase):
         return {
             "name": "room",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -417,6 +421,7 @@ class LocationProfile(ProfileBase):
         return {
             "name": "rack",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

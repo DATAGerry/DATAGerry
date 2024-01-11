@@ -8,6 +8,7 @@
                 <tr class="table-head">
                     <th>PublicID</th>
                     <th>Name</th>
+                    <th>Type</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -16,10 +17,29 @@
                     <tr *ngFor="let sectionTemplate of sectionTemplates">
                         <td class="centered-text small-cell">{{sectionTemplate.public_id}}</td>
                         <td class="centered-text">{{sectionTemplate.label}}</td>
+                        <td class="centered-text medium-cell">{{getTemplateTypeLabel(sectionTemplate)}}</td>
                         <td class="centered-text big-cell">
-                            <button class="btn btn-sm btn-link"
-                                    title="Edit"
-                                    [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]">
+                            <button
+                                class="btn btn-sm btn-link"
+                                title="View Template"
+                                (click)="showTemplatePreview(sectionTemplate)"
+                            >
+                                <i class="far fa-eye"></i>
+                            </button>
+                            <button
+                                *ngIf="sectionTemplate.predefined"
+                                class="btn btn-sm btn-link"
+                                title="Edit"
+                                disabled
+                            >
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button
+                                *ngIf="!sectionTemplate.predefined"
+                                class="btn btn-sm btn-link"
+                                title="Edit"
+                                [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]"
+                            >
                                 <i class="fas fa-edit"></i>
                             </button>
                             <button
@@ -35,7 +55,7 @@
                                 class="btn btn-sm btn-link"
                                 disabled
                             >
-                                <i class="fas fa-globe"></i>
+                                <i class="fas fa-globe-europe"></i>
                             </button>
                             <button
                                 *ngIf="!sectionTemplate.is_global"
@@ -46,6 +66,15 @@
                                 <i class="fas fa-recycle"></i>
                             </button>
                             <button
+                                *ngIf="sectionTemplate.predefined"
+                                class="btn btn-sm btn-link"
+                                title="Delete"
+                                disabled
+                            >
+                                <i class="fas fa-trash-alt"></i>
+                            </button>
+                            <button
+                                *ngIf="!sectionTemplate.predefined"
                                 class="btn btn-sm btn-link"
                                 title="Delete"
                                 (click)="showDeleteModal(sectionTemplate)"

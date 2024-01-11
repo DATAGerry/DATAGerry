@@ -55,6 +55,10 @@ class CmdbSectionTemplate(CmdbDAO):
             'type': 'boolean',
             'default': False
         },
+        'predefined': {
+            'type': 'boolean',
+            'default': False
+        },
         'name': {
             'type': 'string',
             'required': True,
@@ -79,7 +83,13 @@ class CmdbSectionTemplate(CmdbDAO):
 
 # ---------------------------------------------------- CONSTRUCTOR --------------------------------------------------- #
 
-    def __init__(self, name: str, label: str, fields: list, is_global: bool = False, **kwargs):
+    def __init__(self,
+                 name: str,
+                 label: str,
+                 fields: list,
+                 is_global: bool = False,
+                 predefined: bool = False,
+                 **kwargs):
         """
         Initialisation of a section template
 
@@ -92,6 +102,7 @@ class CmdbSectionTemplate(CmdbDAO):
         self.label: str = label
         self.fields: list = fields
         self.is_global: bool = is_global
+        self.predefined: bool = predefined
         self.type: str = self.SECTION_TYPE
         super().__init__(**kwargs)
 
@@ -117,6 +128,7 @@ class CmdbSectionTemplate(CmdbDAO):
             label = data.get('label'),
             fields = data.get('fields'),
             is_global = data.get('is_global',False),
+            predefined = data.get('predefined',False),
             type = cls.SECTION_TYPE,
         )
 
@@ -139,6 +151,7 @@ class CmdbSectionTemplate(CmdbDAO):
             'label': instance.label,
             'fields': instance.fields,
             'is_global': instance.is_global,
+            'predefined': instance.predefined,
             'type': instance.type,
         }
 
@@ -156,6 +169,7 @@ class CmdbSectionTemplate(CmdbDAO):
             'label': instance['label'],
             'fields': instance['fields'],
             'is_global': instance['is_global'],
+            'predefined': instance['predefined'],
             'type': instance['type'],
         }
 

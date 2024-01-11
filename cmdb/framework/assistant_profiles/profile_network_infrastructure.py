@@ -91,6 +91,7 @@ class NetworkInfrastructureProfile(ProfileBase):
         self.type_dict[type_prefix] = {
             "name": "switch",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -308,6 +309,7 @@ class NetworkInfrastructureProfile(ProfileBase):
         self.type_dict[type_prefix] =   {
             "name": "router",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -524,6 +526,7 @@ class NetworkInfrastructureProfile(ProfileBase):
         self.type_dict[type_prefix] =   {
             "name": "patch_panel",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -627,6 +630,7 @@ class NetworkInfrastructureProfile(ProfileBase):
         self.type_dict[type_prefix] = {
             "name": "wireless_access_point",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

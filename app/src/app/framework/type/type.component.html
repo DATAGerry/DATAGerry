@@ -1,11 +1,8 @@
 <div class="d-flex justify-content-between">
   <h1>Type List</h1>
-  <div class="pointer" style="font-size: 2.5rem"><i class="far fa fa-info-circle" (click)="showAlert()"></i></div>
 </div>
 <hr/>
-<cmdb-info-box [message]="INFO_MESSAGE"
-               icon="fas fa-cube"
-               doc="/docs/admin_guide/objects.html"></cmdb-info-box>
+
 <cmdb-table [items]="types" [columns]="columns" [page]="page" [sort]="sort" [id]="id" [tableState]="tableState"
             [stateEnabled]="true" [emptyMessage]="'No types were found!'" [customButtons]="[addTemplate, exportTemplate]"
             [totalItems]="totalTypes" [selectEnabled]="selectEnabled" [loading]="loading" [pageSize]="limit"
