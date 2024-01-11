@@ -86,6 +86,7 @@ class UserManagementProfile(ProfileBase):
         return {
             "name": "company",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -171,6 +172,7 @@ class UserManagementProfile(ProfileBase):
         return {
             "name": "user",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -259,6 +261,7 @@ class UserManagementProfile(ProfileBase):
         return {
             "name": "customer_user",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

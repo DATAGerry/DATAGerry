@@ -80,6 +80,7 @@ class IPAMProfile(ProfileBase):
         return {
             "name": "network",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -157,6 +158,7 @@ class IPAMProfile(ProfileBase):
         return {
             "name": "vlan",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

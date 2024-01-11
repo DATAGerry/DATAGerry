@@ -27,6 +27,7 @@ import { CmdbSectionTemplate } from '../models/cmdb-section-template';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
 import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
+import { PreviewModalComponent } from '../type/builder/modals/preview-modal/preview-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export interface GlobalTemplateCounts {
@@ -124,6 +125,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     'label': sectionTemplate.label,
                     'type': 'section',
                     'is_global': true,
+                    'predefined': false,
                     'fields': JSON.stringify(sectionTemplate.fields),
                     'public_id': sectionTemplate.public_id
                 }
@@ -158,16 +160,11 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     'label': values.templateLabel,
                     'type': 'section',
                     'is_global': values.isGlobal,
+                    'predefined': false,
                     'fields': JSON.stringify(sectionTemplate.fields)
                 }
 
-                if(values.isGlobal){
-                    params.name = this.generateGlobalSectionTemplateName();
-                } 
-                else {
-                    params.name = this.randomSectionTemplateName();
-                }
-
+                params.name = this.generateSectionTemplateName(values.isGlobal);
 
                 this.sectionTemplateService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
                     this.toastService.success("Section Template cloned!");
@@ -181,24 +178,43 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         });
     }
 
+    public showTemplatePreview(sectionTemplate: CmdbSectionTemplate){
+        const previewModal = this.modalService.open(PreviewModalComponent, { scrollable: true });
+        previewModal.componentInstance.sections = [sectionTemplate];
+    }
+
 /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+
     /**
-     * Generates a random name for the section
-     * 
-     * @returns (string): random name for section
+     * Retrives the label for the "Type" column of the table
+     * @param sectionTemplate The template for which the label should be calculated
+     * @returns (string): Type name for the given section template
      */
-    public randomSectionTemplateName() {
-        return `section_template-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
+    public getTemplateTypeLabel(sectionTemplate: CmdbSectionTemplate): string{
+        if(sectionTemplate.predefined){
+            return "Predefined";
+        }
+
+        if(sectionTemplate.is_global){
+            return "Global";
+        }
+
+        return "Standard";
     }
 
 
     /**
-     * Generates a unique name for global section templates
+     * Generates a unique name for section templates
      * 
-     * @returns unique name for global section templates
+     * @returns unique name for section templates
      */
-    public generateGlobalSectionTemplateName(){
+    public generateSectionTemplateName(isGlobal:boolean = false){
         const timestamp = new Date().getTime();
-        return `dg_gst-${timestamp}`;
+        
+        if(isGlobal){
+            return `dg_gst-${timestamp}`;
+        }
+
+        return `section_template-${timestamp}`;
     }
 }

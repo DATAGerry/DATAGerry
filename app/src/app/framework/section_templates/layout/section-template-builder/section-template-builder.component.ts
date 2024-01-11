@@ -27,10 +27,10 @@ import { SectionTemplateService } from '../../services/section-template.service'
 import { ToastService } from 'src/app/layout/toast/toast.service';
 
 import { CmdbMode } from 'src/app/framework/modes.enum';
+import { Controller } from 'src/app/framework/type/builder/controls/controls.common';
 import { CheckboxControl } from 'src/app/framework/type/builder/controls/choice/checkbox.control';
 import { RadioControl } from 'src/app/framework/type/builder/controls/choice/radio.control';
 import { SelectControl } from 'src/app/framework/type/builder/controls/choice/select.control';
-import { Controller } from 'src/app/framework/type/builder/controls/controls.common';
 import { DateControl } from 'src/app/framework/type/builder/controls/date-time/date.control';
 import { LocationControl } from 'src/app/framework/type/builder/controls/specials/location.control';
 import { ReferenceControl } from 'src/app/framework/type/builder/controls/specials/ref.control';
@@ -56,7 +56,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     public sectionComponent: SectionFieldEditComponent;
 
     public initialSection: any = {
-        'name': this.randomSectionName(),
+        'name': this.generateSectionTemplateName(),
         'label': 'Section',
         'type': 'section',
         'fields': []
@@ -113,14 +113,14 @@ export class SectionTemplateBuilderComponent implements OnInit {
                 if(this.initialSection.name.includes('dg_gst-')){
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
-                    this.sectionComponent.form.controls['name'].setValue(this.generateGlobalSectionTemplateName());
+                    this.sectionComponent.form.controls['name'].setValue(this.generateSectionTemplateName(isGlobal));
                 }
             } 
             else {
                 if(this.initialSection.name.includes('section_template')){
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
-                    this.sectionComponent.form.controls['name'].setValue(this.randomSectionName());
+                    this.sectionComponent.form.controls['name'].setValue(this.generateSectionTemplateName());
                 }
             }
         });
@@ -149,6 +149,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
             "name": this.sectionComponent.form.controls['name'].value,
             "label": this.initialSection.label,
             "is_global": this.formGroup.value.isGlobal,
+            "predefined": false,
             "fields": JSON.stringify(this.initialSection.fields) 
         }
 
@@ -171,6 +172,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
             'label': this.initialSection.label,
             'type': 'section',
             'is_global': this.formGroup.value.isGlobal,
+            'predefined': false,
             'fields': JSON.stringify(this.initialSection.fields),
             'public_id': this.initialSection.public_id
         }
@@ -204,6 +206,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * @param event triggered when a field is dropped in the Fieldszone
      */
     public onFieldDrop(event: DndDropEvent) {
+        console.log("onFieldDrop", event.data);
         if (event.dropEffect === 'copy' || event.dropEffect === 'move') {
             this.initialSection.fields.splice(event.index, 0, event.data);
         }
@@ -284,23 +287,17 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
 
     /**
-     * Generates a random name for the section
+     * Generates unique name for sections
      * 
-     * @returns (string): random name for section
+     * @returns Unique name for section
      */
-    public randomSectionName() {
+    public generateSectionTemplateName(isGlobal: boolean = false){
         const timestamp = new Date().getTime();
+
+        if(isGlobal){
+            return `dg_gst-${timestamp}`;
+        }
+        
         return `section_template-${timestamp}`;
-    }
-
-
-    /**
-     * Generates unique name for global sections
-     * 
-     * @returns unique name for global section
-     */
-    public generateGlobalSectionTemplateName(){
-        const timestamp = new Date().getTime();
-        return `dg_gst-${timestamp}`;
     }
 }

@@ -88,6 +88,7 @@ class ServerManagementProfile(ProfileBase):
         self.type_dict['server']: dict = {
             "name": "server",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -313,6 +314,7 @@ class ServerManagementProfile(ProfileBase):
         self.type_dict['appliance']: dict =  {
             "name": "appliance",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -527,6 +529,7 @@ class ServerManagementProfile(ProfileBase):
         self.type_dict['virtual_server']: dict = {
             "name": "virtual_server",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

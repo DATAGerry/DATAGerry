@@ -141,7 +141,6 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
 
         new_section_label: str = self.get_section_label_diff(new_params, CmdbSectionTemplate.to_json(current_template))
         field_diffs = self.get_fields_diff(new_params, CmdbSectionTemplate.to_json(current_template))
-        LOGGER.info(f"field_diffs: {field_diffs}")
 
         types_to_change = self.get_types_using_template(new_params['name'])
 
@@ -149,7 +148,6 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
         for a_type in types_to_change:
 
             to_change_global_section: TypeFieldSection = a_type.get_section(new_params['name'])
-            LOGGER.info(f"to_change_global_section: {to_change_global_section}")
 
             # Change label if it was changed
             if len(new_section_label) > 0:
@@ -174,6 +172,7 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
 
             # Remove deleted fields from type fields since they are not in the new fields
             a_type.fields = [field for field in a_type.fields if field['name'] not in field_diffs['deleted']]
+
             # Remove also the other section fields and add all as new fields
             a_type.fields = [field for field in a_type.fields if field['name'] not in updated_field_names]
 

@@ -132,7 +132,7 @@
                                         </div><!-- card-header -->
                                         <div class="card-body collapse" id="field-{{y}}{{field.name}}">
                                             <cmdb-config-edit
-                                                [mode]="isNewField(field) ? MODES.Create : mode"
+                                                [mode]="MODES.Edit"
                                                 [types]="types"
                                                 [sections]="initialSection"
                                                 [data]="field"

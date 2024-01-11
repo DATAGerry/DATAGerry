@@ -93,6 +93,7 @@ class ClientManagementProfile(ProfileBase):
         self.type_dict[type_prefix]: dict = {
             "name": "client",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -308,6 +309,7 @@ class ClientManagementProfile(ProfileBase):
         return {
             "name": "operating_system",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -384,6 +386,7 @@ class ClientManagementProfile(ProfileBase):
         self.type_dict[type_prefix] = {
             "name": "monitor",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),
@@ -497,6 +500,7 @@ class ClientManagementProfile(ProfileBase):
         self.type_dict[type_prefix] = {
             "name": "printer",
             "selectable_as_parent": True,
+            "global_template_ids": [],
             "active": True,
             "author_id": 1,
             "creation_time": self.get_current_datetime(),

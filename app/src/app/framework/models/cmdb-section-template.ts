@@ -32,5 +32,6 @@ export class CmdbSectionTemplate implements CmdbDao {
   public label: string;
   public fields: Field[];
   public is_global: boolean = false;
-  public type: string = 'Section' //don't change this, it is required due compability
+  public predefined: boolean = false;
+  public type: string = 'section' //don't change this, it is required due compability
 }
