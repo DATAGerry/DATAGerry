@@ -28,7 +28,7 @@ const routes: Routes = [
       pathMatch: 'full',
       data: {
         breadcrumb: '',
-        right: 'base.framework.type.view'
+        right: 'base.framework.sectionTemplate.view'
       },
       resolve: {
         userSetting: UserSettingsResolver
@@ -39,7 +39,7 @@ const routes: Routes = [
       path: 'add',
       data: {
         breadcrumb: 'Add',
-        right: 'base.framework.type.add'
+        right: 'base.framework.sectionTemplate.add'
       },
       component: SectionTemplateAddComponent
     },
@@ -47,7 +47,7 @@ const routes: Routes = [
       path: 'edit/:sectionTemplateID',
       data: {
         breadcrumb: 'Edit',
-        right: 'base.framework.type.edit'
+        right: 'base.framework.sectionTemplate.edit'
       },
       component: SectionTemplateAddComponent
     },

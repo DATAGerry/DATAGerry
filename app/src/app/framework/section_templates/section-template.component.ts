@@ -16,15 +16,19 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { Component, OnDestroy, OnInit } from '@angular/core';
-import { SectionTemplateService } from './services/section-template.service';
+
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
+
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+
+import { SectionTemplateService } from './services/section-template.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
+
 import { RenderResult } from '../models/cmdb-render';
 import { APIGetMultiResponse, APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
-import { CmdbSectionTemplate } from '../models/cmdb-section-template';
-import { ToastService } from 'src/app/layout/toast/toast.service';
+import { CmdbSectionTemplate, Field } from '../models/cmdb-section-template';
 import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
 import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
 import { PreviewModalComponent } from '../type/builder/modals/preview-modal/preview-modal.component';
@@ -48,9 +52,10 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private sectionTemplateService: SectionTemplateService,
-                private modalService: NgbModal,
-                private toastService: ToastService){
+    constructor(
+        private sectionTemplateService: SectionTemplateService,
+        private modalService: NgbModal,
+        private toastService: ToastService){
 
     }
 
@@ -61,9 +66,9 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
 
 
     ngOnDestroy(): void {
-      if (this.modalRef) {
-        this.modalRef.close();
-      }
+        if (this.modalRef) {
+            this.modalRef.close();
+        }
     }
 
 /* -------------------------------------------------- API FUNCTIONS ------------------------------------------------- */
@@ -107,6 +112,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         });
     }
 
+
     /**
      * Displays a modal view for user to confirm transformation of 
      * section template to a global section template
@@ -129,7 +135,6 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     'fields': JSON.stringify(sectionTemplate.fields),
                     'public_id': sectionTemplate.public_id
                 }
-
 
                 this.sectionTemplateService.updateSectionTemplate(params).subscribe((res: APIUpdateSingleResponse) => {
                     this.toastService.success(`Section Template with ID: ${sectionTemplate.public_id} transformed 
@@ -155,13 +160,15 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         this.modalRef.result.then((values: any) => {
             if(values){
 
+                const updatedFields: Field[] = this.setNewFieldIDs(sectionTemplate.fields);
+
                 let params = {
                     'name': sectionTemplate.name,
                     'label': values.templateLabel,
                     'type': 'section',
                     'is_global': values.isGlobal,
                     'predefined': false,
-                    'fields': JSON.stringify(sectionTemplate.fields)
+                    'fields': JSON.stringify(updatedFields)
                 }
 
                 params.name = this.generateSectionTemplateName(values.isGlobal);
@@ -173,17 +180,36 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     console.log("error in clone section template response");
                     this.toastService.error(error);
                 });
-
             }
         });
     }
 
+    /**
+     * Displays a preview of a section template with all fields
+     * 
+     * @param sectionTemplate The section template which should be previewed
+     */
     public showTemplatePreview(sectionTemplate: CmdbSectionTemplate){
         const previewModal = this.modalService.open(PreviewModalComponent, { scrollable: true });
         previewModal.componentInstance.sections = [sectionTemplate];
     }
 
 /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+
+    /**
+     * Creates new IDs for fields
+     * 
+     * @param fields Fields which require new IDs
+     * @returns The given fields with new IDs
+     */
+    private setNewFieldIDs(fields: Field[]){
+        for(let field of fields){
+            field.name = this.generateFieldName(field.type);
+        }
+
+        return fields;
+    }
+
 
     /**
      * Retrives the label for the "Type" column of the table
@@ -200,6 +226,17 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         }
 
         return "Standard";
+    }
+
+
+    /**
+     * Generates a new name for a field
+     * @param fieldType Type of the field
+     */
+    private generateFieldName(fieldType: string){
+        const timestamp = new Date().getTime();
+
+        return `${fieldType}-${timestamp}`
     }
 
 

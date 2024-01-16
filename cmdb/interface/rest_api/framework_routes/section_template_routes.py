@@ -228,6 +228,10 @@ def delete_section_template(public_id: int, request_user: UserModel):
     try:
         template_instance: CmdbSectionTemplate = section_template_manager.get_section_template(public_id)
 
+        if template_instance.predefined:
+            LOGGER.error("Trying to delete a predefined template")
+            return abort(404)
+
         if template_instance.is_global:
             section_template_manager.cleanup_global_section_templates(template_instance.name)
 

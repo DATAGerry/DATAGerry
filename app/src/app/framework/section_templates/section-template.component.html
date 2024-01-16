@@ -1,6 +1,13 @@
 <div>
     <div>
-        <button id="add-section-template-button" class="btn btn-success btn-sm mr-1" [routerLink]="['/framework/section_templates/add']">Add</button>
+        <button 
+            id="add-section-template-button"
+            class="btn btn-success btn-sm mr-1"
+            [routerLink]="['/framework/section_templates/add']"
+            *permissionLink="['base.framework.sectionTemplate.add']"
+        >
+            Add
+        </button>
     </div>
     <div class="dg-table">
         <table layout-table id="section-template-table" class="table table-striped table-hover table-bordered">
@@ -19,74 +26,84 @@
                         <td class="centered-text">{{sectionTemplate.label}}</td>
                         <td class="centered-text medium-cell">{{getTemplateTypeLabel(sectionTemplate)}}</td>
                         <td class="centered-text big-cell">
-                            <button
-                                class="btn btn-sm btn-link"
-                                title="View Template"
-                                (click)="showTemplatePreview(sectionTemplate)"
-                            >
-                                <i class="far fa-eye"></i>
-                            </button>
-                            <button
-                                *ngIf="sectionTemplate.predefined"
-                                class="btn btn-sm btn-link"
-                                title="Edit"
-                                disabled
-                            >
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button
-                                *ngIf="!sectionTemplate.predefined"
-                                class="btn btn-sm btn-link"
-                                title="Edit"
-                                [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]"
-                            >
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button
-                                class="btn btn-sm btn-link"
-                                title="Clone Section Template"
-                                (click)="showCloneModal(sectionTemplate)"
-                            >
-                                <i class="far fa-clone"></i>
-                            </button>
-                            <button
-                                *ngIf="sectionTemplate.is_global"
-                                title="Global Template"
-                                class="btn btn-sm btn-link"
-                                disabled
-                            >
-                                <i class="fas fa-globe-europe"></i>
-                            </button>
-                            <button
-                                *ngIf="!sectionTemplate.is_global"
-                                title="Transform to Global Template"
-                                class="btn btn-sm btn-link"
-                                (click)="showTransformModal(sectionTemplate)"
-                            >
-                                <i class="fas fa-recycle"></i>
-                            </button>
-                            <button
-                                *ngIf="sectionTemplate.predefined"
-                                class="btn btn-sm btn-link"
-                                title="Delete"
-                                disabled
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
-                            <button
-                                *ngIf="!sectionTemplate.predefined"
-                                class="btn btn-sm btn-link"
-                                title="Delete"
-                                (click)="showDeleteModal(sectionTemplate)"
-                            >
-                                <i class="fas fa-trash-alt"></i>
-                            </button>
+                            <span *permissionLink="['base.framework.sectionTemplate.view']">
+                                <button
+                                    class="btn btn-sm btn-link"
+                                    title="View Template"
+                                    (click)="showTemplatePreview(sectionTemplate)"
+                                >
+                                    <i class="far fa-eye"></i>
+                                </button>
+                            </span>
+                            <span *permissionLink="['base.framework.sectionTemplate.edit']">
+                                <button
+                                    *ngIf="sectionTemplate.predefined"
+                                    class="btn btn-sm btn-link"
+                                    title="Edit"
+                                    disabled
+                                >
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button
+                                    *ngIf="!sectionTemplate.predefined"
+                                    class="btn btn-sm btn-link"
+                                    title="Edit"
+                                    [routerLink]="['/framework/section_templates/edit/',sectionTemplate.public_id]"
+                                >
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </span>
+                            <span *permissionLink="['base.framework.sectionTemplate.create',
+                                                    'base.framework.sectionTemplate.edit']">
+                                <button
+                                    class="btn btn-sm btn-link"
+                                    title="Clone Section Template"
+                                    (click)="showCloneModal(sectionTemplate)"
+                                >
+                                    <i class="far fa-clone"></i>
+                                </button>
+                            
+                                <button
+                                    *ngIf="sectionTemplate.is_global"
+                                    title="Global Template"
+                                    class="btn btn-sm btn-link"
+                                    disabled
+                                >
+                                    <i class="fas fa-globe-europe"></i>
+                                </button>
+                                <button
+                                    *ngIf="!sectionTemplate.is_global"
+                                    title="Transform to Global Template"
+                                    class="btn btn-sm btn-link"
+                                    (click)="showTransformModal(sectionTemplate)"
+                                >
+                                    <i class="fas fa-recycle"></i>
+                                </button>
+                            </span>
+                            <span *permissionLink="['base.framework.sectionTemplate.delete']">
+                                <button
+                                    *ngIf="sectionTemplate.predefined"
+                                    class="btn btn-sm btn-link"
+                                    title="Delete"
+                                    disabled
+                                >
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                                <button
+                                    *ngIf="!sectionTemplate.predefined"
+                                    class="btn btn-sm btn-link"
+                                    title="Delete"
+                                    (click)="showDeleteModal(sectionTemplate)"
+                                >
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </span>
                         </td>
                     </tr>
                 </ng-container>
                 <ng-template #noSectionTemplatesMessage>
                     <tr>
-                        <td class="centered-text" colspan="3">No section templates created</td>
+                        <td class="centered-text" colspan="4">No section templates created</td>
                     </tr>
                 </ng-template>
             </tbody>

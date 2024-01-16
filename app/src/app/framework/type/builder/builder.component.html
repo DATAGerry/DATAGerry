@@ -17,14 +17,9 @@
                                     [dndDraggable]="globalSectionTemplate"
                                     class="list-group-item list-group-item-action"
                                 >
-                                    <span *ngIf="globalSectionTemplate.predefined; else notPredefined">
-                                        #{{ globalSectionTemplate.public_id }} - <b>{{ globalSectionTemplate.label }}</b> <i class="fas fa-hammer predefined-section"></i>
+                                    <span>
+                                        #{{ globalSectionTemplate.public_id }} - <b>{{ globalSectionTemplate.label }}</b>
                                     </span>
-                                    <ng-template #notPredefined>
-                                        <span>
-                                            #{{ globalSectionTemplate.public_id }} - <b>{{ globalSectionTemplate.label }}</b>
-                                        </span>
-                                    </ng-template>
                                     <div class="clearfix"></div>
                                 </div>
                             </div>

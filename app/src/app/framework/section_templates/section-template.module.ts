@@ -16,21 +16,25 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { NgModule } from '@angular/core';
-
-import { SectionTemplateService } from './services/section-template.service';
-import { SectionTemplateComponent } from './section-template.component';
-import { SectionTemplateRoutingModule } from './section-template-routing.module';
-import { SectionTemplateBuilderComponent } from './layout/section-template-builder/section-template-builder.component';
-import { SectionTemplateAddComponent } from './layout/section-template-add/section-template-add.component';
 import { CommonModule } from '@angular/common';
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { DndModule } from 'ngx-drag-drop';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
-import { DndModule } from 'ngx-drag-drop';
+
+import { SectionTemplateRoutingModule } from './section-template-routing.module';
 import { BuilderModule } from '../type/builder/builder.module';
-import { MatCheckboxModule } from '@angular/material/checkbox';
 import { ToastModule } from 'src/app/layout/toast/toast.module';
+import { AuthModule } from 'src/app/auth/auth.module';
+
+import { SectionTemplateService } from './services/section-template.service';
+
+import { SectionTemplateComponent } from './section-template.component';
+import { SectionTemplateBuilderComponent } from './layout/section-template-builder/section-template-builder.component';
+import { SectionTemplateAddComponent } from './layout/section-template-add/section-template-add.component';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 import { SectionTemplateTransformModalComponent } from './layout/modals/section-template-transform/section-template-transform-modal.component';
 import { SectionTemplateCloneModalComponent } from './layout/modals/section-template-clone/section-template-clone-modal.component';
@@ -56,7 +60,8 @@ import { SectionTemplateCloneModalComponent } from './layout/modals/section-temp
       DndModule,
       BuilderModule,
       MatCheckboxModule,
-      ToastModule
+      ToastModule,
+      AuthModule
     ],
     exports: [
 

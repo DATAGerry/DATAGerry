@@ -526,13 +526,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param name (string): The name will be placed at the front of the ID
      */
     private createUniqueID(name: string){
-        const uniqueID = `${name}-${Math.floor(Math.random() * (99999 - 10000 + 1)) + 10000}`;
+        const timestamp = new Date().getTime();
+        const uniqueID = `${name}-${timestamp}`;
 
         // if ID is already used then create a new one
         if(this.isUniqueID(uniqueID)){
             return uniqueID;
         } else {
-            return this.createUniqueID(uniqueID);
+            return this.createUniqueID(name);
         }
     }
 
