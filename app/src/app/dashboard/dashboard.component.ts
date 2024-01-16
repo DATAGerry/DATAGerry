@@ -15,8 +15,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
-
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
 import { takeUntil } from 'rxjs/operators';
@@ -37,7 +35,7 @@ import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { CollectionParameters } from '../services/models/api-parameter';
 import { CmdbType } from '../framework/models/cmdb-type';
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
     selector: 'cmdb-dashboard',
@@ -46,34 +44,37 @@ import { CmdbType } from '../framework/models/cmdb-type';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
 
-    /**
-     * Table Template: Dashboard active column.
-     */
+    // Table Template: Dashboard active column
     @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
 
-    /**
-     * Table Template: Dashboard user column.
-     */
+    // Table Template: Dashboard user column
     @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
 
-    /**
-     * Table Template: Dashboard action column.
-     */
+    // Table Template: Dashboard action column
     @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
-    /**
-     * Table Template: Dashboard date column.
-     */
+    // Table Template: Dashboard date column
     @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
-    /**
-     * Global unsubscriber for http calls to the rest backend.
-     */
     private unSubscribe: ReplaySubject<void> = new ReplaySubject();
 
     public objectCount: number = 0;
     public typeCount: number = 0;
     public userCount: number = 0;
+
+    public newestObjects: Array<RenderResult> = [];
+    public newestTableColumns: Array<Column> = [];
+    public newestObjectsCount: number = 0;
+    public readonly newestInnitPage: number = 1;
+    public newestPage: number = this.newestInnitPage;
+    public newestLoading: boolean = false;
+
+    public latestObjects: Array<RenderResult> = [];
+    public latestTableColumns: Array<Column> = [];
+    public latestObjectsCount: number = 0;
+    public readonly latestInnitPage: number = 1;
+    public latestPage: number = this.latestInnitPage;
+    public latestLoading: boolean = false;
 
     public readonly maxChartValue: number = 4;
 
@@ -93,25 +94,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public itemsGroup: number[] = [];
     public colorsGroup: any[] = [];
 
-    public newestObjects: Array<RenderResult> = [];
-    public newestTableColumns: Array<Column> = [];
-    public newestObjectsCount: number = 0;
-    public readonly newestInnitPage: number = 1;
-    public newestPage: number = this.newestInnitPage;
-    public newestLoading: boolean = false;
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    public latestObjects: Array<RenderResult> = [];
-    public latestTableColumns: Array<Column> = [];
-    public latestObjectsCount: number = 0;
-    public readonly latestInnitPage: number = 1;
-    public latestPage: number = this.latestInnitPage;
-    public latestLoading: boolean = false;
-
-    /* -------------------------------------------------------------------------- */
-    /*                                 LIFE CYCLE                                 */
-    /* -------------------------------------------------------------------------- */
-
-    constructor(private typeService: TypeService,
+    constructor(
+        private typeService: TypeService,
         private objectService: ObjectService,
         private categoryService: CategoryService,
         private toastService: ToastService,
@@ -120,8 +106,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         private groupService: GroupService) {
     }
 
-    public ngOnInit(): void {
 
+    public ngOnInit(): void {
         const activeColumn = {
             display: 'Active',
             name: 'active',
@@ -212,6 +198,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             cssClasses: ['text-center'],
             style: { width: '6em' }
         } as unknown as Column;
+
         this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
         this.latestTableColumns = [activeColumn, publicColumn, typeColumn, editorColumn, lastModColumn, actionColumn];
 
@@ -230,15 +217,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.generateGroupChar();
     }
 
+
     public ngOnDestroy(): void {
         this.unSubscribe.next();
         this.unSubscribe.complete();
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                                 OBJECTS API                                */
-    /* -------------------------------------------------------------------------- */
-
+/* --------------------------------------------------- OBJECTS API -------------------------------------------------- */
 
     /**
      * Returns the number of objects
@@ -253,6 +238,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.objectCount = apiResponse.total;
             });
     }
+
 
     /**
      * Gets newest objects
@@ -299,6 +285,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             );
     }
 
+
     /**
      * Deletes the object, the corresponding location and all locations from child objects
      * 
@@ -312,14 +299,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
                     this.loadLatestObjects();
                     this.loadNewestObjects();
-                }
-                );
+                });
             },
-                (error) => {
-                    this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
-                }
+            (error) => {
+                this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
+            }
             );
     }
+
 
     public onObjectDeleteWithObjects(value: RenderResult) {
         console.log("delete with objects");
@@ -329,33 +316,31 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
                     this.loadLatestObjects();
                     this.loadNewestObjects();
-                }
-                );
+                });
             },
-                (error) => {
-                    this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
-                }
+            (error) => {
+                this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
+            }
             );
     }
 
-    /* -------------------------- OBJECTS API - HELPER -------------------------- */
+/* ----------------------------------------------- OBJECT API - HELPER ---------------------------------------------- */
 
     public onNewestPageChange(event) {
         this.newestPage = event;
         this.loadNewestObjects();
     }
 
+
     public onLatestPageChange(event) {
         this.latestPage = event;
         this.loadLatestObjects();
     }
 
-    /* -------------------------------------------------------------------------- */
-    /*                                  TYPES API                                 */
-    /* -------------------------------------------------------------------------- */
+/* ---------------------------------------------------- TYPES API --------------------------------------------------- */
 
     /**
-     * Returns the number number of types
+     * Returns the number of types
      */
     private countTypes(): void {
         const filter = JSON.stringify(this.typeService.getAclFilter());
@@ -366,10 +351,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             });
     }
 
-
-    /* -------------------------------------------------------------------------- */
-    /*                              CHARTS FUNCTIONS                              */
-    /* -------------------------------------------------------------------------- */
+/* ------------------------------------------------ CHARTS FUNCTIONS ------------------------------------------------ */
 
     private generateObjectChar() {
         this.optionsObject = {
@@ -393,6 +375,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }
         });
     }
+
 
     private generateTypeChar() {
         const params = {
@@ -430,6 +413,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
+
     private generateGroupChar() {
         const groupsCallParameters: CollectionParameters = {
             filter: [{
@@ -462,7 +446,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    /* ------------------------------ CHARTS HELPER ----------------------------- */
+
     getRandomColor() {
         const color = Math.floor(0x1000000 * Math.random()).toString(16);
         return '#' + ('000000' + color).slice(-6);

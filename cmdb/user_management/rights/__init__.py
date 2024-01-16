@@ -19,7 +19,7 @@ from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
-    LogRight
+    LogRight, SectionTemplateRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
@@ -67,6 +67,15 @@ FRAMEWORK_RIGHTS = (
             CategoryRight('add', description='Add category'),
             CategoryRight('edit', Levels.PROTECTED, description='Edit category'),
             CategoryRight('delete', Levels.SECURE, description='Delete category')
+        )
+    ),
+    (
+        SectionTemplateRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage section templates from framework'),
+        (
+            SectionTemplateRight('view', description='View section templates'),
+            SectionTemplateRight('add', description='Add section templates'),
+            SectionTemplateRight('edit', Levels.PROTECTED, description='Edit section templates'),
+            SectionTemplateRight('delete', Levels.SECURE, description='Delete section templates'),
         )
     ),
     (

@@ -36,6 +36,15 @@ class ObjectRight(FrameworkRight):
         super().__init__(name, level, description=description)
 
 
+class SectionTemplateRight(FrameworkRight):
+    """TODO: document"""
+    MIN_LEVEL = Levels.PERMISSION
+    MAX_LEVEL = Levels.SECURE
+    PREFIX = f'{FrameworkRight.PREFIX}.sectionTemplate'
+
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
+        super().__init__(name, level, description=description)
+
 class TypeRight(FrameworkRight):
     """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
