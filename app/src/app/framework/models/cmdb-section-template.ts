@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -19,19 +19,19 @@ import { CmdbDao } from './cmdb-dao';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export interface Field{
-  type:string;
-  name: string;
-  label: string;
+    type:string;
+    name: string;
+    label: string;
 }
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export class CmdbSectionTemplate implements CmdbDao {
-  public public_id: number;
-  public name: string;
-  public label: string;
-  public fields: Field[];
-  public is_global: boolean = false;
-  public predefined: boolean = false;
-  public type: string = 'section' //don't change this, it is required due compability
+    public public_id: number;
+    public name: string;
+    public label: string;
+    public fields: Field[];
+    public is_global: boolean = false;
+    public predefined: boolean = false;
+    public type: string = 'section' //don't change this, it is required due compability
 }

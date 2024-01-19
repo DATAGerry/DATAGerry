@@ -147,7 +147,6 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         self.query.append(self.count_('total'))
         return self.query
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 ObjectManager - Class                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -319,3 +318,37 @@ class ObjectManager(ManagerBase):
             raise ManagerIterationError(err) from err
 
         return object_count
+
+
+    def delete_all_object_references(self, public_id: int):
+        """
+        Delete all references to the object with the given public_id
+
+        Args:
+            public_id (int): public_id of targeted object
+        """
+        object_instance: CmdbObject = self.get(public_id)
+        # Get all objects which reference the targeted object
+        iteration_result: IterationResult = self.references(
+                                                    object_=object_instance,
+                                                    filter={'$match': {'active': {'$eq': True}}},
+                                                    limit=0,
+                                                    skip=0,
+                                                    sort='public_id',
+                                                    order=1
+                                            )
+
+
+        referenced_objects: List[dict] =  [object_.__dict__ for object_ in iteration_result.results]
+
+        # Delete the reference in each object and update them
+        for refed_object in referenced_objects:
+            for field in refed_object['fields']:
+                field_value: int = field['value']
+                field_name: str = field['name']
+
+                if field_name.startswith('ref-') and field_value == public_id:
+                    field['value'] = ""
+
+            refed_object_id = refed_object['public_id']
+            self.update(refed_object_id, refed_object)

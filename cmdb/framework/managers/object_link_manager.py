@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime, timezone
 from typing import Union, List
 
@@ -29,6 +30,8 @@ from cmdb.search import Pipeline
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 class ObjectLinkManager(ManagerBase):
     """TODO: document"""
@@ -81,15 +84,18 @@ class ObjectLinkManager(ManagerBase):
 
             #Links don't have a type_id
             #TODO: integrate quick fix in basic workflow (DAT-348)
-            del count_query[2]
+            if len(count_query) >= 3:
+                del count_query[2]
 
             aggregation_result = list(self._aggregate(self.collection, query))
+
             total_cursor = self._aggregate(self.collection, count_query)
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[ObjectLinkModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ObjectLinkModel)
         return iteration_result
@@ -147,4 +153,5 @@ class ObjectLinkManager(ManagerBase):
 
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No link matched this public id')
+
         return link
