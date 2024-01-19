@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,18 +11,21 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidatorFn, Validators } from '@angular/forms';
-import { RenderResult } from '../../../models/cmdb-render';
-import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
+
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { checkObjectExistsValidator, ObjectService } from '../../../services/object.service';
+
+import { RenderResult } from '../../../models/cmdb-render';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   templateUrl: './object-link-add-modal.component.html',
@@ -32,53 +35,62 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
+  public form: UntypedFormGroup;
+
   public primaryResult: RenderResult;
 
   @Input('primaryResult')
   public set primaryRenderResult(result: RenderResult) {
-    this.primaryResult = result;
-    this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
+      this.primaryResult = result;
+      this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
   }
 
-  public form: UntypedFormGroup;
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  private sameIDValidator(): ValidatorFn {
-    return (control: AbstractControl): { [key: string]: any } | null => {
-      const same = control.value === this.primary.value;
-      return same ? { sameID: { value: control.value } } : null;
-    };
-  }
-
-  constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
-    this.form = new UntypedFormGroup({
-      primary: new UntypedFormControl(null, [Validators.required]),
-      secondary: new UntypedFormControl('', [Validators.required, this.sameIDValidator],
-        [checkObjectExistsValidator(objectService)])
-    });
-  }
-
-  public get primary(): UntypedFormControl {
-    return this.form.get('primary') as UntypedFormControl;
-  }
-
-  public get secondary(): UntypedFormControl {
-    return this.form.get('secondary') as UntypedFormControl;
-  }
-
-  public ngOnInit(): void {
-    this.form.get('secondary').updateValueAndValidity();
-  }
-
-  public async onSave() {
-    const formData = this.form.getRawValue();
-    if (!this.secondary.invalid) {
-      this.activeModal.close(formData);
+    constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
+        this.form = new UntypedFormGroup({
+            primary: new UntypedFormControl(null, [Validators.required]),
+            secondary: new UntypedFormControl('', [Validators.required,this.sameIDValidator],
+                                                  [checkObjectExistsValidator(objectService)])
+        });
     }
-  }
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
 
+    public ngOnInit(): void {
+        this.form.get('secondary').updateValueAndValidity();
+    }
+
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    public get primary(): UntypedFormControl {
+        return this.form.get('primary') as UntypedFormControl;
+    }
+
+
+    public get secondary(): UntypedFormControl {
+        return this.form.get('secondary') as UntypedFormControl;
+    }
+
+
+    private sameIDValidator(): ValidatorFn {
+        return (control: AbstractControl): { [key: string]: any } | null => {
+            const same = control.value === this.primary.value;
+
+            return same ? { sameID: { value: control.value } } : null;
+        };
+    }
+
+
+    public async onSave() {
+        const formData = this.form.getRawValue();
+        if (!this.secondary.invalid) {
+            this.activeModal.close(formData);
+        }
+    }
 }

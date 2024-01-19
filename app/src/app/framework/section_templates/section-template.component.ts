@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 
+import { v4 as uuidv4 } from 'uuid';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { SectionTemplateService } from './services/section-template.service';
@@ -184,6 +185,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         });
     }
 
+
     /**
      * Displays a preview of a section template with all fields
      * 
@@ -234,9 +236,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
      * @param fieldType Type of the field
      */
     private generateFieldName(fieldType: string){
-        const timestamp = new Date().getTime();
-
-        return `${fieldType}-${timestamp}`
+        return `${fieldType}-${uuidv4()}`
     }
 
 
@@ -246,12 +246,10 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
      * @returns unique name for section templates
      */
     public generateSectionTemplateName(isGlobal:boolean = false){
-        const timestamp = new Date().getTime();
-        
         if(isGlobal){
-            return `dg_gst-${timestamp}`;
+            return `dg_gst-${uuidv4()}`;
         }
 
-        return `section_template-${timestamp}`;
+        return `section_template-${uuidv4()}`;
     }
 }

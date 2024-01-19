@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -25,11 +25,12 @@ from typing import List, Union
 from queue import Queue
 from bson import json_util
 
+from cmdb.framework.managers.type_manager import TypeManager
+
 from cmdb.database.utils import object_hook
 from cmdb.database.errors.database_errors import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.cmdb_dao import RequiredInitKeyNotFoundError
 from cmdb.framework.cmdb_errors import ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
@@ -72,7 +73,7 @@ class CmdbObjectManager(CmdbManagerBase):
     def __init__(self, database_manager=None, event_queue: Queue = None):
         self._event_queue = event_queue
         self._type_manager = TypeManager(database_manager)
-        super(CmdbObjectManager, self).__init__(database_manager)
+        super().__init__(database_manager)
 
 
     def is_ready(self) -> bool:

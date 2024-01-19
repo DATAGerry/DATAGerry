@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""
+Definition of all routes for objects
+"""
 import json
 import copy
 import logging
@@ -22,12 +24,15 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
+from cmdb.framework.managers.object_link_manager import ObjectLinkManager
+
 from cmdb.database.utils import object_hook
 from cmdb.database.utils import default
 from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework import ObjectLinkModel
 from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
@@ -48,22 +53,21 @@ from cmdb.framework.managers.object_manager import ObjectManager
 from cmdb.framework.cmdb_location_manager import CmdbLocationManager
 from cmdb.framework.managers.location_manager import LocationManager
 from cmdb.framework import CmdbLocation
+# -------------------------------------------------------------------------------------------------------------------- #
+
+objects_blueprint = APIBlueprint('objects', __name__)
+
+LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+    manager = ObjectManager(database_manager=current_app.database_manager)
     type_manager = TypeManager(database_manager=current_app.database_manager)
     log_manager = CmdbLogManager(current_app.database_manager)
     user_manager = UserManager(current_app.database_manager)
     location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
-
-LOGGER = logging.getLogger(__name__)
-
-objects_blueprint = APIBlueprint('objects', __name__)
-
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   CRUD - API CALLS                                                   #
-# -------------------------------------------------------------------------------------------------------------------- #
+    loc_manager = LocationManager(database_manager=current_app.database_manager)
+    link_manager = ObjectLinkManager(current_app.database_manager)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -93,7 +97,8 @@ def insert_object(request_user: UserModel):
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
 
-        new_object_id = object_manager.insert_object(new_object_data, user=request_user,
+        new_object_id = object_manager.insert_object(new_object_data,
+                                                     user=request_user,
                                                      permission=AccessControlPermission.CREATE)
         # get current object state
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
@@ -131,12 +136,9 @@ def insert_object(request_user: UserModel):
         LOGGER.error(err)
         return abort(500)
 
-    resp = make_response(new_object_id)
-    return resp
-
+    return make_response(new_object_id)
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
-
 
 @objects_blueprint.route('/<int:public_id>', methods=['GET'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -144,7 +146,8 @@ def insert_object(request_user: UserModel):
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
     try:
-        object_instance = object_manager.get_object(public_id, user=request_user,
+        object_instance = object_manager.get_object(public_id,
+                                                    user=request_user,
                                                     permission=AccessControlPermission.READ)
     except (ObjectManagerGetError, ManagerGetError) as err:
         return abort(404, err.message)
@@ -158,15 +161,18 @@ def get_object(public_id, request_user: UserModel):
         return abort(404, err.message)
 
     try:
-        render = CmdbRender(object_instance=object_instance, type_instance=type_instance, render_user=request_user,
-                            object_manager=object_manager, ref_render=True)
+        render = CmdbRender(object_instance=object_instance,
+                            type_instance=type_instance,
+                            render_user=request_user,
+                            object_manager=object_manager,
+                            ref_render=True)
+
         render_result = render.result()
     except RenderError as err:
         LOGGER.error(err)
         return abort(500)
 
     return make_response(render_result)
-
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
@@ -184,35 +190,47 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): The objects from db fitting the params
     """
-    manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
     if _fetch_only_active_objs():
         if isinstance(params.filter, dict):
-            filter = params.filter
-            params.filter = [{'$match': filter}]
+            params.filter = [{'$match': params.filter}]
             params.filter.append({'$match': {'active': {"$eq": True}}})
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
 
     try:
         iteration_result: IterationResult[CmdbObject] = manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
-            user=request_user, permission=AccessControlPermission.READ
-        )
+                                                        filter=params.filter,
+                                                        limit=params.limit,
+                                                        skip=params.skip,
+                                                        sort=params.sort,
+                                                        order=params.order,
+                                                        user=request_user,
+                                                        permission=AccessControlPermission.READ)
 
         if view == 'native':
             object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
-            api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+
+            api_response = GetMultiResponse(object_list,
+                                            total=iteration_result.total,
+                                            params=params,
+                                            url=request.url,
+                                            model=CmdbObject.MODEL,
+                                            body=request.method == 'HEAD')
         elif view == 'render':
-            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
+            rendered_list = RenderList(object_list=iteration_result.results,
+                                       request_user=request_user,
                                        database_manager=current_app.database_manager,
-                                       object_manager=object_manager, ref_render=True).render_result_list(
-                raw=True)
-            # LOGGER.info(f"rendered List: {rendered_list}")
-            api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
+                                       object_manager=object_manager,
+                                       ref_render=True).render_result_list(raw=True)
+
+            api_response = GetMultiResponse(rendered_list,
+                                            total=iteration_result.total,
+                                            params=params,
+                                            url=request.url,
+                                            model=Model('RenderResult'),
+                                            body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
 
@@ -224,14 +242,14 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-
 @objects_blueprint.route('/<int:public_id>/native', methods=['GET'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
 def get_native_object(public_id: int, request_user: UserModel):
     """TODO: document"""
     try:
-        object_instance = object_manager.get_object(public_id, user=request_user,
+        object_instance = object_manager.get_object(public_id,
+                                                    user=request_user,
                                                     permission=AccessControlPermission.READ)
     except ObjectManagerGetError:
         return abort(404)
@@ -239,7 +257,6 @@ def get_native_object(public_id: int, request_user: UserModel):
         return abort(403, err.message)
 
     return make_response(object_instance)
-
 
 
 @objects_blueprint.route('/group/<string:value>', methods=['GET'])
@@ -252,7 +269,9 @@ def group_objects_by_type_id(value, request_user: UserModel):
         if _fetch_only_active_objs():
             filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value, filter_state, user=request_user,
+        cursor = object_manager.group_objects_by_value(value,
+                                                       filter_state,
+                                                       user=request_user,
                                                        permission=AccessControlPermission.READ)
         max_length = 0
         for document in cursor:
@@ -267,14 +286,12 @@ def group_objects_by_type_id(value, request_user: UserModel):
     return make_response(result)
 
 
-
 @objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
-    manager = ObjectManager(database_manager=current_app.database_manager)
     view = params.optional.get('view', 'native')
 
     if _fetch_only_active_objs():
@@ -289,7 +306,8 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             params.filter.append({'$match': {}})
 
     try:
-        referenced_object: CmdbObject = manager.get(public_id, user=request_user,
+        referenced_object: CmdbObject = manager.get(public_id,
+                                                    user=request_user,
                                                     permission=AccessControlPermission.READ)
     except ManagerGetError as err:
         return abort(404, err.message)
@@ -297,15 +315,15 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
         return abort(403, err.message)
 
     try:
-        iteration_result: IterationResult[CmdbObject] = manager.references(object_=referenced_object,
-                                                                           filter=params.filter,
-                                                                           limit=params.limit,
-                                                                           skip=params.skip,
-                                                                           sort=params.sort,
-                                                                           order=params.order,
-                                                                           user=request_user,
-                                                                           permission=AccessControlPermission.READ
-                                                                           )
+        iteration_result: IterationResult[CmdbObject] = manager.references(
+                                                                    object_=referenced_object,
+                                                                    filter=params.filter,
+                                                                    limit=params.limit,
+                                                                    skip=params.skip,
+                                                                    sort=params.sort,
+                                                                    order=params.order,
+                                                                    user=request_user,
+                                                                    permission=AccessControlPermission.READ)
 
         if view == 'native':
             object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
@@ -316,6 +334,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                        database_manager=current_app.database_manager,
                                        object_manager=object_manager, ref_render=True).render_result_list(
                 raw=True)
+
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
@@ -326,20 +345,19 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
     return api_response.make_response()
 
 
-
 @objects_blueprint.route('/<int:public_id>/state', methods=['GET'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
 def get_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
     try:
-        found_object = object_manager.get_object(public_id=public_id, user=request_user,
-                                                   permission=AccessControlPermission.READ)
+        found_object = object_manager.get_object(public_id=public_id,
+                                                 user=request_user,
+                                                 permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.debug(err)
         return abort(404)
     return make_response(found_object.active)
-
 
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
@@ -355,16 +373,20 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         GetListResponse: Which includes the json data of multiple objects.
     """
-    manager = ObjectManager(database_manager=current_app.database_manager)
-
     try:
         type_instance: TypeModel = type_manager.get(public_id=public_id)
-        objects: List[CmdbObject] = manager.iterate({'type_id': public_id}, limit=0, skip=0,
-                                                    sort='public_id', order=1, user=request_user).results
+        objects: List[CmdbObject] = manager.iterate({'type_id': public_id},
+                                                    limit=0,
+                                                    skip=0,
+                                                    sort='public_id',
+                                                    order=1,
+                                                    user=request_user).results
     except ManagerGetError as err:
         return abort(400, err.message)
+
     type_fields = sorted([field.get('name') for field in type_instance.fields])
     unstructured: List[dict] = []
+
     for object_ in objects:
         object_fields = [field.get('name') for field in object_.fields]
         if sorted(object_fields) != type_fields:
@@ -373,9 +395,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     api_response = GetListResponse(unstructured, url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
 
-
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
-
 
 @objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.edit')
@@ -390,7 +410,6 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     else:
         object_ids = [public_id]
 
-    manager = ObjectManager(database_manager=current_app.database_manager, event_queue=current_app.event_queue)
     results: list[dict] = []
     failed = []
 
@@ -496,7 +515,6 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     return api_response.make_response()
 
 
-
 @objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 @insert_request_user
@@ -507,11 +525,11 @@ def update_object_state(public_id: int, request_user: UserModel):
     else:
         return abort(400)
     try:
-        manager = ObjectManager(database_manager=current_app.database_manager, event_queue=current_app.event_queue)
         found_object = manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.error(err)
         return abort(404, err.message)
+
     if found_object.active == state:
         return make_response(False, 204)
     try:
@@ -561,7 +579,6 @@ def update_object_state(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
-
 @objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
 @objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 @insert_request_user
@@ -576,14 +593,17 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
-    manager = ObjectManager(database_manager=current_app.database_manager)
     try:
         update_type_instance = type_manager.get(public_id)
 
         type_fields = update_type_instance.fields
 
-        objects_by_type = manager.iterate({'type_id': public_id}, limit=0, skip=0,
-                                          sort='public_id', order=1, user=request_user).results
+        objects_by_type = manager.iterate({'type_id': public_id},
+                                          limit=0,
+                                          skip=0,
+                                          sort='public_id',
+                                          order=1,
+                                          user=request_user).results
 
         for obj in objects_by_type:
             incorrect = []
@@ -614,7 +634,8 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                     value = t_field["value"]
 
                 manager.update_many(query={'public_id': obj.public_id},
-                                    update={'$addToSet': {'fields': {"name": name, "value": value}}}, add_to_set=True)
+                                    update={'$addToSet': {'fields': {"name": name, "value": value}}},
+                                    add_to_set=True)
     except ManagerUpdateError as err:
         return abort(400, err.message)
 
@@ -622,16 +643,14 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
 
     return api_response.make_response()
 
-
-# ----------------------------------------- CRUD - DELETE ---------------------------------------- #
-
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_object(public_id: int, request_user: UserModel):
     """
-    Deletes an object/document and logs the deletion
+    Deletes an object and logs the deletion
 
     Params:
         public_id (int): Public ID of the object which should be deleted
@@ -641,6 +660,12 @@ def delete_object(public_id: int, request_user: UserModel):
     """
     try:
         current_object_instance = object_manager.get_object(public_id)
+
+        # Remove object links and references
+        if current_object_instance:
+            delete_object_links(public_id)
+            manager.delete_all_object_references(public_id)
+
         current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   object_manager=object_manager,
@@ -692,9 +717,7 @@ def delete_object(public_id: int, request_user: UserModel):
     # except (CMDBError, LogManagerInsertError) as err:
     #     LOGGER.error(err)
 
-    resp = make_response(ack)
-    return resp
-
+    return make_response(ack)
 
 
 @objects_blueprint.route('/<int:public_id>/locations', methods=['DELETE'])
@@ -706,12 +729,16 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
         # check if object exists
         current_object_instance = object_manager.get_object(public_id)
 
+        # Remove object links and references
+        if current_object_instance:
+            delete_object_links(public_id)
+            manager.delete_all_object_references(public_id)
+
         # check if location for this object exists
         current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
 
         if current_object_instance and current_location:
             # get all child locations for this location
-            manager = LocationManager(database_manager=current_app.database_manager)
 
             params = CollectionParameters(query_string=None,
                                           filter=[{"$match":{"public_id":{"$gt":1}}}],
@@ -719,15 +746,14 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
                                           sort='public_id',
                                           order=1)
 
-            iteration_result: IterationResult[CmdbLocation] = manager.iterate(
+            iteration_result: IterationResult[CmdbLocation] = loc_manager.iterate(
                                                                 filter=params.filter,
                                                                 limit=params.limit,
                                                                 skip=params.skip,
                                                                 sort=params.sort,
                                                                 order=params.order,
                                                                 user=request_user,
-                                                                permission=AccessControlPermission.READ
-                                                              )
+                                                                permission=AccessControlPermission.READ)
 
             all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
 
@@ -756,7 +782,6 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
     return make_response(deleted)
 
 
-
 @objects_blueprint.route('/<int:public_id>/children', methods=['DELETE'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
@@ -776,12 +801,16 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
         # check if object exists
         current_object_instance = object_manager.get_object(public_id)
 
+        # Remove object links and references
+        if current_object_instance:
+            delete_object_links(public_id)
+            manager.delete_all_object_references(public_id)
+
         # check if location for this object exists
         current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
 
         if current_object_instance and current_location:
             # get all child locations for this location
-            manager = LocationManager(database_manager=current_app.database_manager)
 
             params = CollectionParameters(query_string=None,
                                           filter=[{"$match":{"public_id":{"$gt":1}}}],
@@ -789,15 +818,14 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
                                           sort='public_id',
                                           order=1)
 
-            iteration_result: IterationResult[CmdbLocation] = manager.iterate(
+            iteration_result: IterationResult[CmdbLocation] = loc_manager.iterate(
                                                                 filter=params.filter,
                                                                 limit=params.limit,
                                                                 skip=params.skip,
                                                                 sort=params.sort,
                                                                 order=params.order,
                                                                 user=request_user,
-                                                                permission=AccessControlPermission.READ
-                                                              )
+                                                                permission=AccessControlPermission.READ)
 
             all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
             all_children_locations = location_manager.get_all_children(current_location['public_id'], all_locations)
@@ -831,7 +859,6 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     return make_response(deleted)
 
 
-
 @objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
@@ -863,6 +890,10 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
         for current_object_instance in objects:
             try:
+                # Remove object links and references
+                delete_object_links(current_object_instance.public_id)
+                manager.delete_all_object_references(current_object_instance.public_id)
+
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           object_manager=object_manager,
@@ -877,7 +908,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
             try:
                 ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
-                                                        user=request_user, permission=AccessControlPermission.DELETE))
+                                                        user=request_user,
+                                                        permission=AccessControlPermission.DELETE))
             except ObjectDeleteError:
                 return abort(400)
             except AccessDeniedError as err:
@@ -907,19 +939,38 @@ def delete_many_objects(public_ids, request_user: UserModel):
     except CMDBError:
         return abort(500)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   HELPER - METHODS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def _fetch_only_active_objs() -> bool:
     """
-        Checking if request have cookie parameter for object active state
-        Returns:
-            True if cookie is set or value is true else false
-        """
+    Checking if request have cookie parameter for object active state
+    Returns:
+        True if cookie is set or value is true else false
+    """
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
+
         if value in ['True', 'true']:
             return True
     return False
+
+
+def delete_object_links(public_id: int) -> None:
+    """
+    Deletes all object links where this public_id is set
+
+    Args:
+        public_id (int): public_id of the object which is deleted
+    """
+    object_link_filter: dict = {'$or': [{'primary': public_id}, {'secondary': public_id}]}
+
+    links: list[ObjectLinkModel] = link_manager.iterate(filter=object_link_filter,
+                                                        limit=0,
+                                                        skip=0,
+                                                        sort='public_id',
+                                                        order=1).results
+
+    for link in links:
+        link_manager.delete(link.public_id)

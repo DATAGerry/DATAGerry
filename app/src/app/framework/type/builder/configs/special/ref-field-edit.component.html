@@ -38,7 +38,7 @@
             placeholder="Field label"
             [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
                 'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"
-            (ngModelChange)="onInputChange($event)"
+            (ngModelChange)="onInputChange()"
         />
         <small class="form-text text-muted">a static display name</small>
     </div>

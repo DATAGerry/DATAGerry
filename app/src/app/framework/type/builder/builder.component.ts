@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -26,6 +26,7 @@ import { ChangeDetectionStrategy,
 
 import { ReplaySubject } from 'rxjs';
 
+import { v4 as uuidv4 } from 'uuid';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
@@ -526,8 +527,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param name (string): The name will be placed at the front of the ID
      */
     private createUniqueID(name: string){
-        const timestamp = new Date().getTime();
-        const uniqueID = `${name}-${timestamp}`;
+        const uniqueID = `${name}-${uuidv4()}`;
 
         // if ID is already used then create a new one
         if(this.isUniqueID(uniqueID)){

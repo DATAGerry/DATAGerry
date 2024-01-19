@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,7 @@ manager = SectionTemplateManager(database_manager=current_app.database_manager)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['POST'])
-@section_template_blueprint.protect(auth=True, right='base.framework.type.edit')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.add')
 @section_template_blueprint.parse_location_parameters()
 @insert_request_user
 def create_section_template(params: dict, request_user: UserModel):
@@ -81,11 +81,10 @@ def create_section_template(params: dict, request_user: UserModel):
 
     return make_response(created_section_template_id)
 
-
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['GET', 'HEAD'])
-@section_template_blueprint.protect(auth=True, right='base.framework.object.view')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 @section_template_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 def get_all_section_templates(params: CollectionParameters, request_user: UserModel):
@@ -128,7 +127,7 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
 
 
 @section_template_blueprint.route('/<int:public_id>', methods=['GET'])
-@section_template_blueprint.protect(auth=True, right='base.framework.object.view')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 @insert_request_user
 def get_section_template(public_id: int, request_user: UserModel):
     """
@@ -153,7 +152,7 @@ def get_section_template(public_id: int, request_user: UserModel):
 
 
 @section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
-@section_template_blueprint.protect(auth=True, right='base.framework.object.view')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 @insert_request_user
 def get_global_section_template_count(public_id: int, request_user: UserModel):
     """Retrives the count of types and objects using this global template"""
@@ -177,7 +176,7 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
-@section_template_blueprint.protect(auth=True, right='base.framework.object.edit')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.edit')
 @section_template_blueprint.parse_location_parameters()
 @insert_request_user
 def update_section_template(params: dict, request_user: UserModel):
@@ -217,11 +216,10 @@ def update_section_template(params: dict, request_user: UserModel):
 
     return api_response.make_response()
 
-
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>/', methods=['DELETE'])
-@section_template_blueprint.protect(auth=True, right='base.framework.object.edit')
+@section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.delete')
 @insert_request_user
 def delete_section_template(public_id: int, request_user: UserModel):
     """TODO: document"""

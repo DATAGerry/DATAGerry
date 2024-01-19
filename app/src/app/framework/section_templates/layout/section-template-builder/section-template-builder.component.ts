@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -20,6 +20,8 @@ import { FormControl, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
+
+import { v4 as uuidv4 } from 'uuid';
 import { DndDropEvent } from 'ngx-drag-drop';
 
 import { ValidationService } from 'src/app/framework/type/services/validation.service';
@@ -28,6 +30,9 @@ import { ToastService } from 'src/app/layout/toast/toast.service';
 
 import { CmdbMode } from 'src/app/framework/modes.enum';
 import { Controller } from 'src/app/framework/type/builder/controls/controls.common';
+import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
+import { RenderResult } from 'src/app/framework/models/cmdb-render';
+import { SectionFieldEditComponent } from 'src/app/framework/type/builder/configs/section/section-field-edit.component';
 import { CheckboxControl } from 'src/app/framework/type/builder/controls/choice/checkbox.control';
 import { RadioControl } from 'src/app/framework/type/builder/controls/choice/radio.control';
 import { SelectControl } from 'src/app/framework/type/builder/controls/choice/select.control';
@@ -37,9 +42,6 @@ import { ReferenceControl } from 'src/app/framework/type/builder/controls/specia
 import { PasswordControl } from 'src/app/framework/type/builder/controls/text/password.control';
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
 import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/textarea.control';
-import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
-import { RenderResult } from 'src/app/framework/models/cmdb-render';
-import { SectionFieldEditComponent } from 'src/app/framework/type/builder/configs/section/section-field-edit.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -292,12 +294,10 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * @returns Unique name for section
      */
     public generateSectionTemplateName(isGlobal: boolean = false){
-        const timestamp = new Date().getTime();
-
         if(isGlobal){
-            return `dg_gst-${timestamp}`;
+            return `dg_gst-${uuidv4()}`;
         }
         
-        return `section_template-${timestamp}`;
+        return `section_template-${uuidv4()}`;
     }
 }
