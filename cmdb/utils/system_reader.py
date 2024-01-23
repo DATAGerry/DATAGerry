@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,6 @@ class SystemReader:
     Reader super class
     """
 
-
     def get_value(self, name: str, section: str, default: Any = None) -> Any:
         """
         get specific value from a section
@@ -42,7 +41,6 @@ class SystemReader:
         raise NotImplementedError
 
 
-
     def get_sections(self) -> List[str]:
         """
         get all sections from config
@@ -50,7 +48,6 @@ class SystemReader:
             list of config names
         """
         raise NotImplementedError
-
 
 
     def get_all_values_from_section(self, section: str) -> dict:
@@ -81,7 +78,6 @@ class SystemSettingsReader(SystemReader):
         super().__init__()
 
 
-
     def get_value(self, name, section) -> Union[dict, list]:
         """
         get a value from a given section
@@ -93,17 +89,14 @@ class SystemSettingsReader(SystemReader):
             value
         """
         return self.dbm.find_one_by(
-            collection=SystemSettingsReader.COLLECTION,
-            filter={'_id': section}
-        )[name]
-
+                        collection=SystemSettingsReader.COLLECTION,
+                        filter={'_id': section})[name]
 
 
     def get_section(self, section_name: str) -> dict:
         """TODO: document"""
         query_filter = {'_id': section_name}
         return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter=query_filter)
-
 
 
     def get_sections(self):
@@ -116,7 +109,6 @@ class SystemSettingsReader(SystemReader):
             collection=SystemSettingsReader.COLLECTION,
             projection={'_id': 1}
         )
-
 
 
     def get_all_values_from_section(self, section, default=None) -> dict:

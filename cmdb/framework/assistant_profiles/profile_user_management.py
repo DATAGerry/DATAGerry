@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,11 +32,9 @@ class UserManagementProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def create_user_management_profile(self) -> dict:
         """
@@ -51,14 +49,12 @@ class UserManagementProfile(ProfileBase):
         return self.created_type_ids
 
 
-
     def _create_types_with_dependencies(self):
         """
         Creates all types which are a dependancy for other types
         """
         company_type_data = self.get_company_type()
         self.create_basic_type('company_id',company_type_data)
-
 
 
     def _create_remaining_types(self):
@@ -73,11 +69,9 @@ class UserManagementProfile(ProfileBase):
         customer_user_type_data = self.get_customer_user_type(self.created_type_ids['company_id'])
         self.create_basic_type('customer_user_id', customer_user_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_company_type(self) -> dict:
         """
@@ -161,9 +155,7 @@ class UserManagementProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_user_type(self) -> dict:
         """
@@ -247,9 +239,7 @@ class UserManagementProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_customer_user_type(self, company_type_id: int) -> dict:
         """

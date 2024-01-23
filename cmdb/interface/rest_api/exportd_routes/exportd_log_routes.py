@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from flask import abort, current_app, jsonify, request
@@ -33,6 +33,7 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 exportd_log_blueprint = RootBlueprint('exportd_log_rest', __name__, url_prefix='/exportdlog')
@@ -47,9 +48,8 @@ with current_app.app_context():
 @exportd_blueprint.parse_collection_parameters()
 def get_exportd_logs(params: CollectionParameters):
     """Iterate route for exportd logs"""
-
-    log_manager = ExportDLogManager(current_app.database_manager)
     body = request.method == 'HEAD'
+    log_manager = ExportDLogManager(current_app.database_manager)
 
     try:
         iteration_result: IterationResult[ExportdJobLog] = log_manager.iterate(
@@ -81,8 +81,8 @@ def get_log_list(request_user: UserModel):
         return abort(400, e.message)
     except ModuleNotFoundError as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
+    except CMDBError as err:
+        return abort(404, jsonify(message='Not Found', error=err))
     return make_response(log_list)
 
 
@@ -92,6 +92,7 @@ def get_log_list(request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError as err:
@@ -105,10 +106,11 @@ def delete_log(public_id: int, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.log.view')
 def get_logs_by_jobs(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         object_logs = log_manager.get_exportd_job_logs(public_id=public_id)
     except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_logs_by_jobs: {err}')
+        LOGGER.error('Error in get_logs_by_jobs: %s',err)
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
@@ -122,6 +124,7 @@ def get_logs_by_jobs(public_id: int, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.log.view')
 def get_logs_with_existing_objects(request_user: UserModel):
+    """TODO: document"""
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -134,7 +137,7 @@ def get_logs_with_existing_objects(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
+        LOGGER.error('Error in get_logs_with_existing_objects: %s', err)
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
@@ -164,6 +167,7 @@ def get_logs_with_existing_objects(request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.log.view')
 def get_logs_with_deleted_objects(request_user: UserModel):
+    """TODO: document"""
     existing_list = []
     deleted_list = []
     passed_objects = []
@@ -176,7 +180,7 @@ def get_logs_with_deleted_objects(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
-        LOGGER.error(f'Error in get_logs_with_existing_objects: {err}')
+        LOGGER.error('Error in get_logs_with_existing_objects: %s',err)
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
@@ -206,6 +210,7 @@ def get_logs_with_deleted_objects(request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.log.view')
 def get_job_delete_logs(request_user: UserModel):
+    """TODO: document"""
     try:
         query = {
             'log_type': ExportdJobLog.__name__,
@@ -213,7 +218,7 @@ def get_job_delete_logs(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except (ObjectManagerGetError, Exception) as err:
-        LOGGER.error(f'Error in get_object_delete_logs: {err}')
+        LOGGER.error('Error in get_object_delete_logs: %s', err)
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)

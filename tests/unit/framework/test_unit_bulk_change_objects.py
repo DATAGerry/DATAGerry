@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -154,6 +154,7 @@ class TestBulkChangeFrameworkObjects:
         assert results[0]['active'] == expectations[0]['active']
         assert results[1]['active'] == expectations[1]['active']
         assert results[2]['active'] == expectations[2]['active']
+
 
     def test_bulk_change_object_active_state(self, rest_api, change_object, full_access_user):
         """TODO: document"""

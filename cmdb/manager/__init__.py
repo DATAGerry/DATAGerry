@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -47,7 +47,6 @@ class AbstractManagerBase:
         self._database_manager: DatabaseManagerMongo = database_manager
 
 
-
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Auto disconnect the database connection when the Manager get destroyed."""
         self._database_manager.connector.disconnect()
@@ -68,7 +67,6 @@ class AbstractManagerBase:
             raise ManagerInsertError(err) from err
 
 
-
     def _get(self, collection: Collection, filter=None, *args, **kwargs):
         """
         Calls mongodb find operation
@@ -87,7 +85,6 @@ class AbstractManagerBase:
             raise ManagerGetError(err) from err
 
 
-
     def _update(self, collection: Collection, filter: dict, resource: Any, *args, **kwargs):
         """
         Calls a mongodb update operation
@@ -103,7 +100,6 @@ class AbstractManagerBase:
             return self._database_manager.update(collection, filter=filter, data=resource, *args, **kwargs)
         except Exception as err:
             raise ManagerUpdateError(err) from err
-
 
 
     def _update_many(self, collection: Collection, query: dict, update: dict, add_to_set: bool = False):
@@ -126,7 +122,6 @@ class AbstractManagerBase:
             raise ManagerUpdateError(err) from err
 
 
-
     def _delete(self, collection: Collection, filter: dict, *args, **kwargs):
         """
         Calls a mongodb delete operation
@@ -138,7 +133,6 @@ class AbstractManagerBase:
             return self._database_manager.delete(collection, filter=filter, *args, **kwargs)
         except Exception as err:
             raise ManagerDeleteError(err) from err
-
 
 
     def _aggregate(self, collection: Collection, *args, **kwargs):
@@ -156,7 +150,6 @@ class AbstractManagerBase:
             return self._database_manager.aggregate(collection, *args, **kwargs)
         except Exception as err:
             raise ManagerIterationError(err) from err
-
 
 
     def _count_documents(self, collection: Collection, *args, **kwargs):

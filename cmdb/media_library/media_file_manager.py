@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -39,11 +39,9 @@ class MediaFileManagement(CmdbManagerBase):
         super().__init__(database_manager)
 
 
-
     def get_new_id(self, collection: str) -> int:
         """TODO: document"""
         return self.dbm.get_next_public_id(collection)
-
 
 
     def get_file(self, metadata: dict, blob: bool = False) -> GridOut:
@@ -54,7 +52,6 @@ class MediaFileManagement(CmdbManagerBase):
             LOGGER.error(err)
             raise MediaFileManagerGetError(err=err) from err
         return result.read() if blob else result._file
-
 
 
     def get_many(self, metadata, **params: dict):
@@ -70,8 +67,6 @@ class MediaFileManagement(CmdbManagerBase):
         except (CMDBError, MediaFileManagerGetError) as err:
             raise MediaFileManagerGetError(err) from err
         return GridFsResponse(results, records_total)
-
-
 
 
     def insert_file(self, data, metadata):
@@ -94,7 +89,6 @@ class MediaFileManagement(CmdbManagerBase):
         return media_file._file
 
 
-
     def updata_file(self, data):
         """TODO: document"""
         try:
@@ -103,7 +97,6 @@ class MediaFileManagement(CmdbManagerBase):
         except Exception as err:
             raise MediaFileManagerUpdateError(err) from err
         return data
-
 
 
     def delete_file(self, public_id) -> bool:
@@ -123,8 +116,6 @@ class MediaFileManagement(CmdbManagerBase):
         return True
 
 
-
-
     def exist_file(self, filter_metadata) -> bool:
         """
         Check is MediaFile Object exist
@@ -134,7 +125,6 @@ class MediaFileManagement(CmdbManagerBase):
             bool: If exist return true else false
         """
         return self.fs.exists(**filter_metadata)
-
 
 
 class GridFsResponse:

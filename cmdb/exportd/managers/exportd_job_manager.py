@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,8 @@ class ExportDJobManager(ExportDManager):
         Args:
             database_manager: Connection to the database class.
         """
-        super(ExportDJobManager, self).__init__(ExportdJob.COLLECTION, database_manager=database_manager)
+        super().__init__(ExportdJob.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[ExportdJob]:
@@ -48,7 +49,6 @@ class ExportDJobManager(ExportDManager):
         Returns:
             IterationResult: Instance of IterationResult with generic ExportdJob.
         """
-
         try:
             query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
             count_query: Pipeline = self.builder.count(filter=filter)

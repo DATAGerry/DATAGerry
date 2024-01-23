@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import List, Any, Union
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -49,13 +49,10 @@ class Builder:
         return {'$and': expressions}
 
 
-
-
     @classmethod
     def or_(cls, expressions: List[dict]) -> dict:
         """Joins query clauses with a logical OR."""
         return {'$or': expressions}
-
 
 
     @classmethod
@@ -64,12 +61,10 @@ class Builder:
         return {'$not': expression}
 
 
-
     @classmethod
     def nor_(cls, expressions: List[dict]) -> dict:
         """Joins query clauses with a logical NOR."""
         return {'$nor': expressions}
-
 
 
     # Comparison
@@ -79,12 +74,10 @@ class Builder:
         return {field: {'$eq': value}}
 
 
-
     @classmethod
     def gt_(cls, field: str, value: Any) -> dict:
         """Matches values that are greater than a specified value."""
         return {field: {'$gt': value}}
-
 
 
     @classmethod
@@ -93,12 +86,10 @@ class Builder:
         return {field: {'$gte': value}}
 
 
-
     @classmethod
     def in_(cls, field: str, values: List[Any]) -> dict:
         """Matches any of the values specified in an array."""
         return {field: {'$in': values}}
-
 
 
     @classmethod
@@ -107,12 +98,10 @@ class Builder:
         return {field: {'$lt': value}}
 
 
-
     @classmethod
     def lte_(cls, field: str, value: Any) -> dict:
         """Matches values that are less than or equal to a specified value."""
         return {field: {'$lte': value}}
-
 
 
     @classmethod
@@ -121,12 +110,10 @@ class Builder:
         return {field: {'$ne': value}}
 
 
-
     @classmethod
     def nin_(cls, field: str, values: List[Any]) -> dict:
         """Matches none of the values specified in an array."""
         return {field: {'$nin': values}}
-
 
 
     # Element
@@ -136,11 +123,11 @@ class Builder:
         return {field: {'$exists': exist}}
 
 
-
     @classmethod
     def element_match_(cls, field: str, criteria: dict) -> dict:
         """If element in the array field matches all the specified $elemMatch conditions."""
         return {field: {'$elemMatch': criteria}}
+
 
     # Evaluation
     @classmethod
@@ -149,12 +136,10 @@ class Builder:
         return {field: {'$regex': regex, '$options': options}}
 
 
-
     @classmethod
     def expr_(cls, expression) -> dict:
         """Allows the use of aggregation expressions within the query language."""
         return {'$expr': expression}
-
 
 
     # Aggregations
@@ -165,12 +150,10 @@ class Builder:
         return {'$match': query}
 
 
-
     @classmethod
     def count_(cls, name: str) -> dict:
         """Returns a count of the number of documents at this stage of the aggregation pipeline."""
         return {'$count': name}
-
 
 
     @classmethod
@@ -179,19 +162,16 @@ class Builder:
         return {'$skip': value}
 
 
-
     @classmethod
     def limit_(cls, value: int) -> dict:
         """Limits the number of documents passed to the next stage in the pipeline."""
         return {'$limit': value}
 
 
-
     @classmethod
     def facet_(cls, stages: dict) -> dict:
         """Processes multiple aggregation pipelines within a single stage on the same set of input documents."""
         return {'$facet': stages}
-
 
 
     @classmethod
@@ -201,7 +181,6 @@ class Builder:
         if value:
             statement.update(value)
         return {'$group': statement}
-
 
 
     @classmethod
@@ -217,7 +196,6 @@ class Builder:
         return {'$lookup': {'from': _from, 'localField': _local, 'foreignField': _foreign, 'as': _as}}
 
 
-
     @classmethod
     def lookup_sub_(cls, from_: str, let_: dict, pipeline_: list, as_: str) -> dict:
         """ Performs uncorrelated subqueries between two collections as well as allow other join conditions besides a
@@ -231,12 +209,10 @@ class Builder:
         return {'$lookup': {'from': from_, 'let': let_, 'pipeline': pipeline_, 'as': as_}}
 
 
-
     @classmethod
     def unwind_(cls, path: Union[str, dict]):
         """Duplicates each document in the pipeline, once per array element."""
         return {'$unwind': path}
-
 
 
     @classmethod
@@ -245,14 +221,12 @@ class Builder:
         return {'$project': specification}
 
 
-
     @classmethod
     def sort_(cls, sort: str, order: int) -> dict:
         """Sorts all input documents and returns them to the pipeline in sorted order."""
         if order != 1 and order != -1:
             raise ValueError('Order value must be 1 (ascending) or -1 (descending)')
         return {'$sort': {sort: order}}
-
 
 
     # Type Expression Operators

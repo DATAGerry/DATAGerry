@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -62,6 +62,7 @@ class UserGroupModel(CmdbDAO):
         self.rights: list = rights or []
         super().__init__(public_id=public_id)
 
+
     @classmethod
     def from_data(cls, data: dict, rights: List[BaseRight] = None) -> "UserGroupModel":
         """TODO: document"""
@@ -78,7 +79,6 @@ class UserGroupModel(CmdbDAO):
         )
 
 
-
     @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
         return {
@@ -87,7 +87,6 @@ class UserGroupModel(CmdbDAO):
             'label': instance.label,
             'rights': [BaseRight.to_dict(right) for right in instance.rights]
         }
-
 
 
     @classmethod
@@ -100,17 +99,14 @@ class UserGroupModel(CmdbDAO):
         }
 
 
-
     def set_rights(self, rights: list):
         """TODO: document"""
         self.rights = rights
 
 
-
     def get_rights(self) -> list:
         """TODO: document"""
         return self.rights
-
 
 
     def get_right(self, name) -> str:
@@ -120,6 +116,7 @@ class UserGroupModel(CmdbDAO):
         except Exception as exc:
             raise RightNotFoundError(self.name, name) from exc
 
+
     def has_right(self, right_name) -> bool:
         """TODO: document"""
         try:
@@ -127,6 +124,7 @@ class UserGroupModel(CmdbDAO):
         except RightNotFoundError:
             return False
         return True
+
 
     def has_extended_right(self, right_name: str) -> bool:
         """TODO: document"""
@@ -137,7 +135,6 @@ class UserGroupModel(CmdbDAO):
             return self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}')
 
         return self.has_extended_right(right_name=parent_right_name)
-
 
 
 class RightNotFoundError(CMDBError):

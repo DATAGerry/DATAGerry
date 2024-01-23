@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,6 @@ class ExportRight(BaseRight):
         super().__init__(level, name, description=description)
 
 
-
 class ExportObjectRight(ExportRight):
     """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
@@ -34,7 +33,6 @@ class ExportObjectRight(ExportRight):
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super().__init__(name, level, description=description)
-
 
 
 class ExportTypeRight(ExportRight):

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -44,7 +44,6 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
             pipeline: preset a for defined pipeline
         """
         super().__init__(pipeline=pipeline)
-
 
 
     def build(self, search_term, user: UserModel = None, permission: AccessControlPermission = None,
@@ -103,7 +102,6 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-
     def build(self, *args, **kwargs) -> Pipeline:
         # Load reference fields in runtime
         self.add_pipe(self.lookup_('framework.objects', 'fields.value', 'public_id', 'data'))
@@ -155,7 +153,6 @@ class SearchPipelineBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-
     def get_regex_pipes_values(self) -> List[str]:
         """Extract the regex pipes value from the pipeline"""
         regex_pipes: List[str] = []
@@ -188,7 +185,6 @@ class SearchPipelineBuilder(PipelineBuilder):
                     regex_pipes.append(px)
 
         return regex_pipes
-
 
 
     def build(self, params: List[SearchParam],
@@ -252,6 +248,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
     def __init__(self, manager: CmdbObjectManager):
         """Normally uses a instance of CmdbObjectManager as managers"""
         super().__init__(manager=manager)
+
 
     def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, permission: AccessControlPermission = None,
                   limit: int = Search.DEFAULT_LIMIT,
@@ -334,6 +331,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
             skip=skip
         )
         return search_result
+
 
     def search(self, query: Query, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:

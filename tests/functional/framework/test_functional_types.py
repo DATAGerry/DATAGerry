@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -61,8 +61,8 @@ def collection(connector, database_name):
     from pymongo.mongo_client import MongoClient
     from pymongo.collection import Collection
     mongo_client: MongoClient = connector.client
-    collection: Collection = mongo_client.get_database(database_name).get_collection(TestFrameworkTypes.COLLECTION)
-    return collection
+    a_collection: Collection = mongo_client.get_database(database_name).get_collection(TestFrameworkTypes.COLLECTION)
+    return a_collection
 
 
 @fixture(scope='module', autouse=True)

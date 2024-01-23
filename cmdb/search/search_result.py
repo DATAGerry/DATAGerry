@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,7 @@ LOGGER = logging.getLogger(__name__)
 
 R: TypeVar = TypeVar('R')
 
-
+# FIXME
 class SearchResultMap(Generic[R]):
     """Result mapper for Result/Match binding"""
 
@@ -33,17 +33,23 @@ class SearchResultMap(Generic[R]):
         self.matches: List[str] = matches
 
 
-
     def to_json(self) -> dict:
         """Quick convert for the database"""
         return {'result': self.result.__dict__, 'matches': self.matches}
 
 
-
+# FIXME
 class SearchResult(Generic[R]):
     """Generic search result base"""
 
-    def __init__(self, results: List[R], total_results: int, groups: list, alive: bool, limit: int, skip: int, matches_regex: List[str] = None):
+    def __init__(self,
+                 results: List[R],
+                 total_results: int,
+                 groups: list,
+                 alive: bool,
+                 limit: int,
+                 skip: int,
+                 matches_regex: List[str] = None):
         """
         Constructor for search result
         Args:
@@ -65,7 +71,6 @@ class SearchResult(Generic[R]):
             results]
 
 
-
     def __len__(self):
         """
         Call number of results
@@ -73,7 +78,6 @@ class SearchResult(Generic[R]):
             number of found objects
         """
         return len(self.results)
-
 
 
     @staticmethod
@@ -91,7 +95,6 @@ class SearchResult(Generic[R]):
         fields = result.fields
         if not possible_regex_list:
             return None
-
 
 
         def inner_match_fields(_fields, _matched_fields, _reference=None):
@@ -129,7 +132,6 @@ class SearchResult(Generic[R]):
         if len(matched_fields) > 0:
             return matched_fields
         return None
-
 
 
     def to_json(self) -> dict:

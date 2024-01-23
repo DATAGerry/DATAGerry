@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -67,7 +67,6 @@ class ProfileBase:
         self.type_dict[type_key] = current_type
 
 
-
     def set_type_summary_field(self, type_key: str, field_name: str):
         """
         Sets the summary for the type
@@ -84,7 +83,6 @@ class ProfileBase:
         self.type_dict[type_key] = current_type
 
 
-
     def create_basic_type(self, type_name_key: str, type_dict: dict):
         """
         Creates a new type in the db
@@ -98,7 +96,6 @@ class ProfileBase:
         self.created_type_ids[type_name_key] = new_type_id
 
 
-
     def get_created_type_ids(self) -> dict:
         """
         Returns all created type ids which can be used for other profile creations
@@ -107,7 +104,6 @@ class ProfileBase:
             dict: All created type ids
         """
         return self.created_type_ids
-
 
 
     def get_current_datetime(self) -> datetime:

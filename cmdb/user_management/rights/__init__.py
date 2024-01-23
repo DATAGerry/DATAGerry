@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,6 @@ SYSTEM_RIGHTS = (
         SystemRight('reload', description='Reload system configurations')
     )
 )
-
 
 
 FRAMEWORK_RIGHTS = (
@@ -89,7 +88,6 @@ FRAMEWORK_RIGHTS = (
 )
 
 
-
 EXPORT_RIGHTS = (
     ExportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exports'),
     (
@@ -101,7 +99,6 @@ EXPORT_RIGHTS = (
 )
 
 
-
 IMPORT_RIGHTS = (
     ImportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage imports'),
     (
@@ -111,7 +108,6 @@ IMPORT_RIGHTS = (
         ImportTypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage type imports')
     )
 )
-
 
 
 USER_MANAGEMENT_RIGHTS = (
@@ -133,7 +129,6 @@ USER_MANAGEMENT_RIGHTS = (
         )
     )
 )
-
 
 
 EXPORTD_RIGHTS = (
@@ -159,7 +154,6 @@ EXPORTD_RIGHTS = (
 )
 
 
-
 DOCAPI_RIGHTS = (
     DocapiRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage DocAPI'),
     (
@@ -173,7 +167,7 @@ DOCAPI_RIGHTS = (
     )
 )
 
-
+#TODO: fix this
 __all__ = (
     BaseRight(
         Levels.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'

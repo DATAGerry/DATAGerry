@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,6 @@ class SecurityManager:
         self.salt = "cmdb"
 
 
-
     def generate_hmac(self, data):
         """TODO: document"""
         import hashlib
@@ -53,7 +52,6 @@ class SecurityManager:
         generated_hash.hexdigest()
 
         return base64.b64encode(generated_hash.digest()).decode("utf-8")
-
 
 
     def encrypt_aes(self, raw):
@@ -72,7 +70,6 @@ class SecurityManager:
         return base64.b64encode(iv + cipher.encrypt(raw))
 
 
-
     def decrypt_aes(self, enc):
         """TODO: document"""
         enc = base64.b64decode(enc)
@@ -81,12 +78,10 @@ class SecurityManager:
         return SecurityManager._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
 
 
-
     @staticmethod
     def _pad(s):
         return s + (SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE) * \
                chr(SecurityManager.DEFAULT_BLOCK_SIZE - len(s) % SecurityManager.DEFAULT_BLOCK_SIZE)
-
 
 
     @staticmethod
@@ -94,11 +89,9 @@ class SecurityManager:
         return s[:-ord(s[len(s) - 1:])]
 
 
-
     def generate_symmetric_aes_key(self):
         """TODO: document"""
         return self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
-
 
 
     def get_symmetric_aes_key(self):
@@ -109,7 +102,6 @@ class SecurityManager:
             self.generate_symmetric_aes_key()
             symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
         return symmetric_key
-
 
 
     @staticmethod

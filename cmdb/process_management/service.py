@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -51,7 +51,6 @@ class AbstractCmdbService:
         self._thread_service = None
 
 
-
     def start(self):
         """service start"""
         # setup service logging
@@ -85,18 +84,15 @@ class AbstractCmdbService:
         self._shutdown(None, None)
 
 
-
     def _run(self):
         """daemon action - to be implemented
         implemented action must check the self._even_shutdown flag for termination
         """
 
 
-
     def _shutdown(self, signam, frame):
         """shutdown handler"""
         self.stop()
-
 
 
     def stop(self):
@@ -114,6 +110,7 @@ class AbstractCmdbService:
         # exit process
         LOGGER.info("shutdown %s completed", self._name)
         sys.exit(0)
+
 
     def _handle_event(self, event):
         """action for handling events

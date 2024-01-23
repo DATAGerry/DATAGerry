@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -28,6 +28,7 @@ from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, Quic
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
@@ -41,6 +42,7 @@ search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 @search_blueprint.protect(auth=True)
 @insert_request_user
 def quick_search_result_counter(request_user: UserModel):
+    """TODO: document"""
     search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
     builder = QuickSearchPipelineBuilder()
     only_active = _fetch_only_active_objs()
@@ -50,7 +52,7 @@ def quick_search_result_counter(request_user: UserModel):
     try:
         result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
     except Exception as err:
-        LOGGER.error(f'[Search count]: {err}')
+        LOGGER.error('[Search count]: %s',err)
         return abort(400)
     if len(result) > 0:
         return make_response(result[0])
@@ -62,6 +64,7 @@ def quick_search_result_counter(request_user: UserModel):
 @login_required
 @insert_request_user
 def search_framework(request_user: UserModel):
+    """TODO: document"""
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
@@ -79,7 +82,7 @@ def search_framework(request_user: UserModel):
         else:
             return abort(405)
     except Exception as err:
-        LOGGER.error(f'[Search Framework]: {err}')
+        LOGGER.error('[Search Framework]: %s', err)
         return abort(400, err)
     try:
         searcher = SearcherFramework(manager=object_manager)
@@ -94,7 +97,7 @@ def search_framework(request_user: UserModel):
                                     active=only_active)
 
     except Exception as err:
-        LOGGER.error(f'[Search Framework Rest]: {err}')
+        LOGGER.error('[Search Framework Rest]: %s',err)
         return make_response([], 204)
 
     return make_response(result)

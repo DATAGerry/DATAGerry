@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,7 +46,6 @@ class Updater(CmdbManagerBase):
         super().__init__(self.database_manager)
 
 
-
     @property
     @abstractmethod
     def author(self):
@@ -55,7 +54,6 @@ class Updater(CmdbManagerBase):
         Returns: name
         """
         return NotImplementedError
-
 
 
     @property
@@ -68,7 +66,6 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
-
     @property
     @abstractmethod
     def description(self):
@@ -79,12 +76,10 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
-
     @abstractmethod
     def start_update(self):
         """TODO: document"""
         return NotImplementedError
-
 
 
     @abstractmethod
@@ -98,11 +93,9 @@ class Updater(CmdbManagerBase):
         system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
 
-
     def error(self, msg):
         """TODO: document"""
         raise UpdaterException(msg)
-
 
 
 class UpdaterException(Exception):

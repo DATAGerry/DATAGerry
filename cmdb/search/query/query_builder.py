@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,18 +33,15 @@ class QueryBuilder(Builder):
         self.query = Query({})
 
 
-
     @property
     def query(self) -> Query:
         """TODO: document"""
         return self._query
 
 
-
     @query.setter
     def query(self, value: dict):
         self._query = Query(value)
-
 
 
     def build(self, *args, **kwargs) -> Query:

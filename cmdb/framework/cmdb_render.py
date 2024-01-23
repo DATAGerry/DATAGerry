@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,9 +46,11 @@ class RenderVisualization:
         self.object_information: dict = {}
         self.type_information: dict = {}
 
+
     def get_object_information(self, idx):
         """TODO: document"""
         return self.object_information[idx]
+
 
     def get_type_information(self, idx):
         """TODO: document"""
@@ -59,7 +61,7 @@ class RenderResult(RenderVisualization):
     """TODO: document"""
 
     def __init__(self):
-        super(RenderResult, self).__init__()
+        super().__init__()
         self.fields: list = []
         self.sections: list = []
         self.summaries: list = []
@@ -106,8 +108,8 @@ class CmdbRender:
         """
         if not isinstance(object_instance, CmdbObject):
             raise ObjectInstanceError()
-        else:
-            self._object_instance = object_instance
+
+        self._object_instance = object_instance
 
 
     @property
@@ -350,6 +352,7 @@ class CmdbRender:
 
         return field_map
 
+
     def __merge_reference_section_fields(self, ref_section_field, ref_type, ref_section_fields, level):
         if ref_section_field and ref_section_field.get('type', '') == 'ref-section-field':
             try:
@@ -372,6 +375,7 @@ class CmdbRender:
             except (Exception, TypeError, ObjectManagerGetError) as err:
                 LOGGER.info(err)
         return ref_section_fields
+
 
     def __merge_references(self, current_field):
         # Initialise TypeReference
@@ -543,6 +547,7 @@ class RenderList:
             preparation_objects.append(current_render_result)
 
         return preparation_objects
+
 
 # TODO: transfer errors to seperate class
 class RenderError(CMDBError):

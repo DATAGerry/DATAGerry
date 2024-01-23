@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -21,11 +21,6 @@ from cmdb.media_library.media_file_metadata import FileMetadata
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
-
-
-
-
-
 
 class MediaFile(MediaFileManagementBase):
     """Media Libary File"""
@@ -56,7 +51,6 @@ class MediaFile(MediaFileManagementBase):
         super().__init__(**kwargs)
 
 
-
     def get_public_id(self) -> int:
         """
         get the public id of current element
@@ -78,7 +72,6 @@ class MediaFile(MediaFileManagementBase):
         return self.public_id
 
 
-
     def get_filename(self) -> str:
         """
         Get the name of file
@@ -89,7 +82,6 @@ class MediaFile(MediaFileManagementBase):
             return ""
         else:
             return self.filename
-
 
 
     def get_chunk_size(self) -> bytes:
@@ -104,7 +96,6 @@ class MediaFile(MediaFileManagementBase):
         return self.chunk_size
 
 
-
     def get_upload_date(self) -> date:
         """
         Get the date the document was first stored by GridFS.
@@ -113,7 +104,6 @@ class MediaFile(MediaFileManagementBase):
             bytes: display upload Date
         """
         return self.upload_date
-
 
 
     def get_metadata(self) -> FileMetadata:
@@ -130,7 +120,6 @@ class MediaFile(MediaFileManagementBase):
         return self.metadata
 
 
-
     def get_size(self) -> bytes:
         """
         Get the size of the document in bytes.
@@ -138,7 +127,6 @@ class MediaFile(MediaFileManagementBase):
             bytes: size of the document
         """
         return self.size
-
 
 
     @classmethod
@@ -151,7 +139,6 @@ class MediaFile(MediaFileManagementBase):
             'upload_date': instance.get_upload_date(),
             'metadata': instance.get_metadata()
         }
-
 
 
 class NoPublicIDError(CMDBError):

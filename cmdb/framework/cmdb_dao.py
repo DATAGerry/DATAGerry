@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -78,7 +78,6 @@ class CmdbDAO:
                 setattr(self, key, value)
 
 
-
     def get_public_id(self) -> int:
         """
         get the public id of current element
@@ -100,7 +99,6 @@ class CmdbDAO:
         return self.public_id
 
 
-
     def has_object_id(self) -> bool:
         """
         checks if object already has a database _id
@@ -115,7 +113,6 @@ class CmdbDAO:
             return True
 
         return False
-
 
 
     def __new__(cls, *args, **kwargs):
@@ -146,7 +143,6 @@ class CmdbDAO:
         return super().__new__(cls)
 
 
-
     @classmethod
     def get_index_keys(cls):
         """TODO: document"""
@@ -158,12 +154,10 @@ class CmdbDAO:
         return index_list
 
 
-
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "CmdbDAO":
         """TODO: document"""
         raise NotImplementedError()
-
 
 
     @classmethod
@@ -172,12 +166,10 @@ class CmdbDAO:
         raise NotImplementedError()
 
 
-
     @classmethod
     def to_dict(cls, instance: "CmdbDAO") -> dict:
         """TODO: document"""
         raise NotImplementedError()
-
 
 
     def update_version(self, update) -> str:
@@ -214,7 +206,6 @@ class CmdbDAO:
         return repr(updater_version)
 
 
-
     def get_version(self) -> str:
         """
         Get version number if exists
@@ -227,7 +218,6 @@ class CmdbDAO:
             raise NoVersionError(self.get_public_id())
 
 
-
     def to_database(self) -> dict:
         """
         quick and dirty database converter
@@ -238,10 +228,8 @@ class CmdbDAO:
         return self.__dict__
 
 
-
     def __repr__(self):
         return debug_print(self)
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  _Versioning - CLASS                                                 #
@@ -282,7 +270,6 @@ class _Versioning:
         return self._patch
 
 
-
     @major.setter
     def major(self, value):
         if not isinstance(value, int):
@@ -304,12 +291,10 @@ class _Versioning:
         self._patch = value
 
 
-
     def update_major(self) -> int:
         """TODO: document"""
         self.major += 1
         return self.major
-
 
 
     def update_minor(self) -> int:
@@ -318,17 +303,14 @@ class _Versioning:
         return self.minor
 
 
-
     def update_patch(self) -> int:
         """TODO: document"""
         self.patch += 1
         return self.patch
 
 
-
     def __repr__(self):
         return f'{self.major}.{self.minor}.{self.patch}'
-
 
 
 class VersionTypeError(CMDBError):
@@ -340,7 +322,6 @@ class VersionTypeError(CMDBError):
         self.message = f'The version type {update_input} update for {level} is wrong'
 
 
-
 class NoVersionError(CMDBError):
     """
     Error if object from models child class has no version number
@@ -350,7 +331,6 @@ class NoVersionError(CMDBError):
         self.message = f'The object (ID: {public_id}) has no version control'
 
 
-
 class NoPublicIDError(CMDBError):
     """
     Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
@@ -358,7 +338,6 @@ class NoPublicIDError(CMDBError):
     def __init__(self):
         super().__init__()
         self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
-
 
 
 class RequiredInitKeyNotFoundError(CMDBError):

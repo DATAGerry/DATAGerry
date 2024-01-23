@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -25,9 +25,7 @@ class MediaFileManagementBase:
     ASCENDING = 1
     DESCENDING = -1
     COLLECTION = 'media.*'
-    __SUPER_INIT_KEYS = [
-        'public_id'
-    ]
+
     SUPER_INDEX_KEYS = [
         {'keys': [('public_id', ASCENDING)], 'name': 'public_id', 'unique': True}
     ]

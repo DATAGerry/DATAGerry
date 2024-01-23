@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -22,7 +22,6 @@ from cmdb.framework.utils import Model
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-
 class DocapiTemplateType(Enum):
     """TODO: document"""
     OBJECT = 0
@@ -30,7 +29,7 @@ class DocapiTemplateType(Enum):
 
 class DocapiTemplate(TemplateManagementBase):
     """
-        Docapi Template
+    Docapi Template
     """
     COLLECTION = 'docapi.templates'
     MODEL: Model = 'DocapiTemplate'
@@ -65,7 +64,6 @@ class DocapiTemplate(TemplateManagementBase):
         super().__init__(**kwargs)
 
 
-
     @classmethod
     def from_data(cls, data: dict) -> "DocapiTemplate":
         """TODO: document"""
@@ -83,7 +81,6 @@ class DocapiTemplate(TemplateManagementBase):
         )
 
 
-
     @classmethod
     def to_json(cls, instance: "DocapiTemplate", *args, **kwargs) -> dict:
         """TODO: document"""
@@ -99,7 +96,6 @@ class DocapiTemplate(TemplateManagementBase):
             'template_type': instance.template_type,
             'template_parameters': instance.template_parameters
         }
-
 
 
     def get_public_id(self) -> int:
@@ -120,7 +116,6 @@ class DocapiTemplate(TemplateManagementBase):
         return self.public_id
 
 
-
     def get_name(self) -> str:
         """
         Get the name of the template
@@ -131,7 +126,6 @@ class DocapiTemplate(TemplateManagementBase):
             return ""
         else:
             return self.name
-
 
 
     def get_label(self) -> str:
@@ -146,7 +140,6 @@ class DocapiTemplate(TemplateManagementBase):
         return self.label
 
 
-
     def get_description(self) -> str:
         """
         Get the description of the template
@@ -157,7 +150,6 @@ class DocapiTemplate(TemplateManagementBase):
             return ""
 
         return self.description
-
 
 
     def get_active(self) -> bool:
@@ -176,7 +168,6 @@ class DocapiTemplate(TemplateManagementBase):
         return self.author_id
 
 
-
     def get_template_data(self):
         """
         Get data of this template
@@ -184,7 +175,6 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_data
-
 
 
     def get_template_style(self):
@@ -196,7 +186,6 @@ class DocapiTemplate(TemplateManagementBase):
         return self.template_style
 
 
-
     def get_template_type(self):
         """
         Get type of this template
@@ -206,7 +195,6 @@ class DocapiTemplate(TemplateManagementBase):
         return self.template_type
 
 
-
     def get_template_parameters(self):
         """
         Get parameters of this template
@@ -214,7 +202,6 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_parameters
-
 
 
 class NoPublicIDError(CMDBError):

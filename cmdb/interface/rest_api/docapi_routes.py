@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 import json
 
@@ -33,7 +33,7 @@ from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateMa
     DocapiTemplateManagerInsertError, DocapiTemplateManagerUpdateError, DocapiTemplateManagerDeleteError, \
     DocapiTemplateManager
 from cmdb.user_management import UserModel
-
+# -------------------------------------------------------------------------------------------------------------------- #
 with current_app.app_context():
     docapi_tpl_manager = DocapiTemplateManager(current_app.database_manager, current_app.event_queue)
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
@@ -49,6 +49,7 @@ docs_blueprint = APIBlueprint('docs', __name__)
 @docs_blueprint.protect(auth=True, right='base.docapi.template.view')
 @docs_blueprint.parse_collection_parameters()
 def get_template_list(params: CollectionParameters):
+    """TODO: document"""
     template_manager = DocapiTemplateManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
 
@@ -71,6 +72,7 @@ def get_template_list(params: CollectionParameters):
 @insert_request_user
 @right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: UserModel):
+    """TODO: document"""
     try:
         filterdict = json.loads(searchfilter)
         tpl = docapi_tpl_manager.get_templates_by(**filterdict)
@@ -105,6 +107,7 @@ def get_template(public_id, request_user: UserModel):
 @insert_request_user
 @right_required('base.docapi.template.view')
 def get_template_by_name(name: str, request_user: UserModel):
+    """TODO: document"""
     try:
         tpl = docapi_tpl_manager.get_template_by_name(name=name)
     except DocapiTemplateManagerGetError as err:
@@ -118,6 +121,7 @@ def get_template_by_name(name: str, request_user: UserModel):
 @insert_request_user
 @right_required('base.docapi.template.add')
 def add_template(request_user: UserModel):
+    """TODO: document"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     try:
@@ -147,6 +151,7 @@ def add_template(request_user: UserModel):
 @insert_request_user
 @right_required('base.docapi.template.edit')
 def update_template(request_user: UserModel):
+    """TODO: document"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     new_tpl_data = None
@@ -173,6 +178,7 @@ def update_template(request_user: UserModel):
 @insert_request_user
 @right_required('base.docapi.template.delete')
 def delete_template(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
     except DocapiTemplateManagerDeleteError:
@@ -187,6 +193,7 @@ def delete_template(public_id: int, request_user: UserModel):
 @insert_request_user
 @right_required('base.framework.object.view')
 def render_object_template(public_id: int, object_id: int, request_user: UserModel):
+    """TODO: document"""
     docapi_manager = DocApiManager(docapi_tpl_manager, object_manager)
     output = docapi_manager.render_object_template(public_id, object_id)
 

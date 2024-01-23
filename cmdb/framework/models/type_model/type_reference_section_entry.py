@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,6 @@ This class represents a type reference section entry
 """
 import logging
 from typing import List
-
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -33,7 +32,6 @@ class TypeReferenceSectionEntry:
         self.type_id: int = type_id
         self.section_name: str = section_name
         self.selected_fields: List[str] = selected_fields or []
-
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 

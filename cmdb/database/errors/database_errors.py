@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,13 +26,11 @@ class DatabaseAlreadyExists(DataBaseError):
         super().__init__(message)
 
 
-
 class DatabaseNotExists(DataBaseError):
     """TODO: comment"""
     def __init__(self, database_name: str):
         message = f'Database with the name {database_name} doesn`t exists'
         super().__init__(message)
-
 
 
 class CollectionAlreadyExists(DataBaseError):
@@ -44,7 +42,6 @@ class CollectionAlreadyExists(DataBaseError):
         self.message = f"Collection {collection_name} already exists"
 
 
-
 class FileImportError(DataBaseError):
     """
     Error if json file import to database failed
@@ -52,7 +49,6 @@ class FileImportError(DataBaseError):
     def __init__(self, collection_name):
         super().__init__()
         self.message = f"Collection {collection_name} could not be imported"
-
 
 
 class PublicIDAlreadyExists(DuplicateKeyError):
@@ -64,7 +60,6 @@ class PublicIDAlreadyExists(DuplicateKeyError):
         self.message = f"Object with this public id already exists: {public_id}"
 
 
-
 class NoDocumentFound(DataBaseError):
     """
     Error if no document was found
@@ -72,7 +67,6 @@ class NoDocumentFound(DataBaseError):
     def __init__(self, collection, public_id):
         super().__init__()
         self.message = f"No document with the id {public_id} was found inside {collection}"
-
 
 
 class DocumentCouldNotBeDeleted(DataBaseError):

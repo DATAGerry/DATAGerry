@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -55,7 +55,6 @@ def get_log_level(minlevel=None):
 
     # return loglevel
     return loglevel
-
 
 
 def get_logging_conf():

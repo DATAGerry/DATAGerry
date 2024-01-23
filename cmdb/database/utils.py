@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -37,6 +37,7 @@ from bson.min_key import MinKey
 from bson.objectid import ObjectId
 from bson.timestamp import Timestamp
 from bson.tz_util import utc
+# -------------------------------------------------------------------------------------------------------------------- #
 
 _RE_TYPE = type(re.compile("foo"))
 

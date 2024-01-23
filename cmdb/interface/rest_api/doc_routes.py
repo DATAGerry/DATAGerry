@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from flask import abort, request, current_app
@@ -27,6 +27,7 @@ from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     docapi_tpl_manager = DocapiTemplateManager(current_app.database_manager, current_app.event_queue)
@@ -42,6 +43,7 @@ doc_blueprint = APIBlueprint('doc', __name__)
 @doc_blueprint.protect(auth=True, right='base.docapi.template.view')
 @doc_blueprint.parse_collection_parameters()
 def get_template_list(params: CollectionParameters):
+    """TODO: document"""
     template_manager = DocapiTemplateManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
 

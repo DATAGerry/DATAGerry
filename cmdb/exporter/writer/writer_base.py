@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -45,11 +45,9 @@ class SupportedExporterExtension:
         self.extensions = [*["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"], *arguments]
 
 
-
     def get_extensions(self):
         """Get list of supported export extension"""
         return self.extensions
-
 
 
     def convert_to(self):
@@ -68,7 +66,6 @@ class SupportedExporterExtension:
         return _list
 
 
-
 class BaseExportWriter:
     """TODO: document"""
 
@@ -82,7 +79,6 @@ class BaseExportWriter:
         self.export_format = export_format
         self.export_config = export_config
         self.data: List[RenderResult] = []
-
 
 
     def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
@@ -103,7 +99,6 @@ class BaseExportWriter:
 
         except CMDBError as err:
             return abort(400, err)
-
 
 
     def export(self):

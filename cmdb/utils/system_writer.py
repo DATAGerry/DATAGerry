@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -41,7 +41,6 @@ class SystemWriter:
         self.writer = writer
 
 
-
     def write(self, _id: str, data: dict):
         """
         write data into database
@@ -54,7 +53,6 @@ class SystemWriter:
             acknowledgment: based on database managers
         """
         raise NotImplementedError
-
 
 
     def verify(self, _id: int, data: dict) -> bool:
@@ -79,13 +77,11 @@ class SystemSettingsWriter(SystemWriter):
         super().__init__(database_manager)
 
 
-
     def write(self, _id: str, data: dict):
         """
         Write new settings in database
         """
         return self.writer.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
-
 
 
     def verify(self, _id: str, data: dict = None) -> bool:
@@ -107,7 +103,6 @@ class SystemSettingsWriter(SystemWriter):
         if verify_document != data and data is not None:
             return False
         return True
-
 
 
 class NoEntryFoundError(CMDBError):

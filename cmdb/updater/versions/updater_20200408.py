@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -29,15 +29,17 @@ class Update20200408(Updater):
     def author(self):
         return 'mba'
 
+
     def creation_date(self):
         return '20200408'
+
 
     def description(self):
         return 'Fix possible wrong object counter'
 
+
     def increase_updater_version(self, value):
         super().increase_updater_version(value)
-
 
 
     def start_update(self):

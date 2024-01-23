@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -57,7 +57,6 @@ def get_user_settings(user_id: int):
     return api_response.make_response()
 
 
-
 @user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
 def get_user_setting(user_id: int, resource: str):
     """
@@ -84,7 +83,6 @@ def get_user_setting(user_id: int, resource: str):
     except ManagerGetError as err:
         return abort(404, err.message)
     return api_response.make_response()
-
 
 
 @user_settings_blueprint.route('/', methods=['POST'])
@@ -118,7 +116,6 @@ def insert_setting(user_id: int, data: dict):
     return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
 
 
-
 @user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def update_setting(user_id: int, resource: str, data: dict):
@@ -148,7 +145,6 @@ def update_setting(user_id: int, resource: str, data: dict):
         return abort(400, err.message)
 
     return api_response.make_response()
-
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['DELETE'])

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -116,7 +116,6 @@ class UserModel(CmdbDAO):
         super().__init__(public_id=public_id)
 
 
-
     def get_display_name(self) -> str:
         """
         Get the display name of the user.
@@ -152,11 +151,9 @@ class UserModel(CmdbDAO):
         )
 
 
-
     @classmethod
     def to_data(cls, instance: "UserModel") -> dict:
         return cls.to_dict(instance)
-
 
 
     @classmethod

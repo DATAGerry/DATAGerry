@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -117,6 +117,7 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
             self.query.append(self.sort_(sort=sort, order=order))
 
         self.query += results_query
+
         return self.query
 
 
@@ -337,7 +338,6 @@ class ObjectManager(ManagerBase):
                                                     sort='public_id',
                                                     order=1
                                             )
-
 
         referenced_objects: List[dict] =  [object_.__dict__ for object_ in iteration_result.results]
 

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -100,6 +100,7 @@ class LocationNode:
         """
         return self.public_id
 
+
     def __repr__(self) -> str:
         return f"[LocationNode => public_id: {self.public_id}, \
                                   name: {self.name}, \
@@ -107,6 +108,7 @@ class LocationNode:
                                   icon: {self.icon}, \
                                   object_id: {self.object_id}, \
                                   children: {len(self.children)}]"
+
 
     @classmethod
     def to_json(cls, instance: "LocationNode") -> dict:
@@ -135,13 +137,6 @@ class LocationNode:
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    CRUD - SECTION                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
-
-    # Example Parameters
-    # params = CollectionParameters(query_string=None,
-    #                               filter=[{"$match":{"public_id":{"$gt":1}}}],
-    #                               limit=0,
-    #                               sort='public_id',
-    #                               order=1)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -184,7 +179,8 @@ def create_location(params: dict, request_user: UserModel):
 
 
 
-    location_creation_params['name'] =  params['name'] if params['name'] not in ['', None] else f"ObjectID: {location_creation_params['object_id']}"
+    location_creation_params['name'] =  params['name'] if params['name'] not in ['', None]\
+                                                       else f"ObjectID: {location_creation_params['object_id']}"
 
     created_location_id = location_manager.insert_location(location_creation_params,
                                                            request_user,
@@ -192,9 +188,7 @@ def create_location(params: dict, request_user: UserModel):
 
     return make_response(created_location_id)
 
-
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
-
 
 @location_blueprint.route('/', methods=['GET', 'HEAD'])
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -303,7 +297,6 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-
 @location_blueprint.route('/<int:public_id>', methods=['GET'])
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
@@ -383,6 +376,7 @@ def get_parent(object_id: int, request_user: UserModel):
 
     return make_response(parent)
 
+
 @location_blueprint.route('/<int:object_id>/children', methods=['GET'])
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
@@ -410,7 +404,6 @@ def get_children(object_id: int, request_user: UserModel):
         return abort(404, err.message)
 
     return make_response(children)
-
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -443,7 +436,8 @@ def update_location_for_object(params: dict, request_user: UserModel):
 
         params['name'] = rendered_list[0]['summary_line']
 
-    location_update_params['name'] =  params['name'] if params['name'] not in ['', None] else f"ObjectID: {location_update_params['object_id']}"
+    location_update_params['name'] =  params['name'] if params['name'] not in ['', None]\
+                                                     else f"ObjectID: {location_update_params['object_id']}"
 
     try:
         result = location_manager._update_for_object(CmdbLocation.COLLECTION, object_id, location_update_params)
@@ -457,9 +451,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
 
     return api_response.make_response()
 
-
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
-
 
 @location_blueprint.route('/<int:object_id>/object', methods=['DELETE'])
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')

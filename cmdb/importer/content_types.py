@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,6 @@
 """Basic identifiers for the identification of the corresponding importers based on the file type.
 The Content-Type entity header is used to indicate the media type of the resource.
 """
-
 
 class BASEContent:
     """Empty general content type

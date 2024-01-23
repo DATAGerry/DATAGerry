@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -79,7 +79,6 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
         super().__init__(active)
 
 
-
     def mapping(self, group_dn: str) -> int:
         """Get a group mapping by the group_dn"""
         try:
@@ -87,7 +86,6 @@ class LdapAuthenticationProviderConfig(AuthProviderConfig):
                         group['group_dn'].lower() == group_dn.lower())
         except StopIteration as err:
             raise GroupMappingError(str(err)) from err
-
 
 
 class LdapAuthenticationProvider(AuthenticationProvider):
@@ -105,16 +103,15 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                                                          group_manager=group_manager,
                                                          security_manager=security_manager)
 
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.__ldap_connection:
             self.__ldap_connection.unbind()
 
 
-
     def connect(self) -> bool:
         """TODO: document"""
         return self.__ldap_connection.bind()
-
 
 
     def __map_group(self, possible_user_groups: List[str]) -> int:
@@ -134,7 +131,6 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 except GroupMappingError:
                     continue
         return user_group
-
 
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
@@ -210,7 +206,6 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 LOGGER.debug('[LdapAuthenticationProvider] %s', err)
                 raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
         return user_instance
-
 
 
     def is_active(self) -> bool:

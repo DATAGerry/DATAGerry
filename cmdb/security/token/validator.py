@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,6 @@ class TokenValidator:
         self.key_holder = KeyHolder(database_manager)
 
 
-
     def decode_token(self, token: Union[JsonWebToken, str, dict]):
         """
         Decodes a given token
@@ -55,7 +54,6 @@ class TokenValidator:
         return decoded_token
 
 
-
     def validate_token(self, token: Union[JsonWebToken, str, dict]):
         """
         Validates a given token regarding its expiration
@@ -70,7 +68,6 @@ class TokenValidator:
             token.validate(time.time())
         except InvalidClaimError as err:
             raise ValidationError(err) from err
-
 
 
 class ValidationError(CMDBError):

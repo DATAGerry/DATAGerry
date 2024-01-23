@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -34,7 +34,6 @@ class GroupManager(ManagerBase):
         super().__init__(UserGroupModel.COLLECTION, database_manager=database_manager)
 
 
-
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[UserGroupModel]:
         """
@@ -66,7 +65,6 @@ class GroupManager(ManagerBase):
         return iteration_result
 
 
-
     def get(self, public_id: Union[PublicID, int]) -> UserGroupModel:
         """
         Get a single group by its id.
@@ -81,7 +79,6 @@ class GroupManager(ManagerBase):
         for resource_result in cursor_result.limit(-1):
             return UserGroupModel.from_data(resource_result, rights=self.right_manager.rights)
         raise ManagerGetError(f'Group with ID: {public_id} not found!')
-
 
 
     def insert(self, group: Union[UserGroupModel, dict]) -> PublicID:
@@ -103,7 +100,6 @@ class GroupManager(ManagerBase):
         return self._insert(self.collection, resource=group)
 
 
-
     def update(self, public_id: Union[PublicID, int], group: Union[UserGroupModel, dict]):
         """
         Update a existing group in the system.
@@ -117,7 +113,6 @@ class GroupManager(ManagerBase):
         if update_result.matched_count != 1:
             raise ManagerUpdateError('Something happened during the update!')
         return update_result
-
 
 
     def delete(self, public_id: Union[PublicID, int]) -> UserGroupModel:

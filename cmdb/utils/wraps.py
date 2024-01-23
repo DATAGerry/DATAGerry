@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -51,7 +51,6 @@ def deprecated(message):
         def OldClass(object):
                 pass
     """
-
     if cmdb.__MODE__ == 'DEBUG':
         if isinstance(message, string_types):
             def deprecated_decorator(func1):

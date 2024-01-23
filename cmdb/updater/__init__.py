@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -35,18 +35,15 @@ class UpdaterModule:
         self.system_settings_reader = system_settings_reader
 
 
-
     def __init_settings(self, auth_settings_values: dict) -> UpdateSettings:
         """Merge default values with database entries"""
         return UpdateSettings(**auth_settings_values)
-
 
 
     @property
     def settings(self) -> UpdateSettings:
         """Get the current auth settings"""
         return self.__settings
-
 
 
     @staticmethod

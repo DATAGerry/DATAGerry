@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -20,7 +20,6 @@ from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 GLOBAL_RIGHT_IDENTIFIER = '*'
-
 
 class Levels(IntEnum):
     """
@@ -70,26 +69,32 @@ class BaseRight:
         self.description = description
         self.is_master = name == GLOBAL_RIGHT_IDENTIFIER
 
+
     def get_prefix(self):
         """TODO: document"""
-        return self.PREFIX.split('.')[-1]
+        return self.PREFIX.rsplit('.', maxsplit=1)[-1]
+
 
     def get_label(self):
         """TODO: document"""
         return self.label or f'{self.get_prefix()}.{self.name.split(".")[-1]}'
 
+
     def __getitem__(self, item):
         return self.__getattribute__(item)
+
 
     @classmethod
     def get_levels(cls):
         """TODO: document"""
         return _levelToName
 
+
     @property
     def level(self):
         """TODO: document"""
         return self._level
+
 
     @level.setter
     def level(self, level):
@@ -100,6 +105,7 @@ class BaseRight:
         if level.value > self.MAX_LEVEL.value:
             raise MaxLevelRightError(level, self.MAX_LEVEL)
         self._level = level
+
 
     @classmethod
     def to_dict(cls, instance: "BaseRight") -> dict:

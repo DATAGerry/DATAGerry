@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -50,7 +50,6 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     return response
 
 
-
 class OperationType(Enum):
     """
     Enum for different response operations.
@@ -63,13 +62,11 @@ class OperationType(Enum):
     DELETE = 'DELETE'
 
 
-
 class ResponseMessage:
     """Simple class wrapper for json encoding"""
 
     def __init__(self, obj: dict = None):
         self.obj = obj
-
 
 
 class ResponseSuccessMessage(ResponseMessage):
@@ -85,7 +82,6 @@ class ResponseSuccessMessage(ResponseMessage):
         self.status = status
         self.public_id = public_id
         super().__init__(obj=obj)
-
 
 
 class ResponseFailedMessage(ResponseMessage):
@@ -105,7 +101,6 @@ class ResponseFailedMessage(ResponseMessage):
         super().__init__(obj=obj)
 
 
-
     def to_dict(self) -> dict:
         """TODO: document"""
         return {
@@ -114,7 +109,6 @@ class ResponseFailedMessage(ResponseMessage):
             'error_message': self.error_message,
             'obj': self.obj,
         }
-
 
 
 class BaseAPIResponse:
@@ -140,7 +134,6 @@ class BaseAPIResponse:
         self.time: str = datetime.now(timezone.utc).isoformat()
 
 
-
     def make_response(self, *args, **kwargs) -> Response:
         """
         Abstract method for http response
@@ -149,7 +142,6 @@ class BaseAPIResponse:
             http Response
         """
         raise NotImplementedError
-
 
 
     def export(self, text: str = 'json') -> dict:
@@ -169,12 +161,10 @@ class BaseAPIResponse:
         }
 
 
-
 class GetSingleResponse(BaseAPIResponse):
     """
     API Response for get calls with a single resource.
     """
-    __slots__ = 'result'
 
     def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None, projection: dict = None):
         """
@@ -304,7 +294,6 @@ class GetMultiResponse(BaseAPIResponse):
         }, **super().export()}
 
 
-
 class InsertSingleResponse(BaseAPIResponse):
     """
     API Response for insert call of a single resource.
@@ -325,7 +314,6 @@ class InsertSingleResponse(BaseAPIResponse):
         self.raw: dict = raw
         self.result_id: PublicID = result_id
         super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
-
 
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> Response:
@@ -402,7 +390,6 @@ class UpdateSingleResponse(BaseAPIResponse):
         }, **super().export(*args, **kwargs)}
 
 
-
 class UpdateMultiResponse(BaseAPIResponse):
     """
     API Response for update call of a multiple resources.
@@ -455,7 +442,6 @@ class DeleteSingleResponse(BaseAPIResponse):
     """
     API Response for delete call of a single resource.
     """
-    __slots__ = 'raw'
 
     def __init__(self, raw: dict = None, url: str = None, model: Model = None):
         """

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,15 +30,17 @@ class Update20200226(Updater):
     def author(self):
         return 'sdu'
 
+
     def creation_date(self):
         return '20200226'
+
 
     def description(self):
         return 'Update all types where category ID is 0, to root category public ID.'
 
+
     def increase_updater_version(self, value):
         super().increase_updater_version(value)
-
 
 
     def start_update(self):

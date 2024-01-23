@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -27,6 +27,7 @@ from cmdb.user_management import UserModel
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ LOGGER = logging.getLogger(__name__)
 def get_file_in_request(file_name: str, request_files) -> FileStorage:
     """TODO: document"""
     if file_name not in request_files:
-        LOGGER.error(f'File with name: {file_name} was not provided')
+        LOGGER.error('File with name: %s was not provided', file_name)
         return abort(400)
     return request.files.get(file_name)
 

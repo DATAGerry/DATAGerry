@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import sys
 import time
+import logging
 
 from flask import current_app
 
@@ -26,8 +27,8 @@ from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.user_management import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader
-
-
+# -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 
 with current_app.app_context():
@@ -38,6 +39,7 @@ with current_app.app_context():
 @login_required
 @insert_request_user
 def get_datagerry_information(request_user: UserModel):
+    """TODO: document"""
     from cmdb import __title__, __version__, __runtime__
 
     try:
@@ -62,7 +64,7 @@ def get_datagerry_information(request_user: UserModel):
 @insert_request_user
 @right_required('base.system.view')
 def get_config_information(request_user: UserModel):
-
+    """TODO: document"""
     ssc = SystemConfigReader()
     config_dict = {
         'path': ssc.config_file,
@@ -87,6 +89,7 @@ def get_config_information(request_user: UserModel):
 @insert_request_user
 @right_required('base.system.view')
 def get_system_information(request_user: UserModel):
+    """TODO: document"""
     system_infos = {
         'platform': sys.platform,
         'python_interpreter': {

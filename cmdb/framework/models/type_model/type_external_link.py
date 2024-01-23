@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,6 @@ class TypeExternalLink:
         self.label = label or self.name.title()
         self.icon = icon
         self.fields = fields or []
-
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
@@ -78,7 +77,6 @@ class TypeExternalLink:
             'icon': instance.icon,
             'fields': instance.fields
         }
-
 
 # ------------------------------------------------- GENERAL FUNCTIONS ------------------------------------------------ #
 

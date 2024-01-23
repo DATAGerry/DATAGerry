@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,7 +27,7 @@ LOGGER = logging.getLogger(__name__)
 
 M: TypeVar = TypeVar('M', bound=CmdbManagerBase)
 
-
+#TODO: fix this
 class Search(Generic[M], ABC):
     """TODO: document"""
     DEFAULT_SKIP: int = 0
@@ -38,12 +38,10 @@ class Search(Generic[M], ABC):
         self.__manager: M = manager
 
 
-
     @property
     def manager(self) -> M:
         """TODO: document"""
         return self.__manager
-
 
 
     @manager.setter
@@ -51,12 +49,10 @@ class Search(Generic[M], ABC):
         self.__manager: M = manager
 
 
-
     @abstractmethod
     def aggregate(self, pipeline: Pipeline, *args, **kwargs) -> List:
         """TODO: document"""
         raise NotImplementedError
-
 
 
     @abstractmethod

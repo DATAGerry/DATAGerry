@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -30,6 +30,7 @@ from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
 
@@ -43,6 +44,7 @@ with current_app.app_context():
 @importer_type_blueprint.route('/create/', methods=['POST'])
 @login_required
 def add_type():
+    """TODO: document"""
     error_collection = {}
     upload = request.form.get('uploadFile')
     new_type_list = json.loads(upload, object_hook=json_util.object_hook)
@@ -66,6 +68,7 @@ def add_type():
 @importer_type_blueprint.route('/update/', methods=['POST'])
 @login_required
 def update_type():
+    """TODO: document"""
     error_collection = {}
     upload = request.form.get('uploadFile')
     data_dump = json.loads(upload, object_hook=json_util.object_hook)

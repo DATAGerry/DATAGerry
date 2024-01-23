@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,7 +38,6 @@ class TypeReferenceSection(TypeSection):
         self.reference: reference = reference or {}
         self.fields = fields or []
         super().__init__(type=type, name=name, label=label)
-
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
     @classmethod

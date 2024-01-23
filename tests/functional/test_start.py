@@ -1,6 +1,6 @@
 
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,18 +14,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from cmdb import __title__
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.rest_api import create_rest_api
 
 
 def test_start_routine():
+    """TODO: document"""
     assert __title__ == 'DATAGERRY'
 
 
 class TestRestAPI:
+    """TODO: document"""
 
     def test_rest_api_start(self, database_manager, rest_api):
+        """TODO: document"""
         api = create_rest_api(database_manager, None)
         assert isinstance(api, BaseCmdbApp)
         assert rest_api.get('/').get_json()['title'] == __title__

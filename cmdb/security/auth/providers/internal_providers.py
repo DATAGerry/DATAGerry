@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,6 +46,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
                                                           group_manager=group_manager,
                                                           security_manager=security_manager)
 
+
     def authenticate(self, user_name: str, password: str, *args, **kwargs) -> UserModel:
         """TODO: document"""
         try:
@@ -56,6 +57,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         if login_pass == user.password:
             return user
         raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'Password did not matched with hmac!')
+
 
     def is_active(self) -> bool:
         """Local auth is always activated"""

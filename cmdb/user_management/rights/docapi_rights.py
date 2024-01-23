@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,6 @@ class DocapiRight(BaseRight):
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super().__init__(level, name, description=description)
-
 
 
 class DocapiTemplateRight(DocapiRight):

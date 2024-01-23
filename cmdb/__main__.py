@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,7 +14,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 DATAGERRY is a flexible asset management tool and
 open-source configurable management database
@@ -48,14 +47,12 @@ logging.config.dictConfig(get_logging_conf())
 LOGGER = logging.getLogger(__name__)
 
 
-
 def _activate_debug():
     """
     Activate the debug mode
     """
     cmdb.__MODE__ = 'DEBUG'
     LOGGER.warning("DEBUG mode enabled")
-
 
 
 def _check_database():
@@ -93,7 +90,6 @@ def _check_database():
     return None
 
 
-
 def _start_app():
     """
     Starting the services
@@ -109,13 +105,11 @@ def _start_app():
     LOGGER.info('Process manager started: %s',app_status)
 
 
-
 def _stop_app(signum, frame):
     """TODO: document"""
     global app_manager
 
     app_manager.stop_app()
-
 
 
 def _init_config_reader(config_file):
@@ -126,7 +120,6 @@ def _init_config_reader(config_file):
         SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
 
     SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
-
 
 
 def build_arg_parser() -> Namespace:
@@ -165,7 +158,6 @@ def build_arg_parser() -> Namespace:
     return _parser.parse_args()
 
 
-
 @timing('CMDB start')
 def main(args):
     """
@@ -176,6 +168,7 @@ def main(args):
     LOGGER.info("DATAGERRY starting...")
 
 # --------------------------------------------------- DEBUG - PART --------------------------------------------------- #
+
     if args.debug:
         _activate_debug()
 
@@ -184,6 +177,7 @@ def main(args):
     dbm = None
 
 # --------------------------------------------------- START - PART --------------------------------------------------- #
+
     # check db-settings and run update if needed
     if args.start:
         try:
@@ -243,6 +237,7 @@ def main(args):
             pass
 
 # ---------------------------------------------------- KEYS - PART --------------------------------------------------- #
+
     if args.keys:
         from cmdb.__setup__ import SetupRoutine
         setup_routine = SetupRoutine(dbm)
@@ -266,7 +261,6 @@ def main(args):
     LOGGER.info("DATAGERRY successfully started")
 
 
-
 if __name__ == "__main__":
     welcome_string = colored('Welcome to DATAGERRY \nStarting system with following parameters: \n{}\n', 'yellow')
     brand_string = colored('''
@@ -283,7 +277,7 @@ if __name__ == "__main__":
     @@@@@  @      @  @ @      @       @@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
                         
     ########################################################################\n''', 'green')
-    license_string = colored('''Copyright (C) 2023 becon GmbH
+    license_string = colored('''Copyright (C) 2024 becon GmbH
 licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
 
     try:

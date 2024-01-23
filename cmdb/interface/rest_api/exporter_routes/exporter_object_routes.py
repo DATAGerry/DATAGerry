@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 
 from flask import abort, jsonify, current_app
 
@@ -26,6 +27,7 @@ from cmdb.utils.helpers import load_class
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 exporter_blueprint = APIBlueprint('exporter', __name__)
 
@@ -33,6 +35,7 @@ exporter_blueprint = APIBlueprint('exporter', __name__)
 @exporter_blueprint.route('/extensions', methods=['GET'])
 @login_required
 def get_export_file_types():
+    """TODO: document"""
     return make_response(SupportedExporterExtension().convert_to())
 
 
@@ -42,6 +45,7 @@ def get_export_file_types():
 @insert_request_user
 @insert_request_user
 def export_objects(params: CollectionParameters, request_user: UserModel):
+    """TODO: document"""
     try:
         _config = ExporterConfig(parameters=params, options=params.optional)
         _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] \

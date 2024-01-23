@@ -452,23 +452,6 @@ class CmdbObjectManager(CmdbManagerBase):
 
 
     #@deprecated
-    def get_category_by(self, **requirements) -> CategoryModel:
-        """Get a single category by requirements
-        Notes:
-            Even if multiple categories match the requirements only the first matched will be returned
-        """
-        try:
-            raw_category = self._get_by(collection=CategoryModel.COLLECTION, **requirements)
-        except Exception as error:
-            raise ObjectManagerGetError(error) from error
-
-        try:
-            return CategoryModel.from_data(raw_category)
-        except Exception as error:
-            raise ObjectManagerInitError(error) from error
-
-
-    #@deprecated
     def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:

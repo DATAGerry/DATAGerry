@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -71,11 +71,9 @@ class SetupRoutine:
                     system config reader status: {system_config_reader_status}')
 
 
-
     def get_setup_status(self):
         """TODO: document"""
         return self.status
-
 
 
     def setup(self) -> SetupStatus:
@@ -140,7 +138,6 @@ class SetupRoutine:
         return self.status
 
 
-
     def init_keys(self):
         """TODO: document"""
         kg = KeyGenerator(self.setup_database_manager)
@@ -170,7 +167,6 @@ class SetupRoutine:
         LOGGER.info('KEY ROUTINE: FINISHED')
 
 
-
     def __create_user_management(self):
         """TODO: document"""
         scm = SecurityManager(self.setup_database_manager)
@@ -196,7 +192,6 @@ class SetupRoutine:
         return True
 
 
-
     def __check_database(self):
         """TODO: document"""
         LOGGER.info('SETUP ROUTINE: Checking database connection')
@@ -210,10 +205,8 @@ class SetupRoutine:
         return connection_test
 
 
-
     def __is_database_empty(self) -> bool:
         return not self.setup_database_manager.connector.database.list_collection_names()
-
 
 
     def __init_database(self):
@@ -229,7 +222,6 @@ class SetupRoutine:
 
         # create new database
         self.setup_database_manager.create_database(database_name)
-
 
         #generate framework collections
         for collection in FRAMEWORK_CLASSES:
