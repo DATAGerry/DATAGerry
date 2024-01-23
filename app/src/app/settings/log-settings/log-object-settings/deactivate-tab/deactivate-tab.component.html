@@ -15,7 +15,8 @@
                 (stateSelect)="onStateSelect($event)" (selectedChange)="onSelectedChange($event)"
                 (stateChange)="onStateChange($event)" (stateReset)="onStateReset()"
                 (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-                (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)">
+                (sortChange)="onSortChange($event)" (searchChange)="onSearchChange($event)" 
+                [selectEnabled]="true">
     </cmdb-table>
 
     <ng-template #dateTemplate let-data="data">

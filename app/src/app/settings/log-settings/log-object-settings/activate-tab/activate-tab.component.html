@@ -11,6 +11,7 @@
     <cmdb-table [items]="activeLogs" [totalItems]="total" [columns]="columns" [sort]="sort"
                 [page]="page" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
                 [tableStates]="tableStates" [loading]="loading" [tableState]="tableState"
+                [selectEnabled]="true"
                 [emptyMessage]="'This object is not referenced!'" [stateEnabled]="true"
                 (stateSelect)="onStateSelect($event)" (selectedChange)="onSelectedChange($event)"
                 (stateChange)="onStateChange($event)" (stateReset)="onStateReset()"
