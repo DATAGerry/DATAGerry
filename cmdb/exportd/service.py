@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -40,6 +40,7 @@ scheduler = sched.scheduler(time.time, time.sleep)
 
 class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     """TODO: document"""
+
     def __init__(self):
         super().__init__()
         self._name = "exportd"
@@ -51,6 +52,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
             "cmdb.exportd.#"
             ]
 
+
     def _run(self):
         LOGGER.info("%s: start run", self._name)
         while not self._event_shutdown.is_set():
@@ -58,12 +60,15 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
             time.sleep(1)
         LOGGER.info("%s: end run", self._name)
 
+
     def _handle_event(self, event: Event):
         LOGGER.debug("event received:%s",event.get_type())
         self.handler(event)
 
+
     def __schedule_job(self, event: Event):
         pass
+
 
     def handler(self, event: Event):
         """TODO: document"""
@@ -88,6 +93,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         elif "cmdb.exportd.deleted" != event_type:
             scheduler.enter(5, 1, self.start_thread, argument=(event, ))
 
+
     @staticmethod
     def start_thread(event: Event):
         """TODO: document"""
@@ -109,13 +115,14 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
 
 class ExportdThread(Thread):
     """TODO: document"""
+
     def __init__(self, event: Event, state: bool = False):
 
         scr = SystemConfigReader()
         database_options = scr.get_all_values_from_section('Database')
         database = DatabaseManagerMongo(**database_options)
 
-        super(ExportdThread, self).__init__()
+        super().__init__()
         self.job = None
         self.job_id = int(event.get_param("id"))
         self.type_id = int(event.get_param("type_id")) if event.get_param("type_id") else None
@@ -129,7 +136,9 @@ class ExportdThread(Thread):
         self.exportd_job_manager = ExportdJobManagement(database_manager=database)
         self.user_manager = UserManager(database_manager=database)
 
+
     def run(self):
+        """TODO: document"""
         try:
             if self.type_id:
                 for obj in self.exportd_job_manager.get_job_by_event_based(True):
@@ -143,6 +152,7 @@ class ExportdThread(Thread):
         except Exception as ex:
             LOGGER.error(ex)
             return ex
+
 
     def worker(self):
         """TODO: document"""

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -114,7 +114,7 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             'entry_length': 0
         }
         try:
-            with open(f'{file}', 'r', newline=run_config.get('newline')) as csv_file:
+            with open(f'{file}', 'r', encoding='utf-8', newline=run_config.get('newline')) as csv_file:
                 csv_reader = csv.reader(csv_file,
                                         delimiter=run_config.get('delimiter'),
                                         quotechar=run_config.get('quoteChar'),
@@ -164,7 +164,6 @@ class ExcelObjectParser(BaseObjectParser, XLSXContent):
         'sheet_name': 'Sheet1',
         'header': True
     }
-
 
     def __init__(self, parser_config: dict = None):
         super().__init__(parser_config)

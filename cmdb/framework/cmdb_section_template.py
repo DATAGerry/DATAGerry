@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,6 @@ from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              CmdbSectionTemplate - CLASS                                             #
@@ -106,7 +105,6 @@ class CmdbSectionTemplate(CmdbDAO):
         self.type: str = self.SECTION_TYPE
         super().__init__(**kwargs)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    CLASS FUNCTIONS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -133,7 +131,6 @@ class CmdbSectionTemplate(CmdbDAO):
         )
 
 
-
     @classmethod
     def to_json(cls, instance: "CmdbSectionTemplate") -> dict:
         """
@@ -156,7 +153,6 @@ class CmdbSectionTemplate(CmdbDAO):
         }
 
 
-
     @classmethod
     def to_data(cls, instance: "CmdbSectionTemplate") -> dict:
         """
@@ -172,7 +168,6 @@ class CmdbSectionTemplate(CmdbDAO):
             'predefined': instance['predefined'],
             'type': instance['type'],
         }
-
 
 
     @classmethod

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -39,6 +39,7 @@ class ImproveObject:
         self.value = None
         super()
 
+
     def improve_entry(self) -> dict:
         """
         This method converts field values to the appropriate type
@@ -63,7 +64,6 @@ class ImproveObject:
         return self.entry
 
 
-
     @staticmethod
     def improve_boolean(value) -> bool:
         """
@@ -77,11 +77,11 @@ class ImproveObject:
         if isinstance(value, str):
             if value in ['False', 'false', 'FALSE', '0', 'no']:
                 return False
-            elif value in ['True', 'true', 'TRUE', '1']:
+
+            if value in ['True', 'true', 'TRUE', '1']:
                 return True
 
         return value
-
 
 
     @staticmethod

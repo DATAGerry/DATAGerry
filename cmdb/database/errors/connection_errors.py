@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,7 +23,6 @@ class DatabaseConnectionError(DataBaseError):
     """
     def __init__(self, message):
         super().__init__(f'Connection error - No connection with the database: {message}')
-
 
 
 class ServerTimeoutError(DataBaseError):

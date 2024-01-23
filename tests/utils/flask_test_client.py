@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ class RestAPITestSuite:
 
 class RestAPITestClient(FlaskClient):
     """TODO: document"""
+
     def __init__(self, *args, **kwargs):
         self.database_manager = kwargs.pop('database_manager')
         self._token_generator = TokenGenerator(self.database_manager)
@@ -46,7 +47,6 @@ class RestAPITestClient(FlaskClient):
         self.content_type = 'application/json'
 
 
-
     def inject_auth(self, kwargs: dict) -> dict:
         """TODO: document"""
         if kwargs.get('unauthorized', None):
@@ -64,7 +64,6 @@ class RestAPITestClient(FlaskClient):
         return kwargs
 
 
-
     def get(self, *args, **kw):
         """TODO: document"""
         kw['method'] = 'GET'
@@ -73,7 +72,6 @@ class RestAPITestClient(FlaskClient):
         kw = self.inject_auth(kw)
 
         return super().open(*args, **kw)
-
 
 
     def patch(self, *args, **kw):
@@ -88,7 +86,6 @@ class RestAPITestClient(FlaskClient):
         return super().open(*args, **kw)
 
 
-
     def post(self, *args, **kw):
         """TODO: document"""
         kw['method'] = 'POST'
@@ -99,7 +96,6 @@ class RestAPITestClient(FlaskClient):
         kw = self.inject_auth(kw)
 
         return super().open(*args, **kw)
-
 
 
     def head(self, *args, **kw):
@@ -114,7 +110,6 @@ class RestAPITestClient(FlaskClient):
         return super().open(*args, **kw)
 
 
-
     def put(self, *args, **kw):
         """TODO: document"""
         kw['method'] = 'PUT'
@@ -127,7 +122,6 @@ class RestAPITestClient(FlaskClient):
         return super().open(*args, **kw)
 
 
-
     def delete(self, *args, **kw):
         """TODO: document"""
         kw['method'] = 'DELETE'
@@ -138,7 +132,6 @@ class RestAPITestClient(FlaskClient):
         kw = self.inject_auth(kw)
 
         return super().open(*args, **kw)
-
 
 
     def options(self, *args, **kw):

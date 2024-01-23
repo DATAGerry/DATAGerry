@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,6 @@ class AbstractTemplateData:
         return self._template_data
 
 
-
 class ObjectTemplateData(AbstractTemplateData):
     """TODO: document"""
 
@@ -41,7 +40,6 @@ class ObjectTemplateData(AbstractTemplateData):
         super().__init__()
         self.__object_manager = object_manager
         self._template_data = self.__get_objectdata(cmdb_object, 3)
-
 
 
     def __get_objectdata(self, cmdb_object, iteration):

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -22,7 +22,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
 from cmdb.search.query.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
-
+# -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 
@@ -31,7 +31,7 @@ def get_file_in_request(file_name: str) -> FileStorage:
     try:
         return request.files.get(file_name)
     except (KeyError, Exception):
-        LOGGER.error(f'File with name: {file_name} was not provided')
+        LOGGER.error('File with name: %s was not provided', file_name)
         return abort(400)
 
 
@@ -64,7 +64,7 @@ def generate_metadata_filter(element, _request=None, params=None):
                 filter_metadata.update({"metadata.%s" % key: value})
 
     except (IndexError, KeyError, TypeError, Exception) as ex:
-        LOGGER.error(f'Metadata was not provided - Exception: {ex}')
+        LOGGER.error('Metadata was not provided - Exception: %s', ex)
         return abort(400)
     return filter_metadata
 
@@ -110,10 +110,10 @@ def create_attachment_name(name, index, metadata, media_file_manager):
             name = 'copy_({})_{}'.format(index, name)
             metadata['filename'] = name
             return create_attachment_name(name, index, metadata, media_file_manager)
-        else:
-            return name
+
+        return name
     except Exception as err:
-        raise Exception(err)
+        raise Exception(err) from err
 
 
 def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:

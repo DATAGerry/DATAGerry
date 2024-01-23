@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -34,8 +34,9 @@ from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.user_management.rights import __all__ as rights
-
+# -------------------------------------------------------------------------------------------------------------------- #
 auth_blueprint = APIBlueprint('auth', __name__)
+
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
@@ -50,7 +51,6 @@ def get_auth_settings():
     auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
     return make_response(auth_module.settings)
-
 
 
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
@@ -84,7 +84,6 @@ def get_installed_providers(request_user: UserModel):
     return make_response(provider_names)
 
 
-
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
 @auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
@@ -97,7 +96,6 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     except StopIteration:
         return abort(404, 'Provider not found')
     return make_response(provider_class_config)
-
 
 
 @auth_blueprint.route('/login', methods=['POST'])

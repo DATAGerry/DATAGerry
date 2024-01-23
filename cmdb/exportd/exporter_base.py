@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -47,7 +47,6 @@ class ExportdManagerBase(ExportdJobManagement):
         super().__init__(object_manager.dbm)
 
 
-
     def __get_exportvars(self):
         exportvars = {}
         for variable in self.job.get_variables():
@@ -56,12 +55,10 @@ class ExportdManagerBase(ExportdJobManagement):
         return exportvars
 
 
-
     def __get_sources(self):
         sources = []
         sources.append(ExportSource(self.job, object_manager=self.object_manager, event=self.event))
         return sources
-
 
 
     def __get__destinations(self):
@@ -80,7 +77,6 @@ class ExportdManagerBase(ExportdJobManagement):
             destinations.append(export_destination)
 
         return destinations
-
 
 
     def execute(self, user_id: int, user_name: str, log_flag: bool = True) -> ExportdHeader:
@@ -118,14 +114,12 @@ class ExportdManagerBase(ExportdJobManagement):
         return exportd_header
 
 
-
 class ExportVariable:
     """TODO: document"""
     def __init__(self, name, value_tpl_default, value_tpl_types: dict = None):
         self.__name = name
         self.__value_tpl_default = value_tpl_default
         self.__value_tpl_types = value_tpl_types or {}
-
 
 
     def get_value(self, cmdb_object, template_data):
@@ -159,10 +153,10 @@ class ExportSource:
         self.__objects = self.__fetch_objects()
 
 
-
     def get_objects(self):
         """TODO: document"""
         return self.__objects
+
 
     def __fetch_objects(self):
         """TODO: document"""
@@ -213,6 +207,7 @@ class ExportDestination:
         external_system_class = load_class(class_external_system)
         self.__external_system = external_system_class(self.__destination_parms, self.__export_vars, event)
 
+
     def get_external_system(self):
         """TODO: document"""
         return self.__external_system
@@ -239,21 +234,26 @@ class ExternalSystem:
         self._export_vars = export_vars
         self.msg_string = ""
 
+
     def prepare_export(self):
         """TODO: document"""
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         """TODO: document"""
         pass
 
+
     def finish_export(self) -> ExportdHeader:
         """TODO: document"""
         pass
 
+
     def error(self, msg):
         """TODO: document"""
         raise ExportJobConfigException(msg)
+
 
     def set_msg(self, msg):
         """TODO: document"""

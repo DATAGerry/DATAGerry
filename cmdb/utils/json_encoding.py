@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,6 +31,7 @@ from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.settings.date.date_settings import DateSettingsDAO
 
+# TODO: try just import and remove handling if not uuid
 try:
     import uuid
 
@@ -38,7 +39,6 @@ try:
 except ImportError:
     _use_uuid = False
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
 _RE_TYPE = type(re.compile("foo"))
 

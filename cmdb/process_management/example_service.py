@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,13 +31,11 @@ class ExampleService(cmdb.process_management.service.AbstractCmdbService):
         self._eventtypes = ["cmdb.core.#", "cmdb.service1.#"]
 
 
-
     def _run(self):
         LOGGER.info("%s: start run", self._name)
         while not self._event_shutdown.is_set():
             time.sleep(10)
         LOGGER.info("%s: end run", self._name)
-
 
 
     def _handle_event(self, event):

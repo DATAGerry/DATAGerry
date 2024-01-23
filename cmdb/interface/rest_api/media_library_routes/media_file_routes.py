@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,11 +31,10 @@ from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import 
     get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
     create_attachment_name
 
-
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-
+# -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 
@@ -70,7 +69,6 @@ def get_file_list(params: CollectionParameters):
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
     return api_response.make_response()
-
 
 
 @media_file_blueprint.route('/', methods=['POST'])
@@ -137,7 +135,6 @@ def add_new_file(request_user: UserModel):
     return api_response.make_response(prefix='library')
 
 
-
 @media_file_blueprint.route('/', methods=['PUT'])
 @login_required
 @insert_request_user
@@ -196,7 +193,6 @@ def update_file(request_user: UserModel):
     return make_response(data)
 
 
-
 @media_file_blueprint.route('/<string:filename>/', methods=['GET'])
 @media_file_blueprint.route('/<string:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -224,7 +220,6 @@ def get_file(filename: str):
         return abort(404, err.message)
 
     return make_response(result)
-
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
@@ -257,7 +252,6 @@ def download_file(filename: str):
                 f"attachment; filename={filename}"
         }
     )
-
 
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])

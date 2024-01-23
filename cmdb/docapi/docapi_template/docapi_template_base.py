@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -25,9 +25,7 @@ class TemplateManagementBase:
     ASCENDING = 1
     DESCENDING = -1
     COLLECTION = 'docapi.*'
-    __SUPER_INIT_KEYS = [
-        'public_id'
-    ]
+
     SUPER_INDEX_KEYS = [
         {'keys': [('public_id', ASCENDING)], 'name': 'public_id', 'unique': True}
     ]
@@ -40,6 +38,7 @@ class TemplateManagementBase:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
+
     @classmethod
     def get_index_keys(cls):
         """TODO: document"""
@@ -48,6 +47,7 @@ class TemplateManagementBase:
         for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
         return index_list
+
 
     def to_json(self) -> dict:
         """
@@ -58,6 +58,7 @@ class TemplateManagementBase:
         from cmdb.database.utils import default
         import json
         return json.dumps(self.__dict__, default=default)
+
 
     def to_database(self):
         """TODO: document"""

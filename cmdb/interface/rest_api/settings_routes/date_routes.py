@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from flask import request, current_app, abort
@@ -24,6 +24,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+# -------------------------------------------------------------------------------------------------------------------- #
 
 date_blueprint = APIBlueprint('date', __name__)
 LOGGER = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ with current_app.app_context():
 
 @date_blueprint.route('/', methods=['GET'])
 def get_date_settings():
+    """TODO: document"""
     date_settings = system_settings_reader.get_all_values_from_section('date',
                                                                        default=DateSettingsDAO.__DEFAULT_SETTINGS__)
     date_settings = DateSettingsDAO(**date_settings)
@@ -44,6 +46,7 @@ def get_date_settings():
 @date_blueprint.route('/', methods=['POST', 'PUT'])
 @date_blueprint.protect(auth=True, right='base.system.edit')
 def update_date_settings():
+    """TODO: document"""
     new_auth_settings_values = request.get_json()
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')

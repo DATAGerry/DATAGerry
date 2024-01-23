@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,6 +33,7 @@ LOGGER = logging.getLogger(__name__)
 
 class UserManager(CmdbManagerBase):
     """TODO: document"""
+
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.scm = SecurityManager(database_manager)
         self.rights = self._load_rights()
@@ -44,7 +45,6 @@ class UserManager(CmdbManagerBase):
         return self.dbm.get_next_public_id(collection)
 
 
-
     def get_users(self) -> List[UserModel]:
         """Get all users"""
         user_list = []
@@ -54,7 +54,6 @@ class UserManager(CmdbManagerBase):
             except CMDBError:
                 continue
         return user_list
-
 
 
     def get_users_by(self, sort='public_id', **requirements) -> List[UserModel]:
@@ -71,7 +70,6 @@ class UserManager(CmdbManagerBase):
         return user_list
 
 
-
     def get_user_by(self, **requirements) -> UserModel:
         """Get user by requirement"""
         try:
@@ -80,11 +78,9 @@ class UserManager(CmdbManagerBase):
             raise UserManagerGetError('UserModel not found') from err
 
 
-
     def get_user_by_name(self, user_name) -> UserModel:
         """Get a user by his user_name"""
         return self.get_user_by(user_name=user_name)
-
 
 
     def update_user(self, public_id, update_params: dict):
@@ -95,14 +91,12 @@ class UserManager(CmdbManagerBase):
             raise UserManagerUpdateError(f'Could not update user with ID: {public_id}') from err
 
 
-
     def update_users_by(self, query: dict, update: dict):
         """TODO: document"""
         try:
             return self._update_many(collection=UserModel.COLLECTION, query=query, update=update)
         except Exception as err:
             raise UserManagerUpdateError(err) from err
-
 
 
     def delete_user(self, public_id: int) -> bool:
@@ -113,14 +107,12 @@ class UserManager(CmdbManagerBase):
             raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}') from exc
 
 
-
     def delete_users_by(self, query: dict):
         """TODO: document"""
         try:
             return self._delete_many(collection=UserModel.COLLECTION, filter_query=query).acknowledged
         except Exception as err:
             raise UserManagerDeleteError(err) from err
-
 
 
     def get_groups(self) -> list:
@@ -135,7 +127,6 @@ class UserManager(CmdbManagerBase):
         return group_list
 
 
-
     def get_group(self, public_id: int) -> UserGroupModel:
         """TODO: document"""
         try:
@@ -145,14 +136,12 @@ class UserManager(CmdbManagerBase):
             raise UserManagerGetError(err) from err
 
 
-
     def get_group_by(self, **requirements) -> UserGroupModel:
         """TODO: document"""
         try:
             return UserGroupModel(**self._get_by(collection=UserGroupModel.COLLECTION, **requirements))
         except NoDocumentFound as err:
             raise UserManagerGetError('Group not found') from err
-
 
 
     def update_group(self, public_id, update_params: dict) -> bool:
@@ -166,14 +155,12 @@ class UserManager(CmdbManagerBase):
         return ack
 
 
-
     def insert_group(self, insert_group: UserGroupModel) -> int:
         """TODO: document"""
         try:
             return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.__dict__)
         except Exception as exc:
             raise UserManagerInsertError(insert_group.name) from exc
-
 
 
     def delete_group(self, public_id, user_action: str = None, options: dict = None) -> bool:
@@ -203,7 +190,6 @@ class UserManager(CmdbManagerBase):
         return ack
 
 
-
     def get_right_names_with_min_level(self, min_level):
         """TODO: document"""
         selected_levels = []
@@ -213,17 +199,14 @@ class UserManager(CmdbManagerBase):
         return selected_levels
 
 
-
     def get_all_rights(self):
         """TODO: document"""
         return self.rights
 
 
-
     def _load_rights(self):
         from cmdb.user_management.rights import __all__
         return self._load_right_tree(__all__)
-
 
 
     def _load_right_tree(self, right_list) -> list:
@@ -236,14 +219,12 @@ class UserManager(CmdbManagerBase):
         return rights
 
 
-
     def get_right_by_name(self, name) -> BaseRight:
         """TODO: document"""
         try:
             return next(right for right in self.rights if right.name == name)
         except Exception as exc:
             raise UserManagerGetError(name) from exc
-
 
 
     def group_has_right(self, group_id: int, right_name: str) -> bool:

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,11 +28,9 @@ LOGGER = logging.getLogger(__name__)
 class Update20200512(Updater):
     """TODO: document"""
 
-
     def author(self):
         """TODO: document"""
         return 'mh'
-
 
 
     def creation_date(self):
@@ -40,17 +38,14 @@ class Update20200512(Updater):
         return '20200512'
 
 
-
     def description(self):
         """TODO: document"""
         return 'Restructure category system'
 
 
-
     def increase_updater_version(self, value):
         """TODO: document"""
         raise NotImplementedError
-
 
 
     def start_update(self):
@@ -75,7 +70,6 @@ class Update20200512(Updater):
         super().increase_updater_version(20200512)
 
 
-
     def __convert_category_to_new_structure(self, old_raw_category: dict, index: int) -> CategoryModel:
         """Converts a category from old < 20200512 structure to new format """
         old_raw_category['meta'] = {
@@ -94,8 +88,6 @@ class Update20200512(Updater):
         return category
 
 
-
-
     def __get_types_in_category(self, category_id: int) -> List[int]:
         """Get a list of type ids by calling the old structure and load the category_id field from types
         Notes:
@@ -104,7 +96,6 @@ class Update20200512(Updater):
         return [type.get('public_id') for type in
                 self.database_manager.find_all(collection=TypeModel.COLLECTION,
                                                filter={'category_id': category_id})]
-
 
 
     def __clear_up_types(self):

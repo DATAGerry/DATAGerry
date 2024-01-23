@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -225,7 +225,7 @@ class TypeImporter(BaseImporter):
 
     def __init__(self, file, file_type, config: dict = None):
         self.config = config
-        super(TypeImporter, self).__init__(file=file, file_type=file_type, config=config)
+        super().__init__(file=file, file_type=file_type, config=config)
 
 
     def start_import(self) -> BaseImporterResponse:

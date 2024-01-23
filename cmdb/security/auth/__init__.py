@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -64,7 +64,6 @@ class AuthModule:
         self.__security_manager = security_manager
 
 
-
     @staticmethod
     def __init_settings(auth_settings_values: dict) -> AuthSettingsDAO:
         """Merge default values with database entries"""
@@ -87,7 +86,6 @@ class AuthModule:
         return AuthSettingsDAO(**auth_settings_values)
 
 
-
     @classmethod
     def register_provider(cls, provider: AuthenticationProvider) -> AuthenticationProvider:
         """Install a provider
@@ -96,7 +94,6 @@ class AuthModule:
         """
         cls.__installed_providers.append(provider)
         return provider
-
 
 
     @classmethod
@@ -109,12 +106,10 @@ class AuthModule:
             return False
 
 
-
     @staticmethod
     def get_provider_class(provider_name: str) -> 'AuthenticationProvider':
         """Get a specific provider class by class name"""
         return next(_ for _ in AuthModule.__installed_providers if _.__qualname__ == provider_name)
-
 
 
     @staticmethod
@@ -130,12 +125,10 @@ class AuthModule:
             return False
 
 
-
     @classmethod
     def get_installed_providers(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
-
 
 
     @classmethod
@@ -144,12 +137,10 @@ class AuthModule:
         return cls.__installed_providers
 
 
-
     @classmethod
     def get_installed_external(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
-
 
 
     @property
@@ -158,12 +149,10 @@ class AuthModule:
         return AuthModule.__installed_providers
 
 
-
     @property
     def settings(self) -> AuthSettingsDAO:
         """Get the current auth settings"""
         return self.__settings
-
 
 
     def get_provider(self, provider_name: str) -> AuthenticationProvider:
@@ -185,7 +174,6 @@ class AuthModule:
         except Exception as err:
             LOGGER.error('[AuthModule] %s', err)
             return None
-
 
 
     def login(self, user_name: str, password: str) -> UserModel:

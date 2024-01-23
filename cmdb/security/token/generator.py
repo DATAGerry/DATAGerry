@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -49,12 +49,10 @@ class TokenGenerator:
             'auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
 
-
     def get_expire_time(self) -> datetime:
         """TODO: document"""
         expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))
         return datetime.now(timezone.utc) + timedelta(minutes=expire_time)
-
 
 
     def generate_token(self, payload: dict, optional_claims: dict = None) -> bytes:

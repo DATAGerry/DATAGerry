@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,6 @@ class UserManager(ManagerBase):
 
     def __init__(self, database_manager: DatabaseManagerMongo):
         super().__init__(UserModel.COLLECTION, database_manager=database_manager)
-
 
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
@@ -67,7 +66,6 @@ class UserManager(ManagerBase):
         return iteration_result
 
 
-
     def get(self, public_id: Union[PublicID, int]) -> UserModel:
         """
         Get a single user by its id.
@@ -82,7 +80,6 @@ class UserManager(ManagerBase):
         for resource_result in result.limit(-1):
             return UserModel.from_data(resource_result)
         raise ManagerGetError(f'User with ID: {public_id} not found!')
-
 
 
     def get_by(self, query: Query) -> UserModel:
@@ -101,7 +98,6 @@ class UserManager(ManagerBase):
         raise ManagerGetError(f'User with the query: {query} not found!')
 
 
-
     def get_many(self, query: Query = None) -> List[UserModel]:
         """
         Get a collection of users by a query. Passing no query means all users.
@@ -115,7 +111,6 @@ class UserManager(ManagerBase):
         query = query or {}
         results = self._get(self.collection, filter=query)
         return [UserModel.from_data(user) for user in results]
-
 
 
     def insert(self, user: Union[UserModel, dict]) -> PublicID:
@@ -134,7 +129,6 @@ class UserManager(ManagerBase):
         if isinstance(user, UserModel):
             user = UserModel.to_data(user)
         return self._insert(self.collection, resource=user)
-
 
 
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
@@ -156,7 +150,6 @@ class UserManager(ManagerBase):
         if update_result.matched_count != 1:
             raise ManagerUpdateError('Something happened during the update!')
         return update_result
-
 
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:

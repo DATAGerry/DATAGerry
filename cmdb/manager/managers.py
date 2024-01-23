@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -28,7 +28,6 @@ from cmdb.search.query.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              ManagerQueryBuilder - CLASS                                             #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class ManagerQueryBuilder(Builder):
     """Query/Pipeline builder class for the managers"""
 
@@ -37,9 +36,11 @@ class ManagerQueryBuilder(Builder):
         self.query: Union[Query, Pipeline] = Pipeline([])
         super().__init__()
 
+
     def __len__(self):
         """Get the length of the query"""
         return len(self.query)
+
 
     def clear(self):
         """`Delete` the query content"""
@@ -79,7 +80,6 @@ class ManagerQueryBuilder(Builder):
         return self.query
 
 
-
     def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
         """
         Count the number of documents in the stages
@@ -100,7 +100,6 @@ class ManagerQueryBuilder(Builder):
         self.query.append(self.count_('total'))
         return self.query
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  ManagerBase - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -120,30 +119,35 @@ class ManagerBase(AbstractManagerBase):
         super().__init__(database_manager)
 
 
-
     def count(self, filter: dict, *args, **kwargs) -> int:
         """TODO: document"""
         raise NotImplementedError
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
         """TODO: document"""
         raise NotImplementedError
 
+
     def find(self, filter: dict, *args, **kwargs) -> ListResult:
         """TODO: document"""
         raise NotImplementedError
+
 
     def get(self, public_id: PublicID) -> dict:
         """TODO: document"""
         raise NotImplementedError
 
+
     def insert(self, resource: dict) -> PublicID:
         """TODO: document"""
         raise NotImplementedError
 
+
     def update(self, public_id: PublicID, resource: dict):
         """TODO: document"""
         raise NotImplementedError
+
 
     def delete(self, public_id: PublicID):
         """TODO: document"""

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -46,7 +46,6 @@ class EventManager:
         self._receiver_callback = receiver_callback
 
 
-
     def send_event(self, event):
         """sends an  event
 
@@ -54,7 +53,6 @@ class EventManager:
             event: the created event to send
 
         """
-
 
 
     def get_send_queue(self):
@@ -69,10 +67,8 @@ class EventManager:
         """
 
 
-
     def shutdown(self):
         """shutdown the EventManager"""
-
 
 
 class EventManagerAmqp(EventManager):
@@ -121,15 +117,12 @@ class EventManagerAmqp(EventManager):
         self.__consumer.start()
 
 
-
     def send_event(self, event):
         self.__queue_send.put(event)
 
 
-
     def get_send_queue(self):
         return self.__queue_send
-
 
 
     def shutdown(self):
@@ -138,7 +131,6 @@ class EventManagerAmqp(EventManager):
         # wait for producer and consumer to end
         self.__producer.join()
         self.__consumer.join()
-
 
 
 class EventSenderAmqp(threading.Thread):
@@ -179,7 +171,6 @@ class EventSenderAmqp(threading.Thread):
         self.__channel = None
 
 
-
     def __init_connection(self):
         """create a connection to message broker"""
         try:
@@ -198,9 +189,8 @@ class EventSenderAmqp(threading.Thread):
                 exchange_type="topic"
             )
         except pika.exceptions.AMQPConnectionError:
-            LOGGER.error("{}: EventSenderAmqp connection error".format(self.__process_id))
+            LOGGER.error("%s: EventSenderAmqp connection error", self.__process_id)
             self.__flag_shutdown.set()
-
 
 
     def run(self):
@@ -224,7 +214,6 @@ class EventSenderAmqp(threading.Thread):
             except pika.exceptions.AMQPConnectionError:
                 LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()
-
 
 
 class EventReceiverAmqp(threading.Thread):
@@ -269,7 +258,6 @@ class EventReceiverAmqp(threading.Thread):
         self.__channel = None
 
 
-
     def __process_event_cb(self, ch, method, properties, body):
         """event processing
 
@@ -287,7 +275,6 @@ class EventReceiverAmqp(threading.Thread):
             self.__receiver_callback(event)
 
 
-
     def __check_shutdown_flag(self):
         """check, if the shutdown flag was set"""
         # reinstall shutdown check
@@ -296,7 +283,6 @@ class EventReceiverAmqp(threading.Thread):
         if self.__flag_shutdown.is_set():
             self.__channel.stop_consuming()
             self.__connection.close()
-
 
 
     def __init_connection(self):
@@ -325,9 +311,8 @@ class EventReceiverAmqp(threading.Thread):
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue_handler, no_ack=True)
         except AMQPConnectionError:
-            LOGGER.error("{}: EventReceiverAmqp connection error".format(self.__process_id))
+            LOGGER.error("%s: EventReceiverAmqp connection error",self.__process_id)
             self.__flag_shutdown.set()
-
 
 
     def run(self):

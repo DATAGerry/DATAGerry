@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,6 @@ from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
 LOGGER = logging.getLogger(__name__)
 
 
-
 class NetworkInfrastructureProfile(ProfileBase):
     """
     This class cointains all types and logics for the 'Network Infrastructure'-Profile
@@ -33,10 +32,10 @@ class NetworkInfrastructureProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
+
     def create_network_infrastructure_profile(self) -> dict:
         """
         Creates all types from the 'Network Infrastructure'- Profile
@@ -48,7 +47,6 @@ class NetworkInfrastructureProfile(ProfileBase):
         self._create_remaining_types()
 
         return self.created_type_ids
-
 
 
     def _create_types_with_dependencies(self):
@@ -76,11 +74,9 @@ class NetworkInfrastructureProfile(ProfileBase):
         wap_type_data = self.get_wireless_access_point_type()
         self.create_basic_type('wireless_access_point_id', wap_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_switch_type(self) -> dict:
         """
@@ -293,12 +289,9 @@ class NetworkInfrastructureProfile(ProfileBase):
                 }
             )
 
-
         return self.type_dict[type_prefix]
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_router_type(self):
         """
@@ -423,11 +416,9 @@ class NetworkInfrastructureProfile(ProfileBase):
             }
         }
 
-
         # get the fields and sections of router type
         router_type_fields: list = self.type_dict[type_prefix]['fields']
         router_type_sections: list = self.type_dict[type_prefix]['render_meta']['sections']
-
 
         # Add the network profile dependencies
         network_type_id = self.created_type_ids['network_id']
@@ -448,7 +439,6 @@ class NetworkInfrastructureProfile(ProfileBase):
             )
 
             self.set_type_section_field(type_prefix,'section-47066',network_field_name)
-
 
         # Add the operating system profile dependencies
         operating_system_id = self.created_type_ids['operating_system_id']
@@ -478,7 +468,6 @@ class NetworkInfrastructureProfile(ProfileBase):
                     ]
                 }
             )
-
 
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
@@ -513,9 +502,7 @@ class NetworkInfrastructureProfile(ProfileBase):
 
         return self.type_dict[type_prefix]
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_patch_panel_type(self):
         """
@@ -617,9 +604,7 @@ class NetworkInfrastructureProfile(ProfileBase):
 
         return self.type_dict[type_prefix]
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_wireless_access_point_type(self):
         """
@@ -774,11 +759,9 @@ class NetworkInfrastructureProfile(ProfileBase):
             }
         }
 
-
         # get the fields and sections of router type
         wap_type_fields: list = self.type_dict[type_prefix]['fields']
         wap_type_sections: list = self.type_dict[type_prefix]['render_meta']['sections']
-
 
         # Add the network profile dependencies
         network_type_id = self.created_type_ids['network_id']
@@ -799,7 +782,6 @@ class NetworkInfrastructureProfile(ProfileBase):
             )
 
             self.set_type_section_field(type_prefix,'section-99636',network_field_name)
-
 
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
@@ -831,6 +813,5 @@ class NetworkInfrastructureProfile(ProfileBase):
                     ]
                 }
             )
-
 
         return self.type_dict[type_prefix]

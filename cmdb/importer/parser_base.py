@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,7 @@ class BaseParser:
     def __new__(cls, *args, **kwargs):
         return super(BaseParser, cls).__new__(cls)
 
+
     def __init__(self, parser_config: dict = None):
         _parser_config = parser_config or self.DEFAULT_CONFIG
         self.parser_config: dict = {**self.DEFAULT_CONFIG, **_parser_config}
@@ -37,6 +38,7 @@ class BaseParser:
     def get_config(self) -> dict:
         """TODO: document"""
         return self.parser_config
+
 
     def parse(self, file) -> ParserResponse:
         """TODO: document"""
@@ -63,6 +65,7 @@ class BaseTypeParser(BaseParser):
 
     def __init__(self, parser_config: dict):
         super().__init__(parser_config)
+
 
     def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,8 @@ class ExportDLogManager(ExportDManager):
         Args:
             database_manager: Connection to the database class.
         """
-        super(ExportDLogManager, self).__init__(ExportdJobLog.COLLECTION, database_manager=database_manager)
+        super().__init__(ExportdJobLog.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[ExportdJobLog]:
@@ -60,4 +61,5 @@ class ExportDLogManager(ExportDManager):
             raise ManagerIterationError(err) from err
         iteration_result: IterationResult[ExportdJobLog] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJobLog)
+
         return iteration_result

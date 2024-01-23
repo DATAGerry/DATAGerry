@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,11 +33,9 @@ class AuthSettingsDAO:
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
 
 
-
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
-
 
 
     def get_token_lifetime(self, default: int = DEFAULT_TOKEN_LIFETIME) -> int:
@@ -47,11 +45,9 @@ class AuthSettingsDAO:
         return self.token_lifetime
 
 
-
     def get_provider_list(self) -> List[dict]:
         """Get the list of providers with config"""
         return self.providers
-
 
 
     def get_provider_settings(self, class_name: str) -> dict:

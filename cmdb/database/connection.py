@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -54,7 +54,6 @@ class MongoConnector:
         self.port: int = port
 
 
-
     def connect(self) -> ConnectionStatus:
         """
         Connect to database
@@ -67,7 +66,6 @@ class MongoConnector:
             raise DatabaseConnectionError(err) from err
 
 
-
     def disconnect(self) -> ConnectionStatus:
         """
         Disconnect from database
@@ -77,14 +75,12 @@ class MongoConnector:
         return ConnectionStatus(connected=False)
 
 
-
     def is_connected(self) -> bool:
         """
         check if client is connected successfully
         Returns: True if connected / False if disconnected
         """
         return self.connect().connected
-
 
 
     def __exit__(self, *err):

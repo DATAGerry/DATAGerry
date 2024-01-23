@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,6 @@ def debug_print(self):
     return f'Class: {self.__class__.__name__} \nDict:\n{pprint.pformat(self.__dict__)}'
 
 
-
 def get_config_dir():
     """
     get configuration directory
@@ -45,7 +44,6 @@ def get_config_dir():
     """
     import os
     return os.path.join(os.path.dirname(__file__), '../../etc/')
-
 
 
 def load_class(classname):
@@ -62,7 +60,6 @@ def load_class(classname):
     return loaded_class
 
 
-
 def get_module_classes(module_name):
     """
         Get all class of an module and return list of classes
@@ -76,7 +73,6 @@ def get_module_classes(module_name):
         if module_name in str(data):
             class_list.append(key)
     return class_list
-
 
 
 def str_to_bool(s):

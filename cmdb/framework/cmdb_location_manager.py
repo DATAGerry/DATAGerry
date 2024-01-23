@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -68,7 +68,6 @@ def has_access_control(model: TypeModel, user: UserModel, permission: AccessCont
     return True
 
 
-
 def verify_access(model: TypeModel, user: UserModel = None, permission: AccessControlPermission = None):
     """Validate if a user has access to locations of this type."""
     if not user or not permission:
@@ -78,9 +77,7 @@ def verify_access(model: TypeModel, user: UserModel = None, permission: AccessCo
     if not verify:
         raise AccessDeniedError('Protected by ACL permission!')
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
 class CmdbLocationManager(CmdbManagerBase):
     """
@@ -90,7 +87,6 @@ class CmdbLocationManager(CmdbManagerBase):
         self._event_queue = event_queue
         self._type_manager = TypeManager(database_manager)
         super().__init__(database_manager)
-
 
 
     def get_location_for_object(self, object_id: int, user: UserModel = None,
@@ -108,7 +104,6 @@ class CmdbLocationManager(CmdbManagerBase):
         #     type_ = self._type_manager.get(resource.type_id)
         #     verify_access(type_, user, permission)
         return resource
-
 
 
     def get_all_children(self, public_id: int, all_locations: dict):
@@ -142,7 +137,6 @@ class CmdbLocationManager(CmdbManagerBase):
         return found_children
 
 
-
     def get_location(self, public_id: int, user: UserModel = None,
                    permission: AccessControlPermission = None) -> CmdbLocation:
         """TODO: document"""
@@ -158,6 +152,7 @@ class CmdbLocationManager(CmdbManagerBase):
             type_ = self._type_manager.get(resource.type_id)
             verify_access(type_, user, permission)
         return resource
+
 
     def get_locations_by(self, sort='public_id', direction=-1, user: UserModel = None,
                        permission: AccessControlPermission = None, **requirements):
@@ -177,7 +172,6 @@ class CmdbLocationManager(CmdbManagerBase):
         return ack
 
 
-
     def get_locations_by_type(self, type_id: int):
         """
         function 'get_objects_by_type' gets all objects with the given type_id
@@ -189,7 +183,6 @@ class CmdbLocationManager(CmdbManagerBase):
             list: All objects with the given ID (empty list if none found) 
         """
         return self.get_locations_by(type_id=type_id)
-
 
 
     def count_locations_by_type(self, public_id: int):
@@ -206,7 +199,6 @@ class CmdbLocationManager(CmdbManagerBase):
         formatted_type_id = {'type_id': public_id}
 
         return self.dbm.count(CmdbLocation.COLLECTION, formatted_type_id)
-
 
 
     def count_locations(self):
@@ -262,7 +254,6 @@ class CmdbLocationManager(CmdbManagerBase):
 
         return ack
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    DELETE SECTION                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -300,7 +291,6 @@ class CmdbLocationManager(CmdbManagerBase):
         except (CMDBError, Exception) as error:
             raise LocationManagerDeleteError(error) from error
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    HELPERS SECTION                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -315,7 +305,6 @@ class CmdbLocationManager(CmdbManagerBase):
         return self.dbm.status()
 
 
-
     def get_new_id(self, collection: str) -> int:
         """
         Retrieves next publicID
@@ -326,7 +315,6 @@ class CmdbLocationManager(CmdbManagerBase):
             int: new publicID
         """
         return self.dbm.get_next_public_id(collection)
-
 
 
     def has_children(self, public_id: int):
@@ -341,7 +329,6 @@ class CmdbLocationManager(CmdbManagerBase):
             raise LocationManagerError(str(err)) from err
 
         return has_child
-
 
 
     def aggregate(self, collection, pipeline: Pipeline, **kwargs):

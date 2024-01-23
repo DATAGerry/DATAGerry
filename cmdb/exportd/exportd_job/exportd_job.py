@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -18,7 +18,7 @@ from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO, NoPublicIDError
 from cmdb.framework.utils import Collection, Model
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExecuteState(Enum):
     """TODO: document"""
@@ -73,7 +73,6 @@ class ExportdJob(JobManagementBase):
         super().__init__(**kwargs)
 
 
-
     @classmethod
     def from_data(cls, data: dict) -> "ExportdJob":
         """Create a instance of ExportdJob from database values"""
@@ -92,7 +91,6 @@ class ExportdJob(JobManagementBase):
             state=data.get('state', None),
             exportd_type=data.get('exportd_type', None),
         )
-
 
 
     @classmethod
@@ -115,7 +113,6 @@ class ExportdJob(JobManagementBase):
         }
 
 
-
     def get_public_id(self) -> int:
         """
         get the public id of current element
@@ -136,7 +133,6 @@ class ExportdJob(JobManagementBase):
         return self.public_id
 
 
-
     def get_name(self) -> str:
         """
         Get the name of the job
@@ -147,7 +143,6 @@ class ExportdJob(JobManagementBase):
             return ""
         else:
             return self.name
-
 
 
     def get_label(self) -> str:
@@ -162,7 +157,6 @@ class ExportdJob(JobManagementBase):
             return self.label
 
 
-
     def get_active(self) -> bool:
         """
         Get active state of the job
@@ -175,7 +169,6 @@ class ExportdJob(JobManagementBase):
             return self.active
 
 
-
     def get_sources(self):
         """
         Get all sources of the job
@@ -183,7 +176,6 @@ class ExportdJob(JobManagementBase):
             list: all sources
         """
         return self.sources
-
 
 
     def get_destinations(self):
@@ -195,7 +187,6 @@ class ExportdJob(JobManagementBase):
         return self.destination
 
 
-
     def get_variables(self):
         """
         Get all variables of the job
@@ -203,7 +194,6 @@ class ExportdJob(JobManagementBase):
             list: all variables
         """
         return self.variables
-
 
 
     def get_scheduling(self) -> dict:
@@ -215,7 +205,6 @@ class ExportdJob(JobManagementBase):
         return self.scheduling
 
 
-
     def get_state(self):
         """
         Get state of executation of the job
@@ -225,7 +214,6 @@ class ExportdJob(JobManagementBase):
         return self.state
 
 
-
     def get_exportd_typ(self):
         """
         Get type of executation of the job
@@ -233,7 +221,6 @@ class ExportdJob(JobManagementBase):
             str:
         """
         return self.exportd_type
-
 
 
     def get_author_id(self):

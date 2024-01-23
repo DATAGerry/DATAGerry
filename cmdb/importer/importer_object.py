@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -204,7 +204,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
 
                 if len(founded_objects) != 1:
                     continue
-                
+
                 working_object['fields'].append(
                     {'name': foreign_entry.get_name(),
                         'value': founded_objects[0].get_public_id()
@@ -215,6 +215,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                 continue
 
         return working_object
+
 
     def start_import(self) -> ImporterObjectResponse:
         try:
@@ -243,8 +244,12 @@ class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
 class ExcelObjectImporter(ObjectImporter, XLSXContent):
     """TODO: document"""
 
-    def __init__(self, file=None, config: ExcelObjectImporterConfig = None,
-                 parser: JsonObjectParser = None, object_manager: CmdbObjectManager = None, request_user: UserModel = None):
+    def __init__(self,
+                 file=None,
+                 config: ExcelObjectImporterConfig = None,
+                 parser: JsonObjectParser = None,
+                 object_manager: CmdbObjectManager = None,
+                 request_user: UserModel = None):
         super().__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
                                                   object_manager=object_manager, request_user=request_user)
 
@@ -286,7 +291,6 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
                  })
 
         return working_object
-
 
 
     def start_import(self) -> ImporterObjectResponse:

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -42,7 +42,6 @@ class PipelineBuilder(Builder):
         return len(self.pipeline)
 
 
-
     def clear(self):
         """Clear the pipeline"""
         self.pipeline = Pipeline([])
@@ -63,9 +62,11 @@ class PipelineBuilder(Builder):
         """Add a pipe to the pipeline"""
         self._pipeline.append(pipe)
 
+
     def remove_pipe(self, pipe: dict):
         """Remove a pipe to the pipeline"""
         self._pipeline.remove(pipe)
+
 
     def build(self, *args, **kwargs) -> Pipeline:
         raise NotImplementedError

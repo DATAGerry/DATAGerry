@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -38,6 +38,7 @@ class APIPager:
         self.page = page
         self.page_size = page_size
         self.total_pages = total_pages
+
 
     def to_dict(self) -> dict:
         """TODO: document"""

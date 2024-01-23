@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -62,11 +62,9 @@ class UpdateRoutine:
                     system config reader status: {system_config_reader_status}')
 
 
-
     def get_updater_status(self):
         """TODO: document"""
         return self.status
-
 
 
     def __check_database(self):
@@ -85,11 +83,9 @@ class UpdateRoutine:
         return connection_test
 
 
-
     def __is_database_empty(self) -> bool:
         """TODO: document"""
         return not self.setup_database_manager.connector.database.list_collection_names()
-
 
 
     def start_update(self):
@@ -116,7 +112,6 @@ class UpdateRoutine:
         LOGGER.info('UPDATE ROUTINE: FINISHED!')
 
         return self.status
-
 
 
     def update_database_collection(self):
@@ -156,7 +151,6 @@ class UpdateRoutine:
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
         except Exception as ex:
             LOGGER.info('UPDATE ROUTINE: Database collection validation failed: %s', ex)
-
 
 
     def update_db_version(self):

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -24,7 +24,6 @@ from cmdb.framework.assistant_profiles.profile_base_class import ProfileBase
 LOGGER = logging.getLogger(__name__)
 
 
-
 class IPAMProfile(ProfileBase):
     """
     This class cointains all types and logics for the 'IPAM'-Profile
@@ -33,10 +32,10 @@ class IPAMProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
+
     def create_ipam_profile(self) -> dict:
         """
         Creates all types from the 'IPAM'- Profile
@@ -50,14 +49,12 @@ class IPAMProfile(ProfileBase):
         return self.created_type_ids
 
 
-
     def _create_types_with_dependencies(self):
         """
         Creates all types which are a dependancy for other types
         """
         network_type_data = self.get_network_type()
         self.create_basic_type('network_id',network_type_data)
-
 
 
     def _create_remaining_types(self):
@@ -67,11 +64,9 @@ class IPAMProfile(ProfileBase):
         vlan_type_data = self.get_vlan_type(self.created_type_ids['network_id'])
         self.create_basic_type('vlan_id', vlan_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_network_type(self) -> dict:
         """
@@ -144,9 +139,7 @@ class IPAMProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_vlan_type(self, network_type_id: int) -> dict:
         """

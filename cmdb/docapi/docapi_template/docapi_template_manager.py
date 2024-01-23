@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -43,11 +43,9 @@ class DocapiTemplateManager(CmdbManagerBase):
         super().__init__(database_manager)
 
 
-
     def get_new_id(self) -> int:
         """TODO: document"""
         return self.dbm.get_next_public_id(DocapiTemplate.COLLECTION)
-
 
 
     def get_template(self, public_id: int) -> DocapiTemplate:
@@ -58,7 +56,6 @@ class DocapiTemplateManager(CmdbManagerBase):
             LOGGER.error(err)
             raise err
         return DocapiTemplate(**result)
-
 
 
     def get_templates(self,
@@ -86,7 +83,6 @@ class DocapiTemplateManager(CmdbManagerBase):
         return iteration_result
 
 
-
     def get_templates_by(self, **requirements):
         """TODO: document"""
         try:
@@ -99,7 +95,6 @@ class DocapiTemplateManager(CmdbManagerBase):
             raise DocapiTemplateManagerGetError(err) from err
 
 
-
     def get_template_by_name(self, **requirements) -> DocapiTemplate:
         """TODO: document"""
         try:
@@ -110,7 +105,6 @@ class DocapiTemplateManager(CmdbManagerBase):
             raise DocapiTemplateManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as err:
             raise DocapiTemplateManagerGetError(err) from err
-
 
 
     def insert_template(self, data: (DocapiTemplate, dict)) -> int:
@@ -143,7 +137,6 @@ class DocapiTemplateManager(CmdbManagerBase):
         return ack
 
 
-
     def update_template(self, data: (dict, DocapiTemplate), request_user: UserModel) -> str:
         """
         Update new DocapiTemplat Object
@@ -171,7 +164,6 @@ class DocapiTemplateManager(CmdbManagerBase):
                                                   "user_id": request_user.get_public_id()})
             self._event_queue.put(event)
         return ack.acknowledged
-
 
 
     def delete_template(self, public_id: int, request_user: UserModel) -> bool:

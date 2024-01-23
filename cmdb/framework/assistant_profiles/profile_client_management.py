@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,11 +33,9 @@ class ClientManagementProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def create_client_management_profile(self) -> dict:
         """
@@ -50,7 +48,6 @@ class ClientManagementProfile(ProfileBase):
         self._create_remaining_types()
 
         return self.created_type_ids
-
 
 
     def _create_types_with_dependencies(self):
@@ -78,11 +75,9 @@ class ClientManagementProfile(ProfileBase):
         printer_type_data = self.get_printer_type()
         self.create_basic_type('printer_id', printer_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_client_type(self) -> dict:
         """
@@ -234,7 +229,6 @@ class ClientManagementProfile(ProfileBase):
 
             self.set_type_section_field(type_prefix,'section-36497',network_field_name)
 
-
         # Add the operating system profile dependencies
         operating_system_id = self.created_type_ids['operating_system_id']
 
@@ -263,7 +257,6 @@ class ClientManagementProfile(ProfileBase):
                     ]
                 }
             )
-
 
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
@@ -296,9 +289,7 @@ class ClientManagementProfile(ProfileBase):
                 }
             )
 
-
         return self.type_dict[type_prefix]
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -373,9 +364,7 @@ class ClientManagementProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_monitor_type(self, client_type_id: int) -> dict:
         """
@@ -487,9 +476,7 @@ class ClientManagementProfile(ProfileBase):
 
         return self.type_dict[type_prefix]
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_printer_type(self) -> dict:
         """

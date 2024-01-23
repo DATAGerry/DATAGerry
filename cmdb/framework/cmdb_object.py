@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -129,13 +129,11 @@ class CmdbObject(CmdbDAO):
         super().__init__(**kwargs)
 
 
-
     def __truediv__(self, other):
         if not isinstance(other, self.__class__):
             raise TypeError("Not the same class")
         return {**{'old': [i for i in self.fields if i not in other.fields]},
                 **{'new': [j for j in other.fields if j not in self.fields]}}
-
 
 
     @classmethod
@@ -163,7 +161,6 @@ class CmdbObject(CmdbDAO):
         )
 
 
-
     @classmethod
     def to_json(cls, instance: "CmdbObject") -> dict:
         """Convert a type instance to json conform data"""
@@ -181,7 +178,6 @@ class CmdbObject(CmdbDAO):
         }
 
 
-
     def get_type_id(self) -> int:
         """get input_type if of this object
 
@@ -194,7 +190,6 @@ class CmdbObject(CmdbDAO):
         return int(self.type_id)
 
 
-
     def get_all_fields(self) -> list:
         """ Get all fields with key value pair
 
@@ -202,7 +197,6 @@ class CmdbObject(CmdbDAO):
             all fields
         """
         return self.fields
-
 
 
     def has_field(self, name) -> bool:
@@ -214,14 +208,12 @@ class CmdbObject(CmdbDAO):
         return True
 
 
-
     def set_new_value(self, field, value):
         """TODO: document"""
         self.fields.append({
             'name': field,
             'value': value
         })
-
 
 
     def set_value(self, field, value) -> str:
@@ -234,7 +226,6 @@ class CmdbObject(CmdbDAO):
                 return f['name']
             continue
         raise FieldNotFoundError
-
 
 
     def get_value(self, field) -> (str, None):
@@ -253,7 +244,6 @@ class CmdbObject(CmdbDAO):
         raise ValueError(field)
 
 
-
     def get_values(self, fields: list) -> list:
         """TODO: document"""
         list_of_values = []
@@ -261,7 +251,6 @@ class CmdbObject(CmdbDAO):
             if field['name'] in fields:
                 list_of_values.append(field['value'])
         return list_of_values
-
 
 
     def to_value_strings(self, field_names: list) -> str:
@@ -284,7 +273,6 @@ class TypeNotSetError(CMDBError):
     def __init__(self, public_id):
         self.message = f'The object (ID: {public_id}) is not connected with a input_type'
         super(CMDBError, self).__init__(self.message)
-
 
 
 class NoFoundFieldValueError(CMDBError):

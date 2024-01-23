@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,10 +27,10 @@ LOGGER = logging.getLogger(__name__)
 
 class RightManager(ManagerBase):
     """TODO: document"""
+
     def __init__(self, right_tree):
         self.rights = RightManager.flat_tree(right_tree)
         super().__init__(None, None)
-
 
 
     @staticmethod
@@ -53,7 +53,6 @@ class RightManager(ManagerBase):
         return rights
 
 
-
     @staticmethod
     def tree_to_json(right_tree) -> list:
         """
@@ -66,7 +65,6 @@ class RightManager(ManagerBase):
             else:
                 raw_tree.append(BaseRight.to_dict(node))
         return raw_tree
-
 
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[
@@ -82,7 +80,6 @@ class RightManager(ManagerBase):
             raise ManagerIterationError(err) from err
         result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
         return result
-
 
 
     def get(self, name: str) -> BaseRight:
@@ -101,15 +98,12 @@ class RightManager(ManagerBase):
             raise ManagerGetError(err) from err
 
 
-
     def insert(self, resource: dict) -> PublicID:
         raise NotImplementedError
 
 
-
     def update(self, public_id: PublicID, resource: dict):
         raise NotImplementedError
-
 
 
     def delete(self, public_id: PublicID):

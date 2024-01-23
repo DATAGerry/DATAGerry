@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -53,7 +53,6 @@ class SystemConfigReader:
         return setattr(self.instance, name, value)
 
 
-
     @classmethod
     def from_full_path(cls, full_path: str):
         """TODO: document"""
@@ -93,7 +92,6 @@ class SystemConfigReader:
             self.__envvars = SystemEnvironmentReader()
 
 
-
         def add_section(self, section):
             """
             Add a section to the config parser
@@ -106,9 +104,11 @@ class SystemConfigReader:
                 raise ConfigFileSetError(self.config_file)
             self.config.add_section(section)
 
+
         def get_section(self, section):
             """TODO: document"""
-            return self.config.sections(section)
+            return self.config.sections()
+
 
         def set(self, section, option, value):
             """
@@ -125,7 +125,6 @@ class SystemConfigReader:
             self.config.set(section, option, value)
 
 
-
         def setup(self):
             """
             init configuration file
@@ -139,7 +138,6 @@ class SystemConfigReader:
                 return SystemConfigReader.CONFIG_NOT_LOADED
 
 
-
         def read_config_file(self, file):
             """
             helper function for file reading sets the path directly inside the config attribute
@@ -151,7 +149,6 @@ class SystemConfigReader:
                 self.config.read(file)
             else:
                 raise ConfigFileNotFound(self.config_name)
-
 
 
         def get_value(self, name: str, section: str, default: Any = None):
@@ -185,7 +182,6 @@ class SystemConfigReader:
                 raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
 
-
         def get_sections(self):
             """
             get all sections from config
@@ -196,7 +192,6 @@ class SystemConfigReader:
                 return self.config.sections()
 
             raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
-
 
 
         def get_all_values_from_section(self, section):
@@ -234,7 +229,6 @@ class SystemConfigReader:
             return section_merged
 
 
-
         def status(self):
             """
             checks if config is loaded correctly
@@ -245,6 +239,7 @@ class SystemConfigReader:
                 return self.CONFIG_LOADED
             return self.CONFIG_NOT_LOADED
 
+        # TODO: fix this issue
         def __repr__(self):
             """
             Helper function for debugging

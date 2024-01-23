@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,16 +30,19 @@ with current_app.app_context():
 @debug_blueprint.route('/indexes/<string:collection>/', methods=['GET'])
 @debug_blueprint.route('/indexes/<string:collection>', methods=['GET'])
 def get_index(collection: str):
+    """TODO: document"""
     return make_response(database_manager.get_index_info(collection))
 
 
 @debug_blueprint.route('/error/<int:status_code>/', methods=['GET', 'POST'])
 @debug_blueprint.route('/error/<int:status_code>', methods=['GET', 'POST'])
 def trigger_error_handler(status_code: int):
+    """TODO: document"""
     return abort(status_code)
 
 
 @debug_blueprint.route('/error/<int:status_code>/<string:description>/', methods=['GET', 'POST'])
 @debug_blueprint.route('/error/<int:status_code>/<string:description>', methods=['GET', 'POST'])
 def trigger_error_handler_with_description(status_code: int, description: str):
+    """TODO: document"""
     return abort(status_code, description=description)

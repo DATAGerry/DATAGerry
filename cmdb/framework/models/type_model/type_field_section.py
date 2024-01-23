@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -36,7 +36,6 @@ class TypeFieldSection(TypeSection):
     def __init__(self, type: str, name: str, label: str = None, fields: list = None):
         self.fields = fields or []
         super().__init__(type=type, name=name, label=label)
-
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
@@ -76,7 +75,7 @@ class TypeFieldSection(TypeSection):
             'label': instance.label,
             'fields': instance.fields
         }
-    
+
 # -------------------------------------------------- GENERAL METHODS ------------------------------------------------- #
 
     def get_fields(self) -> list:

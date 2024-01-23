@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -31,13 +31,11 @@ class FileMetadata:
         self.permission = permissions
 
 
-
     def get_ref_to(self) -> objectid:
         """TODO: document"""
         if self.reference is None:
             return None
         return self.reference
-
 
 
     def get_ref_to_type(self) -> str:
@@ -47,13 +45,11 @@ class FileMetadata:
         return self.reference_type
 
 
-
     def get_mime_type(self) -> str:
         """TODO: document"""
         if self.mime_type is None:
             return "application/json"
         return self.mime_type
-
 
 
     def get_permission(self):
@@ -63,7 +59,6 @@ class FileMetadata:
         if self.permission is None:
             return None
         return self.permission
-
 
 
     @classmethod

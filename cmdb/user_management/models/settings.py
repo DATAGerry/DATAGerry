@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -34,7 +34,6 @@ class UserSettingType(Enum):
     SERVER = 'SERVER'
 
 
-
 class UserSettingPayload:
     """
     Payload wrapper user settings.
@@ -49,7 +48,6 @@ class UserSettingPayload:
             payload (Any): Settings option/body/payload.
         """
         self.payload: Any = payload
-
 
 
     @classmethod
@@ -68,7 +66,6 @@ class UserSettingPayload:
         )
 
 
-
     @classmethod
     def to_data(cls, instance: "UserSettingPayload") -> str:
         """
@@ -81,7 +78,6 @@ class UserSettingPayload:
             str: JSON dump data of `UserSettingPayload`.
         """
         return dumps(UserSettingPayload.to_dict(instance), default=default)
-
 
 
     @classmethod
@@ -154,7 +150,6 @@ class UserSettingModel:
         return [IndexModel(**index) for index in cls.INDEX_KEYS]
 
 
-
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "UserSettingModel":
         """
@@ -175,7 +170,6 @@ class UserSettingModel:
         )
 
 
-
     @classmethod
     def to_data(cls, instance: "UserSettingModel") -> str:
         """
@@ -188,7 +182,6 @@ class UserSettingModel:
             str: JSON dump data of `UserSettingsModel`.
         """
         return dumps(UserSettingModel.to_dict(instance), default=default)
-
 
 
     @classmethod

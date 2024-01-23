@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -39,11 +39,9 @@ class ExportdJobManagement(CmdbManagerBase):
         super().__init__(database_manager)
 
 
-
     def get_new_id(self, collection: str) -> int:
         """TODO: document"""
         return self.dbm.get_next_public_id(collection)
-
 
 
     def get_job(self, public_id: int) -> ExportdJob:
@@ -56,7 +54,6 @@ class ExportdJobManagement(CmdbManagerBase):
         return ExportdJob(**result)
 
 
-
     def get_all_jobs(self):
         """TODO: document"""
         job_list = []
@@ -66,7 +63,6 @@ class ExportdJobManagement(CmdbManagerBase):
             except CMDBError:
                 continue
         return job_list
-
 
 
     def get_job_by_name(self, **requirements) -> ExportdJob:
@@ -81,7 +77,6 @@ class ExportdJobManagement(CmdbManagerBase):
             raise ObjectManagerGetError(err) from err
 
 
-
     def get_job_by_args(self, **requirements) -> ExportdJob:
         """TODO: document"""
         try:
@@ -94,7 +89,6 @@ class ExportdJobManagement(CmdbManagerBase):
             raise ObjectManagerGetError(err) from err
 
 
-
     def get_job_by_event_based(self, state):
         """TODO: document"""
         formatted_filter = {'scheduling.event.active': state}
@@ -105,7 +99,6 @@ class ExportdJobManagement(CmdbManagerBase):
             except CMDBError:
                 continue
         return job_list
-
 
 
     def insert_job(self, data: (ExportdJob, dict)) -> int:
@@ -139,7 +132,6 @@ class ExportdJobManagement(CmdbManagerBase):
         except CMDBError as err:
             raise ExportdJobManagerInsertError(err) from err
         return ack
-
 
 
     def update_job(self, data: (dict, ExportdJob), request_user: UserModel, event_start=True) -> str:
@@ -176,7 +168,6 @@ class ExportdJobManagement(CmdbManagerBase):
         return ack.acknowledged
 
 
-
     def delete_job(self, public_id: int, request_user: UserModel) -> bool:
         """TODO: document"""
         try:
@@ -191,7 +182,6 @@ class ExportdJobManagement(CmdbManagerBase):
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}') from exc
 
 
-
     def run_job_manual(self, public_id: int, request_user: UserModel) -> bool:
         """TODO: document"""
         if self._event_queue:
@@ -201,7 +191,7 @@ class ExportdJobManagement(CmdbManagerBase):
             self._event_queue.put(event)
         return True
 
-
+# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
 
 class ExportdJobManagerGetError(ManagerGetError):
     """TODO: document"""
@@ -209,7 +199,6 @@ class ExportdJobManagerGetError(ManagerGetError):
         self.err = err
         super().__init__(err)
 
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
 
 class ExportdJobManagerInsertError(ManagerInsertError):
     """TODO: document"""
@@ -218,13 +207,11 @@ class ExportdJobManagerInsertError(ManagerInsertError):
         super().__init__(err)
 
 
-
 class ExportdJobManagerUpdateError(ManagerUpdateError):
     """TODO: document"""
     def __init__(self, err):
         self.err = err
         super().__init__(err)
-
 
 
 class ExportdJobManagerDeleteError(ManagerDeleteError):

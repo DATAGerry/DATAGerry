@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import datetime
 import time
@@ -27,6 +27,7 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.utils import json_encoding
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
@@ -37,6 +38,7 @@ type_export_blueprint = RootBlueprint('type_export_rest', __name__, url_prefix='
 @type_export_blueprint.route('/', methods=['POST'])
 @login_required
 def export_type():
+    """TODO: document"""
     try:
         type_list = [TypeModel.to_json(type) for type in object_manager.get_all_types()]
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
@@ -44,8 +46,8 @@ def export_type():
         return abort(400, e.message)
     except ModuleNotFoundError as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
+    except CMDBError as err:
+        return abort(404, jsonify(message='Not Found', error=err))
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(
@@ -53,7 +55,7 @@ def export_type():
         mimetype="text/json",
         headers={
             "Content-Disposition":
-                "attachment; filename=%s.%s" % (timestamp, 'json')
+                f"attachment; filename={timestamp}.json"
         }
     )
 
@@ -61,6 +63,7 @@ def export_type():
 @type_export_blueprint.route('/<string:public_ids>', methods=['POST'])
 @login_required
 def export_type_by_ids(public_ids):
+    """TODO: document"""
     try:
         query_list = []
         for key, value in {'public_id': public_ids}.items():
@@ -76,8 +79,8 @@ def export_type_by_ids(public_ids):
         return abort(400, e.message)
     except ModuleNotFoundError as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
+    except CMDBError as err:
+        return abort(404, jsonify(message='Not Found', error=err))
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(
@@ -85,6 +88,6 @@ def export_type_by_ids(public_ids):
         mimetype="text/json",
         headers={
             "Content-Disposition":
-                "attachment; filename=%s.%s" % (timestamp, 'json')
+                f"attachment; filename={timestamp}.json"
         }
     )

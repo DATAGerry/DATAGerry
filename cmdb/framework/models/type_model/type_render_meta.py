@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -41,7 +41,6 @@ class TypeRenderMeta:
         self.sections: List[TypeSection] = sections or []
         self.externals: List[TypeExternalLink] = externals or []
         self.summary: TypeSummary = summary or TypeSummary(fields=None)
-
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 

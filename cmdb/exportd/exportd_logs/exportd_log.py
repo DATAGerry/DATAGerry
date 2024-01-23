@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -64,7 +64,6 @@ class ExportdJobLog(ExportdMetaLog):
                                             action_name=action_name)
 
 
-
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "ExportdJobLog":
         """Create a instance of ExportdJobLog from database values"""
@@ -81,7 +80,6 @@ class ExportdJobLog(ExportdMetaLog):
             action=data.get('action', None),
             action_name=data.get('action_name', None)
         )
-
 
 
     @classmethod

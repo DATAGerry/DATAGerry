@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import List
 
 from flask import request, current_app
@@ -35,6 +35,7 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
+# -------------------------------------------------------------------------------------------------------------------- #
 
 groups_blueprint = APIBlueprint('groups', __name__)
 

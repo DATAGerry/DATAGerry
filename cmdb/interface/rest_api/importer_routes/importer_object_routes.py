@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -42,6 +42,7 @@ from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
 from cmdb.user_management import UserModel, UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -124,7 +125,6 @@ def parse_objects(request_user: UserModel):
     return make_response(parsed_output)
 
 
-
 @importer_object_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
@@ -194,7 +194,7 @@ def import_objects(request_user: UserModel):
     try:
         import_response: ImporterObjectResponse = importer.start_import()
     except ImportRuntimeError as ire:
-        LOGGER.error(f'Error while importing objects: {ire.message}')
+        LOGGER.error('Error while importing objects: %s', ire.message)
         return abort(500, ire.message)
     except AccessDeniedError as err:
         return abort(403, err.message)

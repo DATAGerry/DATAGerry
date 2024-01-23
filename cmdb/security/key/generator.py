@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -25,7 +25,6 @@ class KeyGenerator:
         self.ssw = SystemSettingsWriter(database_manager)
 
 
-
     def generate_rsa_keypair(self):
         """TODO: document"""
         from Crypto.PublicKey import RSA
@@ -38,6 +37,7 @@ class KeyGenerator:
             'public': public_key
         }
         self.ssw.write('security', {'asymmetric_key': asymmetric_key})
+
 
     def generate_symmetric_aes_key(self):
         """TODO: document"""

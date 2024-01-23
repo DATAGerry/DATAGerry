@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -23,6 +23,7 @@ from pymongo.collection import Collection
 
 from cmdb.database.connection import MongoConnector
 from cmdb.database.errors.database_errors import DatabaseAlreadyExists, DatabaseNotExists, CollectionAlreadyExists
+# -------------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                             DatabaseManager - BASE CLASS                                             #
@@ -60,7 +61,6 @@ class DatabaseManager:
         return self.connector.client[name]
 
 
-
     def drop_database(self, database: Union[str, Database]):
         """Delete a existing database.
 
@@ -77,7 +77,6 @@ class DatabaseManager:
             raise DatabaseNotExists(database)
 
         self.connector.client.drop_database(database)
-
 
 
     def create_collection(self, collection_name: str) -> str:
@@ -100,7 +99,6 @@ class DatabaseManager:
         return collection_name
 
 
-
     def get_collection(self, name) -> Collection:
         """
         Get a collection inside database
@@ -109,7 +107,6 @@ class DatabaseManager:
             name: Collection name
         """
         return self.connector.database[name]
-
 
 
     def delete_collection(self, collection: str) -> dict[str, Any]:
@@ -124,17 +121,14 @@ class DatabaseManager:
         return self.connector.database.drop_collection(collection)
 
 
-
     def create_indexes(self, collection: str, indexes: List[IndexModel]) -> List[str]:
         """Creates indexes for collection"""
         return self.get_collection(collection).create_indexes(indexes)
 
 
-
     def get_index_info(self, collection: str):
         """get the max index value"""
         return self.get_collection(collection).index_information()
-
 
 
     def status(self):

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,6 @@ class ExportdLogManager(CmdbManagerBase):
         super().__init__(database_manager)
 
 
-
     # CRUD functions
     def get_all_logs(self):
         """TODO: document"""
@@ -42,7 +41,6 @@ class ExportdLogManager(CmdbManagerBase):
                 LOGGER.error(err)
                 raise LogManagerGetError(err) from err
         return log_list
-
 
 
     def get_log(self, public_id: int):
@@ -57,7 +55,6 @@ class ExportdLogManager(CmdbManagerBase):
             raise LogManagerGetError(err) from err
 
 
-
     def get_logs_by(self, sort='public_id', **requirements):
         """TODO: document"""
         ack = []
@@ -69,7 +66,6 @@ class ExportdLogManager(CmdbManagerBase):
             LOGGER.error(err)
             raise LogManagerGetError(err) from err
         return ack
-
 
 
     def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
@@ -95,11 +91,9 @@ class ExportdLogManager(CmdbManagerBase):
         return ack
 
 
-
     def update_log(self, data) -> int:
         """TODO: document"""
         raise NotImplementedError
-
 
 
     def delete_log(self, public_id):
@@ -110,7 +104,6 @@ class ExportdLogManager(CmdbManagerBase):
             LOGGER.error(err)
             raise LogManagerDeleteError(err) from err
         return ack
-
 
 
     # FIND functions
@@ -143,7 +136,6 @@ class LogManagerGetError(ObjectManagerGetError):
         super().__init__(err)
 
 
-
 class LogManagerInsertError(ObjectManagerInsertError):
     """TODO: document"""
     def __init__(self, err):
@@ -151,13 +143,11 @@ class LogManagerInsertError(ObjectManagerInsertError):
         super().__init__(err)
 
 
-
 class LogManagerUpdateError(ObjectManagerUpdateError):
     """TODO: document"""
     def __init__(self, err):
         self.err = err
         super().__init__(err)
-
 
 
 class LogManagerDeleteError(ObjectManagerDeleteError):

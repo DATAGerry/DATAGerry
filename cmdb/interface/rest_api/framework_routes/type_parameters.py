@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
+from json import loads
 
 from cmdb.interface.api_parameters import Parameter, CollectionParameters
 from cmdb.utils.helpers import str_to_bool
-from json import loads
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class TypeIterationParameters(CollectionParameters):
-
+    """TODO: document"""
     def __init__(self, query_string: Parameter, active: bool = True, **kwargs):
         self.active = active
-        super(TypeIterationParameters, self).__init__(query_string=query_string, **kwargs)
+        super().__init__(query_string=query_string, **kwargs)
+
 
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "TypeIterationParameters":
@@ -37,6 +40,7 @@ class TypeIterationParameters(CollectionParameters):
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
         return cls(Parameter(query_string), active=active, **optional)
+
 
     @classmethod
     def to_dict(cls, parameters: "TypeIterationParameters") -> dict:

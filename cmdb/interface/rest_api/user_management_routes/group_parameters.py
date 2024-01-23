@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,20 +13,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import Enum
 
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import APIParameters, Parameter
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class GroupDeleteMode(Enum):
+    """TODO: document"""
     NONE = None
     MOVE = 'MOVE'
     DELETE = 'DELETE'
 
 
 class GroupDeletionParameters(APIParameters):
+    """TODO: document"""
 
     def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: PublicID = None, **kwargs):
         """
@@ -40,14 +42,18 @@ class GroupDeletionParameters(APIParameters):
         """
         self.action = action
         self.group_id = group_id
-        super(GroupDeletionParameters, self).__init__(query_string=query_string, **kwargs)
+        super().__init__(query_string=query_string, **kwargs)
+
 
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "GroupDeletionParameters":
+        """TODO: document"""
         return cls(Parameter(query_string), **optional)
+
 
     @classmethod
     def to_dict(cls, parameters: "GroupDeletionParameters") -> dict:
+        """TODO: document"""
         return {
             'action': parameters.action,
             'group_id': parameters.group_id,

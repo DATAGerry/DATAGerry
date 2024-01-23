@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -40,7 +40,6 @@ from cmdb.framework.results.list import ListResult
 from cmdb.framework import TypeModel
 from cmdb.framework.models.type_model import TypeFieldSection
 from cmdb.framework.cmdb_object import CmdbObject
-
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -95,7 +94,6 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
 
         return ack
 
-
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
     def get_section_template(self,
@@ -123,7 +121,6 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
             return ack
         except (CMDBError, Exception) as error:
             raise SectionTemplateManagerDeleteError(error) from error
-
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 

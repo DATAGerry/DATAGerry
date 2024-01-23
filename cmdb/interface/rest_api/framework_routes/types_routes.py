@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,6 +32,7 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 from cmdb.framework.cmdb_location_manager import CmdbLocationManager
 from cmdb.framework.cmdb_location import CmdbLocation
 from cmdb.framework.managers.object_manager import ObjectManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
@@ -83,7 +84,6 @@ def get_types(params: TypeIterationParameters):
     return api_response.make_response()
 
 
-
 @types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
 def get_type(public_id: int):
@@ -109,7 +109,6 @@ def get_type(public_id: int):
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
                                      model=TypeModel.MODEL, body=body)
     return api_response.make_response()
-
 
 
 @types_blueprint.route('/', methods=['POST'])
@@ -150,7 +149,6 @@ def insert_type(data: dict):
     api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
                                         model=TypeModel.MODEL)
     return api_response.make_response(prefix='types')
-
 
 
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
@@ -199,7 +197,6 @@ def update_type(public_id: int, data: dict):
     return api_response.make_response()
 
 
-
 @types_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @types_blueprint.protect(auth=True, right='base.framework.type.delete')
 def delete_type(public_id: int):
@@ -243,7 +240,6 @@ def delete_type(public_id: int):
         return abort(400, str(err))
 
     return api_response.make_response()
-
 
 
 @types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])

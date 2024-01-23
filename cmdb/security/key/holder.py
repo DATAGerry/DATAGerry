@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -19,7 +19,6 @@ from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
-
 class KeyHolder:
     """TODO: document"""
 
@@ -33,17 +32,14 @@ class KeyHolder:
         self.rsa_private = self.get_private_key()
 
 
-
     def get_public_key(self):
         """TODO: document"""
         return self.ssr.get_value('asymmetric_key', 'security')['public']
 
 
-
     def get_private_key(self):
         """TODO: document"""
         return self.ssr.get_value('asymmetric_key', 'security')['private']
-
 
 
 class RSAKeyNotExists(CMDBError):

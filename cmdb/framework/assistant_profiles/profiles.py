@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -53,9 +53,6 @@ class ProfileAssistant:
     """
     This class holds all profiles and logics for the initial assistant
     """
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   PROFILE CREATION                                                   #
-# -------------------------------------------------------------------------------------------------------------------- #
 
     def create_profiles(self, profile_list):
         """
@@ -121,7 +118,6 @@ class ProfileAssistant:
                 cur_profile = NetworkInfrastructureProfile(created_type_ids)
                 created_type_ids = cur_profile.create_network_infrastructure_profile()
 
-
             ###### CATEGORY Creation ######
 
             self.create_all_categories(created_type_ids)
@@ -137,10 +133,10 @@ class ProfileAssistant:
 
         return created_ids
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   CATEGORY CREATION                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
+
     def create_all_categories(self, all_type_ids: dict):
         """
         Creates all categories for the assistant
@@ -153,7 +149,6 @@ class ProfileAssistant:
 
         for i, category in enumerate(all_categories):
             category_manager.insert(category)
-
 
 
     def get_all_categories(self, all_type_ids: dict) -> list[dict]:
@@ -212,11 +207,9 @@ class ProfileAssistant:
 
         return all_categories
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   HELPER FUNCTIONS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_category_type_ids(self, all_type_ids: dict, requested_ids: list) -> list:
         """
@@ -236,7 +229,6 @@ class ProfileAssistant:
                 found_type_ids.append(all_type_ids[type_id])
 
         return found_type_ids
-
 
 
     def get_category_body(self, cat_name: str, cat_label: str, cat_icon: str, cat_types: list) -> dict:

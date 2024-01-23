@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,11 +33,9 @@ class ServerManagementProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def create_server_management_profile(self) -> dict:
         """
@@ -52,7 +50,6 @@ class ServerManagementProfile(ProfileBase):
         return self.created_type_ids
 
 
-
     def _create_types_with_dependencies(self):
         """
         Creates all types which are a dependancy for other types
@@ -60,7 +57,6 @@ class ServerManagementProfile(ProfileBase):
         # server type
         server_type_data = self.get_server_type()
         self.create_basic_type('server_id', server_type_data)
-
 
 
     def _create_remaining_types(self):
@@ -75,11 +71,9 @@ class ServerManagementProfile(ProfileBase):
         virtual_server_type_data = self.get_virtual_server_type(self.created_type_ids['server_id'])
         self.create_basic_type('virtual_server_id', virtual_server_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_server_type(self) -> dict:
         """
@@ -268,7 +262,6 @@ class ServerManagementProfile(ProfileBase):
                 }
             )
 
-
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
         customer_user_id = self.created_type_ids['customer_user_id']
@@ -300,12 +293,9 @@ class ServerManagementProfile(ProfileBase):
                 }
             )
 
-
         return self.type_dict['server']
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_appliance_type(self) -> dict:
         """
@@ -453,7 +443,6 @@ class ServerManagementProfile(ProfileBase):
             self.set_type_section_field('appliance','section-40962',network_field_name)
             self.set_type_summary_field('appliance', network_field_name)
 
-
         # Add the operating system profile dependencies
         operating_system_id = self.created_type_ids['operating_system_id']
 
@@ -515,12 +504,9 @@ class ServerManagementProfile(ProfileBase):
                 }
             )
 
-
         return self.type_dict['appliance']
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_virtual_server_type(self, server_type_id: int) -> dict:
         """
@@ -635,7 +621,6 @@ class ServerManagementProfile(ProfileBase):
             self.set_type_section_field('virtual_server','section-21171',network_field_name)
             self.set_type_summary_field('virtual_server', network_field_name)
 
-
         # Add the operating system profile dependencies
         operating_system_id = self.created_type_ids['operating_system_id']
 
@@ -664,7 +649,6 @@ class ServerManagementProfile(ProfileBase):
                     ]
                 }
             )
-
 
         # Add the user management profile dependencies
         user_id = self.created_type_ids['user_id']
@@ -696,6 +680,5 @@ class ServerManagementProfile(ProfileBase):
                     ]
                 }
             )
-
 
         return self.type_dict['virtual_server']

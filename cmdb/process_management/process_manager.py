@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -52,7 +52,6 @@ class ProcessManager:
         self._loaded = False
 
 
-
     def start_app(self) -> bool:
         """start all services from service definitions"""
         for service_def in self.__service_defs:
@@ -68,14 +67,12 @@ class ProcessManager:
         return True
 
 
-
     def stop_app(self):
         """stop all services"""
         self.__flag_shutdown.set()
         # go through processes in different order
         for process in reversed(self.__process_list):
             process.terminate()
-
 
 
     def get_loading_status(self):
@@ -97,7 +94,6 @@ class CmdbProcess:
         self.__classname = classname
 
 
-
     def get_name(self):
         """return the process name
 
@@ -105,7 +101,6 @@ class CmdbProcess:
             str: name of the process
         """
         return self.__name
-
 
 
     def get_class(self):
@@ -132,7 +127,6 @@ class ProcessController(threading.Thread):
         self.__process = process
         self.__flag_shutdown = flag_shutdown
         self.__cb_shutdown = cb_shutdown
-
 
 
     def run(self):

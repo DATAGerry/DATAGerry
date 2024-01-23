@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -32,11 +32,9 @@ class LocationProfile(ProfileBase):
         self.created_type_ids = created_type_ids
         super().__init__(created_type_ids)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       FUNCTIONS                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def create_location_profile(self) -> dict:
         """
@@ -51,14 +49,12 @@ class LocationProfile(ProfileBase):
         return self.created_type_ids
 
 
-
     def _create_types_with_dependencies(self):
         """
         Creates all types which are a dependancy for other types
         """
         country_type_data = self.get_country_type()
         self.create_basic_type('country_id',country_type_data)
-
 
 
     def _create_remaining_types(self):
@@ -81,11 +77,9 @@ class LocationProfile(ProfileBase):
         rack_type_data = self.get_rack_type()
         self.create_basic_type('rack_id', rack_type_data)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TYPE DATA - SECTION                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_country_type(self) -> dict:
         """
@@ -150,9 +144,7 @@ class LocationProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_city_type(self) -> dict:
         """
@@ -220,9 +212,7 @@ class LocationProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_building_type(self) -> dict:
         """
@@ -318,9 +308,7 @@ class LocationProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_room_type(self) -> dict:
         """
@@ -404,9 +392,7 @@ class LocationProfile(ProfileBase):
             }
         }
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-
 
     def get_rack_type(self) -> dict:
         """

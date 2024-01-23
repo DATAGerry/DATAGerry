@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -114,9 +114,8 @@ class FieldNotFoundError(CMDBError):
         super().__init__()
         self.message = f'Field {field_name} was not found inside input_type: {type_name}'
 
-# ---------------------------------------------------------------------------- #
-#                              LOCATION EXCEPTIONS                             #
-# ---------------------------------------------------------------------------- #
+# ------------------------------------------------ LOCATION EXCEPTIONS ----------------------------------------------- #
+
 class LocationManagerError(ManagerGetError):
     """TODO: document"""
     def __init__(self, err):
@@ -150,10 +149,7 @@ class LocationManagerDeleteError(ManagerDeleteError):
     def __init__(self, err):
         super().__init__(err=err)
 
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   OBJECT EXCEPTIONS                                                  #
-# -------------------------------------------------------------------------------------------------------------------- #
+# ------------------------------------------------- OBJECT EXCEPTIONS ------------------------------------------------ #
 
 class ObjectManagerInitError(ManagerInitError):
     """TODO: document"""
@@ -183,11 +179,7 @@ class ObjectManagerDeleteError(ManagerDeleteError):
     def __init__(self, err):
         super().__init__(err=err)
 
-
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                              SECTION TEMPLATE EXCEPTIONS                                             #
-# -------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------- SECTION TEMPLATE EXCEPTIONS ------------------------------------------- #
 
 class SectionTemplateManagerError(ManagerGetError):
     """TODO: document"""

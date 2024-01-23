@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,7 @@ class AccessControlList:
         self.activated = activated
         self.groups: GroupACL = groups
 
+
     @classmethod
     def from_data(cls, data: dict) -> "AccessControlList":
         """TODO: document"""
@@ -34,6 +35,7 @@ class AccessControlList:
             activated=data.get('activated', False),
             groups=GroupACL.from_data(data.get('groups', {}))
         )
+
 
     @classmethod
     def to_json(cls, acl: "AccessControlList") -> dict:
@@ -43,6 +45,7 @@ class AccessControlList:
             'groups': GroupACL.to_json(acl.groups)
         }
 
+
     def grant_access(self, key: T, permission: AccessControlPermission, section: str = None):
         """TODO: document"""
         if section == 'groups':
@@ -50,12 +53,14 @@ class AccessControlList:
         else:
             raise ValueError(f'No ACL section with name: {section}')
 
+
     def revoke_access(self, key: T, permission: AccessControlPermission, section: str = None):
         """TODO: document"""
         if section == 'groups':
             self.groups.grant_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
+
 
     def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
         """TODO: document"""

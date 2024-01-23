@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -72,7 +72,9 @@ class LogQueryBuilder(ManagerQueryBuilder):
                 self.query.append(pipe)
 
         if user and permission:
-            self.query += (LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+            self.query += (LookedAccessControlQueryBuilder().build(
+                                                                group_id=PublicID(user.group_id),
+                                                                permission=permission))
 
         if limit == 0:
             results_query = [self.skip_(limit)]
@@ -107,7 +109,9 @@ class LogQueryBuilder(ManagerQueryBuilder):
                 self.query.append(pipe)
 
         if user and permission:
-            self.query += (LookedAccessControlQueryBuilder().build(group_id=PublicID(user.group_id), permission=permission))
+            self.query += (LookedAccessControlQueryBuilder().build(
+                                                                group_id=PublicID(user.group_id),
+                                                                permission=permission))
 
         self.query.append(self.count_('total'))
 
@@ -173,6 +177,7 @@ class CmdbLogManager(ManagerBase):
             iteration_result.convert_to(CmdbObjectLog)
         except ManagerGetError as err:
             raise ManagerGetError(err) from err
+
         return iteration_result
 
 
@@ -217,28 +222,29 @@ class CmdbLogManager(ManagerBase):
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No log matched this public id')
+
         return raw_log
 
 
 class LogManagerGetError(ManagerGetError):
     """TODO:document"""
     def __init__(self, err):
-        super(LogManagerGetError, self).__init__(err)
+        super().__init__(err)
 
 
 class LogManagerInsertError(ManagerInsertError):
     """TODO:document"""
     def __init__(self, err):
-        super(LogManagerInsertError, self).__init__(err)
+        super().__init__(err)
 
 
 class LogManagerUpdateError(ManagerUpdateError):
     """TODO:document"""
     def __init__(self, err):
-        super(LogManagerUpdateError, self).__init__(err)
+        super().__init__(err)
 
 
 class LogManagerDeleteError(ManagerDeleteError):
     """TODO:document"""
     def __init__(self, err):
-        super(LogManagerDeleteError, self).__init__(err)
+        super().__init__(err)

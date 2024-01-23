@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 import pytest
 
 from cmdb.database.connection import MongoConnector
@@ -21,6 +22,7 @@ from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 @pytest.fixture(scope="session")
 def mongodb_parameters(request):
+    """TODO: document"""
     return request.config.getoption('--mongodb-host'), \
            request.config.getoption('--mongodb-port'), \
            request.config.getoption('--mongodb-database')

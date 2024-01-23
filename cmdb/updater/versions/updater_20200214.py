@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -86,7 +86,6 @@ class Update20200214(Updater):
                 manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
             LOGGER.error(err.message)
-
 
 
     def get_types_by_field_date(self):

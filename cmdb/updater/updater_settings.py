@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -33,17 +33,14 @@ class UpdateSettings:
         self.version = version
 
 
-
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
 
 
-
     def get_version(self) -> int:
         """Get the current version"""
         return self.version
-
 
 
     def run_updates(self, version: int, ssr: SystemSettingsReader):

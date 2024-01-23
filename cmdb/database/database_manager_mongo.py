@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -26,7 +26,7 @@ from cmdb.database.counter import PublicIDCounter
 from cmdb.database.errors.database_errors import NoDocumentFound, \
                                                  DocumentCouldNotBeDeleted
 from cmdb.database.utils import DESCENDING
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -42,11 +42,9 @@ class DatabaseManagerMongo(DatabaseManager):
         super().__init__(connector)
 
 
-
     def __exit__(self, exc_type, exc_val, exc_tb):
         """Auto disconnect the database connection when the Manager get destroyed"""
         self.connector.disconnect()
-
 
 
     def setup(self) -> bool:
@@ -76,7 +74,7 @@ class DatabaseManagerMongo(DatabaseManager):
             except Exception:
                 return False
         return True
-# -------------------------------------------------------------------------------------------------------------------- #
+
 
     def find_all(self, collection, *args, **kwargs) -> list:
         """calls find with all returns
@@ -93,14 +91,12 @@ class DatabaseManagerMongo(DatabaseManager):
         return list(found_documents)
 
 
-
     def find(self, collection: str, *args, **kwargs):
         """General find function"""
         if 'projection' not in kwargs:
             kwargs.update({'projection': {'_id': 0}})
 
         return self.get_collection(collection).find(*args, **kwargs)
-
 
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
@@ -111,11 +107,11 @@ class DatabaseManagerMongo(DatabaseManager):
             found document
         """
         cursor_result = self.find(collection, limit=1, *args, **kwargs)
+
         for result in cursor_result.limit(-1):
             return result
 
         raise NoDocumentFound(collection, args)
-
 
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):
@@ -134,7 +130,6 @@ class DatabaseManagerMongo(DatabaseManager):
             return result
 
 
-
     def find_one_by_object(self, collection: str, object_id: int, *args, **kwargs):
         """
         Retrieves a single document with the given object_id from the given collection
@@ -149,7 +144,6 @@ class DatabaseManagerMongo(DatabaseManager):
         cursor_result = self.find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
         for result in cursor_result.limit(-1):
             return result
-
 
 
     def find_one_child(self, collection: str, parent_id: int, *args, **kwargs):
@@ -168,7 +162,6 @@ class DatabaseManagerMongo(DatabaseManager):
             return result
 
 
-
     def count(self, collection: str, filter: dict = None, *args, **kwargs):
         """Count documents based on filter parameters.
 
@@ -185,7 +178,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return self.get_collection(collection).count_documents(filter=filter, *args, **kwargs)
 
 
-
     def aggregate(self, collection: str, *args, **kwargs):
         """
         Aggregation on mongodb.
@@ -199,7 +191,6 @@ class DatabaseManagerMongo(DatabaseManager):
             returns computed results
         """
         return self.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
-
 
 
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
@@ -225,7 +216,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return data['public_id']
 
 
-
     def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
         """
         Update document inside database
@@ -243,7 +233,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return self.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
 
 
-
     def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
         """update document inside database
 
@@ -258,7 +247,6 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_data = {'$unset': {data: 1}}
 
         return self.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
-
 
 
     def update_many(self, collection: str, query: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
@@ -286,7 +274,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return result
 
 
-
     def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
         """delete document inside database
 
@@ -303,7 +290,6 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, filter)
 
         return result
-
 
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
@@ -329,7 +315,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return result
 
 
-
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -342,7 +327,6 @@ class DatabaseManagerMongo(DatabaseManager):
         formatted_sort = [('public_id', DESCENDING)]
 
         return self.find_one_by(collection=collection, sort=formatted_sort)
-
 
 
     def get_highest_id(self, collection: str) -> int:
@@ -363,7 +347,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return highest
 
 
-
     def get_next_public_id(self, collection: str) -> int:
         """TODO: document"""
         try:
@@ -380,7 +363,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return new_id
 
 
-
     def _init_public_id_counter(self, collection: str):
         """TODO:document"""
         docs_count = self.get_highest_id(collection)
@@ -390,7 +372,6 @@ class DatabaseManagerMongo(DatabaseManager):
         })
 
         return docs_count
-
 
 
     def increment_public_id_counter(self, collection: str):
@@ -408,7 +389,6 @@ class DatabaseManagerMongo(DatabaseManager):
                                                             )
         except Exception as error:
             LOGGER.info('Public ID Counter not increased: reason => %s',error)
-
 
 
     def update_public_id_counter(self, collection: str, value: int):
@@ -431,7 +411,6 @@ class DatabaseManagerMongo(DatabaseManager):
             self.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
 
 
-
     def get_root_location_data(self) -> dict:
         """
         This class holds the correct root location data
@@ -449,7 +428,6 @@ class DatabaseManagerMongo(DatabaseManager):
             "type_icon":"fas fa-globe",
             "type_selectable":True
         }
-
 
 
     def validate_root_location(self, tested_location: dict) -> bool:
@@ -473,7 +451,6 @@ class DatabaseManagerMongo(DatabaseManager):
                 return False
 
         return True
-
 
 
     def set_root_location(self, collection: str, create: bool = False):
