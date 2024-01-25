@@ -17,15 +17,9 @@
 This module handles all predefined section templates
 """
 import logging
-from flask import current_app
-
-from cmdb.framework import CmdbSectionTemplate
-from cmdb.framework.cmdb_section_template_manager import CmdbSectionTemplateManager
-from cmdb.database.errors.database_errors import NoDocumentFound
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                            SectionTemplateCreator - CLASS                                            #
@@ -35,25 +29,7 @@ class SectionTemplateCreator:
     This class handles all iteractions with predefined section templates
     """
 
-    def create_predefined_templates(self) -> None:
-        """Creates all predefined section templates in DB"""
-        predefined_templates: list[dict] = self.__get_predefined_templates()
-
-        cmdb_template_manager: CmdbSectionTemplateManager = CmdbSectionTemplateManager(
-                                                                current_app.database_manager,
-                                                                current_app.event_queue
-                                                            )
-
-        for predefined_template in predefined_templates:
-            # First check if template already exists
-            try:
-                template_name = predefined_template['name']
-                cmdb_template_manager._get_by(CmdbSectionTemplate.COLLECTION,name=template_name)
-            except NoDocumentFound:
-                # The template does not exist, create it
-                cmdb_template_manager.insert_section_template(predefined_template)
-
-    def __get_predefined_templates(self) -> list:
+    def get_predefined_templates(self) -> list:
         """Retrieves all predefined section templates"""
         predefined_templates: list[dict] = []
 
@@ -86,15 +62,21 @@ class SectionTemplateCreator:
         }
 
 
-    def __get_template_section_field(self, field_type: str, name: str, label: str, options: list[dict] = None) -> dict:
+    def __get_template_section_field(self,
+                                     field_type: str,
+                                     name: str,
+                                     label: str,
+                                     options: list[dict] = None,
+                                     regex: str = None) -> dict:
         """
         Retrieves a field model for a section template
 
         Args:
-            field_type (str): type of the field like 'text'
-            name (str): unique identifier for the field
+            field_type (str): Type of the field like 'text', 'select' etc.
+            name (str): Unique identifier for the field
             label (str): label of the field
             options (list[dict], optional): Options for a field of type 'select'. Defaults to None.
+            regex (str): The regex which should be applied for the input. Defaults to None.
 
         Returns:
             dict: The configured field for the section
@@ -108,6 +90,9 @@ class SectionTemplateCreator:
         if options:
             field_values['options'] = options
 
+        if regex:
+            field_values['regex'] = regex
+
         return field_values
 
 # --------------------------------------------------- DATA SECTION --------------------------------------------------- #
@@ -118,10 +103,24 @@ class SectionTemplateCreator:
 
         network_fields: list[dict] = []
 
-        network_fields.append(self.__get_template_section_field("text", "dg-network-ipaddress", "IP address"))
+        ipv4_regex: str = ("(\\b25[0-5]|\\b2[0-4][0-9]|\\b[01]?[0-9][0-9]?)"
+                           "(\\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}")
+
+        ipv4_submask_regex : str =("^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}"
+                                   "([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\/(3[0-2]|[1-2]?\\d)$")
+
+        network_fields.append(self.__get_template_section_field("text",
+                                                                "dg-network-ipaddress",
+                                                                "IP address",
+                                                                None,
+                                                                ipv4_regex))
         network_fields.append(self.__get_template_section_field("text", "dg-network-hostname", "Hostname"))
         network_fields.append(self.__get_template_section_field("text", "dg-network-dns", "DNS"))
-        network_fields.append(self.__get_template_section_field("text", "dg-network-layer3", "Layer3-Net"))
+        network_fields.append(self.__get_template_section_field("text",
+                                                                "dg-network-layer3",
+                                                                "Layer3-Net",
+                                                                None,
+                                                                ipv4_submask_regex))
 
         network_section['fields'] = network_fields
 
@@ -134,8 +133,18 @@ class SectionTemplateCreator:
 
         rack_fields: list[dict] = []
 
-        rack_fields.append(self.__get_template_section_field("text", "dg-rackmounting-ru", "Rack units"))
-        rack_fields.append(self.__get_template_section_field("text", "dg-rackmounting-position", "Mounting position"))
+        positive_integer_regex: str = "^\\d+$"
+
+        rack_fields.append(self.__get_template_section_field("text",
+                                                             "dg-rackmounting-ru",
+                                                             "Rack units",
+                                                             None,
+                                                             positive_integer_regex))
+        rack_fields.append(self.__get_template_section_field("text",
+                                                             "dg-rackmounting-position",
+                                                             "Mounting position",
+                                                             None,
+                                                             positive_integer_regex))
 
         rack_field_options: list = [
             {
@@ -149,9 +158,9 @@ class SectionTemplateCreator:
         ]
 
         rack_fields.append(self.__get_template_section_field("select",
-                                                           "dg-network-dns",
-                                                           "Mounting orientation",
-                                                           rack_field_options))
+                                                             "dg-network-dns",
+                                                             "Mounting orientation",
+                                                             rack_field_options))
 
         rack_section['fields'] = rack_fields
 
@@ -171,12 +180,3 @@ class SectionTemplateCreator:
         model_spec_section['fields'] = model_spec_fields
 
         return model_spec_section
-
-# Regex for Integer
-# 
-
-# Regex IPv4
-# (\b25[0-5]|\b2[0-4][0-9]|\b[01]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}
-
-# Regex IPv4 with Mask
-# ^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\/(3[0-2]|[1-2]?\d)$

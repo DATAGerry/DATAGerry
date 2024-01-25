@@ -260,7 +260,56 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Redirects changes to field properties
+     * @param data new data for field
+     */
+    public onFieldChange(data: any){
+        this.handleFieldChanges(data);
+    }
+
+
+    /**
+     * Handles changes to field properties and updates them
+     * @param data new data for field
+     */
+    private handleFieldChanges(data: any){
+        const newValue: any = data.newValue;
+        const inputName: string = data.inputName;
+        const fieldName: string = data.fieldName;
+
+        if(inputName != 'name' && inputName != 'label'){
+            const index: number = this.getFieldIndexForName(fieldName);
+            if (index >= 0){
+                this.typeInstance.fields[index][inputName] = newValue;
+            }
+        }
+    }
+
+
+    /**
+     * Retrieves the index of a field in the typeinstance
+     * 
+     * @param targetName name of the field which is searched
+     * @returns (int): Index of the field. -1 of no field with this name is found
+     */
+    private getFieldIndexForName(targetName: string): number{
+        let index = 0;
+        for (let field of this.typeInstance.fields){
+            
+            if(field.name == targetName){
+                return index;
+            } else {
+                index += 1;
+            }
+        }
+
+        return -1;
+    }
+
+
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+        console.log("typeInstance", this.typeInstance);
         if(this.isGlobalSection(section)){
             return;
         }

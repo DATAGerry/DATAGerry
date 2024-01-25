@@ -26,6 +26,7 @@ from cmdb.database.counter import PublicIDCounter
 from cmdb.database.errors.database_errors import NoDocumentFound, \
                                                  DocumentCouldNotBeDeleted
 from cmdb.database.utils import DESCENDING
+from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -37,6 +38,7 @@ LOGGER = logging.getLogger(__name__)
 class DatabaseManagerMongo(DatabaseManager):
     """PyMongo (mongodb) implementation of Database Manager"""
 
+# --------------------------------------------------- INIT + DUNDER -------------------------------------------------- #
     def __init__(self, host: str, port: int, database_name: str, **kwargs):
         connector = MongoConnector(host, port, database_name, kwargs)
         super().__init__(connector)
@@ -75,6 +77,138 @@ class DatabaseManagerMongo(DatabaseManager):
                 return False
         return True
 
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
+    def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
+        """Adds document to database
+
+        Args:
+            collection (str): name of database collection
+            data (dict): insert data
+            skip_public (bool): Skip the public id creation and counter increment
+        Returns:
+            int: new public id of the document
+        """
+        if skip_public:
+            return self.get_collection(collection).insert_one(data)
+
+        if 'public_id' not in data:
+            data['public_id'] = self.get_next_public_id(collection=collection)
+
+        self.get_collection(collection).insert_one(data)
+        # update the id counter
+        self.update_public_id_counter(collection, data['public_id'])
+
+        return data['public_id']
+
+
+    def _init_public_id_counter(self, collection: str):
+        """TODO:document"""
+        docs_count = self.get_highest_id(collection)
+        self.get_collection(PublicIDCounter.COLLECTION).insert_one({
+            '_id': collection,
+            'counter': docs_count
+        })
+
+        return docs_count
+
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
+
+    def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
+        """
+        Update document inside database
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): filter of document
+            data: data to update
+
+        Returns:
+            acknowledged
+        """
+        formatted_data = {'$set': data}
+
+        return self.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
+
+
+    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
+        """update document inside database
+
+        Args:
+            collection (str): name of database collection
+            filter (dict): filter of document
+            data: data to delete
+
+        Returns:
+            acknowledged
+        """
+        formatted_data = {'$unset': {data: 1}}
+
+        return self.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
+
+
+    def update_many(self, collection: str, query: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
+        """update all documents that match the filter from a collection.
+
+        Args:
+            collection (str): name of database collection
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
+
+        Returns:
+            A boolean acknowledged as true if the operation ran with write
+            concern or false if write concern was disabled
+        """
+        if not add_to_set:
+            formatted_data = {'$set':update}
+        else:
+            formatted_data = update
+
+        result = self.get_collection(collection).update_many(filter=query, update=formatted_data)
+
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection, None)
+
+        return result
+
+
+    def increment_public_id_counter(self, collection: str):
+        """TODO: document"""
+        working_collection = self.get_collection(PublicIDCounter.COLLECTION)
+        query = {
+            '_id': collection
+        }
+        counter_doc = working_collection.find_one(query)
+        counter_doc['counter'] = counter_doc['counter'] + 1
+
+        try:
+            self.get_collection(PublicIDCounter.COLLECTION).update_one(
+                                                                query, {'$set':{'counter':counter_doc['counter']}}
+                                                            )
+        except Exception as error:
+            LOGGER.info('Public ID Counter not increased: reason => %s',error)
+
+
+    def update_public_id_counter(self, collection: str, value: int):
+        """TODO: document"""
+        working_collection = self.get_collection(PublicIDCounter.COLLECTION)
+        query = {
+            '_id': collection
+        }
+        counter_doc = working_collection.find_one(query)
+        # init counter, if it was not found
+        if counter_doc is None:
+            self._init_public_id_counter(collection)
+            counter_doc = working_collection.find_one(query)
+        # update counter only, if value is higher than counter
+        if value > counter_doc['counter']:
+            counter_doc['counter'] = value
+
+            formatted_data = {'$set':counter_doc}
+
+            self.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
     def find_all(self, collection, *args, **kwargs) -> list:
         """calls find with all returns
@@ -193,128 +327,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return self.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
 
 
-    def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
-        """Adds document to database
-
-        Args:
-            collection (str): name of database collection
-            data (dict): insert data
-            skip_public (bool): Skip the public id creation and counter increment
-        Returns:
-            int: new public id of the document
-        """
-        if skip_public:
-            return self.get_collection(collection).insert_one(data)
-
-        if 'public_id' not in data:
-            data['public_id'] = self.get_next_public_id(collection=collection)
-
-        self.get_collection(collection).insert_one(data)
-        # update the id counter
-        self.update_public_id_counter(collection, data['public_id'])
-
-        return data['public_id']
-
-
-    def update(self, collection: str, filter: dict, data: dict, *args, **kwargs):
-        """
-        Update document inside database
-
-        Args:
-            collection (str): name of database collection
-            filter (dict): filter of document
-            data: data to update
-
-        Returns:
-            acknowledged
-        """
-        formatted_data = {'$set': data}
-
-        return self.get_collection(collection).update_one(filter, formatted_data, *args, **kwargs)
-
-
-    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
-        """update document inside database
-
-        Args:
-            collection (str): name of database collection
-            filter (dict): filter of document
-            data: data to delete
-
-        Returns:
-            acknowledged
-        """
-        formatted_data = {'$unset': {data: 1}}
-
-        return self.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
-
-
-    def update_many(self, collection: str, query: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
-        """update all documents that match the filter from a collection.
-
-        Args:
-            collection (str): name of database collection
-            query (dict): A query that matches the documents to update.
-            update (dict): The modifications to apply.
-
-        Returns:
-            A boolean acknowledged as true if the operation ran with write
-            concern or false if write concern was disabled
-        """
-        if not add_to_set:
-            formatted_data = {'$set':update}
-        else:
-            formatted_data = update
-
-        result = self.get_collection(collection).update_many(filter=query, update=formatted_data)
-
-        if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection, None)
-
-        return result
-
-
-    def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
-        """delete document inside database
-
-        Args:
-            collection (str): name of database collection
-            filter (dict): filter query
-
-        Returns:
-            acknowledged
-        """
-        result = self.get_collection(collection).delete_one(filter)
-
-        if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection, filter)
-
-        return result
-
-
-    def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
-        """removes all documents that match the filter from a collection.
-
-        Args:
-            collection (str): name of database collection
-            filter (dict): Specifies deletion criteria using query operators.
-
-        Returns:
-            A boolean acknowledged as true if the operation ran
-            with write concern or false if write concern was disabled
-        """
-        requirements_filter = {}
-        for k, req in requirements.items():
-            requirements_filter.update({k: req})
-
-        result = self.get_collection(collection).delete_many(requirements_filter)
-
-        if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection, None)
-
-        return result
-
-
     def get_document_with_highest_id(self, collection: str) -> str:
         """get the document with the highest public id inside a collection
 
@@ -362,54 +374,54 @@ class DatabaseManagerMongo(DatabaseManager):
 
         return new_id
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
-    def _init_public_id_counter(self, collection: str):
-        """TODO:document"""
-        docs_count = self.get_highest_id(collection)
-        self.get_collection(PublicIDCounter.COLLECTION).insert_one({
-            '_id': collection,
-            'counter': docs_count
-        })
+    def delete(self, collection: str, filter: dict, *args, **kwargs) -> DeleteResult:
+        """delete document inside database
 
-        return docs_count
+        Args:
+            collection (str): name of database collection
+            filter (dict): filter query
 
+        Returns:
+            acknowledged
+        """
+        result = self.get_collection(collection).delete_one(filter)
 
-    def increment_public_id_counter(self, collection: str):
-        """TODO: document"""
-        working_collection = self.get_collection(PublicIDCounter.COLLECTION)
-        query = {
-            '_id': collection
-        }
-        counter_doc = working_collection.find_one(query)
-        counter_doc['counter'] = counter_doc['counter'] + 1
+        if result.deleted_count != 1:
+            raise DocumentCouldNotBeDeleted(collection, filter)
 
-        try:
-            self.get_collection(PublicIDCounter.COLLECTION).update_one(
-                                                                query, {'$set':{'counter':counter_doc['counter']}}
-                                                            )
-        except Exception as error:
-            LOGGER.info('Public ID Counter not increased: reason => %s',error)
+        return result
 
 
-    def update_public_id_counter(self, collection: str, value: int):
-        """TODO: document"""
-        working_collection = self.get_collection(PublicIDCounter.COLLECTION)
-        query = {
-            '_id': collection
-        }
-        counter_doc = working_collection.find_one(query)
-        # init counter, if it was not found
-        if counter_doc is None:
-            self._init_public_id_counter(collection)
-            counter_doc = working_collection.find_one(query)
-        # update counter only, if value is higher than counter
-        if value > counter_doc['counter']:
-            counter_doc['counter'] = value
+    def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
+        """removes all documents that match the filter from a collection.
 
-            formatted_data = {'$set':counter_doc}
+        Args:
+            collection (str): name of database collection
+            filter (dict): Specifies deletion criteria using query operators.
 
-            self.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
+        Returns:
+            A boolean acknowledged as true if the operation ran
+            with write concern or false if write concern was disabled
+        """
+        requirements_filter = {}
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
 
+        result = self.get_collection(collection).delete_many(requirements_filter)
+
+        if not result.acknowledged:
+            raise DocumentCouldNotBeDeleted(collection, None)
+
+        return result
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 CHECK ROUTINE SECTION                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+# ---------------------------------------------- CmdbLocation - SECTION ---------------------------------------------- #
 
     def get_root_location_data(self) -> dict:
         """
@@ -478,3 +490,29 @@ class DatabaseManagerMongo(DatabaseManager):
             status = self.update(collection,{'public_id':1},self.get_root_location_data())
 
         return status
+
+# ------------------------------------------- CmdbSectionTemplate - Section ------------------------------------------ #
+
+    def init_predefined_templates(self, collection):
+        """
+        Checks if all predefined templates are created, else create them
+        """
+        ## check if counter is created in db, else create one
+        counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
+
+        if not counter:
+            self._init_public_id_counter(collection)
+
+        predefined_template_creator = SectionTemplateCreator()
+        predefined_templates: list[dict] = predefined_template_creator.get_predefined_templates()
+
+        for predefined_template in predefined_templates:
+            # First check if template already exists
+            template_name = predefined_template['name']
+
+            result = self.get_collection(collection).find_one(filter={'name':template_name})
+
+            if not result:
+                # The template does not exist, create it
+                LOGGER.info("Creating Template: %s", {template_name})
+                self.insert(collection, predefined_template)

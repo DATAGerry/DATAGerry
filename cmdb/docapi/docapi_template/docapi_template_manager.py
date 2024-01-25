@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError

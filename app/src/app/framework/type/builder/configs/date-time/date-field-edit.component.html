@@ -10,7 +10,7 @@
                             [formControl]="requiredControl"
                             class="custom-control-input"
                             [id]="nameControl.value+'-required'"
-                            (ngModelChange)="onInputChange($event)"
+                            (ngModelChange)="onInputChange($event, 'required')"
                         />
                         <label class="custom-control-label" [for]="nameControl.value+'-required'"></label>
                     </div>
@@ -24,7 +24,7 @@
                 placeholder="Field name"
                 [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
                  'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"
-                (ngModelChange)="onInputChange($event)"
+                (ngModelChange)="onInputChange($event, 'name')"
             />
         </div>
         <small class="form-text text-muted float-left">Use a unique identifier</small>
@@ -45,7 +45,7 @@
             placeholder="Field label"
             [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
                  'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"
-            (ngModelChange)="onInputChange($event)"
+            (ngModelChange)="onInputChange($event, 'label')"
         />
         <small class="form-text text-muted float-left">A static display name</small>
         <div *ngIf="labelControl.invalid && (labelControl.dirty || labelControl.touched)" class="invalid-feedback">
@@ -63,7 +63,7 @@
             placeholder="This field contains..."
             [ngClass]="{ 'is-valid': descriptionControl.valid && (descriptionControl.dirty || descriptionControl.touched),
                  'is-invalid': descriptionControl.invalid && (descriptionControl.dirty || descriptionControl.touched)}"
-            (ngModelChange)="onInputChange($event)"
+            (ngModelChange)="onInputChange($event, 'description')"
         ></textarea>
         <small class="form-text text-muted">Short field description or helper text</small>
     </div>
@@ -78,6 +78,7 @@
                 ngbDatepicker
                 #d="ngbDatepicker"
                 readonly
+                (ngModelChange)="onInputChange($event, 'value')"
             />
             <div class="input-group-append">
                 <button class="input-group-text" (click)="d.toggle()">
@@ -98,6 +99,7 @@
             placeholder="If you don't know what to enter..."
             [ngClass]="{ 'is-valid': helperTextControl.valid && (helperTextControl.dirty || helperTextControl.touched),
                  'is-invalid': helperTextControl.invalid && (helperTextControl.dirty || helperTextControl.touched)}"
+            (ngModelChange)="onInputChange($event, 'helperText')"
         />
         <small class="form-text text-muted">Small helper popup.</small>
     </div>

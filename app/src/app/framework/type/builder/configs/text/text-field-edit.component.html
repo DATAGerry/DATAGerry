@@ -118,7 +118,7 @@
             [formControl]="helperTextControl"
             type="text"
             class="form-control"
-            placeholder="If you don´t know what to enter..."
+            placeholder="If you don't know what to enter..."
             [ngClass]="{'is-valid': helperTextControl.valid && (helperTextControl.dirty || helperTextControl.touched),
                         'is-invalid': helperTextControl.invalid && (helperTextControl.dirty || helperTextControl.touched)}"
             (ngModelChange)="onInputChange($event, 'helperText')"
