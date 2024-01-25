@@ -22,7 +22,7 @@
                 name-guideline placeholder="Field name"
                 [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
                  'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"
-                (ngModelChange)="onInputChange($event)"
+                (ngModelChange)="onInputChange($event, 'name')"
             />
         </div>
         <small class="form-text text-muted float-left">Use a unique field identifier</small>
@@ -42,7 +42,7 @@
             placeholder="Field label"
             [ngClass]="{ 'is-valid': labelControl.valid && (labelControl.dirty || labelControl.touched),
                  'is-invalid': labelControl.invalid && (labelControl.dirty || labelControl.touched)}"
-            (ngModelChange)="onInputChange($event)"
+            (ngModelChange)="onInputChange($event, 'label')"
         />
         <small class="form-text text-muted float-left">A static display name</small>
         <div *ngIf="labelControl.invalid && (labelControl.dirty || labelControl.touched)" class="invalid-feedback">
@@ -60,6 +60,7 @@
             placeholder="This field contains..."
             [ngClass]="{ 'is-valid': descriptionControl.valid && (descriptionControl.dirty || descriptionControl.touched),
                  'is-invalid': descriptionControl.invalid && (descriptionControl.dirty || descriptionControl.touched)}"
+            (ngModelChange)="onInputChange($event, 'description')"
         ></textarea>
         <small class="form-text text-muted">Short field description or helper text</small>
     </div>
@@ -72,6 +73,7 @@
             placeholder="If you don't know what to enter..."
             [ngClass]="{ 'is-valid': helperTextControl.valid && (helperTextControl.dirty || helperTextControl.touched),
                  'is-invalid': helperTextControl.invalid && (helperTextControl.dirty || helperTextControl.touched)}"
+            (ngModelChange)="onInputChange($event, 'helperText')"
         />
         <small class="form-text text-muted">Small helper popup.</small>
     </div>
@@ -129,7 +131,11 @@
     </div>
     <div class="form-group col-md-12">
         <label>Default value:</label>
-        <select [formControl]="valueControl" class="custom-select" >
+        <select 
+            [formControl]="valueControl"
+            class="custom-select"
+            (ngModelChange)="onInputChange($event, 'value')"
+            >
             <option></option>
             <option *ngFor="let opt of options; let i = index" [value]="opt.name">
                 Label: {{opt.label}} Name: {{opt.name}}

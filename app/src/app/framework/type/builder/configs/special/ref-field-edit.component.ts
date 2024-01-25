@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, ChangeDetectorRef } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { ReplaySubject } from 'rxjs';
@@ -33,7 +33,6 @@ import { CollectionParameters } from '../../../../../services/models/api-paramet
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
 import { Sort, SortDirection } from '../../../../../layout/table/table.types';
 import { nameConvention } from '../../../../../layout/directives/name.directive';
-import { ChangeDetectorRef } from '@angular/core';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -127,6 +126,20 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
 /* ----------------------------------------------- ON_CHANGES SECTION ----------------------------------------------- */
 
+    /**
+     * Feed the subject with changes to field properties
+     * @param event the new value of the field
+     * @param type the type of the field
+     */
+    onRefInputChange(event: any, type: string) {
+        this.fieldChanges$.next({
+            "newValue": event,
+            "inputName":type,
+            "fieldName": this.nameControl.value
+        });
+    }
+
+
     public onChange() {
         const { ref_types } = this.data;
         this.data.ref_types = this.form.controls.ref_types.value;
@@ -138,8 +151,9 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
             this.filteredTypeList = [];
             this.data.value = '';
         } else {
-            this.objectService.getObjectsByType(ref_types).subscribe((res: RenderResult[]) => {
+            this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
                 this.objectList = res;
+                console.log("objectList",this.objectList);
                 this.prepareSummaries();
             });
         }
@@ -147,7 +161,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
 
     public changeDefault(value: any) {
-        console.log("changeDefault => value", value);
         this.data.default = parseInt(value, 10);
 
         return this.data.default;

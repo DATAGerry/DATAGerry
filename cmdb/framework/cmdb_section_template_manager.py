@@ -49,6 +49,7 @@ class CmdbSectionTemplateManager(CmdbManagerBase):
     """
     class CmdbSectionTemplateManager
     """
+
     def __init__(self, database_manager=None, event_queue: Queue = None):
         self._event_queue = event_queue
         self.type_manager = TypeManager(database_manager)

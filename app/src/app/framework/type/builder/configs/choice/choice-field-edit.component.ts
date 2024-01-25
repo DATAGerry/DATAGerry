@@ -11,17 +11,19 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnInit } from '@angular/core';
-import { ConfigEditBaseComponent } from '../config.edit';
-import { ReplaySubject } from 'rxjs';
 import { UntypedFormControl, Validators } from '@angular/forms';
-import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
+
+import { ReplaySubject } from 'rxjs';
+
 import { ValidationService } from '../../../services/validation.service';
+
+import { ConfigEditBaseComponent } from '../config.edit';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-choice-field-edit',
@@ -29,125 +31,106 @@ import { ValidationService } from '../../../services/validation.service';
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
-  /**
-   * Component un-subscriber.
-   * @protected
-   */
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Required form control.
-   */
   public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-
-  /**
-   * Name form control.
-   */
   public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-
-  /**
-   * Label form control.
-   */
   public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-
-  /**
-   * Description form control.
-   */
   public descriptionControl: UntypedFormControl = new UntypedFormControl('');
-
-  /**
-   * Helper form control.
-   */
   public helperTextControl: UntypedFormControl = new UntypedFormControl('');
-
-  /**
-   * Options form control.
-   */
   public optionsControl: UntypedFormControl = new UntypedFormControl([]);
-
-  /**
-   * Helper form control.
-   */
   public valueControl: UntypedFormControl = new UntypedFormControl();
 
-
-  /**
-   * Add able options for choice selection
-   */
+  // Add able options for choice selection
   public options: Array<any> = [];
 
   private initialValue: string;
   isValid$ = true;
 
-  constructor(private validationService: ValidationService) {
-    super();
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  public ngOnInit(): void {
-    this.options = this.data.options;
-    if (this.options === undefined || !Array.isArray(this.options)) {
-      this.options = [];
-      this.options.push({
-        name: `option-${(this.options.length + 1)}`,
-        label: `Option ${(this.options.length + 1)}`
-      });
-      this.data.options = this.options;
+    constructor(private validationService: ValidationService) {
+        super();
     }
 
-    this.form.addControl('required', this.requiredControl);
-    this.form.addControl('name', this.nameControl);
-    this.form.addControl('label', this.labelControl);
-    this.form.addControl('description', this.descriptionControl);
-    this.form.addControl('helperText', this.helperTextControl);
-    this.form.addControl('value', this.valueControl);
-    this.form.addControl('options', this.optionsControl);
 
-    this.disableControlOnEdit(this.nameControl);
-    this.patchData(this.data, this.form);
+    public ngOnInit(): void {
+        this.options = this.data.options;
 
-    this.initialValue = this.nameControl.value;
-  }
+        if (this.options === undefined || !Array.isArray(this.options)) {
+            this.options = [];
+            this.options.push({
+                name: `option-${(this.options.length + 1)}`,
+                label: `Option ${(this.options.length + 1)}`
+            });
+            this.data.options = this.options;
+        }
 
-  /**
-   * Adds a new option with default prefix
-   */
-  public addOption(): void {
-    this.options.push({
-      name: `option-${(this.options.length + 1)}`,
-      label: `Option ${(this.options.length + 1)}`
-    });
-  }
+        this.form.addControl('required', this.requiredControl);
+        this.form.addControl('name', this.nameControl);
+        this.form.addControl('label', this.labelControl);
+        this.form.addControl('description', this.descriptionControl);
+        this.form.addControl('helperText', this.helperTextControl);
+        this.form.addControl('value', this.valueControl);
+        this.form.addControl('options', this.optionsControl);
 
-  /**
-   * Deletes a existing option.
-   * @param value
-   */
-  public delOption(value: any): void {
-    if (this.options.length > 1) {
-      const index = this.options.indexOf(value, 0);
-      if (index > -1) {
-        this.options.splice(index, 1);
-      }
+        this.disableControlOnEdit(this.nameControl);
+        this.patchData(this.data, this.form);
+
+        this.initialValue = this.nameControl.value;
     }
-  }
 
-  public hasValidator(control: string): void {
-    if (this.form.controls[control].hasValidator(Validators.required)) {
 
-      let valid = this.form.controls[control].valid;
-      this.isValid$ = this.isValid$ && valid;
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /**
+     * Adds a new option with default prefix
+     */
+    public addOption(): void {
+        this.options.push({
+            name: `option-${(this.options.length + 1)}`,
+            label: `Option ${(this.options.length + 1)}`
+        });
     }
-  }
 
 
-  onInputChange(event: any) {
+    /**
+     * Deletes a existing option.
+     * @param value
+     */
+    public delOption(value: any): void {
 
-    for (let item in this.form.controls) {
-      this.hasValidator(item)
+        if (this.options.length > 1) {
+            const index = this.options.indexOf(value, 0);
+
+            if (index > -1) {
+                this.options.splice(index, 1);
+            }
+        }
     }
-    this.validationService.setIsValid(this.initialValue, this.isValid$);
-    this.isValid$ = true;
 
-  }
 
+    public hasValidator(control: string): void {
+
+        if (this.form.controls[control].hasValidator(Validators.required)) {
+            let valid = this.form.controls[control].valid;
+            this.isValid$ = this.isValid$ && valid;
+        }
+    }
+
+
+    onInputChange(event: any, type: string) {
+        this.fieldChanges$.next({
+            "newValue": event,
+            "inputName":type,
+            "fieldName": this.nameControl.value
+        });
+
+        for (let item in this.form.controls) {
+            this.hasValidator(item);
+        }
+
+        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.isValid$ = true;
+    }
 }

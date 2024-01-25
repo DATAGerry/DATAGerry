@@ -82,7 +82,8 @@ def get_log_list(request_user: UserModel):
     except ModuleNotFoundError as e:
         return abort(400, e)
     except CMDBError as err:
-        return abort(404, jsonify(message='Not Found', error=err))
+        LOGGER.info("Error occured in get_log_list(): %s", err)
+        return abort(404, jsonify(message='Not Found'))
     return make_response(log_list)
 
 

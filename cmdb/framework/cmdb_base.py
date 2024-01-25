@@ -18,7 +18,6 @@ import logging
 from abc import ABC
 from typing import List
 
-from cmdb.utils.error import CMDBError
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -301,33 +300,3 @@ class CmdbManagerBase(ABC):
             collection=collection,
             **filter_query
         )
-
-
-class ManagerInitError(CMDBError):
-    "TODO: document"
-    def __init__(self, err):
-        self.message = f'Error while INIT operation - E: ${err}'
-
-
-class ManagerGetError(CMDBError):
-    "TODO: document"
-    def __init__(self, err):
-        self.message = f'Error while GET operation - E: ${err}'
-
-
-class ManagerInsertError(CMDBError):
-    "TODO: document"
-    def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: ${err}'
-
-
-class ManagerUpdateError(CMDBError):
-    "TODO: document"
-    def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: ${err}'
-
-
-class ManagerDeleteError(CMDBError):
-    "TODO: document"
-    def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: ${err}'

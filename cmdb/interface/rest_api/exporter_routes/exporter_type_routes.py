@@ -17,6 +17,7 @@
 import json
 import datetime
 import time
+import logging
 
 from flask import abort, jsonify, current_app, Response
 
@@ -28,6 +29,7 @@ from cmdb.framework.cmdb_errors import TypeNotFoundError
 from cmdb.utils import json_encoding
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
@@ -47,7 +49,8 @@ def export_type():
     except ModuleNotFoundError as e:
         return abort(400, e)
     except CMDBError as err:
-        return abort(404, jsonify(message='Not Found', error=err))
+        LOGGER.info("Error occured in export_type(): %s", err)
+        return abort(404, jsonify(message='Not Found'))
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(
@@ -80,7 +83,8 @@ def export_type_by_ids(public_ids):
     except ModuleNotFoundError as e:
         return abort(400, e)
     except CMDBError as err:
-        return abort(404, jsonify(message='Not Found', error=err))
+        LOGGER.info("Error occured in export_type_by_ids(): %s", err)
+        return abort(404, jsonify(message='Not Found'))
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
 
     return Response(

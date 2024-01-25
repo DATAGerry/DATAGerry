@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.framework.cmdb_base import ManagerInitError, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -113,6 +111,37 @@ class FieldNotFoundError(CMDBError):
     def __init__(self, field_name, type_name):
         super().__init__()
         self.message = f'Field {field_name} was not found inside input_type: {type_name}'
+
+# -------------------------------------------------- CMDB BASE ERROS ------------------------------------------------- #
+
+class ManagerInitError(CMDBError):
+    "TODO: document"
+    def __init__(self, err):
+        self.message = f'Error while INIT operation - E: ${err}'
+
+
+class ManagerGetError(CMDBError):
+    "TODO: document"
+    def __init__(self, err):
+        self.message = f'Error while GET operation - E: ${err}'
+
+
+class ManagerInsertError(CMDBError):
+    "TODO: document"
+    def __init__(self, err):
+        self.message = f'Error while INSERT operation - E: ${err}'
+
+
+class ManagerUpdateError(CMDBError):
+    "TODO: document"
+    def __init__(self, err):
+        self.message = f'Error while UPDATE operation - E: ${err}'
+
+
+class ManagerDeleteError(CMDBError):
+    "TODO: document"
+    def __init__(self, err):
+        self.message = f'Error while DELETE operation - E: ${err}'
 
 # ------------------------------------------------ LOCATION EXCEPTIONS ----------------------------------------------- #
 

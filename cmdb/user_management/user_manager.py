@@ -19,7 +19,8 @@ from typing import List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.database.errors.database_errors import NoDocumentFound
-from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel

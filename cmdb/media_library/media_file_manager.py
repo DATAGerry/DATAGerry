@@ -23,7 +23,8 @@ from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.media_library.media_file import MediaFile
 from cmdb.media_library.media_file import FileMetadata
-from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #

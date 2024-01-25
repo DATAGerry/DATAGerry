@@ -72,6 +72,7 @@
             [(ngModel)]="data.description"
             class="form-control"
             [ngModelOptions]="{standalone: true}"
+            (ngModelChange)="onRefInputChange($event, 'description')"
         >
             {{data.description}}
         </textarea>
@@ -85,6 +86,7 @@
             type="text"
             class="form-control"
             value="{{data.helperText}}"
+            (ngModelChange)="onRefInputChange($event, 'helperText')"
         >
     </div>
     <div class="form-group col-md-12">
@@ -176,7 +178,12 @@
     </div>
     <div class="form-group col-md-12">
         <label>Default value:</label>
-        <select [(ngModel)]="data.value" [ngModelOptions]="{standalone: true}" class="form-control">
+        <select 
+            [(ngModel)]="data.value"
+            [ngModelOptions]="{standalone: true}"
+            class="form-control"
+            (ngModelChange)="onRefInputChange($event, 'value')"
+        >
             <option></option>
             <option
                 *ngFor="let obj of objectList; let i = index"

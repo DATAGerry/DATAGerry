@@ -11,7 +11,7 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
@@ -21,12 +21,14 @@ import {
     ComponentRef,
     Input, OnDestroy,
     OnInit,
+    Output,
     ViewChild,
+    EventEmitter,
     ViewContainerRef
 } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
@@ -59,6 +61,11 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
   private component: any;
   private componentRef: ComponentRef<any>;
 
+  fieldChangesSubscription: Subscription;
+
+  // Changed values emitter of components created
+  @Output() valuesChanged: EventEmitter<any> = new EventEmitter();
+
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
     constructor(private resolver: ComponentFactoryResolver) {
         this.form = new UntypedFormGroup({});
@@ -76,11 +83,28 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
         this.componentRef.instance.form = this.form;
         this.componentRef.instance.sections = this.sections;
         this.componentRef.instance.fields = this.fields;
+
+        this.fieldChangesSubscription = this.componentRef.instance.fieldChanges$.subscribe(
+            (data : any) => this.fieldValueChanged(data)
+        );
     }
 
 
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.fieldChangesSubscription.unsubscribe();
     }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /**
+     * Emits changes of values
+     * @param data new values
+     */
+    public fieldValueChanged(data: any){
+        this.valuesChanged.emit(data);
+    }
+
+
 }

@@ -23,6 +23,7 @@ from pymongo.errors import OperationFailure
 from cmdb.updater import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader, SectionError
 from cmdb.framework.cmdb_location import CmdbLocation
+from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
@@ -52,11 +53,9 @@ class CheckRoutine:
         FINISHED = 3
 
 
-
     def __init__(self, dbm: DatabaseManagerMongo):
         self.status: int = CheckRoutine.CheckStatus.NOT
         self.setup_database_manager = dbm
-
 
 
     def get_check_status(self) -> int:
@@ -67,7 +66,6 @@ class CheckRoutine:
             (int): Current CheckStatus
         """
         return self.status
-
 
 
     def checker(self):
@@ -87,7 +85,6 @@ class CheckRoutine:
         return self.status
 
 
-
     def __is_database_empty(self) -> bool:
         """
         Checks if there are any collections in the initialised database
@@ -96,7 +93,6 @@ class CheckRoutine:
             (bool): Returns bool if there are any collection in the initialised database
         """
         return not self.setup_database_manager.connector.database.list_collection_names()
-
 
 
     def __check_database_collection_valid(self) -> bool:
@@ -131,6 +127,11 @@ class CheckRoutine:
                         LOGGER.info("CHECK: No Root Location => Creating a new Root Location!")
                         self.setup_database_manager.set_root_location(collection.COLLECTION, create=True)
 
+                # setup section templates if valid test
+                if collection == CmdbSectionTemplate and collection_test:
+                    # Add predefined templates if they don't exist
+                    self.setup_database_manager.init_predefined_templates(collection.COLLECTION)
+
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
@@ -145,7 +146,6 @@ class CheckRoutine:
 
         LOGGER.info('CHECK: Database collection validation status %s',collection_test)
         return collection_test
-
 
 
     def has_updates(self) -> bool:
