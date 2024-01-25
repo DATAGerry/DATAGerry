@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -27,7 +28,12 @@ from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Pipeline
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                CategoryManager - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CategoryManager(ManagerBase):
     """TODO: document"""
 
@@ -82,6 +88,26 @@ class CategoryManager(ManagerBase):
         for resource_result in cursor_result.limit(-1):
             return CategoryModel.from_data(resource_result)
         raise ManagerGetError(f'Category with ID: {public_id} not found!')
+
+
+    def reset_children_categories(self, public_id: int):
+        """
+        Sets the parent attribute to null for all children of a category
+
+        Args:
+            public_id (int): public_id of parent category
+        
+        Returns:
+            list: All child categories
+        """
+        # Get all children
+        cursor_result = self._get(self.collection, filter={'parent': public_id})
+
+        # Update all child categories
+        for category in cursor_result:
+            category['parent'] = None
+            category_public_id = category['public_id']
+            self.update(category_public_id, category)
 
 
     def insert(self, category: dict) -> PublicID:
