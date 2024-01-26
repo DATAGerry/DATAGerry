@@ -28,14 +28,14 @@ LOGGER = logging.getLogger(__name__)
 class Update20200214(Updater):
     """TODO: document"""
 
-    def author(self):
-        return 'sdu'
 
     def creation_date(self):
         return '20200214'
 
+
     def description(self):
         return 'Update the fieldtype date of CMDB objects: From string to date.'
+
 
     def increase_updater_version(self, value):
         """TODO: document"""
