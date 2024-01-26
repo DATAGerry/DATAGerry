@@ -83,6 +83,7 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.updater.versions.updater_20200226 \
 		--hidden-import cmdb.updater.versions.updater_20200408 \
 		--hidden-import cmdb.updater.versions.updater_20200512 \
+		--hidden-import cmdb.updater.versions.updater_20200513 \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.exportd.externals \

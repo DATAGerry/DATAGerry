@@ -46,17 +46,6 @@ class Updater(CmdbManagerBase):
         super().__init__(self.database_manager)
 
 
-    @property
-    @abstractmethod
-    def author(self):
-        """
-        Name of the creator
-        Returns: name
-        """
-        return NotImplementedError
-
-
-    @property
     @abstractmethod
     def creation_date(self):
         """
@@ -66,7 +55,6 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
-    @property
     @abstractmethod
     def description(self):
         """

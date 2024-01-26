@@ -27,9 +27,6 @@ LOGGER = logging.getLogger(__name__)
 class Update20200226(Updater):
     """TODO: document"""
 
-    def author(self):
-        return 'sdu'
-
 
     def creation_date(self):
         return '20200226'
