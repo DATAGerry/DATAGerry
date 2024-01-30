@@ -67,7 +67,8 @@ class SectionTemplateCreator:
                                      name: str,
                                      label: str,
                                      options: list[dict] = None,
-                                     regex: str = None) -> dict:
+                                     regex: str = None,
+                                     helper_text: str = None) -> dict:
         """
         Retrieves a field model for a section template
 
@@ -92,6 +93,9 @@ class SectionTemplateCreator:
 
         if regex:
             field_values['regex'] = regex
+
+        if helper_text:
+            field_values['helperText'] = helper_text
 
         return field_values
 
@@ -120,7 +124,8 @@ class SectionTemplateCreator:
                                                                 "dg-network-layer3",
                                                                 "Layer3-Net",
                                                                 None,
-                                                                ipv4_submask_regex))
+                                                                ipv4_submask_regex,
+                                                                "IP/Subnet mask"))
 
         network_section['fields'] = network_fields
 
@@ -158,7 +163,7 @@ class SectionTemplateCreator:
         ]
 
         rack_fields.append(self.__get_template_section_field("select",
-                                                             "dg-network-dns",
+                                                             "dg-rackmounting-orientation",
                                                              "Mounting orientation",
                                                              rack_field_options))
 

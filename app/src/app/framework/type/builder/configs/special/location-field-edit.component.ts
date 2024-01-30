@@ -80,7 +80,6 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
         this.form.addControl('label', this.labelControl);
 
         this.currentTypeID = this.activeRoute.data['_value']?.type?.public_id;
-        console.log("currentTypeID", this.currentTypeID);
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
 

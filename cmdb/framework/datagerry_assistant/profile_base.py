@@ -17,12 +17,14 @@
 This module is the base class for the profiles of DATAGERRY assistant
 """
 import logging
-from datetime import datetime, timezone
 
 from flask import current_app
 from cmdb.framework import TypeModel
+
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
+from .profile_type_constructor import ProfileTypeConstructor
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -39,48 +41,24 @@ class ProfileBase:
         self.type_collection = TypeModel.COLLECTION
 
         with current_app.app_context():
-            self.type_manager: TypeManager = TypeManager(current_app.database_manager)
-            self.object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
+            self.type_manager = TypeManager(current_app.database_manager)
+            self.object_manager = CmdbObjectManager(current_app.database_manager)
+            self.type_constructor = ProfileTypeConstructor(current_app.database_manager)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   HELPER FUNCTIONS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-    def set_type_section_field(self, type_key: str, section_id: str, field_name: str):
+    def get_created_id(self, identifier: str) -> int:
         """
-        Sets the section for the type
-
+        Retrieves the public_id of a type from the 'created_type_ids'-dict
         Args:
-            type_key (str): Used to identify the correct type of the profile
-            section_id (str): Used to identify the correct section in the list
-            field_name (str): The unique field name like 'ref-33320'
+            identifier (str): Name of key for the type
+
+        Returns:
+            int: public_id of the type. Default is None
         """
-        current_type = self.type_dict[type_key]
-
-        type_sections: list = current_type['render_meta']['sections']
-
-        for section in type_sections:
-            if section['name'] == section_id:
-                section_fields: list = section['fields']
-                section_fields.append(field_name)
-
-        self.type_dict[type_key] = current_type
-
-
-    def set_type_summary_field(self, type_key: str, field_name: str):
-        """
-        Sets the summary for the type
-
-        Args:
-            type_key (str): _description_
-            field_name (str): _description_
-        """
-        current_type = self.type_dict[type_key]
-
-        type_summary_fields: list = current_type['render_meta']['summary']['fields']
-        type_summary_fields.append(field_name)
-
-        self.type_dict[type_key] = current_type
+        return self.created_type_ids[identifier]
 
 
     def create_basic_type(self, type_name_key: str, type_dict: dict):
@@ -104,13 +82,3 @@ class ProfileBase:
             dict: All created type ids
         """
         return self.created_type_ids
-
-
-    def get_current_datetime(self) -> datetime:
-        """
-        Calculates the current datetime and returns it
-        
-        Returns:
-            datetime: Current datetime
-        """
-        return datetime.now(timezone.utc)
