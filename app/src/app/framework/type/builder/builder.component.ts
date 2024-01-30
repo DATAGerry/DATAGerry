@@ -418,8 +418,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public getSectionMode(section: CmdbTypeSection, mode: CmdbMode){
-
-        if(this.isGlobalSection(section) || section.name.includes("dg_gst-")){
+        //TODO: improve this condition
+        if(this.isGlobalSection(section) || section.name.includes("dg_gst-") || section.name.includes("dg-")){
             return CmdbMode.Global
         }
         

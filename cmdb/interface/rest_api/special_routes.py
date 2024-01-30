@@ -23,7 +23,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
-from cmdb.framework.assistant_profiles.profiles import ProfileAssistant
+from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
 from cmdb.manager.errors import ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 

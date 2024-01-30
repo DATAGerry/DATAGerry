@@ -37,7 +37,6 @@ import { CheckboxControl } from 'src/app/framework/type/builder/controls/choice/
 import { RadioControl } from 'src/app/framework/type/builder/controls/choice/radio.control';
 import { SelectControl } from 'src/app/framework/type/builder/controls/choice/select.control';
 import { DateControl } from 'src/app/framework/type/builder/controls/date-time/date.control';
-import { LocationControl } from 'src/app/framework/type/builder/controls/specials/location.control';
 import { ReferenceControl } from 'src/app/framework/type/builder/controls/specials/ref.control';
 import { PasswordControl } from 'src/app/framework/type/builder/controls/text/password.control';
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
@@ -84,8 +83,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     ];
 
     public specialControls = [
-        new Controller('ref', new ReferenceControl()),
-        new Controller('location', new LocationControl())
+        new Controller('ref', new ReferenceControl())
     ];
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */

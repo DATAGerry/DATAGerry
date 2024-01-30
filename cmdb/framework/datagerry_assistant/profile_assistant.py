@@ -14,44 +14,30 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This file contans all profile data and logics for the initial assistant
+This module contains the "ProfileAssistant" class
 """
 import logging
-from enum import Enum
 from datetime import datetime, timezone
 
 from flask import current_app
+
 from cmdb.framework.managers.category_manager import CategoryManager
 
-from cmdb.framework.assistant_profiles.profile_user_management import UserManagementProfile
-from cmdb.framework.assistant_profiles.profile_location import LocationProfile
-from cmdb.framework.assistant_profiles.profile_ipam import IPAMProfile
-from cmdb.framework.assistant_profiles.profile_client_management import ClientManagementProfile
-from cmdb.framework.assistant_profiles.profile_server_management import ServerManagementProfile
-from cmdb.framework.assistant_profiles.profile_network_infrastructure import NetworkInfrastructureProfile
+from .profile_name import ProfileName
+from .profile_user_management import UserManagementProfile
+from .profile_location import LocationProfile
+from .profile_ipam import IPAMProfile
+from .profile_client_management import ClientManagementProfile
+from .profile_server_management import ServerManagementProfile
+from .profile_network_infrastructure import NetworkInfrastructureProfile
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ProfileName(str, Enum):
-    """
-    Enumeration of all valid profile names which can be created through the initial assistant
-    
-    Args:
-        Enum (str): Name of a profile
-    """
-    USER_MANAGEMENT = 'user-management-profile'
-    LOCATION = 'location-profile'
-    IPAM = 'ipam-profile'
-    CLIENT_MANAGEMENT = 'client-management-profile'
-    SERVER_MANAGEMENT = 'server-management-profile'
-    NETWORK_INFRASTRUCTURE = 'network-infrastructure-profile'
-
-
 class ProfileAssistant:
     """
-    This class holds all profiles and logics for the initial assistant
+    This class creates all types and categories selected in the DATAGERRY assistant
     """
 
     def create_profiles(self, profile_list):
@@ -61,6 +47,7 @@ class ProfileAssistant:
         Args:
             profile_list: List of profiles which should be created
         """
+        # This is passed along the creation process
         created_type_ids: dict = {
             'company_id': None,
             'user_id': None,
@@ -86,8 +73,6 @@ class ProfileAssistant:
         }
 
         try:
-            ###### PROFILE CREATION ######
-
             # create all types from user management profile
             if ProfileName.USER_MANAGEMENT in profile_list:
                 cur_profile = UserManagementProfile(created_type_ids)
@@ -114,11 +99,10 @@ class ProfileAssistant:
                 created_type_ids = cur_profile.create_server_management_profile()
 
             # create all types from network infrastructure profile
-            if ProfileName.SERVER_MANAGEMENT in profile_list:
+            if ProfileName.NETWORK_INFRASTRUCTURE in profile_list:
                 cur_profile = NetworkInfrastructureProfile(created_type_ids)
                 created_type_ids = cur_profile.create_network_infrastructure_profile()
 
-            ###### CATEGORY Creation ######
 
             self.create_all_categories(created_type_ids)
 
@@ -128,14 +112,12 @@ class ProfileAssistant:
         created_ids = []
 
         for type_id in created_type_ids:
-            if type_id is not None:
+            if type_id:
                 created_ids.append(type_id)
 
         return created_ids
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   CATEGORY CREATION                                                  #
-# -------------------------------------------------------------------------------------------------------------------- #
+# ------------------------------------------------- CATEGORY CREATION ------------------------------------------------ #
 
     def create_all_categories(self, all_type_ids: dict):
         """
@@ -207,9 +189,6 @@ class ProfileAssistant:
 
         return all_categories
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   HELPER FUNCTIONS                                                   #
-# -------------------------------------------------------------------------------------------------------------------- #
 
     def get_category_type_ids(self, all_type_ids: dict, requested_ids: list) -> list:
         """

@@ -109,9 +109,9 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                                                 permission=AccessControlPermission.READ
                                                             )
 
-        location_list: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
+        template_list: List[dict] = [template_.__dict__ for template_ in iteration_result.results]
 
-        api_response = GetMultiResponse(location_list,
+        api_response = GetMultiResponse(template_list,
                                         iteration_result.total,
                                         params,
                                         request.url,
