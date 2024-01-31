@@ -16,75 +16,126 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import {
-  Component,
-  ComponentFactoryResolver, HostBinding,
-  Input,
-  OnInit,
-  ViewChild,
-  ViewContainerRef
+    Component,
+    ComponentFactoryResolver, HostBinding,
+    Input,
+    OnInit,
+    ViewChild,
+    ViewContainerRef
 } from '@angular/core';
 import { Column } from '../../table.types';
+import { Router } from '@angular/router';
 
 @Component({
-  // tslint:disable-next-line:component-selector
-  selector: 'td[table-cell]',
-  templateUrl: './table-cell.component.html',
-  styleUrls: ['./table-cell.component.scss']
+    // tslint:disable-next-line:component-selector
+    selector: 'td[table-cell]',
+    templateUrl: './table-cell.component.html',
+    styleUrls: ['./table-cell.component.scss']
 })
 export class TableCellComponent<T> {
 
-  // noinspection JSMismatchedCollectionQueryUpdate
-  @HostBinding('class') private cssClasses: Array<string>;
-  @HostBinding('class') private cellClasses: Array<string>;
+    constructor(private router: Router) { }
 
-  /**
-   * When column is hidden, add css class hidden to cell.
+    // noinspection JSMismatchedCollectionQueryUpdate
+    @HostBinding('class') private cssClasses: Array<string>;
+    @HostBinding('class') private cellClasses: Array<string>;
+
+    /**
+     * When column is hidden, add css class hidden to cell.
+     */
+    @HostBinding('class.hidden') @Input() public hidden: boolean = false;
+
+    /**
+   * getting boolean value to ensure if want Edit and View Route 
    */
-  @HostBinding('class.hidden') @Input() public hidden: boolean = false;
+    @Input() isViewAndEditRequired: Boolean;
 
-  /**
-   * Row index which this cell is in.
-   */
-  @Input() rowIndex: number;
+    /**
+     * Row index which this cell is in.
+     */
+    @Input() rowIndex: number;
 
-  public data: any;
+    public data: any;
 
-  public column: Column;
+    public column: Column;
 
-  @Input('column')
-  public set Column(col: Column) {
-    this.column = col;
-    this.hidden = this.column.hidden;
-    this.cssClasses = this.column.cssClasses || [];
-    this.cellClasses = this.column.cellClasses || [];
-  }
+    publicID: string;
+    isSingleClick: Boolean = true;
 
-  public item: T;
-
-  @Input('item')
-  public set Item(item: T) {
-    this.item = item;
-    if (this.column.data) {
-      const cellData = TableCellComponent.resolve(this.column.data, this.item);
-      if (this.column.render) {
-        this.data = this.column.render(cellData, this.item, this.column, this.rowIndex);
-      } else {
-        this.data = cellData;
-      }
-
+    @Input('column')
+    public set Column(col: Column) {
+        this.column = col;
+        this.hidden = this.column.hidden;
+        this.cssClasses = this.column.cssClasses || [];
+        this.cellClasses = this.column.cellClasses || [];
     }
-  }
 
-  /**
-   * Resolves a given objects path to a value.
-   * @param path to the property
-   * @param obj resolvable object
-   * @param separator ident
-   */
-  static resolve(path, obj, separator = '.') {
-    const properties = Array.isArray(path) ? path : path.split(separator);
-    return properties.reduce((prev, curr) => prev && prev[curr], obj);
-  }
+    public item: T;
 
+    @Input('item')
+    public set Item(item: T) {
+        this.item = item;
+        if (this.column.data) {
+            const cellData = TableCellComponent.resolve(this.column.data, this.item);
+            if (this.column.render) {
+                this.data = this.column.render(cellData, this.item, this.column, this.rowIndex);
+            } else {
+                this.data = cellData;
+            }
+
+        }
+
+        // Extracting PublicID from item
+        if (item && item['object_information'] && item['object_information']['object_id']) {
+            this.publicID = item['object_information']['object_id'];
+        }
+    }
+
+
+    /**
+     * Resolves a given objects path to a value.
+     * @param path to the property
+     * @param obj resolvable object
+     * @param separator ident
+     */
+    static resolve(path, obj, separator = '.') {
+        const properties = Array.isArray(path) ? path : path.split(separator);
+        return properties.reduce((prev, curr) => prev && prev[curr], obj);
+    }
+
+
+    /**
+     * Function to handle a single click for viewing an object
+     */
+    handleObjectView() {
+        if (this.isViewAndEditRequired) {
+            this.isSingleClick = true;
+
+            setTimeout(() => {
+                if (this.isSingleClick) {
+                    this.generateRouterLink('view', this.publicID);
+                }
+            }, 300);
+        }
+    }
+
+
+    // Function to handle a double click for editing an object
+    handleObjectEdit() {
+        if (this.isViewAndEditRequired) {
+            this.isSingleClick = false;
+            this.generateRouterLink('edit', this.publicID);
+        }
+    }
+
+
+    /**
+     * Function to generate a router link based on the action and publicID
+     * @param action 
+     * @param publicID 
+     */
+    generateRouterLink(action: string, publicID: string) {
+        this.router.navigate(['/', 'framework', 'object', action, publicID]);
+    }
 
 }

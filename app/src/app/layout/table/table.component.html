@@ -59,8 +59,8 @@
                  (change)="toggleRowSelection(item, $event)"/>
         </div>
       </td>
-      <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [hidden]="column.hidden"
-          [ngStyle]="column.style"></td>
+          <td table-cell *ngFor="let column of columns" [column]="column" [item]="item" [hidden]="column.hidden" [rowIndex]="rowIndex"
+         [ngStyle]="column.style" [isViewAndEditRequired]="isViewAndEditRequired"></td>
     </tr>
     <tr *ngIf="items?.length === 0">
       <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">

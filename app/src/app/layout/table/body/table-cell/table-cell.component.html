@@ -1,3 +1,6 @@
 <ng-container *ngIf="column.template" [ngTemplateOutlet]="column.template"
               [ngTemplateOutletContext]="{ data: data, item: item, column: column}"></ng-container>
-<ng-container *ngIf="data && !column.template">{{data}}</ng-container>
+<div (click)="handleObjectView()" (dblclick)="handleObjectEdit()" class="clickable-container"  >
+    <ng-container *ngIf="data && !column.template">
+      <span>{{data}}</span></ng-container>
+  </div>
