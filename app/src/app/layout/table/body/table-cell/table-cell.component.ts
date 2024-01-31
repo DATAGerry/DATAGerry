@@ -120,7 +120,9 @@ export class TableCellComponent<T> {
     }
 
 
-    // Function to handle a double click for editing an object
+    /**
+     * Function to handle a double click for editing an object
+     */
     handleObjectEdit() {
         if (this.isViewAndEditRequired) {
             this.isSingleClick = false;
@@ -131,8 +133,8 @@ export class TableCellComponent<T> {
 
     /**
      * Function to generate a router link based on the action and publicID
-     * @param action 
-     * @param publicID 
+     * @param action - The action to perform, e.g., 'view', 'edit', etc.
+     * @param publicID - The unique identifier associated with the object
      */
     generateRouterLink(action: string, publicID: string) {
         this.router.navigate(['/', 'framework', 'object', action, publicID]);
