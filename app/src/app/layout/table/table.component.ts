@@ -68,7 +68,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
   /**
    * html table id
    */
-  @Input() public id: string = `table-${ Math.random().toString(36).substring(10) }`;
+  @Input() public id: string = `table-${Math.random().toString(36).substring(10)}`;
+
+  @Input() public isViewAndEditRequired: boolean = false;
 
   /**
    * Message which will be shown if no data are in the table.

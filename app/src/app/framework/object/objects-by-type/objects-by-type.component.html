@@ -15,7 +15,8 @@
             (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)" (columnSearchChange)="onColumnSearchChange($event)">
+            (searchChange)="onSearchChange($event)" (columnSearchChange)="onColumnSearchChange($event)"
+            [isViewAndEditRequired]="true">
 </cmdb-table>
 
 <ng-template #activeTemplate let-data="data">
