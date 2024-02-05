@@ -108,7 +108,7 @@ export class TableCellComponent<T> {
      * Function to handle a single click for viewing an object
      */
     handleObjectView() {
-        if (this.isViewAndEditRequired) {
+        if (this.isViewAndEditRequired && this.column.name !== 'actions') {
             this.isSingleClick = true;
 
             setTimeout(() => {
@@ -124,7 +124,7 @@ export class TableCellComponent<T> {
      * Function to handle a double click for editing an object
      */
     handleObjectEdit() {
-        if (this.isViewAndEditRequired) {
+        if (this.isViewAndEditRequired && this.column.name !== 'actions') {
             this.isSingleClick = false;
             this.generateRouterLink('edit', this.publicID);
         }
