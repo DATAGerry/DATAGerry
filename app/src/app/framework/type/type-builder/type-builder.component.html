@@ -10,7 +10,7 @@
             <aw-wizard-step [stepId]="'1'" stepTitle="Basic information">
                 <ng-template awWizardStepSymbol><i class="fas fa-info"></i></ng-template>
                 <hr/>
-                <cmdb-type-basic-step 
+                <cmdb-type-basic-step
                     [mode]="mode"
                     [typeInstance]="typeInstance"
                     (validateChange)="basicValid = $event"

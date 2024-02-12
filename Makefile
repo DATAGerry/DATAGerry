@@ -15,9 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
-BUILDVAR_VERSION = 2.0.0
-BUILDVAR_VERSION_EXT = 2.0.0
-BUILDVAR_DOCKER_TAG = 2.0.0
+BUILDVAR_VERSION = 2.1.0
+BUILDVAR_VERSION_EXT = 2.1.0
+BUILDVAR_DOCKER_TAG = 2.1.0
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest

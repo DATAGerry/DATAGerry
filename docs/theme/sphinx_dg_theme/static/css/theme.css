@@ -7435,14 +7435,14 @@ blockquote {
   display: flex;
   width: 100%; }
   #document #sidebar {
-    background: #212529;
+    background: #ebe1ca;
     width: 300px;
     min-height: 100vh; }
     #document #sidebar .sidebar-header {
       background: #e94d18;
       padding: 20px; }
   #document .documentwrapper {
-    padding: 20px;
+    padding: 40px;
     min-height: 100vh;
     width: calc(100% - 300px); }
 

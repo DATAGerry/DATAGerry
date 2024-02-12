@@ -2,7 +2,7 @@
 Configuration
 *************
 
-Most of DATAGERRY's configuration is stored in MongoDB. There are a view parameters which cannot be stored at this place
+Most of DATAGERRY's configuration is stored in MongoDB. There are a few parameters which cannot be stored at this place
 (e.g. database connection to MongoDB itself). For this parameters, we provide an INI style configuration file, called
 cmdb.conf. Please see the following example:
 

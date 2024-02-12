@@ -204,14 +204,12 @@ def parse_authorization_header(header):
         auth_type = b"bearer"
         auth_info = value
 
-    if auth_type == b"basic":
+    if auth_type in (b"basic","basic"):
         try:
             username, password = base64.b64decode(auth_info).split(b":", 1)
 
             with current_app.app_context():
-                # username = _to_str(username, "utf-8") #from werkzeug
                 username = username.decode("utf-8")
-                # password = _to_str(password, "utf-8") #from werkzeug
                 password = password.decode("utf-8")
 
                 user_manager: UserManager = UserManager(current_app.database_manager)
@@ -249,4 +247,5 @@ def parse_authorization_header(header):
             return auth_info
         except Exception:
             return None
+
     return None
