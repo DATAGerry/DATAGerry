@@ -24,6 +24,7 @@ BIN_PYTEST = pytest
 BIN_PIP = pip
 BIN_NPM = npm
 BIN_RPMBUILD = rpmbuild
+BIN_DEBBUILD = dpkg-deb
 DIR_BUILD = $(CURDIR)/target
 DIR_BIN_BUILD = ${DIR_BUILD}/bin
 DIR_TEMP= ${DIR_BUILD}/temp
@@ -31,6 +32,7 @@ DIR_DOCS_SOURCE = docs/source
 DIR_DOCS_BUILD = ${DIR_BUILD}/docs
 DIR_DOCS_TARGET = cmdb/interface/docs/static
 DIR_RPM_BUILD = ${DIR_BUILD}/rpm
+DIR_DEB_BUILD = ${DIR_BUILD}/deb
 DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_DOCKER_BUILD = ${DIR_BUILD}/docker
 DIR_WEB_SOURCE = app
@@ -133,6 +135,20 @@ targz: bin
 	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
 	tar -czvf ${DIR_TARGZ_BUILD}/datagerry-${BUILDVAR_VERSION}.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
 
+# create deb package
+.PHONY: deb
+deb: bin
+	mkdir -p ${DIR_DEB_BUILD}
+	mkdir -p ${DIR_DEB_BUILD}/DEBIAN
+	cp contrib/deb/control ${DIR_DEB_BUILD}/DEBIAN
+	sed -i 's/@@DG_BUILDVAR_VERSION@@/$(subst -,_,${BUILDVAR_VERSION})/g' ${DIR_DEB_BUILD}/DEBIAN/control
+	cp contrib/deb/postinst ${DIR_DEB_BUILD}/DEBIAN
+	cp contrib/deb/preinst ${DIR_DEB_BUILD}/DEBIAN
+	cp ${DIR_BIN_BUILD}/datagerry ${DIR_DEB_BUILD}/usr/bin
+	cp contrib/systemd/datagerry.service ${DIR_DEB_BUILD}/usr/lib/systemd/system
+	cp etc/cmdb.conf ${DIR_DEB_BUILD}/etc/datagerry/
+	cp contrib/tmpfiles.d/datagerry.conf ${DIR_DEB_BUILD}/usr/lib/tmpfiles.d
+	${BIN_DEBBUILD} --build dg_${BUILDVAR_VERSION}
 
 # create Docker image
 .PHONY: docker

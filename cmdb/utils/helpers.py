@@ -16,10 +16,11 @@
 """
 Collection of different helper classes and functions
 """
-import collections
 import re
+import os
 import sys
 import importlib
+import pprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def debug_print(self):
@@ -31,8 +32,6 @@ def debug_print(self):
     Returns:
         (str): pretty formatted string of debug informations
     """
-    import pprint
-
     return f'Class: {self.__class__.__name__} \nDict:\n{pprint.pformat(self.__dict__)}'
 
 
@@ -42,7 +41,6 @@ def get_config_dir():
     Returns:
         (str): path to the configuration files
     """
-    import os
     return os.path.join(os.path.dirname(__file__), '../../etc/')
 
 
@@ -52,7 +50,7 @@ def load_class(classname):
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
     if match is None:
-        raise Exception("Could not load class {}".format(classname, ))
+        raise Exception(f"Could not load class {classname}")
     module_name = match.group(1)
     class_name = match.group(2)
     loaded_module = importlib.import_module(module_name)

@@ -20,7 +20,7 @@ open-source configurable management database
 """
 import logging.config
 import signal
-from time import sleep
+import traceback
 from argparse import ArgumentParser, Namespace
 import os
 import sys
@@ -31,8 +31,6 @@ from cmdb.__check__ import CheckRoutine
 from cmdb.__update__ import UpdateRoutine
 
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.wraps import timing
-from cmdb.utils.termcolor import colored
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 
@@ -46,137 +44,20 @@ import cmdb.process_management.process_manager
 logging.config.dictConfig(get_logging_conf())
 LOGGER = logging.getLogger(__name__)
 
-
-def _activate_debug():
-    """
-    Activate the debug mode
-    """
-    cmdb.__MODE__ = 'DEBUG'
-    LOGGER.warning("DEBUG mode enabled")
+app_manager = cmdb.process_management.process_manager.ProcessManager()
 
 
-def _check_database():
-    """
-    Checks whether the specified connection of the configuration is reachable.
-    Returns: Datebase if response
-    """
-    ssc = SystemConfigReader()
-    LOGGER.info('Checking database connection with %s data',ssc.config_name)
-    database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(**database_options)
-
-    try:
-        connection_test = dbm.connector.is_connected()
-    except ServerTimeoutError:
-        connection_test = False
-    LOGGER.debug('Database status is %s',connection_test)
-
-    if connection_test is True:
-        return dbm
-
-    retries = 0
-
-    while retries < 3:
-        retries += 1
-        LOGGER.warning(
-            'Retry %i: Checking database connection with %s data', retries, SystemConfigReader.DEFAULT_CONFIG_NAME
-        )
-
-        connection_test = dbm.connector.is_connected()
-
-        if connection_test:
-            return dbm
-
-    return None
-
-
-def _start_app():
-    """
-    Starting the services
-    """
-    global app_manager
-
-    # install signal handler
-    signal.signal(signal.SIGTERM, _stop_app)
-
-    # start app
-    app_manager = cmdb.process_management.process_manager.ProcessManager()
-    app_status = app_manager.start_app()
-    LOGGER.info('Process manager started: %s',app_status)
-
-
-def _stop_app(signum, frame):
-    """TODO: document"""
-    global app_manager
-
-    app_manager.stop_app()
-
-
-def _init_config_reader(config_file):
-    """TODO: document"""
-    path, filename = os.path.split(config_file)
-    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
-        SystemConfigReader.RUNNING_CONFIG_NAME = filename
-        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
-
-    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
-
-
-def build_arg_parser() -> Namespace:
-    """
-    Generate application parameter parser
-    Returns: instance of OptionParser
-    """
-    _parser = ArgumentParser(prog='DATAGERRY', usage=f"usage: {__title__} [options]")
-
-    _parser.add_argument('--keys',
-                         action='store_true',
-                         default=False,
-                         dest='keys',
-                         help="init keys")
-
-    _parser.add_argument('-d',
-                         '--debug',
-                         action='store_true',
-                         default=False,
-                         dest='debug',
-                         help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
-
-    _parser.add_argument('-s',
-                         '--start',
-                         action='store_true',
-                         default=False,
-                         dest='start',
-                         help="starting cmdb core system - enables services")
-
-    _parser.add_argument('-c',
-                         '--config',
-                         default='./etc/cmdb.conf',
-                         dest='config_file',
-                         help="optional path to config file")
-
-    return _parser.parse_args()
-
-
-@timing('CMDB start')
-def main(args):
+def main(args: Namespace):
     """
     Default application start function
     Args:
         args: start-options
     """
+    dbm = None
     LOGGER.info("DATAGERRY starting...")
 
-# --------------------------------------------------- DEBUG - PART --------------------------------------------------- #
-
-    if args.debug:
-        _activate_debug()
-
+    _activate_debug(args)
     _init_config_reader(args.config_file)
-
-    dbm = None
-
-# --------------------------------------------------- START - PART --------------------------------------------------- #
 
     # check db-settings and run update if needed
     if args.start:
@@ -236,7 +117,6 @@ def main(args):
         else:
             pass
 
-# ---------------------------------------------------- KEYS - PART --------------------------------------------------- #
 
     if args.keys:
         from cmdb.__setup__ import SetupRoutine
@@ -257,39 +137,157 @@ def main(args):
 
     if args.start:
         _start_app()
-    sleep(0.2)  # prevent logger output
-    LOGGER.info("DATAGERRY successfully started")
+        LOGGER.info("DATAGERRY successfully started")
 
 
-if __name__ == "__main__":
-    welcome_string = colored('Welcome to DATAGERRY \nStarting system with following parameters: \n{}\n', 'yellow')
-    brand_string = colored('''
-    ########################################################################                                  
-    
-    @@@@@     @   @@@@@@@ @           @@@@@  @@@@@@@ @@@@@   @@@@@  @@    @@
-    @    @    @@     @    @@         @@@@@@@ @@@@@@@ @@@@@@  @@@@@@ @@@  @@@
-    @     @  @  @    @   @  @       @@@   @@ @@@     @@   @@ @@   @@ @@  @@ 
-    @     @  @  @    @   @  @       @@       @@@@@@  @@   @@ @@   @@  @@@@  
-    @     @ @    @   @  @    @      @@   @@@ @@@@@@  @@@@@@  @@@@@@   @@@@  
-    @     @ @@@@@@   @  @@@@@@      @@   @@@ @@@     @@@@@   @@@@@     @@   
-    @     @ @    @   @  @    @      @@@   @@ @@@     @@ @@@  @@ @@@    @@   
-    @    @ @      @  @ @      @      @@@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
-    @@@@@  @      @  @ @      @       @@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
-                        
-    ########################################################################\n''', 'green')
-    license_string = colored('''Copyright (C) 2024 becon GmbH
-licensed under the terms of the GNU Affero General Public License version 3\n''', 'yellow')
+def _check_database():
+    """
+    Checks whether the specified connection of the configuration is reachable.
+    Returns: Datebase if response
+    """
+    ssc = SystemConfigReader()
+    LOGGER.info('Checking database connection with %s data',ssc.config_name)
+    database_options = ssc.get_all_values_from_section('Database')
+    dbm = DatabaseManagerMongo(**database_options)
 
     try:
-        options = build_arg_parser()
-        print(brand_string)
-        print(welcome_string.format(options.__dict__))
-        print(license_string)
-        sleep(0.2)  # prevent logger output
+        connection_test = dbm.connector.is_connected()
+    except ServerTimeoutError:
+        connection_test = False
+    LOGGER.debug('Database status is %s',connection_test)
+
+    if connection_test is True:
+        return dbm
+
+    retries = 0
+
+    while retries < 3:
+        retries += 1
+        LOGGER.warning(
+            'Retry %i: Checking database connection with %s data', retries, SystemConfigReader.DEFAULT_CONFIG_NAME
+        )
+
+        connection_test = dbm.connector.is_connected()
+
+        if connection_test:
+            return dbm
+
+    return None
+
+
+def _start_app():
+    """Starting application services"""
+    # install signal handler
+    signal.signal(signal.SIGTERM, _stop_app)
+
+    # start app
+    app_status = app_manager.start_app()
+    LOGGER.info('Process manager started: %s',app_status)
+
+
+def _stop_app():
+    """Stop application services"""
+    app_manager.stop_app()
+
+# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
+
+def build_arg_parser() -> Namespace:
+    """
+    Generate application parameter parser
+    Returns: instance of OptionParser
+    """
+    _parser = ArgumentParser(prog='DATAGERRY', usage=f"usage: {__title__} [options]")
+
+    _parser.add_argument('--keys',
+                         action='store_true',
+                         default=False,
+                         dest='keys',
+                         help="init keys")
+
+    _parser.add_argument('-d',
+                         '--debug',
+                         action='store_true',
+                         default=False,
+                         dest='debug',
+                         help="enable debug mode: DO NOT USE ON PRODUCTIVE SYSTEMS")
+
+    _parser.add_argument('-s',
+                         '--start',
+                         action='store_true',
+                         default=False,
+                         dest='start',
+                         help="starting cmdb core system - enables services")
+
+    _parser.add_argument('-c',
+                         '--config',
+                         default='./etc/cmdb.conf',
+                         dest='config_file',
+                         help="optional path to config file")
+
+    return _parser.parse_args()
+
+
+def _activate_debug(args: Namespace):
+    """
+    Activate the debug mode if set
+    """
+    if args.debug:
+        cmdb.__MODE__ = 'DEBUG'
+        LOGGER.warning("DEBUG mode enabled")
+
+
+def _init_config_reader(config_file: str):
+    """
+    Initialises the config file reader
+    Args:
+        config_file (str): Path to config file as a string
+    """
+    path, filename = os.path.split(config_file)
+
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+        SystemConfigReader.RUNNING_CONFIG_NAME = filename
+        SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
+
+    SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
+
+# --------------------------------------------------- INTIALOSATION -------------------------------------------------- #
+
+if __name__ == "__main__":
+    BRAND_STRING = """
+        ########################################################################                                  
+        
+        @@@@@     @   @@@@@@@ @           @@@@@  @@@@@@@ @@@@@   @@@@@  @@    @@
+        @    @    @@     @    @@         @@@@@@@ @@@@@@@ @@@@@@  @@@@@@ @@@  @@@
+        @     @  @  @    @   @  @       @@@   @@ @@@     @@   @@ @@   @@ @@  @@ 
+        @     @  @  @    @   @  @       @@       @@@@@@  @@   @@ @@   @@  @@@@  
+        @     @ @    @   @  @    @      @@   @@@ @@@@@@  @@@@@@  @@@@@@   @@@@  
+        @     @ @@@@@@   @  @@@@@@      @@   @@@ @@@     @@@@@   @@@@@     @@   
+        @     @ @    @   @  @    @      @@@   @@ @@@     @@ @@@  @@ @@@    @@   
+        @    @ @      @  @ @      @      @@@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
+        @@@@@  @      @  @ @      @       @@@@@@ @@@@@@@ @@  @@@ @@  @@@   @@   
+                            
+        ########################################################################\n
+    """
+
+    WELCOME_STRING = """
+        Welcome to DATAGERRY
+        Starting system with following parameters:
+        {}\n
+    """
+
+    LICENSE_STRING = """
+        Copyright (C) 2024 becon GmbH
+        licensed under the terms of the GNU Affero General Public License version 3\n
+    """
+
+    try:
+        options: Namespace = build_arg_parser()
+        print(BRAND_STRING)
+        print(WELCOME_STRING.format(options.__dict__))
+        print(LICENSE_STRING)
         main(options)
     except Exception as err:
         if cmdb.__MODE__ == 'DEBUG':
-            import traceback
             traceback.print_exc()
 
         LOGGER.critical("There was an unforeseen error %s",err)

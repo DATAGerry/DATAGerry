@@ -95,27 +95,3 @@ def deprecated(message):
         return message(*args, **kwargs)
 
     return _deprecated
-
-
-def timing(msg=None):
-    """
-    Time wrap function - Measures time of function duration
-    Args:
-        msg: output message
-
-    Returns:
-        wrap function
-    """
-    def _timing(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            import time
-            time1 = time.time()
-            ret = f(*args, **kwargs)
-            time2 = time.time()
-            LOGGER.debug(f'{msg} took {(time2 - time1) * 1000.0} MS')
-            return ret
-
-        return wrap
-
-    return _timing
