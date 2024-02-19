@@ -58,16 +58,17 @@ def main(args: Namespace):
     _activate_debug(args)
     _init_config_reader(args.config_file)
 
-    try:
-        dbm: DatabaseManagerMongo = _check_database()
-        if not dbm:
-            raise DatabaseConnectionError('Could not establish connection to db')
+    if args.start:
+        try:
+            dbm: DatabaseManagerMongo = _check_database()
+            if not dbm:
+                raise DatabaseConnectionError('Could not establish connection to db')
 
-        LOGGER.info("Database connection established.")
+            LOGGER.info("Database connection established.")
 
-    except DatabaseConnectionError as error:
-        LOGGER.critical("%s: %s",type(error).__name__, error)
-        sys.exit(1)
+        except DatabaseConnectionError as error:
+            LOGGER.critical("%s: %s",type(error).__name__, error)
+            sys.exit(1)
 
     # check db-settings and run update if needed
     if args.start:
