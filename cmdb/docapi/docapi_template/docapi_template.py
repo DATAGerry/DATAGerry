@@ -19,7 +19,7 @@ from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 from cmdb.framework.utils import Model
-from cmdb.utils.error import CMDBError
+from cmdb.errors.docapi import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class DocapiTemplateType(Enum):
@@ -163,6 +163,7 @@ class DocapiTemplate(TemplateManagementBase):
 
         return self.active
 
+
     def get_author_id(self):
         """TODO: document"""
         return self.author_id
@@ -202,13 +203,3 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_parameters
-
-
-class NoPublicIDError(CMDBError):
-    """
-    Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
-    """
-
-    def __init__(self):
-        super().__init__()
-        self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'

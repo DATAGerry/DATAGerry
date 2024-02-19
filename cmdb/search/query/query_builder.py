@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from cmdb.search.query import Query
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class QueryBuilder(Builder):

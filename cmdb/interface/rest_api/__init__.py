@@ -132,7 +132,7 @@ def register_error_pages(app):
     Params:
         app (BaseCmdbApp): app where to register the error handlers
     """
-    from cmdb.interface.error_handlers import not_implemented, internal_server_error, page_gone, not_acceptable, \
+    from cmdb.interface.error_handlers import internal_server_error, page_gone, not_acceptable, \
                                               method_not_allowed, page_not_found, forbidden, unauthorized, \
                                               bad_request, service_unavailable
 
@@ -144,5 +144,4 @@ def register_error_pages(app):
     app.register_error_handler(406, not_acceptable)
     app.register_error_handler(410, page_gone)
     app.register_error_handler(500, internal_server_error)
-    app.register_error_handler(501, not_implemented)
     app.register_error_handler(503, service_unavailable)

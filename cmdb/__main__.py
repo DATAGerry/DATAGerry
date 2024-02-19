@@ -29,13 +29,12 @@ import cmdb
 from cmdb import __title__
 from cmdb.__check__ import CheckRoutine
 from cmdb.__update__ import UpdateRoutine
-
+from cmdb.__setup__ import SetupRoutine
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.error import CMDBError
 from cmdb.utils.system_config import SystemConfigReader
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.database.errors.connection_errors import ServerTimeoutError, DatabaseConnectionError
+from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
 
 import cmdb.process_management.process_manager
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -59,7 +58,6 @@ def main(args: Namespace):
     _activate_debug(args)
     _init_config_reader(args.config_file)
 
-    # check db-settings and run update if needed
     if args.start:
         try:
             dbm: DatabaseManagerMongo = _check_database()
@@ -68,76 +66,91 @@ def main(args: Namespace):
 
             LOGGER.info("Database connection established.")
 
-        except CMDBError as error:
-            LOGGER.critical(error)
+        except DatabaseConnectionError as error:
+            LOGGER.critical("%s: %s",type(error).__name__, error)
             sys.exit(1)
 
-        check_routine = CheckRoutine(dbm)
-        # check db-settings
-        try:
-            check_status = check_routine.checker()
-        except Exception as error:
-            LOGGER.error(error)
-            check_status = check_routine.get_check_status()
-            LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
-
-        if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
-            # run update
-            update_routine = UpdateRoutine()
-
-            try:
-                update_status = update_routine.start_update()
-            except RuntimeError as error:
-                LOGGER.error(error)
-                update_status = update_routine.get_updater_status()
-                LOGGER.warning('The update did not go through as expected - Status %s', update_status)
-
-            if update_status == UpdateRoutine.UpateStatus.FINISHED:
-                check_status = CheckRoutine.CheckStatus.FINISHED
-            else:
-                sys.exit(1)
-
-        if check_status == CheckRoutine.CheckStatus.FINISHED:
-            # run setup if needed
-            from cmdb.__setup__ import SetupRoutine
-            setup_routine = SetupRoutine(dbm)
-
-            try:
-                setup_status = setup_routine.setup()
-            except RuntimeError as error:
-                LOGGER.error(error)
-                setup_status = setup_routine.get_setup_status()
-                LOGGER.warning('The setup did not go through as expected - Status %s', setup_status)
-
-            if setup_status == SetupRoutine.SetupStatus.FINISHED:
-                pass
-            else:
-                sys.exit(1)
-
-        else:
-            pass
-
+    # check db-settings and run update if needed
+    if args.start:
+        _start_check_routines(dbm)
 
     if args.keys:
-        from cmdb.__setup__ import SetupRoutine
-        setup_routine = SetupRoutine(dbm)
-        setup_status = None
-
-        try:
-            setup_routine.init_keys()
-        except RuntimeError as error:
-            LOGGER.error(error)
-            setup_status = setup_routine.get_setup_status()
-            LOGGER.warning('The key generation did not go through as expected - Status %s', setup_status)
-
-        if setup_status == SetupRoutine.SetupStatus.FINISHED:
-            sys.exit(0)
-        else:
-            sys.exit(1)
+        _start_key_routine(dbm)
 
     if args.start:
         _start_app()
         LOGGER.info("DATAGERRY successfully started")
+
+# ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
+
+def _start_key_routine(dbm: DatabaseManagerMongo):
+    """
+    Starts key generation routine
+    Args:
+        dbm (DatabaseManagerMongo): Database Connector
+    """
+    setup_routine = SetupRoutine(dbm)
+    setup_status = None
+
+    try:
+        setup_routine.init_keys()
+    except RuntimeError as error:
+        LOGGER.error(error)
+        setup_status = setup_routine.get_setup_status()
+        LOGGER.warning('The key generation did not go through as expected - Status %s', setup_status)
+
+    if setup_status == SetupRoutine.SetupStatus.FINISHED:
+        sys.exit(0)
+    else:
+        sys.exit(1)
+
+
+def _start_check_routines(dbm: DatabaseManagerMongo):
+    """
+    Starts validation of database structure
+    Args:
+        dbm (DatabaseManagerMongo): Database Connector
+    """
+    check_routine = CheckRoutine(dbm)
+        # check db-settings
+    try:
+        check_status = check_routine.checker()
+    except Exception as error:
+        LOGGER.error(error)
+        check_status = check_routine.get_check_status()
+        LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
+
+    if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
+        # run update
+        update_routine = UpdateRoutine()
+
+        try:
+            update_status = update_routine.start_update()
+        except RuntimeError as error:
+            LOGGER.error(error)
+            update_status = update_routine.get_updater_status()
+            LOGGER.warning('The update did not go through as expected - Status %s', update_status)
+
+        if update_status == UpdateRoutine.UpateStatus.FINISHED:
+            check_status = CheckRoutine.CheckStatus.FINISHED
+        else:
+            sys.exit(1)
+
+    if check_status == CheckRoutine.CheckStatus.FINISHED:
+        # run setup if needed
+        setup_routine = SetupRoutine(dbm)
+
+        try:
+            setup_status = setup_routine.setup()
+        except RuntimeError as error:
+            LOGGER.error(error)
+            setup_status = setup_routine.get_setup_status()
+            LOGGER.warning('The setup did not go through as expected - Status %s', setup_status)
+
+        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+            pass
+        else:
+            sys.exit(1)
 
 
 def _check_database():
@@ -173,21 +186,6 @@ def _check_database():
             return dbm
 
     return None
-
-
-def _start_app():
-    """Starting application services"""
-    # install signal handler
-    signal.signal(signal.SIGTERM, _stop_app)
-
-    # start app
-    app_status = app_manager.start_app()
-    LOGGER.info('Process manager started: %s',app_status)
-
-
-def _stop_app():
-    """Stop application services"""
-    app_manager.stop_app()
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 
@@ -250,7 +248,22 @@ def _init_config_reader(config_file: str):
 
     SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
 
-# --------------------------------------------------- INTIALOSATION -------------------------------------------------- #
+
+def _start_app():
+    """Starting application services"""
+    # install signal handler
+    signal.signal(signal.SIGTERM, _stop_app)
+
+    # start app
+    app_status = app_manager.start_app()
+    LOGGER.info('Process manager started: %s',app_status)
+
+
+def _stop_app():
+    """Stop application services"""
+    app_manager.stop_app()
+
+# --------------------------------------------------- INTIALISATION -------------------------------------------------- #
 
 if __name__ == "__main__":
     BRAND_STRING = """
@@ -290,6 +303,6 @@ if __name__ == "__main__":
         if cmdb.__MODE__ == 'DEBUG':
             traceback.print_exc()
 
-        LOGGER.critical("There was an unforeseen error %s",err)
+        LOGGER.critical("%s: %s",type(err).__name__, err)
         LOGGER.info("DATAGERRY stopped!")
         sys.exit(1)

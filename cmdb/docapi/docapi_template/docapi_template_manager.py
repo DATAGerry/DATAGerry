@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
@@ -25,7 +26,7 @@ from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError
 from cmdb.search import Pipeline
-from cmdb.utils.error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -107,7 +108,7 @@ class DocapiTemplateManager(CmdbManagerBase):
             raise DocapiTemplateManagerGetError(err) from err
 
 
-    def insert_template(self, data: (DocapiTemplate, dict)) -> int:
+    def insert_template(self, data: Union[DocapiTemplate, dict]) -> int:
         """
         Insert new DocapiTemplate Object
         Args:
@@ -137,7 +138,7 @@ class DocapiTemplateManager(CmdbManagerBase):
         return ack
 
 
-    def update_template(self, data: (dict, DocapiTemplate), request_user: UserModel) -> str:
+    def update_template(self, data: Union[DocapiTemplate, dict], request_user: UserModel) -> str:
         """
         Update new DocapiTemplat Object
         Args:

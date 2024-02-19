@@ -29,7 +29,7 @@ from cmdb.interface.route_utils import login_required, make_response
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
@@ -59,7 +59,7 @@ def add_type():
             type_instance = TypeModel.from_data(new_type_data)
             type_manager.insert(type_instance)
         except (ManagerInsertError, CMDBError) as err:
-            error_collection.update({"public_id": new_type_data['public_id'], "message": err.message})
+            error_collection.update({"public_id": new_type_data['public_id'], "message": err})
 
     resp = make_response(error_collection)
     return resp
@@ -80,8 +80,8 @@ def update_type():
         try:
             type_manager.get(update_type_instance.public_id)
             type_manager.update(update_type_instance.public_id, update_type_instance)
-        except (Exception, ManagerGetError) as err:
-            error_collection.update({"public_id": add_data_dump['public_id'], "message": err.message})
+        except (ManagerGetError, Exception) as err:
+            error_collection.update({"public_id": add_data_dump['public_id'], "message": err})
 
     resp = make_response(error_collection)
     return resp

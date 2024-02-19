@@ -16,13 +16,9 @@
 """
 DATAGERRY error super class
 """
-from cmdb.utils.helpers import debug_print
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class CMDBError(Exception):
     """Error super class which should not be called directly"""
-    def __init__(self):
-        pass
-
-    def __repr__(self):
-        return debug_print(self)
+    def __init__(self, message: str = None):
+        super().__init__(message)

@@ -17,7 +17,7 @@
 import logging
 from typing import List, Type
 
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError

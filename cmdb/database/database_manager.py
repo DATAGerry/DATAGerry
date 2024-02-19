@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """The module implements the base for database managers"""
+import logging
 from typing import Union, Any, List
 
 from pymongo.database import Database
@@ -21,23 +22,22 @@ from pymongo.errors import CollectionInvalid
 from pymongo import IndexModel
 from pymongo.collection import Collection
 
-from cmdb.database.connection import MongoConnector
-from cmdb.database.errors.database_errors import DatabaseAlreadyExists, DatabaseNotExists, CollectionAlreadyExists
+from cmdb.database.mongo_connector import MongoConnector
+from cmdb.errors.database import DatabaseAlreadyExists, DatabaseNotExists, CollectionAlreadyExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                             DatabaseManager - BASE CLASS                                             #
-# -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
+
 
 class DatabaseManager:
     """
-    Base for database managers
+    Base class for database managers
     """
 
     def __init__(self, connector: MongoConnector):
         """Constructor of `DatabaseManager`
         Args:
-            connector (CONNECTOR): Database Connector for subclass implementation
+            connector (MongoConnector): Database Connector for subclass implementation
         """
         self.connector: MongoConnector = connector
 

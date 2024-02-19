@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from abc import ABC
 from typing import List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -24,10 +23,10 @@ from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbManagerBase(ABC):
-    """Represents the base class for cmdb managers. A respective implementation is always adapted to the
-       respective database managers :class:`cmdb.database.DatabaseManager`.
-       But should always use at least the super functions listed here.
+class CmdbManagerBase:
+    """
+    Represents the base class for cmdb managers. A respective implementation is always adapted to the
+    respective database manager :class:`cmdb.database.DatabaseManager`.
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
@@ -36,8 +35,7 @@ class CmdbManagerBase(ABC):
             directly in the declaration of the object managers
 
         Args:
-            database_manager (DatabaseManager): initialisation of an database managers
-
+            database_manager (DatabaseManagerMongo): Instance of DatabaseManagerMongo
         """
         self.dbm: DatabaseManagerMongo = database_manager
 
@@ -68,21 +66,6 @@ class CmdbManagerBase(ABC):
         return self.dbm.aggregate(collection, pipeline=pipeline, **kwargs)
 
 
-    def _search(self, collection: str, query, **kwargs):
-        """search after query requirements
-
-        Args:
-            collection: collection to search
-            query: query or aggregate pipe
-            *args:
-            **kwargs:
-
-        Returns:
-            list of found documents
-        """
-        return self.dbm.search(collection, filter=query, **kwargs)
-
-
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
 
@@ -93,10 +76,7 @@ class CmdbManagerBase(ABC):
         Returns:
             str: founded document in json format
         """
-        return self.dbm.find_one(
-            collection=collection,
-            public_id=public_id
-        )
+        return self.dbm.find_one(collection=collection, public_id=public_id)
 
 
     def _get_location(self, collection: str, object_id: int) -> dict:
@@ -109,10 +89,7 @@ class CmdbManagerBase(ABC):
         Returns:
             str: location document in json format
         """
-        return self.dbm.find_one(
-            collection=collection,
-            object_id=object_id
-        )
+        return self.dbm.find_one(collection=collection, object_id=object_id)
 
 
     def get_location_by_object(self, collection: str, object_id: int) -> dict:
@@ -192,10 +169,7 @@ class CmdbManagerBase(ABC):
             int: new public_id of inserted document
             None: if anything goes wrong
         """
-        return self.dbm.insert(
-            collection=collection,
-            data=data
-        )
+        return self.dbm.insert(collection=collection, data=data)
 
 
     def _update(self, collection: str, public_id: int, data: dict) -> object:
@@ -209,11 +183,7 @@ class CmdbManagerBase(ABC):
         Returns:
             acknowledgment of database
         """
-        return self.dbm.update(
-            collection=collection,
-            filter={'public_id': public_id},
-            data=data
-        )
+        return self.dbm.update(collection=collection, filter={'public_id': public_id}, data=data)
 
 
     def _update_for_object(self, collection: str, object_id: int, data: dict) -> object:
@@ -286,9 +256,9 @@ class CmdbManagerBase(ABC):
         ).acknowledged
 
 
-    def _delete_many(self, collection: str, filter_query: dict):
+    def delete_many(self, collection: str, filter_query: dict):
         """
-        removes all documents that match the filter from a collection.
+        Removes all documents that match the filter from a collection.
         Args:
             collection (str): name of the database collection
             filter (dict): Specifies deletion criteria using query operators.
@@ -296,7 +266,4 @@ class CmdbManagerBase(ABC):
         Returns:
             acknowledgment of database
         """
-        return self.dbm.delete_many(
-            collection=collection,
-            **filter_query
-        )
+        return self.dbm.delete_many(collection=collection, **filter_query)

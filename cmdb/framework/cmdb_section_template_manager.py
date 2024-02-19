@@ -31,7 +31,7 @@ from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.utils.error import CMDBError
-from cmdb.database.errors.database_errors import PublicIDAlreadyExists
+from cmdb.errors.database import PublicIDAlreadyExists
 from cmdb.framework.cmdb_errors import ObjectInsertError, \
                                        SectionTemplateManagerDeleteError, \
                                        SectionTemplateManagerError, \

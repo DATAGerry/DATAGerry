@@ -31,11 +31,6 @@ class Builder:
         raise NotImplementedError()
 
 
-    def build(self, *args, **kwargs):
-        """TODO: document"""
-        raise NotImplementedError()
-
-
     def clear(self):
         """TODO: document"""
         raise NotImplementedError()

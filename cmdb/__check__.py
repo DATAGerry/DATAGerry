@@ -21,7 +21,8 @@ from enum import Enum
 from pymongo.errors import OperationFailure
 
 from cmdb.updater import UpdaterModule
-from cmdb.utils.system_reader import SystemSettingsReader, SectionError
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.errors.system_config import SectionError
 from cmdb.framework.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -70,7 +71,7 @@ class CheckRoutine:
 
     def checker(self):
         """TODO: document"""
-        LOGGER.info('STARTED Checks...')
+        LOGGER.info('STARTING Checks...')
         self.status = CheckRoutine.CheckStatus.FINISHED
 
         # check database
@@ -174,7 +175,7 @@ class CheckRoutine:
                 return False
 
         except SectionError as err:
-            LOGGER.error(err.message)
+            LOGGER.error(err)
             return False
 
         return True

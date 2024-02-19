@@ -18,7 +18,6 @@ Definition of all routes for section templates
 """
 import json
 import logging
-from typing import List
 
 from flask import abort, request, current_app
 
@@ -31,13 +30,16 @@ from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.framework.cmdb_section_template_manager import CmdbSectionTemplateManager
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ResponseFailedMessage
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ResponseFailedMessage, ErrorBody
 from cmdb.manager import ManagerIterationError, ManagerGetError
-from cmdb.framework.managers.section_template_manager import SectionTemplateManager
+
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.section_templates_manager import SectionTemplatesManager
+
 from cmdb.framework.cmdb_errors import SectionTemplateManagerGetError, ObjectManagerUpdateError, \
     SectionTemplateManagerDeleteError
 from cmdb.security.acl.errors import AccessDeniedError
-from cmdb.utils.error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -45,7 +47,7 @@ LOGGER = logging.getLogger(__name__)
 section_template_blueprint = APIBlueprint('section_templates', __name__)
 
 section_template_manager = CmdbSectionTemplateManager(current_app.database_manager, current_app.event_queue)
-manager = SectionTemplateManager(database_manager=current_app.database_manager)
+template_manager = SectionTemplatesManager(current_app.database_manager, current_app.event_queue)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -86,30 +88,19 @@ def create_section_template(params: dict, request_user: UserModel):
 @section_template_blueprint.route('/', methods=['GET', 'HEAD'])
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 @section_template_blueprint.parse_collection_parameters(view='native')
-@insert_request_user
-def get_all_section_templates(params: CollectionParameters, request_user: UserModel):
-    """
-    Returns all locations based on the params
+def get_all_section_templates(params: CollectionParameters):
+    """Returns all locations based on the params
 
     Args:
         params (CollectionParameters): params for locations request
-        request_user (UserModel): User requesting the data
-
     Returns:
         (Response): All locations considering the params
     """
     try:
-        iteration_result: IterationResult[CmdbSectionTemplate] = manager.iterate(
-                                                                filter=params.filter,
-                                                                limit=params.limit,
-                                                                skip=params.skip,
-                                                                sort=params.sort,
-                                                                order=params.order,
-                                                                user=request_user,
-                                                                permission=AccessControlPermission.READ
-                                                            )
+        builder_params: BuilderParameters = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
-        template_list: List[dict] = [template_.__dict__ for template_ in iteration_result.results]
+        iteration_result: IterationResult[CmdbSectionTemplate] = template_manager.iterate(builder_params)
+        template_list: list[dict] = [template_.__dict__ for template_ in iteration_result.results]
 
         api_response = GetMultiResponse(template_list,
                                         iteration_result.total,
@@ -117,11 +108,9 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         request.url,
                                         CmdbSectionTemplate.MODEL,
                                         request.method == 'HEAD')
-
     except ManagerIterationError as err:
-        return abort(400, err.message)
-    except ManagerGetError as err:
-        return abort(404, err.message)
+        LOGGER.debug("ManagerIterationError: %s", err)
+        return ErrorBody(400, str(err)).response()
 
     return api_response.make_response()
 

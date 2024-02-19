@@ -22,7 +22,7 @@ from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import Collection, PublicID
 from cmdb.manager import AbstractManagerBase
 from cmdb.search import Query, Pipeline
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # -------------------------------------------------------------------------------------------------------------------- #

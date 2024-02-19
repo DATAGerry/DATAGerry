@@ -24,7 +24,7 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
 from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
 from cmdb.framework.managers.log_manager import CmdbLogManager
-from cmdb.manager.errors import ManagerIterationError, ManagerGetError, ManagerDeleteError
+from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
 from cmdb.interface.route_utils import make_response, insert_request_user
 
 from cmdb.interface.api_parameters import CollectionParameters
@@ -56,7 +56,7 @@ def get_log(public_id: int, request_user: UserModel):
         ObjectManager(database_manager=database_manager).get(selected_log.object_id, user=request_user,
                                                              permission=AccessControlPermission.READ)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
     return make_response(selected_log)
@@ -95,11 +95,11 @@ def delete_log(public_id: int, request_user: UserModel):
                                                              permission=AccessControlPermission.DELETE)
         deleted_object = log_manager.delete(public_id=public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
-        return abort(403, err.message)
+        return abort(403, err)
     except ManagerDeleteError as err:
-        return abort(500, err.message)
+        return abort(500, err)
     return make_response(deleted_object, 202)
 
 
@@ -144,7 +144,7 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ObjectManagerGetError as error:
         LOGGER.error('Error in get_logs_with_existing_objects: %s', error)
         return abort(404)
@@ -191,7 +191,7 @@ def get_logs_with_deleted_objects(params: CollectionParameters):
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
 
     except ManagerIterationError as error:
-        return abort(400, error.message)
+        return abort(400, error)
     except ObjectManagerGetError as error:
         LOGGER.error('Error in get_logs_with_deleted_objects: %s', error)
         return abort(404)
@@ -217,7 +217,7 @@ def get_object_delete_logs(params: CollectionParameters):
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
 
     except ManagerIterationError as error:
-        return abort(400, error.message)
+        return abort(400, error)
     except ObjectManagerGetError as error:
         LOGGER.error('Error in get_object_delete_logs: %s', error)
         return abort(404)
@@ -241,11 +241,11 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
         api_response = GetMultiResponse(logs, total=iteration_result.total, params=params,
                                         url=request.url, model=CmdbMetaLog.MODEL, body=body)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return api_response.make_response()
 
@@ -270,11 +270,11 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         logs = log_manager.iterate(filter=query, limit=0, skip=0, order=1, sort='public_id')
         corresponding_logs = [CmdbObjectLog.to_json(_) for _ in logs.results]
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     if len(corresponding_logs) < 1:
         return make_response(corresponding_logs, 204)

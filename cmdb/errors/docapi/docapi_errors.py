@@ -13,11 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Base Database Error Class"""
-from cmdb.utils.error import CMDBError
+"""Contains DocAPI Error Classes"""
+from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DataBaseError(CMDBError):
-    """Base Database Error"""
-    def __init__(self, message: str = None):
-        self.message = message
+class DocapiError(CMDBError):
+    """Base DocAPI Error"""
+    def __init__(self, message: str):
+        super().__init__(message)
+
+# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+
+class NoPublicIDError(DocapiError):
+    """Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS"""
+    def __init__(self):
+        super().__init__('The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs')

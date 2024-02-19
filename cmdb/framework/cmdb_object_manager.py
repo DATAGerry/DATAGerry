@@ -28,7 +28,7 @@ from bson import json_util
 from cmdb.framework.managers.type_manager import TypeManager
 
 from cmdb.database.utils import object_hook
-from cmdb.database.errors.database_errors import PublicIDAlreadyExists
+from cmdb.errors.database import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.models.category import CategoryModel
@@ -366,7 +366,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         """TODO: document"""
-        ack = self._delete_many(CmdbObject.COLLECTION, filter_query)
+        ack = self.delete_many(CmdbObject.COLLECTION, filter_query)
         if self._event_queue:
             event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
                                                         "user_id": user.get_public_id(),

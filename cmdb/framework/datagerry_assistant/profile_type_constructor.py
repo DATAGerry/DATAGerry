@@ -17,7 +17,8 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.framework.managers.section_template_manager import SectionTemplateManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
@@ -30,7 +31,7 @@ class ProfileTypeConstructor:
     """Creates valid section and field data for types in order to be stored in the DB"""
 
     def __init__(self, database_manager):
-        self.template_manager = SectionTemplateManager(database_manager)
+        self.template_manager = SectionTemplatesManager(database_manager)
         self.predefined_templates = self.__get_predefined_templates()
         self.type_config: dict = {}
 
@@ -379,12 +380,9 @@ class ProfileTypeConstructor:
         formatted_list: dict = {}
         predefined_filter = {'predefined': True}
 
-        iteration_result: IterationResult[CmdbSectionTemplate] = self.template_manager.iterate(
-                                                                        filter=predefined_filter,
-                                                                        limit=0,
-                                                                        skip=0,
-                                                                        sort='public_id',
-                                                                        order=1)
+        builder_params: BuilderParameters = BuilderParameters(predefined_filter)
+
+        iteration_result: IterationResult[CmdbSectionTemplate] = self.template_manager.iterate(builder_params)
 
         template_list: list[dict] = [template_.__dict__ for template_ in iteration_result.results]
 

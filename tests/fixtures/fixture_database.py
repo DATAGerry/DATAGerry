@@ -16,9 +16,9 @@
 """TODO: document"""
 import pytest
 
-from cmdb.database.connection import MongoConnector
+from cmdb.database.mongo_connector import MongoConnector
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @pytest.fixture(scope="session")
 def mongodb_parameters(request):
@@ -30,16 +30,19 @@ def mongodb_parameters(request):
 
 @pytest.fixture(scope="session")
 def database_name(mongodb_parameters):
+    """TODO: document"""
     return mongodb_parameters[2]
 
 
 @pytest.fixture(scope="session")
 def connector(mongodb_parameters):
+    """TODO: document"""
     host, port, database = mongodb_parameters
     return MongoConnector(host, port, database)
 
 
 @pytest.fixture(scope="session")
 def database_manager(mongodb_parameters):
+    "TODO: document"
     host, port, database = mongodb_parameters
     return DatabaseManagerMongo(host, port, database)

@@ -124,6 +124,17 @@ class CollectionParameters(APIParameters):
         return params
 
 
+    @classmethod
+    def get_builder_params(cls, params: "CollectionParameters") -> dict:
+        """Extracts the attributes required for BuilderParameters"""
+        return {
+            'criteria': params.filter,
+            'limit': params.limit,
+            'sort': params.sort,
+            'order': params.order,
+            'skip': params.skip,
+        }
+
     def __repr__(self):
         return f"""
                 Parameters: Query({self.query_string}),

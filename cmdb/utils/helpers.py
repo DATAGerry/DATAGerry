@@ -47,6 +47,7 @@ def get_config_dir():
 def load_class(classname):
     """ load and return the class with the given classname """
     # extract class from module
+    #TODO: check if this regex is correct
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
     if match is None:

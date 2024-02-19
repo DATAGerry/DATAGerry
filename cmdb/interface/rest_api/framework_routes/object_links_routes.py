@@ -29,7 +29,7 @@ from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetSingleResponse, DeleteSingleResponse, InsertSingleResponse, GetMultiResponse
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.manager.errors import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
+from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
@@ -62,7 +62,7 @@ def insert_link(request_user: UserModel):
         result_id = link_manager.insert(data, user=request_user, permission=AccessControlPermission.CREATE)
         raw_doc = link_manager.get(public_id=result_id)
     except (ManagerGetError, ManagerInsertError) as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
@@ -112,9 +112,9 @@ def get_links(params: CollectionParameters, request_user: UserModel):
                                         body=body)
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return api_response.make_response()
 
@@ -138,7 +138,7 @@ def get_link(public_id: int, request_user: UserModel):
     try:
         link = link_manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
@@ -163,9 +163,9 @@ def delete_link(public_id: int, request_user: UserModel):
 
         api_response = DeleteSingleResponse(raw=ObjectLinkModel.to_json(deleted_type), model=ObjectLinkModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 

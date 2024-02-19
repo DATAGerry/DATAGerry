@@ -18,7 +18,7 @@ import logging
 from typing import List
 
 from cmdb.search.query import Pipeline
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -69,4 +69,5 @@ class PipelineBuilder(Builder):
 
 
     def build(self, *args, **kwargs) -> Pipeline:
+        """TODO: document"""
         raise NotImplementedError

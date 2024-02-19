@@ -17,40 +17,10 @@
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class WrongInputFormatError(CMDBError):
-    """TODO: document"""
-    def __init__(self, class_name, data, error):
-        self.message = f"Error while parsing {class_name} - Data: {data} - Error: {error}"
-
-
-class UpdateError(CMDBError):
-    """TODO: document"""
-    def __init__(self, class_name, data, error):
-        self.message = f"Update error while updating {class_name} - Data: {data} - Error: {error}"
-
-
-class TypeInsertError(CMDBError):
-    """TODO: document"""
-    def __init__(self, type_id):
-        self.message = f"Type with ID: {type_id} could not be inserted!"
-
-
-class TypeAlreadyExists(CMDBError):
-    """TODO: document"""
-    def __init__(self, type_id):
-        self.message = f"Type with ID: {type_id} already exists!"
-
-
 class TypeNotFoundError(CMDBError):
     """TODO: document"""
     def __init__(self, type_id):
         self.message = f"Type with ID: {type_id} not found!"
-
-
-class ObjectNotFoundError(CMDBError):
-    """TODO: document"""
-    def __init__(self, obj_id):
-        self.message = f"Object with ID: {obj_id} not found!"
 
 
 class ObjectInsertError(CMDBError):
@@ -59,22 +29,10 @@ class ObjectInsertError(CMDBError):
         self.message = f'Object could not be inserted | Error {error.message} \n show into logs for details'
 
 
-class ObjectUpdateError(CMDBError):
-    """TODO: document"""
-    def __init__(self, msg):
-        self.message = f'Something went wrong during update: {msg}'
-
-
 class ObjectDeleteError(CMDBError):
     """TODO: document"""
     def __init__(self, msg):
         self.message = f'Something went wrong during delete: {msg}'
-
-
-class NoRootCategories(CMDBError):
-    """TODO: document"""
-    def __init__(self):
-        self.message = 'No root categories exists'
 
 
 class ExternalFillError(CMDBError):
@@ -93,13 +51,6 @@ class TypeReferenceLineFillError(CMDBError):
 
 class FieldInitError(CMDBError):
     """Error if field could not be initialized"""
-    def __init__(self, field_name):
-        super().__init__()
-        self.message = f'Field {field_name} could not be initialized'
-
-
-class NoSummaryDefinedError(CMDBError):
-    """Error if no summary fields designed"""
     def __init__(self, field_name):
         super().__init__()
         self.message = f'Field {field_name} could not be initialized'

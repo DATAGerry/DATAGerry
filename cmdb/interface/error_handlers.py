@@ -28,7 +28,7 @@ from typing import Optional
 
 from flask import request, jsonify
 from werkzeug.exceptions import HTTPException, NotFound, BadRequest, Unauthorized, Forbidden, MethodNotAllowed, \
-    NotAcceptable, Gone, InternalServerError, NotImplemented, ServiceUnavailable
+    NotAcceptable, Gone, InternalServerError, ServiceUnavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -60,18 +60,21 @@ class ErrorResponse:
 
     def make_error(self, error: HTTPException) -> dict:
         """make a flask valid error response"""
+
         resp = jsonify(self.__dict__)
         resp.status_code = self.get_status_code()
         error.description = self.description
         resp.error = error
+
         return resp
 
 
 # 4xx Client errors
 def bad_request(error):
     """400 Bad Request"""
+
     resp = ErrorResponse(status=400, prefix='Bad Request', description=BadRequest.description,
-                         message=error.description, joke='... cause the access was nuts!')
+                            message=error.description, joke='... cause the access was nuts!')
     return resp.make_error(error)
 
 
@@ -122,13 +125,6 @@ def internal_server_error(error):
     """500 Internal Server Error"""
     resp = ErrorResponse(status=500, prefix='Internal Server Error', description=InternalServerError.description,
                          message=error.description, joke='Are you nuts?')
-    return resp.make_error(error)
-
-
-def not_implemented(error):
-    """501 Not Implemented"""
-    resp = ErrorResponse(status=501, prefix='Not Implemented', description=NotImplemented.description,
-                         message=error.description, joke='to not be able to do something for toffee/nuts.')
     return resp.make_error(error)
 
 

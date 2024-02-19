@@ -17,31 +17,24 @@
 Database-Connection
 Real connection to database over a given connector
 """
-from datetime import datetime
+import logging
+
 from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.errors import ConnectionFailure
 
-from cmdb.database.errors.connection_errors import DatabaseConnectionError
+from cmdb.errors.database import DatabaseConnectionError
+
+from .connection_status import ConnectionStatus
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ConnectionStatus:
-    """Class representing the status of connection to database"""
+LOGGER = logging.getLogger(__name__)
 
-    def __init__(self, connected: bool, message: str = 'No message given', time_alive: datetime = None):
-        self.connected: bool = connected
-        self.message: str = message
-        self.time_alive = time_alive
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                MongoConnector - CLASS                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
 
 class MongoConnector:
     """
     PyMongo (MongoDB) implementation from connector
     """
-    DEFAULT_CONNECTION_TIMEOUT = 3000
 
     def __init__(self, host: str, port: int, database_name: str, client_options: dict = None):
         if client_options:
@@ -80,7 +73,7 @@ class MongoConnector:
         check if client is connected successfully
         Returns: True if connected / False if disconnected
         """
-        return self.connect().connected
+        return self.connect().get_status()
 
 
     def __exit__(self, *err):
