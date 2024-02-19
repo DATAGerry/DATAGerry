@@ -29,20 +29,20 @@ def mongodb_parameters(request):
 
 
 @pytest.fixture(scope="session")
-def database_name(params):
+def database_name(mongodb_parameters):
     """TODO: document"""
-    return params[2]
+    return mongodb_parameters[2]
 
 
 @pytest.fixture(scope="session")
-def connector(params):
+def connector(mongodb_parameters):
     """TODO: document"""
-    host, port, database = params
+    host, port, database = mongodb_parameters
     return MongoConnector(host, port, database)
 
 
 @pytest.fixture(scope="session")
-def database_manager(params):
+def database_manager(mongodb_parameters):
     "TODO: document"
-    host, port, database = params
+    host, port, database = mongodb_parameters
     return DatabaseManagerMongo(host, port, database)

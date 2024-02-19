@@ -104,8 +104,8 @@ def get_type(public_id: int):
 
     try:
         type_ = type_manager.get(public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        return abort(404)
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
                                      model=TypeModel.MODEL, body=body)
     return api_response.make_response()

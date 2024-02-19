@@ -90,8 +90,8 @@ def get_user(public_id: int):
 
     try:
         user: UserModel = user_manager.get(public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        return abort(404)
     api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
                                      model=UserModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
