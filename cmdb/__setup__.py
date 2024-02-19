@@ -18,8 +18,7 @@ import logging
 from datetime import datetime, timezone
 from enum import Enum
 
-from cmdb.database.errors.connection_errors import ServerTimeoutError
-from cmdb.database.errors.database_errors import DatabaseNotExists
+from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.utils.system_config import SystemConfigReader

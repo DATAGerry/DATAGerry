@@ -228,9 +228,9 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
                                         request.method == 'HEAD')
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
 
     return api_response.make_response()
@@ -290,9 +290,9 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
                                             url=request.url, model=CmdbLocation.MODEL, body=request.method == 'HEAD')
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return api_response.make_response()
 

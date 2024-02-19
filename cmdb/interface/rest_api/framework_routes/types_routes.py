@@ -21,7 +21,7 @@ from flask import abort, request, current_app
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.managers.type_manager import TypeManager
@@ -78,9 +78,9 @@ def get_types(params: TypeIterationParameters):
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=TypeModel.MODEL, body=body)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -105,7 +105,7 @@ def get_type(public_id: int):
     try:
         type_ = type_manager.get(public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
                                      model=TypeModel.MODEL, body=body)
     return api_response.make_response()
@@ -143,9 +143,9 @@ def insert_type(data: dict):
         result_id: PublicID = type_manager.insert(data)
         raw_doc = type_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
                                         model=TypeModel.MODEL)
     return api_response.make_response(prefix='types')
@@ -177,9 +177,9 @@ def update_type(public_id: int, data: dict):
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     # when types are updated, update all locations with relevant data from this type
     updated_type = type_manager.get(public_id)
@@ -233,9 +233,9 @@ def delete_type(public_id: int):
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
 
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except Exception as err:
         return abort(400, str(err))
 
@@ -256,6 +256,6 @@ def count_objects(public_id: int):
     try:
         objects_count = object_manager.count_objects(public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return make_api_response(objects_count)

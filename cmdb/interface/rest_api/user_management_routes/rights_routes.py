@@ -17,7 +17,7 @@
 from flask import request, abort
 
 from cmdb.framework.utils import Model
-from cmdb.manager.errors import ManagerGetError, ManagerIterationError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
@@ -67,9 +67,9 @@ def get_rights(params: CollectionParameters):
                                         url=request.url, model=Model('Right'), body=request.method == 'HEAD')
         return api_response.make_response()
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
 
 @rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
@@ -95,7 +95,7 @@ def get_right(name: str):
     try:
         right = right_manager.get(name)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
                                      body=request.method == 'HEAD')
     return api_response.make_response()

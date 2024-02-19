@@ -18,7 +18,7 @@ import base64
 import logging
 from Crypto import Random
 from Crypto.Cipher import AES
-from cmdb.database.errors.database_errors import NoDocumentFound
+from cmdb.errors.database import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -54,7 +54,7 @@ def get_template_list(params: CollectionParameters):
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=DocapiTemplate.MODEL, body=body)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()

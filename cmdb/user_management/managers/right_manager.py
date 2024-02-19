@@ -104,7 +104,3 @@ class RightManager(ManagerBase):
 
     def update(self, public_id: PublicID, resource: dict):
         raise NotImplementedError
-
-
-    def delete(self, public_id: PublicID):
-        raise NotImplementedError

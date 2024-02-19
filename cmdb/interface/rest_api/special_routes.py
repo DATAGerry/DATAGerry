@@ -24,7 +24,7 @@ from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
-from cmdb.manager.errors import ManagerInsertError
+from cmdb.errors.manager import ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
@@ -104,7 +104,7 @@ def create_initial_profiles(data: str):
         profile_assistant = ProfileAssistant()
         created_ids = profile_assistant.create_profiles(profiles)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return make_response(created_ids)
 

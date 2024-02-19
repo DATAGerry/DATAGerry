@@ -20,7 +20,7 @@ import logging
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)

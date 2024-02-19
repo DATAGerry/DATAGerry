@@ -35,7 +35,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Query, Pipeline
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel

@@ -23,7 +23,7 @@ from datetime import datetime
 from werkzeug._internal import _wsgi_decoding_dance
 from flask import request, abort, current_app
 
-from cmdb.manager.errors import ManagerGetError
+from cmdb.errors.manager import ManagerGetError
 from cmdb.security.auth import AuthModule
 from cmdb.security.security import SecurityManager
 from cmdb.security.token.validator import TokenValidator, ValidationError

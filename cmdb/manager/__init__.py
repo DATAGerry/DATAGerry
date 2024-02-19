@@ -21,7 +21,7 @@ from typing import Any
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.utils import Collection
 
-from cmdb.manager.errors import ManagerGetError,\
+from cmdb.errors.manager import ManagerGetError,\
                                 ManagerInsertError,\
                                 ManagerUpdateError,\
                                 ManagerDeleteError,\

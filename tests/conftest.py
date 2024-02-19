@@ -40,7 +40,7 @@ pytest_plugins = [
 @pytest.fixture(scope="session", autouse=True)
 def preset_database(database_manager, database_name):
     """TODO: document"""
-    from cmdb.database.errors.database_errors import DatabaseNotExists
+    from cmdb.errors.database import DatabaseNotExists
     from cmdb.security.key.generator import KeyGenerator
     from cmdb.security.security import SecurityManager
     from cmdb.user_management.managers.group_manager import GroupManager

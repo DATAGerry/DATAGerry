@@ -18,7 +18,7 @@ import logging
 from typing import List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.database.errors.database_errors import NoDocumentFound
+from cmdb.errors.database import NoDocumentFound
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
@@ -111,7 +111,7 @@ class UserManager(CmdbManagerBase):
     def delete_users_by(self, query: dict):
         """TODO: document"""
         try:
-            return self._delete_many(collection=UserModel.COLLECTION, filter_query=query).acknowledged
+            return self.delete_many(collection=UserModel.COLLECTION, filter_query=query).acknowledged
         except Exception as err:
             raise UserManagerDeleteError(err) from err
 

@@ -21,8 +21,11 @@ import configparser
 from cmdb.utils.cast import auto_cast
 from cmdb.utils.system_env_reader import SystemEnvironmentReader
 from cmdb.utils.system_reader import SystemReader
-from cmdb.utils.system_errors import ConfigFileSetError, ConfigFileNotFound, ConfigNotLoaded, SectionError, \
-    KeySectionError
+from cmdb.errors.system_config import ConfigFileSetError,\
+                                      ConfigFileNotFound,\
+                                      ConfigNotLoaded,\
+                                      SectionError,\
+                                      KeySectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemConfigReader:
@@ -154,6 +157,7 @@ class SystemConfigReader:
                 return value
             except KeyError:
                 pass
+
             # load option from config file
             if self.config_status == SystemConfigReader.CONFIG_LOADED:
                 if self.config.has_section(section):
@@ -161,12 +165,12 @@ class SystemConfigReader:
                         if default:
                             return default
                         raise KeyError(name)
-                    else:
-                        return auto_cast(self.config[section][name])
-                else:
-                    raise SectionError(section)
-            else:
-                raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
+
+                    return auto_cast(self.config[section][name])
+
+                raise SectionError(section)
+
+            raise ConfigNotLoaded(SystemConfigReader.RUNNING_CONFIG_NAME)
 
 
         def get_sections(self):

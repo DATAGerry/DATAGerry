@@ -13,21 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: comment"""
-from cmdb.database.errors import DataBaseError
-# -------------------------------------------------------------------------------------------------------------------- #
-
-class DatabaseConnectionError(DataBaseError):
-    """
-    Error if connection to database broke up
-    """
-    def __init__(self, message):
-        super().__init__(f'Connection error - No connection with the database: {message}')
-
-
-class ServerTimeoutError(DataBaseError):
-    """
-    Server timeout error if connection is lost
-    """
-    def __init__(self, host):
-        super().__init__(f'Server Timeout - No connection to database at {host}')

@@ -122,8 +122,10 @@ def default(obj):
             flags += "i"
         if obj.flags & re.MULTILINE:
             flags += "m"
-        return {"$regex": obj.pattern,
-                "$options": flags}
+        return {
+            "$regex": obj.pattern,
+            "$options": flags
+        }
 
     if isinstance(obj, MinKey):
         return {"$minKey": 1}

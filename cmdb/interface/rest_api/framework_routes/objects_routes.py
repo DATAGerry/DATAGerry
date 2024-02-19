@@ -235,9 +235,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
             return abort(401, 'No possible view parameter')
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return api_response.make_response()
 
@@ -310,7 +310,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                                     user=request_user,
                                                     permission=AccessControlPermission.READ)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
@@ -341,7 +341,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             return abort(401, 'No possible view parameter')
 
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     return api_response.make_response()
 
 
@@ -382,7 +382,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
                                                     order=1,
                                                     user=request_user).results
     except ManagerGetError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     type_fields = sorted([field.get('name') for field in type_instance.fields])
     unstructured: List[dict] = []
@@ -634,10 +634,10 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                     value = t_field["value"]
 
                 manager.update_many(query={'public_id': obj.public_id},
-                                    update={'$addToSet': {'fields': {"name": name, "value": value}}},
+                                    update={'fields': {"name": name, "value": value}},
                                     add_to_set=True)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     api_response = UpdateMultiResponse([], url=request.url, model=CmdbObject.MODEL)
 

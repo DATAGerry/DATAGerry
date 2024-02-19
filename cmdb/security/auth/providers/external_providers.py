@@ -23,7 +23,7 @@ from typing import List
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
 from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
 from cmdb.security.auth.auth_providers import AuthenticationProvider

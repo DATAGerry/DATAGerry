@@ -81,7 +81,9 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
         this.sectionTemplateService.getSectionTemplates().pipe(takeUntil(this.unsubscribe))
         .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
             this.sectionTemplates = apiResponse.results;
-        });
+        },
+        apiResponse => this.toastService.error(apiResponse.error)
+        );
     }
 
 /* ------------------------------------------------- MODAL HANDLING ------------------------------------------------- */

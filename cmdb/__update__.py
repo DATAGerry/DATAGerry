@@ -21,7 +21,7 @@ from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.database.errors.connection_errors import ServerTimeoutError
+from cmdb.errors.database import ServerTimeoutError
 
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter

@@ -21,24 +21,21 @@ import logging
 from pymongo.results import DeleteResult, UpdateResult
 from cmdb.database.database_manager import DatabaseManager
 
-from cmdb.database.connection import MongoConnector
+from cmdb.database.mongo_connector import MongoConnector
 from cmdb.database.counter import PublicIDCounter
-from cmdb.database.errors.database_errors import NoDocumentFound, \
-                                                 DocumentCouldNotBeDeleted
+from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 from cmdb.database.utils import DESCENDING
 from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                             DatabaseManagerMongo - CLASS                                             #
-# -------------------------------------------------------------------------------------------------------------------- #
-
 class DatabaseManagerMongo(DatabaseManager):
-    """PyMongo (mongodb) implementation of Database Manager"""
+    """
+    PyMongo (MongoDB) implementation of Database Manager
+    Extends: DatabaseManager
+    """
 
-# --------------------------------------------------- INIT + DUNDER -------------------------------------------------- #
     def __init__(self, host: str, port: int, database_name: str, **kwargs):
         connector = MongoConnector(host, port, database_name, kwargs)
         super().__init__(connector)
@@ -61,6 +58,7 @@ class DatabaseManagerMongo(DatabaseManager):
         collection = FRAMEWORK_COLLECTIONS + USER_MANAGEMENT_COLLECTIONS
 
         def _gen_default_tables(collection_class):
+            #TODO: Check list_collection_names()-function
             all_collections = self.connector.list_collection_names()
 
             if collection_class not in all_collections:
@@ -87,16 +85,15 @@ class DatabaseManagerMongo(DatabaseManager):
             data (dict): insert data
             skip_public (bool): Skip the public id creation and counter increment
         Returns:
-            int: new public id of the document
+            int: New public id of the document
         """
         if skip_public:
             return self.get_collection(collection).insert_one(data)
 
         if 'public_id' not in data:
-            data['public_id'] = self.get_next_public_id(collection=collection)
+            data['public_id'] = self.get_next_public_id(collection)
 
         self.get_collection(collection).insert_one(data)
-        # update the id counter
         self.update_public_id_counter(collection, data['public_id'])
 
         return data['public_id']
@@ -159,10 +156,7 @@ class DatabaseManagerMongo(DatabaseManager):
             A boolean acknowledged as true if the operation ran with write
             concern or false if write concern was disabled
         """
-        if not add_to_set:
-            formatted_data = {'$set':update}
-        else:
-            formatted_data = update
+        formatted_data = {'$addToSet':update} if add_to_set else {'$set':update}
 
         result = self.get_collection(collection).update_many(filter=query, update=formatted_data)
 
@@ -219,7 +213,7 @@ class DatabaseManagerMongo(DatabaseManager):
             **kwargs: key arguments
 
         Returns:
-            list: list of founded documents
+            list: list of found documents
         """
         found_documents = self.find(collection=collection, *args, **kwargs)
         return list(found_documents)
@@ -327,20 +321,6 @@ class DatabaseManagerMongo(DatabaseManager):
         return self.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
 
 
-    def get_document_with_highest_id(self, collection: str) -> str:
-        """get the document with the highest public id inside a collection
-
-        Args:
-            collection (str): name of database collection
-
-        Returns:
-            str: document from database
-        """
-        formatted_sort = [('public_id', DESCENDING)]
-
-        return self.find_one_by(collection=collection, sort=formatted_sort)
-
-
     def get_highest_id(self, collection: str) -> int:
         """wrapper function
         calls get_document_with_highest_id() and returns the public_id
@@ -350,10 +330,13 @@ class DatabaseManagerMongo(DatabaseManager):
 
         Returns:
             int: highest public id
-
         """
         try:
-            highest = int(self.get_document_with_highest_id(collection)['public_id'])
+            formatted_sort = [('public_id', DESCENDING)]
+
+            highest_id = self.find_one_by(collection=collection, sort=formatted_sort)
+
+            highest = int(highest_id['public_id'])
         except NoDocumentFound:
             return 0
         return highest
@@ -362,10 +345,8 @@ class DatabaseManagerMongo(DatabaseManager):
     def get_next_public_id(self, collection: str) -> int:
         """TODO: document"""
         try:
-            founded_counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={
-                '_id': collection
-            })
-            new_id = founded_counter['counter'] + 1
+            found_counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
+            new_id = found_counter['counter'] + 1
         except (NoDocumentFound, Exception):
             docs_count = self._init_public_id_counter(collection)
             new_id = docs_count + 1
@@ -415,7 +396,6 @@ class DatabaseManagerMongo(DatabaseManager):
             raise DocumentCouldNotBeDeleted(collection, None)
 
         return result
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 CHECK ROUTINE SECTION                                                #

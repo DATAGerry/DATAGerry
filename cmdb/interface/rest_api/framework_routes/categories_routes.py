@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from flask import abort, current_app, request
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.manager.errors import ManagerGetError, \
+from cmdb.errors.manager import ManagerGetError, \
                                 ManagerInsertError, \
                                 ManagerDeleteError, \
                                 ManagerUpdateError, \
@@ -69,9 +69,9 @@ def insert_category(data: dict):
         result_id: PublicID = category_manager.insert(data)
         raw_doc = category_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     api_response = InsertSingleResponse(result_id=result_id,
                                         raw=CategoryModel.to_json(raw_doc),
@@ -136,9 +136,9 @@ def get_categories(params: CollectionParameters):
                                         model=CategoryModel.MODEL,
                                         body=body)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -162,7 +162,7 @@ def get_category(public_id: int):
     try:
         category_instance = category_manager.get(public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     api_response = GetSingleResponse(CategoryModel.to_json(category_instance),
                                      url=request.url,
@@ -196,9 +196,9 @@ def update_category(public_id: int, data: dict):
         category_manager.update(public_id=PublicID(public_id), category=CategoryModel.to_json(category))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return api_response.make_response()
 
@@ -228,7 +228,7 @@ def delete_category(public_id: int):
 
         api_response = DeleteSingleResponse(raw=CategoryModel.to_json(deleted_category), model=CategoryModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()

@@ -28,7 +28,7 @@ from bson import json_util
 from flask import current_app
 
 from cmdb.database.utils import object_hook
-from cmdb.database.errors.database_errors import PublicIDAlreadyExists
+from cmdb.errors.database import PublicIDAlreadyExists
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.managers.type_manager import TypeManager

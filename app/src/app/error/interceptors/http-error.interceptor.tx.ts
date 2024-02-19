@@ -35,7 +35,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
   public readonly NOT_ACCEPTABLE: number = 406;
   public readonly PAGE_GONE: number = 410;
   public readonly INTERNAL_SERVER_ERROR: number = 500;
-  public readonly NOT_IMPLEMENTED: number = 501;
 
   private readonly INFO_ERRORS: number[] = [
     this.BAD_REQUEST,
@@ -43,7 +42,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     this.METHOD_NOT_ALLOWED,
     this.NOT_ACCEPTABLE,
     this.PAGE_GONE,
-    this.NOT_IMPLEMENTED,
     this.FORBIDDEN
   ];
 
