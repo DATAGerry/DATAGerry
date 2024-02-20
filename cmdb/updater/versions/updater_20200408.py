@@ -15,9 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+
+from cmdb.errors.cmdb_error import CMDBError
+
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -34,10 +37,6 @@ class Update20200408(Updater):
         return 'Fix possible wrong object counter'
 
 
-    def increase_updater_version(self, value):
-        super().increase_updater_version(value)
-
-
     def start_update(self):
         try:
             collection = CmdbObject.COLLECTION
@@ -45,5 +44,6 @@ class Update20200408(Updater):
             self.database_manager.update_public_id_counter(collection, highest_id)
 
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
-            raise Exception(err.message) from err
+            raise CMDBError(err) from err
+
         self.increase_updater_version(20200408)

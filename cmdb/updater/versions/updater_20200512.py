@@ -38,11 +38,6 @@ class Update20200512(Updater):
         return 'Restructure category system'
 
 
-    def increase_updater_version(self, value):
-        """TODO: document"""
-        raise NotImplementedError
-
-
     def start_update(self):
         """TODO: document"""
         collection = CategoryModel.COLLECTION

@@ -53,3 +53,9 @@ class ManagerDeleteError(ManagerError):
     """Manager exception for delete operations"""
     def __init__(self, err: str):
         super().__init__(f'Error while DELETE: {err}')
+
+
+class DisallowedActionError(ManagerError):
+    """Manager exception when an illegal action is initiated"""
+    def __init__(self, err: str):
+        super().__init__(f'Disallowed Action: {err}')

@@ -26,6 +26,7 @@ import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -53,7 +54,9 @@ export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements
   }
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    public constructor(private differs: KeyValueDiffers, private sectionTemplateService: SectionTemplateService) {
+    public constructor(private differs: KeyValueDiffers,
+                       private sectionTemplateService: SectionTemplateService,
+                       private toastService: ToastService) {
         super();
     }
 
@@ -101,6 +104,8 @@ export class TypeFieldsStepComponent extends TypeBuilderStepComponent implements
         .subscribe((apiResponse: APIGetMultiResponse<CmdbSectionTemplate>) => {
             this.sectionTemplates = apiResponse.results.filter((template) => template.is_global == false);
             this.globalSectionTemplates = apiResponse.results.filter((template) => template.is_global == true);
-        });
+        },
+        apiResponse => this.toastService.error(apiResponse.error)
+        );
     }
 }

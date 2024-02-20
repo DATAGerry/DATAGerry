@@ -14,8 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+from abc import ABC, abstractmethod
 
-class BaseExporterFormat:
+class BaseExporterFormat(ABC):
     """TODO: document"""
     FILE_EXTENSION = None
     LABEL = None
@@ -27,6 +28,6 @@ class BaseExporterFormat:
     def __init__(self, file_name=''):
         self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
 
+    @abstractmethod
     def export(self, data, *args):
         """TODO: document"""
-        pass

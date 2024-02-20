@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import List
+import datetime
+import time
 
 from flask import Response, abort
 
@@ -78,7 +79,7 @@ class BaseExportWriter:
         """
         self.export_format = export_format
         self.export_config = export_config
-        self.data: List[RenderResult] = []
+        self.data: list[RenderResult] = []
 
 
     def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
@@ -88,7 +89,7 @@ class BaseExportWriter:
 
         try:
             _params = self.export_config.parameters
-            _result: List[CmdbObject] = manager.iterate(filter=_params.filter,
+            _result: list[CmdbObject] = manager.iterate(filter=_params.filter,
                                                         sort=_params.sort,
                                                         order=_params.order,
                                                         limit=0, skip=0,
@@ -103,8 +104,6 @@ class BaseExportWriter:
 
     def export(self):
         """TODO: document"""
-        import datetime
-        import time
 
         conf_option = self.export_config.options
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')

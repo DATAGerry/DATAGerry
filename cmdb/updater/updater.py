@@ -70,7 +70,6 @@ class Updater(CmdbManagerBase):
         return NotImplementedError
 
 
-    @abstractmethod
     def increase_updater_version(self, value: int):
         """TODO: document"""
         ssr = SystemSettingsReader(self.database_manager)

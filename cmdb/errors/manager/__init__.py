@@ -19,7 +19,8 @@ from .manager_errors import ManagerError,\
                             ManagerInsertError,\
                             ManagerUpdateError,\
                             ManagerDeleteError,\
-                            ManagerIterationError
+                            ManagerIterationError,\
+                            DisallowedActionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -28,5 +29,6 @@ __all__ = [
     'ManagerInsertError',
     'ManagerUpdateError',
     'ManagerDeleteError',
-    'ManagerIterationError'
+    'ManagerIterationError',
+    'DisallowedActionError'
 ]

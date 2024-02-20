@@ -15,10 +15,18 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This package contains all errors for the docapi of DATAGERRY"""
 from .docapi_errors import DocapiError,\
-                           NoPublicIDError
+                           NoPublicIDError,\
+                           DocapiGetError,\
+                           DocapiUpdateError,\
+                           DocapiInsertError,\
+                           DocapiDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
     'DocapiError',
-    'NoPublicIDError'
+    'NoPublicIDError',
+    'DocapiGetError',
+    'DocapiUpdateError',
+    'DocapiInsertError',
+    'DocapiDeleteError'
 ]
