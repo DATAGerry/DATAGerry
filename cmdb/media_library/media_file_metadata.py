@@ -54,7 +54,6 @@ class FileMetadata:
 
     def get_permission(self):
         """TODO: document"""
-        # TODO implement this method later
         #  The action of officially allowing someone to do a particular thing
         if self.permission is None:
             return None
@@ -62,7 +61,7 @@ class FileMetadata:
 
 
     @classmethod
-    def to_json(cls, instance) -> dict:
+    def to_json(cls, instance: "FileMetadata") -> dict:
         """Convert a type instance to json conform data"""
         return {
             'reference': instance.get_ref_to(),

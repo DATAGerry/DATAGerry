@@ -34,11 +34,6 @@ class Update20200513(Updater):
         return "Adds the property 'global_template_ids' and 'selectable_as_parent' to all types"
 
 
-    def increase_updater_version(self, value):
-        """TODO: document"""
-        super().increase_updater_version(value)
-
-
     def start_update(self):
         """TODO: document"""
         collection = TypeModel.COLLECTION

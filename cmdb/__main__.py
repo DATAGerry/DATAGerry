@@ -35,6 +35,7 @@ from cmdb.utils.system_config import SystemConfigReader
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
+from cmdb.errors.cmdb_error import CMDBError
 
 import cmdb.process_management.process_manager
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -52,34 +53,37 @@ def main(args: Namespace):
     Args:
         args: start-options
     """
-    dbm = None
-    LOGGER.info("DATAGERRY starting...")
+    try:
+        dbm = None
+        LOGGER.info("DATAGERRY starting...")
 
-    _activate_debug(args)
-    _init_config_reader(args.config_file)
+        _activate_debug(args)
+        _init_config_reader(args.config_file)
 
-    if args.start:
-        try:
-            dbm: DatabaseManagerMongo = _check_database()
-            if not dbm:
-                raise DatabaseConnectionError('Could not establish connection to db')
+        if args.start:
+            try:
+                dbm: DatabaseManagerMongo = _check_database()
+                if not dbm:
+                    raise DatabaseConnectionError('Could not establish connection to db')
 
-            LOGGER.info("Database connection established.")
+                LOGGER.info("Database connection established.")
 
-        except DatabaseConnectionError as error:
-            LOGGER.critical("%s: %s",type(error).__name__, error)
-            sys.exit(1)
+            except DatabaseConnectionError as error:
+                LOGGER.critical("%s: %s",type(error).__name__, error)
+                sys.exit(1)
 
-    # check db-settings and run update if needed
-    if args.start:
-        _start_check_routines(dbm)
+        # check db-settings and run update if needed
+        if args.start:
+            _start_check_routines(dbm)
 
-    if args.keys:
-        _start_key_routine(dbm)
+        if args.keys:
+            _start_key_routine(dbm)
 
-    if args.start:
-        _start_app()
-        LOGGER.info("DATAGERRY successfully started")
+        if args.start:
+            _start_app()
+            LOGGER.info("DATAGERRY successfully started")
+    except Exception as error:
+        raise CMDBError(error) from error
 
 # ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
 
@@ -299,7 +303,7 @@ if __name__ == "__main__":
         print(WELCOME_STRING.format(options.__dict__))
         print(LICENSE_STRING)
         main(options)
-    except Exception as err:
+    except CMDBError as err:
         if cmdb.__MODE__ == 'DEBUG':
             traceback.print_exc()
 

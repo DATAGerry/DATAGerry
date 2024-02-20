@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Object/Type render"""
 import logging
-from typing import List, Union
+from typing import Union
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
@@ -236,7 +236,7 @@ class CmdbRender:
         return field
 
 
-    def __merge_fields_value(self, level: int = 3) -> List[dict]:
+    def __merge_fields_value(self, level: int = 3) -> list[dict]:
         """
         Checks all fields for references.
         Fields with references are extended by the property 'references'.
@@ -323,7 +323,7 @@ class CmdbRender:
                         'fields': []
                     }
                 except (ManagerGetError, Exception) as error:
-                    LOGGER.warning("%s",error.message)
+                    LOGGER.warning("%s",error)
                     continue
 
                 if not ref_section:
@@ -521,9 +521,9 @@ class CmdbRender:
 
 class RenderList:
     """TODO: document"""
-    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
+    def __init__(self, object_list: list[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
                  ref_render=False, object_manager: CmdbObjectManager = None):
-        self.object_list: List[CmdbObject] = object_list
+        self.object_list: list[CmdbObject] = object_list
         self.request_user = request_user
         self.ref_render = ref_render
         self.object_manager = object_manager
@@ -531,9 +531,9 @@ class RenderList:
         self.user_manager = UserManager(database_manager=database_manager)
 
     #@timing('RenderList')
-    def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
+    def render_result_list(self, raw: bool = False) -> list[Union[RenderResult, dict]]:
         """TODO: document"""
-        preparation_objects: List[RenderResult] = []
+        preparation_objects: list[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
                 type_instance=self.object_manager.get_type(passed_object.type_id),

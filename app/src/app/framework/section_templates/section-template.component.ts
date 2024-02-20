@@ -79,7 +79,7 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
      */
     getAllSectionTemplates(){
         this.sectionTemplateService.getSectionTemplates().pipe(takeUntil(this.unsubscribe))
-        .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+        .subscribe((apiResponse: APIGetMultiResponse<CmdbSectionTemplate>) => {
             this.sectionTemplates = apiResponse.results;
         },
         apiResponse => this.toastService.error(apiResponse.error)
@@ -107,9 +107,9 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     this.sectionTemplateService.deleteSectionTemplate(sectionTemplateID).subscribe((res: any) => {
                         this.toastService.success("Section Template with ID " + sectionTemplateID  + " deleted!");
                         this.getAllSectionTemplates();
-                    }, error => {
-                      this.toastService.error(error);
-                    });
+                    },
+                    res => this.toastService.error(res.error)
+                    );
                 }
             });
         });
@@ -143,9 +143,9 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
                     this.toastService.success(`Section Template with ID: ${sectionTemplate.public_id} transformed 
                                             to a Global Section Template!`);
                     this.getAllSectionTemplates();
-                }, error => {
-                  this.toastService.error(error);
-                });
+                },
+                res => this.toastService.error(res.error)
+                );
             }
         });
     }

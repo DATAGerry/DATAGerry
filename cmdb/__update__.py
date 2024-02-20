@@ -16,6 +16,7 @@
 """TODO: document"""
 import logging
 from enum import Enum
+from pymongo.errors import CollectionInvalid
 
 from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
@@ -123,7 +124,7 @@ class UpdateRoutine:
             for collection in FRAMEWORK_CLASSES:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
-                except Exception:
+                except CollectionInvalid:
                     self.setup_database_manager.create_collection(collection.COLLECTION)
                     # set unique indexes
                     self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
@@ -133,7 +134,7 @@ class UpdateRoutine:
             for collection in USER_MANAGEMENT_COLLECTION:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
-                except Exception:
+                except CollectionInvalid:
                     self.setup_database_manager.create_collection(collection.COLLECTION)
                     # set unique indexes
                     self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
@@ -143,7 +144,7 @@ class UpdateRoutine:
             for collection in JOB_MANAGEMENT_COLLECTION:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
-                except Exception:
+                except CollectionInvalid:
                     self.setup_database_manager.create_collection(collection.COLLECTION)
                     # set unique indexes
                     self.setup_database_manager.create_indexes(collection.COLLECTION,

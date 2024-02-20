@@ -167,7 +167,7 @@ class CheckRoutine:
             if new_version > current_version:
                 LOGGER.error(
                     """
-                    Please run an update. There are new updates available.
+                    There are new updates available. Updating initialised...
                     Current Updater Version: %s
                     Newest Update Version: %s
                     """,current_version, new_version)

@@ -41,6 +41,7 @@ import { ReferenceControl } from 'src/app/framework/type/builder/controls/specia
 import { PasswordControl } from 'src/app/framework/type/builder/controls/text/password.control';
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
 import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/textarea.control';
+import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -180,9 +181,9 @@ export class SectionTemplateBuilderComponent implements OnInit {
         this.sectionTemplateService.updateSectionTemplate(params).subscribe((res: APIUpdateSingleResponse) => {
             this.toastService.success("Section Template updated!");
             this.router.navigate(['/framework/section_templates']);
-        }, error => {
-          this.toastService.error(error);
-        });
+        },
+        res => this.toastService.error(res.error)
+        );
     }
 
 
@@ -192,10 +193,12 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * @param publicID publicID of section template which should be edited
      */
     private getSectionTemplate(publicID: number){
-        this.sectionTemplateService.getSectionTemplate(publicID).subscribe((response: RenderResult) => {
+        this.sectionTemplateService.getSectionTemplate(publicID).subscribe((response: CmdbSectionTemplate) => {
             this.initialSection = response;
             this.formGroup.controls.isGlobal.setValue(this.initialSection.is_global);
-          });
+          },
+          apiResponse => this.toastService.error(apiResponse.error)
+          );
     }
 
 /* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
@@ -206,7 +209,6 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * @param event triggered when a field is dropped in the Fieldszone
      */
     public onFieldDrop(event: DndDropEvent) {
-        console.log("onFieldDrop", event.data);
         if (event.dropEffect === 'copy' || event.dropEffect === 'move') {
             this.initialSection.fields.splice(event.index, 0, event.data);
         }

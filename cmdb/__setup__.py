@@ -18,6 +18,7 @@ import logging
 from datetime import datetime, timezone
 from enum import Enum
 
+from cmdb.errors.cmdb_error import CMDBError
 from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
@@ -159,8 +160,10 @@ class SetupRoutine:
             usm.update(admin_user.get_public_id(), admin_user)
 
             LOGGER.info('KEY ROUTINE: Password was updated for user: %s', admin_user.user_name)
-        except Exception as ex:
-            LOGGER.info('KEY ROUTINE: Password was updated for user failed: %s', ex)
+        except Exception as err:
+            LOGGER.info('KEY ROUTINE: Password update for user failed: %s', err)
+            raise CMDBError(err) from err
+
 
         LOGGER.info('KEY ROUTINE: FINISHED')
 
@@ -216,7 +219,7 @@ class SetupRoutine:
         try:
             self.setup_database_manager.drop_database(database_name)
         except DatabaseNotExists as err:
-            LOGGER.error(err.message)
+            LOGGER.error(err)
 
         # create new database
         self.setup_database_manager.create_database(database_name)

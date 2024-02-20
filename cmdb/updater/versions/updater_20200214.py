@@ -17,6 +17,8 @@
 import sys
 import time
 import logging
+from datetime import datetime
+
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
@@ -35,12 +37,6 @@ class Update20200214(Updater):
 
     def description(self):
         return 'Update the fieldtype date of CMDB objects: From string to date.'
-
-
-    def increase_updater_version(self, value):
-        """TODO: document"""
-        super().increase_updater_version(value)
-
 
 
     def start_update(self):
@@ -68,7 +64,6 @@ class Update20200214(Updater):
     def worker(self, type_):
         """TODO: document"""
         try:
-            from datetime import datetime
             manager = ObjectManager(database_manager=self.database_manager)  # TODO: Replace when object api is updated
             object_list = self.object_manager.get_objects_by_type(type_.public_id)
             matches = type_.matches
@@ -76,7 +71,6 @@ class Update20200214(Updater):
             for obj in object_list:
                 for field in obj.fields:
                     if [x for x in matches if x['name'] == field['name']]:
-                        # name = field['name']
                         value = field['value']
                         if value:
                             if isinstance(value, datetime):

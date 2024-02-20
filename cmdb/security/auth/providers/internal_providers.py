@@ -52,7 +52,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         try:
             user: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
         except ManagerGetError as err:
-            raise AuthenticationError(LocalAuthenticationProvider.get_name(), err.message) from err
+            raise AuthenticationError(LocalAuthenticationProvider.get_name(), err) from err
         login_pass = self.security_manager.generate_hmac(password)
         if login_pass == user.password:
             return user

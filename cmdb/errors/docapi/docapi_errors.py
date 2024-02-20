@@ -28,3 +28,27 @@ class NoPublicIDError(DocapiError):
     """Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS"""
     def __init__(self):
         super().__init__('The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs')
+
+
+class DocapiGetError(DocapiError):
+    """Error raised when a GET-operation fails"""
+    def __init__(self, err: str):
+        super().__init__(f'DocAPI-Error while GET: {err}')
+
+
+class DocapiInsertError(DocapiError):
+    """Error raised when an INSERT-operation fails"""
+    def __init__(self, err: str):
+        super().__init__(f'DocAPI-Error while INSERT: {err}')
+
+
+class DocapiUpdateError(DocapiError):
+    """Error raised when an UPDATE-operation fails"""
+    def __init__(self, err: str):
+        super().__init__(f'DocAPI-Error while UPDATE: {err}')
+
+
+class DocapiDeleteError(DocapiError):
+    """Error raised when a DELETE-operation fails"""
+    def __init__(self, err: str):
+        super().__init__(f'DocAPI-Error while DELETE: {err}')

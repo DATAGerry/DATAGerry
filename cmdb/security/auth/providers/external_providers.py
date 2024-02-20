@@ -99,7 +99,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         self.__ldap_server = Server(**config.server_config)
         self.__ldap_connection = Connection(self.__ldap_server, **config.connection_config)
-        super(LdapAuthenticationProvider, self).__init__(config, user_manager=user_manager,
+        super().__init__(config, user_manager=user_manager,
                                                          group_manager=group_manager,
                                                          security_manager=security_manager)
 

@@ -47,10 +47,8 @@ class BaseManager:
         Insert document/object into database
 
         Args:
-            collection (str): Name of the database collection
             data (dict): Data which should be inserted
             skip_public (bool): Skip the public id creation and counter increment
-
         Returns:
             int: New public_id of inserted document
             None: If anything goes wrong
@@ -70,7 +68,7 @@ class BaseManager:
             Cursor over the result set
         """
         try:
-            return self.dbm.find(self.collection, *args, **kwargs)
+            return self.dbm.find_one(self.collection, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err) from err
 
@@ -86,6 +84,16 @@ class BaseManager:
             return self.dbm.aggregate(self.collection, *args, **kwargs)
         except Exception as err:
             raise ManagerIterationError(err) from err
+
+
+    def get_next_public_id(self):
+        """
+        Retrieves next public_id for the collection
+
+        Returns:
+            int: New highest public_id of the collection
+        """
+        return self.dbm.get_next_public_id(self.collection)
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -122,13 +130,19 @@ class BaseManager:
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
-    def delete(self, criteria: dict):
+    def delete(self, criteria: dict) -> bool:
         """
         Calls MongoDB delete operation
+
         Args:
-            criteria: Filter to match document
+            criteria (dict): Filter to match document
+        Raises:
+            ManagerDeleteError: Something went wrong while trying to delete document
+
+        Returns:
+            bool: True if deletion is successful
         """
         try:
-            return self.dbm.delete(criteria)
+            return self.dbm.delete(self.collection, criteria).acknowledged
         except Exception as err:
             raise ManagerDeleteError(err) from err
