@@ -77,7 +77,7 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
 
   public columns: Array<Column>;
 
-  public sort: Sort = { name: 'date', order: SortDirection.DESCENDING } as Sort;
+  public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
 
   public selectedLogIDs: Array<number> = [];
 

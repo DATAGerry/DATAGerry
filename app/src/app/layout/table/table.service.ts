@@ -100,8 +100,11 @@ export class TableService<C = TableState> implements OnDestroy {
   public setCurrentTableState(url: string, id: string, state: TableState) {
     const resource: string = convertResourceURL(url);
     this.indexDB.getSetting(resource).subscribe((setting: UserSetting<TableStatePayload>) => {
-      setting.payloads.find(payload => payload.id === id).currentState = state;
-      this.indexDB.updateSetting(setting);
+      const payload = setting?.payloads.find(payload => payload.id === id);
+      if (payload) {
+        payload.currentState = state;
+        this.indexDB.updateSetting(setting);
+      }
     });
   }
 
