@@ -23,7 +23,6 @@ import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { Observable, forkJoin, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 
 @Component({
     selector: 'cmdb-modal-content',
