@@ -204,6 +204,54 @@ export class SectionTemplateBuilderComponent implements OnInit {
 /* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
 
     /**
+     * Redirects changes to field properties
+     * @param data new data for field
+     */
+    public onFieldChange(data: any){
+        this.handleFieldChanges(data);
+    }
+
+
+    /**
+     * Handles changes to field properties and updates them
+     * @param data new data for field
+     */
+    private handleFieldChanges(data: any){
+        const newValue: any = data.newValue;
+        const inputName: string = data.inputName;
+        const fieldName: string = data.fieldName;
+
+        if(inputName != 'name' && inputName != 'label'){
+            const index: number = this.getFieldIndexForName(fieldName);
+            if (index >= 0){
+                this.initialSection.fields[index][inputName] = newValue;
+            }
+        }
+    }
+
+
+    /**
+     * Retrieves the index of a field in the typeinstance
+     * 
+     * @param targetName name of the field which is searched
+     * @returns (int): Index of the field. -1 of no field with this name is found
+     */
+        private getFieldIndexForName(targetName: string): number{
+            let index = 0;
+            for (let field of this.initialSection.fields){
+                
+                if(field.name == targetName){
+                    return index;
+                } else {
+                    index += 1;
+                }
+            }
+    
+            return -1;
+        }
+
+
+    /**
      * Handels dropping fields in Fieldzone
      * 
      * @param event triggered when a field is dropped in the Fieldszone

@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
+"""
+Definition of all routes for CmdbSectionTemplates
+"""
 import logging
 
 from datetime import datetime, timezone
