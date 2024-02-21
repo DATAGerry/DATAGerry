@@ -143,6 +143,7 @@
                                                 [types]="types"
                                                 [sections]="initialSection"
                                                 [data]="field"
+                                                (valuesChanged)="onFieldChange($event)"
                                             ></cmdb-config-edit>
                                         </div>
                                     </div><!-- fields-card-->

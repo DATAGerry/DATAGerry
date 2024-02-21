@@ -309,7 +309,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
-        console.log("typeInstance", this.typeInstance);
+
         if(this.isGlobalSection(section)){
             return;
         }
@@ -369,11 +369,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         if (index !== -1) {
             if (item.type === 'section') {
                 const fields: Array<string> = this.typeInstance.render_meta.sections[index].fields;
-
                 for (const field of fields) {
-                    const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field);
-
-                    if (index !== -1) {
+                    const fieldIdx = this.typeInstance.fields.map(x => x.name).indexOf(field['name']);
+                    if (fieldIdx !== -1) {
                         this.typeInstance.fields.splice(fieldIdx, 1);
                     }
                 }
@@ -479,12 +477,22 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Checks if the gieldName is in the List of global field names
+     * 
+     * @param fieldName Name of the field which should be checked
+     * @returns True if it is in the List
+     */
     public isGlobalField(fieldName: string){
         return this.globalSectionTemplateFields.indexOf(fieldName) > -1;
     }
 
 
+    /**
+     * Saves field names of all global section templates in a list
+     */
     private initGlobalFieldsList(){
+
         for(let templateIndex in this.globalSectionTemplates){
             let aTemplate = this.globalSectionTemplates[templateIndex];
 
@@ -492,7 +500,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 let aField = aTemplate.fields[fieldIndex];
                 this.globalSectionTemplateFields.push(aField.name);
             }
-
         }
     }
 
@@ -527,7 +534,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public extractSectionData(data: CmdbSectionTemplate){
         let sectionName: string = data.name;
 
-        if(!this.isUniqueID(sectionName)){
+        if(!data.is_global && !this.isUniqueID(sectionName)){
             sectionName = this.createUniqueID('section_template');
         }
 
@@ -550,7 +557,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         for (let fieldIndex in sectionTemplateFields){
             let aField = sectionTemplateFields[fieldIndex];
 
-            if(!this.isUniqueID(aField.name)){
+            if(!this.isGlobalField(aField.name) && !this.isUniqueID(aField.name)){
                 aField.name = this.createUniqueID(aField.type);
             }
 
