@@ -117,9 +117,13 @@ $navbar-dropdown-header-background: theme-color('primary');
       color: #999999;
     }
 
-    &:hover p.hover-trigger,
-    &:hover .hover-trigger:hover {
+    &:hover .hover-trigger:hover,
+    &:hover p {
       color: #212529;
+    }
+
+    & p:hover {
+      color: #999999 !important;
     }
   }
 
