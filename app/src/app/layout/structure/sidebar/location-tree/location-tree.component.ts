@@ -31,6 +31,7 @@ import { ObjectService } from 'src/app/framework/services/object.service';
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { RenderResult } from '../../../../framework/models/cmdb-render';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { UntypedFormControl } from '@angular/forms';
 
 /* -------------------------------------------------------------------------- */
 /*                                 INTERFACES                                 */
@@ -62,31 +63,35 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     treeControl = new NestedTreeControl<LocationNode>(node => node.children);
     dataSource = new MatTreeNestedDataSource<LocationNode>();
 
+    //Filter
+    public filterTerm: UntypedFormControl = new UntypedFormControl('');
+    private filterTermSubscription: Subscription;
+
     /**
      * used for highlighting the selected location
      */
     public selectedLocationID: number;
 
-  /* -------------------------------------------------------------------------- */
-  /*                                LIFE - CYCLE                                */
-  /* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                LIFE - CYCLE                                */
+    /* -------------------------------------------------------------------------- */
 
 
     constructor(private locationService: LocationService,
-                private treeManagerService: TreeManagerService,
-                private objectService: ObjectService,
-                private route: Router){
+        private treeManagerService: TreeManagerService,
+        private objectService: ObjectService,
+        private route: Router) {
 
     }
 
 
-    public ngOnInit(){
+    public ngOnInit() {
         this.objectServiceSubscription = this.objectService.objectActionSource.subscribe(
-          (action: string) => this.onObjectActionEventRecieved(action)
+            (action: string) => this.onObjectActionEventRecieved(action)
         );
 
         this.locationServiceSubscription = this.locationService.locationActionSource.subscribe(
-          (action: string) => this.onLocationActionEventRecieved(action)
+            (action: string) => this.onLocationActionEventRecieved(action)
         );
 
         this.getLocationTree();
@@ -105,17 +110,17 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     /**
     * Get all locations except the root location formatted as hierarchical tree data
     */
-    private getLocationTree(){
+    private getLocationTree() {
         const params: CollectionParameters = {
-          filter: [{ $match: { public_id: { $gt: 1 } } }],
-          limit: 0, sort: 'public_id', order: 1, page: 1
+            filter: [{ $match: { public_id: { $gt: 1 } } }],
+            limit: 0, sort: 'public_id', order: 1, page: 1
         };
-  
+
         this.locationService.getLocationsTree(params).pipe(takeUntil(this.unsubscribe))
-              .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
                 this.dataSource.data = this.forceCast<LocationNode[]>(apiResponse.results);
                 this.treeManagerService.expandNodes(this.dataSource.data, this.treeControl);
-        });
+            });
     }
 
 
@@ -124,34 +129,34 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
      * 
      * @param action (string): Type of object action (create, delete or update)
      */
-    public onObjectActionEventRecieved(action: string){
-      this.getLocationTree();
+    public onObjectActionEventRecieved(action: string) {
+        this.getLocationTree();
     }
 
-        /**
-     * EventListener function which will update the tree when objects were changed
-     * 
-     * @param action (string): Type of object action (create, delete or update)
-     */
-      public onLocationActionEventRecieved(action: string){
+    /**
+  * EventListener function which will update the tree when objects were changed
+  * 
+  * @param action (string): Type of object action (create, delete or update)
+  */
+    public onLocationActionEventRecieved(action: string) {
         this.getLocationTree();
-      }
+    }
 
     /**
     * Set the selected location and loads the object overview in the content view
     * 
     * @param clickedObjectID the objectID of the location which is clicked in location tree
     */
-    public onLocationElementClicked(clickedObjectID: number){
+    public onLocationElementClicked(clickedObjectID: number) {
         this.selectedLocationID = clickedObjectID;
-        this.route.navigateByUrl('/framework/object/view/'+clickedObjectID);
-     }
+        this.route.navigateByUrl('/framework/object/view/' + clickedObjectID);
+    }
 
 
     /**
      * Updates status of all expanded locations and saves them
      */
-    public onExpandClicked(){
+    public onExpandClicked() {
         this.treeManagerService.extractExpandedIds(this.treeControl.expansionModel.selected);
     }
 
@@ -163,8 +168,8 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     /**
      * Reloads the tree after an update
      */
-    public reloadTree(){
-      this.ngOnInit();
+    public reloadTree() {
+        this.ngOnInit();
     }
 
     /* -------------------------------------------------------------------------- */
@@ -179,6 +184,6 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     * @returns array of LocationNode
     */
     public forceCast<T>(input: any): T {
-      return input;
+        return input;
     }
 }

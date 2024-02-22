@@ -3,12 +3,12 @@
 .location-tree-invisible {
     display: none;
 }
-  
+
 // /*
 //  * This padding sets alignment of the nested nodes.
 //  */
 .location-tree .mat-nested-tree-node div[role=group] {
-  padding-left: 20px;
+    padding-left: 20px;
 }
 
 /*
@@ -16,77 +16,98 @@
  * Leaf nodes need to have padding so as to align with other non-leaf nodes
  * under the same parent.
  */
-.location-tree div[role=group] > .mat-tree-node {
-  padding-left: 20px;
+.location-tree div[role=group]>.mat-tree-node {
+    padding-left: 20px;
 }
 
-.location-tree div[role=group] > .mat-tree-node.no-children {
-  padding-left: 30px;
+.location-tree div[role=group]>.mat-tree-node.no-children {
+    padding-left: 30px;
 }
 
-.location_icon{
-  padding-right: 4px;
-  margin-left: -6px;
+.location_icon {
+    padding-right: 4px;
+    margin-left: -6px;
 }
 
 .location_element:hover {
-  background-color: $dg-hover-background-color;
+    background-color: $dg-hover-background-color;
 }
 
 .location_name:hover {
-  cursor: pointer;
-  color: $dg-primary-color;
+    cursor: pointer;
+    color: $dg-primary-color;
 }
 
 .location-selected {
-  background-color: $dg-selected-background-color;
+    background-color: $dg-selected-background-color;
 }
 
 mat-tree-node {
-  padding-left: 5px;
+    padding-left: 5px;
 }
 
 .mat-tree-node {
-  min-height: 30px;
+    min-height: 30px;
 }
 
 .mat-mdc-icon-button .mat-mdc-button-persistent-ripple {
-  border-radius: 20% !important;
+    border-radius: 20% !important;
 }
 
 .mat-mdc-icon-button.mat-mdc-button-base {
-  width: 30px;
-  height: 30px;
-  padding: 0px;
+    width: 30px;
+    height: 30px;
+    padding: 0px;
 }
 
 .material-icons {
-  font-family: 'Material Icons';
-  font-weight: normal;
-  font-style: normal;
-  font-size: 22px;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  margin-left: -10px;
+    font-family: 'Material Icons';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 22px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    margin-left: -10px;
 }
 
-#location-tree > mat-tree-node.mat-tree-node.no-children{
-  padding-left: 30px;
+#location-tree>mat-tree-node.mat-tree-node.no-children {
+    padding-left: 30px;
 }
 
 .mat-mdc-button {
-  --mat-mdc-button-persistent-ripple-color: none !important;
-  --mat-mdc-button-ripple-color: none !important;
+    --mat-mdc-button-persistent-ripple-color: none !important;
+    --mat-mdc-button-ripple-color: none !important;
 }
 
 #location-tree {
-  width: auto;
+    width: auto;
 }
 
 // .mat-tree {
 //   background-color: inherit;
 // }
+
+.input-wrapper-search {
+    position: relative;
+
+    i.fa-times.input-icon-clear {
+        &:hover {
+            cursor: pointer;
+        }
+
+        position: absolute;
+        color: black;
+        opacity: 0.8;
+        top: calc(50% - 0.5em);
+        right: 10%;
+    }
+}
+
+#category-filter {
+    margin-right: 10px;
+    min-width: 90%;
+}
