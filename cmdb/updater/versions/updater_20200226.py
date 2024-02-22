@@ -22,6 +22,7 @@ from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.type import TypeModel
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -42,7 +43,8 @@ class Update20200226(Updater):
     def start_update(self):
         try:
             # Get root category
-            category = self.category_manager.iterate({'root': True}, limit=0, skip=0, sort='public_id', order=1)
+            build_params = BuilderParameters({'root': True})
+            category = self.categories_manager.iterate(build_params)
             # Update all types where category ID is 0,
             # to root category public ID
             if len(category):

@@ -26,8 +26,16 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 
 from cmdb.framework import CategoryModel
+from cmdb.framework.models.category import CategoryTree
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.framework.results.iteration import IterationResult
+from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.user_management import UserModel
 
-from cmdb.errors.manager import ManagerInsertError
+from cmdb.errors.manager import ManagerInsertError,\
+                                ManagerGetError,\
+                                ManagerIterationError,\
+                                ManagerUpdateError
 
 from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
@@ -54,20 +62,32 @@ class CategoriesManager(BaseManager):
         self.type_manager = TypeManager(dbm)
         super().__init__(CategoryModel.COLLECTION, dbm)
 
+
+    @property
+    def tree(self) -> CategoryTree:
+        """
+        Get the complete category list as nested tree.
+
+        Returns:
+            CategoryTree: Categories as tree structure.
+        """
+        # Find all types
+        types = self.type_manager.find({}).results
+        build_params = BuilderParameters({})
+        categories = self.iterate(build_params).results
+
+        return CategoryTree(categories, types)
+
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
     def insert_category(self, category: dict) -> int:
         """
-        Insert a single category into the system.
+        Insert a ategory into the database
 
         Args:
-            category (dict): Raw data of the category.
-
-        Notes:
-            If no public id was given, the database manager will auto insert the next available ID.
-
+            category (dict): Raw data of the category
         Returns:
-            int: The Public ID of the new inserted category
+            int: The public_id of the new inserted category
         """
         if isinstance(category, CategoryModel):
             category = CategoryModel.to_json(category)
@@ -78,3 +98,66 @@ class CategoriesManager(BaseManager):
             raise ManagerInsertError(error) from error
 
         return ack
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def iterate(self,
+                builder_params: BuilderParameters,
+                user: UserModel = None,
+                permission: AccessControlPermission = None) -> IterationResult[CategoryModel]:
+        """
+        Performs an aggregation on the database
+        Args:
+            builder_params (BuilderParameters): Contains input to identify the target of action
+            user (UserModel, optional): User requesting this action
+            permission (AccessControlPermission, optional): Permission which should be checked for the user
+        Raises:
+            ManagerIterationError: Raised when something goes wrong during the aggregate part
+            ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
+        Returns:
+            IterationResult[CategoryModel]: Result which matches the Builderparameters
+        """
+        try:
+            query: list[dict] = self.query_builder.build(builder_params,user, permission)
+            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+
+            aggregation_result = list(self.aggregate(query))
+            total_cursor = self.aggregate(count_query)
+
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
+
+        except ManagerGetError as err:
+            raise ManagerIterationError(err) from err
+
+        try:
+            iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
+            iteration_result.convert_to(CategoryModel)
+        except Exception as err:
+            raise ManagerIterationError(err) from err
+
+        return iteration_result
+
+# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
+
+    def reset_children_categories(self, public_id: int) -> None:
+        """
+        Sets the parent attribute to null for all children of a category
+
+        Args:
+            public_id (int): public_id of parent category
+        """
+        try:
+            # Get all children
+            cursor_result = self.get(filter={'parent': public_id})
+
+            # Update all child categories
+            for category in cursor_result:
+                category['parent'] = None
+                category_public_id = category['public_id']
+                self.update({'public_id':category_public_id}, category)
+        except ManagerGetError as err:
+            raise ManagerGetError(err) from err
+        except ManagerUpdateError as err:
+            raise ManagerUpdateError(err) from err
