@@ -1,4 +1,10 @@
 <div>
+
+    <div class="input-wrapper-search">
+        <input id="category-filter" class="form-control form-control-sm" type="text" placeholder="Filter.." [formControl]="filterTerm">
+        <i class="fas fa-times input-icon-clear"  (click)="this.filterTerm.reset('')"></i>
+      </div>
+
     <mat-tree [dataSource]="dataSource" [treeControl]="treeControl" id="location-tree" #locationTree class="location-tree">
         <mat-tree-node *matTreeNodeDef="let node" matTreeNodeToggle 
         class="location_element child_locations"  
