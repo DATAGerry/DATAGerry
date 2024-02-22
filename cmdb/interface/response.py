@@ -18,7 +18,7 @@ from json import dumps
 from datetime import datetime, timezone
 from enum import Enum
 from math import ceil
-from typing import List
+from typing import List, Union
 from flask import make_response as flask_response
 from werkzeug.wrappers import Response
 
@@ -309,9 +309,8 @@ class InsertSingleResponse(BaseAPIResponse):
     """
     API Response for insert call of a single resource.
     """
-    __slots__ = 'result_id', 'raw'
 
-    def __init__(self, raw: dict, result_id: [PublicID, str] = None, url: str = None, model: Model = None):
+    def __init__(self, raw: dict, result_id: Union[PublicID, str, int] = None, url: str = None, model: Model = None):
         """
         Constructor of InsertSingleResponse.
 
@@ -323,7 +322,7 @@ class InsertSingleResponse(BaseAPIResponse):
         """
 
         self.raw: dict = raw
-        self.result_id: PublicID = result_id
+        self.result_id: int = int(result_id)
         super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
 
 

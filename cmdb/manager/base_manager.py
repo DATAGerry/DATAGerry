@@ -60,15 +60,31 @@ class BaseManager:
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
-    def get(self, *args, **kwargs):
+    def get_one(self, *args, **kwargs):
         """
-        Calls MongoDB find operation with *args
+        Calls MongoDB find operation with *args for a single document
 
         Returns:
             Cursor over the result set
         """
         try:
             return self.dbm.find_one(self.collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
+
+    def get(self, *args, **kwargs):
+        """
+        General find function
+
+        Raises:
+            ManagerGetError: When something goes wrong while retrieving the documents
+
+        Returns:
+            Cursor: Result of the 'find'-Operation as Cursor
+        """
+        try:
+            return self.dbm.find(self.collection, *args, **kwargs)
         except Exception as err:
             raise ManagerGetError(err) from err
 

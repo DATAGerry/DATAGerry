@@ -151,7 +151,7 @@ class SectionTemplatesManager(BaseManager):
         """
         try:
             found_template: CmdbSectionTemplate = None
-            section_template = self.get(public_id)
+            section_template = self.get_one(public_id)
 
             if section_template:
                 found_template = CmdbSectionTemplate(**section_template)

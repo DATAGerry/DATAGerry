@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 
 from flask import current_app
 
-from cmdb.framework.managers.category_manager import CategoryManager
+from cmdb.manager.categories_manager import CategoriesManager
 
 from .profile_name import ProfileName
 from .profile_user_management import UserManagementProfile
@@ -127,7 +127,7 @@ class ProfileAssistant:
             all_type_ids (dict): All created type_ids from the assistant
         """
         all_categories: list[dict] = self.get_all_categories(all_type_ids)
-        category_manager: CategoryManager = CategoryManager(database_manager=current_app.database_manager)
+        category_manager = CategoriesManager(current_app.database_manager)
 
         for i, category in enumerate(all_categories):
             category_manager.insert(category)

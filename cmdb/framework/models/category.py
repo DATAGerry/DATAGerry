@@ -14,12 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from typing import List, Union
 
 from cmdb.framework.models import TypeModel
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Model, Collection
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
+
 
 class CategoryModel(CmdbDAO):
     """Category"""
@@ -134,6 +137,7 @@ class CategoryModel(CmdbDAO):
     def to_json(cls, instance: "CategoryModel") -> dict:
         """Convert a category instance to json conform data"""
         meta = instance.get_meta()
+
         return {
             'public_id': instance.get_public_id(),
             'name': instance.get_name(),
