@@ -21,13 +21,12 @@ from queue import Queue
 from typing import Union
 from deepdiff import DeepDiff
 
-from cmdb.event_management.event import Event
-
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
 
+from cmdb.event_management.event import Event
 from cmdb.framework import TypeModel
 from cmdb.framework.models.type_model import TypeFieldSection
 from cmdb.framework import CmdbSectionTemplate

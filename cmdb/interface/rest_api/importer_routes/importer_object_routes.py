@@ -106,9 +106,8 @@ def get_default_parser_config(parser_type: str):
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
 @login_required
-@insert_request_user
 @right_required('base.import.object.*')
-def parse_objects(request_user: UserModel):
+def parse_objects():
     """TODO: document"""
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
@@ -174,7 +173,7 @@ def import_objects(request_user: UserModel):
         return abort(406, ple.message)
     parser = parser_class(parser_config)
 
-    LOGGER.info(f'Parser {parser_class} was loaded')
+    LOGGER.info('Parser %s was loaded', parser_class)
 
     # Load importer config
     try:
@@ -189,7 +188,7 @@ def import_objects(request_user: UserModel):
     except ImporterLoadError as ile:
         return abort(406, ile.message)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
-    LOGGER.info(f'Importer {importer_class} was loaded')
+    LOGGER.info('Importer %s was loaded', importer_class)
 
     try:
         import_response: ImporterObjectResponse = importer.start_import()
@@ -210,22 +209,21 @@ def import_objects(request_user: UserModel):
             current_type_instance = object_manager.get_type(importer_config_request.get('type_id'))
             current_object = object_manager.get_object(message.public_id)
 
-            # pymongo 4.6.0
-            # current_object_render_result = CmdbRender(object_instance=current_object,
-            #                                           type_instance=current_type_instance,
-            #                                           render_user=request_user,
-            #                                           object_manager=object_manager).result()
+            current_object_render_result = CmdbRender(object_instance=current_object,
+                                                      type_instance=current_type_instance,
+                                                      render_user=request_user,
+                                                      object_manager=object_manager).result()
 
-            # # insert object create log
-            # log_params = {
-            #     'object_id': message.public_id,
-            #     'user_id': request_user.get_public_id(),
-            #     'user_name': request_user.get_display_name(),
-            #     'comment': 'Object was imported',
-            #     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-            #     'version': current_object.version
-            # }
-            # log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            # insert object create log
+            log_params = {
+                'object_id': message.public_id,
+                'user_id': request_user.get_public_id(),
+                'user_name': request_user.get_display_name(),
+                'comment': 'Object was imported',
+                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+                'version': current_object.version
+            }
+            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)
@@ -233,7 +231,7 @@ def import_objects(request_user: UserModel):
         except RenderError as err:
             LOGGER.error(err)
             return abort(500)
-        # except LogManagerInsertError as err: #pymongo 4.6.0
-        #     LOGGER.error(err)
+        except LogManagerInsertError as err:
+            LOGGER.error(err)
 
     return make_response(import_response)

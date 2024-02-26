@@ -26,7 +26,6 @@ import { ApiCallService, ApiServicePrefix, httpObserveOptions } from '../../serv
 import { CmdbLink } from '../models/cmdb-link';
 import { APIDeleteSingleResponse,
          APIGetMultiResponse,
-         APIGetSingleResponse,
          APIInsertSingleResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -40,10 +39,6 @@ export class LinkService<T = CmdbLink> implements ApiServicePrefix {
 
   constructor(private api: ApiCallService) {
   }
-
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                   CRUD - SECTION                                                   */
-/* ------------------------------------------------------------------------------------------------------------------ */
 
 /* -------------------------------------------------- CRUD - CREATE ------------------------------------------------- */
 
@@ -65,22 +60,6 @@ export class LinkService<T = CmdbLink> implements ApiServicePrefix {
 /* --------------------------------------------------- CRUD - READ -------------------------------------------------- */
 
     /**
-     * Get a specific object link by its PublicID.
-     * @param publicID
-     */
-    public getLink(publicID: number): Observable<T> {
-        const options = httpObserveOptions;
-        options.params = new HttpParams();
-
-        return this.api.callGet<T>(`${ this.servicePrefix }/${ publicID }`, options).pipe(
-            map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => {
-                return apiResponse.body.result as T;
-            })
-        );
-    }
-
-
-    /**
      * Get the partners public id on a link
      * @param objectID
      * @param link
@@ -91,41 +70,8 @@ export class LinkService<T = CmdbLink> implements ApiServicePrefix {
 
 
     /**
-     * Iterate over the links collection
-     * @param params Instance of CollectionParameters
-     */
-    public getLinks(params: CollectionParameters = {
-        filter: undefined,
-        limit: 10,
-        sort: 'public_id',
-        order: 1,
-        page: 1
-    }): Observable<APIGetMultiResponse<T>> {
-        const options = httpObserveOptions;
-        let httpParams: HttpParams = new HttpParams();
-
-        if (params.filter !== undefined) {
-            const filter = JSON.stringify(params.filter);
-            httpParams = httpParams.set('filter', filter);
-        }
-
-        httpParams = httpParams.set('limit', params.limit.toString());
-        httpParams = httpParams.set('sort', params.sort);
-        httpParams = httpParams.set('order', params.order.toString());
-        httpParams = httpParams.set('page', params.page.toString());
-        options.params = httpParams;
-
-        return this.api.callGet<Array<T>>(this.servicePrefix + '/', options).pipe(
-            map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-                return apiResponse.body;
-            })
-        );
-    }
-
-
-    /**
      * Iterate over the links collection by a specific id
-     * @param objectID
+     * @param objectID public_id of object link
      * @param params Instance of CollectionParameters
      */
     public getPartnerLinks(objectID: number, params: CollectionParameters = {
@@ -159,8 +105,8 @@ export class LinkService<T = CmdbLink> implements ApiServicePrefix {
 /* -------------------------------------------------- CRUD - DELETE ------------------------------------------------- */
 
     /**
-     * Delete a existing link.
-     * @param publicID
+     * Delete an existing object link
+     * @param publicID public_id of the object link
      */
     public deleteLink(publicID: number): Observable<any> {
         const options = httpObserveOptions;
