@@ -197,15 +197,11 @@ class CmdbLogManager(ManagerBase):
 
         try:
             new_log = CmdbLog(**log_data)
-            ack = self._insert(CmdbMetaLog.COLLECTION, new_log) #new_log.to_database(), but it is error
+            ack = self._insert(CmdbMetaLog.COLLECTION, CmdbObjectLog.to_json(new_log))
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise LogManagerInsertError(err) from err
         return ack
-
-
-    def update(self, data) -> int:
-        raise NotImplementedError
 
 
     def delete(self, public_id: Union[PublicID, int]) -> Union[CmdbMetaLog, CmdbObjectLog]:

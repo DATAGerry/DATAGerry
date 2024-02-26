@@ -221,7 +221,6 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     public changeState(publicID: number, status: boolean) {
         const options = this.options;
         options.params = new HttpParams();
-
         return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state`, status, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
@@ -328,7 +327,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-/* ---------------------------------------- CRUD - DELETE --------------------------------------- */
+/* -------------------------------------------------- CRUD - DELETE ------------------------------------------------- */
 
     public deleteManyObjects(publicID: any) {
         const options = this.options;
@@ -346,7 +345,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-
+    /**
+     * Delete an object with the given public_id
+     * @param publicID public_id of object which should be deleted
+     * @returns 
+     */
     public deleteObject(publicID: any): Observable<any> {
         const options = this.options;
         options.params = new HttpParams();
@@ -385,9 +388,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                   UNCLEAN OBJECTS                                                  */
-/* ------------------------------------------------------------------------------------------------------------------ */
+/* ------------------------------------------------- UNCLEAN OBJECTS ------------------------------------------------ */
 
     public countUncleanObjects(typeID: number): Observable<number> {
         const options = this.options;

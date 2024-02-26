@@ -24,8 +24,9 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
-from cmdb.framework.managers.object_link_manager import ObjectLinkManager
+from cmdb.manager.object_links_manager import ObjectLinksManager
 
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.utils import object_hook
 from cmdb.database.utils import default
 from cmdb.framework import CmdbObject, TypeModel
@@ -67,7 +68,7 @@ with current_app.app_context():
     user_manager = UserManager(current_app.database_manager)
     location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     loc_manager = LocationManager(database_manager=current_app.database_manager)
-    link_manager = ObjectLinkManager(current_app.database_manager)
+    object_links_manager = ObjectLinksManager(current_app.database_manager, current_app.event_queue)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -103,26 +104,26 @@ def insert_object(request_user: UserModel):
         # get current object state
         current_type_instance = object_manager.get_type(new_object_data['type_id'])
         current_object = object_manager.get_object(new_object_id)
-        # TODO: pymongo 4.6.0 issue
-        # current_object_render_result = CmdbRender(object_instance=current_object,
-        #                                           object_manager=object_manager,
-        #                                           type_instance=current_type_instance,
-        #                                           render_user=request_user).result()
+
+        current_object_render_result = CmdbRender(object_instance=current_object,
+                                                  object_manager=object_manager,
+                                                  type_instance=current_type_instance,
+                                                  render_user=request_user).result()
 
         # Generate new insert log
-        # try:
-        #     log_params = {
-        #         'object_id': new_object_id,
-        #         'user_id': request_user.get_public_id(),
-        #         'user_name': request_user.get_display_name(),
-        #         'comment': 'Object was created',
-        #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-        #         'version': current_object.version
-        #     }
+        try:
+            log_params = {
+                'object_id': new_object_id,
+                'user_id': request_user.get_public_id(),
+                'user_name': request_user.get_display_name(),
+                'comment': 'Object was created',
+                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+                'version': current_object.version
+            }
 
-        #     log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
-        # except LogManagerInsertError as err:
-        #     LOGGER.error(err)
+            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        except LogManagerInsertError as err:
+            LOGGER.error(err)
 
     except (TypeError, ObjectInsertError) as err:
         LOGGER.error(err)
@@ -450,7 +451,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             except (KeyError, IndexError, ValueError):
                 update_comment = ''
             except TypeError as err:
-                LOGGER.error(f'Error: {str(err.args)} Object: {json.dumps(new_data, default=default)}')
+                LOGGER.error('Error: %s Object: %s', str(err.args), json.dumps(new_data, default=default))
                 failed.append(ResponseFailedMessage(error_message=str(err.args), status=400,
                                                     public_id=obj_id, obj=new_data).to_dict())
                 continue
@@ -477,20 +478,20 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             manager.update(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
             results.append(new_data)
 
-            # Generate log entry # TODO: pymongo 4.6.0 issue
-            # try:
-            #     log_data = {
-            #         'object_id': obj_id,
-            #         'version': update_object_instance.get_version(),
-            #         'user_id': request_user.get_public_id(),
-            #         'user_name': request_user.get_display_name(),
-            #         'comment': update_comment,
-            #         'changes': changes,
-            #         'render_state': json.dumps(update_object_instance, default=default).encode('UTF-8')
-            #     }
-            #     log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
-            # except (CMDBError, LogManagerInsertError) as err:
-            #     LOGGER.error(err)
+            # Generate log entry
+            try:
+                log_data = {
+                    'object_id': obj_id,
+                    'version': update_object_instance.get_version(),
+                    'user_id': request_user.get_public_id(),
+                    'user_name': request_user.get_display_name(),
+                    'comment': update_comment,
+                    'changes': changes,
+                    'render_state': json.dumps(update_object_instance, default=default).encode('UTF-8')
+                }
+                log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+            except (CMDBError, LogManagerInsertError) as err:
+                LOGGER.debug("Error: %s", err)
 
         except AccessDeniedError as err:
             LOGGER.error(err)
@@ -555,25 +556,24 @@ def update_object_state(public_id: int, request_user: UserModel):
         LOGGER.error(err)
         return abort(500)
 
-    # TODO: pymongo 4.6.0 issue
-    # try:
-    #     # generate log
-    #     change = {
-    #         'old': not state,
-    #         'new': state
-    #     }
-    #     log_data = {
-    #         'object_id': public_id,
-    #         'version': founded_object.version,
-    #         'user_id': request_user.get_public_id(),
-    #         'user_name': request_user.get_display_name(),
-    #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
-    #         'comment': 'Active status has changed',
-    #         'changes': change,
-    #     }
-    #     log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
-    # except (CMDBError, LogManagerInsertError) as err:
-    #     LOGGER.error(err)
+    try:
+        # generate log
+        change = {
+            'old': not state,
+            'new': state
+        }
+        log_data = {
+            'object_id': public_id,
+            'version': found_object.version,
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_display_name(),
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+            'comment': 'Active status has changed',
+            'changes': change,
+        }
+        log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+    except (CMDBError, LogManagerInsertError) as err:
+        LOGGER.error(err)
 
     api_response = UpdateSingleResponse(result=found_object.__dict__, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
@@ -702,20 +702,19 @@ def delete_object(public_id: int, request_user: UserModel):
     except CMDBError:
         return abort(500)
 
-    # TODO: pymongo 4.6.0 issue
-    # try:
-    #     # generate log
-    #     log_data = {
-    #         'object_id': public_id,
-    #         'version': current_object_render_result.object_information['version'],
-    #         'user_id': request_user.get_public_id(),
-    #         'user_name': request_user.get_display_name(),
-    #         'comment': 'Object was deleted',
-    #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
-    #     }
-    #     log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-    # except (CMDBError, LogManagerInsertError) as err:
-    #     LOGGER.error(err)
+    try:
+        # generate log
+        log_data = {
+            'object_id': public_id,
+            'version': current_object_render_result.object_information['version'],
+            'user_id': request_user.get_public_id(),
+            'user_name': request_user.get_display_name(),
+            'comment': 'Object was deleted',
+            'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+        }
+        log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+    except (CMDBError, LogManagerInsertError) as err:
+        LOGGER.error(err)
 
     return make_response(ack)
 
@@ -917,20 +916,19 @@ def delete_many_objects(public_ids, request_user: UserModel):
             except CMDBError:
                 return abort(500)
 
-            # TODO: pymongo 4.6.0 issue
-            # try:
-            #     # generate log
-            #     log_data = {
-            #         'object_id': current_object_instance.get_public_id(),
-            #         'version': current_object_render_result.object_information['version'],
-            #         'user_id': request_user.get_public_id(),
-            #         'user_name': request_user.get_display_name(),
-            #         'comment': 'Object was deleted',
-            #         'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
-            #     }
-            #     log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-            # except (CMDBError, LogManagerInsertError) as err:
-            #     LOGGER.error(err)
+            try:
+                # generate log
+                log_data = {
+                    'object_id': current_object_instance.get_public_id(),
+                    'version': current_object_render_result.object_information['version'],
+                    'user_id': request_user.get_public_id(),
+                    'user_name': request_user.get_display_name(),
+                    'comment': 'Object was deleted',
+                    'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
+                }
+                log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+            except (CMDBError, LogManagerInsertError) as err:
+                LOGGER.error(err)
 
         return make_response({'successfully': ack})
 
@@ -966,11 +964,9 @@ def delete_object_links(public_id: int) -> None:
     """
     object_link_filter: dict = {'$or': [{'primary': public_id}, {'secondary': public_id}]}
 
-    links: list[ObjectLinkModel] = link_manager.iterate(filter=object_link_filter,
-                                                        limit=0,
-                                                        skip=0,
-                                                        sort='public_id',
-                                                        order=1).results
+    builder_params = BuilderParameters(object_link_filter)
+
+    links: list[ObjectLinkModel] = object_links_manager.iterate(builder_params).results
 
     for link in links:
-        link_manager.delete(link.public_id)
+        object_links_manager.delete({'public_id':link.public_id})
