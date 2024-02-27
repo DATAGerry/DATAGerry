@@ -20,14 +20,12 @@ import logging
 from queue import Queue
 from typing import Union
 
-from cmdb.event_management.event import Event
-
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 
+from cmdb.event_management.event import Event
 from cmdb.framework import CategoryModel
 from cmdb.framework.models.category import CategoryTree
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
@@ -39,6 +37,7 @@ from cmdb.errors.manager import ManagerInsertError,\
 
 from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
+from . query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 

@@ -274,22 +274,6 @@ class DatabaseManagerMongo(DatabaseManager):
             return result
 
 
-    def find_one_child(self, collection: str, parent_id: int, *args, **kwargs):
-        """
-        Retrieves a single child location of given parent
-
-        Args:
-            collection (str): name of database collection
-            parent_id (int): public_id of parent
-
-        Returns:
-            document with given parent
-        """
-        cursor_result = self.find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
-        for result in cursor_result.limit(-1):
-            return result
-
-
     def count(self, collection: str, filter: dict = None, *args, **kwargs):
         """Count documents based on filter parameters.
 

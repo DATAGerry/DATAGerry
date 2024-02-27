@@ -45,12 +45,14 @@ class ClientManagementProfile(ProfileBase):
         client_management_profile_data: dict = {
             'operating_system_id' : self.get_operating_system_type(),
             'client_id': self.get_client_type(),
-            'monitor_id': self.get_monitor_type(self.created_type_ids['client_id']),
             'printer_id': self.get_printer_type(),
         }
 
         for type_name, type_dict in client_management_profile_data.items():
             self.create_basic_type(type_name, type_dict)
+
+        #depedent types
+        self.create_basic_type('monitor_id', self.get_monitor_type(self.created_type_ids['client_id']))
 
 
         return self.created_type_ids

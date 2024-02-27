@@ -259,38 +259,6 @@ class MongoDatabaseManager(DatabaseManager):
             return result
 
 
-    def find_one_by_object(self, collection: str, object_id: int, *args, **kwargs):
-        """
-        Retrieves a single document with the given object_id from the given collection
-
-        Args:
-            collection (str): name of database collection
-            object_id (int): object_id of document
-
-        Returns:
-            document with given object_id
-        """
-        cursor_result = self.find(collection, {'object_id': object_id}, limit=1, *args, **kwargs)
-        for result in cursor_result.limit(-1):
-            return result
-
-
-    def find_one_child(self, collection: str, parent_id: int, *args, **kwargs):
-        """
-        Retrieves a single child location of given parent
-
-        Args:
-            collection (str): name of database collection
-            parent_id (int): public_id of parent
-
-        Returns:
-            document with given parent
-        """
-        cursor_result = self.find(collection, {'parent': parent_id}, limit=1, *args, **kwargs)
-        for result in cursor_result.limit(-1):
-            return result
-
-
     def count(self, collection: str, filter: dict = None, *args, **kwargs):
         """Count documents based on filter parameters.
 

@@ -220,6 +220,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         });
     } else if (this.mode === CmdbMode.Edit) {
       saveTypeInstance.editor_id = this.userService.getCurrentUser().public_id;
+      console.log("saveTypeInstance", saveTypeInstance)
       this.typeService.putType(saveTypeInstance).subscribe((updateResp: CmdbType) => {
         this.toast.success(`Type was successfully edited: TypeID: ${updateResp.public_id}`);
         this.router.navigate(['/framework/type/'], { queryParams: { typeEditSuccess: updateResp.public_id } });

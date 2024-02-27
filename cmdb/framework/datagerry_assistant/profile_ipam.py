@@ -40,14 +40,15 @@ class IPAMProfile(ProfileBase):
         Returns:
             dict: The created type ids dict
         """
-        # Do NOT change the order of data due dependency
         ipam_profile_data: dict = {
-            'network_id' : self.get_network_type(),
-            'vlan_id': self.get_vlan_type(self.created_type_ids['network_id']),
+            'network_id' : self.get_network_type()
         }
 
         for type_name, type_dict in ipam_profile_data.items():
             self.create_basic_type(type_name, type_dict)
+
+        #dependent types
+        self.create_basic_type('vlan_id', self.get_vlan_type(self.created_type_ids['network_id']))
 
         return self.created_type_ids
 

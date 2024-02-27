@@ -94,40 +94,6 @@ class ManagerDeleteError(CMDBError):
     def __init__(self, err):
         self.message = f'Error while DELETE operation - E: ${err}'
 
-# ------------------------------------------------ LOCATION EXCEPTIONS ----------------------------------------------- #
-
-class LocationManagerError(ManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
-
-
-class LocationManagerInitError(ManagerInitError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
-
-
-class LocationManagerGetError(ManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
-
-
-class LocationManagerInsertError(ManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
-
-class LocationManagerUpdateError(ManagerUpdateError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
-
-class LocationManagerDeleteError(ManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err=err)
 
 # ------------------------------------------------- OBJECT EXCEPTIONS ------------------------------------------------ #
 

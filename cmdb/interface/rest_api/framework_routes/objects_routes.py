@@ -24,7 +24,12 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
+from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
+from cmdb.manager.locations_manager import LocationsManager
+from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
+from cmdb.framework.managers.type_manager import TypeManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.utils import object_hook
@@ -34,15 +39,12 @@ from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, Obj
     ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
 from cmdb.framework import ObjectLinkModel
-from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse, UpdateSingleResponse,\
-    ResponseFailedMessage
+    ResponseFailedMessage, ErrorBody
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
@@ -50,9 +52,7 @@ from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel, UserManager
 from cmdb.utils.error import CMDBError
-from cmdb.framework.managers.object_manager import ObjectManager
-from cmdb.framework.cmdb_location_manager import CmdbLocationManager
-from cmdb.framework.managers.location_manager import LocationManager
+
 from cmdb.framework import CmdbLocation
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -66,9 +66,8 @@ with current_app.app_context():
     type_manager = TypeManager(database_manager=current_app.database_manager)
     log_manager = CmdbLogManager(current_app.database_manager)
     user_manager = UserManager(current_app.database_manager)
-    location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
-    loc_manager = LocationManager(database_manager=current_app.database_manager)
     object_links_manager = ObjectLinksManager(current_app.database_manager, current_app.event_queue)
+    locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -658,6 +657,8 @@ def delete_object(public_id: int, request_user: UserModel):
     Returns:
         Response: Acknowledgment of database 
     """
+    current_location = None
+
     try:
         current_object_instance = object_manager.get_object(public_id)
 
@@ -673,11 +674,14 @@ def delete_object(public_id: int, request_user: UserModel):
                                                   render_user=request_user).result()
 
         #an object can not be deleted if it has a location AND the location is a parent for other locations
-        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
-        # child_location = location_manager._get_child(CmdbLocation.COLLECTION,current_location['public_id'])
+        try:
+            current_location = locations_manager.get_location_for_object(public_id)
+            child_location = locations_manager.get_one_by({'parent': current_location.public_id})
 
-        # if child_location and len(child_location) > 0:
-        #     return abort(405, message='The location of this object has child locations!')
+            if child_location and len(child_location) > 0:
+                return ErrorBody(405, "The location of this object has child locations!").response()
+        except ManagerGetError:
+            pass
 
     except ObjectManagerGetError as err:
         LOGGER.error(err)
@@ -687,12 +691,10 @@ def delete_object(public_id: int, request_user: UserModel):
         return abort(500)
 
     try:
-        #when deleting an object also delete the corresponding location
         if current_location:
-            deleted = location_manager.delete_location(current_location['public_id'], request_user)
+            locations_manager.delete({'public_id':current_location.public_id})
 
-        ack = object_manager.delete_object(public_id=public_id, user=request_user,
-                                           permission=AccessControlPermission.DELETE)
+        ack = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
     except ObjectManagerGetError as err:
         return abort(400, err.message)
     except AccessDeniedError as err:
@@ -734,36 +736,23 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
             manager.delete_all_object_references(public_id)
 
         # check if location for this object exists
-        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
+        current_location = locations_manager.get_location_for_object(public_id)
 
         if current_object_instance and current_location:
             # get all child locations for this location
+            build_params = BuilderParameters([{"$match":{"public_id":{"$gt":1}}}])
 
-            params = CollectionParameters(query_string=None,
-                                          filter=[{"$match":{"public_id":{"$gt":1}}}],
-                                          limit=0,
-                                          sort='public_id',
-                                          order=1)
-
-            iteration_result: IterationResult[CmdbLocation] = loc_manager.iterate(
-                                                                filter=params.filter,
-                                                                limit=params.limit,
-                                                                skip=params.skip,
-                                                                sort=params.sort,
-                                                                order=params.order,
-                                                                user=request_user,
-                                                                permission=AccessControlPermission.READ)
+            iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(build_params)
 
             all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
-
-            all_children = location_manager.get_all_children(current_location['public_id'], all_locations)
+            all_children = locations_manager.get_all_children(current_location.public_id, all_locations)
 
             # delete all child locations
             for child in all_children:
-                location_manager.delete_location(child['public_id'], request_user)
+                locations_manager.delete({'public_id':child['public_id']})
 
             # delete the current object and its location
-            location_manager.delete_location(current_location['public_id'], request_user)
+            locations_manager.delete({'public_id':current_location.public_id})
 
             deleted = object_manager.delete_object(public_id, request_user, permission=AccessControlPermission.DELETE)
 
@@ -806,42 +795,30 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
             manager.delete_all_object_references(public_id)
 
         # check if location for this object exists
-        current_location = location_manager.get_location_by_object(CmdbLocation.COLLECTION, public_id)
+        current_location = locations_manager.get_location_for_object(public_id)
 
         if current_object_instance and current_location:
             # get all child locations for this location
+            builder_params = BuilderParameters([{"$match":{"public_id":{"$gt":1}}}])
 
-            params = CollectionParameters(query_string=None,
-                                          filter=[{"$match":{"public_id":{"$gt":1}}}],
-                                          limit=0,
-                                          sort='public_id',
-                                          order=1)
-
-            iteration_result: IterationResult[CmdbLocation] = loc_manager.iterate(
-                                                                filter=params.filter,
-                                                                limit=params.limit,
-                                                                skip=params.skip,
-                                                                sort=params.sort,
-                                                                order=params.order,
-                                                                user=request_user,
-                                                                permission=AccessControlPermission.READ)
+            iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(builder_params)
 
             all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
-            all_children_locations = location_manager.get_all_children(current_location['public_id'], all_locations)
+            all_children_locations = locations_manager.get_all_children(current_location.public_id, all_locations)
 
             children_object_ids = []
 
             # delete all child locations and extract their corresponding object_ids
             for child in all_children_locations:
                 children_object_ids.append(child['object_id'])
-                location_manager.delete_location(child['public_id'], request_user)
+                locations_manager.delete({'public_id':child['public_id']})
 
             # # delete the objects of child locations
             for child_object_id in children_object_ids:
                 object_manager.delete_object(child_object_id, request_user, AccessControlPermission.DELETE)
 
             # # delete the current object and its location
-            location_manager.delete_location(current_location['public_id'], request_user)
+            locations_manager.delete({'public_id':current_location.public_id})
             deleted = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
 
         else:
@@ -878,14 +855,17 @@ def delete_many_objects(public_ids, request_user: UserModel):
         ack = []
         objects = object_manager.get_objects_by(**filter_public_ids)
 
-        # TODO: At the current state it is not possible to bulk delete objects with locations
-        #
+        # At the current state it is not possible to bulk delete objects with locations
         # check if any object has a location
         for current_object_instance in objects:
-            location_for_object = location_manager.get_location_for_object(current_object_instance.public_id)
+            try:
+                location_for_object = locations_manager.get_location_for_object(current_object_instance.public_id)
 
-            if location_for_object:
-                return abort(405)
+                if location_for_object:
+                    return ErrorBody(405, """It is not possible to bulk delete objects
+                                             if any of them has a location""").response()
+            except ManagerGetError:
+                pass
 
         for current_object_instance in objects:
             try:
