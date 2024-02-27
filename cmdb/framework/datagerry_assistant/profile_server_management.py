@@ -45,12 +45,12 @@ class ServerManagementProfile(ProfileBase):
         server_management_profile_data: dict = {
             'server_id' : self.get_server_type(),
             'appliance_id': self.get_appliance_type(),
-            'virtual_server_id': self.get_virtual_server_type(self.created_type_ids['server_id']),
         }
 
         for type_name, type_dict in server_management_profile_data.items():
             self.create_basic_type(type_name, type_dict)
 
+        self.create_basic_type('virtual_server_id', self.get_virtual_server_type(self.created_type_ids['server_id']))
 
         return self.created_type_ids
 

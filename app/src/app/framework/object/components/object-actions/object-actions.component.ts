@@ -15,13 +15,13 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import {Component, Input, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
-import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
+
+import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
 import { ObjectService } from '../../../services/object.service';
 import { LocationService } from 'src/app/framework/services/location.service';
@@ -30,8 +30,7 @@ import { ToastService } from 'src/app/layout/toast/toast.service';
 
 import { RenderResult } from '../../../models/cmdb-render';
 import { AccessControlList } from '../../../../acl/acl.types';
-/* -------------------------------------------------------------------------- */
-
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-object-actions',
@@ -43,41 +42,32 @@ export class ObjectActionsComponent implements OnDestroy {
   @Input() renderResult: RenderResult;
   @Input() acl: AccessControlList;
 
-  /**
-  * Component un-subscriber.
-  */
-    public subscriber: ReplaySubject<void>;
-    private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
+  public subscriber: ReplaySubject<void>;
+  private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
 
-    /**
-     * Holds the modal Reference
-     */
-    private modalRef: NgbModalRef;
+  private modalRef: NgbModalRef;
 
-/* -------------------------------------------------------------------------- */
-/*                                 LIFE CYLCE                                 */
-/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-
-  constructor(private objectService: ObjectService, 
-              private locationService: LocationService, 
-              private sidebarService: SidebarService, 
-              private toastService: ToastService, 
-              private router: Router ) {
-      this.subscriber = new ReplaySubject<void>();
-  }
-  
-  public ngOnDestroy(): void {
-    if (this.modalRef) {
-      this.modalRef.close();
+    constructor(private objectService: ObjectService, 
+                private locationService: LocationService, 
+                private sidebarService: SidebarService, 
+                private toastService: ToastService, 
+                private router: Router ) {
+        this.subscriber = new ReplaySubject<void>();
     }
-    this.subscriber.unsubscribe();
-    this.locationSubscription.unsubscribe();
-  }
 
-/* -------------------------------------------------------------------------- */
-/*                               MODAL FUNCTIONS                              */
-/* -------------------------------------------------------------------------- */
+
+    public ngOnDestroy(): void {
+        if (this.modalRef) {
+            this.modalRef.close();
+        }
+
+        this.subscriber.unsubscribe();
+        this.locationSubscription.unsubscribe();
+    }
+
+/* ------------------------------------------------- MODAL FUNCTIONS ------------------------------------------------ */
 
     /**
      * Decides if it a normal delete or locations are involved
@@ -89,9 +79,9 @@ export class ObjectActionsComponent implements OnDestroy {
         this.locationService.getChildren(publicID).pipe(takeUntil(this.locationSubscription))
         .subscribe((children: RenderResult[]) => {
             if(children && children.length > 0){
-              this.deleteWithLocations(publicID);
+                this.deleteWithLocations(publicID);
             } else {
-              this.deleteObject(publicID);
+                this.deleteObject(publicID);
             }
         },
         (error) => {
@@ -127,8 +117,10 @@ export class ObjectActionsComponent implements OnDestroy {
         });
     }
 
+
     /**
-     * TODO: Implementation for deleting with locations and multiple objects
+     * Opens a modal where the user has to decide to either delete locations with objects or only locations
+     * of sub nodes in the location tree
      * @param publicID 
      */
     private deleteWithLocations(publicID: number){
@@ -137,7 +129,6 @@ export class ObjectActionsComponent implements OnDestroy {
       this.modalRef.result.then((result) => {
           //delete all child objects with their locations
           if(result == 'objects'){
-            console.log("delete locations for publicID: ", publicID);
             this.objectService.deleteObjectWithChildren(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
                 this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
                 this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
@@ -151,7 +142,6 @@ export class ObjectActionsComponent implements OnDestroy {
 
           //delete only locations of children
           if(result == 'locations'){
-            console.log("delete locations for publicID: ", publicID);
               this.objectService.deleteObjectWithLocations(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
                   this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
                   this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);

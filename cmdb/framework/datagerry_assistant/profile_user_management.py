@@ -40,15 +40,16 @@ class UserManagementProfile(ProfileBase):
         Returns:
             dict: The created type ids dict
         """
-        # Do NOT change the order of data due dependency
         user_management_profile_data: dict = {
             'company_id' : self.get_company_type(),
-            'user_id': self.get_user_type(),
-            'customer_user_id': self.get_customer_user_type(self.created_type_ids['company_id'])
+            'user_id': self.get_user_type()
         }
 
         for type_name, type_dict in user_management_profile_data.items():
             self.create_basic_type(type_name, type_dict)
+
+        # depedent types
+        self.create_basic_type('customer_user_id', self.get_customer_user_type(self.created_type_ids['company_id']))
 
         return self.created_type_ids
 
@@ -173,7 +174,6 @@ class UserManagementProfile(ProfileBase):
         Args:
             company_type_id (int): public_id of created 'Company'-Type
         """
-
         customer_user_sections: list = [
             {
                 "name": "section-82897",
@@ -233,5 +233,4 @@ class UserManagementProfile(ProfileBase):
                                                                             'customer_user',
                                                                             'Customer User',
                                                                             'fas fa-user-tie')
-
         return customer_user_type

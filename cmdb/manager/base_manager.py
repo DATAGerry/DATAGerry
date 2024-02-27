@@ -89,6 +89,45 @@ class BaseManager:
             raise ManagerGetError(err) from err
 
 
+    def get_one_by(self, criteria: dict):
+        """
+        Retrieves a single document defined by a filter
+
+        Args:
+            criteria (dict): Filter for the document
+        """
+        try:
+            return self.dbm.find_one_by(self.collection, criteria)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
+
+    def get_many(self,
+                 sort: str = 'public_id',
+                 direction: int = -1,
+                 limit=0,
+                 **requirements: dict) -> list[dict]:
+        """Get all documents from the database which have the passing requirements
+
+        Args:
+            sort (str): sort by given key - default public_id
+            **requirements (dict): dictionary of key value pairs
+
+        Returns:
+            list: list of all documents
+        """
+        requirements_filter = {}
+        formatted_sort = [(sort, direction)]
+
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
+
+        return self.dbm.find_all(collection=self.collection,
+                                 limit=limit,
+                                 filter=requirements_filter,
+                                 sort=formatted_sort)
+
+
     def aggregate(self, *args, **kwargs):
         """
         Calls MongoDB aggregation with *args
