@@ -31,7 +31,6 @@ import { ObjectService } from 'src/app/framework/services/object.service';
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { RenderResult } from '../../../../framework/models/cmdb-render';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
-import { UntypedFormControl } from '@angular/forms';
 
 /* -------------------------------------------------------------------------- */
 /*                                 INTERFACES                                 */
@@ -63,14 +62,12 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     treeControl = new NestedTreeControl<LocationNode>(node => node.children);
     dataSource = new MatTreeNestedDataSource<LocationNode>();
 
-    //Filter
-    public filterTerm: UntypedFormControl = new UntypedFormControl('');
-    private filterTermSubscription: Subscription;
 
     /**
      * used for highlighting the selected location
      */
     public selectedLocationID: number;
+    public searchString: string = '';
 
     /* -------------------------------------------------------------------------- */
     /*                                LIFE - CYCLE                                */
@@ -99,6 +96,59 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this.objectServiceSubscription.unsubscribe();
+    }
+
+
+    /**
+    * Reset the search string
+    */
+    handleSearchReset() {
+        this.searchString = "";
+    }
+
+
+    /**
+    * Filter function for leaf nodes
+    */
+    filterLeafNode(node: LocationNode): boolean {
+
+        if (!this.searchString || !node.name) {
+            return false;
+        }
+        const nodeName = node.name.toLowerCase();
+        return nodeName.indexOf(this.searchString.toLowerCase()) === -1;
+    }
+
+
+    /**
+     * Filters a parent node based on a search string.
+     * 
+     * @param node The parent node to be filtered.
+     * @returns A boolean indicating whether the node should be filtered out or not.
+     */
+    filterParentNode(node: LocationNode): boolean {
+        if (!this.searchString) {
+            return false;
+        }
+
+        // Check if the search string matches the parent node
+        if (node.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1) {
+            return false;
+        }
+
+        // Check if any descendants match the search string
+        const descendants = this.treeControl.getDescendants(node);
+        if (descendants.some((descendantNode) => descendantNode.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1)) {
+            return false;
+        }
+
+        // If the search string matches the immediate child, show the parent
+        const immediateChild = descendants.find((descendantNode) => descendantNode.name === node.name + 1);
+        if (immediateChild && immediateChild.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1) {
+            return true;
+        }
+
+        return true;
     }
 
 
