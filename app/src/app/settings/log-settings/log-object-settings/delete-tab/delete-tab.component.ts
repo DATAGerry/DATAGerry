@@ -11,28 +11,30 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
-
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
-import { CmdbLog } from '../../../../framework/models/cmdb-log';
-import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../layout/table/table.types';
-import { CollectionParameters } from '../../../../services/models/api-parameter';
-import { LogService } from '../../../../framework/services/log.service';
-import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { TableComponent } from '../../../../layout/table/table.component';
+import { ActivatedRoute, Data, Router } from '@angular/router';
+
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { ActivatedRoute, Data, Router } from '@angular/router';
-import { UserSetting } from '../../../../management/user-settings/models/user-setting';
+
+import { LogService } from '../../../../framework/services/log.service';
 import {
     convertResourceURL,
     UserSettingsService
 } from '../../../../management/user-settings/services/user-settings.service';
 import { UserSettingsDBService } from '../../../../management/user-settings/services/user-settings-db.service';
+
+import { CmdbLog } from '../../../../framework/models/cmdb-log';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../layout/table/table.types';
+import { CollectionParameters } from '../../../../services/models/api-parameter';
+import { APIGetMultiResponse } from '../../../../services/models/api-response';
+import { TableComponent } from '../../../../layout/table/table.component';
+import { UserSetting } from '../../../../management/user-settings/models/user-setting';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
     selector: 'cmdb-delete-tab',
@@ -44,22 +46,12 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
     @Output() deleteEmitter = new EventEmitter<number>();
     @Output() cleanUpEmitter = new EventEmitter<number[]>();
 
-    /**
-     * Component un-subscriber.
-     */
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-    /**
-     * Table component.
-     */
     @ViewChild(TableComponent) objectsTableComponent: TableComponent<CmdbLog>;
-
     @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
-
     @ViewChild('dataTemplate', { static: true }) dataTemplate: TemplateRef<any>;
-
     @ViewChild('changeTemplate', { static: true }) changeTemplate: TemplateRef<any>;
-
     @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
 
     @Input() set reloadLogs(value: boolean) {
@@ -70,13 +62,9 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
     }
 
     public selectedLogIDs: Array<number> = [];
-
     public filter: string;
-
     public deleteLogList: CmdbLog[] = [];
-
     public columns: Array<Column>;
-
     public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
 
     private readonly initLimit: number = 10;
@@ -90,28 +78,29 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
 
     public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1 };
 
-    /**
-     * The Id used for the table
-     */
+    // The Id used for the table
     public id: string = 'object-deleted-log-list-table';
 
     public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
-
     public tableStates: Array<TableState> = [];
 
     public get tableState(): TableState {
         return this.tableStateSubject.getValue() as TableState;
     }
 
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
     constructor(private logService: LogService,
-        private route: ActivatedRoute, private router: Router,
-        private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-        private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
-        console.log('deleted constructor')
+                private route: ActivatedRoute,
+                private router: Router,
+                private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+                private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+
         this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
             if (data.userSetting) {
                 const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
                     .find(payloads => payloads.id === this.id);
+
                 if (userSettingPayloads) {
                     this.tableStates = userSettingPayloads.tableStates;
                     this.tableStateSubject.next(userSettingPayloads.currentState);
@@ -128,6 +117,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         });
     }
 
+
     public ngOnInit(): void {
         this.resetCollectionParameters();
         this.setColumns();
@@ -135,9 +125,25 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         this.loadDeleted();
     }
 
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+        console.log('deleted destroy x#####')
+    }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
     private loadDeleted() {
         const filter = JSON.stringify(this.filterBuilder());
-        this.apiParameters = { filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page };
+        this.apiParameters = {
+            filter,
+            limit: this.limit,
+            sort: this.sort.name,
+            order: this.sort.order,
+            page: this.page
+        };
+
         this.logService.getDeleteLogs(this.apiParameters).pipe(takeUntil(this.subscriber))
             .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
                 this.deleteLogList = apiResponse.results;
@@ -145,9 +151,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
             });
     }
 
-    /**
-     * Initialize table state
-     */
+
     private initTable() {
         if (this.tableState) {
             this.sort = this.tableState.sort;
@@ -156,12 +160,15 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         }
     }
 
+
     private resetCollectionParameters(): void {
         this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1 };
     }
 
+
     private setColumns(): void {
         const columns = [];
+
         columns.push({
             display: 'Log ID',
             name: 'public_id',
@@ -243,8 +250,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
             style: { width: '6em' }
         } as unknown as Column);
 
-        columns.push(
-            {
+        columns.push({
                 display: 'Log Time',
                 name: 'log_time',
                 data: 'log_time',
@@ -253,26 +259,29 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
                 style: { 'white-space': 'nowrap' },
                 template: this.dateTemplate,
                 searchable: false,
-            } as Column
-        );
+        } as Column);
 
         this.columns = columns;
     }
+
 
     public onPageChange(page: number) {
         this.page = page;
         this.loadDeleted();
     }
 
+
     public onPageSizeChange(limit: number): void {
         this.limit = limit;
         this.loadDeleted();
     }
 
+
     public onSortChange(sort: Sort): void {
         this.sort = sort;
         this.loadDeleted();
     }
+
 
     public onSearchChange(search: any): void {
         if (search) {
@@ -283,15 +292,19 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         this.loadDeleted();
     }
 
+
     public onSelectedChange(selectedItems: Array<CmdbLog>): void {
         this.selectedLogIDs = selectedItems.map(m => m.public_id);
     }
 
+
     public filterBuilder(): any {
         const query = [];
+
         if (this.filter) {
             const searchableColumns = this.columns.filter(c => c.searchable);
             const or = [];
+
             // Searchable Columns
             for (const column of searchableColumns) {
                 const regex: any = {};
@@ -301,17 +314,21 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
                 };
                 or.push(regex);
             }
+
             query.push({
                 $addFields: {
                     public_id: { $toString: '$public_id' }
                 }
             });
+
             query.push({ $match: { $and: [{ log_type: 'CmdbObjectLog' }, { $or: or }] } });
         } else {
             query.push({ $match: { log_type: 'CmdbObjectLog' } });
         }
+
         return query;
     }
+
 
     /**
      * Select a state.
@@ -326,6 +343,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         this.loadDeleted();
     }
 
+
     /**
      * On table State change.
      * Update state.
@@ -333,6 +351,7 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
     public onStateChange(state: TableState): void {
         this.tableStateSubject.next(state);
     }
+
 
     /**
      * On table State change.
@@ -345,15 +364,10 @@ export class DeleteTabComponent implements OnInit, OnDestroy {
         this.loadDeleted();
     }
 
+
     public cleanup() {
         this.cleanUpEmitter.emit(this.selectedLogIDs);
         this.objectsTableComponent.selectedItems = [];
         this.selectedLogIDs = [];
-    }
-
-    public ngOnDestroy(): void {
-        this.subscriber.next();
-        this.subscriber.complete();
-        console.log('deleted destroy x#####')
     }
 }
