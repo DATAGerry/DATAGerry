@@ -78,7 +78,6 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     private sameIDValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             const same = control.value === this.primary.value;
-            console.log('Same ID:', same);
             return same ? { sameID: true } : null;
         };
     }
