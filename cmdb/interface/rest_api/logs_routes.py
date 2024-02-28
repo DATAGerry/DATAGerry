@@ -13,20 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
+"""Definition of all routes for Logs"""
 import logging
 
 from werkzeug.exceptions import abort
 from flask import current_app, request
 
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
-from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
 from cmdb.framework.managers.log_manager import CmdbLogManager
+
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
+from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
 from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
 from cmdb.interface.route_utils import make_response, insert_request_user
-
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse
@@ -40,21 +39,19 @@ logs_blueprint = APIBlueprint('logs', __name__)
 
 with current_app.app_context():
     database_manager = current_app.database_manager
-    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
     log_manager = CmdbLogManager(current_app.database_manager)
+    object_manager = ObjectManager(current_app.database_manager, current_app.event_queue)
 
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
-# CRUD routes
 @logs_blueprint.route('/<int:public_id>', methods=['GET'])
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @insert_request_user
 def get_log(public_id: int, request_user: UserModel):
     """TODO: document"""
-    manager = CmdbLogManager(database_manager=database_manager)
     try:
-        selected_log: CmdbObjectLog = manager.get(public_id=public_id)
-        ObjectManager(database_manager=database_manager).get(selected_log.object_id, user=request_user,
-                                                             permission=AccessControlPermission.READ)
+        selected_log: CmdbObjectLog = log_manager.get(public_id=public_id)
+        object_manager.get(selected_log.object_id, request_user, AccessControlPermission.READ)
     except ManagerGetError as err:
         return abort(404, err)
     except AccessDeniedError as err:
@@ -62,48 +59,6 @@ def get_log(public_id: int, request_user: UserModel):
     return make_response(selected_log)
 
 
-@logs_blueprint.route('/', methods=['POST'])
-def insert_log(*args, **kwargs):
-    """
-    It is not planned to insert a log
-    Returns:
-        always a 405 Method Not Allowed	error
-    """
-    return abort(405)
-
-
-@logs_blueprint.route('/<int:public_id>/', methods=['PUT'])
-@logs_blueprint.route('/<int:public_id>', methods=['PUT'])
-def update_log(public_id, *args, **kwargs):
-    """
-    It is not planned to update a log
-    Returns:
-        always a 405 Method Not Allowed	error
-    """
-    return abort(405)
-
-
-@logs_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@logs_blueprint.protect(auth=True, right='base.framework.log.delete')
-@insert_request_user
-def delete_log(public_id: int, request_user: UserModel):
-    """TODO: document"""
-    manager = CmdbLogManager(database_manager=database_manager)
-    try:
-        selected_log: CmdbObjectLog = manager.get(public_id=public_id)
-        ObjectManager(database_manager=database_manager).get(selected_log.object_id, user=request_user,
-                                                             permission=AccessControlPermission.DELETE)
-        deleted_object = log_manager.delete(public_id=public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
-    except AccessDeniedError as err:
-        return abort(403, err)
-    except ManagerDeleteError as err:
-        return abort(500, err)
-    return make_response(deleted_object, 202)
-
-
-# FIND routes
 @logs_blueprint.route('/object/exists', methods=['GET', 'HEAD'])
 @logs_blueprint.protect(auth=True, right='base.framework.log.view')
 @logs_blueprint.parse_collection_parameters()
@@ -280,3 +235,24 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         return make_response(corresponding_logs, 204)
 
     return make_response(corresponding_logs)
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
+
+@logs_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@logs_blueprint.protect(auth=True, right='base.framework.log.delete')
+@insert_request_user
+def delete_log(public_id: int, request_user: UserModel):
+    """TODO: document"""
+    manager = CmdbLogManager(database_manager=database_manager)
+    try:
+        selected_log: CmdbObjectLog = manager.get(public_id=public_id)
+        ObjectManager(database_manager=database_manager).get(selected_log.object_id, user=request_user,
+                                                             permission=AccessControlPermission.DELETE)
+        deleted_object = log_manager.delete(public_id=public_id)
+    except ManagerGetError as err:
+        return abort(404, err)
+    except AccessDeniedError as err:
+        return abort(403, err)
+    except ManagerDeleteError as err:
+        return abort(500, err)
+    return make_response(deleted_object, 202)
