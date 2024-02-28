@@ -28,35 +28,33 @@ import { RenderResult } from '../../../models/cmdb-render';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  templateUrl: './object-link-add-modal.component.html',
-  styleUrls: ['./object-link-add-modal.component.scss']
+    templateUrl: './object-link-add-modal.component.html',
+    styleUrls: ['./object-link-add-modal.component.scss']
 })
 export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    public form: UntypedFormGroup;
+    public primaryResult: RenderResult;
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public form: UntypedFormGroup;
+    @Input('primaryResult')
+    public set primaryRenderResult(result: RenderResult) {
+        this.primaryResult = result;
+        this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
+    }
 
-  public primaryResult: RenderResult;
-
-  @Input('primaryResult')
-  public set primaryRenderResult(result: RenderResult) {
-      this.primaryResult = result;
-      this.form.get('primary').setValue(this.primaryResult.object_information.object_id);
-  }
-
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(public activeModal: NgbActiveModal, private objectService: ObjectService) {
         this.form = new UntypedFormGroup({
             primary: new UntypedFormControl(null, [Validators.required]),
-            secondary: new UntypedFormControl('', [Validators.required,this.sameIDValidator],
-                                                  [checkObjectExistsValidator(objectService)])
+            secondary: new UntypedFormControl('', [Validators.required],
+                [checkObjectExistsValidator(objectService)])
         });
     }
 
 
     public ngOnInit(): void {
+        this.form.get('secondary').setValidators(this.sameIDValidator());
         this.form.get('secondary').updateValueAndValidity();
     }
 
@@ -66,7 +64,6 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public get primary(): UntypedFormControl {
         return this.form.get('primary') as UntypedFormControl;
@@ -81,8 +78,7 @@ export class ObjectLinkAddModalComponent implements OnInit, OnDestroy {
     private sameIDValidator(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: any } | null => {
             const same = control.value === this.primary.value;
-
-            return same ? { sameID: { value: control.value } } : null;
+            return same ? { sameID: true } : null;
         };
     }
 
