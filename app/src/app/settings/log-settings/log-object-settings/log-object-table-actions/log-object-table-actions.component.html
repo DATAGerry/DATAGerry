@@ -2,7 +2,7 @@
   <a class="text-dark" routerLink="/framework/object/log/{{publicID}}" title="View log">
     <i class="far fa-eye"></i>
   </a>
-  <a class="text-dark ml-1" *permissionLink="['base.framework.log.delete']" title="Delete log"
+  <a class="text-dark ml-1 deletebutton" *permissionLink="['base.framework.log.delete']" title="Delete log"
      (click)="deleteEmitter.emit(publicID);">
     <i class="far fa-trash-alt"></i>
   </a>
