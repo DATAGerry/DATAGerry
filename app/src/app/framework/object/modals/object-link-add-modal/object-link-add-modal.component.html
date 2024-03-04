@@ -33,6 +33,6 @@
   </div>
   <div class="modal-footer">
     <button type="button" class="btn btn-outline-dark" (click)="activeModal.dismiss('Close click')" >Close</button>
-    <button type="button" class="btn btn-outline-primary" (click)="onSave()" [disabled]="secondary.invalid && (secondary.dirty || secondary.touched) || !secondary.value ">Save</button>
+    <button type="button" class="btn btn-outline-primary" (click)="onSave()" [disabled]="!form.valid" >Save</button>
   </div>
 </form>
