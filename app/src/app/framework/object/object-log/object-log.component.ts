@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit, Renderer2 } from '@angular/core';
+import { Component, OnInit, Renderer2, ChangeDetectorRef } from '@angular/core';
 import { LogService } from '../../services/log.service';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbLog } from '../../models/cmdb-log';
@@ -25,75 +25,84 @@ import { CmdbMode } from '../../modes.enum';
 import { UntypedFormGroup } from '@angular/forms';
 
 @Component({
-  selector: 'cmdb-object-log',
-  templateUrl: './object-log.component.html',
-  styleUrls: ['./object-log.component.scss']
+    selector: 'cmdb-object-log',
+    templateUrl: './object-log.component.html',
+    styleUrls: ['./object-log.component.scss']
 })
 export class ObjectLogComponent implements OnInit {
 
-  private logID: number;
-  public log: CmdbLog;
-  public completeLogList: CmdbLog[];
-  public mode: CmdbMode.View;
-  public renderForm: UntypedFormGroup;
-  public compareForm: UntypedFormGroup;
-  public renderResult: RenderResult;
-  public compareResult: RenderResult;
+    private logID: number;
+    public log: CmdbLog;
+    public completeLogList: CmdbLog[];
+    public mode: CmdbMode.View;
+    public renderForm: UntypedFormGroup;
+    public compareForm: UntypedFormGroup;
+    public renderResult: RenderResult;
+    public compareResult: RenderResult;
 
-  constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2) {
-    this.renderForm = new UntypedFormGroup({});
-    this.compareForm = new UntypedFormGroup({});
-    this.activateRoute.params.subscribe((params) => {
-      this.logID = params.publicID;
-    });
-  }
-
-  public ngOnInit(): void {
-    this.logService.getLog(this.logID).subscribe((log: CmdbLog) => {
-        this.log = log;
-        this.renderResult = JSON.parse(this.log.render_state);
-      },
-      (error) => {
-        console.error(error);
-      },
-      () => {
-        this.logService.getCorrespondingLogs(this.logID).subscribe((logs: CmdbLog[]) => {
-          this.completeLogList = logs;
+    constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2,
+        private readonly changeDetectorRef: ChangeDetectorRef) {
+        this.renderForm = new UntypedFormGroup({});
+        this.compareForm = new UntypedFormGroup({});
+        this.activateRoute.params.subscribe((params) => {
+            this.logID = params.publicID;
         });
-      });
-  }
-
-  public loadCompareRender(logID: number) {
-    // tslint:disable-next-line:triple-equals
-    const selectedCompareLog: CmdbLog = this.completeLogList.filter(compareLog => compareLog.public_id == logID)[0];
-    if (selectedCompareLog.render_state !== undefined) {
-      this.compareForm = new UntypedFormGroup({});
-      this.compareResult = JSON.parse(selectedCompareLog.render_state);
     }
-    this.markDifferences();
-  }
 
-  private markDifferences() {
-    const changedInField = this.renderResult.fields.filter(this.comparer(this.compareResult.fields));
 
-    Object.keys(this.renderForm.controls).forEach(key => {
-      const currentSelector = `input[name='${key}']`;
-      document.querySelector(currentSelector).classList.remove('bg-success');
-      document.querySelector(currentSelector).classList.remove('text-white');
-      if (changedInField.some((item) => item.name === key)) {
-        document.querySelector(currentSelector).classList.add('bg-success');
-        document.querySelector(currentSelector).classList.add('text-white');
-      }
-    });
-  }
+    public ngOnInit(): void {
+        this.logService.getLog(this.logID).subscribe((log: CmdbLog) => {
+            this.log = log;
+            this.renderResult = JSON.parse(this.log.render_state);
+        },
+            (error) => {
+                console.error(error);
+            },
+            () => {
+                this.logService.getCorrespondingLogs(this.logID).subscribe((logs: CmdbLog[]) => {
+                    this.completeLogList = logs;
+                });
+            });
+    }
 
-  private comparer(otherArray) {
-    return (current) => {
-      return otherArray.filter((other) => {
-        return other.value === current.value && other.name === current.name;
-      }).length === 0;
-    };
-  }
 
+    ngAfterViewChecked(): void {
+        this.changeDetectorRef.detectChanges();
+    }
+
+
+    public loadCompareRender(logID: number) {
+        // tslint:disable-next-line:triple-equals
+        const selectedCompareLog: CmdbLog = this.completeLogList.filter(compareLog => compareLog.public_id == logID)[0];
+        if (selectedCompareLog.render_state !== undefined) {
+            this.compareForm = new UntypedFormGroup({});
+            this.compareResult = JSON.parse(selectedCompareLog.render_state);
+        }
+        this.markDifferences();
+    }
+
+
+    private markDifferences() {
+        const changedInField = this.renderResult.fields.filter(this.comparer(this.compareResult.fields));
+
+        Object.keys(this.renderForm.controls).forEach(key => {
+            const currentSelector = `input[name='${key}']`;
+            document.querySelector(currentSelector).classList.remove('bg-success');
+            document.querySelector(currentSelector).classList.remove('text-white');
+            if (changedInField.some((item) => item.name === key)) {
+                document.querySelector(currentSelector).classList.add('bg-success');
+                document.querySelector(currentSelector).classList.add('text-white');
+            }
+        });
+    }
+
+
+    private comparer(otherArray) {
+        return (current) => {
+            return otherArray.filter((other) => {
+                return other.value === current.value && other.name === current.name;
+            }).length === 0;
+        };
+    }
 
 }
