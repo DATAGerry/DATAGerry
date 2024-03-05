@@ -30,10 +30,7 @@ from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
-from cmdb.errors.manager import ManagerInsertError,\
-                                ManagerGetError,\
-                                ManagerIterationError,\
-                                ManagerUpdateError
+from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
 
 from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder

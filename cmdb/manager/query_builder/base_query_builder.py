@@ -21,6 +21,8 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.user_management import UserModel
 
+from cmdb.framework.models.log import CmdbObjectLog, LogAction
+
 from .builder import Builder
 from .builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -97,6 +99,7 @@ class BaseQueryBuilder(Builder):
         """`Delete` the query content"""
         self.query = None
 
+
     def __init_query(self, criteria: Union[dict, list[dict]]) -> list[dict]:
         """
         Initialises the query with valid format
@@ -116,5 +119,37 @@ class BaseQueryBuilder(Builder):
         elif isinstance(criteria, list):
             for pipe in criteria:
                 query.append(pipe)
+
+        return query
+
+
+    def prepare_log_query(self, object_exists: bool = True) -> list[dict]:
+        """
+        Prepares the query for logs
+
+        Args:
+            object_exists (bool): If the referenced object of the log still exists
+
+        Returns:
+            list[dict]: the prepared query for object logs
+        """
+        query = []
+
+        query.append({'$match': {
+            'log_type': CmdbObjectLog.__name__,
+            'action': {
+                '$ne': LogAction.DELETE.value
+            }
+        }})
+
+        query.append({"$lookup": {
+            "from": "framework.objects",
+            "let": {"ref_id": "$object_id"},
+            "pipeline": [{'$match': {'$expr': {'$eq': ["$public_id", '$$ref_id']}}}],
+            "as": "object"
+        }})
+
+        query.append({'$unwind': {'path': '$object', 'preserveNullAndEmptyArrays': True}})
+        query.append({'$match': {'object': {'$exists': object_exists}}})
 
         return query

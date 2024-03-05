@@ -21,12 +21,14 @@ from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.user_management import UserModel, UserManager
+from cmdb.manager.logs_manager import LogsManager
+
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
@@ -41,7 +43,9 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
-from cmdb.user_management import UserModel, UserManager
+
+from cmdb.errors.manager import ManagerInsertError
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -49,7 +53,7 @@ LOGGER = logging.getLogger(__name__)
 with current_app.app_context():
     user_manager = UserManager(current_app.database_manager)
     object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-    log_manager = CmdbLogManager(current_app.database_manager)
+    logs_manager = LogsManager(current_app.database_manager, current_app.event_queue)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
@@ -223,7 +227,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)
@@ -231,7 +235,7 @@ def import_objects(request_user: UserModel):
         except RenderError as err:
             LOGGER.error(err)
             return abort(500)
-        except LogManagerInsertError as err:
-            LOGGER.error(err)
+        except ManagerInsertError as err:
+            LOGGER.error("ManagerInsertError: %s", err)
 
     return make_response(import_response)

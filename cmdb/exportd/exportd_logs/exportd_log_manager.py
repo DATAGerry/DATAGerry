@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 from cmdb.framework.cmdb_base import CmdbManagerBase
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, ObjectManagerUpdateError, \
+from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
     ObjectManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log import LOGGER, LogAction
 from cmdb.utils.error import CMDBError
@@ -137,13 +137,6 @@ class LogManagerGetError(ObjectManagerGetError):
 
 
 class LogManagerInsertError(ObjectManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class LogManagerUpdateError(ObjectManagerUpdateError):
     """TODO: document"""
     def __init__(self, err):
         self.err = err

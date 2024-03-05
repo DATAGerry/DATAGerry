@@ -26,14 +26,14 @@ from flask import abort, jsonify, request, current_app
 
 from cmdb.framework.managers.object_manager import ObjectManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.user_management import UserModel, UserManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
-from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.database.utils import object_hook
-from cmdb.database.utils import default
+from cmdb.database.utils import object_hook, default
 from cmdb.framework import CmdbObject, TypeModel
 from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
     ObjectManagerUpdateError
@@ -47,11 +47,13 @@ from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMul
     ResponseFailedMessage, ErrorBody
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel, UserManager
+
+from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerInsertError
 
 from cmdb.framework import CmdbLocation
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -64,10 +66,10 @@ with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
     manager = ObjectManager(database_manager=current_app.database_manager)
     type_manager = TypeManager(database_manager=current_app.database_manager)
-    log_manager = CmdbLogManager(current_app.database_manager)
     user_manager = UserManager(current_app.database_manager)
     object_links_manager = ObjectLinksManager(current_app.database_manager, current_app.event_queue)
     locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
+    logs_manager = LogsManager(current_app.database_manager, current_app.event_queue)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
@@ -120,9 +122,9 @@ def insert_object(request_user: UserModel):
                 'version': current_object.version
             }
 
-            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
-        except LogManagerInsertError as err:
-            LOGGER.error(err)
+            logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+        except ManagerInsertError as err:
+            LOGGER.error("ManagerInsertError: %s", err)
 
     except (TypeError, ObjectInsertError) as err:
         LOGGER.error(err)
@@ -488,9 +490,9 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                     'changes': changes,
                     'render_state': json.dumps(update_object_instance, default=default).encode('UTF-8')
                 }
-                log_manager.insert(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
-            except (CMDBError, LogManagerInsertError) as err:
-                LOGGER.debug("Error: %s", err)
+                logs_manager.insert_log(action=LogAction.EDIT, log_type=CmdbObjectLog.__name__, **log_data)
+            except ManagerInsertError as err:
+                LOGGER.error("ManagerInsertError: %s", err)
 
         except AccessDeniedError as err:
             LOGGER.error(err)
@@ -570,9 +572,10 @@ def update_object_state(public_id: int, request_user: UserModel):
             'comment': 'Active status has changed',
             'changes': change,
         }
-        log_manager.insert(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
-    except (CMDBError, LogManagerInsertError) as err:
-        LOGGER.error(err)
+
+        logs_manager.insert_log(action=LogAction.ACTIVE_CHANGE, log_type=CmdbObjectLog.__name__, **log_data)
+    except ManagerInsertError as err:
+        LOGGER.error("ManagerInsertError: %s", err)
 
     api_response = UpdateSingleResponse(result=found_object.__dict__, url=request.url, model=CmdbObject.MODEL)
     return api_response.make_response()
@@ -714,9 +717,9 @@ def delete_object(public_id: int, request_user: UserModel):
             'comment': 'Object was deleted',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
         }
-        log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-    except (CMDBError, LogManagerInsertError) as err:
-        LOGGER.error(err)
+        logs_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+    except ManagerInsertError as err:
+        LOGGER.error("ManagerInsertError: %s", err)
 
     return make_response(ack)
 
@@ -906,9 +909,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
                     'comment': 'Object was deleted',
                     'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
                 }
-                log_manager.insert(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
-            except (CMDBError, LogManagerInsertError) as err:
-                LOGGER.error(err)
+                logs_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
+            except ManagerInsertError as err:
+                LOGGER.error("ManagerInsertError: %s", err)
 
         return make_response({'successfully': ack})
 
