@@ -19,7 +19,7 @@ Definition of all routes for CmdbSectionTemplates
 import logging
 
 from datetime import datetime, timezone
-from flask import abort, current_app, request
+from flask import current_app, request
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.errors.manager import ManagerGetError, \
@@ -224,6 +224,6 @@ def delete_category(public_id: int):
         return ErrorBody(404, "Could not retrieve the child categeories from the database!").response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete the categeory: (E:{err})!").response()
+        return ErrorBody(400, f"Could not delete the categeory with the ID:{public_id}!").response()
 
     return api_response.make_response()
