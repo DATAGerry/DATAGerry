@@ -36,4 +36,6 @@ export class LogObjectTableActionsComponent {
    */
   @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
 
+  @Input() public isViewButtonEnable: boolean;
+
 }
