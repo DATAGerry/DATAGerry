@@ -26,7 +26,6 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { SectionTemplateService } from './services/section-template.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 
-import { RenderResult } from '../models/cmdb-render';
 import { APIGetMultiResponse, APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { SectionTemplateDeleteModalComponent } from './layout/modals/section-template-delete/section-template-delete-modal.component';
 import { CmdbSectionTemplate, Field } from '../models/cmdb-section-template';
