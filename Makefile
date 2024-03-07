@@ -140,15 +140,22 @@ targz: bin
 deb: bin
 	mkdir -p ${DIR_DEB_BUILD}
 	mkdir -p ${DIR_DEB_BUILD}/DEBIAN
+	mkdir -p ${DIR_DEB_BUILD}/usr/bin
+	mkdir -p ${DIR_DEB_BUILD}/usr/lib/systemd/system
+	mkdir -p ${DIR_DEB_BUILD}/usr/lib/tmpfiles.d
+	mkdir -p ${DIR_DEB_BUILD}/etc/datagerry
 	cp contrib/deb/control ${DIR_DEB_BUILD}/DEBIAN
-	sed -i 's/@@DG_BUILDVAR_VERSION@@/$(subst -,_,${BUILDVAR_VERSION})/g' ${DIR_DEB_BUILD}/DEBIAN/control
 	cp contrib/deb/postinst ${DIR_DEB_BUILD}/DEBIAN
 	cp contrib/deb/preinst ${DIR_DEB_BUILD}/DEBIAN
+	chmod 755 ${DIR_DEB_BUILD}/DEBIAN/*
 	cp ${DIR_BIN_BUILD}/datagerry ${DIR_DEB_BUILD}/usr/bin
 	cp contrib/systemd/datagerry.service ${DIR_DEB_BUILD}/usr/lib/systemd/system
 	cp etc/cmdb.conf ${DIR_DEB_BUILD}/etc/datagerry/
 	cp contrib/tmpfiles.d/datagerry.conf ${DIR_DEB_BUILD}/usr/lib/tmpfiles.d
-	${BIN_DEBBUILD} --build dg_${BUILDVAR_VERSION}
+	chmod 755 ${DIR_DEB_BUILD}/usr/*
+	chmod 755 ${DIR_DEB_BUILD}/etc/*
+	cd ${DIR_DEB_BUILD}
+	 ${BIN_DEBBUILD} --build ${DIR_DEB_BUILD}
 
 # create Docker image
 .PHONY: docker
