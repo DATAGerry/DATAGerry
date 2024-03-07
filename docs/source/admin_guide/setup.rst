@@ -1,18 +1,21 @@
 *****
 Setup
 *****
+This page contains a detailed overview on how to install DATAGERRY on different operating systems and plattforms.
+
+| 
+
+=======================================================================================================================
+
+| 
 
 Requirements
 ============
-
-.. note::
-    This section will be updated in the near future since some changes took place
-
 DATAGERRY has the following system requirements:
 
  * Linux Operating System
- * MongoDB 4.4+
- * RabbitMQ
+ * MongoDB 4.4+ (MongoDB 6.0 recommended)
+ * RabbitMQ (except the deb-packages)
 
 Although, DATAGERRY comes with an own webserver, we recomend Nginx as a reverse proxy for performance reasons.
 
@@ -21,14 +24,20 @@ There are several setup options for DATAGERRY, which are described in the sectio
  * Docker Image
  * RPM file (for RHEL/CentOS distributions)
  * tar.gz archive with setup script (for Debian/Ubuntu or other distributions)
+ * deb-package (for Debian)
 
 If you want to have a fast and easy start, use our Docker Image and docker-compose file.
 
+| 
 
-Docker Image
-============
+=======================================================================================================================
+
+| 
+
+Setup via Docker Image
+======================
 The fastest way for getting started with DATAGERRY is using Docker. We provide a docker-compose file, which creates
-four containers (DATAGERRY, MongoDB, RabbitMQ, Nginx). All data were stored in MongoDB using Docker volumes on the 
+four containers (DATAGERRY, MongoDB, RabbitMQ, Nginx). All data is stored in MongoDB using Docker volumes on the 
 Docker host system.
 
 To start, copy the following docker-compose.yml in a directory of your Docker host.
@@ -61,7 +70,7 @@ To access the DATAGERRY frontend, use the following parameters:
 
 .. code-block:: console
 
-    http://<<host> or https://<host>
+    http://<host> or https://<host>
     user: admin
     password: admin
 
@@ -74,14 +83,10 @@ latest
     an automatic upgrade to the next major release if one is available. For production, we recommend the <release> tag
     below.
 
-<release> (e.g. 1.0.1)
+<release> (e.g. 2.0.0)
     Every release has its own tag. So, if you want to use a specific version (or prevent your environment from automatic
-    upgrades, just use a specific version as a Docker tag.
+    upgrades) just use a specific version as a Docker tag.
 
-branches_<branch-name> (e.g. branches_development)
-    If you follow our development process and want to test a specific branch from our git repository, just use this tag.
-    Please keep in mind, that these things aren't released yet and a branch is a work-in-progress. So it can change at 
-    any time and break existing things. We don't recommend to use these images in production.
 
 To use a specific Docker tag, just replace the following line of the docker-compose.yml:
 
@@ -95,9 +100,14 @@ To use a specific Docker tag, just replace the following line of the docker-comp
     # example:
     image: becongmbh/datagerry:2.0.0
 
+| 
 
-RPM setup
-=========
+=======================================================================================================================
+
+| 
+
+Setup via RPM 
+=============
 
 For Red Hat Enterprise Linux (RHEL) or RHEL based systems like CentOS or Oracle Linux, we provide a RPM file for
 installing DATAGERRY.
@@ -107,7 +117,9 @@ The following RHEL/CentOS versions are supported and tested:
  * RHEL/CentOS 8
 
 
-Before we can install DATAGERRY, we need to install the required dependencies MongoDB and Rabbit MQ.
+Before you can install DATAGERRY, you need to install the required dependencies MongoDB and Rabbit MQ.
+
+=======================================================================================================================
 
 Setup MongoDB
 -------------
@@ -115,7 +127,7 @@ Setup MongoDB
 MongoDB 4.4+ is required as database for DATAGERRY.
 
 .. note::
-    The setup of MongoDB is described in detail on the MongoDB website: https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/
+    The setup of MongoDB is described in detail on the `MongoDB website https://docs.mongodb.com/manual/tutorial/install-mongodb-on-red-hat/`
     The following section is a quick install guide of MonogDB.
 
 To setup MongoDB, place the follwing file under /etc/yum.repos.d/mongodb.repo:
@@ -139,6 +151,7 @@ After that, install the mongodb-org package and start the server with SystemD:
     $ sudo systemctl enable mongod
     $ sudo systemctl start mongod
 
+=======================================================================================================================
 
 Setup RabbitMQ
 --------------
@@ -177,18 +190,20 @@ Now, RabbitMQ can be installed and started:
     $ sudo systemctl enable rabbitmq-server
     $ sudo systemctl start rabbitmq-server
 
+=======================================================================================================================
 
 Setup DATAGERRY
 ---------------
 
-If all requirements were installed, we'll can install the downloaded DATAGERRY RPM file:
+If all requirements were installed, you can install the downloaded DATAGERRY RPM file:
 
 .. code-block:: console
 
     $ sudo rpm -ivh DATAGERRY-<version>.x86_64.rpm
 
 
-To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
+To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file
+**/etc/datagerry/cmdb.conf**
 
 After that, activate and start DATAGERRY with Systemd:
 
@@ -211,9 +226,14 @@ To access the DATAGERRY frontend, use the following parameters:
     If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
     accessible.
 
+| 
 
-tar.gz archive setup
-====================
+=======================================================================================================================
+
+| 
+
+Setup via tar.gz archive
+========================
 For all non rpm based Linux distributions, we provide a tar.gz archive with a setup shell script. Systemd is a
 requirement for that setup. This should work on most distributions, and is tested with the following distributions:
 
@@ -223,27 +243,28 @@ requirement for that setup. This should work on most distributions, and is teste
 
 Before we can install DATAGERRY, we need to install the required dependencies MongoDB and Rabbit MQ.
 
+=======================================================================================================================
+
 Setup MongoDB
 -------------
+MongoDB 4.4+ (6.0 recommended) is required as database for DATAGERRY.
 
-MongoDB 4.4+ is required as database for DATAGERRY.
+Please follow the offical `MongoDB documentation <https://docs.mongodb.com/manual/administration/install-on-linux/>`_
+to setup MongoDB for your distribution.
 
-Please follow the offical `MongoDB documentation <https://docs.mongodb.com/manual/administration/install-on-linux/>` to
-setup MongoDB for your distribution.
-
+=======================================================================================================================
 
 Setup RabbitMQ
 --------------
-
 RabbitMQ 3.8+ is used as messaging bus between the processes of DATAGERRY.
 
-Please follow the offical `RabbitMQ documentation <https://www.rabbitmq.com/download.html#installation-guides>` to
+Please follow the offical `RabbitMQ documentation <https://www.rabbitmq.com/download.html#installation-guides>`_ to
 setup RabbitMQ for your distribution.
 
+=======================================================================================================================
 
 Setup DATAGERRY
 ---------------
-
 Extract the provided tar.gz archive and execute the setup script as root:
 
 .. code-block:: console
@@ -252,7 +273,8 @@ Extract the provided tar.gz archive and execute the setup script as root:
     $ cd datagerry
     $ sudo ./setup.sh
 
-To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file /etc/datagerry/cmdb.conf
+To change the parameters for connecting to MongoDB and RabbitMQ, edit the configuration file
+**/etc/datagerry/cmdb.conf**
 
 After that, activate and start DATAGERRY with Systemd:
 
@@ -271,10 +293,41 @@ To access the DATAGERRY frontend, use the following parameters:
     password: admin
 
 .. note::
-    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should ba
+    If you can't access the webfrontend of DATAGERRY, check the firewall settings of your server. Port 4000 should be
     accessible.
 
+| 
 
+=======================================================================================================================
+
+| 
+
+Setup via deb-package
+=====================
+The deb-package already contains RabbitMQ and you just need to install MongoDB. Follow the offical instructions from
+the `MongoDB-Homepage <https://www.mongodb.com/docs/v6.0/tutorial/install-mongodb-on-debian/>`_.
+
+The next step is to download the deb-package and install it via the following command (execute the command in the
+folder where the deb-package is).
+
+.. code-block:: console
+
+    apt install ./<deb-package-filename>
+
+
+To access the DATAGERRY frontend, use the following parameters:
+
+.. code-block:: console
+
+    http://<<host>:4000
+    user: admin
+    password: admin
+
+| 
+
+=======================================================================================================================
+
+| 
 
 Setting up Nginx as reverse proxy
 =================================
@@ -287,7 +340,11 @@ following example configuration for Nginx (nginx.conf):
 This will Nginx listen on port 80 (HTTP) and 443 (HTTPS) and create a redirect from HTTP to HTTPS. If someone access 
 *https://<host>/*, Nginx will contact *http://127.0.0.1:4000*, where DATAGERRY is listening.
 
+| 
 
+=======================================================================================================================
+
+| 
 
 Update DATAGERRY
 ================
