@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from cmdb.utils.error import CMDBError
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class AuthenticationError(CMDBError):
-
+    """TODO: document"""
     def __init__(self, provider_name: str, error=None):
         self.message = f'Could not authenticate via provider: {provider_name} - error message: {error}'
 
 
 class ProviderError(CMDBError):
-
+    """TODO: document"""
     def __init__(self, message: str):
         self.message = message
 
@@ -54,3 +55,4 @@ class GroupMappingError(ProviderError):
 
     def __init__(self, message: str):
         self.message = message
+        super().__init__(message)

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,16 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Error super class
 """
-
+from cmdb.utils.helpers import debug_print
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CMDBError(Exception):
+    """TODO: document"""
     def __init__(self):
-        super().__init__()
+        pass
 
     def __repr__(self):
-        from cmdb.utils.helpers import debug_print
-        return debug_print(self.message or self.msg)
+        return debug_print(self)

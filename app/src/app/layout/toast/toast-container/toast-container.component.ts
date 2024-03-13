@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -34,10 +34,7 @@ import {animate, state, style, transition, trigger} from '@angular/animations';
       transition(':enter', [
         style({opacity: 0}),
         animate(500)
-      ]),
-
-      transition(':leave',
-        animate('0.5s 3s', style({opacity: 0})))
+      ])
     ])
   ]
 })

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,10 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import Enum
 from json import loads
 from typing import NewType, List, Union
+# -------------------------------------------------------------------------------------------------------------------- #
 
 Parameter = NewType('Parameter', str)
 
@@ -35,11 +36,14 @@ class APIParameters:
         self.projection: dict = projection
         self.optional = optional
 
+
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "APIParameters":
+        """TODO: document"""
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
         return cls(Parameter(query_string), **optional)
+
 
     @classmethod
     def to_dict(cls, parameters: "APIParameters") -> dict:
@@ -50,6 +54,7 @@ class APIParameters:
         if parameters.projection:
             params.update({'projection': parameters.projection})
         return params
+
 
     def __repr__(self):
         return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'
@@ -81,7 +86,8 @@ class CollectionParameters(APIParameters):
         else:
             self.skip: int = (self.page - 1) * self.limit
         self.filter: Union[List[dict], dict] = filter or {}
-        super(CollectionParameters, self).__init__(query_string=query_string, **kwargs)
+        super().__init__(query_string=query_string, **kwargs)
+
 
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "CollectionParameters":
@@ -101,6 +107,7 @@ class CollectionParameters(APIParameters):
             optional['projection'] = loads(optional['projection'])
         return cls(Parameter(query_string), **optional)
 
+
     @classmethod
     def to_dict(cls, parameters: "CollectionParameters") -> dict:
         """Get the object as a dict"""
@@ -116,5 +123,22 @@ class CollectionParameters(APIParameters):
             params.update({'projection': parameters.projection})
         return params
 
+
+    @classmethod
+    def get_builder_params(cls, params: "CollectionParameters") -> dict:
+        """Extracts the attributes required for BuilderParameters"""
+        return {
+            'criteria': params.filter,
+            'limit': params.limit,
+            'sort': params.sort,
+            'order': params.order,
+            'skip': params.skip,
+        }
+
     def __repr__(self):
-        return f'Parameters: Query({self.query_string}),Filter({self.filter})  | Projection({self.projection}) |Optional({self.optional})'
+        return f"""
+                Parameters: Query({self.query_string}),
+                Filter({self.filter}),
+                Projection({self.projection}),
+                Optional({self.optional})
+                """

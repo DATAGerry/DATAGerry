@@ -1,87 +1,79 @@
 <ng-template #activeTemplate let-data="data">
-  <div class="text-center">
-    <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
-  </div>
+    <div class="text-center">
+        <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+    </div>
 </ng-template>
 
 <ng-template #userTemplate let-data="data">
-  <cmdb-user-compact [userID]="data"></cmdb-user-compact>
+    <cmdb-user-compact [userID]="data"></cmdb-user-compact>
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions [publicID]="item.object_information.object_id" [result]="item"
-                             [acl]="item.type_information.acl"
-                             (deleteObjectsEmitter)="onoDeleteWithObjects(item)"
-                             (deleteLocationsEmitter)="onDeleteWithLocations(item)"
-                             (deleteEmitter)="onObjectDelete(item)"></cmdb-object-table-actions>
+    <cmdb-object-table-actions
+        [publicID]="item.object_information.object_id"
+        [result]="item"
+        [acl]="item.type_information.acl"
+        (deleteObjectsEmitter)="onObjectDeleteWithObjects(item)"
+        (deleteLocationsEmitter)="onObjectDeleteWithLocations(item)"
+        (deleteEmitter)="onObjectDelete(item)"
+    ></cmdb-object-table-actions>
 </ng-template>
 
-<div class="row mb-3">
-  <div class="col-4">
-    <div class="card">
-      <cmdb-dashcard name="Objects"
-                     [numbers]=objectCount
-                     linkRoute="/framework/object/"
-                     icon="fa fa-cube"></cmdb-dashcard>
-      <div class="card-body">
-        <cmdb-charts chartType="bar"
-                     [dataLabels]="labelsObject"
-                     [dataItems]="itemsObject"
-                     [labelColors]="colorsObject"
-                     [chartOptions]="optionsObject"></cmdb-charts>
-      </div>
+    <div style="max-width: 99% !important;">
+        <div class="card">
+            <cmdb-dashcard
+                name="Objects"
+                [numbers]=objectCount
+                linkRoute="/framework/object/"
+                icon="fa fa-cube"
+            ></cmdb-dashcard>
+            <div class="card-body">
+                <cmdb-charts
+                    chartType="bar"
+                    [dataLabels]="labelsObject"
+                    [dataItems]="itemsObject"
+                    [labelColors]="colorsObject"
+                    [chartOptions]="optionsObject"
+                ></cmdb-charts>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="col-4">
-    <div class="card">
-      <cmdb-dashcard name="Types"
-                     [numbers]=typeCount
-                     linkRoute="/framework/type/"
-                     icon="fa fa-cubes"></cmdb-dashcard>
-      <div class="card-body">
-        <cmdb-charts chartType="pie"
-                     [dataLabels]="labelsCategory"
-                     [dataItems]="itemsCategory"
-                     [labelColors]="colorsCategory"></cmdb-charts>
-      </div>
-    </div>
-  </div>
-  <div class="col-4">
-    <div class="card">
-      <cmdb-dashcard name="Users"
-                     [numbers]=userCount
-                     linkRoute="/management/users"
-                     icon="fa fa-users"></cmdb-dashcard>
-      <div class="card-body">
-        <cmdb-charts chartType="doughnut"
-                     [dataLabels]="labelsGroup"
-                     [dataItems]="itemsGroup"
-                     [labelColors]="colorsGroup"></cmdb-charts>
-      </div>
-    </div>
-  </div>
-</div>
 <hr/>
 <ng-container *ngIf="newestObjects">
-  <h2>Newest objects</h2>
-  <cmdb-table [id]="'dashboard-newest-table'" [items]="newestObjects" [totalItems]="newestObjectsCount"
-              [loading]="newestLoading"
-              [columns]="newestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [loadingEnabled]="true"
-              [emptyMessage]="'No newest objects!'" [pageSizeEnabled]="false" [paginationEnabled]="true"
-              (pageChange)="onNewestPageChange($event)">
-  </cmdb-table>
+    <h2>Newest objects</h2>
+    <cmdb-table
+        [id]="'dashboard-newest-table'"
+        [items]="newestObjects"
+        [totalItems]="newestObjectsCount"
+        [loading]="newestLoading"
+        [columns]="newestTableColumns"
+        [sortable]="false"
+        [searchEnabled]="false"
+        [pageSize]="10"
+        [loadingEnabled]="true"
+        [emptyMessage]="'No newest objects!'"
+        [pageSizeEnabled]="false"
+        [paginationEnabled]="true"
+        (pageChange)="onNewestPageChange($event)"
+    ></cmdb-table>
 </ng-container>
 <hr/>
 <ng-container *ngIf="latestObjects">
-  <h2>Last modified objects</h2>
-  <cmdb-table [id]="'dashboard-latest-table'" [items]="latestObjects" [totalItems]="latestObjectsCount"
-              [loading]="latestLoading"
-              [columns]="latestTableColumns" [sortable]="false" [searchEnabled]="false" [pageSize]="10"
-              [loadingEnabled]="true"
-              [emptyMessage]="'No modified objects!'" [pageSizeEnabled]="false"
-              (pageChange)="onLatestPageChange($event)">
-  </cmdb-table>
+    <h2>Last modified objects</h2>
+    <cmdb-table
+        [id]="'dashboard-latest-table'"
+        [items]="latestObjects"
+        [totalItems]="latestObjectsCount"
+        [loading]="latestLoading"
+        [columns]="latestTableColumns"
+        [sortable]="false"
+        [searchEnabled]="false"
+        [pageSize]="10"
+        [loadingEnabled]="true"
+        [emptyMessage]="'No modified objects!'"
+        [pageSizeEnabled]="false"
+        (pageChange)="onLatestPageChange($event)"
+    ></cmdb-table>
 </ng-container>
 
 <ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 
 class DateSettingsDAO:
     """Regional Date Settings"""
@@ -29,13 +29,16 @@ class DateSettingsDAO:
         self.date_format = date_format
         self.timezone = timezone
 
+
     def get_id(self) -> str:
         """Get the database document identifier"""
         return self._id
 
+
     def get_format(self) -> str:
         """Get the current date format"""
         return self.date_format
+
 
     def get_timezone(self) -> str:
         """ Get the current timezone"""

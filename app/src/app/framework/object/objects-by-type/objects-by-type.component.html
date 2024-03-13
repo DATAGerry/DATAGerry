@@ -1,34 +1,64 @@
 <h1><i class="{{type?.render_meta?.icon}}"></i> {{type?.label}}</h1>
 <hr/>
 <div class="mt-2 mb-2">
-  <cmdb-object-table-head [type]="type" [selectedObjects]="selectedObjects" [selectedObjectsIDs]="selectedObjectsIDs"
-                          [formatList]="formatList" [totalResults]="totalResults"
-                          (manyObjectDeletes)="onManyObjectDeletes()" (fileExport)="exportingFiles($event)">
-  </cmdb-object-table-head>
+    <cmdb-object-table-head
+        [type]="type"
+        [selectedObjects]="selectedObjects"
+        [selectedObjectsIDs]="selectedObjectsIDs"
+        [formatList]="formatList"
+        [totalResults]="totalResults"
+        (manyObjectDeletes)="onManyObjectDeletes()"
+        (fileExport)="exportingFiles($event)"
+    ></cmdb-object-table-head>
 </div>
 
-<cmdb-table [items]="results" [totalItems]="totalResults" [columns]="columns" [sort]="sort" [toggleable]="true"
-            [page]="page" [rowClasses]="['align-middle']" [pageSize]="limit" [id]="id"
-            [tableStates]="tableStates" [selectEnabled]="true" [loading]="loading" [tableState]="tableState"
-            [emptyMessage]="'There are no objects for this type yet!'" [stateEnabled]="true"
-            [initialVisibleColumns]="initialVisibleColumns" [columnSearchEnabled]="true"
-            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()"
-            (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
-            (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (searchChange)="onSearchChange($event)" (columnSearchChange)="onColumnSearchChange($event)">
-</cmdb-table>
+<cmdb-table
+    [items]="results"
+    [totalItems]="totalResults"
+    [columns]="columns"
+    [sort]="sort"
+    [toggleable]="true"
+    [page]="page"
+    [rowClasses]="['align-middle']"
+    [pageSize]="limit"
+    [id]="id"
+    [tableStates]="tableStates"
+    [selectEnabled]="true"
+    [loading]="loading"
+    [tableState]="tableState"
+    [emptyMessage]="'There are no objects for this type yet!'"
+    [stateEnabled]="true"
+    [initialVisibleColumns]="initialVisibleColumns"
+    [columnSearchEnabled]="true"
+    (stateSelect)="onStateSelect($event)"
+    (stateReset)="onStateReset()"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)"
+    (selectedChange)="onSelectedChange($event)"
+    (searchChange)="onSearchChange($event)"
+    (columnSearchChange)="onColumnSearchChange($event)"
+    [isViewAndEditRequired]="true"
+></cmdb-table>
 
 <ng-template #activeTemplate let-data="data">
-  <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+    <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
 </ng-template>
 
 <ng-template #fieldTemplate let-data="data">
-  <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
+    <cmdb-render-element [mode]="mode" [data]="data.field" [value]="data.value"></cmdb-render-element>
 </ng-template>
 
 <ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>
 
 <ng-template #actionTemplate let-item="item">
-  <cmdb-object-table-actions *ngIf="type" [publicID]="item.object_information.object_id" [result]="item" [acl]="type?.acl"
-                             (deleteEmitter)="onObjectDelete($event)"></cmdb-object-table-actions>
+    <cmdb-object-table-actions
+        *ngIf="type"
+        [publicID]="item.object_information.object_id"
+        [result]="item"
+        [acl]="type?.acl"
+        (deleteEmitter)="onObjectDelete($event)"
+        (deleteObjectsEmitter)="onObjectDeleteWithObjects(item.object_information.object_id)"
+        (deleteLocationsEmitter)="onObjectDeleteWithLocations(item.object_information.object_id)"
+    ></cmdb-object-table-actions>
 </ng-template>

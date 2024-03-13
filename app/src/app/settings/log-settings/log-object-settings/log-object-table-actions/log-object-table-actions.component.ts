@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -35,5 +35,7 @@ export class LogObjectTableActionsComponent {
    * Emitter when element was deleted.
    */
   @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
+
+  @Input() public isViewButtonEnable: boolean;
 
 }

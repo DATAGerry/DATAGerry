@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,11 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from flask import request, abort
 
 from cmdb.framework.utils import Model
-from cmdb.manager.errors import ManagerGetError, ManagerIterationError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
@@ -26,6 +26,7 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
 from cmdb.user_management.models.right import _nameToLevel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 rights_blueprint = APIBlueprint('rights', __name__)
 
@@ -58,17 +59,17 @@ def get_rights(params: CollectionParameters):
             api_response = GetMultiResponse(right_manager.tree_to_json(right_tree), total=len(right_tree),
                                             params=params, url=request.url, model='Right-Tree', body=body)
             return api_response.make_response(pagination=False)
-        else:
-            iteration_result: IterationResult[BaseRight] = right_manager.iterate(
-                filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
-            rights = [BaseRight.to_dict(type) for type in iteration_result.results]
-            api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
-                                            url=request.url, model=Model('Right'), body=request.method == 'HEAD')
-            return api_response.make_response()
+
+        iteration_result: IterationResult[BaseRight] = right_manager.iterate(
+            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        rights = [BaseRight.to_dict(type) for type in iteration_result.results]
+        api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
+                                        url=request.url, model=Model('Right'), body=request.method == 'HEAD')
+        return api_response.make_response()
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
 
 @rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
@@ -94,7 +95,7 @@ def get_right(name: str):
     try:
         right = right_manager.get(name)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
                                      body=request.method == 'HEAD')
     return api_response.make_response()

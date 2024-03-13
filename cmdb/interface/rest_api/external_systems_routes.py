@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,8 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 import logging
 
 from flask import abort, jsonify, current_app
@@ -24,6 +23,7 @@ from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     exportd_manager = ExportdJobManagement(current_app.database_manager)
@@ -36,12 +36,14 @@ external_system = RootBlueprint('external_system', __name__, url_prefix='/extern
 @external_system.route('/', methods=['GET'])
 @login_required
 def get_external_system_list():
+    """TODO: document"""
     return make_response(get_module_classes('cmdb.exportd.externals.external_systems'))
 
 
 @external_system.route('/parameters/<string:class_external_system>', methods=['GET'])
 # @login_required
 def get_external_system_params(class_external_system):
+    """TODO: document"""
     try:
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.parameters
@@ -57,6 +59,7 @@ def get_external_system_params(class_external_system):
 @external_system.route('/variables/<string:class_external_system>', methods=['GET'])
 # @login_required
 def get_external_system_variables(class_external_system):
+    """TODO: document"""
     try:
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.variables

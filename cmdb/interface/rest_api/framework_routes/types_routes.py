@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,29 +13,39 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime, timezone
 
 from flask import abort, request, current_app
 
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.locations_manager import LocationsManager
+from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse, make_api_response
-from cmdb.framework.cmdb_location_manager import CmdbLocationManager
+
 from cmdb.framework.cmdb_location import CmdbLocation
-from cmdb.framework.managers.object_manager import ObjectManager
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
 
+type_manager = TypeManager(database_manager=current_app.database_manager)
+locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
+object_manager = ObjectManager(current_app.database_manager)
+deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
@@ -59,7 +69,6 @@ def get_types(params: TypeIterationParameters):
         ManagerGetError: If the collection could not be found.
 
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
     body = request.method == 'HEAD'
     view = params.active
     if view:
@@ -77,9 +86,9 @@ def get_types(params: TypeIterationParameters):
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=TypeModel.MODEL, body=body)
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -98,15 +107,12 @@ def get_type(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of a TypeModel.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
-
     try:
         type_ = type_manager.get(public_id)
-    except ManagerGetError as err:
-        return abort(404, err.message)
+    except ManagerGetError:
+        return abort(404)
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
-                                     model=TypeModel.MODEL, body=body)
+                                     model=TypeModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
 
 
@@ -127,7 +133,6 @@ def insert_type(data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new type and its public_id.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
     data.setdefault('creation_time', datetime.now(timezone.utc))
     possible_id = data.get('public_id', None)
     if possible_id:
@@ -142,9 +147,9 @@ def insert_type(data: dict):
         result_id: PublicID = type_manager.insert(data)
         raw_doc = type_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
                                         model=TypeModel.MODEL)
     return api_response.make_response(prefix='types')
@@ -168,23 +173,19 @@ def update_type(public_id: int, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated type.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
-    location_manager = CmdbLocationManager(current_app.database_manager, current_app.event_queue)
     try:
-
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
-
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
-    
+        return abort(400, err)
+
     # when types are updated, update all locations with relevant data from this type
     updated_type = type_manager.get(public_id)
-    locations_with_type = location_manager.get_locations_by_type(public_id)
+    locations_with_type = locations_manager.get_locations_by(type_id=public_id)
 
     data = {
         'type_label': updated_type.label,
@@ -192,8 +193,9 @@ def update_type(public_id: int, data: dict):
         'type_selectable': updated_type.selectable_as_parent
     }
 
+    location: CmdbLocation
     for location in locations_with_type:
-        location_manager._update(CmdbLocation.COLLECTION, location.public_id, data)
+        locations_manager.update({'public_id':location.public_id}, data)
 
     return api_response.make_response()
 
@@ -217,34 +219,24 @@ def delete_type(public_id: int):
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
-    
-    object_manager = ObjectManager(current_app.database_manager)
-
     try:
-        #objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
-        # deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
-        # deleted_type = type_manager.delete(public_id=PublicID(public_id))
-        # api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
         objects_count = object_manager.count_objects(public_id)
 
         if objects_count > 0:
             raise ManagerDeleteError('Delete not possible if objects of this type exist')
-        
-        from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-        deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
+
         objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
         deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
 
-
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except Exception as err:
         return abort(400, str(err))
+
     return api_response.make_response()
 
 
@@ -257,13 +249,9 @@ def count_objects(public_id: int):
     Args:
         public_id (int): public_id of the type
     """
-    object_manager = ObjectManager(current_app.database_manager)
-    #body = request.method == 'HEAD'
-
     try:
         objects_count = object_manager.count_objects(public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
-    # api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
-    #                                  model=TypeModel.MODEL, body=body)
+        return abort(404, err)
+
     return make_api_response(objects_count)

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from functools import wraps
 import logging
 
@@ -21,11 +21,12 @@ from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
 
 from cmdb.manager import ManagerGetError
-from cmdb.interface.api_parameters import CollectionParameters, APIParameters
+from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
 
     def __init__(self, *args, **kwargs):
-        super(APIBlueprint, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
 
     @staticmethod
     def protect(auth: bool = True, right: str = None, excepted: dict = None):
@@ -56,7 +57,7 @@ class APIBlueprint(Blueprint):
                             token = parse_authorization_header(request.headers['Authorization'])
                             try:
                                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
-                            except ValidationError as err:
+                            except ValidationError:
                                 return abort(401)
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
@@ -86,6 +87,7 @@ class APIBlueprint(Blueprint):
 
     @classmethod
     def validate(cls, schema=None):
+        """TODO: document"""
         validator = Validator(schema, purge_unknown=True)
 
         def _validate(f):
@@ -104,6 +106,7 @@ class APIBlueprint(Blueprint):
 
         return _validate
 
+
     @classmethod
     def parse_parameters(cls, parameters_class, **optional):
         """
@@ -115,7 +118,6 @@ class APIBlueprint(Blueprint):
         Returns:
             APIParameters: Wrapper class
         """
-
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
@@ -133,17 +135,20 @@ class APIBlueprint(Blueprint):
 
     @classmethod
     def parse_location_parameters(cls, **optional):
+        """TODO: document"""
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
-
+                """TODO: document"""
                 try:
-                    locationArgs = request.args.to_dict()
+                    location_args = request.args.to_dict()
                 except Exception as error:
                     return abort(400, str(error))
-                return f(locationArgs)
+                return f(location_args)
             return _decorate
         return _parse
+
+
 
     @classmethod
     def parse_collection_parameters(cls, **optional):
@@ -176,9 +181,8 @@ class APIBlueprint(Blueprint):
 
 class RootBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
-
     def __init__(self, *args, **kwargs):
-        super(RootBlueprint, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.nested_blueprints = []
 
     def register_nested_blueprint(self, nested_blueprint):
@@ -190,14 +194,15 @@ class RootBlueprint(Blueprint):
 
     @classmethod
     def parse_assistant_parameters(cls, **optional):
+        """TODO: document"""
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
                 try:
-                    locationArgs = request.args.to_dict()
+                    location_args = request.args.to_dict()
                 except Exception as error:
                     return abort(400, str(error))
-                return f(locationArgs)
+                return f(location_args)
             return _decorate
         return _parse
 
@@ -205,12 +210,13 @@ class RootBlueprint(Blueprint):
 class NestedBlueprint:
     """Default Blueprint class but with parent prefix route
     """
-
     def __init__(self, blueprint, url_prefix):
         self.blueprint = blueprint
         self.prefix = '/' + url_prefix
-        super(NestedBlueprint, self).__init__()
+        super().__init__()
+
 
     def route(self, rule, **options):
+        """TODO: document"""
         rule = self.prefix + rule
         return self.blueprint.route(rule, **options)

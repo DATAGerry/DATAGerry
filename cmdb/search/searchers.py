@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from typing import List
 
@@ -30,18 +30,21 @@ from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.framework.utils import PublicID
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class QuickSearchPipelineBuilder(PipelineBuilder):
+    """TODO: document"""
 
     def __init__(self, pipeline: Pipeline = None):
         """Init constructor
         Args:
             pipeline: preset a for defined pipeline
         """
-        super(QuickSearchPipelineBuilder, self).__init__(pipeline=pipeline)
+        super().__init__(pipeline=pipeline)
+
 
     def build(self, search_term, user: UserModel = None, permission: AccessControlPermission = None,
               active_flag: bool = False, *args, **kwargs) -> Pipeline:
@@ -86,6 +89,8 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 
 
 class SearchReferencesPipelineBuilder(PipelineBuilder):
+    """TODO: document"""
+
     def __init__(self, pipeline: Pipeline = None):
         """
         Init constructor load reference fields in runtime.
@@ -94,7 +99,8 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
         Args:
             pipeline: preset a for defined pipeline
         """
-        super(SearchReferencesPipelineBuilder, self).__init__(pipeline=pipeline)
+        super().__init__(pipeline=pipeline)
+
 
     def build(self, *args, **kwargs) -> Pipeline:
         # Load reference fields in runtime
@@ -137,13 +143,15 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
 
 
 class SearchPipelineBuilder(PipelineBuilder):
+    """TODO: document"""
 
     def __init__(self, pipeline: Pipeline = None):
         """Init constructor
         Args:
             pipeline: preset a for defined pipeline
         """
-        super(SearchPipelineBuilder, self).__init__(pipeline=pipeline)
+        super().__init__(pipeline=pipeline)
+
 
     def get_regex_pipes_values(self) -> List[str]:
         """Extract the regex pipes value from the pipeline"""
@@ -178,6 +186,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         return regex_pipes
 
+
     def build(self, params: List[SearchParam],
               obj_manager: CmdbObjectManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
@@ -194,7 +203,7 @@ class SearchPipelineBuilder(PipelineBuilder):
             self.add_pipe(self.match_({'active': {"$eq": True}}))
 
         # text builds
-        text_params = [_ for _ in params if _.search_form == 'text' or _.search_form == 'regex']
+        text_params = [_ for _ in params if _.search_form in ('text','regex')]
         for param in text_params:
             regex = self.regex_('fields.value', param.search_text, 'ims')
             self.add_pipe(self.match_(regex))
@@ -238,7 +247,8 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
     def __init__(self, manager: CmdbObjectManager):
         """Normally uses a instance of CmdbObjectManager as managers"""
-        super(SearcherFramework, self).__init__(manager=manager)
+        super().__init__(manager=manager)
+
 
     def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, permission: AccessControlPermission = None,
                   limit: int = Search.DEFAULT_LIMIT,
@@ -293,7 +303,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
         try:
             matches_regex = plb.get_regex_pipes_values()
         except Exception as err:
-            LOGGER.error(f'Extract regex pipes: {err}')
+            LOGGER.error('Extract regex pipes: %s',err)
             matches_regex = []
 
         if len(raw_search_result_list[0]['data']) > 0:
@@ -322,9 +332,8 @@ class SearcherFramework(Search[CmdbObjectManager]):
         )
         return search_result
 
+
     def search(self, query: Query, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
                skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
-        """
-        Uses mongodb find query system
-        """
+        """Uses mongodb find query system"""
         raise NotImplementedError()

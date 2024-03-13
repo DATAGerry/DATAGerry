@@ -1,7 +1,7 @@
 version: "3.0"
 services:
   nginx:
-    image: nethinks/nginx:latest
+    image: becongmbh/nginx:latest
     hostname: nginx
     ports:
     - "80:80"
@@ -17,7 +17,7 @@ services:
       - ./cert:/data/cert
 
   datagerry:
-    image: nethinks/datagerry:latest
+    image: becongmbh/datagerry:latest
     hostname: datagerry
     depends_on:
     - db
@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mongo:4.2-bionic
+    image: mongo:4.4.29
     hostname: db
     restart: unless-stopped
     volumes:

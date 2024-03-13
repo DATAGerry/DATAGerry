@@ -1,6 +1,6 @@
 
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -14,10 +14,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import pytest
 
 def pytest_addoption(parser):
+    """TODO: document"""
     parser.addoption(
         '--mongodb-host', action='store', default='localhost', help='Host of mongodb test instance'
     )
@@ -38,7 +39,8 @@ pytest_plugins = [
 
 @pytest.fixture(scope="session", autouse=True)
 def preset_database(database_manager, database_name):
-    from cmdb.database.errors.database_errors import DatabaseNotExists
+    """TODO: document"""
+    from cmdb.errors.database import DatabaseNotExists
     from cmdb.security.key.generator import KeyGenerator
     from cmdb.security.security import SecurityManager
     from cmdb.user_management.managers.group_manager import GroupManager

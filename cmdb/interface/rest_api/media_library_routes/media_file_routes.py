@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,8 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
+import logging
 
 from bson import json_util
 from flask import abort, request, current_app, Response
@@ -30,10 +31,12 @@ from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import 
     get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
     create_attachment_name
 
-
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
+# -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
+
 
 with current_app.app_context():
     media_file_manager = MediaFileManagement(current_app.database_manager)
@@ -128,6 +131,7 @@ def add_new_file(request_user: UserModel):
         return abort(500)
 
     api_response = InsertSingleResponse(raw=result, result_id=result['public_id'], url=request.url)
+
     return api_response.make_response(prefix='library')
 
 
@@ -186,8 +190,7 @@ def update_file(request_user: UserModel):
     except MediaFileManagerUpdateError:
         return abort(500)
 
-    resp = make_response(data)
-    return resp
+    return make_response(data)
 
 
 @media_file_blueprint.route('/<string:filename>/', methods=['GET'])
@@ -215,8 +218,9 @@ def get_file(filename: str):
             result = None
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
+
     return make_response(result)
-  
+
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
@@ -245,7 +249,7 @@ def download_file(filename: str):
         mimetype="application/octet-stream",
         headers={
             "Content-Disposition":
-                "attachment; filename=%s" % filename
+                f"attachment; filename={filename}"
         }
     )
 

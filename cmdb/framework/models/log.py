@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime
 from enum import Enum
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class LogAction(Enum):
+    """TODO: document"""
     CREATE = 0
     EDIT = 1
     ACTIVE_CHANGE = 2
@@ -32,9 +34,7 @@ class LogAction(Enum):
 
 
 class CmdbMetaLog(CmdbDAO):
-    """
-    CmdbLog
-    """
+    """CmdbMetaLog"""
     COLLECTION: Collection = 'framework.logs'
     MODEL: Model = 'CmdbLog'
 
@@ -43,10 +43,12 @@ class CmdbMetaLog(CmdbDAO):
         self.log_time: datetime = log_time
         self.action: LogAction = action
         self.action_name = action_name
-        super(CmdbMetaLog, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
 
 class CmdbObjectLog(CmdbMetaLog):
+    """TODO:document"""
+
     DEFAULT_VERSION: str = '1.0.0'
     SCHEMA: dict = {
         'object_id': {
@@ -99,6 +101,7 @@ class CmdbObjectLog(CmdbMetaLog):
 
     UNKNOWN_USER_STRING = 'Unknown'
 
+
     def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction, action_name: str,
                  object_id: int, version, user_id: int, user_name: str = None, changes: list = None,
                  comment: str = None, render_state=None):
@@ -109,8 +112,9 @@ class CmdbObjectLog(CmdbMetaLog):
         self.comment = comment
         self.changes = changes or []
         self.render_state = render_state
-        super(CmdbObjectLog, self).__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action,
+        super().__init__(public_id=public_id, log_type=log_type, log_time=log_time, action=action,
                                             action_name=action_name)
+
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObjectLog":
@@ -129,6 +133,7 @@ class CmdbObjectLog(CmdbMetaLog):
             action=data.get('action', None),
             action_name=data.get('action_name', None),
         )
+
 
     @classmethod
     def to_json(cls, instance: "CmdbObjectLog") -> dict:
@@ -150,8 +155,13 @@ class CmdbObjectLog(CmdbMetaLog):
 
 
 class CmdbLog:
+    """TODO: document"""
     REGISTERED_LOG_TYPE = {}
     DEFAULT_LOG_TYPE = CmdbObjectLog
+
+    def __new__(cls, *args, **kwargs):
+        return cls.__get_log_class(*args, **kwargs)(*args, **kwargs)
+
 
     @classmethod
     def __get_log_class(cls, *args, **kwargs):
@@ -161,13 +171,33 @@ class CmdbLog:
             log_class = cls.DEFAULT_LOG_TYPE
         return log_class
 
+
     @classmethod
     def register_log_type(cls, log_name, log_class):
+        """TODO: document"""
         cls.REGISTERED_LOG_TYPE[log_name] = log_class
+
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs):
+        """TODO: document"""
         return cls.__get_log_class(**data).from_data(data, *args, **kwargs)
 
-    def __new__(cls, *args, **kwargs):
-        return cls.__get_log_class(*args, **kwargs)(*args, **kwargs)
+
+    @classmethod
+    def to_json(cls, instance: "CmdbLog") -> dict:
+        """Convert a type instance to json conform data"""
+        return {
+            'public_id': instance.public_id,
+            'log_time': instance.log_time,
+            'log_type': instance.log_type,
+            'action': instance.action,
+            'object_id': instance.object_id,
+            'version': instance.version,
+            'user_name': instance.user_name,
+            'user_id': instance.user_id,
+            'render_state': instance.render_state,
+            'changes': instance.changes,
+            'comment': instance.comment,
+            'action_name': instance.action_name
+        }

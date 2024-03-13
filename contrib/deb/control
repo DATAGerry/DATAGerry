@@ -1,0 +1,8 @@
+Package: DataGerry
+Version: 2.1.0
+Architecture: all
+Essential: no
+Priority: optional
+Depends: rabbitmq-server
+Maintainer: becon GmbH
+Description: Open Source CMDB und Asset Management Tool

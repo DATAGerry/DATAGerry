@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,10 +11,11 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+
 /*!
  * Bootstrap v4.3.1 (https://getbootstrap.com/)
  * Copyright 2011-2019 The Bootstrap Authors
@@ -45,7 +46,7 @@
   --dark: #343a40;
   --cmdb-primary: #e94d18;
   --cmdb-secondary: #fbba00;
-  --nethinks: #6fb31a;
+  --beconbmgh: #6fb31a;
   --breakpoint-xs: 0;
   --breakpoint-sm: 576px;
   --breakpoint-md: 768px;
@@ -238,7 +239,8 @@ button,
 [type="button"],
 [type="reset"],
 [type="submit"] {
-  -webkit-appearance: button; }
+  -webkit-appearance: button;
+  appearance: button; }
 
 button:not(:disabled),
 [type="button"]:not(:disabled),
@@ -262,7 +264,8 @@ input[type="date"],
 input[type="time"],
 input[type="datetime-local"],
 input[type="month"] {
-  -webkit-appearance: listbox; }
+  -webkit-appearance: listbox; 
+  appearance: listbox;}
 
 textarea {
   overflow: auto;
@@ -294,7 +297,8 @@ progress {
 
 [type="search"] {
   outline-offset: -2px;
-  -webkit-appearance: none; }
+  -webkit-appearance: none; 
+  appearance: none;}
 
 [type="search"]::-webkit-search-decoration {
   -webkit-appearance: none; }
@@ -1260,21 +1264,21 @@ pre {
   .table-hover .table-cmdb-secondary:hover > th {
     background-color: #fee59f; }
 
-.table-nethinks,
-.table-nethinks > th,
-.table-nethinks > td {
+.table-beconbmgh,
+.table-beconbmgh > th,
+.table-beconbmgh> td {
   background-color: #d7eabf; }
 
-.table-nethinks th,
-.table-nethinks td,
-.table-nethinks thead th,
-.table-nethinks tbody + tbody {
+  .table-beconbmgh th,
+  .table-beconbmgh td,
+  .table-beconbmgh thead th,
+  .table-beconbmgh tbody + tbody {
   border-color: #b4d788; }
 
-.table-hover .table-nethinks:hover {
+.table-hover .table-beconbmgh:hover {
   background-color: #cbe4ac; }
-  .table-hover .table-nethinks:hover > td,
-  .table-hover .table-nethinks:hover > th {
+  .table-hover .table-beconbmgh:hover > td,
+  .table-hover .table-beconbmgh:hover > th {
     background-color: #cbe4ac; }
 
 .table-active,
@@ -1995,27 +1999,27 @@ fieldset:disabled a.btn {
     .show > .btn-cmdb-secondary.dropdown-toggle:focus {
       box-shadow: 0 0 0 0.2rem rgba(218, 164, 6, 0.5); }
 
-.btn-nethinks {
+.btn-becongmbh {
   color: #FFFFFF;
   background-color: #6fb31a;
   border-color: #6fb31a; }
-  .btn-nethinks:hover {
+  .btn-becongmbh:hover {
     color: #FFFFFF;
     background-color: #5a9215;
     border-color: #538614; }
-  .btn-nethinks:focus, .btn-nethinks.focus {
+  .btn-becongmbh:focus, .btn-becongmbh.focus {
     box-shadow: 0 0 0 0.2rem rgba(133, 190, 60, 0.5); }
-  .btn-nethinks.disabled, .btn-nethinks:disabled {
+  .btn-becongmbh.disabled, .btn-becongmbh:disabled {
     color: #FFFFFF;
     background-color: #6fb31a;
     border-color: #6fb31a; }
-  .btn-nethinks:not(:disabled):not(.disabled):active, .btn-nethinks:not(:disabled):not(.disabled).active,
-  .show > .btn-nethinks.dropdown-toggle {
+  .btn-becongmbh:not(:disabled):not(.disabled):active, .btn-becongmbh:not(:disabled):not(.disabled).active,
+  .show > .btn-becongmbh.dropdown-toggle {
     color: #FFFFFF;
     background-color: #538614;
     border-color: #4c7b12; }
-    .btn-nethinks:not(:disabled):not(.disabled):active:focus, .btn-nethinks:not(:disabled):not(.disabled).active:focus,
-    .show > .btn-nethinks.dropdown-toggle:focus {
+    .btn-becongmbh:not(:disabled):not(.disabled):active:focus, .btn-becongmbh:not(:disabled):not(.disabled).active:focus,
+    .show > .btn-becongmbh.dropdown-toggle:focus {
       box-shadow: 0 0 0 0.2rem rgba(133, 190, 60, 0.5); }
 
 .btn-outline-primary {
@@ -2228,25 +2232,25 @@ fieldset:disabled a.btn {
     .show > .btn-outline-cmdb-secondary.dropdown-toggle:focus {
       box-shadow: 0 0 0 0.2rem rgba(251, 186, 0, 0.5); }
 
-.btn-outline-nethinks {
+.btn-outline-becongmbh {
   color: #6fb31a;
   border-color: #6fb31a; }
-  .btn-outline-nethinks:hover {
+  .btn-outline-becongmbh:hover {
     color: #FFFFFF;
     background-color: #6fb31a;
     border-color: #6fb31a; }
-  .btn-outline-nethinks:focus, .btn-outline-nethinks.focus {
+  .btn-outline-becongmbh:focus, .btn-outline-becongmbh.focus {
     box-shadow: 0 0 0 0.2rem rgba(111, 179, 26, 0.5); }
-  .btn-outline-nethinks.disabled, .btn-outline-nethinks:disabled {
+  .btn-outline-becongmbh.disabled, .btn-outline-becongmbh:disabled {
     color: #6fb31a;
     background-color: transparent; }
-  .btn-outline-nethinks:not(:disabled):not(.disabled):active, .btn-outline-nethinks:not(:disabled):not(.disabled).active,
-  .show > .btn-outline-nethinks.dropdown-toggle {
+  .btn-outline-becongmbh:not(:disabled):not(.disabled):active, .btn-outline-becongmbh:not(:disabled):not(.disabled).active,
+  .show > .btn-outline-becongmbh.dropdown-toggle {
     color: #FFFFFF;
     background-color: #6fb31a;
     border-color: #6fb31a; }
-    .btn-outline-nethinks:not(:disabled):not(.disabled):active:focus, .btn-outline-nethinks:not(:disabled):not(.disabled).active:focus,
-    .show > .btn-outline-nethinks.dropdown-toggle:focus {
+    .btn-outline-becongmbh:not(:disabled):not(.disabled):active:focus, .btn-outline-becongmbh:not(:disabled):not(.disabled).active:focus,
+    .show > .btn-outline-becongmbh.dropdown-toggle:focus {
       box-shadow: 0 0 0 0.2rem rgba(111, 179, 26, 0.5); }
 
 .btn-link {
@@ -3782,13 +3786,13 @@ input[type="button"].btn-block {
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(251, 186, 0, 0.5); }
 
-.badge-nethinks {
+.badge-becongmbh {
   color: #FFFFFF;
   background-color: #6fb31a; }
-  a.badge-nethinks:hover, a.badge-nethinks:focus {
+  a.badge-becongmbh:hover, a.badge-becongmbh:focus {
     color: #FFFFFF;
     background-color: #538614; }
-  a.badge-nethinks:focus, a.badge-nethinks.focus {
+  a.badge-becongmbh:focus, a.badge-becongmbh.focus {
     outline: 0;
     box-shadow: 0 0 0 0.2rem rgba(111, 179, 26, 0.5); }
 
@@ -3918,13 +3922,13 @@ input[type="button"].btn-block {
   .alert-cmdb-secondary .alert-link {
     color: #503b00; }
 
-.alert-nethinks {
+.alert-becongmbh {
   color: #3a5d0e;
   background-color: #e2f0d1;
   border-color: #d7eabf; }
-  .alert-nethinks hr {
+  .alert-becongmbh hr {
     border-top-color: #cbe4ac; }
-  .alert-nethinks .alert-link {
+  .alert-becongmbh .alert-link {
     color: #1e3107; }
 
 @keyframes progress-bar-stripes {
@@ -4217,13 +4221,13 @@ input[type="button"].btn-block {
     background-color: #836100;
     border-color: #836100; }
 
-.list-group-item-nethinks {
+.list-group-item-becongmbh {
   color: #3a5d0e;
   background-color: #d7eabf; }
-  .list-group-item-nethinks.list-group-item-action:hover, .list-group-item-nethinks.list-group-item-action:focus {
+  .list-group-item-becongmbh.list-group-item-action:hover, .list-group-item-becongmbh.list-group-item-action:focus {
     color: #3a5d0e;
     background-color: #cbe4ac; }
-  .list-group-item-nethinks.list-group-item-action.active {
+  .list-group-item-becongmbh.list-group-item-action.active {
     color: #FFFFFF;
     background-color: #3a5d0e;
     border-color: #3a5d0e; }
@@ -4926,12 +4930,12 @@ button.bg-cmdb-secondary:hover,
 button.bg-cmdb-secondary:focus {
   background-color: #c89400 !important; }
 
-.bg-nethinks {
+.bg-becongmbh {
   background-color: #6fb31a !important; }
 
-a.bg-nethinks:hover, a.bg-nethinks:focus,
-button.bg-nethinks:hover,
-button.bg-nethinks:focus {
+a.bg-becongmbh:hover, a.bg-becongmbh:focus,
+button.bg-becongmbh:hover,
+button.bg-becongmbh:focus {
   background-color: #538614 !important; }
 
 .bg-white {
@@ -5000,7 +5004,7 @@ button.bg-nethinks:focus {
 .border-cmdb-secondary {
   border-color: #fbba00 !important; }
 
-.border-nethinks {
+.border-becongmbh {
   border-color: #6fb31a !important; }
 
 .border-white {
@@ -7265,10 +7269,10 @@ a.text-cmdb-primary:hover, a.text-cmdb-primary:focus {
 a.text-cmdb-secondary:hover, a.text-cmdb-secondary:focus {
   color: #af8100 !important; }
 
-.text-nethinks {
+.text-becongmbh {
   color: #6fb31a !important; }
 
-a.text-nethinks:hover, a.text-nethinks:focus {
+a.text-becongmbh:hover, a.text-becongmbh:focus {
   color: #467010 !important; }
 
 .text-body {
@@ -7431,14 +7435,14 @@ blockquote {
   display: flex;
   width: 100%; }
   #document #sidebar {
-    background: #212529;
+    background: #ebe1ca;
     width: 300px;
     min-height: 100vh; }
     #document #sidebar .sidebar-header {
       background: #e94d18;
       padding: 20px; }
   #document .documentwrapper {
-    padding: 20px;
+    padding: 40px;
     min-height: 100vh;
     width: calc(100% - 300px); }
 

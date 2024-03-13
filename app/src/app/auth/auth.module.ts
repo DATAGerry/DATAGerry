@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,21 +11,24 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { LoginComponent } from './login.component';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { InlineSVGModule } from 'ng-inline-svg';
-import { PermissionLinkDirective } from './directives/permission-link.directive';
-import { PermissionGuard } from './guards/permission.guard';
-import { SessionTimeoutNotificationModalComponent } from './modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
+
 import { SessionTimeoutService } from './services/session-timeout.service';
+
+import { PermissionLinkDirective } from './directives/permission-link.directive';
+
+import { PermissionGuard } from './guards/permission.guard';
+
+import { LoginComponent } from './login.component';
+import { SessionTimeoutNotificationModalComponent } from './modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
   declarations: [LoginComponent, PermissionLinkDirective, SessionTimeoutNotificationModalComponent],
@@ -37,7 +40,6 @@ import { SessionTimeoutService } from './services/session-timeout.service';
     FormsModule,
     RouterModule,
     ReactiveFormsModule,
-    InlineSVGModule,
   ],
   providers: [
     PermissionGuard,

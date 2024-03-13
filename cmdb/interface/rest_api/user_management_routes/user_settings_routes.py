@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,6 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 from typing import List
 
 from flask import current_app, abort, request
@@ -23,6 +24,7 @@ from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSi
 from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
 from cmdb.user_management.managers.setting_manager import UserSettingsManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 user_settings_blueprint = APIBlueprint('user_settings', __name__)
 
@@ -51,7 +53,7 @@ def get_user_settings(user_id: int):
         api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,
                                        body=request.method == 'HEAD')
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -79,7 +81,7 @@ def get_user_setting(user_id: int, resource: str):
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
                                          model=UserSettingModel.MODEL, body=request.method == 'HEAD')
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -106,9 +108,9 @@ def insert_setting(user_id: int, data: dict):
         setting: UserSettingModel = settings_manager.get_user_setting(user_id=user_id,
                                                                       resource=data.get('resource'))
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.resource,
                                         url=request.url, model=UserSettingModel.MODEL)
     return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
@@ -138,9 +140,9 @@ def update_setting(user_id: int, resource: str, data: dict):
         settings_manager.update(user_id=user_id, resource=resource, setting=setting)
         api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return api_response.make_response()
 
@@ -166,7 +168,7 @@ def delete_setting(user_id: int, resource: str):
         deleted_setting = settings_manager.delete(user_id=user_id, resource=resource)
         api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()

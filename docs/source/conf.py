@@ -22,7 +22,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 # -- Project information -----------------------------------------------------
 
 project = 'DATAGERRY'
-copyright = '2023, becon GmbH'
+copyright = '2024, becon GmbH'
 author = 'becon GmbH'
 
 # The short X.Y version

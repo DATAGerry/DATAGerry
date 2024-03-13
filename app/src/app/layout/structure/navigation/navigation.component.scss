@@ -22,7 +22,7 @@ $navbar-dropdown-padding: 0.3rem 0.8rem;
 $navbar-dropdown-header-color: $white;
 $navbar-dropdown-header-background: theme-color('primary');
 
-#navbar-search-bar{
+#navbar-search-bar {
   padding-right: 1rem;
 }
 
@@ -92,10 +92,38 @@ $navbar-dropdown-header-background: theme-color('primary');
           color: $white;
         }
 
-        i, svg {
+        i,
+        svg {
           margin-right: 10px;
         }
       }
+    }
+  }
+
+  .nav-1,
+  .nav-2,
+  .nav-3 {
+    margin: 3px;
+
+
+    & a.nav-link {
+      padding: 0;
+      margin: 0 5px;
+    }
+
+    & p {
+      font-size: 12px;
+      margin: 0;
+      color: #999999;
+    }
+
+    &:hover .hover-trigger:hover,
+    &:hover p {
+      color: #212529;
+    }
+
+    & p:hover {
+      color: #999999 !important;
     }
   }
 
@@ -171,7 +199,7 @@ $navbar-dropdown-header-background: theme-color('primary');
       line-height: initial;
     }
 
-    .dropdown-icon-item:hover{
+    .dropdown-icon-item:hover {
       cursor: pointer;
     }
 
@@ -195,8 +223,9 @@ $navbar-dropdown-header-background: theme-color('primary');
     .container-content {
       border-bottom: 1px solid darken(white, 40%);
     }
+
     .dropdown-lg {
-      width: 220px!important;
+      width: 220px !important;
     }
   }
 }
@@ -206,18 +235,25 @@ $navbar-dropdown-header-background: theme-color('primary');
     .nav-user {
       padding: 0 !important;
       text-align: left !important;
+
       .account-user-name,
       .account-position {
-        display: none!important;
+        display: none !important;
       }
+
       .account-user-avatar {
-        top: 8px!important;
-        left: 3px!important;
+        top: 8px !important;
+        left: 3px !important;
       }
+
       .account-user-avatar img {
-        height: 22px!important;
-        width: 22px!important;
+        height: 22px !important;
+        width: 22px !important;
       }
     }
   }
+}
+
+.hover-trigger:hover {
+  color: #212529;
 }

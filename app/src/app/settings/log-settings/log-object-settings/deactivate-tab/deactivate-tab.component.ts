@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -18,13 +18,12 @@
 
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output, TemplateRef, ViewChild } from '@angular/core';
 import { CmdbLog } from '../../../../framework/models/cmdb-log';
-import { Column, Sort, SortDirection, TableState, TableStatePayload} from '../../../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../../../layout/table/table.types';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { LogService } from '../../../../framework/services/log.service';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { DatePipe } from '@angular/common';
 import { TableComponent } from '../../../../layout/table/table.component';
-import { BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UserSetting } from '../../../../management/user-settings/models/user-setting';
@@ -32,8 +31,6 @@ import {
   convertResourceURL,
   UserSettingsService
 } from '../../../../management/user-settings/services/user-settings.service';
-import { FileSaverService } from 'ngx-filesaver';
-import { FileService } from '../../../../export/export.service';
 import { UserSettingsDBService } from '../../../../management/user-settings/services/user-settings-db.service';
 
 
@@ -57,15 +54,15 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
    */
   @ViewChild(TableComponent) objectsTableComponent: TableComponent<CmdbLog>;
 
-  @ViewChild('dateTemplate', {static: true}) dateTemplate: TemplateRef<any>;
+  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
-  @ViewChild('actionTemplate', {static: true}) actionTemplate: TemplateRef<any>;
+  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
-  @ViewChild('dataTemplate', {static: true}) dataTemplate: TemplateRef<any>;
+  @ViewChild('dataTemplate', { static: true }) dataTemplate: TemplateRef<any>;
 
-  @ViewChild('changeTemplate', {static: true}) changeTemplate: TemplateRef<any>;
+  @ViewChild('changeTemplate', { static: true }) changeTemplate: TemplateRef<any>;
 
-  @ViewChild('userTemplate', {static: true}) userTemplate: TemplateRef<any>;
+  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
 
   @Input() set reloadLogs(value: boolean) {
     if (value) {
@@ -80,7 +77,7 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
 
   public columns: Array<Column>;
 
-  public sort: Sort = { name: 'date', order: SortDirection.DESCENDING } as Sort;
+  public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
 
   public selectedLogIDs: Array<number> = [];
 
@@ -93,7 +90,7 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
   public total: number = 0;
   public loading: boolean = false;
 
-  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1};
+  public apiParameters: CollectionParameters = { limit: 10, sort: 'log_time', order: -1, page: 1 };
 
   /**
    * The Id used for the table
@@ -108,17 +105,18 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
     return this.tableStateSubject.getValue() as TableState;
   }
 
-  constructor(private logService: LogService, private datePipe: DatePipe,
-              private fileSaverService: FileSaverService, private fileService: FileService,
-              private route: ActivatedRoute, private router: Router,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+  constructor(private logService: LogService,
+    private route: ActivatedRoute, private router: Router,
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+    private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
           .find(payloads => payloads.id === this.id);
-        this.tableStates = userSettingPayloads.tableStates;
-        this.tableStateSubject.next(userSettingPayloads.currentState);
+        if (userSettingPayloads) {
+          this.tableStates = userSettingPayloads.tableStates;
+          this.tableStateSubject.next(userSettingPayloads.currentState);
+        }
       } else {
         this.tableStates = [];
         this.tableStateSubject.next(undefined);
@@ -140,12 +138,12 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
 
   private loadDeActivated() {
     const filter = JSON.stringify(this.filterBuilder());
-    this.apiParameters = {filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page};
+    this.apiParameters = { filter, limit: this.limit, sort: this.sort.name, order: this.sort.order, page: this.page };
     this.logService.getLogsWithNotExistingObject(this.apiParameters).pipe(takeUntil(this.subscriber))
       .subscribe((apiResponse: APIGetMultiResponse<CmdbLog>) => {
         this.deActiveLogList = apiResponse.results;
         this.total = apiResponse.total;
-    });
+      });
   }
 
   /**
@@ -160,7 +158,7 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
   }
 
   private resetCollectionParameters(): void {
-    this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1};
+    this.apiParameters = { limit: 10, sort: 'date', order: -1, page: 1 };
   }
 
   private setColumns(): void {
@@ -313,9 +311,9 @@ export class DeactivateTabComponent implements OnInit, OnDestroy {
           public_id: { $toString: '$public_id' }
         }
       });
-      query.push({ $match: { $and: [{log_type: 'CmdbObjectLog'}, {$or: or}]}});
+      query.push({ $match: { $and: [{ log_type: 'CmdbObjectLog' }, { $or: or }] } });
     } else {
-      query.push({$match: {log_type: 'CmdbObjectLog'}});
+      query.push({ $match: { log_type: 'CmdbObjectLog' } });
     }
     return query;
   }

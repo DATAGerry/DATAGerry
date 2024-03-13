@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,102 +13,138 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""
+Definition of all routes for object links
+"""
+import logging
 from flask import abort, request, current_app
 
-from cmdb.framework.models.link import ObjectLinkModel
-from cmdb.framework.managers.object_link_manager import ObjectLinkManager
-from cmdb.framework.results import IterationResult
-from cmdb.framework.utils import PublicID
-from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetSingleResponse, DeleteSingleResponse, InsertSingleResponse, GetMultiResponse
 from cmdb.interface.route_utils import insert_request_user
+
+from cmdb.manager.object_links_manager import ObjectLinksManager
+
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+
+from cmdb.framework.models.link import ObjectLinkModel
+from cmdb.framework.results import IterationResult
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.response import DeleteSingleResponse,\
+                                    InsertSingleResponse,\
+                                    GetMultiResponse,\
+                                    ErrorBody
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.manager.errors import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
+from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 links_blueprint = APIBlueprint('links', __name__)
 
+LOGGER = logging.getLogger(__name__)
 
-@links_blueprint.route('/', methods=['GET', 'HEAD'])
-@links_blueprint.protect(auth=True, right='base.framework.object.view')
-@links_blueprint.parse_collection_parameters()
-@insert_request_user
-def get_links(params: CollectionParameters, request_user: UserModel):
-    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
+object_links_manager = ObjectLinksManager(current_app.database_manager, current_app.event_queue)
 
-    try:
-        iteration_result: IterationResult[ObjectLinkModel] = link_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order,
-            user=request_user, permission=AccessControlPermission.READ)
-        types = [ObjectLinkModel.to_json(type) for type in iteration_result.results]
-        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=ObjectLinkModel.MODEL, body=body)
-    except ManagerIterationError as err:
-        return abort(400, err.message)
-    except ManagerGetError as err:
-        return abort(404, err.message)
-    return api_response.make_response()
-
-
-@links_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
-@links_blueprint.protect(auth=True, right='base.framework.object.view')
-@insert_request_user
-def get_link(public_id: int, request_user: UserModel):
-    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
-    try:
-        link = link_manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
-    except ManagerGetError as err:
-        return abort(404, err.message)
-    except AccessDeniedError as err:
-        return abort(403, err.message)
-    api_response = GetSingleResponse(ObjectLinkModel.to_json(link), url=request.url,
-                                     model=ObjectLinkModel.MODEL, body=body)
-    return api_response.make_response()
-
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @links_blueprint.route('/', methods=['POST'])
 @links_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
 def insert_link(request_user: UserModel):
-    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
+    """
+    Creates a new object link in the database
+
+    Args:
+        request_user (UserModel): User requesting this operation
+    Returns:
+        InsertSingleResponse: Object containing the created public_id of the new object link
+    """
     data = request.json
 
     try:
-        result_id = link_manager.insert(data, user=request_user, permission=AccessControlPermission.CREATE)
-        raw_doc = link_manager.get(public_id=result_id)
-    except (ManagerGetError, ManagerInsertError) as err:
-        return abort(400, err.message)
+        result_id = object_links_manager.insert_object_link(data, request_user, AccessControlPermission.CREATE)
+        raw_doc = object_links_manager.get_link(result_id, request_user, AccessControlPermission.CREATE)
+    except ManagerInsertError as err:
+        LOGGER.debug("ManagerIterationError: %s", err)
+        return ErrorBody(400, "Could not create the ObjectLink!").response()
+    except ManagerGetError as err:
+        LOGGER.debug("ManagerGetError: %s", err)
+        return ErrorBody(400, "Could not retrieve the created ObjectLink!").response()
     except AccessDeniedError as err:
-        return abort(403, err.message)
-    api_response = InsertSingleResponse(result_id=result_id, raw=ObjectLinkModel.to_json(raw_doc), url=request.url,
-                                        model=ObjectLinkModel.MODEL)
+        LOGGER.debug("AccessDeniedError: %s", err)
+        return ErrorBody(403, "No permission to create an ObjectLink!").response()
+
+    api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
+                                        result_id,
+                                        request.url,
+                                        ObjectLinkModel.MODEL)
+
     return api_response.make_response(prefix='objects/links')
 
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
-@links_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
-@links_blueprint.protect(auth=True, right='base.framework.object.edit')
-def update_link(public_id: int):
-    return abort(501, 'Links must could not be changed!')
+@links_blueprint.route('/', methods=['GET', 'HEAD'])
+@links_blueprint.protect(auth=True, right='base.framework.object.view')
+@links_blueprint.parse_collection_parameters()
+def get_links(params: CollectionParameters):
+    """
+    Retrieves all object links with given parameters
 
+    Args:
+        params (CollectionParameters): Filter for the request
+        request_user (UserModel): User making the request
+    Returns:
+        GetMultiResponse: Retrived object links from db
+    """
+    try:
+        builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
+        iteration_result: IterationResult[ObjectLinkModel] = object_links_manager.iterate(builder_params)
+
+        object_links = [ObjectLinkModel.to_json(object_link) for object_link in iteration_result.results]
+
+        api_response = GetMultiResponse(object_links,
+                                        iteration_result.total,
+                                        params,
+                                        request.url,
+                                        ObjectLinkModel.MODEL,
+                                        request.method == 'HEAD')
+
+    except ManagerIterationError as err:
+        return abort(400, err)
+    except ManagerGetError as err:
+        return abort(404, err)
+
+    return api_response.make_response()
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @links_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @links_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
 def delete_link(public_id: int, request_user: UserModel):
-    link_manager = ObjectLinkManager(database_manager=current_app.database_manager)
+    """
+    Deletes an object link with the given public_id
+
+    Args:
+        public_id (int): public_id of the object_link
+        request_user (UserModel): User requesting this operation
+    Returns:
+        DeleteSingleResponse: with the deleted object link
+    """
     try:
-        deleted_type = link_manager.delete(public_id=PublicID(public_id), user=request_user,
-                                           permission=AccessControlPermission.DELETE)
-        api_response = DeleteSingleResponse(raw=ObjectLinkModel.to_json(deleted_type), model=ObjectLinkModel.MODEL)
+        deleted_link = object_links_manager.delete_object_link(public_id, request_user, AccessControlPermission.DELETE)
+
+        api_response = DeleteSingleResponse(raw=deleted_link, model=ObjectLinkModel.MODEL)
+
     except ManagerGetError as err:
-        return abort(404, err.message)
+        LOGGER.debug("ManagerGetError: %s", err)
+        return ErrorBody(404, "Could not retrieve the ObjectLink which should be deleted!").response()
     except ManagerDeleteError as err:
-        return abort(400, err.message)
+        LOGGER.debug("ManagerDeleteError: %s", err)
+        return ErrorBody(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
     except AccessDeniedError as err:
-        return abort(403, err.message)
+        LOGGER.debug("AccessDeniedError: %s", err)
+        return ErrorBody(403, "No permission to delete an ObjectLink!").response()
+
     return api_response.make_response()

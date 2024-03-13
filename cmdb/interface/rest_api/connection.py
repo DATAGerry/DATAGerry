@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from flask import current_app
 
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 
 connection_routes = RootBlueprint('connection_routes', __name__)
@@ -32,6 +32,7 @@ with current_app.app_context():
 
 @connection_routes.route('/')
 def connection_response():
+    """TODO: document"""
     from cmdb import __title__, __version__
     resp = {
         'title': __title__,

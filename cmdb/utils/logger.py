@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,15 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Logging module
 """
-import logging.config
-import logging.handlers
 import os
-import datetime
 import multiprocessing
+import pathlib
+
+import cmdb
+# -------------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
 LOGLEVELS = {
@@ -33,6 +33,7 @@ LOGLEVELS = {
     "CRITICAL": 50
 }
 
+
 def get_log_level(minlevel=None):
     """
     loads logger configuration from config file
@@ -40,8 +41,6 @@ def get_log_level(minlevel=None):
     Returns:
         config level
     """
-    import cmdb
-
     # set default loglevel to WARNING
     loglevel = "WARNING"
 
@@ -65,8 +64,6 @@ def get_logging_conf():
     Returns:
         instance of logging.Logger
     """
-    import pathlib
-
     pathlib.Path(DEFAULT_LOG_DIR).mkdir(parents=True, exist_ok=True)
 
     # get current process name
@@ -83,21 +80,21 @@ def get_logging_conf():
             'file_daemon': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': "{}{}.log".format(DEFAULT_LOG_DIR, proc_name),
+                'filename': f"{DEFAULT_LOG_DIR}{proc_name}.log",
                 'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
                 'backupCount': 4
             },
             'file_web_access': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': "{}webserver.access.log".format(DEFAULT_LOG_DIR),
+                'filename': f"{DEFAULT_LOG_DIR}webserver.access.log",
                 'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
                 'backupCount': 4
             },
             'file_web_error': {
                 'class': 'logging.handlers.RotatingFileHandler',
                 'formatter': 'generic',
-                'filename': "{}webserver.error.log".format(DEFAULT_LOG_DIR),
+                'filename': f"{DEFAULT_LOG_DIR}webserver.error.log",
                 'maxBytes': 10 * 1024 * 1024,  # 10 MBytes
                 'backupCount': 4
             }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,50 +13,44 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Different wrapper functions for interface module
 """
 import logging
 import warnings
 import inspect
-
-import cmdb
 from functools import wraps
 
-string_types = (type(b''), type(u''))
+import cmdb
+# -------------------------------------------------------------------------------------------------------------------- #
 
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+string_types = (type(b''), type(''))
 
 LOGGER = logging.getLogger(__name__)
 
 
 def deprecated(message):
     """
-        This is a decorator which can be used to mark functions as deprecated.
-        It will result in a warning being emitted when the function is used.
-        The `message` argument must be an instance of :class:`basestring`
-        (:class:`str` in python 3) For example::
+    This is a decorator which can be used to mark functions as deprecated.
+    It will result in a warning being emitted when the function is used.
+    The `message` argument must be an instance of :class:`basestring`
+    (:class:`str` in python 3) For example::
 
-            # The @deprecated is used with a 'message'.
-            @deprecated("please, use another function")
-            def old_function(x, y):
+        # The @deprecated is used with a 'message'.
+        @deprecated("please, use another function")
+        def old_function(x, y):
+            pass
+
+        # The @deprecated is used without any 'message'.
+        @deprecated
+        def old_function(x, y):
+            pass
+
+        # The @deprecated is used for class.
+        @deprecated
+        def OldClass(object):
                 pass
-
-            # The @deprecated is used without any 'message'.
-            @deprecated
-            def old_function(x, y):
-                pass
-
-            # The @deprecated is used for class.
-            @deprecated
-            def OldClass(object):
-                 pass
     """
-
     if cmdb.__MODE__ == 'DEBUG':
         if isinstance(message, string_types):
             def deprecated_decorator(func1):
@@ -78,7 +72,7 @@ def deprecated(message):
 
             return deprecated_decorator
 
-        elif inspect.isclass(message) or inspect.isfunction(message):
+        if inspect.isclass(message) or inspect.isfunction(message):
             warning2 = "Call to deprecated class {name}." \
                 if inspect.isclass(message) else "Call to deprecated function {name}."
 
@@ -94,35 +88,10 @@ def deprecated(message):
 
             return deprecated_func2
 
+
     @wraps(message)
     def _deprecated(*args, **kwargs):
-        LOGGER.debug(f'{message} is likely to be deprecated soon!')
+        LOGGER.debug('%s is likely to be deprecated soon!',message)
         return message(*args, **kwargs)
 
     return _deprecated
-
-
-def timing(msg=None):
-    """
-    Time wrap function - Measures time of function duration
-    Args:
-        msg: output message
-
-    Returns:
-        wrap function
-    """
-
-    def _timing(f):
-        @wraps(f)
-        def wrap(*args, **kwargs):
-            import logging
-            import time
-            time1 = time.time()
-            ret = f(*args, **kwargs)
-            time2 = time.time()
-            logging.getLogger(__name__).debug(f'{msg} took {(time2 - time1) * 1000.0} MS')
-            return ret
-
-        return wrap
-
-    return _timing

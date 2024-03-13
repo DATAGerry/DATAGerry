@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
@@ -28,6 +27,7 @@ from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.user_manager import UserManager
 from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.rights import __all__ as rights
+# -------------------------------------------------------------------------------------------------------------------- #
 
 # TODO: Refactor to use with dependency injection
 

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,13 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """Basic Authentication Module"""
-
 import logging
-from typing import List, ClassVar
+from typing import List, Type
 
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
     AuthenticationError
@@ -31,6 +29,7 @@ from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.security import SecurityManager
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager, UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
@@ -64,6 +63,7 @@ class AuthModule:
         self.__group_manager = group_manager
         self.__security_manager = security_manager
 
+
     @staticmethod
     def __init_settings(auth_settings_values: dict) -> AuthSettingsDAO:
         """Merge default values with database entries"""
@@ -80,11 +80,11 @@ class AuthModule:
                         **auth_settings_values['providers'][provider_index]['config']).__dict__
                 except Exception as err:
                     LOGGER.error(
-                        f'Error while parsing auth provider settings for: {provider.get_name()}: {err} \n Fallback to default values!')
-                    auth_settings_values['providers'][provider_index][
-                        'config'] = provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
+                        'Error while parsing auth provider settings for: %s: %s\n Fallback to default values!',provider.get_name(),err)
+                    auth_settings_values['providers'][provider_index]['config'] = provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
 
         return AuthSettingsDAO(**auth_settings_values)
+
 
     @classmethod
     def register_provider(cls, provider: AuthenticationProvider) -> AuthenticationProvider:
@@ -95,6 +95,7 @@ class AuthModule:
         cls.__installed_providers.append(provider)
         return provider
 
+
     @classmethod
     def unregister_provider(cls, provider: AuthenticationProvider) -> bool:
         """Uninstall a provider"""
@@ -104,10 +105,12 @@ class AuthModule:
         except ValueError:
             return False
 
+
     @staticmethod
     def get_provider_class(provider_name: str) -> 'AuthenticationProvider':
         """Get a specific provider class by class name"""
         return next(_ for _ in AuthModule.__installed_providers if _.__qualname__ == provider_name)
+
 
     @staticmethod
     def provider_exists(provider_name: str) -> bool:
@@ -121,50 +124,57 @@ class AuthModule:
         except StopIteration:
             return False
 
+
     @classmethod
     def get_installed_providers(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
+
 
     @classmethod
     def get_installed_internals(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
+
     @classmethod
     def get_installed_external(cls) -> List['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
+
 
     @property
     def providers(self) -> List['AuthenticationProvider']:
         """Get all installed providers as property list"""
         return AuthModule.__installed_providers
 
+
     @property
     def settings(self) -> AuthSettingsDAO:
         """Get the current auth settings"""
         return self.__settings
 
+
     def get_provider(self, provider_name: str) -> AuthenticationProvider:
         """Get a initialized provider instance"""
         try:
-            _provider_class_name: ClassVar[str] = provider_name
+            _provider_class_name: Type[str] = provider_name
             if not AuthModule.provider_exists(provider_name=_provider_class_name):
                 return None
-            _provider_class: ClassVar[AuthenticationProvider] = AuthModule.get_provider_class(_provider_class_name)
-            _provider_config_class: ClassVar[AuthProviderConfig] = _provider_class.PROVIDER_CONFIG_CLASS
+            _provider_class: Type[AuthenticationProvider] = AuthModule.get_provider_class(_provider_class_name)
+            _provider_config_class: Type[AuthProviderConfig] = _provider_class.PROVIDER_CONFIG_CLASS
             _provider_config_values: dict = self.settings.get_provider_settings(_provider_class_name) \
                 .get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
             _provider_config_instance = _provider_config_class(**_provider_config_values)
             _provider_instance = _provider_class(config=_provider_config_instance, user_manager=self.__user_manager,
                                                  group_manager=self.__group_manager,
-                                                 security_manager=self.__securitymanager)
+                                                 security_manager=self.__security_manager)
 
             return _provider_instance
         except Exception as err:
-            LOGGER.error(f'[AuthModule] {err}')
+            LOGGER.error('[AuthModule] %s', err)
             return None
+
 
     def login(self, user_name: str, password: str) -> UserModel:
         """
@@ -186,8 +196,8 @@ class AuthModule:
             if not self.provider_exists(provider_class_name):
                 raise AuthenticationProviderNotExistsError(provider_class_name)
 
-            provider: ClassVar[AuthenticationProvider] = self.get_provider_class(provider_class_name)
-            provider_config_class: ClassVar[str] = provider.PROVIDER_CONFIG_CLASS
+            provider: Type[AuthenticationProvider] = self.get_provider_class(provider_class_name)
+            provider_config_class: Type[str] = provider.PROVIDER_CONFIG_CLASS
             provider_config_settings = self.settings.get_provider_settings(provider.get_name())
 
             provider_config_instance = provider_config_class(**provider_config_settings)
@@ -196,11 +206,11 @@ class AuthModule:
             if not provider_instance.is_active():
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
             if provider_instance.EXTERNAL_PROVIDER and not self.settings.enable_external:
-                raise AuthenticationProviderNotActivated(f'External providers are deactivated')
+                raise AuthenticationProviderNotActivated('External providers are deactivated')
 
             return provider_instance.authenticate(user_name, password)
 
-        except ManagerGetError:
+        except ManagerGetError as err:
             # get installed providers
             provider_list = self.providers
 
@@ -219,9 +229,10 @@ class AuthModule:
                                              security_manager=self.__security_manager)
                 try:
                     return provider_instance.authenticate(user_name, password)
-                except AuthenticationError as err:
+                except AuthenticationError:
                     continue
-                except (ManagerGetError, ManagerInsertError):
-                    LOGGER.error(f'User found by provider but could not be inserted or found {err}')
+                except (ManagerGetError, ManagerInsertError) as error:
+                    LOGGER.error('User found by provider but could not be inserted or found %s',error)
                     continue
-            raise AuthenticationError('Unknown user could not login.')
+
+            raise AuthenticationError('Unknown user could not login.') from err

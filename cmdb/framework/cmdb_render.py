@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,16 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-"""
-Object/Type render
-"""
-
+"""Object/Type render"""
 import logging
-from typing import List, Union
-
+from typing import Union
 from datetime import datetime, timezone
-from cmdb.database.managers import DatabaseManagerMongo
+from dateutil.parser import parse
+
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, \
     TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
@@ -30,37 +27,41 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager import ManagerGetError
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-
 from cmdb.utils.error import CMDBError
-
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.models.type import TypeModel, TypeExternalLink, TypeFieldSection, TypeReference, \
-    TypeReferenceSection
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
 from cmdb.user_management.user_manager import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
-from dateutil.parser import parse
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class RenderVisualization:
+    """TODO: document"""
 
     def __init__(self):
         self.current_render_time = datetime.now(timezone.utc)
         self.object_information: dict = {}
         self.type_information: dict = {}
 
+
     def get_object_information(self, idx):
+        """TODO: document"""
         return self.object_information[idx]
 
+
     def get_type_information(self, idx):
+        """TODO: document"""
         return self.type_information[idx]
 
 
 class RenderResult(RenderVisualization):
+    """TODO: document"""
 
     def __init__(self):
-        super(RenderResult, self).__init__()
+        super().__init__()
         self.fields: list = []
         self.sections: list = []
         self.summaries: list = []
@@ -69,6 +70,8 @@ class RenderResult(RenderVisualization):
 
 
 class CmdbRender:
+    """TODO: document"""
+
     AUTHOR_ANONYMOUS_NAME = 'unknown'
 
     def __init__(self, object_instance: CmdbObject,
@@ -86,6 +89,7 @@ class CmdbRender:
 
         self.ref_render = ref_render
 
+
     @property
     def object_instance(self) -> CmdbObject:
         """
@@ -95,6 +99,7 @@ class CmdbRender:
         """
         return self._object_instance
 
+
     @object_instance.setter
     def object_instance(self, object_instance: CmdbObject):
         """
@@ -103,8 +108,9 @@ class CmdbRender:
         """
         if not isinstance(object_instance, CmdbObject):
             raise ObjectInstanceError()
-        else:
-            self._object_instance = object_instance
+
+        self._object_instance = object_instance
+
 
     @property
     def type_instance(self) -> TypeModel:
@@ -114,6 +120,7 @@ class CmdbRender:
         This already happens when the object is instantiated.
         """
         return self._type_instance
+
 
     @type_instance.setter
     def type_instance(self, type_instance: TypeModel):
@@ -125,8 +132,11 @@ class CmdbRender:
             raise TypeInstanceError()
         self._type_instance = type_instance
 
+
     def result(self, level: int = 3) -> RenderResult:
+        """TODO: document"""
         return self._generate_result(level)
+
 
     def _generate_result(self, level: int) -> RenderResult:
         render_result = RenderResult()
@@ -143,6 +153,7 @@ class CmdbRender:
             traceback.print_exc()
             raise RenderError(f'Error while generating a CMDBResult: {str(error)}') from error
         return render_result
+
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
@@ -171,6 +182,7 @@ class CmdbRender:
         }
         return render_result
 
+
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.user_manager.get(self.type_instance.author_id).get_display_name()
@@ -191,13 +203,15 @@ class CmdbRender:
             'active': self.type_instance.active,
             'version': self.type_instance.version,
             'acl': self.type_instance.acl.to_json(self.type_instance.acl)
-
         }
+
         return render_result
+
 
     def __set_fields(self, render_result: RenderResult, level: int) -> RenderResult:
         render_result.fields = self.__merge_fields_value(level-1)
         return render_result
+
 
     def __set_sections(self, render_result: RenderResult) -> RenderResult:
         try:
@@ -206,6 +220,7 @@ class CmdbRender:
         except (IndexError, ValueError):
             render_result.sections = []
         return render_result
+
 
     def __merge_field_content_section(self, field: dict, object_: CmdbObject):
         curr_field = [x for x in object_.fields if x['name'] == field['name']][0]
@@ -220,7 +235,8 @@ class CmdbRender:
             field['reference'] = self.__merge_references(field)
         return field
 
-    def __merge_fields_value(self, level: int = 3) -> List[dict]:
+
+    def __merge_fields_value(self, level: int = 3) -> list[dict]:
         """
         Checks all fields for references.
         Fields with references are extended by the property 'references'.
@@ -231,13 +247,13 @@ class CmdbRender:
             return field_map
 
         for idx, section in enumerate(self.type_instance.render_meta.sections):
-            if type(section) is TypeFieldSection and isinstance(section, TypeFieldSection):
+            if isinstance(section, TypeFieldSection):
                 for section_field in section.fields:
                     field = {}
                     try:
                         field = self.type_instance.get_field(section_field)
                         field = self.__merge_field_content_section(field, self.object_instance)
-                        if (field['type'] == 'ref' or field['type'] == 'location') and (not self.ref_render or 'summaries' not in field):
+                        if (field['type'] in ('ref','location')) and (not self.ref_render or 'summaries' not in field):
                             ref_field_name: str = field['name']
                             field = self.type_instance.get_field(ref_field_name)
                             reference_id: int = self.object_instance.get_value(ref_field_name)
@@ -257,8 +273,12 @@ class CmdbRender:
                                 for ref_section_field_name in ref_type.get_fields():
                                     try:
                                         ref_section_field = ref_type.get_field(ref_section_field_name['name'])
-                                        ref_field = self.__merge_field_content_section(ref_section_field, reference_object)
-                                    except (FileNotFoundError, ValueError, IndexError, FieldNotFoundError, FieldInitError):
+                                        ref_field = self.__merge_field_content_section(
+                                                                                ref_section_field,
+                                                                                reference_object
+                                                                            )
+                                    except (FileNotFoundError, ValueError, IndexError, \
+                                            FieldNotFoundError, FieldInitError):
                                         continue
                                     field['reference']['summaries'].append(ref_field)
 
@@ -277,7 +297,7 @@ class CmdbRender:
 
                     field_map.append(field)
 
-            elif type(section) is TypeReferenceSection and isinstance(section, TypeReferenceSection):
+            elif isinstance(section, TypeReferenceSection):
                 try:
                     ref_field_name: str = f'{section.name}-field'
                     ref_field = self.type_instance.get_field(ref_field_name)
@@ -303,7 +323,7 @@ class CmdbRender:
                         'fields': []
                     }
                 except (ManagerGetError, Exception) as error:
-                    LOGGER.warning("%s",error.message)
+                    LOGGER.warning("%s",error)
                     continue
 
                 if not ref_section:
@@ -332,6 +352,7 @@ class CmdbRender:
 
         return field_map
 
+
     def __merge_reference_section_fields(self, ref_section_field, ref_type, ref_section_fields, level):
         if ref_section_field and ref_section_field.get('type', '') == 'ref-section-field':
             try:
@@ -354,6 +375,7 @@ class CmdbRender:
             except (Exception, TypeError, ObjectManagerGetError) as err:
                 LOGGER.info(err)
         return ref_section_fields
+
 
     def __merge_references(self, current_field):
         # Initialise TypeReference
@@ -380,9 +402,7 @@ class CmdbRender:
                 try:
                     _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 except (FieldInitError, FieldNotFoundError) as error:
-                    LOGGER.warning(f'Type #{self.type_instance.public_id} '
-                                   f'Summary setting refers to non-existent field(s).'
-                                   f'{error.message}')
+                    LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error.message)
 
                 reference.type_id = ref_type.get_public_id()
                 reference.object_id = int(current_field['value'])
@@ -416,6 +436,7 @@ class CmdbRender:
             finally:
                 return TypeReference.to_json(reference)
 
+
     def __set_summaries(self, render_result: RenderResult) -> RenderResult:
         # global summary list
         summary_list = []
@@ -443,6 +464,7 @@ class CmdbRender:
         finally:
             render_result.summary_line = summary_line
         return render_result
+
 
     def __set_external(self, render_result: RenderResult) -> RenderResult:
         """
@@ -498,10 +520,10 @@ class CmdbRender:
 
 
 class RenderList:
-
-    def __init__(self, object_list: List[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
+    """TODO: document"""
+    def __init__(self, object_list: list[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
                  ref_render=False, object_manager: CmdbObjectManager = None):
-        self.object_list: List[CmdbObject] = object_list
+        self.object_list: list[CmdbObject] = object_list
         self.request_user = request_user
         self.ref_render = ref_render
         self.object_manager = object_manager
@@ -509,8 +531,9 @@ class RenderList:
         self.user_manager = UserManager(database_manager=database_manager)
 
     #@timing('RenderList')
-    def render_result_list(self, raw: bool = False) -> List[Union[RenderResult, dict]]:
-        preparation_objects: List[RenderResult] = []
+    def render_result_list(self, raw: bool = False) -> list[Union[RenderResult, dict]]:
+        """TODO: document"""
+        preparation_objects: list[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
                 type_instance=self.object_manager.get_type(passed_object.type_id),
@@ -526,6 +549,7 @@ class RenderList:
         return preparation_objects
 
 
+# TODO: transfer errors to seperate class
 class RenderError(CMDBError):
     """
     Error class raised when an error occurs during rendering.

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,33 +13,40 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from datetime import datetime, timezone
 
 from cmdb.event_management.event import Event
-from cmdb.database.managers import DatabaseManagerMongo
-from cmdb.framework.cmdb_base import CmdbManagerBase, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb. framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
     ManagerDeleteError
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class ExportdJobManagement(CmdbManagerBase):
+    """TODO: document"""
 
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
         self._event_queue = event_queue
         super().__init__(database_manager)
 
+
     def get_new_id(self, collection: str) -> int:
+        """TODO: document"""
         return self.dbm.get_next_public_id(collection)
 
+
     def get_job(self, public_id: int) -> ExportdJob:
+        """TODO: document"""
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)
         except (ExportdJobManagerGetError, Exception) as err:
@@ -47,7 +54,9 @@ class ExportdJobManagement(CmdbManagerBase):
             raise err
         return ExportdJob(**result)
 
+
     def get_all_jobs(self):
+        """TODO: document"""
         job_list = []
         for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION):
             try:
@@ -56,27 +65,33 @@ class ExportdJobManagement(CmdbManagerBase):
                 continue
         return job_list
 
+
     def get_job_by_name(self, **requirements) -> ExportdJob:
+        """TODO: document"""
         try:
             found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
                 return ExportdJob(**found_type_list[0])
             else:
                 raise ObjectManagerGetError(err='More than 1 type matches this requirement')
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err) from err
+
 
     def get_job_by_args(self, **requirements) -> ExportdJob:
+        """TODO: document"""
         try:
             found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
                 return ExportdJob(**found_type_list[0])
             else:
                 raise ObjectManagerGetError(err='More than 1 type matches this requirement')
-        except (CMDBError, Exception) as e:
-            raise ObjectManagerGetError(err=e)
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerGetError(err) from err
+
 
     def get_job_by_event_based(self, state):
+        """TODO: document"""
         formatted_filter = {'scheduling.event.active': state}
         job_list = []
         for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
@@ -85,6 +100,7 @@ class ExportdJobManagement(CmdbManagerBase):
             except CMDBError:
                 continue
         return job_list
+
 
     def insert_job(self, data: (ExportdJob, dict)) -> int:
         """
@@ -97,10 +113,11 @@ class ExportdJobManagement(CmdbManagerBase):
         if isinstance(data, dict):
             try:
                 new_object = ExportdJob(**data)
-            except CMDBError as e:
-                raise ExportdJobManagerInsertError(e)
+            except CMDBError as err:
+                raise ExportdJobManagerInsertError(err) from err
         elif isinstance(data, ExportdJob):
             new_object = data
+
         try:
             ack = self.dbm.insert(
                 collection=ExportdJob.COLLECTION,
@@ -113,9 +130,10 @@ class ExportdJobManagement(CmdbManagerBase):
                                                      "user_id": new_object.get_author_id(),
                                                      "event": 'automatic'})
                 self._event_queue.put(event)
-        except CMDBError as e:
-            raise ExportdJobManagerInsertError(e)
+        except CMDBError as err:
+            raise ExportdJobManagerInsertError(err) from err
         return ack
+
 
     def update_job(self, data: (dict, ExportdJob), request_user: UserModel, event_start=True) -> str:
         """
@@ -139,6 +157,8 @@ class ExportdJobManagement(CmdbManagerBase):
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
+
+
         if self._event_queue and event_start:
             state = update_object.scheduling["event"]["active"] and update_object.get_active()
             event = Event("cmdb.exportd.updated", {"id": update_object.get_public_id(),
@@ -148,7 +168,9 @@ class ExportdJobManagement(CmdbManagerBase):
             self._event_queue.put(event)
         return ack.acknowledged
 
+
     def delete_job(self, public_id: int, request_user: UserModel) -> bool:
+        """TODO: document"""
         try:
             ack = self._delete(collection=ExportdJob.COLLECTION, public_id=public_id)
             if self._event_queue:
@@ -157,10 +179,12 @@ class ExportdJobManagement(CmdbManagerBase):
                                                        "event": 'automatic'})
                 self._event_queue.put(event)
             return ack
-        except Exception:
-            raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}')
+        except Exception as exc:
+            raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}') from exc
+
 
     def run_job_manual(self, public_id: int, request_user: UserModel) -> bool:
+        """TODO: document"""
         if self._event_queue:
             event = Event("cmdb.exportd.run_manual", {"id": public_id,
                                                       "user_id": request_user.get_public_id(),
@@ -168,26 +192,31 @@ class ExportdJobManagement(CmdbManagerBase):
             self._event_queue.put(event)
         return True
 
+# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
 
 class ExportdJobManagerGetError(ManagerGetError):
-
+    """TODO: document"""
     def __init__(self, err):
-        super(ExportdJobManagerGetError, self).__init__(err)
+        self.err = err
+        super().__init__(err)
 
 
 class ExportdJobManagerInsertError(ManagerInsertError):
-
+    """TODO: document"""
     def __init__(self, err):
-        super(ExportdJobManagerInsertError, self).__init__(err)
+        self.err = err
+        super().__init__(err)
 
 
 class ExportdJobManagerUpdateError(ManagerUpdateError):
-
+    """TODO: document"""
     def __init__(self, err):
-        super(ExportdJobManagerUpdateError, self).__init__(err)
+        self.err = err
+        super().__init__(err)
 
 
 class ExportdJobManagerDeleteError(ManagerDeleteError):
-
+    """TODO: document"""
     def __init__(self, err):
-        super(ExportdJobManagerDeleteError, self).__init__(err)
+        self.err = err
+        super().__init__(err)

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,19 +11,19 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
 import { Injectable } from '@angular/core';
-import {ApiCallService, ApiServicePrefix, httpObserveOptions, HttpProtocolHelper} from '../../services/api-call.service';
+import { ApiCallService, ApiServicePrefix, httpObserveOptions, HttpProtocolHelper } from '../../services/api-call.service';
 import { Observable } from 'rxjs';
-import {filter, map} from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { CmdbLog } from '../models/cmdb-log';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../services/models/api-response';
-import { HttpParams, HttpResponse } from '@angular/common/http';
+import { HttpResponse } from '@angular/common/http';
 
 @Injectable({
   providedIn: 'root'
@@ -33,7 +33,10 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
   constructor(private api: ApiCallService) {
   }
 
-  public servicePrefix: string = 'log';
+  public servicePrefix: string = 'logs';
+
+
+
 
   public getLog(publicID: number): Observable<T> {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`).pipe(
@@ -42,6 +45,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
       })
     );
   }
+
+
 
   /**
    * Iterate over the log collection
@@ -59,6 +64,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
     );
   }
 
+
+
   public getLogsWithExistingObject(params: CollectionParameters = { filter: undefined,
     limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
@@ -70,6 +77,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
       })
     );
   }
+
+
 
   public getLogsWithNotExistingObject(params: CollectionParameters = { filter: undefined,
     limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
@@ -83,6 +92,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
     );
   }
 
+
+
   public getDeleteLogs(params: CollectionParameters = { filter: undefined,
     limit: 10, sort: 'public_id', order: 1, page: 1}): Observable<APIGetMultiResponse<T>> {
     const options = HttpProtocolHelper.createHttpProtocolOptions(httpObserveOptions, params.filter,
@@ -95,6 +106,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
     );
   }
 
+
+
   public getCorrespondingLogs(publicID: number) {
     return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/corresponding`).pipe(
       map((apiResponse) => {
@@ -105,6 +118,8 @@ export class LogService<T = CmdbLog> implements ApiServicePrefix {
       })
     );
   }
+
+
 
   public deleteLog(publicID: number): Observable<T>  {
     return this.api.callDelete<boolean>(`${this.servicePrefix}/${publicID}`).pipe(

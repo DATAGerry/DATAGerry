@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,22 +13,23 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 import copy
-
-from pytest import fixture
 from datetime import datetime, timezone
 from http import HTTPStatus
 
+from pytest import fixture
+
 from cmdb.framework import TypeModel, CmdbObject
-from cmdb.framework.models.type import TypeRenderMeta, TypeFieldSection, TypeSummary
+from cmdb.framework.models.type_model import TypeSummary
+from cmdb.framework.models.type_model import TypeFieldSection, TypeRenderMeta
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @fixture(scope='module')
 def example_type():
+    """TODO: document"""
     return TypeModel(
         public_id=1, name='test', label='Test', author_id=1, creation_time=datetime.now(),
         active=True, version=None, description='Test type',
@@ -54,6 +55,7 @@ def example_type():
 
 @fixture(scope='module')
 def example_object():
+    """TODO: document"""
     return CmdbObject(
         public_id=1, type_id=1, status=True, creation_time=datetime.now(timezone.utc),
         author_id=1, active=True, fields=[{
@@ -88,6 +90,7 @@ def change_object() -> dict:
 
 @fixture(scope='module')
 def collection(connector, database_name):
+    """TODO: document"""
     from pymongo.mongo_client import MongoClient
     from pymongo.collection import Collection
     client: MongoClient = connector.client
@@ -97,6 +100,7 @@ def collection(connector, database_name):
 
 @fixture(scope='module', autouse=True)
 def setup(request, collection, example_type):
+    """TODO: document"""
     collection.insert_one(document=TypeModel.to_json(example_type))
 
     def drop_collection():
@@ -105,9 +109,9 @@ def setup(request, collection, example_type):
     request.addfinalizer(drop_collection)
 
 class TestBulkChangeFrameworkObjects:
-
+    """TODO: document"""
     OBJECT_COLLECTION: str = CmdbObject.COLLECTION
-    ROUTE_URL: str = '/object'
+    ROUTE_URL: str = '/objects'
 
     def test_insert_object(self, rest_api, example_object, full_access_user):
         """
@@ -126,7 +130,7 @@ class TestBulkChangeFrameworkObjects:
         assert len(rest_api.get(f'{self.ROUTE_URL}/').get_json()['results']) == 3
 
     def test_bulk_change_object_field_value(self, rest_api, change_object, full_access_user):
-
+        """TODO: document"""
         expectations = rest_api.get(f'{self.ROUTE_URL}/').get_json()['results']
         params = {'objectIDs': [1, 2, 3]}
 
@@ -151,8 +155,9 @@ class TestBulkChangeFrameworkObjects:
         assert results[1]['active'] == expectations[1]['active']
         assert results[2]['active'] == expectations[2]['active']
 
-    def test_bulk_change_object_active_state(self, rest_api, change_object, full_access_user):
 
+    def test_bulk_change_object_active_state(self, rest_api, change_object, full_access_user):
+        """TODO: document"""
         expectations = rest_api.get(f'{self.ROUTE_URL}/').get_json()['results']
         params = {'objectIDs': [1, 2, 3]}
 
@@ -167,6 +172,3 @@ class TestBulkChangeFrameworkObjects:
         assert results[0]['active']
         assert results[1]['active']
         assert results[2]['active']
-
-
-

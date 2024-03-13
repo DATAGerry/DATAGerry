@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -62,31 +62,33 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     treeControl = new NestedTreeControl<LocationNode>(node => node.children);
     dataSource = new MatTreeNestedDataSource<LocationNode>();
 
+
     /**
      * used for highlighting the selected location
      */
     public selectedLocationID: number;
+    public searchString: string = '';
 
-  /* -------------------------------------------------------------------------- */
-  /*                                LIFE - CYCLE                                */
-  /* -------------------------------------------------------------------------- */
+    /* -------------------------------------------------------------------------- */
+    /*                                LIFE - CYCLE                                */
+    /* -------------------------------------------------------------------------- */
 
 
     constructor(private locationService: LocationService,
-                private treeManagerService: TreeManagerService,
-                private objectService: ObjectService,
-                private route: Router){
+        private treeManagerService: TreeManagerService,
+        private objectService: ObjectService,
+        private route: Router) {
 
     }
 
 
-    public ngOnInit(){
+    public ngOnInit() {
         this.objectServiceSubscription = this.objectService.objectActionSource.subscribe(
-          (action: string) => this.onObjectActionEventRecieved(action)
+            (action: string) => this.onObjectActionEventRecieved(action)
         );
 
         this.locationServiceSubscription = this.locationService.locationActionSource.subscribe(
-          (action: string) => this.onLocationActionEventRecieved(action)
+            (action: string) => this.onLocationActionEventRecieved(action)
         );
 
         this.getLocationTree();
@@ -94,6 +96,59 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
 
     public ngOnDestroy(): void {
         this.objectServiceSubscription.unsubscribe();
+    }
+
+
+    /**
+    * Reset the search string
+    */
+    handleSearchReset() {
+        this.searchString = "";
+    }
+
+
+    /**
+    * Filter function for leaf nodes
+    */
+    filterLeafNode(node: LocationNode): boolean {
+
+        if (!this.searchString || !node.name) {
+            return false;
+        }
+        const nodeName = node.name.toLowerCase();
+        return nodeName.indexOf(this.searchString.toLowerCase()) === -1;
+    }
+
+
+    /**
+     * Filters a parent node based on a search string.
+     * 
+     * @param node The parent node to be filtered.
+     * @returns A boolean indicating whether the node should be filtered out or not.
+     */
+    filterParentNode(node: LocationNode): boolean {
+        if (!this.searchString) {
+            return false;
+        }
+
+        // Check if the search string matches the parent node
+        if (node.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1) {
+            return false;
+        }
+
+        // Check if any descendants match the search string
+        const descendants = this.treeControl.getDescendants(node);
+        if (descendants.some((descendantNode) => descendantNode.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1)) {
+            return false;
+        }
+
+        // If the search string matches the immediate child, show the parent
+        const immediateChild = descendants.find((descendantNode) => descendantNode.name === node.name + 1);
+        if (immediateChild && immediateChild.name.toLowerCase().indexOf(this.searchString?.toLowerCase()) !== -1) {
+            return true;
+        }
+
+        return true;
     }
 
 
@@ -105,17 +160,17 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     /**
     * Get all locations except the root location formatted as hierarchical tree data
     */
-    private getLocationTree(){
+    private getLocationTree() {
         const params: CollectionParameters = {
-          filter: [{ $match: { public_id: { $gt: 1 } } }],
-          limit: 0, sort: 'public_id', order: 1, page: 1
+            filter: [{ $match: { public_id: { $gt: 1 } } }],
+            limit: 0, sort: 'public_id', order: 1, page: 1
         };
-  
+
         this.locationService.getLocationsTree(params).pipe(takeUntil(this.unsubscribe))
-              .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
                 this.dataSource.data = this.forceCast<LocationNode[]>(apiResponse.results);
                 this.treeManagerService.expandNodes(this.dataSource.data, this.treeControl);
-        });
+            });
     }
 
 
@@ -124,34 +179,34 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
      * 
      * @param action (string): Type of object action (create, delete or update)
      */
-    public onObjectActionEventRecieved(action: string){
-      this.getLocationTree();
+    public onObjectActionEventRecieved(action: string) {
+        this.getLocationTree();
     }
 
-        /**
-     * EventListener function which will update the tree when objects were changed
-     * 
-     * @param action (string): Type of object action (create, delete or update)
-     */
-      public onLocationActionEventRecieved(action: string){
+    /**
+  * EventListener function which will update the tree when objects were changed
+  * 
+  * @param action (string): Type of object action (create, delete or update)
+  */
+    public onLocationActionEventRecieved(action: string) {
         this.getLocationTree();
-      }
+    }
 
     /**
     * Set the selected location and loads the object overview in the content view
     * 
     * @param clickedObjectID the objectID of the location which is clicked in location tree
     */
-    public onLocationElementClicked(clickedObjectID: number){
+    public onLocationElementClicked(clickedObjectID: number) {
         this.selectedLocationID = clickedObjectID;
-        this.route.navigateByUrl('/framework/object/view/'+clickedObjectID);
-     }
+        this.route.navigateByUrl('/framework/object/view/' + clickedObjectID);
+    }
 
 
     /**
      * Updates status of all expanded locations and saves them
      */
-    public onExpandClicked(){
+    public onExpandClicked() {
         this.treeManagerService.extractExpandedIds(this.treeControl.expansionModel.selected);
     }
 
@@ -163,8 +218,8 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     /**
      * Reloads the tree after an update
      */
-    public reloadTree(){
-      this.ngOnInit();
+    public reloadTree() {
+        this.ngOnInit();
     }
 
     /* -------------------------------------------------------------------------- */
@@ -179,6 +234,6 @@ export class LocationTreeComponent implements OnInit, OnDestroy {
     * @returns array of LocationNode
     */
     public forceCast<T>(input: any): T {
-      return input;
+        return input;
     }
 }

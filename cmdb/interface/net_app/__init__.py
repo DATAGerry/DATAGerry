@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,6 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 Init module for static routes
 """
@@ -23,9 +22,10 @@ from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
 
 from cmdb.interface.net_app.app_routes import app_pages, redirect_index
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def create_app():
+    """TODO: document"""
     app = BaseCmdbApp(__name__)
     CORS(app)
 

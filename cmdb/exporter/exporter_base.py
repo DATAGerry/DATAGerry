@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C)  becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: ducoment"""
 import csv
 import io
 import json
@@ -22,21 +22,20 @@ import tempfile
 import xml.dom.minidom
 import xml.etree.ElementTree as ET
 import zipfile
-import openpyxl
-
 from typing import List
+import openpyxl
 
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exporter.exporter_utils import ExperterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.exporter.config.config_type import ExporterConfigType
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
 object_manager = CmdbObjectManager(database_manager=database_manager)
@@ -44,7 +43,7 @@ type_manager = TypeManager(database_manager=database_manager)
 
 
 class ZipExportType(BaseExporterFormat):
-
+    """TODO: ducoment"""
     FILE_EXTENSION = "zip"
     LABEL = "ZIP"
     MULTITYPE_SUPPORT = True
@@ -52,8 +51,8 @@ class ZipExportType(BaseExporterFormat):
     DESCRIPTION = "Export Zipped Files"
     ACTIVE = True
 
-    def export(self, data: List[RenderResult], *args):
 
+    def export(self, data: List[RenderResult], *args):
         """
         Export a zip file, containing the object list sorted by type in several files.
 
@@ -64,7 +63,6 @@ class ZipExportType(BaseExporterFormat):
         Returns:
             zip file containing object files separated by types
         """
-
         # check what export type is requested and intitializes a new zip file in memory
         export_type = load_class(f'cmdb.exporter.exporter_base.{args[0].get("classname", "")}')()
         zipped_file = io.BytesIO()
@@ -102,13 +100,14 @@ class ZipExportType(BaseExporterFormat):
 
 
 class CsvExportType(BaseExporterFormat):
-
+    """TODO: ducoment"""
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
     ICON = "file-csv"
     DESCRIPTION = "Export as CSV (only of the same type)"
     ACTIVE = True
+
 
     def export(self, data: List[RenderResult], *args):
 
@@ -162,7 +161,7 @@ class CsvExportType(BaseExporterFormat):
         return self.csv_writer([*header, *columns], rows)
 
     def csv_writer(self, header, rows, dialect=csv.excel):
-
+        """TODO: ducoment"""
         csv_file = io.StringIO()
         writer = csv.writer(csv_file, dialect=dialect)
         writer.writerow(header)
@@ -173,7 +172,7 @@ class CsvExportType(BaseExporterFormat):
 
 
 class JsonExportType(BaseExporterFormat):
-
+    """TODO: ducoment"""
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
@@ -182,7 +181,6 @@ class JsonExportType(BaseExporterFormat):
     ACTIVE = True
 
     def export(self, data: List[RenderResult], *args):
-
         """Exports data as .json file
 
         Args:
@@ -191,7 +189,6 @@ class JsonExportType(BaseExporterFormat):
         Returns:
             Json file containing the data
         """
-
         # init values
         meta = False
         view = 'native'
@@ -240,7 +237,7 @@ class JsonExportType(BaseExporterFormat):
 
 
 class XlsxExportType(BaseExporterFormat):
-
+    """TODO: ducoment"""
     FILE_EXTENSION = "xlsx"
     LABEL = "XLSX"
     MULTITYPE_SUPPORT = True
@@ -248,8 +245,8 @@ class XlsxExportType(BaseExporterFormat):
     DESCRIPTION = "Export as XLS"
     ACTIVE = True
 
-    def export(self, data: List[RenderResult], *args):
 
+    def export(self, data: List[RenderResult], *args):
         """Exports object_list as .xlsx file
 
         Args:
@@ -258,7 +255,6 @@ class XlsxExportType(BaseExporterFormat):
         Returns:
             Xlsx file containing the data
         """
-
         workbook = self.create_xls_object(data, args)
 
         # save workbook
@@ -267,8 +263,10 @@ class XlsxExportType(BaseExporterFormat):
             tmp.seek(0)
             return tmp.read()
 
-    def create_xls_object(self, data: List[RenderResult], args):
 
+
+    def create_xls_object(self, data: List[RenderResult], args):
+        """TODO: ducoment"""
         # create workbook
         workbook = openpyxl.Workbook()
 
@@ -348,7 +346,7 @@ class XlsxExportType(BaseExporterFormat):
 
 
 class XmlExportType(BaseExporterFormat):
-
+    """TODO: ducoment"""
     FILE_EXTENSION = "xml"
     LABEL = "XML"
     MULTITYPE_SUPPORT = True
@@ -357,7 +355,6 @@ class XmlExportType(BaseExporterFormat):
     ACTIVE = True
 
     def export(self, data: List[RenderResult], *args):
-
         """Exports object_list as .xml file
 
         Args:
@@ -366,7 +363,6 @@ class XmlExportType(BaseExporterFormat):
         Returns:
             Xml file containing the data
         """
-
         # init values
         header = ['public_id', 'active', 'type_label']
         columns = [] if not data else [x['name'] for x in data[0].fields]

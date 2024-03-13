@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,15 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from datetime import datetime, timezone
 
 from dateutil import parser
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UserModel(CmdbDAO):
+    """TODO: document"""
     COLLECTION: Collection = 'management.users'
     MODEL: Model = 'User'
     INDEX_KEYS = [
@@ -112,7 +113,8 @@ class UserModel(CmdbDAO):
         self.first_name: str = first_name or None
         self.last_name: str = last_name or None
 
-        super(UserModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
+
 
     def get_display_name(self) -> str:
         """
@@ -124,11 +126,13 @@ class UserModel(CmdbDAO):
         """
         if self.first_name is None or self.last_name is None:
             return self.user_name
-        else:
-            return f'{self.first_name} {self.last_name}'
+
+        return f'{self.first_name} {self.last_name}'
+
 
     @classmethod
     def from_data(cls, data: dict) -> "UserModel":
+        """TODO: document"""
         reg_date = data.get('registration_time', None)
         if reg_date and isinstance(reg_date, str):
             reg_date = parser.parse(reg_date)
@@ -146,9 +150,11 @@ class UserModel(CmdbDAO):
             last_name=data.get('last_name', None)
         )
 
+
     @classmethod
     def to_data(cls, instance: "UserModel") -> dict:
         return cls.to_dict(instance)
+
 
     @classmethod
     def to_dict(cls, instance: "UserModel") -> dict:

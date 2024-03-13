@@ -1,5 +1,7 @@
-FROM centos:8
-LABEL maintainer="monitoring@nethinks.com"
+FROM quay.io/centos/centos:stream9
+LABEL maintainer="adnan.smajic@becon.de"
+
+RUN yum install -y freetype fontconfig
 
 # set locale
 ARG build_locale=en_US

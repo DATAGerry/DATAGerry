@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -26,8 +26,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { ArchwizardModule } from 'angular-archwizard';
 import { QRCodeModule } from 'angularx-qrcode';
-import { JwPaginationModule } from 'jw-angular-pagination';
-
+import { NgxPaginationModule } from 'ngx-pagination';
 import { ObjectRoutingModule } from './object-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { RenderModule } from '../render/render.module';
@@ -139,7 +138,7 @@ import { ObjectBulkChangeCompleteComponent } from './object-bulk-change/object-b
     RenderModule,
     UsersModule,
     TableModule,
-    JwPaginationModule
+    NgxPaginationModule
   ],
   exports: [
     ObjectViewRenderComponent,

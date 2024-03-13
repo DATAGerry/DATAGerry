@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -104,9 +104,12 @@ export class UserSettingsDBService<T = UserSetting, P = UserSettingPayload> impl
    * @param setting UserSetting data.
    */
   public addSetting(setting: UserSetting<P>): void {
-    this.dbService.add(this.storeName, setting).subscribe(key => {
-      this.userSettingsService.addUserSetting(setting).pipe(takeUntil(this.subscriber)).subscribe();
-    });
+
+    if (!this.dbService.getByKey(this.storeName, setting as any)) {
+      this.dbService.add(this.storeName, setting).subscribe(key => {
+        this.userSettingsService.addUserSetting(setting).pipe(takeUntil(this.subscriber)).subscribe();
+      });
+    }
   }
 
   /**

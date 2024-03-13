@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,33 +13,36 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class AbstractTemplateData:
-
+    """TODO: document"""
     def __init__(self):
         self._template_data = {}
 
     def get_template_data(self):
+        """TODO: document"""
         return self._template_data
 
 
 class ObjectTemplateData(AbstractTemplateData):
+    """TODO: document"""
 
     def __init__(self, object_manager, cmdb_object):
         super().__init__()
         self.__object_manager = object_manager
         self._template_data = self.__get_objectdata(cmdb_object, 3)
 
+
     def __get_objectdata(self, cmdb_object, iteration):
-        
         data = {}
         data["id"] = cmdb_object.object_information['object_id']
         data["fields"] = {}

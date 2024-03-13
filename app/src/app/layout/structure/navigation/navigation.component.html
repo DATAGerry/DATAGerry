@@ -31,11 +31,12 @@
         <div class="col-12 col-sm-5">
           <ul class="nav navbar-nav navbar-right-menu list-inline text-center d-flex justify-content-end align-items-center">
             <!-- nav Framework -->
-            <li *permissionLink="['base.framework.object.view', 'base.framework.type.view', 'base.framework.category.view']"
-                class="nav-item dropdown mr-2">
+            <div class="nav-1">
+              <li *permissionLink="['base.framework.object.view', 'base.framework.type.view', 'base.framework.category.view']"
+                class="nav-item dropdown">
               <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
                  aria-expanded="false">
-                <i class="fas fa-map"></i>
+                <i class="fas fa-map hover-trigger"></i>
               </a>
               <div class="dropdown-menu dropdown">
                 <div class="dropdown-header">Framework</div>
@@ -51,112 +52,126 @@
                    *permissionLink="'base.framework.category.view'" [routerLink]="['/framework/category']">
                   <i class="fas fa-folder-open"></i> Categories
                 </a>
+                <a class="dropdown-item"
+                *permissionLink="'base.framework.sectionTemplate.view'" [routerLink]="['/framework/section_templates']">
+               <i class="fas fa-hammer"></i> Section Templates
+             </a>
               </div>
             </li>
+            <p class="hover-trigger">Framework</p>
+            </div>
 
             <!-- toolbox -->
-            <li class="nav-item dropdown nav-item-toolbox mr-2">
-              <a class="nav-link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="fas fa-th"></i>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right dropdown-lg" >
-                <div class="dropdown-header">Toolbox</div>
-                <div class="p-2">
-                  <div class="row no-gutters">
-                    <div class="col">
-                      <a class="dropdown-icon-item" *permissionLink="['base.exportd.job.view']"
-                         [routerLink]="['/exportd']">
-                        <i class="fas fa-tachometer-alt"></i> <span>Exportd</span>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a class="dropdown-icon-item" *permissionLink="['base.docapi.template.view']"
-                         [routerLink]="['/docapi']">
-                        <fa-icon icon="file-pdf"></fa-icon> <span>PDF Templates</span>
-                      </a>
-                    </div>
-                    <div class="col">
-                      <a class="dropdown-icon-item" *permissionLink="'base.framework.object.edit'"
-                         [routerLink]="['/filemanager/explorer']">
-                        <i class="fas fa-folder"></i> <span>Explorer</span></a>
-                    </div>
-                    <div class="col">
-                      <a class="dropdown-icon-item" *permissionLink="'base.import.*'" [routerLink]="['/import']">
-                        <fa-icon icon="file-import"></fa-icon><span>Importer</span></a>
-                    </div>
-                    <div class="col">
-                      <a class="dropdown-icon-item" *permissionLink="'base.export.*'" [routerLink]="['/export']">
-                        <fa-icon icon="file-export"></fa-icon><span>Exporter</span></a>
-                    </div>
-                    <div class="col">
-                      <a class="dropdown-icon-item" (click)="feedback()"
-                         data-toggle="modal" data-target="#feedback-modal">
-                        <i class="far fa-smile"></i> <span>Feedback</span>
-                      </a>
-                    </div>
-                    <div class="col">
-                        <a class="dropdown-icon-item" (click)="openIntroModal()">
-                            <fa-icon icon="magic"></fa-icon><span>Assistant</span>
+
+            <div class="nav-2">
+              <li class="nav-item dropdown nav-item-toolbox ">
+                <a class="nav-link" href="#" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  <i class="fas fa-th hover-trigger"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right dropdown-lg" >
+                  <div class="dropdown-header">Toolbox</div>
+                  <div class="p-2">
+                    <div class="row no-gutters">
+                      <div class="col">
+                        <a class="dropdown-icon-item" *permissionLink="['base.exportd.job.view']"
+                           [routerLink]="['/exportd']">
+                          <i class="fas fa-tachometer-alt"></i> <span>Exportd</span>
                         </a>
+                      </div>
+                      <div class="col">
+                        <a class="dropdown-icon-item" *permissionLink="['base.docapi.template.view']"
+                           [routerLink]="['/docapi']">
+                          <fa-icon icon="file-pdf"></fa-icon> <span>PDF Templates</span>
+                        </a>
+                      </div>
+                      <div class="col">
+                        <a class="dropdown-icon-item" *permissionLink="'base.framework.object.edit'"
+                           [routerLink]="['/filemanager/explorer']">
+                          <i class="fas fa-folder"></i> <span>Explorer</span></a>
+                      </div>
+                      <div class="col">
+                        <a class="dropdown-icon-item" *permissionLink="'base.import.*'" [routerLink]="['/import']">
+                          <fa-icon icon="file-import"></fa-icon><span>Importer</span></a>
+                      </div>
+                      <div class="col">
+                        <a class="dropdown-icon-item" *permissionLink="'base.export.*'" [routerLink]="['/export']">
+                          <fa-icon icon="file-export"></fa-icon><span>Exporter</span></a>
+                      </div>
+                      <div class="col">
+                        <a class="dropdown-icon-item" (click)="feedback()"
+                           data-toggle="modal" data-target="#feedback-modal">
+                          <i class="far fa-smile"></i> <span>Feedback</span>
+                        </a>
+                      </div>
+                      <div class="col">
+                          <a class="dropdown-icon-item" (click)="openIntroModal()">
+                              <fa-icon icon="magic"></fa-icon><span>Assistant</span>
+                          </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </li>
+              </li>
+              <p class="hover-trigger">Toolbox</p>
+            </div>
 
             <!-- nav System -->
-            <li class="nav-item dropdown mr-2">
-              <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
-                 aria-expanded="false">
-                <i class="fas fa-cog"></i>
-              </a>
-              <div class="dropdown-menu dropdown-menu-right">
-                <div class="dropdown-header"
-                     *permissionLink="['base.system.view', 'base.system.edit','base.system.reload']">System
+            <div class="nav-3">
+              <li class="nav-item dropdown ">
+                <a class="nav-link" href="#" role="button" data-toggle="dropdown" aria-haspopup="true"
+                   aria-expanded="false">
+                  <i class="fas fa-cog hover-trigger"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-right">
+                  <div class="dropdown-header"
+                       *permissionLink="['base.system.view', 'base.system.edit','base.system.reload']">System
+                  </div>
+                  <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
+                    <i class="fas fa-info-circle"></i> System Information</a>
+                  <a class="dropdown-item" *permissionLink="'base.system.edit'"
+                     [routerLink]="['/settings/auth']">
+                    <i class="fas fa-lock"></i> Authentication
+                  </a>
+                  <a class="dropdown-item" *permissionLink="'base.system.edit'"
+                     [routerLink]="['/settings/regional-settings']">
+                    <i class="fas fa-calendar-alt"></i> Regional Settings
+                  </a>
+                  <a class="dropdown-item" *permissionLink="'base.system.reload'"
+                     [routerLink]="['/settings/system/properties']">
+                    <i class="fas fa-database"></i> Database Properties
+                  </a>
+                  <div class="dropdown-header"
+                       *permissionLink="['base.user-management.user.view', 'base.user-management.group.view']">
+                    User Management
+                  </div>
+                  <a class="dropdown-item" *permissionLink="'base.user-management.user.*'"
+                     [routerLink]="['/management/users']"><i class="fas fa-user-friends"></i> Users
+                  </a>
+                  <a class="dropdown-item" *permissionLink="'base.user-management.group.view'"
+                     [routerLink]="['/management/groups']"><i class="fas fa-users"></i> Groups
+                  </a>
+                  <a class="dropdown-item" [routerLink]="['/management/rights']">
+                    <i class="fas fa-low-vision"></i> Rights
+                  </a>
+                  <a class="dropdown-item" *permissionLink="'base.framework.type.view'"
+                     [routerLink]="['/', 'management', 'groups','acl']">
+                    <i class="fas fa-list"></i> ACL
+                  </a>
+                  <div *permissionLink="'base.framework.log.view'" class="dropdown-header">Logs</div>
+                  <a *permissionLink="'base.framework.log.view'" class="dropdown-item"
+                     [routerLink]="['/settings/logs/objects']">
+                    <fa-icon icon="clipboard-list"></fa-icon>
+                    Object Logs</a>
+                  <a class="dropdown-item" *permissionLink="['base.exportd.log.view']"
+                     [routerLink]="['/settings/logs/exportdjobs']">
+                    <fa-icon icon="clipboard-list"></fa-icon>
+                    Exportd Logs</a>
                 </div>
-                <a class="dropdown-item" *permissionLink="'base.system.view'" [routerLink]="['/settings/system']">
-                  <i class="fas fa-info-circle"></i> System Information</a>
-                <a class="dropdown-item" *permissionLink="'base.system.edit'"
-                   [routerLink]="['/settings/auth']">
-                  <i class="fas fa-lock"></i> Authentication
-                </a>
-                <a class="dropdown-item" *permissionLink="'base.system.edit'"
-                   [routerLink]="['/settings/regional-settings']">
-                  <i class="fas fa-calendar-alt"></i> Regional Settings
-                </a>
-                <a class="dropdown-item" *permissionLink="'base.system.reload'"
-                   [routerLink]="['/settings/system/properties']">
-                  <i class="fas fa-database"></i> Database Properties
-                </a>
-                <div class="dropdown-header"
-                     *permissionLink="['base.user-management.user.view', 'base.user-management.group.view']">
-                  User Management
-                </div>
-                <a class="dropdown-item" *permissionLink="'base.user-management.user.*'"
-                   [routerLink]="['/management/users']"><i class="fas fa-user-friends"></i> Users
-                </a>
-                <a class="dropdown-item" *permissionLink="'base.user-management.group.view'"
-                   [routerLink]="['/management/groups']"><i class="fas fa-users"></i> Groups
-                </a>
-                <a class="dropdown-item" [routerLink]="['/management/rights']">
-                  <i class="fas fa-low-vision"></i> Rights
-                </a>
-                <a class="dropdown-item" *permissionLink="'base.framework.type.view'"
-                   [routerLink]="['/', 'management', 'groups','acl']">
-                  <i class="fas fa-list"></i> ACL
-                </a>
-                <div *permissionLink="'base.framework.log.view'" class="dropdown-header">Logs</div>
-                <a *permissionLink="'base.framework.log.view'" class="dropdown-item"
-                   [routerLink]="['/settings/logs/objects']">
-                  <fa-icon icon="clipboard-list"></fa-icon>
-                  Object Logs</a>
-                <a class="dropdown-item" *permissionLink="['base.exportd.log.view']"
-                   [routerLink]="['/settings/logs/exportdjobs']">
-                  <fa-icon icon="clipboard-list"></fa-icon>
-                  Exportd Logs</a>
-              </div>
-            </li>
+              </li>
 
+              <p class="hover-trigger">Settings</p>
+            </div>
+            
             <!-- nav user -->
             <li class="nav-item dropdown ml-0">
               <a class="nav-link nav-user mr-0"
@@ -168,7 +183,7 @@
                 </span>
                 <span>
                     <span class="account-user-name">{{user?.first_name}} {{user?.last_name}}</span>
-                    <span class="account-position">{{group?.label}}</span>
+                    <span class="account-position hover-trigger">{{group?.label}}</span>
                 </span>
               </a>
 

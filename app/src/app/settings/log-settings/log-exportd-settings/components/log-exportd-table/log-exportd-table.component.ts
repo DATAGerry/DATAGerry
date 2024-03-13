@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -53,6 +53,7 @@ import { takeUntil } from 'rxjs/operators';
           Are you sure you want to delete this log?
       </div>
       <div class="modal-footer">
+          <button type="button" class="btn btn-warning" (click)="activeModal.dismiss('Cross click')">Close</button>
           <button type="button" class="btn btn-danger" (click)="activeModal.close(this.publicID)">Delete</button>
       </div>
   `
@@ -212,11 +213,11 @@ export class LogExportdTableComponent implements OnDestroy {
   }
 
   constructor(private jobLogService: ExportdJobLogService, private toast: ToastService,
-              private modalService: NgbModal, private datePipe: DatePipe,
-              private fileSaverService: FileSaverService, private fileService: FileService,
-              private route: ActivatedRoute, private router: Router,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    private modalService: NgbModal, private datePipe: DatePipe,
+    private fileSaverService: FileSaverService, private fileService: FileService,
+    private route: ActivatedRoute, private router: Router,
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+    private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
   }
 
   /**
@@ -511,16 +512,16 @@ export class LogExportdTableComponent implements OnDestroy {
     this.modalRef = this.modalService.open(DeleteLogJobModalComponent);
     this.modalRef.componentInstance.publicID = publicID;
     this.modalRef.result.then(result => {
-        this.jobLogService.deleteLog(publicID).subscribe(ack => {
-            this.toast.success('Log was deleted!');
-          }, (error) => {
-            this.toast.error(error);
-          },
-          () => {
-            this.loadLogsFromAPI();
-          }
-        );
+      this.jobLogService.deleteLog(publicID).subscribe(ack => {
+        this.toast.success('Log was deleted!');
+      }, (error) => {
+        this.toast.error(error);
       },
+        () => {
+          this.loadLogsFromAPI();
+        }
+      );
+    },
       (error) => {
         this.toast.error(error);
       });

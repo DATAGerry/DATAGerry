@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 import json
 
@@ -37,6 +37,7 @@ from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
 from cmdb.utils.error import CMDBError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     object_manager = CmdbObjectManager(current_app.database_manager)
@@ -87,8 +88,9 @@ def get_exportd_job_list(request_user: UserModel):
         return abort(400, e.message)
     except ModuleNotFoundError as e:
         return abort(400, e)
-    except CMDBError as e:
-        return abort(404, jsonify(message='Not Found', error=e.message))
+    except CMDBError as err:
+        LOGGER.info("Error occured in get_exportd_job_list(): %s", err)
+        return abort(404, jsonify(message='Not Found'))
     return make_response(job_list)
 
 
@@ -118,6 +120,7 @@ def get_exportd_job(public_id, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.view')
 def get_type_by_name(name: str, request_user: UserModel):
+    """TODO: document"""
     try:
         job_instance = exportd_manager.get_job_by_name(name=name)
     except ObjectManagerGetError as err:
@@ -130,6 +133,7 @@ def get_type_by_name(name: str, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.add')
 def add_job(request_user: UserModel):
+    """TODO: document"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     try:
@@ -174,6 +178,7 @@ def add_job(request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.edit')
 def update_job(request_user: UserModel):
+    """TODO: document"""
     from bson import json_util
     add_data_dump = json.dumps(request.json)
     new_job_data = None
@@ -217,6 +222,7 @@ def update_job(request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.delete')
 def delete_job(public_id: int, request_user: UserModel):
+    """TODO: document"""
     try:
         try:
             job_instance = exportd_manager.get_job(public_id)
@@ -268,6 +274,7 @@ def get_run_job_manual(public_id, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.run')
 def get_job_output_by_id(public_id, request_user: UserModel):
+    """TODO: document"""
     try:
         job = exportd_manager.get_job_by_args(public_id=public_id, exportd_type='PULL')
         resp = worker(job, request_user)
@@ -282,6 +289,7 @@ def get_job_output_by_id(public_id, request_user: UserModel):
 @insert_request_user
 @right_required('base.exportd.job.run')
 def get_job_output_by_name(name, request_user: UserModel):
+    """TODO: document"""
     try:
         job = exportd_manager.get_job_by_args(name=name, exportd_type='PULL')
         resp = worker(job, request_user)
@@ -291,6 +299,7 @@ def get_job_output_by_name(name, request_user: UserModel):
 
 
 def worker(job: ExportdJob, request_user: UserModel):
+    """TODO: document"""
     from flask import make_response as make_res
     from cmdb.exportd.exporter_base import ExportdManagerBase
     from cmdb.event_management.event import Event
@@ -304,7 +313,7 @@ def worker(job: ExportdJob, request_user: UserModel):
                                                                                       request_user.get_display_name(),
                                                                                       False)
         response = make_res(content.data, content.status)
-        response.headers['Content-Type'] = '%s; charset=%s' % (content.mimetype, content.charset)
+        response.headers['Content-Type'] = f'{content.mimetype}; charset={content.charset}'
         return response
     except Exception as err:
         LOGGER.error(err)

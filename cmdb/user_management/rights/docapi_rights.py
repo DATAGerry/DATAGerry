@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,22 +13,23 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-
+"""TODO: document"""
 from cmdb.user_management.models.right import BaseRight, Levels
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class DocapiRight(BaseRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
-    PREFIX = '{}.{}'.format(BaseRight.PREFIX, 'docapi')
+    PREFIX = f'{BaseRight.PREFIX}.docapi'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(DocapiRight, self).__init__(level, name, description=description)
+        super().__init__(level, name, description=description)
 
 
 class DocapiTemplateRight(DocapiRight):
+    """TODO: document"""
     MIN_LEVEL = Levels.PROTECTED
-    PREFIX = '{}.{}'.format(DocapiRight.PREFIX, 'template')
+    PREFIX = f'{DocapiRight.PREFIX}.template'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super(DocapiTemplateRight, self).__init__(name, level, description=description)
+        super().__init__(name, level, description=description)

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -23,105 +23,132 @@ import { RenderResult } from '../../../models/cmdb-render';
 import { CmdbType } from '../../../models/cmdb-type';
 
 @Component({
-  selector: 'cmdb-object-bulk-change-preview',
-  templateUrl: './object-bulk-change-preview.component.html',
-  styleUrls: ['./object-bulk-change-preview.component.scss'],
-  changeDetection: ChangeDetectionStrategy.Default
+    selector: 'cmdb-object-bulk-change-preview',
+    templateUrl: './object-bulk-change-preview.component.html',
+    styleUrls: ['./object-bulk-change-preview.component.scss'],
+    changeDetection: ChangeDetectionStrategy.Default
 })
 export class ObjectBulkChangePreviewComponent {
 
-  /**
-   * Render form mode.
-   */
-  public readonly mode: CmdbMode = CmdbMode.Simple;
+    /**
+     * Render form mode.
+     */
+    public readonly mode: CmdbMode = CmdbMode.Simple;
 
-  /**
-   * Changed data.
-   */
-  @Input() public changeForm: UntypedFormGroup;
+    /**
+     * Initial Page number
+     */
+    public p: number = 1;
 
-  /**
-   * Object types of bulk change.
-   */
-  @Input() public type: CmdbType;
+    /**
+     * Changed data.
+     */
+    @Input() public changeForm: UntypedFormGroup;
 
-  /**
-   * Activation state
-   * @private
-   */
-  private objectState: boolean;
+    /**
+     * Object types of bulk change.
+     */
+    @Input() public type: CmdbType;
 
-  @Input()
-  public set activeState(value: boolean) {
-    this.objectState = value;
-  }
+    /**
+     * Activation state
+     * @private
+     */
+    private objectState: boolean;
 
-  public get activeState(): boolean {
-    return this.objectState;
-  }
+    @Input()
+    public set activeState(value: boolean) {
+        this.objectState = value;
+    }
 
-  /**
-   * List of original results.
-   */
-  public originals: Array<RenderResult> = [];
 
-  /**
-   * List of results.
-   */
-  public results: Array<RenderResult> = [];
+    public get activeState(): boolean {
+        return this.objectState;
+    }
 
-  @Input('results')
-  public set Results(renderResults: Array<RenderResult>) {
-    this.results = renderResults;
-    this.originals = JSON.parse(JSON.stringify(renderResults));
-  }
 
-  /**
-   * List of paginated items.
-   */
-  public displayedItems: Array<RenderResult> = [];
+    /**
+     * List of original results.
+     */
+    public originals: Array<RenderResult> = [];
 
-  /**
-   * Get a field from the type definition
-   * @param name
-   */
-  public getField(name: string): any {
-    const f = this.type.fields.find(field => field.name === name);
-    f.value = this.changeForm.get(name).value;
-    return f;
-  }
+    /**
+     * List of results.
+     */
+    public results: Array<RenderResult> = [];
 
-  /**
-   * Get the original displayed item.
-   * @param index
-   * @param name
-   */
-  public getOriginal(index: number, name: string): any {
-    return this.displayedItems[index].fields.find(field => field.name === name);
-  }
+    @Input('results')
+    public set Results(renderResults: Array<RenderResult>) {
+        this.results = renderResults;
+        this.originals = JSON.parse(JSON.stringify(renderResults));
+        this.onChangePage(this.paginateItems(this.results, 1, 10));
+    }
 
-  /**
-   * Set the displayed items on a new set.
-   * @param items
-   */
-  public onChangePage(items: Array<RenderResult>) {
-    this.displayedItems = items;
-  }
 
-  /**
-   * Get changed value
-   * @param name
-   */
-  public getChangedValue(name: string): any {
-    return this.changeForm.get(name).value;
-  }
+    /**
+     * List of paginated items.
+     */
+    public displayedItems: Array<RenderResult> = [];
 
-  /**
-   * Track when item was changed trigger.
-   * @param index
-   * @param item
-   */
-  public track(index, item) {
-    return item.value.value;
-  }
+    /**
+     * Get a field from the type definition
+     * @param name
+     */
+    public getField(name: string): any {
+        const f = this.type.fields.find(field => field.name === name);
+        f.value = this.changeForm.get(name).value;
+        return f;
+    }
+
+
+    /**
+     * Get the original displayed item.
+     * @param index
+     * @param name
+     */
+    public getOriginal(index: number, name: string): any {
+        return this.displayedItems[index].fields.find(field => field.name === name);
+    }
+
+
+    /**
+     * Set the displayed items on a new set.
+     * @param items
+     */
+    public onChangePage(items: Array<RenderResult>) {
+        this.displayedItems = items;
+    }
+
+
+    /**
+     * Get changed value
+     * @param name
+     */
+    public getChangedValue(name: string): any {
+        return this.changeForm.get(name).value;
+    }
+
+
+    /**
+     * Track when item was changed trigger.
+     * @param index
+     * @param item
+     */
+    public track(index, item) {
+        return item.value.value;
+    }
+
+
+    /**
+    * Paginates the given array of items based on the page number and page size.
+    * @param items The array of items to paginate.
+    * @param pageNumber The current page number.
+    * @param pageSize The number of items per page.
+    * @returns The paginated array of items for the given page.
+    */
+    private paginateItems(items: RenderResult[], pageNumber: number, pageSize: number): RenderResult[] {
+        const startIndex = (pageNumber - 1) * pageSize;
+        const endIndex = Math.min(startIndex + pageSize, items.length);
+        return items.slice(startIndex, endIndex);
+    }
 }

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,9 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
+from abc import ABC, abstractmethod
 
-
-class BaseExporterFormat:
+class BaseExporterFormat(ABC):
+    """TODO: document"""
     FILE_EXTENSION = None
     LABEL = None
     MULTITYPE_SUPPORT = False
@@ -26,5 +28,6 @@ class BaseExporterFormat:
     def __init__(self, file_name=''):
         self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
 
+    @abstractmethod
     def export(self, data, *args):
-        pass
+        """TODO: document"""

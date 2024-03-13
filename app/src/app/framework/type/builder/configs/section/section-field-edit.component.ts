@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -43,9 +43,8 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
    * Label form control.
    */
   public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-
-  private previousNameControlValue: string = '';
   private initialValue: string;
+  isValid$ = true;
 
   public constructor(private validationService: ValidationService) {
     super();
@@ -56,29 +55,33 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     this.form.addControl('label', this.labelControl);
 
     this.disableControlOnEdit(this.nameControl);
+    this.disableControlsOnGlobal(this.nameControl);
+    this.disableControlsOnGlobal(this.labelControl);
     this.patchData(this.data, this.form);
-
     this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
-  }
-
-  onInputChange(event: any, type: string) {
-    const isValid = type === 'name' ? this.nameControl.valid : this.labelControl.valid;
-    const fieldName = 'label';
-    const fieldValue = this.nameControl.value;
-
-    this.validationService.updateValidationStatus(type, isValid, fieldName, fieldValue, this.initialValue, this.previousNameControlValue);
-
-    if (fieldValue.length === 0) {
-      this.previousNameControlValue = this.initialValue;
-    } else {
-      this.previousNameControlValue = fieldValue;
-    }
   }
 
   public ngOnDestroy(): void {
     this.subscriber.next();
     this.subscriber.complete();
+  }
+
+  public hasValidator(control: string): void {
+    if (this.form.controls[control].hasValidator(Validators.required)) {
+
+      let valid = this.form.controls[control].valid;
+      this.isValid$ = this.isValid$ && valid;
+    }
+  }
+
+  onInputChange(event: any, type: string) {
+
+    for (let item in this.form.controls) {
+      this.hasValidator(item)
+    }
+    this.validationService.setIsValid(this.initialValue, this.isValid$);
+    this.isValid$ = true;
+
   }
 
 }

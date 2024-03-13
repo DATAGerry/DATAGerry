@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,16 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight, Levels
 from cmdb.user_management.rights.system_rights import SystemRight
 from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
-    LogRight
+    LogRight, SectionTemplateRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
+# -------------------------------------------------------------------------------------------------------------------- #
 
 SYSTEM_RIGHTS = (
     SystemRight(GLOBAL_RIGHT_IDENTIFIER, description='System and settings'),
@@ -32,6 +33,7 @@ SYSTEM_RIGHTS = (
         SystemRight('reload', description='Reload system configurations')
     )
 )
+
 
 FRAMEWORK_RIGHTS = (
     FrameworkRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage the core framework'),
@@ -67,6 +69,15 @@ FRAMEWORK_RIGHTS = (
         )
     ),
     (
+        SectionTemplateRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage section templates from framework'),
+        (
+            SectionTemplateRight('view', description='View section templates'),
+            SectionTemplateRight('add', description='Add section templates'),
+            SectionTemplateRight('edit', Levels.PROTECTED, description='Edit section templates'),
+            SectionTemplateRight('delete', Levels.SECURE, description='Delete section templates'),
+        )
+    ),
+    (
         LogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage framework logs'),
         (
             LogRight('view', description='View logs'),
@@ -75,6 +86,7 @@ FRAMEWORK_RIGHTS = (
         )
     )
 )
+
 
 EXPORT_RIGHTS = (
     ExportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exports'),
@@ -86,6 +98,7 @@ EXPORT_RIGHTS = (
     )
 )
 
+
 IMPORT_RIGHTS = (
     ImportRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage imports'),
     (
@@ -95,6 +108,7 @@ IMPORT_RIGHTS = (
         ImportTypeRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage type imports')
     )
 )
+
 
 USER_MANAGEMENT_RIGHTS = (
     UserManagementRight(GLOBAL_RIGHT_IDENTIFIER, description='UserModel management'),
@@ -115,6 +129,7 @@ USER_MANAGEMENT_RIGHTS = (
         )
     )
 )
+
 
 EXPORTD_RIGHTS = (
     ExportdRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd'),
@@ -138,6 +153,7 @@ EXPORTD_RIGHTS = (
     )
 )
 
+
 DOCAPI_RIGHTS = (
     DocapiRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage DocAPI'),
     (
@@ -150,6 +166,8 @@ DOCAPI_RIGHTS = (
         ),
     )
 )
+
+#TODO: fix this
 __all__ = (
     BaseRight(
         Levels.NOTSET, GLOBAL_RIGHT_IDENTIFIER, description='Base application right'

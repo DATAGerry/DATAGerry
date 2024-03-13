@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from cmdb.database.managers import DatabaseManagerMongo
+"""TODO: document"""
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog
 from cmdb.manager.managers import ManagerBase as ExportDManager
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.search import Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportDLogManager(ExportDManager):
-
+    """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
         Constructor of `ExportDLogManager`
@@ -31,7 +31,8 @@ class ExportDLogManager(ExportDManager):
         Args:
             database_manager: Connection to the database class.
         """
-        super(ExportDLogManager, self).__init__(ExportdJobLog.COLLECTION, database_manager=database_manager)
+        super().__init__(ExportdJobLog.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[ExportdJobLog]:
@@ -48,7 +49,6 @@ class ExportDLogManager(ExportDManager):
         Returns:
             IterationResult: Instance of IterationResult with generic ExportdJobLog.
         """
-
         try:
             query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
             count_query: Pipeline = self.builder.count(filter=filter)
@@ -58,7 +58,8 @@ class ExportDLogManager(ExportDManager):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[ExportdJobLog] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJobLog)
+
         return iteration_result

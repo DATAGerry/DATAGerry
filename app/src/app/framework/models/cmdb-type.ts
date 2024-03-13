@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -15,84 +15,83 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { CmdbDao } from './cmdb-dao';
 import { AccessControlList } from '../../acl/acl.types';
-
-export interface CmdbTypeListEntry {
-  name: string;
-  label: string;
-  public_id: number;
-  render_meta: CmdbTypeMeta;
-}
-
-export class CmdbTypeList extends Array<CmdbTypeListEntry> {
-}
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 export interface CmdbTypeSection {
-  type: string;
-  name: string;
-  label: string;
-  fields?: Array<any>;
-  reference?: {
-    type_id: number;
-    section_name: string;
-    selected_fields?: Array<string>;
-  };
+    type: string;
+    name: string;
+    label: string;
+    fields?: Array<any>;
+    reference?: {
+        type_id: number;
+        section_name: string;
+        selected_fields?: Array<string>;
+    };
 }
+
 
 export interface CmdbTypeExternalLink {
-  name: string;
-  href: string;
-  label: string;
-  icon: string;
-  fields: Array<any>;
+    name: string;
+    href: string;
+    label: string;
+    icon: string;
+    fields: Array<any>;
 }
+
 
 export interface CmdbTypeMeta {
-  icon: string;
-  sections: Array<CmdbTypeSection>;
-  externals: Array<CmdbTypeExternalLink>;
-  summary: CmdbTypeSummary;
+    icon: string;
+    sections: Array<CmdbTypeSection>;
+    externals: Array<CmdbTypeExternalLink>;
+    summary: CmdbTypeSummary;
 }
+
 
 export interface CmdbTypeSummary {
-  fields: Array<string>;
+    fields: Array<string>;
 }
 
+
 export class CmdbType implements CmdbDao {
+    public readonly public_id: number;
+    public name: string;
+    public label?: string;
+    public description?: string;
+    public active: boolean;
+    public selectable_as_parent: boolean;
+    public global_template_ids?: Array<string> = [];
+    public author_id: number;
+    public version: string;
+    public creation_time: any;
+    public editor_id: number;
+    public last_edit_time: any;
+    public render_meta: CmdbTypeMeta;
+    public fields: Array<any> = [];
+    public acl?: AccessControlList;
 
-  public readonly public_id: number;
-  public name: string;
-  public label?: string;
-  public description?: string;
-  public active: boolean;
-  public selectable_as_parent: boolean;
-  public author_id: number;
-  public version: string;
-  public creation_time: any;
-  public editor_id: number;
-  public last_edit_time: any;
-  public render_meta: CmdbTypeMeta;
-  public fields: Array<any> = [];
-  public acl?: AccessControlList;
 
-  public has_references(): boolean {
-    for (const field of this.fields) {
-      if (field.type === 'ref') {
-        return true;
-      }
+    public has_references(): boolean {
+        for (const field of this.fields) {
+            if (field.type === 'ref') {
+                return true;
+            }
+        }
+
+        return false;
     }
-    return false;
-  }
 
-  public get_reference_fields() {
-    const refFields = [];
-    for (const field of this.fields) {
-      if (field.type === 'ref') {
-        refFields.push(field);
-      }
+
+    public get_reference_fields() {
+        const refFields = [];
+
+        for (const field of this.fields) {
+            if (field.type === 'ref') {
+                refFields.push(field);
+            }
+        }
+
+        return refFields;
     }
-    return refFields;
-  }
 }

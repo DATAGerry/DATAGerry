@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,13 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import List
 
 from flask import request, current_app
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
@@ -35,6 +35,7 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
+# -------------------------------------------------------------------------------------------------------------------- #
 
 groups_blueprint = APIBlueprint('groups', __name__)
 
@@ -68,9 +69,9 @@ def get_groups(params: CollectionParameters):
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
                                         url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     except FrameworkIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -97,7 +98,7 @@ def get_group(public_id: int):
     try:
         group = group_manager.get(public_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
                                      model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
@@ -126,9 +127,9 @@ def insert_group(data: dict):
         result_id: PublicID = group_manager.insert(data)
         group = group_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group), url=request.url,
                                         model=UserGroupModel.MODEL)
     return api_response.make_response(prefix='groups')
@@ -162,9 +163,9 @@ def update_group(public_id: int, data: dict):
         api_response = UpdateSingleResponse(result=group_dict, url=request.url,
                                             model=UserGroupModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     return api_response.make_response()
 
 
@@ -207,20 +208,20 @@ def delete_group(public_id: int, params: GroupDeletionParameters):
                         except ManagerUpdateError as err:
                             return abort(400,
                                          f'Could not move user: {user.public_id} to group: {params.group_id} | '
-                                         f'Error: {err.message}')
+                                         f'Error: {err}')
 
             if params.action == GroupDeleteMode.DELETE.value:
                 for user in users_in_group:
                     try:
                         user_manager.delete(user.public_id)
                     except ManagerDeleteError as err:
-                        return abort(400, f'Could not delete user: {user.public_id} | Error: {err.message}')
+                        return abort(400, f'Could not delete user: {user.public_id} | Error: {err}')
 
     try:
         deleted_group = group_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()

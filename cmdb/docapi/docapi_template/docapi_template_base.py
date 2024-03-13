@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,25 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class TemplateManagementBase:
+    """TODO: document"""
     ASCENDING = 1
     DESCENDING = -1
     COLLECTION = 'docapi.*'
-    __SUPER_INIT_KEYS = [
-        'public_id'
-    ]
-    __SUPER_INDEX_KEYS = [
+
+    SUPER_INDEX_KEYS = [
         {'keys': [('public_id', ASCENDING)], 'name': 'public_id', 'unique': True}
     ]
     IGNORED_INIT_KEYS = []
@@ -40,16 +35,19 @@ class TemplateManagementBase:
 
     def __init__(self, **kwargs):
         self.public_id = None
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+        for key, value in kwargs.items():
+            setattr(self, key, value)
+
 
     @classmethod
     def get_index_keys(cls):
+        """TODO: document"""
         from pymongo import IndexModel
-        index_list = list()
-        for index in cls.INDEX_KEYS + cls.__SUPER_INDEX_KEYS:
+        index_list = []
+        for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
         return index_list
+
 
     def to_json(self) -> dict:
         """
@@ -61,5 +59,7 @@ class TemplateManagementBase:
         import json
         return json.dumps(self.__dict__, default=default)
 
+
     def to_database(self):
+        """TODO: document"""
         return self.__dict__

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,15 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import unique, Enum, auto
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @unique
 class AccessControlPermission(Enum):
     """Permission enum for possible ACL operations."""
 
     def _generate_next_value_(self, start, count, last_values):
+        """TODO: document"""
         return self
 
     CREATE = auto()

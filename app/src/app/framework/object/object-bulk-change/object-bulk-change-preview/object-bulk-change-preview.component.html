@@ -1,6 +1,6 @@
 <h2>Changed objects: {{results?.length}}</h2>
 <hr/>
-<div class="bulk-changed-result" *ngFor="let item of displayedItems; let itemIdx = index">
+<div class="bulk-changed-result" *ngFor="let item of results | paginate: { itemsPerPage: 10, currentPage: p}; let itemIdx = index ">
   <div class="row">
     <div class="col-sm-4">
       <cmdb-active-badge [activeStatus]="activeState"></cmdb-active-badge>
@@ -46,4 +46,4 @@
   </div>
   <hr/>
 </div>
-<jw-pagination #paginationBulkChanges [pageSize]="10" [items]="originals" (changePage)="onChangePage($event)"></jw-pagination>
+<pagination-controls class="pagination" (pageChange)="p = $event"></pagination-controls>

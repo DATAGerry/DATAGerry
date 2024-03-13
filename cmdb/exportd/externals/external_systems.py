@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,31 +13,34 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO. document"""
 import ipaddress
 import xml.etree.ElementTree as ET
-import requests
 import json
 import re
 import os
-import pymysql
 import subprocess
+import requests
+import pymysql
+
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExternalSystemDummy(ExternalSystem):
-
+    """TODO. document"""
     parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemDummy, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__rows = []
+
 
     def prepare_export(self):
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -46,8 +49,12 @@ class ExternalSystemDummy(ExternalSystem):
             row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
-            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+            row["variables"][key] = str(self._export_vars\
+                                        .get(key, ExportVariable(key, ""))\
+                                        .get_value(cmdb_object, template_data))
+
         self.__rows.append(row)
+
 
     def finish_export(self):
         json_data = json.dumps(self.__rows)
@@ -57,26 +64,95 @@ class ExternalSystemDummy(ExternalSystem):
 
 
 class ExternalSystemOpenNMS(ExternalSystem):
-
+    """TODO. document"""
     parameters = [
-        {"name": "resturl", "required": True, "description": "OpenNMS REST URL", "default": "http://127.0.0.1:8980/opennms/rest"},
-        {"name": "restuser", "required": True, "description": "OpenNMS REST user", "default": "admin"},
-        {"name": "restpassword", "required": True, "description": "OpenNMS REST password", "default": "admin"},
-        {"name": "requisition", "required": True, "description": "OpenNMS requisition to use", "default": "cmdb"},
-        {"name": "services", "required": False, "description": "name of services to bind on each node sepetated by space", "default": "ICMP SNMP"},
-        {"name": "exportSnmpConfig", "required": False, "description": "also export SNMP configuration for nodes", "default": "false"},
-        {"name": "exportSnmpConfigRetries", "required": False, "description": "export SNMP configuration for nodes: set SNMP retries", "default": "1"},
-        {"name": "exportSnmpConfigTimeout", "required": False, "description": "export SNMP configuration for nodes: set SNMP timeout", "default": "2000"}
+        {
+            "name": "resturl",
+            "required": True,
+            "description": "OpenNMS REST URL",
+            "default": "http://127.0.0.1:8980/opennms/rest"
+        },
+        {
+            "name": "restuser",
+            "required": True,
+            "description": "OpenNMS REST user",
+            "default": "admin"
+        },
+        {
+            "name": "restpassword",
+            "required": True,
+            "description": "OpenNMS REST password",
+            "default": "admin"
+        },
+        {
+            "name": "requisition",
+            "required": True,
+            "description": "OpenNMS requisition to use",
+            "default": "cmdb"
+        },
+        {
+            "name": "services",
+            "required": False,
+            "description": "name of services to bind on each node sepetated by space",
+            "default": "ICMP SNMP"
+        },
+        {
+            "name": "exportSnmpConfig",
+            "required": False,
+            "description": "also export SNMP configuration for nodes",
+            "default": "false"
+        },
+        {
+            "name": "exportSnmpConfigRetries",
+            "required": False,
+            "description": "export SNMP configuration for nodes: set SNMP retries",
+            "default": "1"
+        },
+        {
+            "name": "exportSnmpConfigTimeout",
+            "required": False,
+            "description": "export SNMP configuration for nodes: set SNMP timeout",
+            "default": "2000"
+        }
     ]
 
     variables = [
-        {"name": "nodelabel", "required": True, "description": "nodelabel for the OpenNMS node."},
-        {"name": "ip", "required": True, "description": "ip address to add in OpenNMS"},
-        {"name": "furtherIps", "required": False, "description": "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3."},
-        {"name": "asset_", "required": False, "description": "content for asset field e.g. - asset_city for adding information to the city field"},
-        {"name": "category_", "required": False, "description": "use variable value of the field to define a category e.g. - category_1"},
-        {"name": "snmp_community", "required": False, "description": "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true."},
-        {"name": "snmp_version", "required": False, "description": "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. Currently the exporter supports only v1/v2c"}
+        {
+            "name": "nodelabel",
+            "required": True,
+            "description": "nodelabel for the OpenNMS node."
+        },
+        {
+            "name": "ip",
+            "required": True,
+            "description": "ip address to add in OpenNMS"
+        },
+        {
+            "name": "furtherIps",
+            "required": False,
+            "description": "further ip addresses to add to OpenNMS node. Format: IP1;IP2;IP3."
+        },
+        {
+            "name": "asset_",
+            "required": False,
+            "description": "content for asset field e.g. - asset_city for adding information to the city field"
+        },
+        {
+            "name": "category_",
+            "required": False,
+            "description": "use variable value of the field to define a category e.g. - category_1"
+        },
+        {
+            "name": "snmp_community",
+            "required": False,
+            "description": "SNMP community of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true."
+        },
+        {
+            "name": "snmp_version",
+            "required": False,
+            "description": "SNMP version of a node. This will be set in OpenNMS, if exportSnmpConfig is set to true. \
+                            Currently the exporter supports only v1/v2c"
+        }
     ]
 
     onms_assetfields = {
@@ -138,8 +214,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
         "longitude": 32
     }
 
+
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemOpenNMS, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__services = self._destination_parms.get("services").split()
         self.__snmp_export = False
@@ -152,6 +229,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         self.__timeout = 10
         self.__xml = None
 
+
     def prepare_export(self):
         # check connection to OpenNMS
         self.__onms_check_connection()
@@ -160,19 +238,29 @@ class ExternalSystemOpenNMS(ExternalSystem):
         attributes["foreign-source"] = self._destination_parms["requisition"]
         self.__xml = ET.Element("model-import", attributes)
 
+
     def add_object(self, cmdb_object, template_data):
         # init error handling
         warning = False
 
         # get node variables
         node_foreignid = cmdb_object.object_information['object_id']
-        node_label = self._export_vars.get("nodelabel", ExportVariable("nodelabel", "undefined")).get_value(cmdb_object, template_data)
-        node_location = self._export_vars.get("location", ExportVariable("location", "default")).get_value(cmdb_object, template_data)
+        node_label = self._export_vars\
+                    .get("nodelabel", ExportVariable("nodelabel", "undefined"))\
+                    .get_value(cmdb_object, template_data)
+        node_location = self._export_vars\
+                        .get("location", ExportVariable("location", "default"))\
+                        .get_value(cmdb_object, template_data)
 
         # get interface information
         interfaces_in = []
-        interfaces_in.append(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object, template_data))
-        interfaces_in.extend(self._export_vars.get("furtherIps", ExportVariable("furtherIps", "[]")).get_value(cmdb_object, template_data).split(";"))
+        interfaces_in.append(self._export_vars\
+                            .get("ip", ExportVariable("ip", "127.0.0.1"))\
+                            .get_value(cmdb_object, template_data))
+        interfaces_in.extend(self._export_vars\
+                            .get("furtherIps", ExportVariable("furtherIps", "[]"))\
+                            .get_value(cmdb_object, template_data).split(";"))
+
         # validate interfaces
         interfaces = []
         for interface in interfaces_in:
@@ -193,7 +281,9 @@ class ExternalSystemOpenNMS(ExternalSystem):
         for export_var in self._export_vars:
             if export_var.startswith("asset_"):
                 asset_name = export_var.replace("asset_", "", 1)
-                asset_value = self.__check_asset(asset_name, self._export_vars.get(export_var).get_value(cmdb_object, template_data))
+                asset_value = self.__check_asset(asset_name, self._export_vars\
+                                                .get(export_var)\
+                                                .get_value(cmdb_object, template_data))
                 if asset_value:
                     assets[asset_name] = asset_value
 
@@ -231,9 +321,16 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
         # update SNMP config if option is set
         if self.__snmp_export:
-            snmp_ip = str(self._export_vars.get("ip", ExportVariable("ip", "127.0.0.1")).get_value(cmdb_object, template_data))
-            snmp_community = str(self._export_vars.get("snmp_community", ExportVariable("snmp_community", "public")).get_value(cmdb_object, template_data))
-            snmp_version = str(self._export_vars.get("snmp_version", ExportVariable("snmp_version", "v2c")).get_value(cmdb_object, template_data))
+            snmp_ip = str(self._export_vars\
+                         .get("ip", ExportVariable("ip", "127.0.0.1"))\
+                         .get_value(cmdb_object, template_data))
+            snmp_community = str(self._export_vars\
+                                .get("snmp_community", ExportVariable("snmp_community", "public"))\
+                                .get_value(cmdb_object, template_data))
+            snmp_version = str(self._export_vars\
+                               .get("snmp_version", ExportVariable("snmp_version", "v2c"))\
+                               .get_value(cmdb_object, template_data))
+
             if self.__check_ip(snmp_ip):
                 self.__onms_update_snmpconf_v12(snmp_ip, snmp_community, snmp_version)
 
@@ -242,49 +339,70 @@ class ExternalSystemOpenNMS(ExternalSystem):
         if warning:
             self.__obj_warning.append(cmdb_object.object_information['object_id'])
 
+
     def finish_export(self):
         self.__onms_update_requisition()
         self.__onms_sync_requisition()
         # create result message
         msg = "Export to OpenNMS finished. "
-        msg += "{} objects exported. ".format(len(self.__obj_successful))
-        msg += "The following objects were exported with warnings: {}".format(self.__obj_warning)
+        msg += f"{len(self.__obj_successful)} objects exported. "
+        msg += f"The following objects were exported with warnings: {self.__obj_warning}"
         self.set_msg(msg)
 
+
     def __onms_check_connection(self):
-        url = "{}/info".format(self._destination_parms["resturl"])
+        url = f"{self._destination_parms['resturl']}/info"
         try:
-            response = requests.get(url, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
+            response = requests.get(url,
+                                    auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
+                                    verify=False, timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
+
+
     def __onms_update_requisition(self):
-        url = "{}/requisitions".format(self._destination_parms["resturl"])
+        rest_url = self._destination_parms["resturl"]
+        url = f"{rest_url}/requisitions"
         data = ET.tostring(self.__xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
         try:
-            response = requests.post(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
-                                     verify=False, timeout=self.__timeout)
+            response = requests.post(
+                                url,
+                                data=data,
+                                headers=headers,
+                                auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
+                                verify=False,
+                                timeout=self.__timeout)
+
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
 
+
     def __onms_sync_requisition(self):
-        url = "{}/requisitions/{}/import".format(self._destination_parms["resturl"], self._destination_parms["requisition"])
+        url = f"{self._destination_parms['resturl']}/requisitions/{self._destination_parms['requisition']}/import"
         try:
-            response = requests.put(url, data="", auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]), verify=False, timeout=self.__timeout)
+            response = requests.put(
+                                url,
+                                data="",
+                                auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
+                                verify=False,
+                                timeout=self.__timeout)
+
             if response.status_code > 202:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
+
 
     def __onms_update_snmpconf_v12(self, ip, community, version="v2c", port="161"):
         # create XML
@@ -301,19 +419,24 @@ class ExternalSystemOpenNMS(ExternalSystem):
         snmp_version.text = version
 
         # send XML to OpenNMS
-        url = "{}/snmpConfig/{}".format(self._destination_parms["resturl"], ip)
+        url = f"{self._destination_parms['resturl']}/snmpConfig/{ip}"
         data = ET.tostring(snmp_config_xml, encoding="utf-8", method="xml")
         headers = {
             "Content-Type": "application/xml"
         }
         try:
-            response = requests.put(url, data=data, headers=headers, auth=(self._destination_parms["restuser"], self._destination_parms["restpassword"]),
-                                    verify=False, timeout=self.__timeout)
+            response = requests.put(url,
+                                    data=data,
+                                    headers=headers,
+                                    auth=(self._destination_parms["restuser"],self._destination_parms["restpassword"]),
+                                    verify=False,
+                                    timeout=self.__timeout)
             if response.status_code > 204:
-                self.error("Error communicating to OpenNMS: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to OpenNMS: HTTP/{str(response.status_code)}")
         except Exception:
             self.error("Can't connect to OpenNMS API")
         return True
+
 
     def __check_ip(self, input_ip):
         try:
@@ -321,6 +444,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         except ValueError:
             return False
         return True
+
 
     def __check_asset(self, asset_name, asset_value):
         try:
@@ -333,23 +457,61 @@ class ExternalSystemOpenNMS(ExternalSystem):
 
 
 class ExternalSystemCpanelDns(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "cpanelApiUrl",        "required": True,   "description": "cPanel API base URL", "default": "https://1.2.3.4:2083/json-api"},
-        {"name": "cpanelApiUser",       "required": True,   "description": "cPanel username", "default": "admin"},
-        {"name": "cpanelApiPassword",   "required": True,   "description": "cPanel password", "default": "admin"},
-        {"name": "cpanelApiToken",      "required": True,   "description": "cPanel token", "default": ""},
-        {"name": "domainName",          "required": True,   "description": "DNS Zone managed by cPanel for adding DNS A records", "default": "objects.datagerry.com"},
-        {"name": "cpanelApiSslVerify",  "required": False,  "description": "disable SSL peer verification", "default": False}
+        {
+            "name": "cpanelApiUrl",
+            "required": True,
+            "description": "cPanel API base URL",
+            "default": "https://1.2.3.4:2083/json-api"
+        },
+        {
+            "name": "cpanelApiUser",
+            "required": True,
+            "description": "cPanel username",
+            "default": "admin"
+        },
+        {
+            "name": "cpanelApiPassword",
+            "required": True,
+            "description": "cPanel password",
+            "default": "admin"
+        },
+        {
+            "name": "cpanelApiToken",
+            "required": True,
+            "description": "cPanel token",
+            "default": ""
+        },
+        {
+            "name": "domainName",
+            "required": True,
+            "description": "DNS Zone managed by cPanel for adding DNS A records",
+            "default": "objects.datagerry.com"
+        },
+        {
+            "name": "cpanelApiSslVerify",
+            "required": False,
+            "description": "disable SSL peer verification",
+            "default": False
+        }
     ]
 
     variables = [
-        {"name": "hostname",    "required": True,   "description": "host part of the DNS A record. e.g. - test"},
-        {"name": "ip",          "required": True,   "description": "ip address of the DNS A record. e.g. - 8.8.8.8"}
+        {
+            "name": "hostname",
+            "required": True,
+            "description": "host part of the DNS A record. e.g. - test"
+        },
+        {
+            "name": "ip",
+            "required": True,
+            "description": "ip address of the DNS A record. e.g. - 8.8.8.8"
+        }
     ]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemCpanelDns, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
 
         self.__variables = export_vars
 
@@ -359,7 +521,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
         self.__cpanel_api_token = self._destination_parms.get("cpanelApiToken")
         self.__domain_name = self._destination_parms.get("domainName")
         self.__cpanel_api_url = self._destination_parms.get("cpanelApiUrl")
-        self.__cpanel_api_url += "/cpanel?cpanel_jsonapi_user={}".format(self.__cpanel_api_user)
+        self.__cpanel_api_url += f"/cpanel?cpanel_jsonapi_user={self.__cpanel_api_user}"
         self.__cpanel_api_url += "&cpanel_jsonapi_apiversion=2&"
 
         if not (self.__cpanel_api_user and self.__cpanel_api_password and self.__domain_name and self.__cpanel_api_url):
@@ -372,14 +534,20 @@ class ExternalSystemCpanelDns(ExternalSystem):
         self.__existing_records = self.get_a_records(self.__domain_name)
         self.__created_records = {}
 
+
     def add_object(self, cmdb_object, template_data):
         # get variables from object
-        hostname = self.format_hostname(str(self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)))
-        ip = self.format_ip(str(self._export_vars.get("ip", ExportVariable("ip", "")).get_value(cmdb_object, template_data)))
+        hostname = self.format_hostname(str(self._export_vars\
+                                            .get("hostname", ExportVariable("hostname", "default"))\
+                                            .get_value(cmdb_object, template_data)))
+        ip = self.format_ip(str(self._export_vars\
+                                .get("ip", ExportVariable("ip", ""))\
+                                .get_value(cmdb_object, template_data)))
 
         # ignore CmdbObject,
         if ip == "" or hostname == "":
-            self.set_msg('Ignore CmdbObject ID:%s. IP and/or hostname is invalid' % cmdb_object.object_information['object_id'])
+            self.set_msg(f"Ignore CmdbObject ID:{cmdb_object.object_information['object_id']}. \
+                           IP and/or hostname is invalid")
 
         # check if a DNS record exist for object
         if hostname in self.__existing_records.keys():
@@ -400,10 +568,12 @@ class ExternalSystemCpanelDns(ExternalSystem):
         # save to created records
         self.__created_records[hostname] = ip
 
+
     def finish_export(self):
         # delete all DNS A records that does not exist in DATAGERRY
         for hostname in self.__existing_records:
             self.delete_a_records(self.__domain_name, hostname)
+
 
     def get_a_records(self, cur_domain: str):
         """
@@ -413,7 +583,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
         Returns:
             A records with hostname -> IP
         """
-        url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone&domain={}{}".format(cur_domain, "&type=A")
+        url_parameters = f"cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=fetchzone&domain={cur_domain}&type=A"
         json_result = self.get_data(url_parameters)
 
         if json_result['cpanelresult']['data'][0]['status'] == 0:
@@ -444,6 +614,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         return output
 
+
     def get_data(self, url: str):
         """
         Sends an HTTP request to cPanel and returns result
@@ -461,13 +632,13 @@ class ExternalSystemCpanelDns(ExternalSystem):
             __session__.auth = (self.__cpanel_api_user, self.__cpanel_api_password)
 
             headers = {
-                'Authorization': 'WHM %s:%s' % (self.__cpanel_api_user, self.__cpanel_api_token),
+                'Authorization': f'WHM {self.__cpanel_api_user}:{self.__cpanel_api_token}'
             }
             url = self.__cpanel_api_url + url
             response = requests.get(url,
                                     headers=headers,
                                     auth=(self.__cpanel_api_user, self.__cpanel_api_password),
-                                    )
+                                    timeout=10)
 
             # If the response was successful, no Exception will be raised
             response.raise_for_status()
@@ -481,6 +652,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         return json_result
 
+
     def add_a_record(self, cur_domain, cur_hostname, cur_ip):
         """
         Adds an A record to the given domain in cPanel
@@ -493,10 +665,11 @@ class ExternalSystemCpanelDns(ExternalSystem):
 
         """
         url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=add_zone_record"
-        url_parameters += "&domain={}".format(cur_domain)
-        url_parameters += "&name={}".format(cur_hostname)
-        url_parameters += "&type=A&address={}".format(cur_ip)
+        url_parameters += f"&domain={cur_domain}"
+        url_parameters += f"&name={cur_hostname}"
+        url_parameters += f"&type=A&address={cur_ip}"
         self.get_data(url_parameters)
+
 
     def delete_a_records(self, cur_domain, cur_hostname):
         """
@@ -518,6 +691,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
                 url_parameters += "&domain={}&line={}".format(cur_domain, str(records[r_name]['line']))
                 self.get_data(url_parameters)
 
+
     def format_hostname(self, value: str) -> str:
         """
     Checks, if a hostname has the correct format.
@@ -529,6 +703,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
         value = re.sub(r' ', "", value)
         value = re.sub(r'[^A-Za-z0-9\-\.]', "", value)
         return value
+
 
     def format_ip(self, value) -> str:
         """
@@ -542,24 +717,39 @@ class ExternalSystemCpanelDns(ExternalSystem):
         try:
             if ipaddress.IPv4Address(value) or ipaddress.IPv6Address(value):
                 return value
-        except:
+        except Exception:
             return ""
+
         return ""
 
 
 class ExternalSystemCsv(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "csv_filename", "required": False, "description": "name of the output CSV file. Default: stdout",
-         "default": "/tmp/testfile.csv"},
-        {"name": "csv_delimiter", "required": False, "description": "CSV delimiter. Default: ';'", "default": ";"},
-        {"name": "csv_enclosure", "required": False, "description": "CSV enclosure. Default: '“'", "default": '”'}
+        {
+            "name": "csv_filename",
+            "required": False,
+            "description": "name of the output CSV file. Default: stdout",
+            "default": "/tmp/testfile.csv"
+        },
+        {
+            "name": "csv_delimiter",
+            "required": False,
+            "description": "CSV delimiter. Default: ';'",
+            "default": ";"
+        },
+        {
+            "name": "csv_enclosure",
+            "required": False,
+            "description": "CSV enclosure. Default: '“'",
+            "default": '”'
+        }
     ]
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemCsv, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # get parameters for cPanel access
@@ -569,28 +759,36 @@ class ExternalSystemCsv(ExternalSystem):
         self.header = []
         self.rows = []
 
+
     def prepare_export(self):
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
         for key in self.__variables:
             if key not in self.header:
                 self.header.append(key)
-            row.update({key: str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))})
+            row.update({key: str(self._export_vars\
+                                .get(key, ExportVariable(key, ""))\
+                                .get_value(cmdb_object, template_data))})
         self.rows.append(row)
+
 
     def finish_export(self):
         import csv
-        with open(self.filename, 'w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=self.header, delimiter=self.delimiter, quotechar=self.enclosure)
+        with open(self.filename, 'w', encoding='utf-8', newline='') as csv_file:
+            writer = csv.DictWriter(csv_file,
+                                    fieldnames=self.header,
+                                    delimiter=self.delimiter,
+                                    quotechar=self.enclosure)
             writer.writeheader()
             for row in self.rows:
                 writer.writerow(row)
 
 
 class ExternalSystemAnsible(ExternalSystem):
-
+    """TODO: document"""
     parameters = []
 
     variables = [
@@ -611,8 +809,9 @@ class ExternalSystemAnsible(ExternalSystem):
         }
     ]
 
+
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemAnsible, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__variables = export_vars
 
         # initialize store for created ansible groups
@@ -624,9 +823,12 @@ class ExternalSystemAnsible(ExternalSystem):
         # initialize store for hostname
         self.host_list = []
 
+
     def add_object(self, cmdb_object, template_data):
         # get hostname for ansible inventory
-        hostname = self._export_vars.get("hostname", ExportVariable("hostname", "default")).get_value(cmdb_object, template_data)
+        hostname = self._export_vars\
+                    .get("hostname", ExportVariable("hostname", "default"))\
+                    .get_value(cmdb_object, template_data)
 
         if hostname:
             self.host_list.append(hostname)
@@ -640,7 +842,10 @@ class ExternalSystemAnsible(ExternalSystem):
             matches = re.search(r'group_(.*)$', v_name)
             if matches:
                 group_name = matches.group(1)
-                group_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
+                group_value = self._export_vars\
+                                .get(v_name, ExportVariable(v_name, ""))\
+                                .get_value(cmdb_object, template_data)
+
                 # check if the value is true
                 if group_name != 'all' and group_value in ['true', 'True']:
                     # write to ansible group store
@@ -650,7 +855,9 @@ class ExternalSystemAnsible(ExternalSystem):
             matches = re.search(r'hostvar_(.*)$', v_name)
             if matches:
                 host_var_name = matches.group(1)
-                host_var_value = self._export_vars.get(v_name, ExportVariable(v_name, "")).get_value(cmdb_object, template_data)
+                host_var_value = self._export_vars\
+                                    .get(v_name, ExportVariable(v_name, ""))\
+                                    .get_value(cmdb_object, template_data)
                 hostvars.update({host_var_name: host_var_value})
 
         # put all hosts into ansible group all
@@ -666,6 +873,7 @@ class ExternalSystemAnsible(ExternalSystem):
                 self.ansible_groups[group]['hosts'] = []
             self.ansible_groups[group]['hosts'].append(hostname)
 
+
     def finish_export(self):
         # create JSON
         groups = self.ansible_groups
@@ -675,16 +883,26 @@ class ExternalSystemAnsible(ExternalSystem):
 
 
 class ExternalSystemExecuteScript(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "script", "required": True, "description": "The script or binary to execute", "default": "/opt/scripts/export"},
-        {"name": "timeout", "required": True, "description": "Timeout for executing the script in seconds", "default": "30"}
+        {
+            "name": "script",
+            "required": True,
+            "description": "The script or binary to execute",
+            "default": "/opt/scripts/export"
+        },
+        {
+            "name": "timeout",
+            "required": True,
+            "description": "Timeout for executing the script in seconds",
+            "default": "30"
+        }
     ]
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemExecuteScript, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__script = self._destination_parms.get("script")
         self.__timeout = int(self._destination_parms.get("timeout"))
@@ -692,8 +910,10 @@ class ExternalSystemExecuteScript(ExternalSystem):
         if not (self.__script and self.__timeout):
             self.error("missing parameters")
 
+
     def prepare_export(self):
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -702,7 +922,9 @@ class ExternalSystemExecuteScript(ExternalSystem):
             row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
-            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+            row["variables"][key] = str(self._export_vars\
+                                        .get(key, ExportVariable(key, ""))\
+                                        .get_value(cmdb_object, template_data))
         self.__rows.append(row)
 
     def finish_export(self):
@@ -715,18 +937,24 @@ class ExternalSystemExecuteScript(ExternalSystem):
         script_name = os.path.basename(self.__script)
         permission_filename = os.path.join(script_path, ".datagerry_exec.json")
         try:
-            with open(permission_filename, "r") as permission_file:
+            with open(permission_filename, "r", encoding='utf-8') as permission_file:
                 permission_data = json.load(permission_file)
                 if script_name not in permission_data["allowed_scripts"]:
-                    self.error("You are not allowed to execute this script. Please check your .datagerry_exec.json file.")
+                    self.error("You are not allowed to execute this script. \
+                               Please check your .datagerry_exec.json file.")
         except OSError:
             self.error("You are not allowed to execute this script. Could not open .datagerry_exec.json file.")
         except KeyError:
-            self.error("You are not allowed to execute this script. Please check structure of your .datagerry_exec.json file.")
+            self.error("You are not allowed to execute this script. \
+                       Please check structure of your .datagerry_exec.json file.")
 
         # execute script
         try:
-            result = subprocess.run(self.__script, timeout=self.__timeout, input=json_data, encoding="utf-8")
+            result = subprocess.run(self.__script,
+                                    timeout=self.__timeout,
+                                    input=json_data,
+                                    encoding="utf-8",
+                                    check=False)
             if result.returncode != 0:
                 self.error("executed script returned an error")
         except FileNotFoundError:
@@ -736,29 +964,52 @@ class ExternalSystemExecuteScript(ExternalSystem):
 
 
 class ExternalSystemGenericRestCall(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "url", "required": True, "description": "URL for HTTP POST", "default": "https://localhost:8443/dg_export"},
-        {"name": "timeout", "required": True, "description": "Timeout for executing the REST call in seconds", "default": "30"},
-        {"name": "username", "required": False, "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.", "default": ""},
-        {"name": "password", "required": False, "description": "Password for a HTTP basic authentication.", "default": ""}
+        {
+            "name": "url",
+            "required": True,
+            "description": "URL for HTTP POST",
+            "default": "https://localhost:8443/dg_export"
+        },
+        {
+            "name": "timeout",
+            "required": True,
+            "description": "Timeout for executing the REST call in seconds",
+            "default": "30"
+        },
+        {
+            "name": "username",
+            "required": False,
+            "description": "Username for a HTTP basic authentication. If empty, no authentication will be done.",
+            "default": ""
+        },
+        {
+            "name": "password",
+            "required": False,
+            "description": "Password for a HTTP basic authentication.",
+            "default": ""
+        }
     ]
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemGenericRestCall, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         # init destination vars
         self.__url = self._destination_parms.get("url")
         self.__timeout = int(self._destination_parms.get("timeout"))
         self.__username = self._destination_parms.get("username")
         self.__password = self._destination_parms.get("password")
         self.__rows = []
+
         if not (self.__url and self.__timeout):
             self.error("missing parameters")
 
+
     def prepare_export(self):
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         row = {}
@@ -767,8 +1018,11 @@ class ExternalSystemGenericRestCall(ExternalSystem):
             row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
-            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+            row["variables"][key] = str(self._export_vars\
+                                        .get(key, ExportVariable(key, ""))\
+                                        .get_value(cmdb_object, template_data))
         self.__rows.append(row)
+
 
     def finish_export(self):
         # create json data
@@ -778,6 +1032,7 @@ class ExternalSystemGenericRestCall(ExternalSystem):
         headers = {
             "Content-Type": "application/json"
         }
+
         auth = None
         if self.__username:
             auth = (self.__username, self.__password)
@@ -785,7 +1040,7 @@ class ExternalSystemGenericRestCall(ExternalSystem):
             response = requests.post(self.__url, data=json_data, headers=headers, auth=auth, verify=False,
                                      timeout=self.__timeout)
             if response.status_code > 202:
-                self.error("Error communicating to REST endpoint: HTTP/{}".format(str(response.status_code)))
+                self.error(f"Error communicating to REST endpoint: HTTP/{str(response.status_code)}")
         except requests.exceptions.ConnectionError:
             self.error("Can't connect to REST endpoint")
         except requests.exceptions.Timeout:
@@ -793,13 +1048,13 @@ class ExternalSystemGenericRestCall(ExternalSystem):
 
 
 class ExternalSystemGenericPullJson(ExternalSystem):
-
+    """TODO: document"""
     parameters = []
 
     variables = [{}]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemGenericPullJson, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
         self.__rows = []
 
     def prepare_export(self):
@@ -812,8 +1067,11 @@ class ExternalSystemGenericPullJson(ExternalSystem):
             row["event"] = self.event.get_param('event')
         row["variables"] = {}
         for key in self._export_vars:
-            row["variables"][key] = str(self._export_vars.get(key, ExportVariable(key, "")).get_value(cmdb_object, template_data))
+            row["variables"][key] = str(self._export_vars\
+                                        .get(key, ExportVariable(key, ""))\
+                                        .get_value(cmdb_object, template_data))
         self.__rows.append(row)
+
 
     def finish_export(self):
         json_data = json.dumps(self.__rows)
@@ -822,12 +1080,32 @@ class ExternalSystemGenericPullJson(ExternalSystem):
 
 
 class ExternalSystemMySQLDB(ExternalSystem):
-
+    """TODO: document"""
     parameters = [
-        {"name": "dbserver", "required": True, "description": "database server", "default": "localhost"},
-        {"name": "database", "required": True, "description": "database name", "default": "db"},
-        {"name": "username", "required": False, "description": "username for database server", "default": "user"},
-        {"name": "password", "required": False, "description": "password for database server", "default": "password"}
+        {
+            "name": "dbserver",
+            "required": True,
+            "description": "database server",
+            "default": "localhost"
+        },
+        {
+            "name": "database",
+            "required": True,
+            "description": "database name",
+            "default": "db"
+        },
+        {
+            "name": "username",
+            "required": False,
+            "description": "username for database server",
+            "default": "user"
+        },
+        {
+            "name": "password",
+            "required": False,
+            "description": "password for database server",
+            "default": "password"
+        }
     ]
 
     variables = [
@@ -839,7 +1117,7 @@ class ExternalSystemMySQLDB(ExternalSystem):
     ]
 
     def __init__(self, destination_parms, export_vars, event=None):
-        super(ExternalSystemMySQLDB, self).__init__(destination_parms, export_vars, event)
+        super().__init__(destination_parms, export_vars, event)
 
 
         # get table names for sync
@@ -851,14 +1129,19 @@ class ExternalSystemMySQLDB(ExternalSystem):
                 self.__tables.append(table_name)
                 self.__table_data[table_name] = []
 
+
     def prepare_export(self):
         pass
+
 
     def add_object(self, cmdb_object, template_data):
         # add data for insert statement
         for table in self.__tables:
             varname = "table_" + table
-            self.__table_data[table].append(str(self._export_vars.get(varname, ExportVariable(varname, "")).get_value(cmdb_object, template_data)))
+            self.__table_data[table].append(str(self._export_vars\
+                                                .get(varname, ExportVariable(varname, ""))\
+                                                .get_value(cmdb_object, template_data)))
+
 
     def finish_export(self):
         # connect to database
@@ -878,14 +1161,14 @@ class ExternalSystemMySQLDB(ExternalSystem):
             # remove all data from existing tables
             for table in self.__tables:
                 with db_connection.cursor() as cursor:
-                    sql = "DELETE FROM {}".format(table)
+                    sql = f"DELETE FROM {table}"
                     cursor.execute(sql)
 
             # insert new data in all tables
             for table in self.__tables:
                 for data in self.__table_data[table]:
                     with db_connection.cursor() as cursor:
-                        sql = "INSERT INTO {} VALUES({})".format(table, data)
+                        sql = f"INSERT INTO {table} VALUES({data})"
                         cursor.execute(sql)
 
             # close transaction

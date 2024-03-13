@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,32 +13,30 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-"""
-Example service
-
-"""
+"""Example service"""
 import logging
 import time
 import cmdb.process_management.service
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class ExampleService(cmdb.process_management.service.AbstractCmdbService):
-    """Example implementation of AbstractCmdbService
-    """
+    """Example implementation of AbstractCmdbService"""
 
     def __init__(self):
-        super(ExampleService, self).__init__()
+        super().__init__()
         self._name = "service1"
         self._eventtypes = ["cmdb.core.#", "cmdb.service1.#"]
 
+
     def _run(self):
-        LOGGER.info("{}: start run".format(self._name))
+        LOGGER.info("%s: start run", self._name)
         while not self._event_shutdown.is_set():
             time.sleep(10)
-        LOGGER.info("{}: end run".format(self._name))
+        LOGGER.info("%s: end run", self._name)
+
 
     def _handle_event(self, event):
-        LOGGER.info("{}: event received: {}".format(self._name, event))
+        LOGGER.info("%s: event received: %s",self._name, event)

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2019 NETHINKS GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -12,18 +12,19 @@
 # GNU Affero General Public License for more details.
 #
 # You should have received a copy of the GNU Affero General Public License
-# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+# along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
-BUILDVAR_VERSION = 2.0.0
-BUILDVAR_VERSION_EXT = 2.0.0
-BUILDVAR_DOCKER_TAG = 2.0.0
+BUILDVAR_VERSION = 2.1.0
+BUILDVAR_VERSION_EXT = 2.1.0
+BUILDVAR_DOCKER_TAG = 2.1.0
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
 BIN_PIP = pip
 BIN_NPM = npm
 BIN_RPMBUILD = rpmbuild
+BIN_DEBBUILD = dpkg-deb
 DIR_BUILD = $(CURDIR)/target
 DIR_BIN_BUILD = ${DIR_BUILD}/bin
 DIR_TEMP= ${DIR_BUILD}/temp
@@ -31,6 +32,7 @@ DIR_DOCS_SOURCE = docs/source
 DIR_DOCS_BUILD = ${DIR_BUILD}/docs
 DIR_DOCS_TARGET = cmdb/interface/docs/static
 DIR_RPM_BUILD = ${DIR_BUILD}/rpm
+DIR_DEB_BUILD = ${DIR_BUILD}/deb
 DIR_TARGZ_BUILD = ${DIR_BUILD}/targz
 DIR_DOCKER_BUILD = ${DIR_BUILD}/docker
 DIR_WEB_SOURCE = app
@@ -83,6 +85,7 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.updater.versions.updater_20200226 \
 		--hidden-import cmdb.updater.versions.updater_20200408 \
 		--hidden-import cmdb.updater.versions.updater_20200512 \
+		--hidden-import cmdb.updater.versions.updater_20200513 \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.exportd.externals \
@@ -132,6 +135,27 @@ targz: bin
 	cp contrib/setup/setup.sh ${DIR_TARGZ_BUILD}/src/datagerry
 	tar -czvf ${DIR_TARGZ_BUILD}/datagerry-${BUILDVAR_VERSION}.tar.gz -C ${DIR_TARGZ_BUILD}/src datagerry
 
+# create deb package
+.PHONY: deb
+deb: bin
+	mkdir -p ${DIR_DEB_BUILD}
+	mkdir -p ${DIR_DEB_BUILD}/DEBIAN
+	mkdir -p ${DIR_DEB_BUILD}/usr/bin
+	mkdir -p ${DIR_DEB_BUILD}/usr/lib/systemd/system
+	mkdir -p ${DIR_DEB_BUILD}/usr/lib/tmpfiles.d
+	mkdir -p ${DIR_DEB_BUILD}/etc/datagerry
+	cp contrib/deb/control ${DIR_DEB_BUILD}/DEBIAN
+	cp contrib/deb/postinst ${DIR_DEB_BUILD}/DEBIAN
+	cp contrib/deb/preinst ${DIR_DEB_BUILD}/DEBIAN
+	chmod 755 ${DIR_DEB_BUILD}/DEBIAN/*
+	cp ${DIR_BIN_BUILD}/datagerry ${DIR_DEB_BUILD}/usr/bin
+	cp contrib/systemd/datagerry.service ${DIR_DEB_BUILD}/usr/lib/systemd/system
+	cp etc/cmdb.conf ${DIR_DEB_BUILD}/etc/datagerry/
+	cp contrib/tmpfiles.d/datagerry.conf ${DIR_DEB_BUILD}/usr/lib/tmpfiles.d
+	chmod 755 ${DIR_DEB_BUILD}/usr/*
+	chmod 755 ${DIR_DEB_BUILD}/etc/*
+	cd ${DIR_DEB_BUILD}
+	${BIN_DEBBUILD} --build ${DIR_DEB_BUILD}
 
 # create Docker image
 .PHONY: docker
@@ -141,7 +165,7 @@ docker: rpm
 	mkdir -p ${DIR_DOCKER_BUILD}/src/files
 	cp contrib/docker/Dockerfile ${DIR_DOCKER_BUILD}/src
 	cp ${DIR_RPM_BUILD}/RPMS/x86_64/DATAGERRY-*.rpm ${DIR_DOCKER_BUILD}/src/files
-	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t nethinks/datagerry:${BUILDVAR_DOCKER_TAG} ${DIR_DOCKER_BUILD}/src
+	docker build -f ${DIR_DOCKER_BUILD}/src/Dockerfile -t becongmbh/datagerry:${BUILDVAR_DOCKER_TAG} ${DIR_DOCKER_BUILD}/src
 
 
 # execute tests

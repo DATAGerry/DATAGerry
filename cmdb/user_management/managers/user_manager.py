@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,22 +13,24 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import Union, List
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
 from ...framework.results import IterationResult
 from ...framework.utils import PublicID
 from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerUpdateError
 from ...manager.managers import ManagerBase
 from ...search import Query, Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManager(ManagerBase):
+    """TODO: document"""
 
     def __init__(self, database_manager: DatabaseManagerMongo):
-        super(UserManager, self).__init__(UserModel.COLLECTION, database_manager=database_manager)
+        super().__init__(UserModel.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[UserModel]:
@@ -56,10 +58,13 @@ class UserManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[UserModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(UserModel)
+
         return iteration_result
+
 
     def get(self, public_id: Union[PublicID, int]) -> UserModel:
         """
@@ -76,6 +81,7 @@ class UserManager(ManagerBase):
             return UserModel.from_data(resource_result)
         raise ManagerGetError(f'User with ID: {public_id} not found!')
 
+
     def get_by(self, query: Query) -> UserModel:
         """
         Get a single user by a query.
@@ -91,6 +97,7 @@ class UserManager(ManagerBase):
             return UserModel.from_data(resource_result)
         raise ManagerGetError(f'User with the query: {query} not found!')
 
+
     def get_many(self, query: Query = None) -> List[UserModel]:
         """
         Get a collection of users by a query. Passing no query means all users.
@@ -104,6 +111,7 @@ class UserManager(ManagerBase):
         query = query or {}
         results = self._get(self.collection, filter=query)
         return [UserModel.from_data(user) for user in results]
+
 
     def insert(self, user: Union[UserModel, dict]) -> PublicID:
         """
@@ -122,6 +130,7 @@ class UserManager(ManagerBase):
             user = UserModel.to_data(user)
         return self._insert(self.collection, resource=user)
 
+
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
         """
         Update a existing user in the system.
@@ -139,8 +148,9 @@ class UserManager(ManagerBase):
         update_result = self._update(collection=self.collection, filter={'public_id': public_id}, resource=user)
 
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
         return update_result
+
 
     def delete(self, public_id: Union[PublicID, int]) -> UserModel:
         """
@@ -157,7 +167,7 @@ class UserManager(ManagerBase):
             UserModel: The deleted user as its model.
         """
         if public_id in [1]:
-            raise ManagerDeleteError(f'You cant delete the admin user')
+            raise ManagerDeleteError('You cant delete the admin user')
         user: UserModel = self.get(public_id=public_id)
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
 

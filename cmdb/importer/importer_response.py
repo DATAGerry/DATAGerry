@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,9 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import List
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class BaseImporterResponse:
     """Base response after import action"""
@@ -30,7 +30,7 @@ class ImporterObjectResponse(BaseImporterResponse):
     def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
         self.success_imports: List[ImportSuccessMessage] = success_imports or []
         self.failed_imports: List[ImportFailedMessage] = failed_imports or []
-        super(ImporterObjectResponse, self).__init__(message=message)
+        super().__init__(message=message)
 
 
 class ImportMessage:
@@ -50,7 +50,7 @@ class ImportSuccessMessage(ImportMessage):
             obj (optional): cmdb object instance
         """
         self.public_id = public_id
-        super(ImportSuccessMessage, self).__init__(obj=obj)
+        super().__init__(obj=obj)
 
 
 class ImportFailedMessage(ImportMessage):
@@ -63,4 +63,4 @@ class ImportFailedMessage(ImportMessage):
             obj (optional): failed dict
         """
         self.error_message = error_message
-        super(ImportFailedMessage, self).__init__(obj=obj)
+        super().__init__(obj=obj)

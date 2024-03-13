@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO, NoPublicIDError
 from cmdb.framework.utils import Collection, Model
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExecuteState(Enum):
+    """TODO: document"""
     SUCCESSFUL = 0
     INFO = 1
     WARNING = 2
@@ -29,6 +30,7 @@ class ExecuteState(Enum):
 
 
 class ExportdJobType(Enum):
+    """TODO: document"""
     PUSH = 0
     PULL = 1
 
@@ -68,7 +70,8 @@ class ExportdJob(JobManagementBase):
         self.scheduling = scheduling
         self.state = state or 0
         self.exportd_type = exportd_type or ExportdJobType.PUSH.name
-        super(ExportdJob, self).__init__(**kwargs)
+        super().__init__(**kwargs)
+
 
     @classmethod
     def from_data(cls, data: dict) -> "ExportdJob":
@@ -89,6 +92,7 @@ class ExportdJob(JobManagementBase):
             exportd_type=data.get('exportd_type', None),
         )
 
+
     @classmethod
     def to_json(cls, instance: "ExportdJob") -> dict:
         """Convert a job instance to json conform data"""
@@ -108,6 +112,7 @@ class ExportdJob(JobManagementBase):
             'exportd_type': instance.exportd_type,
         }
 
+
     def get_public_id(self) -> int:
         """
         get the public id of current element
@@ -122,11 +127,11 @@ class ExportdJob(JobManagementBase):
 
         Raises:
             NoPublicIDError: if `public_id` is zero or not set
-
         """
         if self.public_id == 0 or self.public_id is None:
             raise NoPublicIDError()
         return self.public_id
+
 
     def get_name(self) -> str:
         """
@@ -139,6 +144,7 @@ class ExportdJob(JobManagementBase):
         else:
             return self.name
 
+
     def get_label(self) -> str:
         """
         Get the label of the job
@@ -149,6 +155,7 @@ class ExportdJob(JobManagementBase):
             return ""
         else:
             return self.label
+
 
     def get_active(self) -> bool:
         """
@@ -161,6 +168,7 @@ class ExportdJob(JobManagementBase):
         else:
             return self.active
 
+
     def get_sources(self):
         """
         Get all sources of the job
@@ -168,6 +176,7 @@ class ExportdJob(JobManagementBase):
             list: all sources
         """
         return self.sources
+
 
     def get_destinations(self):
         """
@@ -177,6 +186,7 @@ class ExportdJob(JobManagementBase):
         """
         return self.destination
 
+
     def get_variables(self):
         """
         Get all variables of the job
@@ -184,6 +194,7 @@ class ExportdJob(JobManagementBase):
             list: all variables
         """
         return self.variables
+
 
     def get_scheduling(self) -> dict:
         """
@@ -193,6 +204,7 @@ class ExportdJob(JobManagementBase):
         """
         return self.scheduling
 
+
     def get_state(self):
         """
         Get state of executation of the job
@@ -200,6 +212,7 @@ class ExportdJob(JobManagementBase):
             str:
         """
         return self.state
+
 
     def get_exportd_typ(self):
         """
@@ -209,5 +222,7 @@ class ExportdJob(JobManagementBase):
         """
         return self.exportd_type
 
+
     def get_author_id(self):
+        """TODO: document"""
         return self.author_id

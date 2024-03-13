@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,20 +13,20 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
 import logging
-from abc import ABC
 from typing import List
 
-from cmdb.utils.error import CMDBError
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
-class CmdbManagerBase(ABC):
-    """Represents the base class for cmdb managers. A respective implementation is always adapted to the
-       respective database managers :class:`cmdb.database.DatabaseManager`.
-       But should always use at least the super functions listed here.
+class CmdbManagerBase:
+    """
+    Represents the base class for cmdb managers. A respective implementation is always adapted to the
+    respective database manager :class:`cmdb.database.DatabaseManager`.
     """
 
     def __init__(self, database_manager: DatabaseManagerMongo):
@@ -35,10 +35,10 @@ class CmdbManagerBase(ABC):
             directly in the declaration of the object managers
 
         Args:
-            database_manager (DatabaseManager): initialisation of an database managers
-
+            database_manager (DatabaseManagerMongo): Instance of DatabaseManagerMongo
         """
         self.dbm: DatabaseManagerMongo = database_manager
+
 
     def _count(self, collection: str) -> int:
         """get the number of objects in given collection
@@ -49,6 +49,7 @@ class CmdbManagerBase(ABC):
             (int): number of found objects
         """
         return self.dbm.count(collection=collection)
+
 
     def _aggregate(self, collection: str, pipeline, **kwargs):
         """search after query requirements
@@ -64,19 +65,6 @@ class CmdbManagerBase(ABC):
         """
         return self.dbm.aggregate(collection, pipeline=pipeline, **kwargs)
 
-    def _search(self, collection: str, query, **kwargs):
-        """search after query requirements
-
-        Args:
-            collection: collection to search
-            query: query or aggregate pipe
-            *args:
-            **kwargs:
-
-        Returns:
-            list of found documents
-        """
-        return self.dbm.search(collection, filter=query, **kwargs)
 
     def _get(self, collection: str, public_id: int) -> dict:
         """get document from the database by their public id
@@ -88,11 +76,9 @@ class CmdbManagerBase(ABC):
         Returns:
             str: founded document in json format
         """
-        return self.dbm.find_one(
-            collection=collection,
-            public_id=public_id
-        )
-    
+        return self.dbm.find_one(collection=collection, public_id=public_id)
+
+
     def _get_location(self, collection: str, object_id: int) -> dict:
         """get location document from the database by their object id
 
@@ -103,11 +89,9 @@ class CmdbManagerBase(ABC):
         Returns:
             str: location document in json format
         """
-        return self.dbm.find_one(
-            collection=collection,
-            object_id=object_id
-        )
-    
+        return self.dbm.find_one(collection=collection, object_id=object_id)
+
+
     def get_location_by_object(self, collection: str, object_id: int) -> dict:
         """get location document from the database by their object id
 
@@ -122,21 +106,7 @@ class CmdbManagerBase(ABC):
             collection=collection,
             object_id=object_id
         )
-    
-    def _get_child(self, collection: str, parent_id: int) -> dict:
-        """_summary_
 
-        Args:
-            collection (str): name of the database collection
-            parent_id (int): public_id of parent
-
-        Returns:
-            (dict): Child location dict 
-        """
-        return self.dbm.find_one_child(
-            collection=collection,
-            parent_id=parent_id
-        )
 
     def _get_by(self, collection: str, **requirements: dict) -> dict:
         """get document from the database by requirements
@@ -146,12 +116,12 @@ class CmdbManagerBase(ABC):
             **requirements:
 
         Returns:
-
         """
         requirements_filter = {}
         for k, req in requirements.items():
             requirements_filter.update({k: req})
         return self.dbm.find_one_by(collection=collection, filter=requirements_filter)
+
 
     def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> \
             List[dict]:
@@ -164,13 +134,13 @@ class CmdbManagerBase(ABC):
 
         Returns:
             list: list of all documents
-
         """
         requirements_filter = {}
         formatted_sort = [(sort, direction)]
         for k, req in requirements.items():
             requirements_filter.update({k: req})
         return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
+
 
     def _insert(self, collection: str, data: dict) -> int:
         """insert document/object into database
@@ -182,12 +152,9 @@ class CmdbManagerBase(ABC):
         Returns:
             int: new public_id of inserted document
             None: if anything goes wrong
-
         """
-        return self.dbm.insert(
-            collection=collection,
-            data=data
-        )
+        return self.dbm.insert(collection=collection, data=data)
+
 
     def _update(self, collection: str, public_id: int, data: dict) -> object:
         """
@@ -200,12 +167,9 @@ class CmdbManagerBase(ABC):
         Returns:
             acknowledgment of database
         """
-        return self.dbm.update(
-            collection=collection,
-            filter={'public_id': public_id},
-            data=data
-        )
-    
+        return self.dbm.update(collection=collection, filter={'public_id': public_id}, data=data)
+
+
     def _update_for_object(self, collection: str, object_id: int, data: dict) -> object:
         """
         update document/object in database
@@ -222,6 +186,7 @@ class CmdbManagerBase(ABC):
             filter={'object_id': object_id},
             data=data
         )
+
 
     def _unset_update_many(self, collection: str, data: str) -> object:
         """
@@ -240,6 +205,7 @@ class CmdbManagerBase(ABC):
             data=data
         )
 
+
     def _update_many(self, collection: str, query: dict, update: dict):
         """
         update all documents that match the filter from a collection.
@@ -257,6 +223,7 @@ class CmdbManagerBase(ABC):
             update=update
         )
 
+
     def _delete(self, collection: str, public_id: int):
         """
         delete document/object inside database
@@ -272,9 +239,10 @@ class CmdbManagerBase(ABC):
             filter={'public_id': public_id}
         ).acknowledged
 
-    def _delete_many(self, collection: str, filter_query: dict):
+
+    def delete_many(self, collection: str, filter_query: dict):
         """
-        removes all documents that match the filter from a collection.
+        Removes all documents that match the filter from a collection.
         Args:
             collection (str): name of the database collection
             filter (dict): Specifies deletion criteria using query operators.
@@ -282,37 +250,4 @@ class CmdbManagerBase(ABC):
         Returns:
             acknowledgment of database
         """
-        return self.dbm.delete_many(
-            collection=collection,
-            **filter_query
-        )
-
-
-class ManagerInitError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while INIT operation - E: ${err}'
-
-
-class ManagerGetError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while GET operation - E: ${err}'
-
-
-class ManagerInsertError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while INSERT operation - E: ${err}'
-
-
-class ManagerUpdateError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while UPDATE operation - E: ${err}'
-
-
-class ManagerDeleteError(CMDBError):
-
-    def __init__(self, err):
-        self.message = f'Error while DELETE operation - E: ${err}'
+        return self.dbm.delete_many(collection=collection, **filter_query)

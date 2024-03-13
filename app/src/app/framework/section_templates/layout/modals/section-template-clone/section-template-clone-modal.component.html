@@ -1,0 +1,39 @@
+<div class="modal-content">
+    <div class="modal-body">
+        <img 
+            id="login-logo" 
+            src="/assets/img/datagerry_logo.svg" 
+            class="img-fluid mx-auto d-block w-50"
+            alt="DATAGERRY"
+        />
+        <br>
+        <div class="clone-heading">
+            <h4><b>Cloning of {{sectionTemplate.label}} [ID:{{sectionTemplate.public_id}}]</b></h4>
+            Enter the name for the copy and decide if it should be a global template!
+        </div>
+        <form [formGroup]="cloneForm">
+            <div class="form-group">
+                <hr>
+                <br>
+                <div class="form-label-group">
+                    <input 
+                        type="text"
+                        formControlName="templateLabel"
+                        placeholder="Template name"
+                        required
+                        autofocus
+                    >
+                </div>
+                <br>
+                <div class="form-label-group">
+                    <input formControlName="isGlobal" type="checkbox" id="isGlobal">
+                    <label class="is-global-label" for="isGlobal">Global Template</label>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-light" (click)="activeModal.close(false)">Cancel</button>
+        <button type="button" class="btn btn-primary" [disabled]="!cloneForm.valid" (click)="activeModal.close(cloneForm.value)">Clone Template</button>
+    </div>
+</div>

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LookedAccessControlQueryBuilder(PipelineBuilder):
     """Query builder for looked objects in aggregation calls."""
 
     def __init__(self, pipeline: Pipeline = None):
-        super(LookedAccessControlQueryBuilder, self).__init__(pipeline=pipeline)
+        super().__init__(pipeline=pipeline)
+
 
     def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
         self.clear()
@@ -32,6 +33,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         self.add_pipe(self._unwind_types())
         self.add_pipe(self._match_acl(group_id, permission))
         return self.pipeline
+
 
     def _lookup_types(self) -> dict:
         return self.lookup_sub_(
@@ -48,9 +50,11 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
             as_='type'
         )
 
+
     def _unwind_types(self) -> dict:
         unwind = self.unwind_(path='$type')
         return unwind
+
 
     def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
         return self.match_(
@@ -69,7 +73,8 @@ class AccessControlQueryBuilder(PipelineBuilder):
     """Query builder for restrict objects in aggregation calls."""
 
     def __init__(self, pipeline: Pipeline = None):
-        super(AccessControlQueryBuilder, self).__init__(pipeline=pipeline)
+        super().__init__(pipeline=pipeline)
+
 
     def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
         self.clear()
@@ -77,6 +82,7 @@ class AccessControlQueryBuilder(PipelineBuilder):
         self.add_pipe(self._unwind_types())
         self.add_pipe(self._match_acl(group_id, permission))
         return self.pipeline
+
 
     def _lookup_types(self) -> dict:
         return self.lookup_sub_(
@@ -93,9 +99,11 @@ class AccessControlQueryBuilder(PipelineBuilder):
             as_='type'
         )
 
+
     def _unwind_types(self) -> dict:
         unwind = self.unwind_(path='$type')
         return unwind
+
 
     def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
         return self.match_(

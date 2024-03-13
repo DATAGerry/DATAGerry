@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,54 +13,65 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
-import cmdb.process_management.service
-import cmdb.exportd.exporter_base
+
 import time
 import sched
-
-from cmdb.event_management.event import Event
 from threading import Thread
 from datetime import datetime, timezone
+
+from cmdb.event_management.event import Event
+import cmdb.process_management.service
+import cmdb.exportd.exporter_base
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.user_management.managers.user_manager import UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 scheduler = sched.scheduler(time.time, time.sleep)
 
 
 class ExportdService(cmdb.process_management.service.AbstractCmdbService):
+    """TODO: document"""
+
     def __init__(self):
-        super(ExportdService, self).__init__()
+        super().__init__()
         self._name = "exportd"
-        self._eventtypes = ["cmdb.core.object.#",
-                            "cmdb.core.objects.#",
-                            "cmdb.core.objecttype.#",
-                            "cmdb.core.objecttypes.#",
-                            "cmdb.exportd.#"]
+        self._eventtypes = [
+            "cmdb.core.object.#",
+            "cmdb.core.objects.#",
+            "cmdb.core.objecttype.#",
+            "cmdb.core.objecttypes.#",
+            "cmdb.exportd.#"
+            ]
+
 
     def _run(self):
-        LOGGER.info("{}: start run".format(self._name))
+        LOGGER.info("%s: start run", self._name)
         while not self._event_shutdown.is_set():
             scheduler.run()
             time.sleep(1)
-        LOGGER.info("{}: end run".format(self._name))
+        LOGGER.info("%s: end run", self._name)
+
 
     def _handle_event(self, event: Event):
-        LOGGER.debug("event received: {}".format(event.get_type()))
+        LOGGER.debug("event received:%s",event.get_type())
         self.handler(event)
+
 
     def __schedule_job(self, event: Event):
         pass
 
+
     def handler(self, event: Event):
+        """TODO: document"""
         # get type of Event
         event_type = event.get_type()
 
@@ -82,8 +93,10 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         elif "cmdb.exportd.deleted" != event_type:
             scheduler.enter(5, 1, self.start_thread, argument=(event, ))
 
+
     @staticmethod
     def start_thread(event: Event):
+        """TODO: document"""
         event_type = event.get_type()
         # start new threads
 
@@ -101,6 +114,7 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
 
 
 class ExportdThread(Thread):
+    """TODO: document"""
 
     def __init__(self, event: Event, state: bool = False):
 
@@ -108,7 +122,7 @@ class ExportdThread(Thread):
         database_options = scr.get_all_values_from_section('Database')
         database = DatabaseManagerMongo(**database_options)
 
-        super(ExportdThread, self).__init__()
+        super().__init__()
         self.job = None
         self.job_id = int(event.get_param("id"))
         self.type_id = int(event.get_param("type_id")) if event.get_param("type_id") else None
@@ -122,7 +136,9 @@ class ExportdThread(Thread):
         self.exportd_job_manager = ExportdJobManagement(database_manager=database)
         self.user_manager = UserManager(database_manager=database)
 
+
     def run(self):
+        """TODO: document"""
         try:
             if self.type_id:
                 for obj in self.exportd_job_manager.get_job_by_event_based(True):
@@ -137,7 +153,9 @@ class ExportdThread(Thread):
             LOGGER.error(ex)
             return ex
 
+
     def worker(self):
+        """TODO: document"""
         cur_user = None
         try:
             # update job for UI
@@ -168,12 +186,9 @@ class ExportdThread(Thread):
                     'message': ['Successful'] if not err else err.args,
                 }
                 self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
-            except LogManagerInsertError as err:
-                LOGGER.error(err)
+            except LogManagerInsertError as error:
+                LOGGER.error(error)
         finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
             self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
-
-
-

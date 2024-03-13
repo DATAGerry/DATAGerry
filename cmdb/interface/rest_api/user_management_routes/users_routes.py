@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,12 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from datetime import datetime, timezone
 from flask import abort, request, current_app
 
 from cmdb.framework.utils import PublicID
-from cmdb.manager.errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -28,6 +28,7 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
+# -------------------------------------------------------------------------------------------------------------------- #
 
 users_blueprint = APIBlueprint('users', __name__)
 
@@ -61,9 +62,9 @@ def get_users(params: CollectionParameters):
         api_response = GetMultiResponse(users, total=iteration_result.total, params=params,
                                         url=request.url, model=UserModel.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -89,8 +90,8 @@ def get_user(public_id: int):
 
     try:
         user: UserModel = user_manager.get(public_id)
-    except ManagerGetError as err:
-        return abort(404, err.message)
+    except ManagerGetError:
+        return abort(404)
     api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
                                      model=UserModel.MODEL, body=request.method == 'HEAD')
     return api_response.make_response()
@@ -121,9 +122,9 @@ def insert_user(data: dict):
         result_id: PublicID = user_manager.insert(data)
         user = user_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     api_response = InsertSingleResponse(result_id=result_id, raw=UserModel.to_dict(user), url=request.url,
                                         model=UserModel.MODEL)
     return api_response.make_response(prefix='users')
@@ -153,9 +154,9 @@ def update_user(public_id: int, data: dict):
         user_manager.update(public_id=PublicID(public_id), user=user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     return api_response.make_response()
 
 
@@ -180,9 +181,9 @@ def delete_user(public_id: int):
         deleted_group = user_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerDeleteError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     return api_response.make_response()
 
 
@@ -211,8 +212,8 @@ def change_user_password(public_id: int):
         user_manager.update(public_id=PublicID(public_id), user=user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except ManagerUpdateError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return api_response.make_response()

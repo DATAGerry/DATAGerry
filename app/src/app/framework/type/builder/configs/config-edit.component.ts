@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -11,26 +11,30 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import {
-  Component,
-  ComponentFactoryResolver,
-  ComponentRef, EventEmitter,
-  Input, OnDestroy,
-  OnInit, Output,
-  ViewChild,
-  ViewContainerRef
+    Component,
+    ComponentFactoryResolver,
+    ComponentRef,
+    Input, OnDestroy,
+    OnInit,
+    Output,
+    ViewChild,
+    EventEmitter,
+    ViewContainerRef
 } from '@angular/core';
+import { UntypedFormGroup } from '@angular/forms';
+
+import { ReplaySubject, Subscription } from 'rxjs';
+
 import { configComponents } from './configs.list';
 import { CmdbType } from '../../../models/cmdb-type';
 import { CmdbMode } from '../../../modes.enum';
-import { UntypedFormGroup } from '@angular/forms';
 import { ConfigEditBaseComponent } from './config.edit';
-import { ReplaySubject } from 'rxjs';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-config-edit',
@@ -57,25 +61,50 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
   private component: any;
   private componentRef: ComponentRef<any>;
 
-  constructor(private resolver: ComponentFactoryResolver) {
-    this.form = new UntypedFormGroup({});
-  }
+  fieldChangesSubscription: Subscription;
 
-  public ngOnInit(): void {
-    this.container.clear();
-    this.component = configComponents[this.data.type];
+  // Changed values emitter of components created
+  @Output() valuesChanged: EventEmitter<any> = new EventEmitter();
 
-    const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
-    this.componentRef = this.container.createComponent(factory);
-    this.componentRef.instance.mode = this.mode;
-    this.componentRef.instance.data = this.data;
-    this.componentRef.instance.form = this.form;
-    this.componentRef.instance.sections = this.sections;
-    this.componentRef.instance.fields = this.fields;
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    constructor(private resolver: ComponentFactoryResolver) {
+        this.form = new UntypedFormGroup({});
+    }
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+
+    public ngOnInit(): void {
+        this.container.clear();
+        this.component = configComponents[this.data.type];
+
+        const factory = this.resolver.resolveComponentFactory<ConfigEditBaseComponent>(this.component);
+        this.componentRef = this.container.createComponent(factory);
+        this.componentRef.instance.mode = this.mode;
+        this.componentRef.instance.data = this.data;
+        this.componentRef.instance.form = this.form;
+        this.componentRef.instance.sections = this.sections;
+        this.componentRef.instance.fields = this.fields;
+
+        this.fieldChangesSubscription = this.componentRef.instance.fieldChanges$.subscribe(
+            (data : any) => this.fieldValueChanged(data)
+        );
+    }
+
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+        this.fieldChangesSubscription.unsubscribe();
+    }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /**
+     * Emits changes of values
+     * @param data new values
+     */
+    public fieldValueChanged(data: any){
+        this.valuesChanged.emit(data);
+    }
+
+
 }

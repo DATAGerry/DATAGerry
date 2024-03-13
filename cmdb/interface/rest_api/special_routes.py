@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 
 from flask import request, abort, current_app
@@ -23,9 +23,9 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
-from cmdb.framework.assistant_profiles.profiles import ProfileAssistant
-from cmdb.manager.errors import ManagerInsertError
-
+from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
+from cmdb.errors.manager import ManagerInsertError
+# -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
     object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
@@ -96,17 +96,15 @@ def create_initial_profiles(data: str):
     types_total = object_manager.count_types()
     objects_total = object_manager.count_objects()
 
-    # TODO: only execute if there are no categories, types and objects in the database
-    # if categories_total == 0 and types_total == 0 and objects_total == 0:
-    #     LOGGER.info("EMPTY DB")
-    # else:
-    #     LOGGER.info("STUFF in DB")
+    # Only execute if there are no categories, types and objects in the database
+    if categories_total > 0 or types_total > 0 or objects_total > 0:
+        return abort(400, "There exists either objects, types or categories in the DB")
 
     try:
         profile_assistant = ProfileAssistant()
         created_ids = profile_assistant.create_profiles(profiles)
     except ManagerInsertError as err:
-        return abort(400, err.message)
+        return abort(400, err)
 
     return make_response(created_ids)
 
@@ -119,6 +117,6 @@ def _fetch_only_active_objs():
     """
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
-        if value in ['True', 'true']:
-            return True
+        return value in ['True', 'true']
+
     return False

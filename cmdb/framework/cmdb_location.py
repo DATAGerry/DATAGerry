@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,18 +13,21 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
 """
 This module contains the implementation of CmdbLocation, which is representing
 a location in Datagarry.
 """
-
 import logging
 
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 CmdbLocation - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbLocation(CmdbDAO):
     """
@@ -37,9 +40,7 @@ class CmdbLocation(CmdbDAO):
         DEFAULT_VERSION (str):      The default "starting" version number.
         SCHEMA (dict):              The validation schema for this DAO.
         INDEX_KEYS (list):          List of index keys for the database.
-
     """
-
     COLLECTION: Collection = 'framework.locations'
     MODEL: Model = 'Location'
     DEFAULT_VERSION: str = '1.0.0'
@@ -76,12 +77,16 @@ class CmdbLocation(CmdbDAO):
         },
     }
 
+# ---------------------------------------------------- CONSTRUCTOR --------------------------------------------------- #
 
-    # ---------------------------------------------------------------------------- #
-    #                               DUNDER FUNCTIONS                               #
-    # ---------------------------------------------------------------------------- #
-
-    def __init__(self, name, parent, object_id, type_id, type_label, type_icon="fas fa-cube", type_selectable=True, **kwargs):
+    def __init__(self, name: str,
+                 parent: int,
+                 object_id: int,
+                 type_id: int,
+                 type_label: str,
+                 type_icon: str = "fas fa-cube",
+                 type_selectable = True,
+                 **kwargs):
         """
         Initialisation of location
 
@@ -103,10 +108,7 @@ class CmdbLocation(CmdbDAO):
         self.type_selectable: bool = type_selectable
         super().__init__(**kwargs)
 
-
-    # ---------------------------------------------------------------------------- #
-    #                                CLASS FUNCTIONS                               #
-    # ---------------------------------------------------------------------------- #
+# -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "CmdbLocation":
@@ -120,15 +122,16 @@ class CmdbLocation(CmdbDAO):
             (CmdbLocation): Instance of CmdbLocation with data from dict
         """
         return cls(
-            public_id=data.get('public_id'),
-            name=data.get('name'),
-            parent=data.get('parent'),
-            object_id=data.get('object_id'),
-            type_id=data.get('type_id'),
-            type_label=data.get('type_label'),
-            type_icon=data.get('type_icon', 'fas fa-cube'),
-            type_selectable=data.get('type_selectable', True),
+            public_id = data.get('public_id'),
+            name = data.get('name'),
+            parent = data.get('parent'),
+            object_id = data.get('object_id'),
+            type_id = data.get('type_id'),
+            type_label = data.get('type_label'),
+            type_icon = data.get('type_icon', 'fas fa-cube'),
+            type_selectable = data.get('type_selectable', True),
         )
+
 
     @classmethod
     def to_json(cls, instance: "CmdbLocation") -> dict:
@@ -151,6 +154,7 @@ class CmdbLocation(CmdbDAO):
             'type_icon': instance.type_icon,
             'type_selectable': instance.type_selectable,
         }
+
 
     @classmethod
     def to_data(cls, instance: "CmdbLocation") -> dict:

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -27,6 +27,21 @@ export class SelectSimpleComponent extends RenderFieldComponent {
 
   constructor() {
     super();
+  }
+
+  /**
+   * Retrieves the label corresponding to a given value from the options array.
+   * 
+   * @param value - The value for which to find the corresponding label.
+   * @returns The label of the option with the matching value, or an empty string if no match is found.
+   */
+  getLabelForValue(value: string): string {
+
+    // Find the option in the options array where the name property matches the given value
+    const matchingOption = this.data.options.find(option => option.name === value);
+
+    // If a matching option is found, return its label; otherwise, return an empty string
+    return matchingOption ? matchingOption.label : '';
   }
 
 }

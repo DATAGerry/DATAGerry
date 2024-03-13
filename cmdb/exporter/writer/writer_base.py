@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,34 +13,28 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
+import datetime
+import time
 
 from flask import Response, abort
-from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_render import RenderList, RenderResult
-
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
-
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
-
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
-
-
-try:
-    from cmdb.utils.error import CMDBError
-except ImportError:
-    CMDBError = Exception
+from cmdb.utils.error import CMDBError
 
 from cmdb.utils.helpers import load_class
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SupportedExporterExtension:
     """Supported export extensions for exporting (csv, json, xlsx, xml)"""
+
 
     def __init__(self, extensions=None):
         """
@@ -51,9 +45,11 @@ class SupportedExporterExtension:
         arguments = extensions if extensions else []
         self.extensions = [*["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"], *arguments]
 
+
     def get_extensions(self):
         """Get list of supported export extension"""
         return self.extensions
+
 
     def convert_to(self):
         """Converts the supported export extension inside the list to a passed BaseExporterFormat list."""
@@ -72,6 +68,7 @@ class SupportedExporterExtension:
 
 
 class BaseExportWriter:
+    """TODO: document"""
 
     def __init__(self, export_format: BaseExporterFormat, export_config: ExporterConfig):
         """init of FileExporter
@@ -82,7 +79,8 @@ class BaseExportWriter:
         """
         self.export_format = export_format
         self.export_config = export_config
-        self.data: List[RenderResult] = []
+        self.data: list[RenderResult] = []
+
 
     def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
         """Get all objects from the collection"""
@@ -91,7 +89,7 @@ class BaseExportWriter:
 
         try:
             _params = self.export_config.parameters
-            _result: List[CmdbObject] = manager.iterate(filter=_params.filter,
+            _result: list[CmdbObject] = manager.iterate(filter=_params.filter,
                                                         sort=_params.sort,
                                                         order=_params.order,
                                                         limit=0, skip=0,
@@ -100,12 +98,12 @@ class BaseExportWriter:
             self.data = RenderList(object_list=_result, request_user=user, database_manager=database_manager,
                                    object_manager=dep_object_manager, ref_render=True).render_result_list(raw=False)
 
-        except CMDBError as e:
-            return abort(400, e)
+        except CMDBError as err:
+            return abort(400, err)
+
 
     def export(self):
-        import datetime
-        import time
+        """TODO: document"""
 
         conf_option = self.export_config.options
         timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
@@ -116,6 +114,6 @@ class BaseExportWriter:
             mimetype="text/" + self.export_format.__class__.FILE_EXTENSION,
             headers={
                 "Content-Disposition":
-                    "attachment; filename=%s.%s" % (timestamp, self.export_format.__class__.FILE_EXTENSION)
+                    f"attachment; filename={timestamp}.{self.export_format.__class__.FILE_EXTENSION}"
             }
         )

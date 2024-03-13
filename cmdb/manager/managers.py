@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,33 +13,39 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from typing import Union, List
 
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import Collection, PublicID
 from cmdb.manager import AbstractManagerBase
 from cmdb.search import Query, Pipeline
-from cmdb.search.query.builder import Builder
+from cmdb.manager.query_builder.builder import Builder
+# -------------------------------------------------------------------------------------------------------------------- #
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              ManagerQueryBuilder - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ManagerQueryBuilder(Builder):
     """Query/Pipeline builder class for the managers"""
 
     def __init__(self):
         """Init a query or a pipeline to None"""
         self.query: Union[Query, Pipeline] = Pipeline([])
-        super(ManagerQueryBuilder, self).__init__()
+        super().__init__()
+
 
     def __len__(self):
         """Get the length of the query"""
         return len(self.query)
 
+
     def clear(self):
         """`Delete` the query content"""
         self.query = None
+
 
     def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
             Union[Query, Pipeline]:
@@ -58,7 +64,7 @@ class ManagerQueryBuilder(Builder):
             The `FrameworkQueryBuilder` query pipeline with the parameter contents.
         """
         self.clear()
-        self.query = Pipeline([])
+        self.query: Union[Query, Pipeline] = Pipeline([])
 
         if isinstance(filter, dict):
             self.query.append(self.match_(filter))
@@ -72,6 +78,7 @@ class ManagerQueryBuilder(Builder):
             self.query.append(self.limit_(limit))
 
         return self.query
+
 
     def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
         """
@@ -93,6 +100,9 @@ class ManagerQueryBuilder(Builder):
         self.query.append(self.count_('total'))
         return self.query
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  ManagerBase - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ManagerBase(AbstractManagerBase):
     """Framework managers implementation for all framework based CRUD operations."""
@@ -106,25 +116,39 @@ class ManagerBase(AbstractManagerBase):
         """
         self.collection: Collection = collection
         self.builder = ManagerQueryBuilder()
-        super(ManagerBase, self).__init__(database_manager)
+        super().__init__(database_manager)
+
 
     def count(self, filter: dict, *args, **kwargs) -> int:
+        """TODO: document"""
         raise NotImplementedError
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult:
+        """TODO: document"""
         raise NotImplementedError
+
 
     def find(self, filter: dict, *args, **kwargs) -> ListResult:
+        """TODO: document"""
         raise NotImplementedError
+
 
     def get(self, public_id: PublicID) -> dict:
+        """TODO: document"""
         raise NotImplementedError
+
 
     def insert(self, resource: dict) -> PublicID:
+        """TODO: document"""
         raise NotImplementedError
+
 
     def update(self, public_id: PublicID, resource: dict):
+        """TODO: document"""
         raise NotImplementedError
 
+
     def delete(self, public_id: PublicID):
+        """TODO: document"""
         raise NotImplementedError

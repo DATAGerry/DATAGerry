@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,17 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from cmdb.database.managers import DatabaseManagerMongo
+"""TODO: document"""
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd import ExportdJob
 from cmdb.manager.managers import ManagerBase as ExportDManager
 from cmdb.framework.results import IterationResult
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.search import Pipeline
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportDJobManager(ExportDManager):
-
+    """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo):
         """
         Constructor of `ExportDJobManager`
@@ -31,7 +31,8 @@ class ExportDJobManager(ExportDManager):
         Args:
             database_manager: Connection to the database class.
         """
-        super(ExportDJobManager, self).__init__(ExportdJob.COLLECTION, database_manager=database_manager)
+        super().__init__(ExportdJob.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[ExportdJob]:
@@ -48,7 +49,6 @@ class ExportDJobManager(ExportDManager):
         Returns:
             IterationResult: Instance of IterationResult with generic ExportdJob.
         """
-
         try:
             query: Pipeline = self.builder.build(filter=filter, limit=limit, skip=skip, sort=sort, order=order)
             count_query: Pipeline = self.builder.count(filter=filter)
@@ -58,7 +58,7 @@ class ExportDJobManager(ExportDManager):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[ExportdJob] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJob)
         return iteration_result

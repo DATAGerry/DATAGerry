@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,91 +13,47 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from cmdb.framework.cmdb_base import ManagerInitError, ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
+"""TODO: document"""
 from cmdb.utils.error import CMDBError
-
-
-class WrongInputFormatError(CMDBError):
-    def __init__(self, class_name, data, error):
-        self.message = f"Error while parsing {class_name} - Data: {data} - Error: {error}"
-
-
-class UpdateError(CMDBError):
-    def __init__(self, class_name, data, error):
-        self.message = f"Update error while updating {class_name} - Data: {data} - Error: {error}"
-
-
-class TypeInsertError(CMDBError):
-    def __init__(self, type_id):
-        self.message = f"Type with ID: {type_id} could not be inserted!"
-
-
-class TypeAlreadyExists(CMDBError):
-    def __init__(self, type_id):
-        self.message = f"Type with ID: {type_id} already exists!"
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class TypeNotFoundError(CMDBError):
+    """TODO: document"""
     def __init__(self, type_id):
         self.message = f"Type with ID: {type_id} not found!"
 
 
-class ObjectNotFoundError(CMDBError):
-    def __init__(self, obj_id):
-        self.message = f"Object with ID: {obj_id} not found!"
-
-
 class ObjectInsertError(CMDBError):
+    """TODO: document"""
     def __init__(self, error):
-        self.message = 'Object could not be inserted | Error {} \n show into logs for details'.format(error.message)
-
-
-class ObjectUpdateError(CMDBError):
-    def __init__(self, msg):
-        self.message = 'Something went wrong during update: {}'.format(msg)
+        self.message = f'Object could not be inserted | Error {error.message} \n show into logs for details'
 
 
 class ObjectDeleteError(CMDBError):
+    """TODO: document"""
     def __init__(self, msg):
-        self.message = 'Something went wrong during delete: {}'.format(msg)
-
-
-class NoRootCategories(CMDBError):
-    def __init__(self):
-        self.message = 'No root categories exists'
+        self.message = f'Something went wrong during delete: {msg}'
 
 
 class ExternalFillError(CMDBError):
     """Error if href of TypeExternalLink could not filled with input data"""
-
     def __init__(self, inputs, error):
         super().__init__()
-        self.message = 'Href link do not fit with inputs: {}, error: {}'.format(inputs, error)
+        self.message = f'Href link do not fit with inputs: {inputs}, error: {error}'
 
 
 class TypeReferenceLineFillError(CMDBError):
     """Error if summary line of TypeReferences could not filled with input data"""
-
     def __init__(self, inputs, error):
         super().__init__()
-        self.message = 'Type reference summary line do not fit with inputs: {}, error: {}'.format(inputs, error)
+        self.message = f'Type reference summary line do not fit with inputs: {inputs}, error: {error}'
 
 
 class FieldInitError(CMDBError):
     """Error if field could not be initialized"""
-
     def __init__(self, field_name):
         super().__init__()
-        self.message = 'Field {} could not be initialized'.format(field_name)
-
-
-class NoSummaryDefinedError(CMDBError):
-    """Error if no summary fields designed"""
-
-    def __init__(self, field_name):
-        super().__init__()
-        self.message = 'Field {} could not be initialized'.format(field_name)
+        self.message = f'Field {field_name} could not be initialized'
 
 
 class FieldNotFoundError(CMDBError):
@@ -105,72 +61,66 @@ class FieldNotFoundError(CMDBError):
 
     def __init__(self, field_name, type_name):
         super().__init__()
-        self.message = 'Field {} was not found inside input_type: {}'.format(field_name, type_name)
+        self.message = f'Field {field_name} was not found inside input_type: {type_name}'
 
-# ---------------------------------------------------------------------------- #
-#                              LOCATION EXCEPTIONS                             #
-# ---------------------------------------------------------------------------- #
-class LocationManagerError(ManagerGetError):
+# -------------------------------------------------- CMDB BASE ERROS ------------------------------------------------- #
 
+class ManagerInitError(CMDBError):
+    "TODO: document"
     def __init__(self, err):
-        super().__init__(err=err)
+        self.message = f'Error while INIT operation - E: ${err}'
 
 
-class LocationManagerInitError(ManagerInitError):
-
+class ManagerGetError(CMDBError):
+    "TODO: document"
     def __init__(self, err):
-        super().__init__(err=err)
+        self.message = f'Error while GET operation - E: ${err}'
 
 
-class LocationManagerGetError(ManagerGetError):
-
+class ManagerInsertError(CMDBError):
+    "TODO: document"
     def __init__(self, err):
-        super().__init__(err=err)
+        self.message = f'Error while INSERT operation - E: ${err}'
 
 
-class LocationManagerInsertError(ManagerInsertError):
-
+class ManagerUpdateError(CMDBError):
+    "TODO: document"
     def __init__(self, err):
-        super().__init__(err=err)
+        self.message = f'Error while UPDATE operation - E: ${err}'
 
-class LocationManagerUpdateError(ManagerUpdateError):
 
+class ManagerDeleteError(CMDBError):
+    "TODO: document"
     def __init__(self, err):
-        super().__init__(err=err)
+        self.message = f'Error while DELETE operation - E: ${err}'
 
-class LocationManagerDeleteError(ManagerDeleteError):
 
-    def __init__(self, err):
-        super().__init__(err=err)
-
-# ---------------------------------------------------------------------------- #
-#                               OBJECT EXCEPTIONS                              #
-# ---------------------------------------------------------------------------- #
+# ------------------------------------------------- OBJECT EXCEPTIONS ------------------------------------------------ #
 
 class ObjectManagerInitError(ManagerInitError):
-
+    """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)
 
 
 class ObjectManagerGetError(ManagerGetError):
-
+    """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)
 
 class ObjectManagerInsertError(ManagerInsertError):
-
+    """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)
 
 
 class ObjectManagerUpdateError(ManagerUpdateError):
-
+    """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)
 
 
 class ObjectManagerDeleteError(ManagerDeleteError):
-
+    """TODO: document"""
     def __init__(self, err):
         super().__init__(err=err)

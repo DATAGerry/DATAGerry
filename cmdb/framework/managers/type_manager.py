@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""
+TODO: document
+"""
 import json
-
-from bson import json_util
+import logging
 from typing import Union, List
 
+from bson import json_util
+
 from cmdb.database.utils import object_hook
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import TypeModel
 from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
@@ -28,7 +31,13 @@ from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Pipeline
+# -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  TypeManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class TypeManager(ManagerBase):
     """
@@ -42,7 +51,8 @@ class TypeManager(ManagerBase):
         Args:
             database_manager: Connection to the database class.
         """
-        super(TypeManager, self).__init__(TypeModel.COLLECTION, database_manager=database_manager)
+        super().__init__(TypeModel.COLLECTION, database_manager=database_manager)
+
 
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[TypeModel]:
@@ -69,7 +79,7 @@ class TypeManager(ManagerBase):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            raise ManagerIterationError(err=err)
+            raise ManagerIterationError(err) from err
         iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(TypeModel)
         return iteration_result
@@ -87,6 +97,7 @@ class TypeManager(ManagerBase):
         types: List[TypeModel] = [TypeModel.from_data(result) for result in results]
         return ListResult(types)
 
+
     def get(self, public_id: Union[PublicID, int]) -> TypeModel:
         """
         Get a single type by its id.
@@ -101,6 +112,7 @@ class TypeManager(ManagerBase):
         for resource_result in cursor_result.limit(-1):
             return TypeModel.from_data(resource_result)
         raise ManagerGetError(f'Type with ID: {public_id} not found!')
+
 
     def insert(self, type: Union[TypeModel, dict]) -> PublicID:
         """
@@ -122,6 +134,7 @@ class TypeManager(ManagerBase):
 
         return self._insert(self.collection, resource=type)
 
+
     def update(self, public_id: Union[PublicID, int], type: Union[TypeModel, dict]):
         """
         Update a existing type in the system.
@@ -140,8 +153,10 @@ class TypeManager(ManagerBase):
 
         update_result = self._update(self.collection, filter={'public_id': public_id}, resource=type)
         if update_result.matched_count != 1:
-            raise ManagerUpdateError(f'Something happened during the update!')
+            raise ManagerUpdateError('Something happened during the update!')
+
         return update_result
+
 
     def delete(self, public_id: Union[PublicID, int]) -> TypeModel:
         """

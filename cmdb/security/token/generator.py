@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,23 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
 from datetime import datetime, timedelta, timezone
 
 from authlib.jose import jwt
 
 from cmdb import __title__
-from cmdb.database.managers import DatabaseManagerMongo
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.auth import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
 from cmdb.utils.system_reader import SystemSettingsReader
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
 class TokenGenerator:
+    """TODO: document"""
     DEFAULT_CLAIMS = {
         'iss': {
             'essential': True,
@@ -46,11 +48,15 @@ class TokenGenerator:
         self.auth_module = AuthModule(SystemSettingsReader(self.database_manager).get_all_values_from_section(
             'auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
+
     def get_expire_time(self) -> datetime:
+        """TODO: document"""
         expire_time = int(self.auth_module.settings.get_token_lifetime(DEFAULT_TOKEN_LIFETIME))
         return datetime.now(timezone.utc) + timedelta(minutes=expire_time)
 
+
     def generate_token(self, payload: dict, optional_claims: dict = None) -> bytes:
+        """TODO: document"""
         optional_claims = optional_claims or {}
 
         token_claims = {

@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,7 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import json
 import logging
 
@@ -21,12 +21,14 @@ from flask import request, abort, current_app
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.user_management import UserModel, UserManager
+from cmdb.manager.logs_manager import LogsManager
+
 from cmdb.database.utils import default
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.managers.log_manager import LogManagerInsertError, CmdbLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_render import RenderError, CmdbRender
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
@@ -41,14 +43,17 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
-from cmdb.user_management import UserModel, UserManager
+
+from cmdb.errors.manager import ManagerInsertError
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 with current_app.app_context():
     user_manager = UserManager(current_app.database_manager)
     object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-    log_manager = CmdbLogManager(current_app.database_manager)
+    logs_manager = LogsManager(current_app.database_manager, current_app.event_queue)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
@@ -57,6 +62,7 @@ importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/obj
 @importer_object_blueprint.route('/importer', methods=['GET'])
 @login_required
 def get_importer():
+    """TODO: document"""
     importer_response = []
     for importer in __OBJECT_IMPORTER__:
         importer_response.append({
@@ -72,6 +78,7 @@ def get_importer():
 @importer_object_blueprint.route('/importer/config<string:importer_type>', methods=['GET'])
 @login_required
 def get_default_importer_config(importer_type):
+    """TODO: document"""
     try:
         importer: ObjectImporterConfig = __OBJECT_IMPORTER_CONFIG__[importer_type]
     except IndexError:
@@ -83,16 +90,16 @@ def get_default_importer_config(importer_type):
 @importer_object_blueprint.route('/parser', methods=['GET'])
 @login_required
 def get_parser():
+    """TODO: document"""
     parser = [parser for parser in __OBJECT_PARSER__]
     return make_response(parser)
 
 
-# @importer_object_blueprint.route('/parser/default', defaults={'importer_type': 'json'}, methods=['GET'])
-# @importer_object_blueprint.route('/parser/default/', defaults={'importer_type': 'json'}, methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>', methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>/', methods=['GET'])
 @login_required
 def get_default_parser_config(parser_type: str):
+    """TODO: document"""
     try:
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
@@ -103,19 +110,21 @@ def get_default_parser_config(parser_type: str):
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
 @login_required
-@insert_request_user
 @right_required('base.import.object.*')
-def parse_objects(request_user: UserModel):
+def parse_objects():
+    """TODO: document"""
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config
     parser_config: dict = get_element_from_data_request('parser_config', request) or {}
     # Load file format
     file_format = request.form.get('file_format', None)
+
     try:
         parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
     except ParserRuntimeError as pre:
         return abort(500, pre.message)
+
     return make_response(parsed_output)
 
 
@@ -124,6 +133,7 @@ def parse_objects(request_user: UserModel):
 @insert_request_user
 @right_required('base.import.object.*')
 def import_objects(request_user: UserModel):
+    """TODO: document"""
     # Check if file exists
     if not request.files:
         return abort(400, 'No import file was provided')
@@ -167,7 +177,7 @@ def import_objects(request_user: UserModel):
         return abort(406, ple.message)
     parser = parser_class(parser_config)
 
-    LOGGER.info(f'Parser {parser_class} was loaded')
+    LOGGER.info('Parser %s was loaded', parser_class)
 
     # Load importer config
     try:
@@ -182,12 +192,12 @@ def import_objects(request_user: UserModel):
     except ImporterLoadError as ile:
         return abort(406, ile.message)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
-    LOGGER.info(f'Importer {importer_class} was loaded')
+    LOGGER.info('Importer %s was loaded', importer_class)
 
     try:
         import_response: ImporterObjectResponse = importer.start_import()
     except ImportRuntimeError as ire:
-        LOGGER.error(f'Error while importing objects: {ire.message}')
+        LOGGER.error('Error while importing objects: %s', ire.message)
         return abort(500, ire.message)
     except AccessDeniedError as err:
         return abort(403, err.message)
@@ -202,6 +212,7 @@ def import_objects(request_user: UserModel):
             # get object state of every imported object
             current_type_instance = object_manager.get_type(importer_config_request.get('type_id'))
             current_object = object_manager.get_object(message.public_id)
+
             current_object_render_result = CmdbRender(object_instance=current_object,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
@@ -216,7 +227,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
-            log_manager.insert(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
+            logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
             LOGGER.error(err)
@@ -224,7 +235,7 @@ def import_objects(request_user: UserModel):
         except RenderError as err:
             LOGGER.error(err)
             return abort(500)
-        except LogManagerInsertError as err:
-            LOGGER.error(err)
+        except ManagerInsertError as err:
+            LOGGER.error("ManagerInsertError: %s", err)
 
     return make_response(import_response)

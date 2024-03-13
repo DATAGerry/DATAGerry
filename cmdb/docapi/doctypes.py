@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,11 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import io
 from xhtml2pdf import pisa
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class DocumentType:
+    """TODO: document"""
     FILE_EXTENSION = None
     ICON = None
     LABEL = None
@@ -26,10 +28,12 @@ class DocumentType:
         pass
 
     def create_doc(self, input_data):
+        """TODO: document"""
         pass
 
 
 class PdfDocumentType:
+    """TODO: document"""
     FILE_EXTENSION = "pdf"
     ICON = "file-pdf"
     LABEL = "PDF"
@@ -38,6 +42,7 @@ class PdfDocumentType:
         pass
 
     def create_doc(self, input_data):
+        """TODO: document"""
         output = io.BytesIO()
         # create PDF
         pdf_creator = pisa.CreatePDF(

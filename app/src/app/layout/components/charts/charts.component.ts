@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import {Component, Input, AfterViewInit, AfterViewChecked, ViewChild } from '@angular/core';
+import { Component, Input, AfterViewInit, AfterViewChecked, ViewChild } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 // IMPORTANT
 // chartjs-plugin-datalabel must be loaded after the Chart.js library!
@@ -64,10 +64,14 @@ export class ChartsComponent implements AfterViewInit, AfterViewChecked {
         datasets: [{
           backgroundColor: this.labelColors,
           datalabels: {
-            color: '#FFF', font: { size: 12 }
-          }
-        }]
+            color: '#FFF', font: { size: 15 }
+          },
+        }],
       },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+      }
     });
     this.chart.data.labels = this.dataLabels;
     this.chart.data.datasets[0].data = this.dataItems;

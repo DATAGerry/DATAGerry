@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,10 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
-from typing import TypeVar, Generic, List, Union, Type
+"""TODO: document"""
+from typing import TypeVar, Generic, List, Union
 
 from cmdb.framework import CmdbDAO
+# -------------------------------------------------------------------------------------------------------------------- #
 
 C = TypeVar('C', bound=CmdbDAO)
 
@@ -33,6 +34,7 @@ class ListResult(Generic[C]):
         """
         self.results = results
         self._total = None
+
 
     @property
     def total(self):

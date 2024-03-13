@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,15 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from json import dumps
-
-from pytest import fixture, importorskip
 from datetime import datetime
 from http import HTTPStatus
 
+from pytest import fixture, importorskip
+
 from cmdb.framework import TypeModel
-from cmdb.framework.models.type import TypeRenderMeta, TypeFieldSection, TypeSummary
+from cmdb.framework.models.type_model import TypeSummary
+from cmdb.framework.models.type_model import TypeFieldSection, TypeRenderMeta
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
 from tests.utils.flask_test_client import RestAPITestSuite
@@ -29,6 +30,7 @@ from tests.utils.flask_test_client import RestAPITestSuite
 
 @fixture(scope='module')
 def example_type():
+    """TODO: document"""
     return TypeModel(
         public_id=1, name='test', label='Test', author_id=1, creation_time=datetime.now(),
         active=True, version=None, description='Test type',
@@ -55,15 +57,17 @@ def example_type():
 
 @fixture(scope='module')
 def collection(connector, database_name):
+    """TODO: document"""
     from pymongo.mongo_client import MongoClient
     from pymongo.collection import Collection
     mongo_client: MongoClient = connector.client
-    collection: Collection = mongo_client.get_database(database_name).get_collection(TestFrameworkTypes.COLLECTION)
-    return collection
+    a_collection: Collection = mongo_client.get_database(database_name).get_collection(TestFrameworkTypes.COLLECTION)
+    return a_collection
 
 
 @fixture(scope='module', autouse=True)
 def setup(request, collection, example_type):
+    """TODO: document"""
     collection.insert_one(document=TypeModel.to_json(example_type))
 
     def drop_collection():
@@ -73,12 +77,14 @@ def setup(request, collection, example_type):
 
 
 class TestFrameworkTypes(RestAPITestSuite):
+    """TODO: document"""
     importorskip('cmdb.framework')
 
     COLLECTION: str = TypeModel.COLLECTION
     ROUTE_URL: str = '/types'
 
     def test_get_types(self, rest_api, full_access_user, none_access_user):
+        """TODO: document"""
         # Route callable
         default_response = rest_api.get(f'{self.ROUTE_URL}/')
         assert default_response.status_code == HTTPStatus.OK
@@ -119,7 +125,9 @@ class TestFrameworkTypes(RestAPITestSuite):
         none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/', unauthorized=True)
         assert none_get_types_response.status_code == HTTPStatus.UNAUTHORIZED
 
+
     def test_get_type(self, rest_api, example_type, full_access_user, none_access_user):
+        """TODO: document"""
         # Route callable
         default_response = rest_api.get(f'{self.ROUTE_URL}/{example_type.public_id}')
         assert default_response.status_code == HTTPStatus.OK
@@ -147,7 +155,9 @@ class TestFrameworkTypes(RestAPITestSuite):
         none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/{example_type.public_id}', unauthorized=True)
         assert none_get_types_response.status_code == HTTPStatus.UNAUTHORIZED
 
+
     def test_insert_type(self, rest_api, example_type, full_access_user, none_access_user):
+        """TODO: document"""
         example_type.public_id = 2
         example_type.name = 'test2'
 
@@ -185,7 +195,9 @@ class TestFrameworkTypes(RestAPITestSuite):
         example_type.public_id = 1
         example_type.name = 'test'
 
+
     def test_update_type(self, rest_api, example_type, full_access_user, none_access_user):
+        """TODO: document"""
         example_type.name = 'updated'
 
         # Test default route
@@ -218,6 +230,7 @@ class TestFrameworkTypes(RestAPITestSuite):
         example_type.name = 'test'
 
     def test_delete_type(self, rest_api, example_type, full_access_user, none_access_user):
+        """TODO: document"""
         # Test default route
         rest_api.post(f'{self.ROUTE_URL}/', json=TypeModel.to_json(example_type))
 
@@ -242,4 +255,3 @@ class TestFrameworkTypes(RestAPITestSuite):
         # ACCESS UNAUTHORIZED
         un_get_types_response = rest_api.delete(f'{self.ROUTE_URL}/{example_type.public_id}', unauthorized=True)
         assert un_get_types_response.status_code == HTTPStatus.UNAUTHORIZED
-

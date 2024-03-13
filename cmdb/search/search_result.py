@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,34 +13,43 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 import logging
-from builtins import print
 from typing import TypeVar, Generic, List
 
 from bson import Regex
+# -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
 R: TypeVar = TypeVar('R')
 
-
+# FIXME
 class SearchResultMap(Generic[R]):
-    """Result mapper for Result/Match binding
-    """
+    """Result mapper for Result/Match binding"""
 
     def __init__(self, result: R, matches: List[str] = None):
         self.result = result
         self.matches: List[str] = matches
+
 
     def to_json(self) -> dict:
         """Quick convert for the database"""
         return {'result': self.result.__dict__, 'matches': self.matches}
 
 
+# FIXME
 class SearchResult(Generic[R]):
     """Generic search result base"""
 
-    def __init__(self, results: List[R], total_results: int, groups: list, alive: bool, limit: int, skip: int, matches_regex: List[str] = None):
+    def __init__(self,
+                 results: List[R],
+                 total_results: int,
+                 groups: list,
+                 alive: bool,
+                 limit: int,
+                 skip: int,
+                 matches_regex: List[str] = None):
         """
         Constructor for search result
         Args:
@@ -61,6 +70,7 @@ class SearchResult(Generic[R]):
             SearchResultMap[R](result=result, matches=self.find_match_fields(result, matches_regex)) for result in
             results]
 
+
     def __len__(self):
         """
         Call number of results
@@ -68,6 +78,7 @@ class SearchResult(Generic[R]):
             number of found objects
         """
         return len(self.results)
+
 
     @staticmethod
     def find_match_fields(result: R, possible_regex_list=None):
@@ -84,6 +95,7 @@ class SearchResult(Generic[R]):
         fields = result.fields
         if not possible_regex_list:
             return None
+
 
         def inner_match_fields(_fields, _matched_fields, _reference=None):
             """
@@ -121,7 +133,9 @@ class SearchResult(Generic[R]):
             return matched_fields
         return None
 
+
     def to_json(self) -> dict:
+        """TODO: document"""
         return {
             'limit': self.limit,
             'skip': self.skip,

@@ -1,6 +1,6 @@
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
-* Copyright (C) 2023 becon GmbH
+* Copyright (C) 2024 becon GmbH
 *
 * This program is free software: you can redistribute it and/or modify
 * it under the terms of the GNU Affero General Public License as
@@ -451,7 +451,6 @@ export class ObjectComponent implements OnInit, OnDestroy {
   }
 
   public onObjectDeleteWithLocations(objectID: number){
-    console.log("object.component => delete with locations");
     this.objectService.deleteObjectWithLocations(objectID).pipe(takeUntil(this.subscriber))
     .subscribe(() => {
         this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
@@ -463,7 +462,6 @@ export class ObjectComponent implements OnInit, OnDestroy {
   }
 
   public onObjectDeleteWithObjects(objectID: number){
-    console.log("object.component => delete with objects");
     this.objectService.deleteObjectWithChildren(objectID).pipe(takeUntil(this.subscriber))
     .subscribe(() => {
         this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);

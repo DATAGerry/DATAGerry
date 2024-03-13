@@ -1,5 +1,5 @@
 # DATAGERRY - OpenSource Enterprise CMDB
-# Copyright (C) 2023 becon GmbH
+# Copyright (C) 2024 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -13,14 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from datetime import datetime, timezone
 
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectLinkModel(CmdbDAO):
+    """TODO: document"""
+
     COLLECTION: Collection = "framework.links"
     MODEL: Model = 'ObjectLink'
 
@@ -30,19 +32,28 @@ class ObjectLinkModel(CmdbDAO):
         self.primary: int = primary
         self.secondary: int = secondary
         self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
-        super(ObjectLinkModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
+
 
     def get_primary(self) -> int:
+        """TODO: document"""
         return self.primary
 
+
     def get_secondary(self) -> int:
+        """TODO: document"""
         return self.secondary
 
+
     def get_creation_time(self) -> datetime:
+        """TODO: document"""
         return self.creation_time
 
+
     def get_partners(self) -> (int, int):
+        """TODO: document"""
         return self.get_primary(), self.get_secondary()
+
 
     @classmethod
     def from_data(cls, data: dict, *args, **kwargs) -> "ObjectLinkModel":
@@ -53,6 +64,7 @@ class ObjectLinkModel(CmdbDAO):
             secondary=int(data.get('secondary')),
             creation_time=data.get('creation_time', None),
         )
+
 
     @classmethod
     def to_json(cls, instance: "ObjectLinkModel") -> dict:
