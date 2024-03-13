@@ -28,7 +28,7 @@ services:
     restart: unless-stopped
 
   db:
-    image: mongo:4.2-bionic
+    image: mongo:4.4.29
     hostname: db
     restart: unless-stopped
     volumes:

@@ -155,7 +155,7 @@ deb: bin
 	chmod 755 ${DIR_DEB_BUILD}/usr/*
 	chmod 755 ${DIR_DEB_BUILD}/etc/*
 	cd ${DIR_DEB_BUILD}
-	 ${BIN_DEBBUILD} --build ${DIR_DEB_BUILD}
+	${BIN_DEBBUILD} --build ${DIR_DEB_BUILD}
 
 # create Docker image
 .PHONY: docker

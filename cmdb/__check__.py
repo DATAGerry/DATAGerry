@@ -18,7 +18,10 @@ This module contains logics for database validation and setup
 """
 import logging
 from enum import Enum
+from datetime import datetime, timezone
+
 from pymongo.errors import OperationFailure
+
 
 from cmdb.updater import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader
@@ -26,6 +29,11 @@ from cmdb.errors.system_config import SectionError
 from cmdb.framework.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
+from cmdb.user_management import __FIXED_GROUPS__
+from cmdb.user_management.managers.user_manager import UserManager, UserModel
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.security.security import SecurityManager
 
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
@@ -137,16 +145,43 @@ class CheckRoutine:
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
 
+            # if there are no groups create groups and admin user
+            if self.setup_database_manager.count('management.groups') < 2:
+                self.init_user_management()
+
             # exportdJob management collections
             for collection in JOB_MANAGEMENT_COLLECTION:
-                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)[
-                    'valid']
+                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
         except OperationFailure as err:
             LOGGER.info('CHECK: Database collection validation for "%s" failed, error: %s', collection.COLLECTION, err)
             collection_test = False
 
         LOGGER.info('CHECK: Database collection validation status %s',collection_test)
         return collection_test
+
+
+    def init_user_management(self):
+        """Creates intital groups and admin user"""
+        LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
+        scm = SecurityManager(self.setup_database_manager)
+        group_manager = GroupManager(self.setup_database_manager)
+        user_manager = UserManager(self.setup_database_manager)
+
+        for group in __FIXED_GROUPS__:
+            group_manager.insert(group)
+
+        # setting the initial user to admin/admin as default
+        admin_name = 'admin'
+        admin_pass = 'admin'
+        admin_user = UserModel(
+            public_id=1,
+            user_name=admin_name,
+            active=True,
+            group_id=__FIXED_GROUPS__[0].get_public_id(),
+            registration_time=datetime.now(timezone.utc),
+            password=scm.generate_hmac(admin_pass),
+        )
+        user_manager.insert(admin_user)
 
 
     def has_updates(self) -> bool:

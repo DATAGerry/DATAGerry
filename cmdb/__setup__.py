@@ -113,7 +113,8 @@ class SetupRoutine:
             # create user management
             LOGGER.info('SETUP ROUTINE: UserModel management')
             try:
-                self.__create_user_management()
+                if self.setup_database_manager.count('management.groups') < 2:
+                    self.__create_user_management()
             except Exception as err:
                 self.status = SetupRoutine.SetupStatus.ERROR
                 raise RuntimeError(
@@ -170,6 +171,7 @@ class SetupRoutine:
 
     def __create_user_management(self):
         """TODO: document"""
+        LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
         scm = SecurityManager(self.setup_database_manager)
         group_manager = GroupManager(self.setup_database_manager)
         user_manager = UserManager(self.setup_database_manager)
