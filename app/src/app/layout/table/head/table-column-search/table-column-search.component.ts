@@ -32,7 +32,6 @@ import { ReplaySubject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, takeUntil } from 'rxjs/operators';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'thead[table-column-search]',
   templateUrl: './table-column-search.component.html',
   styleUrls: ['./table-column-search.component.scss'],

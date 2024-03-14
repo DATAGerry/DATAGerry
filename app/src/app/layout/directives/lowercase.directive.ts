@@ -19,7 +19,6 @@
 import { Directive, HostListener } from '@angular/core';
 
 @Directive({
-  // tslint:disable-next-line: directive-selector
   selector: '[lowercase]'
 })
 export class LowercaseDirective {

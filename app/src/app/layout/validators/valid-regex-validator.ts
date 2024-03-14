@@ -21,7 +21,6 @@ import { AbstractControl, UntypedFormControl, ValidationErrors, ValidatorFn } fr
 export const ValidRegexValidator: ValidatorFn = (control: AbstractControl | UntypedFormControl): ValidationErrors | null => {
   let regexInValid;
   try {
-    // tslint:disable-next-line:no-unused-expression
     new RegExp(control.value);
     regexInValid = false;
   } catch (e) {

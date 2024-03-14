@@ -29,7 +29,6 @@ import {
 import { Column, Sort, SortDirection } from '../../table.types';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'th[table-column-head]',
   templateUrl: './table-column-head.component.html',
   styleUrls: ['./table-column-head.component.scss'],

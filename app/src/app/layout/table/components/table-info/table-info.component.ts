@@ -19,7 +19,6 @@
 import { Component, Input } from '@angular/core';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-info',
   templateUrl: './table-info.component.html',
   styleUrls: ['./table-info.component.scss']

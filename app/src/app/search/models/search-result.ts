@@ -26,10 +26,8 @@ export class SearchResult {
 export class SearchResultList {
   public limit: number;
   public skip?: number;
-  // tslint:disable-next-line:variable-name
   public total_results: number;
   public results?: SearchResult[];
-  // tslint:disable-next-line:variable-name
   public groups?: any[];
 }
 

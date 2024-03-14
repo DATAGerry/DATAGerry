@@ -122,7 +122,7 @@ export class CategoryComponent implements OnInit, OnDestroy {
       name: 'public_id',
       data: 'public_id',
       cssClasses: ['text-center'],
-      style: { 'white-space': 'nowrap'  },
+      style: { 'white-space': 'nowrap' },
       searchable: false,
       sortable: true
     } as unknown as Column;
@@ -301,7 +301,6 @@ export class CategoryComponent implements OnInit, OnDestroy {
    */
   private saveTree(root: CmdbCategoryTree, parentNode?: CmdbCategoryNode): Observable<any>[] {
     let observers: Observable<any>[] = [];
-    // tslint:disable-next-line:forin
     for (let i = 0; i < root.length; i++) {
       const node = root[i];
       node.category.meta.order = i + 1;

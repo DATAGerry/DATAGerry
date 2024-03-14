@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from
 import { PasswordStrengthMeterService } from './password-strength-meter.service';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'password-strength-meter',
   templateUrl: './password-strength-meter.component.html',
   styleUrls: ['./password-strength-meter.component.scss'],

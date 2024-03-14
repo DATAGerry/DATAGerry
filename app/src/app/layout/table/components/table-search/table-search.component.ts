@@ -22,7 +22,6 @@ import { debounceTime, takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-search',
   templateUrl: './table-search.component.html',
   styleUrls: ['./table-search.component.scss']

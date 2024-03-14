@@ -19,7 +19,6 @@
 import { Directive, HostBinding } from '@angular/core';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: 'table[layout-table]'
 })
 export class TableDirective {

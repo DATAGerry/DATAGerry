@@ -19,7 +19,6 @@
 import { Directive, Output, EventEmitter, HostBinding, HostListener } from '@angular/core';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: '[appDragDrop]'
 })
 export class FileDragDropDirective {

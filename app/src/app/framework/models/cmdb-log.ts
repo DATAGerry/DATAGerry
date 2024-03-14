@@ -19,7 +19,6 @@
 import { CmdbDao } from './cmdb-dao';
 
 export class CmdbLog implements CmdbDao {
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public render_state: string;
   public user_name: string;
@@ -30,5 +29,4 @@ export class CmdbLog implements CmdbDao {
   public action_name: string;
   public log_time: any;
   public changes: any;
-  // tslint:enable
 }

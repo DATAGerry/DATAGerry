@@ -27,7 +27,6 @@ import { Column } from '../../table.types';
 import { Router } from '@angular/router';
 
 @Component({
-    // tslint:disable-next-line:component-selector
     selector: 'td[table-cell]',
     templateUrl: './table-cell.component.html',
     styleUrls: ['./table-cell.component.scss']

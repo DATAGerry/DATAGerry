@@ -21,7 +21,6 @@ import { Directive, Input } from '@angular/core';
 import { Column } from '../table.types';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: 'tr[table-row]'
 })
 export class TableRowDirective<T> {

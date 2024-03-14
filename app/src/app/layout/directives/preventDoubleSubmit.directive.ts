@@ -23,7 +23,6 @@ export enum KEY_CODE {
 }
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: 'button[type=submit]'
 })
 export class PreventDoubleSubmitDirective {

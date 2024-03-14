@@ -54,7 +54,6 @@ export class GroupsAclTabsComponent implements OnDestroy {
   public set GroupsACL(groups: AccessControlListSection<number>) {
     if (groups) {
       this.groupsACL = groups;
-      // tslint:disable-next-line:forin
       for (const entry in groups.includes) {
         this.addControl(entry);
       }

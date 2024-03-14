@@ -21,7 +21,6 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbObject implements CmdbDao {
 
-  // tslint:disable:variable-name
   public public_id: number;
   public type_id: number;
   public status: boolean = true;
@@ -34,5 +33,4 @@ export class CmdbObject implements CmdbDao {
   public last_edit_time: any;
   public author_name?: string;
   public comment?: string;
-  // tslint:enable
 }

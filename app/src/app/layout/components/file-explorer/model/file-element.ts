@@ -23,7 +23,6 @@ import { FileMetadata } from './metadata';
 export class FileElement implements CmdbDao {
 
   // a set of data that describes and gives information about other data.
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public readonly gridOutId: number;
   public filename: string;
@@ -33,7 +32,6 @@ export class FileElement implements CmdbDao {
   public inProcess: boolean = false;
   public children: any[] = [];
   public hasSubFolders: boolean = false;
-  // tslint:enable:variable-name
 
   public constructor(init?: Partial<FileElement>) {
     Object.assign(this, init);

@@ -19,7 +19,6 @@
 import { ChangeDetectionStrategy, Component, Input, ViewEncapsulation } from '@angular/core';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-loading',
   templateUrl: './table-loading.component.html',
   styleUrls: ['./table-loading.component.scss'],

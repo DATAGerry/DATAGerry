@@ -19,7 +19,6 @@
 import { Directive, ElementRef, Input, OnChanges, Renderer2, SimpleChanges } from '@angular/core';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: '[rightLevelColor]'
 })
 export class RightLevelColorDirective implements OnChanges {

@@ -19,7 +19,6 @@
 import { CmdbDao } from './cmdb-dao';
 
 export class CmdbCollection implements CmdbDao {
-  // tslint:disable: variable-name
   public public_id: number;
   public template_id: number;
   public creation_time: {
@@ -29,11 +28,9 @@ export class CmdbCollection implements CmdbDao {
     $date: string;
   };
   public object_list: [];
-  // tslint:enable
 }
 
 export class CmdbCollectionTemplate implements CmdbDao {
-  // tslint:disable: variable-name
   public public_id: number;
   public name: string;
   public label?: string;
@@ -44,5 +41,4 @@ export class CmdbCollectionTemplate implements CmdbDao {
     $date: string;
   };
   public type_order_list?: [];
-  // tslint:enable
 }

@@ -20,7 +20,6 @@ import { CmdbDao } from './cmdb-dao';
 
 export class CmdbObjectAttachment implements CmdbDao {
 
-  // tslint:disable-next-line:variable-name
   readonly public_id: number;
   public filename: string;
   public uploadDate: Date;

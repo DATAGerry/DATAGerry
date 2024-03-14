@@ -72,7 +72,6 @@ export class ObjectLogComponent implements OnInit {
 
 
     public loadCompareRender(logID: number) {
-        // tslint:disable-next-line:triple-equals
         const selectedCompareLog: CmdbLog = this.completeLogList.filter(compareLog => compareLog.public_id == logID)[0];
         if (selectedCompareLog.render_state !== undefined) {
             this.compareForm = new UntypedFormGroup({});
