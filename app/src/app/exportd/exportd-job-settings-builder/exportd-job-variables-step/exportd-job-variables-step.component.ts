@@ -41,7 +41,6 @@ import { takeUntil } from 'rxjs/operators';
 
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: '[dropdowndirection]'
 })
 export class DropDownDirectionDirective {

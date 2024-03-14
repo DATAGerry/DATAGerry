@@ -18,7 +18,6 @@
 
 export class ExportdJob {
 
-  // tslint:disable: variable-name
   private readonly _id?: string;
   public public_id: number;
   public name: string;
@@ -35,5 +34,4 @@ export class ExportdJob {
   public running: boolean;
   public state: any;
   public exportd_type: string;
-  // tslint:enable
 }

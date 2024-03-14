@@ -71,7 +71,6 @@ export interface Pager {
 }
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-pagination',
   templateUrl: './table-pagination.component.html',
   styleUrls: ['./table-pagination.component.scss']

@@ -23,7 +23,6 @@ import { AclPermissionService } from '../services/acl-permission.service';
 import { AccessControlList } from '../../acl/acl.types';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: '[permissionLink]',
   exportAs: 'permissionLink'
 })

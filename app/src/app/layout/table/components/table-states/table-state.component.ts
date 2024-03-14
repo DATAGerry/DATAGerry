@@ -21,7 +21,6 @@ import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms
 import { TableState } from '../../table.types';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-state',
   templateUrl: './table-state.component.html',
   styleUrls: ['./table-state.component.scss']

@@ -22,7 +22,6 @@ import { CmdbType } from './cmdb-type';
 
 export class CmdbCategory implements CmdbDao {
 
-  // tslint:disable-next-line:variable-name
   public public_id: number;
   public name: string;
   public label: string;

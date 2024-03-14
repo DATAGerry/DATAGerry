@@ -17,7 +17,6 @@
 */
 
 export class ExportdLog {
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public job_id: number;
   public state: string;
@@ -30,5 +29,4 @@ export class ExportdLog {
   public log_time: {
     $date: string
   };
-  // tslint:enable
 }

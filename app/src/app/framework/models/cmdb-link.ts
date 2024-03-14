@@ -21,11 +21,9 @@ import { RenderResult } from './cmdb-render';
 
 export class CmdbLink implements CmdbDao {
 
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public primary: number;
   public secondary: number;
   public creation_time: Date;
   public partnerObject?: RenderResult;
-  // tslint:enable:variable-name
 }

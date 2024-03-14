@@ -27,7 +27,6 @@ export function nameConvention(input: string): string {
 }
 
 @Directive({
-  // tslint:disable-next-line: directive-selector
   selector: '[name-guideline]'
 })
 export class NameDirective {

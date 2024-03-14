@@ -20,7 +20,6 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { Column } from '../../table.types';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-column-toggle',
   templateUrl: './table-column-toggle.component.html',
   styleUrls: ['./table-column-toggle.component.scss']

@@ -19,7 +19,6 @@
 import { Component, HostBinding, Input } from '@angular/core';
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'div[ui-block], span[ui-block]',
   templateUrl: './block.component.html',
   styleUrls: ['./block.component.scss']

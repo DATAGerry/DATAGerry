@@ -44,7 +44,6 @@ export class UserSetting<P = UserSettingPayload> {
   }
 }
 
-// tslint:disable-next-line:no-empty-interface
 export interface UserSettingPayload {
   id: string;
 }

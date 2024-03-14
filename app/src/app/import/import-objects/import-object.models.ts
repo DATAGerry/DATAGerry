@@ -25,17 +25,13 @@ export class ImporterFile {
 
 export class ImporterConfig {
   mapping: {} = {};
-  // tslint:disable:variable-name
   type_id: number = undefined;
   start_element: number = 0;
   max_elements: number = 0;
   overwrite_public: boolean = false;
-  // tslint:enable
 }
 
 export class ImportResponse {
-  // tslint:disable:variable-name
   success_imports: any[];
   failed_imports: any[];
-  // tslint:enable
 }

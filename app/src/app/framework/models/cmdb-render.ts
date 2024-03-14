@@ -19,7 +19,6 @@
 import { AccessControlList } from '../../acl/acl.types';
 
 export class RenderResult {
-  // tslint:disable:variable-name
   public current_render_time: {
     $date: string
   };
@@ -57,5 +56,4 @@ export class RenderResult {
   public summaries: any[];
   public summary_line: string;
   public externals: any[];
-// tslint:enable:variable-name
 }
