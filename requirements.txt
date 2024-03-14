@@ -37,7 +37,7 @@ pyasn1==0.5.0
 pycairo==1.25.1
 pycodestyle==2.11.1
 pycparser==2.21
-pycryptodome==3.19.0
+pycryptodome==3.19.1
 pyflakes==3.1.0
 Pygments==2.16.1
 pyinstaller==6.1.0
