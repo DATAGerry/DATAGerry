@@ -29,7 +29,7 @@ ldap3==2.9.1
 MarkupSafe==2.1.5
 mccabe==0.7.0
 openpyxl==3.1.2
-packaging==23.2
+packaging==24.0
 pika==0.12.0
 Pillow==10.2.0
 pluggy==1.4.0
@@ -40,8 +40,8 @@ pycparser==2.21
 pycryptodome==3.20.0
 pyflakes==3.2.0
 Pygments==2.17.2
-pyinstaller==6.1.0
-pyinstaller-hooks-contrib==2023.10
+pyinstaller==6.5.0
+pyinstaller-hooks-contrib==2024.3
 pylint==3.1.0
 pymongo==4.6.2
 PyMySQL==1.1.0
