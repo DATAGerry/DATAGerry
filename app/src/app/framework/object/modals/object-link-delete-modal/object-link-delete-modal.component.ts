@@ -56,7 +56,8 @@ export class ObjectLinkDeleteModalComponent implements OnInit, OnDestroy {
 /* -------------------------------------------------- EVENT HANDLER ------------------------------------------------- */
 
     public onDelete() {
-        this.deleteSubscription = this.linkService.deleteLink(this.publicID).subscribe(() => {}).add(() => {
+        //DAT-774
+        this.deleteSubscription = this.linkService.deleteLink(this.publicID).subscribe(() => {
             this.activeModal.close();
             this.closeEmitter.emit('deleted');
             this.toastService.success("ObjectLink was deleted!");

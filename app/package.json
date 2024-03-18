@@ -52,7 +52,7 @@
     "ngx-pagination": "^6.0.3",
     "node-sass": "^8.0.0",
     "primeicons": "^6.0.1",
-    "rxjs": "^6.6.7",
+    "rxjs": "^7.8.1",
     "semver": "^7.5.4",
     "socket.io-parser": "^4.2.4",
     "tinymce": "^6.7.2",
