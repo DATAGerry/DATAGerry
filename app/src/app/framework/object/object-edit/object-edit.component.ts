@@ -19,6 +19,7 @@
 import { Component, HostListener, OnInit } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 import { ObjectService } from '../../services/object.service';
 import { ToastService } from '../../../layout/toast/toast.service';
@@ -49,52 +50,55 @@ export class ObjectEditComponent implements OnInit {
   public renderForm: UntypedFormGroup;
   public commitForm: UntypedFormGroup;
   private objectID: number;
-  public activeState : boolean;
+  public activeState: boolean;
 
 
   public selectedLocation: number = -1;
   public locationTreeName: string;
   public locationForObjectExists: boolean = false;
 
-/* -------------------------------------------------------------------------- */
-/*                                 LIFE CYCLE                                 */
-/* -------------------------------------------------------------------------- */
+  /* -------------------------------------------------------------------------- */
+  /*                                 LIFE CYCLE                                 */
+  /* -------------------------------------------------------------------------- */
 
   constructor(private objectService: ObjectService,
-              private typeService: TypeService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private toastService: ToastService,
-              private locationService: LocationService,
-              private sidebarService : SidebarService){
-      this.route.params.subscribe((params) => {
-          this.objectID = params.publicID;
-      });
+    private typeService: TypeService,
+    private route: ActivatedRoute,
+    private router: Router,
+    private toastService: ToastService,
+    private locationService: LocationService,
+    private sidebarService: SidebarService,
+    private _location: Location) {
+    this.route.params.subscribe((params) => {
+      this.objectID = params.publicID;
+    });
 
-      this.renderForm = new UntypedFormGroup({});
-      this.commitForm = new UntypedFormGroup({
-          comment: new UntypedFormControl('')
-      });
+    this.renderForm = new UntypedFormGroup({});
+    this.commitForm = new UntypedFormGroup({
+      comment: new UntypedFormControl('')
+    });
   }
+
 
   public ngOnInit(): void {
-      this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-          this.renderResult = rr;
-          this.activeState = this.renderResult.object_information.active;
-      },
+    this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
+      this.renderResult = rr;
+      this.activeState = this.renderResult.object_information.active;
+    },
       error => {
-          console.error(error);
+        console.error(error);
       },
       () => {
-          this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
-              this.objectInstance = ob;
-          });
+        this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
+          this.objectInstance = ob;
+        });
 
-          this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-              this.typeInstance = value;
-          });
+        this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+          this.typeInstance = value;
+        });
       });
   }
+
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll($event) {
@@ -106,6 +110,14 @@ export class ObjectEditComponent implements OnInit {
     }
   }
 
+  /**
+   * Function to handle navigating back in the browser history
+  */
+  backClicked() {
+    this._location.back();
+  }
+
+
   public editObject(): void {
     this.renderForm.markAllAsTouched();
     if (this.renderForm.valid) {
@@ -114,21 +126,21 @@ export class ObjectEditComponent implements OnInit {
       Object.keys(this.renderForm.value).forEach((key: string) => {
         let val = this.renderForm.value[key];
 
-        if(key == 'dg_location'){
-          this.selectedLocation = val; 
+        if (key == 'dg_location') {
+          this.selectedLocation = val;
         }
-        else if(key == 'locationTreeName'){
-          this.locationTreeName = val; 
+        else if (key == 'locationTreeName') {
+          this.locationTreeName = val;
           return;
-        } else if(key == 'locationForObjectExists'){
+        } else if (key == 'locationForObjectExists') {
           this.locationForObjectExists = String(val).toLowerCase() === 'true' ? true : false;
           return;
         }
 
-        if (val === undefined || val == null) { 
-          val = ''; 
-          
-          if(key == "dg_location"){
+        if (val === undefined || val == null) {
+          val = '';
+
+          if (key == "dg_location") {
             patchValue.push({
               name: key,
               value: null
@@ -168,30 +180,32 @@ export class ObjectEditComponent implements OnInit {
     }
   }
 
+
   public toggleChange() {
     this.activeState = this.activeState !== true;
     this.renderForm.markAsDirty();
+  }
+
+
+  private handleLocation(object_id: number, parent: number, name: string = "", type_id: number) {
+    let params = {
+      "object_id": object_id,
+      "parent": parent,
+      "name": name,
+      "type_id": type_id
     }
 
-  private handleLocation(object_id: number, parent: number, name: string = "", type_id: number){
-      let params = {
-        "object_id": object_id,
-        "parent": parent,
-        "name": name,
-        "type_id": type_id 
-      }
-
     //a parent is selected and there is no existing location for this object => create it
-    if(parent && parent > 0 && !this.locationForObjectExists){
+    if (parent && parent > 0 && !this.locationForObjectExists) {
       this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
       }, error => {
         this.toastService.error(error);
       });
       return;
     }
-    
+
     //a parent is selected and location for this object exists => update existing location
-    if(parent && parent > 0 && this.locationForObjectExists) {
+    if (parent && parent > 0 && this.locationForObjectExists) {
       this.locationService.updateLocationForObject(params).subscribe((res: APIUpdateMultiResponse) => {
       }, error => {
         this.toastService.error(error);
@@ -200,7 +214,7 @@ export class ObjectEditComponent implements OnInit {
     }
 
     //parent is removed but location still exists => delete location
-    if(!parent && this.locationForObjectExists){
+    if (!parent && this.locationForObjectExists) {
       this.locationService.deleteLocationForObject(object_id).subscribe((res: APIUpdateMultiResponse) => {
       }, error => {
         this.toastService.error(error);

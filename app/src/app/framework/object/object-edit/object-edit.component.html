@@ -9,7 +9,7 @@
                 (click)="editObject()"
                 [disabled]="!renderForm.dirty">Save</button>
         <button type="button" class="btn btn-outline-danger"
-                routerLink="/framework/object/view/{{renderResult?.object_information?.object_id}}">Cancel
+                (click)="backClicked()">Cancel
         </button>
       </div>
     </div>
