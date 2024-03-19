@@ -15,11 +15,10 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
@@ -31,39 +30,46 @@ import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../sett
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-date-field-edit',
-  templateUrl: './date-field-edit.component.html',
-  providers: [
-    { provide: NgbDateAdapter, useClass: NgbStringAdapter },
-    { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
-  ]
+    selector: 'cmdb-date-field-edit',
+    templateUrl: './date-field-edit.component.html',
+    providers: [
+        { provide: NgbDateAdapter, useClass: NgbStringAdapter },
+        { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
+    ]
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public datePlaceholder = 'YYYY-MM-DD';
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    public datePlaceholder = 'YYYY-MM-DD';
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
+    date: Date;
+
+    @ViewChild('dateInputVisible') dateInputVisible: ElementRef<HTMLInputElement>;
+    @ViewChild('dateInputHidden') dateInputHidden: ElementRef<HTMLInputElement>;
+    isDatePickerVisible = true;
 
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    constructor(private dateSettingsService: DateSettingsService, private validationService: ValidationService) {
+
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    constructor(private dateSettingsService: DateSettingsService, private validationService: ValidationService,
+        private renderer: Renderer2, private elementRef: ElementRef) {
         super();
     }
 
 
     public ngOnInit(): void {
-        this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
-            this.datePlaceholder = dateSettings.date_format;
-        });
+        // this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
+        //     this.datePlaceholder = dateSettings.date_format;
+        // });
 
         this.form.addControl('required', this.requiredControl);
         this.form.addControl('name', this.nameControl);
@@ -84,7 +90,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -97,7 +103,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value
         });
 
@@ -109,6 +115,31 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.isValid$ = true;
     }
 
+    /**
+     * Toggles the input type between 'date' and 'text' on double click.
+     */
+
+    onDblClick(event: MouseEvent) {
+        const inputElement = event.target as HTMLInputElement;
+        if (inputElement.type === 'date') {
+            inputElement.type = 'text';
+
+            setTimeout(() => {
+                inputElement.select();
+            });
+        }
+    }
+
+    /**
+     * Changes the input type back to 'date' when the input element loses focus,
+     * if the current type is 'text'.
+     */
+    onFocusOut(event: FocusEvent) {
+        const inputElement = event.target as HTMLInputElement;
+        if (inputElement.type === 'text') {
+            inputElement.type = 'date';
+        }
+    }
 
     /**
      * Resets the date to null.

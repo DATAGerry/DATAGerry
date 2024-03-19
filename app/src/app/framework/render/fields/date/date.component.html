@@ -7,7 +7,9 @@
       <ng-container [ngSwitch]="true">
         <ng-container *ngSwitchCase="mode == MODES.View">
           <input type="text" name="{{data.name}}" [placeholder]="datePlaceholder" class="form-control"
-                 [formControlName]="data.name" ngbDatepicker #d="ngbDatepicker"/>
+                 [formControlName]="data.name" ngbDatepicker />
+          
+
           <div class="input-group-append">
             <span class="input-group-text" (click)="copyToClipboard()">
               <fa-icon [icon]="['far', 'clipboard']"></fa-icon>
@@ -17,16 +19,20 @@
         <ng-container *ngSwitchCase="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">
           <cmdb-object-bulk-input-appends *ngIf="mode == MODES.Bulk" [data]="data" [controller]="controller"
                                           [changeForm]="changeForm"></cmdb-object-bulk-input-appends>
-            <input type="text" name="{{data.name}}" class="form-control" [placeholder]="datePlaceholder"
+
+                   <input
+                   type="date"
+                   name="{{data.name}}"
                    [formControlName]="data.name"
-                   ngbDatepicker #d="ngbDatepicker"
+                   class="form-control"
+                   [placeholder]="datePlaceholder"
+                   
+                   (dblclick)="onDblClick($event)"
+                   (focusout)="onFocusOut($event)"
+                   ngbDatepicker
                    [ngClass]="{ 'is-valid': controller.valid && (controller.dirty || controller.touched),
-                   'is-invalid': controller.invalid && (controller.dirty || controller.touched)}" readonly/>
-            <div class="input-group-append input-group-sm">
-              <span class="input-group-text" (click)="d.toggle()">
-                <fa-icon icon="calendar-alt"></fa-icon>
-              </span>
-            </div>
+                   'is-invalid': controller.invalid && (controller.dirty || controller.touched)}"
+                 />
             <cmdb-input-appends [data]="data" [mode]="mode" [parentFormGroup]="parentFormGroup"></cmdb-input-appends>
             <div class="input-group-append input-group-sm">
               <span class="input-group-text text-danger" (click)="resetDate()">
@@ -49,5 +55,6 @@
       </div>
     </div>
     <small class="description form-text text-muted">{{data?.description}}</small>
+    <small class="form-text text-muted" *ngIf="mode == MODES.Create || mode == MODES.Edit || mode == MODES.Bulk">To paste in a date use the following format: YYYY-MM-DD</small>
   </div>
 </div>
