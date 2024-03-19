@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { RenderFieldComponent } from '../components.fields';
 import { formatDate } from '@angular/common';
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
@@ -24,6 +24,7 @@ import { NgbStringAdapter, CustomDateParserFormatter } from '../../../../setting
 import { takeUntil } from 'rxjs/operators';
 import { DateSettingsService } from '../../../../settings/services/date-settings.service';
 import { ReplaySubject } from 'rxjs';
+import { FormGroup, FormControl } from '@angular/forms'; // Import FormGroup and FormControl
 
 
 @Component({
@@ -31,9 +32,9 @@ import { ReplaySubject } from 'rxjs';
   templateUrl: './date.component.html',
   styleUrls: ['./date.component.scss'],
   providers: [
-    {provide: NgbDateAdapter, useClass: NgbStringAdapter},
-    {provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter}
-    ]
+    { provide: NgbDateAdapter, useClass: NgbStringAdapter },
+    // { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
+  ]
 })
 export class DateComponent extends RenderFieldComponent implements  OnInit {
 
@@ -77,4 +78,23 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
     selBox.value = formatDate(this.currentDate, 'dd/MM/yyyy', 'en-US');
     this.generateDataForClipboard(selBox);
   }
+
+  onDblClick(event: MouseEvent) {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement.type === 'date') {
+      inputElement.type = 'text';
+
+      setTimeout(() => {
+        inputElement.select();
+      });
+    }
+  }
+
+  onFocusOut(event: FocusEvent) {
+    const inputElement = event.target as HTMLInputElement;
+    if (inputElement.type === 'text') {
+      inputElement.type = 'date';
+    }
+  }
+
 }
