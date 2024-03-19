@@ -115,6 +115,9 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.isValid$ = true;
     }
 
+    /**
+     * Toggles the input type between 'date' and 'text' on double click.
+     */
 
     onDblClick(event: MouseEvent) {
         const inputElement = event.target as HTMLInputElement;
@@ -127,6 +130,10 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         }
     }
 
+    /**
+     * Changes the input type back to 'date' when the input element loses focus,
+     * if the current type is 'text'.
+     */
     onFocusOut(event: FocusEvent) {
         const inputElement = event.target as HTMLInputElement;
         if (inputElement.type === 'text') {

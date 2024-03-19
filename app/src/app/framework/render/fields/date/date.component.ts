@@ -36,7 +36,7 @@ import { FormGroup, FormControl } from '@angular/forms'; // Import FormGroup and
     // { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
   ]
 })
-export class DateComponent extends RenderFieldComponent implements  OnInit {
+export class DateComponent extends RenderFieldComponent implements OnInit {
 
   /**
    * Un-subscriber for `DateSettingsComponent`.
@@ -51,7 +51,7 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
 
   ngOnInit(): void {
     if (this.parentFormGroup.get(this.data.name).value === '') {
-      this.parentFormGroup.get(this.data.name).setValue(null, {onlySelf: true});
+      this.parentFormGroup.get(this.data.name).setValue(null, { onlySelf: true });
     }
     this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
       this.datePlaceholder = dateSettings.date_format;
@@ -67,7 +67,7 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
   }
 
   public resetDate() {
-    this.controller.setValue(null, {onlySelf: true});
+    this.controller.setValue(null, { onlySelf: true });
     this.controller.reset();
     this.controller.markAsTouched();
     this.controller.markAsDirty();
@@ -78,6 +78,10 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
     selBox.value = formatDate(this.currentDate, 'dd/MM/yyyy', 'en-US');
     this.generateDataForClipboard(selBox);
   }
+
+  /**
+   * Toggles the input type between 'date' and 'text' on double click.
+   */
 
   onDblClick(event: MouseEvent) {
     const inputElement = event.target as HTMLInputElement;
@@ -90,6 +94,10 @@ export class DateComponent extends RenderFieldComponent implements  OnInit {
     }
   }
 
+  /**
+   * Changes the input type back to 'date' when the input element loses focus,
+   * if the current type is 'text'.
+   */
   onFocusOut(event: FocusEvent) {
     const inputElement = event.target as HTMLInputElement;
     if (inputElement.type === 'text') {
