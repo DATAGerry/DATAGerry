@@ -92,7 +92,6 @@ export class AttachmentsListModalComponent implements OnInit {
         this.recordsTotal = this.attachments.length;
         this.inProcess = false;
         this.updatePagination(data);
-        this.cdr.detectChanges();
       });
   }
 
