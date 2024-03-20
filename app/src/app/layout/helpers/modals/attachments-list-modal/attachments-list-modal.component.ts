@@ -69,7 +69,7 @@ export class AttachmentsListModalComponent implements OnInit {
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
       this.attachments.push(...data.results);
-      this.recordsTotal = data.total;
+      this.recordsTotal = this.attachments.length;
       this.updatePagination(data);
     });
   }
@@ -89,9 +89,10 @@ export class AttachmentsListModalComponent implements OnInit {
         } else {
           this.attachments = data.results;
         }
-        this.recordsTotal = data.total;
+        this.recordsTotal = this.attachments.length;
         this.inProcess = false;
         this.updatePagination(data);
+        this.cdr.detectChanges();
       });
   }
 
