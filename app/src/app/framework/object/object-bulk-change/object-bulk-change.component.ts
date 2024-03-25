@@ -11,27 +11,28 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnDestroy, ViewChild } from '@angular/core';
 import { UntypedFormGroup } from '@angular/forms';
+import { Router } from '@angular/router';
+
+import { ReplaySubject, takeUntil } from 'rxjs';
+
 import { ObjectService } from '../../services/object.service';
-import { TypeService } from '../../services/type.service';
-import { ActivatedRoute, Router } from '@angular/router';
+import { UserService } from '../../../management/services/user.service';
+import { ProgressSpinnerService } from '../../../layout/progress/progress-spinner.service';
+
+import { WizardComponent } from '@rg-software/angular-archwizard';
+
 import { RenderResult } from '../../models/cmdb-render';
-import { ReplaySubject } from 'rxjs';
 import { CmdbType } from '../../models/cmdb-type';
 import { httpObserveOptions } from '../../../services/api-call.service';
 import { CmdbObject } from '../../models/cmdb-object';
-import { takeUntil } from 'rxjs/operators';
-import { ToastService } from '../../../layout/toast/toast.service';
-import { UserService } from '../../../management/services/user.service';
-import { ProgressSpinnerService } from '../../../layout/progress/progress-spinner.service';
-import { WizardComponent } from 'angular-archwizard';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-object-bulk-change',
@@ -40,111 +41,95 @@ import { APIUpdateMultiResponse } from '../../../services/models/api-response';
 })
 export class ObjectBulkChangeComponent implements OnDestroy {
 
-  /**
-   * The aw-wizard component defines the root component of a wizard.
-   */
-  @ViewChild('wizard', { static: false }) public wizard: WizardComponent;
+    // The aw-wizard component defines the root component of a wizard.
+    @ViewChild('wizard', { static: false }) public wizard: WizardComponent;
 
-  /**
-   * Component un subscriber.
-   * @private
-   */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Type of objects to bulk change.
-   */
-  public type: CmdbType;
+    // Type of objects to bulk change.
+    public type: CmdbType;
 
-  /**
-   * Form for bulk change editor.
-   */
-  public changeForm: UntypedFormGroup = new UntypedFormGroup({});
-  public renderForm: UntypedFormGroup = new UntypedFormGroup({});
+    // Form for bulk change editor.
+    public changeForm: UntypedFormGroup = new UntypedFormGroup({});
+    public renderForm: UntypedFormGroup = new UntypedFormGroup({});
 
-  /**
-   * Active status changed.
-   */
-  public activeState: boolean | undefined = undefined;
+    public activeState: boolean | undefined = undefined;
 
-  /**
-   * List of to change selected items.
-   */
-  public renderResults: Array<RenderResult> = [];
+    // List of to change selected items.
+    public renderResults: Array<RenderResult> = [];
 
-  /**
-   * APIUpdateMultiResponse
-   */
-  public apiResponse: APIUpdateMultiResponse;
+    public apiResponse: APIUpdateMultiResponse;
 
-  /**
-   * HTTP Options for PUT request
-   * @private
-   */
-  private httpOptions;
+    // HTTP Options for PUT request
+    private httpOptions;
 
-  constructor(private objectService: ObjectService, private typeService: TypeService, private userServer: UserService,
-              private activeRoute: ActivatedRoute, private router: Router, private toastService: ToastService,
-              private spinner: ProgressSpinnerService, ) {
-    if (this.router.getCurrentNavigation().extras.state) {
-      this.type = this.router.getCurrentNavigation().extras.state.type;
-      this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
-      this.httpOptions = Object.assign({}, httpObserveOptions);
-      this.httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
-    }
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  /**
-   * Was the form touched.
-   */
-  public get hasChanges(): boolean {
-    return this.renderForm.dirty;
-  }
+    constructor(private objectService: ObjectService,
+                private userServer: UserService,
+                private router: Router,
+                private spinner: ProgressSpinnerService) {
 
-  /**
-   * Save a references object to the database.
-   */
-  public saveObject() {
-    this.spinner.show();
-
-    const changes = this.changeForm.getRawValue();
-    const newObjectInstance = new CmdbObject();
-
-    if (this.activeState !== undefined) {
-      newObjectInstance.active = this.activeState;
+                if (this.router.getCurrentNavigation().extras.state) {
+                    this.type = this.router.getCurrentNavigation().extras.state.type;
+                    this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
+                    this.httpOptions = Object.assign({}, httpObserveOptions);
+                    this.httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
+                }
     }
 
-    newObjectInstance.author_id = this.userServer.getCurrentUser().public_id;
-    newObjectInstance.type_id = this.type.public_id;
-    newObjectInstance.fields = [];
 
-    Object.keys(changes).forEach((key: string) => {
-      newObjectInstance.fields.push({
-        name: key,
-        value: changes[key]
-      });
-    });
-
-    this.objectService.putObject(0, newObjectInstance, this.httpOptions)
-      .pipe(takeUntil(this.subscriber)).subscribe((response: APIUpdateMultiResponse) => {
-        this.apiResponse = response;
-        this.goToNextStepIndex(2);
-      }, () => {
-        this.spinner.hide();
-      }, () => {
-        this.spinner.hide();
-      });
-  }
-
-  private goToNextStepIndex(index: number) {
-    if (this.wizard ) {
-      this.wizard.goToStep(index);
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
     }
-  }
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
+    // Was the form touched
+    public get hasChanges(): boolean {
+        return this.renderForm.dirty;
+    }
+
+
+    // Save a references object to the database.
+    public saveObject() {
+        this.spinner.show();
+
+        const changes = this.changeForm.getRawValue();
+        const newObjectInstance = new CmdbObject();
+
+        if (this.activeState !== undefined) {
+            newObjectInstance.active = this.activeState;
+        }
+
+        newObjectInstance.author_id = this.userServer.getCurrentUser().public_id;
+        newObjectInstance.type_id = this.type.public_id;
+        newObjectInstance.fields = [];
+
+        Object.keys(changes).forEach((key: string) => {
+            newObjectInstance.fields.push({
+                name: key,
+                value: changes[key]
+            });
+        });
+
+        this.objectService.putObject(0, newObjectInstance, this.httpOptions).pipe(takeUntil(this.subscriber))
+            .subscribe((response: APIUpdateMultiResponse) => {
+            this.apiResponse = response;
+            this.goToNextStepIndex(2);
+            }, () => {
+                this.spinner.hide();
+            }, () => {
+                this.spinner.hide();
+            }
+        );
+    }
+
+
+    private goToNextStepIndex(index: number) {
+        if (this.wizard ) {
+        this.wizard.goToStep(index);
+        }
+    }
 }

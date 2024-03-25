@@ -11,19 +11,18 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+
+import { Observable, map, catchError } from 'rxjs';
+
 import { UserSetting } from '../models/user-setting';
-import { Observable } from 'rxjs';
 import { UserSettingsDBService } from '../services/user-settings-db.service';
-import { catchError, map } from 'rxjs/operators';
-import { HttpResponse } from '@angular/common/http';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 /**
  * Resolver for the current user settings of a URL.
@@ -31,27 +30,28 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
 @Injectable({
   providedIn: 'root'
 })
-export class UserSettingsResolver implements Resolve<UserSetting | unknown> {
+export class UserSettingsResolver  {
 
-  constructor(private userSettingsDB: UserSettingsDBService<UserSetting>) {
-  }
+    constructor(private userSettingsDB: UserSettingsDBService<UserSetting>) {
 
-  /**
-   * Resolves data from the indexedDB by the current state URL.
-   * @param route ActivatedRouteSnapshot
-   * @param state RouterStateSnapshot
-   */
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-    Observable<UserSetting | unknown> | Promise<UserSetting | unknown> | UserSetting | unknown {
-    const ident = state.url.toString().substring(1).split('/').join('-');
-    return this.userSettingsDB.getSetting(ident).pipe(
-      map((setting: UserSetting) => {
-        return setting;
-      }),
-      catchError((error) => {
-        console.error(`No user setting for the route: ${ident} | Error: ${error}`);
-        return undefined;
-      })
-    );
-  }
+    }
+
+
+    /**
+     * Resolves data from the indexedDB by the current state URL.
+     */
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+        Observable<UserSetting | unknown> | Promise<UserSetting | unknown> | UserSetting | unknown {
+            const ident = state.url.toString().substring(1).split('/').join('-');
+
+            return this.userSettingsDB.getSetting(ident).pipe(
+                map((setting: UserSetting) => {
+                    return setting;
+                }),
+                catchError((error) => {
+                    console.error(`No user setting for the route: ${ident} | Error: ${error}`);
+                    return undefined;
+                })
+            );
+    }
 }

@@ -11,42 +11,50 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { User } from '../models/user';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+
 import { Observable } from 'rxjs';
+
 import { UserService } from '../services/user.service';
 import { AuthService } from '../../auth/services/auth.service';
 
+import { User } from '../models/user';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 @Injectable({
   providedIn: 'root'
 })
-export class OwnUserResolver implements Resolve<User> {
+export class OwnUserResolver  {
 
-  constructor(private authService: AuthService, private userService: UserService) {
-  }
+    constructor(private authService: AuthService, private userService: UserService) {
 
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
-    const userID: number = +this.authService.currentUserValue.public_id;
-    return this.userService.getUser(userID);
-  }
+    }
+
+
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
+        const userID: number = +this.authService.currentUserValue.public_id;
+        return this.userService.getUser(userID);
+    }
 }
 
+
 @Injectable({
   providedIn: 'root'
 })
-export class UserResolver implements Resolve<User> {
+export class UserResolver  {
 
-  constructor(private userService: UserService) {
-  }
+    constructor(private userService: UserService) {
 
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
-    const userID: number = +route.paramMap.get('publicID');
-    return this.userService.getUser(userID);
-  }
+    }
+
+
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<User> | Promise<User> | User {
+        const userID: number = +route.paramMap.get('publicID');
+        return this.userService.getUser(userID);
+    }
 }

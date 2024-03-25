@@ -278,7 +278,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         const inputName: string = data.inputName;
         const fieldName: string = data.fieldName;
 
-        if(inputName != 'name' && inputName != 'label'){
+        if(inputName != 'name'){
             const index: number = this.getFieldIndexForName(fieldName);
             if (index >= 0){
                 this.typeInstance.fields[index][inputName] = newValue;

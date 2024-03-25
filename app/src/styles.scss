@@ -28,7 +28,7 @@
 @import "~@fortawesome/fontawesome-free/css/solid.css";
 
 /* import archwizard */
-@import "angular-archwizard/styles/archwizard.scss";
+@import "node_modules/@rg-software/angular-archwizard/styles/archwizard.scss";
 
 /* custom global modules */
 @import "scss/variables";
@@ -46,7 +46,6 @@
 @import "scss/card";
 @import "scss/gimmick";
 @import "scss/intro";
-@import "scss/sidebar/tree";
 @import "scss/sidebar/tree";
 @import "scss/dnd";
 @import "scss/tree";
