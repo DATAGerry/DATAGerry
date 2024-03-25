@@ -17,24 +17,17 @@
 */
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 
-import { takeUntil } from 'rxjs/operators';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, takeUntil } from 'rxjs';
 
-import { TypeService } from '../framework/services/type.service';
 import { ObjectService } from '../framework/services/object.service';
-import { CategoryService } from '../framework/services/category.service';
-import { GroupService } from '../management/services/group.service';
 import { UserService } from '../management/services/user.service';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 
-import { CmdbCategory } from '../framework/models/cmdb-category';
-import { Group } from '../management/models/group';
 import { APIGetMultiResponse } from '../services/models/api-response';
 import { RenderResult } from '../framework/models/cmdb-render';
 import { Column } from '../layout/table/table.types';
 import { CollectionParameters } from '../services/models/api-parameter';
-import { CmdbType } from '../framework/models/cmdb-type';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -82,28 +75,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public labelsObject: string[] = [];
     public itemsObject: number[] = [];
     public colorsObject: any[] = [];
-    public optionsObject: {} = {};
-
-    // Chart Types
-    public labelsCategory: string[] = [];
-    public itemsCategory: number[] = [];
-    public colorsCategory: any[] = [];
-
-    // Chart Users
-    public labelsGroup: string[] = [];
-    public itemsGroup: number[] = [];
-    public colorsGroup: any[] = [];
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
-        private typeService: TypeService,
         private objectService: ObjectService,
-        private categoryService: CategoryService,
         private toastService: ToastService,
         private sidebarService: SidebarService,
-        private userService: UserService,
-        private groupService: GroupService) {
+        private userService: UserService) {
+
     }
 
 
@@ -202,7 +182,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.newestTableColumns = [activeColumn, publicColumn, typeColumn, authorColumn, creationColumn, actionColumn];
         this.latestTableColumns = [activeColumn, publicColumn, typeColumn, editorColumn, lastModColumn, actionColumn];
 
-        this.countTypes();
         this.countObjects();
 
         this.userService.countUsers().pipe(takeUntil(this.unSubscribe)).subscribe((totals: any) => {
@@ -213,8 +192,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadLatestObjects();
 
         this.generateObjectChar();
-        this.generateTypeChar();
-        this.generateGroupChar();
     }
 
 
@@ -292,7 +269,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
      * @param value object which should be deleted
      */
     public onObjectDeleteWithLocations(value: RenderResult) {
-        console.log("delete with locations => value:", value);
         this.objectService.deleteObjectWithLocations(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
             .subscribe(() => {
                 this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
@@ -309,7 +285,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
     public onObjectDeleteWithObjects(value: RenderResult) {
-        console.log("delete with objects");
         this.objectService.deleteObjectWithChildren(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
             .subscribe(() => {
                 this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
@@ -337,111 +312,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadLatestObjects();
     }
 
-/* ---------------------------------------------------- TYPES API --------------------------------------------------- */
-
-    /**
-     * Returns the number of types
-     */
-    private countTypes(): void {
-        const filter = JSON.stringify(this.typeService.getAclFilter());
-        const apiParameters: CollectionParameters = { page: 1, limit: 1, sort: 'public_id', order: 1, filter };
-        this.typeService.getTypes(apiParameters).pipe(takeUntil(this.unSubscribe))
-            .subscribe((response: APIGetMultiResponse<CmdbType>) => {
-                this.typeCount = response.total;
-            });
-    }
-
 /* ------------------------------------------------ CHARTS FUNCTIONS ------------------------------------------------ */
 
     private generateObjectChar() {
-        this.optionsObject = {
-            responsive: true,
-            legend: {
-                display: false
-            },
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero: true
-                    }
-                }]
-            },
-        };
         this.objectService.groupObjectsByType('type_id').pipe(takeUntil(this.unSubscribe)).subscribe(values => {
             for (const obj of values) {
                 this.labelsObject.push(obj.label);
                 this.colorsObject.push(this.getRandomColor());
                 this.itemsObject.push(obj.count);
-            }
-        });
-    }
-
-
-    private generateTypeChar() {
-        const params = {
-            filter: undefined,
-            limit: 5,
-            sort: 'public_id',
-            order: 1,
-            page: 1,
-            view: 'tree'
-        };
-        this.categoryService.getCategories(params).pipe(takeUntil(this.unSubscribe))
-            .subscribe((apiResponse: APIGetMultiResponse<CmdbCategory>) => {
-                const categories = apiResponse.results as Array<CmdbCategory>;
-                for (const cate of categories) {
-                    this.labelsCategory.push(cate.label);
-                    this.colorsCategory.push(this.getRandomColor());
-
-                    if (cate.types.length !== 0) {
-                        this.itemsCategory.push(cate.types.length);
-                    } else {
-                        this.itemsCategory.push(null);
-                    }
-                }
-            });
-
-        this.typeService.getUncategorizedTypes().subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-            const uncategorizedTypes = apiResponse.results as Array<CmdbType>;
-
-            // Add one portion for uncategorized
-            if (uncategorizedTypes.length !== 0) {
-                this.itemsCategory.push(uncategorizedTypes.length);
-                this.labelsCategory.push('UNCATEGORIZED');
-                this.colorsCategory.push(this.getRandomColor());
-            }
-        });
-    }
-
-
-    private generateGroupChar() {
-        const groupsCallParameters: CollectionParameters = {
-            filter: [{
-                $lookup:
-                {
-                    from: 'management.users',
-                    localField: 'public_id',
-                    foreignField: 'group_id',
-                    as: 'users'
-                }
-            }],
-            limit: 5,
-            sort: 'public_id',
-            order: 1,
-            page: 1
-        };
-
-        this.groupService.getGroups(groupsCallParameters).subscribe((data: APIGetMultiResponse<Group>) => {
-            for (let i = 0; i < data.results.length; i++) {
-                this.userService.countUsers({ group_id: data.results[i].public_id }).pipe(takeUntil(this.unSubscribe))
-                    .subscribe((nUsers: number) => {
-                        this.labelsGroup.push(data.results[i].label);
-                        this.colorsGroup.push(this.getRandomColor());
-                        this.itemsGroup.push(nUsers);
-                    });
-                if (i === this.maxChartValue) {
-                    break;
-                }
             }
         });
     }
