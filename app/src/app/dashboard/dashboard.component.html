@@ -1,11 +1,11 @@
 <ng-template #activeTemplate let-data="data">
     <div class="text-center">
-        <cmdb-active-badge [activeStatus]="data"></cmdb-active-badge>
+        <cmdb-active-badge [activeStatus]="data"/>
     </div>
 </ng-template>
 
 <ng-template #userTemplate let-data="data">
-    <cmdb-user-compact [userID]="data"></cmdb-user-compact>
+    <cmdb-user-compact [userID]="data"/>
 </ng-template>
 
 <ng-template #actionTemplate let-item="item">
@@ -16,7 +16,7 @@
         (deleteObjectsEmitter)="onObjectDeleteWithObjects(item)"
         (deleteLocationsEmitter)="onObjectDeleteWithLocations(item)"
         (deleteEmitter)="onObjectDelete(item)"
-    ></cmdb-object-table-actions>
+    />
 </ng-template>
 
     <div style="max-width: 99% !important;">
@@ -26,15 +26,13 @@
                 [numbers]=objectCount
                 linkRoute="/framework/object/"
                 icon="fa fa-cube"
-            ></cmdb-dashcard>
+            />
             <div class="card-body">
                 <cmdb-charts
-                    chartType="bar"
                     [dataLabels]="labelsObject"
                     [dataItems]="itemsObject"
                     [labelColors]="colorsObject"
-                    [chartOptions]="optionsObject"
-                ></cmdb-charts>
+                />
             </div>
         </div>
     </div>
@@ -55,7 +53,7 @@
         [pageSizeEnabled]="false"
         [paginationEnabled]="true"
         (pageChange)="onNewestPageChange($event)"
-    ></cmdb-table>
+    />
 </ng-container>
 <hr/>
 <ng-container *ngIf="latestObjects">
@@ -73,7 +71,9 @@
         [emptyMessage]="'No modified objects!'"
         [pageSizeEnabled]="false"
         (pageChange)="onLatestPageChange($event)"
-    ></cmdb-table>
+    />
 </ng-container>
 
-<ng-template #dateTemplate let-data="data">{{data | dateFormatter}}</ng-template>
+<ng-template #dateTemplate let-data="data">
+    {{data | dateFormatter}}
+</ng-template>
