@@ -11,26 +11,28 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+
 import { Observable } from 'rxjs';
+
 import { AuthService } from '../services/auth.service';
 import { AuthProvider } from '../models/providers';
-
+/* ------------------------------------------------------------------------------------------------------------------ */
 @Injectable({
   providedIn: 'root'
 })
-export class ProviderResolver implements Resolve<Array<AuthProvider>> {
+export class ProviderResolver  {
 
-  constructor(private authService: AuthService) {
-  }
+    constructor(private authService: AuthService) {
+    }
 
-  resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Array<AuthProvider>> | Promise<Array<AuthProvider>> | Array<AuthProvider> {
-    return this.authService.getProviders();
-  }
+    resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+        Observable<Array<AuthProvider>> | Promise<Array<AuthProvider>> | Array<AuthProvider> {
+            return this.authService.getProviders();
+    }
 }

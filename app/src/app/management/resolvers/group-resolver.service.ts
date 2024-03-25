@@ -11,36 +11,39 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { Group } from '../models/group';
-import { Observable } from 'rxjs';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
+
+import { Observable, map } from 'rxjs';
+
 import { GroupService } from '../services/group.service';
+import { AuthService } from '../../auth/services/auth.service';
+
+import { Group } from '../models/group';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { map } from 'rxjs/operators';
-import { User } from '../models/user';
-import { AuthService } from '../../auth/services/auth.service';
-import { UserService } from '../services/user.service';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable({
   providedIn: 'root'
 })
-export class OwnGroupResolver implements Resolve<Group> {
+export class OwnGroupResolver  {
 
-  constructor(private authService: AuthService, private groupService: GroupService) {
-  }
+    constructor(private authService: AuthService, private groupService: GroupService) {
 
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
-    const groupID: number = +this.authService.currentUserValue.group_id;
-    return this.groupService.getGroup(groupID);
-  }
+    }
+
+
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
+        const groupID: number = +this.authService.currentUserValue.group_id;
+        return this.groupService.getGroup(groupID);
+    }
 }
+
 
 /**
  * Resolver for a single group
@@ -48,16 +51,19 @@ export class OwnGroupResolver implements Resolve<Group> {
 @Injectable({
   providedIn: 'root'
 })
-export class GroupResolver implements Resolve<Group> {
+export class GroupResolver  {
 
-  constructor(private groupService: GroupService) {
-  }
+    constructor(private groupService: GroupService) {
 
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
-    const groupID: number = +route.paramMap.get('publicID');
-    return this.groupService.getGroup(groupID);
-  }
+    }
+
+
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot): Observable<Group> | Promise<Group> | Group {
+        const groupID: number = +route.paramMap.get('publicID');
+        return this.groupService.getGroup(groupID);
+    }
 }
+
 
 /**
  * Resolver for all groups
@@ -65,18 +71,25 @@ export class GroupResolver implements Resolve<Group> {
 @Injectable({
   providedIn: 'root'
 })
-export class GroupsResolver implements Resolve<Array<Group>> {
+export class GroupsResolver  {
 
-  constructor(private groupService: GroupService) {
-  }
+    constructor(private groupService: GroupService) {
 
-  public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
-    Observable<Array<Group>> | Promise<Array<Group>> | Array<Group> {
-    const params: CollectionParameters = {
-      filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
-    };
-    return this.groupService.getGroups(params).pipe(map((response: APIGetMultiResponse<Group>) => {
-      return response.results as Array<Group>;
-    }));
-  }
+    }
+
+
+    public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
+        Observable<Array<Group>> | Promise<Array<Group>> | Array<Group> {
+            const params: CollectionParameters = {
+                filter: undefined,
+                limit: 0,
+                sort: 'public_id',
+                order: 1,
+                page: 1
+            };
+
+            return this.groupService.getGroups(params).pipe(map((response: APIGetMultiResponse<Group>) => {
+                return response.results as Array<Group>;
+            }));
+    }
 }

@@ -153,7 +153,6 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         } else {
             this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
                 this.objectList = res;
-                console.log("objectList",this.objectList);
                 this.prepareSummaries();
             });
         }

@@ -11,36 +11,35 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Resolve, RouterStateSnapshot } from '@angular/router';
-import { Observable } from 'rxjs';
-import { ObjectService } from '../services/object.service';
-import { RenderResult } from '../models/cmdb-render';
+import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 
-/**
- * Service class for resolving a PublicID to a `RenderResult`.
- */
+import { Observable } from 'rxjs';
+
+import { ObjectService } from '../services/object.service';
+
+import { RenderResult } from '../models/cmdb-render';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+// Service class for resolving a PublicID to a `RenderResult`.
 @Injectable({
   providedIn: 'root'
 })
-export class ObjectViewResolver implements Resolve<RenderResult> {
+export class ObjectViewResolver  {
 
   constructor(public objectService: ObjectService) {
   }
 
   /**
    * Resolves the passed PublicID to a `RenderResult` {@link RenderResult}.
-   * @param route ActivatedRouteSnapshot
-   * @param state RouterStateSnapshot
    */
   public resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
     Observable<RenderResult> | Promise<RenderResult> | RenderResult {
-    const publicID: number = +route.paramMap.get('publicID');
-    return this.objectService.getObject(publicID);
+        const publicID: number = +route.paramMap.get('publicID');
+        return this.objectService.getObject(publicID);
   }
 }
