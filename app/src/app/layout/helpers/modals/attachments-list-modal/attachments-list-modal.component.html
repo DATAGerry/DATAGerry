@@ -50,6 +50,8 @@
     </div>
   </div>
   <div class="modal-footer">
+    <button type="button" class="btn btn-danger" (click)="activeModal.dismiss('Close click')" >Close</button>
+
     <button type="button" class="btn btn-secondary mr-1"
             [disabled]='inProcess'
             (click)="activeModal.close({total: recordsTotal})">Done</button>
