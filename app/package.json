@@ -37,7 +37,7 @@
     "@rg-software/angular-archwizard": "^17.0.0",
     "@tinymce/tinymce-angular": "^7.0.0",
     "angularx-qrcode": "^17.0.0",
-    "bootstrap": "^4.6.2",
+    "bootstrap": "^5.3.3",
     "chart.js": "^4.4.2",
     "chartjs-plugin-datalabels": "^2.2.0",
     "core-js": "^3.36.1",
