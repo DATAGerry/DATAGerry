@@ -20,7 +20,6 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { ObjectService } from '../framework/services/object.service';
-import { UserService } from '../management/services/user.service';
 import { ToastService } from '../layout/toast/toast.service';
 import { SidebarService } from '../layout/services/sidebar.service';
 
@@ -53,7 +52,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     public objectCount: number = 0;
     public typeCount: number = 0;
-    public userCount: number = 0;
 
     public newestObjects: Array<RenderResult> = [];
     public newestTableColumns: Array<Column> = [];
@@ -81,8 +79,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     constructor(
         private objectService: ObjectService,
         private toastService: ToastService,
-        private sidebarService: SidebarService,
-        private userService: UserService) {
+        private sidebarService: SidebarService) {
 
     }
 
@@ -183,11 +180,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.latestTableColumns = [activeColumn, publicColumn, typeColumn, editorColumn, lastModColumn, actionColumn];
 
         this.countObjects();
-
-        this.userService.countUsers().pipe(takeUntil(this.unSubscribe)).subscribe((totals: any) => {
-            this.userCount = totals;
-        });
-
         this.loadNewestObjects();
         this.loadLatestObjects();
 

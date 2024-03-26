@@ -134,25 +134,6 @@
                     }
                 }
             }
-        },
-        "datagerry-app-e2e": {
-            "root": "e2e/",
-            "projectType": "application",
-            "prefix": "",
-            "architect": {
-                "e2e": {
-                    "builder": "@angular-devkit/build-angular:protractor",
-                    "options": {
-                        "protractorConfig": "e2e/protractor.conf.js",
-                        "devServerTarget": "datagerry-app:serve"
-                    },
-                    "configurations": {
-                        "production": {
-                            "devServerTarget": "datagerry-app:serve:production"
-                        }
-                    }
-                }
-            }
         }
     }
 }
