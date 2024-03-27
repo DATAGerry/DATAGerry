@@ -11,42 +11,33 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { TextComponent } from './text/text.component';
 import { PasswordComponent } from './text/password.component';
-import { EmailComponent } from './text/email.component';
-import { PhoneComponent } from './text/phone.component';
 import { TextareaComponent } from './textarea/textarea.component';
-import { HrefComponent } from './text/href.component';
 import { CheckboxComponent } from './choice/checkbox.component';
 import { RadioComponent } from './choice/radio.component';
 import { SelectComponent } from './choice/select.component';
-import { DummyComponent } from './dummy/dummy.component';
 import { RefComponent } from './special/ref.component';
 import { LocationComponent } from './special/location.component';
 import { DateComponent } from './date/date.component';
 import { NumberComponent } from './math/number.component';
 import { RefSectionComponent } from './section/ref-section.component';
-
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 export const fieldComponents: { [type: string]: any } = {
-  'text': TextComponent,
-  'password': PasswordComponent,
-  'email': EmailComponent,
-  'tel': PhoneComponent,
-  'textarea': TextareaComponent,
-  'number': NumberComponent,
-  'href': HrefComponent,
-  'checkbox': CheckboxComponent,
-  'radio': RadioComponent,
-  'select': SelectComponent,
-  'ref': RefComponent,
-  'location': LocationComponent,
-  'date': DateComponent,
-  'debug': DummyComponent,
-  'ref-section-field': RefSectionComponent
+    'text': TextComponent,
+    'password': PasswordComponent,
+    'textarea': TextareaComponent,
+    'number': NumberComponent,
+    'checkbox': CheckboxComponent,
+    'radio': RadioComponent,
+    'select': SelectComponent,
+    'ref': RefComponent,
+    'location': LocationComponent,
+    'date': DateComponent,
+    'ref-section-field': RefSectionComponent
 };

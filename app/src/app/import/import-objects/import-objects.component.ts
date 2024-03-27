@@ -11,25 +11,27 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { AfterViewInit, Component, OnDestroy, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
+
+import { ImportService } from '../import.service';
+import { SidebarService } from '../../layout/services/sidebar.service';
+
 import { CmdbType } from '../../framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.models';
-import { ImportService } from '../import.service';
-import { Subscription } from 'rxjs';
-import { SidebarService } from '../../layout/services/sidebar.service';
-import { ProgressSpinnerService } from '../../layout/progress/progress-spinner.service';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-import-objects',
   templateUrl: './import-objects.component.html',
   styleUrls: ['./import-objects.component.scss']
 })
-export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy {
+export class ImportObjectsComponent implements OnInit, OnDestroy {
 
   private fileReader: FileReader;
   public typeInstance: CmdbType = undefined;
@@ -52,103 +54,112 @@ export class ImportObjectsComponent implements OnInit, AfterViewInit, OnDestroy 
   // Import Response
   public importResponse: ImportResponse = undefined;
 
-  public constructor(private importService: ImportService, private spinner: ProgressSpinnerService, public sidebarService: SidebarService) {
-    this.fileReader = new FileReader();
-    this.importerSubscription = new Subscription();
-    this.parseDataSubscription = new Subscription();
-  }
-
-  public ngOnInit(): void {
-    this.spinner.show();
-    this.fileReader.onload = () => {
-      this.importerFile.fileContent = this.fileReader.result;
-    };
-  }
-
-  public ngAfterViewInit(): void {
-    this.spinner.hide();
-  }
-
-  public ngOnDestroy(): void {
-    if (this.fileReader.readyState !== FileReader.DONE) {
-      this.fileReader.abort();
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    public constructor(private importService: ImportService, public sidebarService: SidebarService) {
+        this.fileReader = new FileReader();
+        this.importerSubscription = new Subscription();
+        this.parseDataSubscription = new Subscription();
     }
-    this.importerSubscription.unsubscribe();
-    this.parseDataSubscription.unsubscribe();
-  }
 
-  public formatChange(format: string) {
-    this.importerFile.fileFormat = format;
-    const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
-      .subscribe((defaultConfig: any) => {
-          this.defaultImporterConfig = defaultConfig;
-        },
-        (error) => console.error(error),
-        () => defaultImporterConfig.unsubscribe()
-      );
-  }
 
-  public fileChange(file: File) {
-    this.importerFile.file = file;
-    this.importerFile.fileName = file.name;
-    this.fileReader.readAsText(file);
-  }
-
-  public parserConfigChange(config: any) {
-    this.parserConfig = config;
-  }
-
-  public importConfigChange(config: any) {
-    if (config !== undefined) {
-      this.importerConfig = config as ImporterConfig;
-      if (this.typeInstance !== undefined) {
-        this.importerConfig.type_id = this.typeInstance.public_id as number;
-      }
+    public ngOnInit(): void {
+        this.fileReader.onload = () => {
+            this.importerFile.fileContent = this.fileReader.result;
+        };
     }
-  }
 
-  public typeChange(change: any) {
-    this.importerConfig.type_id = change.typeID as number;
-    this.typeInstance = change.typeInstance as CmdbType;
-  }
 
-  public mappingChange(change: any) {
-    this.mapping = change.filter(value => Object.keys(value).length !== 0);
-  }
+    public ngOnDestroy(): void {
+        if (this.fileReader.readyState !== FileReader.DONE) {
+            this.fileReader.abort();
+        }
 
-  public onParseData() {
-    this.spinner.show();
-    this.parseDataSubscription = this.importService.postObjectParser(
-      this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe(
-      (parsedData) => {
-        this.parsedData = parsedData;
-      },
-      (e) => console.error(e),
-      () => {
-        this.spinner.hide();
-      }
-    );
-  }
-
-  public startImport() {
-    this.spinner.show();
-    const runtimeConfig = this.importerConfig;
-    if (this.defaultImporterConfig.manually_mapping) {
-      runtimeConfig.mapping = this.mapping;
+        this.importerSubscription.unsubscribe();
+        this.parseDataSubscription.unsubscribe();
     }
-    this.importService.importObjects(this.importerFile.file, this.importerFile.fileFormat, this.parserConfig, runtimeConfig).subscribe(
-      (importResponse) => {
-        this.importResponse = importResponse;
-      },
-      (error) => {
-        console.error(error);
-        this.spinner.hide();
-      },
-      () => {
-        this.spinner.hide();
-        this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
-      }
-    );
-  }
 
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+
+    public formatChange(format: string) {
+        this.importerFile.fileFormat = format;
+        const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
+        .subscribe({
+            next: (defaultConfig: any) => {
+                    this.defaultImporterConfig = defaultConfig;
+                },
+            error: (error) => console.error(error),
+            complete: () => defaultImporterConfig.unsubscribe()
+        })
+    }
+
+
+    public fileChange(file: File) {
+        this.importerFile.file = file;
+        this.importerFile.fileName = file.name;
+        this.fileReader.readAsText(file);
+    }
+
+
+    public parserConfigChange(config: any) {
+        this.parserConfig = config;
+    }
+
+
+    public importConfigChange(config: any) {
+        if (config !== undefined) {
+            this.importerConfig = config as ImporterConfig;
+
+            if (this.typeInstance !== undefined) {
+                this.importerConfig.type_id = this.typeInstance.public_id as number;
+            }
+        }
+    }
+
+
+    public typeChange(change: any) {
+        this.importerConfig.type_id = change.typeID as number;
+        this.typeInstance = change.typeInstance as CmdbType;
+    }
+
+
+    public mappingChange(change: any) {
+        this.mapping = change.filter(value => Object.keys(value).length !== 0);
+    }
+
+
+    public onParseData() {
+        this.parseDataSubscription = this.importService.postObjectParser(
+        this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe({
+            next: (parsedData) => {
+                this.parsedData = parsedData;
+            },
+            error: (error) => console.error(error)
+        });
+    }
+
+
+    public startImport() {
+        const runtimeConfig = this.importerConfig;
+
+        if (this.defaultImporterConfig.manually_mapping) {
+            runtimeConfig.mapping = this.mapping;
+        }
+
+        this.importService.importObjects(this.importerFile.file,
+                                         this.importerFile.fileFormat,
+                                         this.parserConfig,
+                                         runtimeConfig)
+            .subscribe({
+                next: (importResponse) => {
+                    this.importResponse = importResponse;
+                },
+                error: (error) => {
+                    console.error(error);
+                },
+                complete: () => {
+                    this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
+                }
+            }
+        );
+    }
 }

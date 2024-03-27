@@ -24,6 +24,7 @@ import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 Chart.register(...registerables);
 /* ------------------------------------------------------------------------------------------------------------------ */
+
 @Component({
   selector: 'cmdb-charts',
   templateUrl: './charts.component.html',
@@ -37,22 +38,24 @@ export class ChartsComponent implements AfterViewInit, AfterViewChecked {
   private chart;
 
   private labels = new BehaviorSubject<any[]>([]);
+
   @Input() set dataLabels(value: string[]) {
     this.labels.next(value);
   }
 
-  get dataLabels() {
-    return this.labels.getValue();
-  }
+    get dataLabels() {
+        return this.labels.getValue();
+    }
 
-  private items = new BehaviorSubject<any[]>([]);
-  @Input() set dataItems(value: any[]) {
-    this.items.next(value);
-  }
+    private items = new BehaviorSubject<any[]>([]);
+    @Input() set dataItems(value: any[]) {
+        this.items.next(value);
+    }
 
-  get dataItems() {
-    return this.items.getValue();
-  }
+    get dataItems() {
+        return this.items.getValue();
+    }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     ngAfterViewInit() {
         this.chart = new Chart(this.chartRef.nativeElement,
@@ -81,6 +84,9 @@ export class ChartsComponent implements AfterViewInit, AfterViewChecked {
                     plugins: {
                         legend: {
                             display: false
+                        },
+                        tooltip: {
+                            enabled: false
                         }
                     }
                 },

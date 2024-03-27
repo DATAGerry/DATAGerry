@@ -23,7 +23,6 @@ import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { ObjectService } from '../../services/object.service';
 import { UserService } from '../../../management/services/user.service';
-import { ProgressSpinnerService } from '../../../layout/progress/progress-spinner.service';
 
 import { WizardComponent } from '@rg-software/angular-archwizard';
 
@@ -65,17 +64,13 @@ export class ObjectBulkChangeComponent implements OnDestroy {
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private objectService: ObjectService,
-                private userServer: UserService,
-                private router: Router,
-                private spinner: ProgressSpinnerService) {
-
-                if (this.router.getCurrentNavigation().extras.state) {
-                    this.type = this.router.getCurrentNavigation().extras.state.type;
-                    this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
-                    this.httpOptions = Object.assign({}, httpObserveOptions);
-                    this.httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
-                }
+    constructor(private objectService: ObjectService, private userServer: UserService, private router: Router) {
+        if (this.router.getCurrentNavigation().extras.state) {
+            this.type = this.router.getCurrentNavigation().extras.state.type;
+            this.renderResults = this.router.getCurrentNavigation().extras.state.objects;
+            this.httpOptions = Object.assign({}, httpObserveOptions);
+            this.httpOptions.params = { objectIDs: this.renderResults.map(m => m.object_information.object_id) };
+        }
     }
 
 
@@ -94,8 +89,6 @@ export class ObjectBulkChangeComponent implements OnDestroy {
 
     // Save a references object to the database.
     public saveObject() {
-        this.spinner.show();
-
         const changes = this.changeForm.getRawValue();
         const newObjectInstance = new CmdbObject();
 
@@ -116,12 +109,8 @@ export class ObjectBulkChangeComponent implements OnDestroy {
 
         this.objectService.putObject(0, newObjectInstance, this.httpOptions).pipe(takeUntil(this.subscriber))
             .subscribe((response: APIUpdateMultiResponse) => {
-            this.apiResponse = response;
-            this.goToNextStepIndex(2);
-            }, () => {
-                this.spinner.hide();
-            }, () => {
-                this.spinner.hide();
+                this.apiResponse = response;
+                this.goToNextStepIndex(2);
             }
         );
     }
@@ -129,7 +118,7 @@ export class ObjectBulkChangeComponent implements OnDestroy {
 
     private goToNextStepIndex(index: number) {
         if (this.wizard ) {
-        this.wizard.goToStep(index);
+            this.wizard.goToStep(index);
         }
     }
 }

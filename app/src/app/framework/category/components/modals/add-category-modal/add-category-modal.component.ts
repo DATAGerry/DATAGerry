@@ -11,16 +11,17 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnInit } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
 import { CategoryService, checkCategoryExistsValidator } from '../../../../services/category.service';
-import { ProgressSpinnerService } from '../../../../../layout/progress/progress-spinner.service';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-add-category-modal',
@@ -31,23 +32,26 @@ export class AddCategoryModalComponent implements OnInit {
 
   public catAddForm: UntypedFormGroup;
 
-  constructor(public activeModal: NgbActiveModal, private categoryService: CategoryService) {
-    this.catAddForm = new UntypedFormGroup({
-      name: new UntypedFormControl('', Validators.required),
-      label: new UntypedFormControl('')
-    });
-  }
 
-  public ngOnInit(): void {
-    this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
-  }
+    constructor(public activeModal: NgbActiveModal, private categoryService: CategoryService) {
+        this.catAddForm = new UntypedFormGroup({
+            name: new UntypedFormControl('', Validators.required),
+            label: new UntypedFormControl('')
+        });
+    }
 
-  public get name(): UntypedFormControl {
-    return this.catAddForm.get('name') as UntypedFormControl;
-  }
 
-  public get label(): UntypedFormControl {
-    return this.catAddForm.get('label') as UntypedFormControl;
-  }
+    public ngOnInit(): void {
+        this.name.setAsyncValidators(checkCategoryExistsValidator(this.categoryService));
+    }
 
+
+    public get name(): UntypedFormControl {
+        return this.catAddForm.get('name') as UntypedFormControl;
+    }
+
+
+    public get label(): UntypedFormControl {
+        return this.catAddForm.get('label') as UntypedFormControl;
+    }
 }
