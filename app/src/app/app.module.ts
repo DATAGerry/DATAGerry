@@ -15,7 +15,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -27,13 +26,9 @@ import { ToastModule } from './layout/toast/toast.module';
 import { AppRoutingModule } from './app-routing.module';
 import { MainModule } from './main/main.module';
 import { AuthModule } from './auth/auth.module';
-import { ProgressModule } from './layout/progress/progress.module';
 
 import { PreviousRouteService } from './services/previous-route.service';
 import { RequestCacheService } from './services/request-cache.service';
-import { AppLoadingService } from './services/app-loading.service';
-import { ProgressBarService } from './layout/progress/progress-bar.service';
-import { ProgressSpinnerService } from './layout/progress/progress-spinner.service';
 import { SessionTimeoutService } from './auth/services/session-timeout.service';
 import { TreeManagerService } from './services/tree-manager.service';
 import { ObjectService } from './framework/services/object.service';
@@ -49,40 +44,36 @@ import { AppComponent } from './app.component';
 
 
 @NgModule({
-  declarations: [
-    AppComponent,
-  ],
-  imports: [
-    CommonModule,
-    BrowserModule,
-    BrowserAnimationsModule,
-    HttpClientModule,
-    MainModule,
-    AuthModule,
-    LayoutModule,
-    ToastModule,
-    ProgressModule,
-    AppRoutingModule
-  ],
-  exports: [
-    BrowserModule
-  ],
-  providers: [
-    PreviousRouteService,
-    DatePipe,
-    DateFormatterPipe,
-    AppLoadingService,
-    SessionTimeoutService,
-    ProgressBarService,
-    ProgressSpinnerService,
-    RequestCacheService,
-    TreeManagerService,
-    ObjectService,
-    { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
-    { provide: HTTP_INTERCEPTORS, useClass: APICachingInterceptor, multi: true }
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent,
+    ],
+    imports: [
+        CommonModule,
+        BrowserModule,
+        BrowserAnimationsModule,
+        HttpClientModule,
+        MainModule,
+        AuthModule,
+        LayoutModule,
+        ToastModule,
+        AppRoutingModule
+    ],
+    exports: [
+        BrowserModule
+    ],
+    providers: [
+        PreviousRouteService,
+        DatePipe,
+        DateFormatterPipe,
+        SessionTimeoutService,
+        RequestCacheService,
+        TreeManagerService,
+        ObjectService,
+        { provide: HTTP_INTERCEPTORS, useClass: BasicAuthInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: APICachingInterceptor, multi: true }
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 }
