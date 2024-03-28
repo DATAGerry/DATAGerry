@@ -11,63 +11,52 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { AboutComponent } from './components/about/about.component';
-import { ContactComponent } from './components/contact/contact.component';
-import { TeamComponent } from './components/team/team.component';
-import { LicenseComponent } from './components/license/license.component';
+
 import { PermissionGuard } from '../auth/guards/permission.guard';
+
+import { AboutComponent } from './components/about/about.component';
+import { LicenseComponent } from './components/license/license.component';
 import { InfoComponent } from './info.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Overview',
+    {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [PermissionGuard],
+        data: {
+        breadcrumb: 'Overview',
+        },
+        component: InfoComponent
     },
-    component: InfoComponent
-  },
-  {
-    path: 'about',
-    data: {
-      breadcrumb: 'About'
+    {
+        path: 'about',
+        data: {
+        breadcrumb: 'About'
+        },
+        component: AboutComponent
     },
-    component: AboutComponent
-  },
-  {
-    path: 'contact',
-    data: {
-      breadcrumb: 'Contact'
-    },
-    component: ContactComponent
-  },
-  {
-    path: 'team',
-    data: {
-      breadcrumb: 'Team'
-    },
-    component: TeamComponent
-  }
-  ,
-  {
-    path: 'license',
-    data: {
-      breadcrumb: 'License'
-    },
-    component: LicenseComponent
-  }
+    {
+        path: 'license',
+        data: {
+        breadcrumb: 'License'
+        },
+        component: LicenseComponent
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [
+        RouterModule.forChild(routes)
+    ],
+    exports: [
+        RouterModule
+    ]
 })
 export class InfoRoutingModule { }
