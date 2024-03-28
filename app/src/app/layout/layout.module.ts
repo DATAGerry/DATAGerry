@@ -11,19 +11,49 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
+import { NgSelectModule } from '@ng-select/ng-select';
+import { IconPickerModule } from 'ngx-icon-picker';
+import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { QRCodeModule } from 'angularx-qrcode';
+import { NgxPaginationModule } from 'ngx-pagination';
+
+import { SearchBarModule } from '../search/search-bar/search-bar.module';
+import { ToastModule } from './toast/toast.module';
+import { AuthModule } from '../auth/auth.module';
+import { RenderModule } from '../framework/render/render.module';
+import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
+import { TableModule } from './table/table.module';
+import {MatTreeModule} from '@angular/material/tree';
+import {MatIconModule} from '@angular/material/icon';
+import {MatButtonModule} from '@angular/material/button';
+
 import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
+
+import { FileDragDropDirective } from './directives/fileDragDrop.directive';
+import { NameDirective } from './directives/name.directive';
+import { LowercaseDirective } from './directives/lowercase.directive';
+import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
+import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.directive';
+
+import { FileSizePipe } from './pipes/file-size.pipe';
+import { NameGuidePipe } from './pipes/name-guide.pipe';
+import { FileExtensionPipe } from './pipes/file-extension.pipe';
+import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
+import { TypeFilterPipe } from './pipes/typeFilter.pipe';
+
 import { NavigationComponent } from './structure/navigation/navigation.component';
 import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component';
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
@@ -58,142 +88,110 @@ import { MetadataInfoComponent } from './components/file-explorer/modal/metadata
 import { AttachmentsListModalComponent } from './helpers/modals/attachments-list-modal/attachments-list-modal.component';
 import { QrCodeComponent } from './helpers/qrcode/qr-code.component';
 import { BlockComponent } from './components/block/block.component';
-import { FeedbackModalComponent } from './helpers/modals/feedback-modal/feedback-modal.component';
 import { TypeSelectComponent } from './components/type-select/type-select.component';
-
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { NgSelectModule } from '@ng-select/ng-select';
-import { SearchBarModule } from '../search/search-bar/search-bar.module';
-import { ToastModule } from './toast/toast.module';
-import { AuthModule } from '../auth/auth.module';
-import { IconPickerModule } from 'ngx-icon-picker';
-import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
-import { RenderModule } from '../framework/render/render.module';
-import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
-import { TableModule } from './table/table.module';
-import { QRCodeModule } from 'angularx-qrcode';
-import { NgxPaginationModule } from 'ngx-pagination';
-
-import { FileSizePipe } from './pipes/file-size.pipe';
-import { NameGuidePipe } from './pipes/name-guide.pipe';
-import { FileExtensionPipe } from './pipes/file-extension.pipe';
-import { CategoryTreeFilterPipe } from './pipes/categoryTreeFilter.pipe';
-import { TypeFilterPipe } from './pipes/typeFilter.pipe';
-
-import { FileDragDropDirective } from './directives/fileDragDrop.directive';
-import { NameDirective } from './directives/name.directive';
-import { LowercaseDirective } from './directives/lowercase.directive';
-import { TableSortEventDirective } from './components/file-explorer/directives/tabletSortEvent.directive';
-import { PreventDoubleSubmitDirective } from './directives/preventDoubleSubmit.directive';
-
-//tree imports - start
-import {MatTreeModule} from '@angular/material/tree';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
-//tree imports - ned
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
-  declarations: [
-    BreadcrumbComponent,
-    NavigationComponent,
-    SidebarComponent,
-    LocationTreeComponent,
-    SidebarCategoryComponent,
-    ContentHeaderComponent,
-    ActiveBadgeComponent,
-    IntroComponent,
-    TypeLabelComponent,
-    FooterComponent,
-    IconPickerComponent,
-    ChartsComponent,
-    StepByStepIntroComponent,
-    BranchInfoModalComponent,
-    ProfileInfoModalComponent,
-    FileSizePipe,
-    SidebarTypeComponent,
-    CategoryTreeFilterPipe,
-    TypeFilterPipe,
-    FileExtensionPipe,
-    AddAttachmentsModalComponent,
-    FilemanagerModalComponent,
-    GeneralModalComponent,
-    LocationsModalComponent,
-    ObjectPreviewModalComponent,
-    InfoBoxComponent,
-    FileExplorerComponent,
-    FolderTreeComponent,
-    FileViewListComponent,
-    NewFolderDialogComponent,
-    RenameDialogComponent,
-    MetadataInfoComponent,
-    ContextmenuComponent,
-    FolderPathViewerComponent,
-    MoveDialogComponent,
-    NameGuidePipe,
-    AttachmentsListModalComponent,
-    QrCodeComponent,
-    BlockComponent,
-    FeedbackModalComponent,
-    TypeSelectComponent,
-    NameDirective,
-    LowercaseDirective,
-    FileDragDropDirective,
-    TableSortEventDirective,
-    PreventDoubleSubmitDirective,
-  ],
-  exports: [
-    FileExplorerComponent,
-    NavigationComponent,
-    BreadcrumbComponent,
-    FooterComponent,
-    ContentHeaderComponent,
-    ActiveBadgeComponent,
-    TypeLabelComponent,
-    IconPickerComponent,
-    ChartsComponent,
-    SidebarComponent,
-    FileSizePipe,
-    CategoryTreeFilterPipe,
-    TypeFilterPipe,
-    FileExtensionPipe,
-    InfoBoxComponent,
-    QrCodeComponent,
-    BlockComponent,
-    TypeSelectComponent,
-    NameDirective,
-    NameGuidePipe,
-    LowercaseDirective,
-    FileDragDropDirective,
-    PreventDoubleSubmitDirective,
-  ],
-  imports: [
-    CommonModule,
-    RouterModule,
-    NgSelectModule,
-    ReactiveFormsModule,
-    SearchBarModule,
-    NgbModule,
-    FormsModule,
-    TableModule,
-    FontAwesomeModule,
-    IconPickerModule,
-    ToastModule,
-    AuthModule,
-    RenderModule,
-    FileexplorerModule,
-    QRCodeModule,
-    NgxPaginationModule,
-    MatTreeModule,
-    MatButtonModule,
-    MatIconModule,
-  ],
-  providers: [
-    BreadcrumbService,
-    NgbActiveModal
-  ]
+    declarations: [
+        BreadcrumbComponent,
+        NavigationComponent,
+        SidebarComponent,
+        LocationTreeComponent,
+        SidebarCategoryComponent,
+        ContentHeaderComponent,
+        ActiveBadgeComponent,
+        IntroComponent,
+        TypeLabelComponent,
+        FooterComponent,
+        IconPickerComponent,
+        ChartsComponent,
+        StepByStepIntroComponent,
+        BranchInfoModalComponent,
+        ProfileInfoModalComponent,
+        FileSizePipe,
+        SidebarTypeComponent,
+        CategoryTreeFilterPipe,
+        TypeFilterPipe,
+        FileExtensionPipe,
+        AddAttachmentsModalComponent,
+        FilemanagerModalComponent,
+        GeneralModalComponent,
+        LocationsModalComponent,
+        ObjectPreviewModalComponent,
+        InfoBoxComponent,
+        FileExplorerComponent,
+        FolderTreeComponent,
+        FileViewListComponent,
+        NewFolderDialogComponent,
+        RenameDialogComponent,
+        MetadataInfoComponent,
+        ContextmenuComponent,
+        FolderPathViewerComponent,
+        MoveDialogComponent,
+        NameGuidePipe,
+        AttachmentsListModalComponent,
+        QrCodeComponent,
+        BlockComponent,
+        TypeSelectComponent,
+        NameDirective,
+        LowercaseDirective,
+        FileDragDropDirective,
+        TableSortEventDirective,
+        PreventDoubleSubmitDirective,
+    ],
+    exports: [
+        FileExplorerComponent,
+        NavigationComponent,
+        BreadcrumbComponent,
+        FooterComponent,
+        ContentHeaderComponent,
+        ActiveBadgeComponent,
+        TypeLabelComponent,
+        IconPickerComponent,
+        ChartsComponent,
+        SidebarComponent,
+        FileSizePipe,
+        CategoryTreeFilterPipe,
+        TypeFilterPipe,
+        FileExtensionPipe,
+        InfoBoxComponent,
+        QrCodeComponent,
+        BlockComponent,
+        TypeSelectComponent,
+        NameDirective,
+        NameGuidePipe,
+        LowercaseDirective,
+        FileDragDropDirective,
+        PreventDoubleSubmitDirective,
+    ],
+    imports: [
+        CommonModule,
+        RouterModule,
+        NgSelectModule,
+        ReactiveFormsModule,
+        SearchBarModule,
+        NgbModule,
+        FormsModule,
+        TableModule,
+        FontAwesomeModule,
+        IconPickerModule,
+        ToastModule,
+        AuthModule,
+        RenderModule,
+        FileexplorerModule,
+        QRCodeModule,
+        NgxPaginationModule,
+        MatTreeModule,
+        MatButtonModule,
+        MatIconModule,
+    ],
+    providers: [
+        BreadcrumbService,
+        NgbActiveModal
+    ]
 })
 export class LayoutModule {
-  constructor(private iconLibrary: FaIconLibrary) {
-    iconLibrary.addIconPacks(fas, far, fab);
-  }
+    constructor(iconLibrary: FaIconLibrary) {
+        iconLibrary.addIconPacks(fas, far, fab);
+    }
 }
