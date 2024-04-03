@@ -18,19 +18,19 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 
 import { AccessControlList, AccessControlPermission } from '../../acl.types';
-import { Group } from '../../../management/models/group';
+import { Group } from 'src/app/management/models/group';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-    selector: 'cmdb-acl-objects-information-permissions-column',
-    templateUrl: './acl-objects-information-permissions-column.component.html',
-    styleUrls: ['./acl-objects-information-permissions-column.component.scss']
+    selector: 'cmdb-acl-object-permissions',
+    templateUrl: './acl-object-permissions.component.html',
+    styleUrls: ['./acl-object-permissions.component.scss']
 })
-export class AclObjectsInformationPermissionsColumnComponent implements OnChanges {
-    // Selected group which compares to the acl.
+export class AclObjectPermissionsComponent implements OnChanges {
+    // Selected group which compares to the acl
     @Input() public group: Group;
 
-    // ACL of the current row type.
+    // ACL of the current row type
     @Input() public acl: AccessControlList;
 
     public permissions: Array<AccessControlPermission> = [];
@@ -43,6 +43,9 @@ export class AclObjectsInformationPermissionsColumnComponent implements OnChange
 
 /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
+    /**
+     * Generates the permissions for the object if there are any
+     */
     public generate(): void {
         if (!this.group || !this.acl) {
             this.permissions = [];

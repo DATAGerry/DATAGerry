@@ -25,11 +25,18 @@
 </ng-template>
 
 <ng-template #aclActivateTemplate let-data="data">
-    <cmdb-acl-objects-information-activation-column [acl]="data"/>
+    <div class="text-center">
+        @if(data.activated) {
+            <span class="badge badge-success">Activated</span>
+        }
+        @else {
+            <span class="badge badge-danger">Deactivated</span>
+        }
+    </div>
 </ng-template>
 
 <ng-template #aclPermissionsTemplate let-data="data">
-    <cmdb-acl-objects-information-permissions-column
+    <cmdb-acl-object-permissions
         [group]="group"
         [acl]="data"
     />

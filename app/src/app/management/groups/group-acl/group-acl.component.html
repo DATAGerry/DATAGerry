@@ -1,22 +1,26 @@
 <h1>Object ACL Management</h1>
 <hr/>
+
 <form [formGroup]="objectsACLGroupForm">
-  <div class="form-group row">
-    <label class="col-sm-2 col-form-label">Group</label>
-    <div class="col-sm-10">
-      <ng-select [items]="groups"
-                 [virtualScroll]="true"
-                 [loading]="groupsLoading"
-                 formControlName="group"
-                 bindLabel="label"
-                 placeholder="Select a group"
-                 appendTo="body"
-                 (scrollToEnd)="onScrollToEnd()">
-        <ng-template ng-header-tmp>
-          <small class="form-text text-muted" *ngIf="totalGroups">Loaded {{groups.length}} of {{totalGroups}}</small>
-        </ng-template>
-      </ng-select>
+    <div class="form-group row">
+        <label class="col-sm-2 col-form-label">Group</label>
+        <div class="col-sm-10">
+            <ng-select
+                [items]="groups"
+                [virtualScroll]="true"
+                [loading]="groupsLoading"
+                formControlName="group"
+                bindLabel="label"
+                placeholder="Select a group"
+                appendTo="body"
+                (scrollToEnd)="onScrollToEnd()"
+            >
+                <ng-template ng-header-tmp>
+                    <small class="form-text text-muted" *ngIf="totalGroups">Loaded {{groups.length}} of {{totalGroups}}</small>
+                </ng-template>
+            </ng-select>
+        </div>
     </div>
-  </div>
 </form>
-<cmdb-acl-objects-information-table *ngIf="selectedGroup" [group]="selectedGroup"></cmdb-acl-objects-information-table>
+
+<cmdb-acl-objects-table *ngIf="selectedGroup" [group]="selectedGroup"/>

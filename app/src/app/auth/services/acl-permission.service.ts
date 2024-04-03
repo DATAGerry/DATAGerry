@@ -11,14 +11,16 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
+
 import { AuthService } from './auth.service';
-import { AccessControlList } from '../../acl/acl.types';
+
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable({
   providedIn: 'root'
@@ -27,38 +29,47 @@ export class AclPermissionService {
 
   private acl: AccessControlList;
 
-  constructor(private authService: AuthService) {}
 
-  public checkRights(acl: AccessControlList, rights: string | string[]) {
-    if (!acl.activated) {
-      return null;
+/* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
+    constructor(private authService: AuthService) {
+
     }
-    this.acl = acl;
-    if (Array.isArray(rights)) {
 
-      if (rights.length === 1) {
-        return this.hasRight(rights[0]);
-      }
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
-      for (const right of rights) {
-        if (!this.hasRight(right)) {
-          return false;
+    public checkRights(acl: AccessControlList, rights: string | string[]) {
+        if (!acl.activated) {
+            return null;
         }
-      }
-    } else {
-      return this.hasRight(rights);
+
+        this.acl = acl;
+
+        if (Array.isArray(rights)) {
+            if (rights.length === 1) {
+                return this.hasRight(rights[0]);
+            }
+
+            for (const right of rights) {
+                if (!this.hasRight(right)) {
+                    return false;
+                }
+            }
+        } else {
+            return this.hasRight(rights);
+        }
+
+        return true;
     }
-    return true;
-  }
 
-  private hasRight(right: string) {
-    const currentGroup = this.authService.currentUserValue.group_id;
-    const rights = this.acl.groups.includes[currentGroup] as string[];
-    if (!rights) {
-      return false;
+
+    private hasRight(right: string) {
+        const currentGroup = this.authService.currentUserValue.group_id;
+        const rights = this.acl.groups.includes[currentGroup] as string[];
+
+        if (!rights) {
+            return false;
+        }
+
+        return rights.includes(right);
     }
-    return rights.includes(right);
-
-  }
-
 }

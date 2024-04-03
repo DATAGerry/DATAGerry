@@ -20,22 +20,22 @@ import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 
 import { ReplaySubject, takeUntil } from 'rxjs';
 
-import { TypeService } from '../../../framework/services/type.service';
-import { PermissionService } from '../../../auth/services/permission.service';
+import { TypeService } from 'src/app/framework/services/type.service';
+import { PermissionService } from 'src/app/auth/services/permission.service';
 
-import { Group } from '../../../management/models/group';
-import { CmdbType } from '../../../framework/models/cmdb-type';
-import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { Column, Sort, SortDirection } from '../../../layout/table/table.types';
-import { CollectionParameters } from '../../../services/models/api-parameter';
+import { Group } from 'src/app/management/models/group';
+import { CmdbType } from 'src/app/framework/models/cmdb-type';
+import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { Column, Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { CollectionParameters } from 'src/app/services/models/api-parameter';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-    selector: 'cmdb-acl-objects-information-table',
-    templateUrl: './acl-objects-information-table.component.html',
-    styleUrls: ['./acl-objects-information-table.component.scss']
+    selector: 'cmdb-acl-objects-table',
+    templateUrl: './acl-objects-table.component.html',
+    styleUrls: ['./acl-objects-table.component.scss']
 })
-export class AclObjectsInformationTableComponent implements OnInit, OnDestroy {
+export class AclObjectsTableComponent implements OnInit, OnDestroy {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 

@@ -20,28 +20,20 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 
-import { TableModule } from '../layout/table/table.module';
-import { LayoutModule } from '../layout/layout.module';
+import { TableModule } from 'src/app/layout/table/table.module';
+import { LayoutModule } from 'src/app/layout/layout.module';
 
-import {
-    AclObjectsInformationTableComponent
-} from './components/acl-objects-information-table/acl-objects-information-table.component';
-import {
-    AclObjectsInformationActivationColumnComponent
-} from './components/acl-objects-information-activation-column/acl-objects-information-activation-column.component';
-import {
-    AclObjectsInformationPermissionsColumnComponent
-} from './components/acl-objects-information-permissions-column/acl-objects-information-permissions-column.component';
+import { AclObjectsTableComponent} from './components/acl-objects-table/acl-objects-table.component';
+import { AclObjectPermissionsComponent } from './components/acl-object-permissions/acl-object-permissions.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
     declarations: [
-        AclObjectsInformationTableComponent,
-        AclObjectsInformationActivationColumnComponent,
-        AclObjectsInformationPermissionsColumnComponent
+        AclObjectsTableComponent,
+        AclObjectPermissionsComponent
     ],
     exports: [
-        AclObjectsInformationTableComponent
+        AclObjectsTableComponent
     ],
     imports: [
         CommonModule,

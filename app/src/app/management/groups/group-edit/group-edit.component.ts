@@ -11,65 +11,78 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ReplaySubject, takeUntil } from 'rxjs';
+
 import { GroupService } from '../../services/group.service';
-import { ReplaySubject, Subject } from 'rxjs';
-import { Group } from '../../models/group';
-import { ActivatedRoute, Data, Router } from '@angular/router';
-import { GroupFormComponent } from '../components/group-form/group-form.component';
-import { Right } from '../../models/right';
-import { takeUntil } from 'rxjs/operators';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { PermissionService } from '../../../auth/services/permission.service';
 
+import { Group } from '../../models/group';
+import { GroupFormComponent } from '../components/group-form/group-form.component';
+import { Right } from '../../models/right';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 @Component({
-  selector: 'cmdb-group-edit',
-  templateUrl: './group-edit.component.html',
-  styleUrls: ['./group-edit.component.scss']
+    selector: 'cmdb-group-edit',
+    templateUrl: './group-edit.component.html',
+    styleUrls: ['./group-edit.component.scss']
 })
 export class GroupEditComponent implements OnInit, OnDestroy {
 
-  @ViewChild(GroupFormComponent, { static: true }) private groupForm: GroupFormComponent;
+    @ViewChild(GroupFormComponent, { static: true }) private groupForm: GroupFormComponent;
 
-  public rights: Array<Right> = [];
-  public valid: boolean = false;
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public group: Group;
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private typeEditRightName = 'base.framework.type.edit';
 
-  private typeEditRightName = 'base.framework.type.edit';
-  public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) || this.permissionService.hasExtendedRight(this.typeEditRightName);
+    public rights: Array<Right> = [];
+    public valid: boolean = false;
+    public group: Group;
 
-  constructor(private route: ActivatedRoute, private router: Router, private groupService: GroupService,
-              private toastService: ToastService, private permissionService: PermissionService) {
-    this.rights = this.route.snapshot.data.rights as Array<Right>;
-    this.group = this.route.snapshot.data.group as Group;
-  }
+    public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) ||
+                            this.permissionService.hasExtendedRight(this.typeEditRightName);
 
-  public ngOnInit(): void {
-    this.group = this.route.snapshot.data.group as Group;
-    this.groupForm.nameControl.clearAsyncValidators();
-    this.groupForm.nameControl.disable();
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+    constructor(private route: ActivatedRoute,
+                private router: Router,
+                private groupService: GroupService,
+                private toastService: ToastService,
+                private permissionService: PermissionService) {
 
-  public edit(group: Group): void {
-    const editGroup = Object.assign(this.group, group);
-    if (this.valid) {
-      this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
-          this.toastService.success(`Group ${ g.label } was updated!`);
-          this.router.navigate(['/', 'management', 'groups']);
-        }
-      );
+        this.rights = this.route.snapshot.data.rights as Array<Right>;
+        this.group = this.route.snapshot.data.group as Group;
     }
-  }
 
+
+    public ngOnInit(): void {
+        this.groupForm.nameControl.clearAsyncValidators();
+        this.groupForm.nameControl.disable();
+    }
+
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+
+    public edit(group: Group): void {
+        const editGroup = Object.assign(this.group, group);
+        
+        if (this.valid) {
+            this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber))
+            .subscribe((g: Group) => {
+                this.toastService.success(`Group ${ g.label } was updated!`);
+                this.router.navigate(['/', 'management', 'groups']);
+                }
+            );
+        }
+    }
 }

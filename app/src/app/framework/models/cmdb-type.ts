@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { CmdbDao } from './cmdb-dao';
-import { AccessControlList } from '../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export interface CmdbTypeSection {

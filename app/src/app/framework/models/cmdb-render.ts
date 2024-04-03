@@ -11,49 +11,53 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-import { AccessControlList } from '../../acl/acl.types';
+import { AccessControlList } from "src/app/modules/acl/acl.types";
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 export class RenderResult {
-  public current_render_time: {
-    $date: string
-  };
-  public object_information: {
-    object_id: number;
-    creation_time: {
-      $date: string
-    },
-    last_edit_time: {
-      $date: string
-    },
-    author_id: number;
-    author_name: string;
-    editor_id?: number;
-    editor_name?: string;
-    active: boolean;
-    version: string;
-  };
-  public type_information: {
-    type_id: number;
-    type_name: string;
-    type_label: string;
-    creation_time: {
-      $date: string
-    },
-    author_id: number;
-    author_name: string;
-    active: boolean;
-    version: string;
-    icon: string;
-    acl: AccessControlList;
-  };
-  public fields: any[];
-  public sections: any[];
-  public summaries: any[];
-  public summary_line: string;
-  public externals: any[];
+
+    public current_render_time: {
+        $date: string
+    };
+
+    public object_information: {
+        object_id: number;
+        creation_time: {
+            $date: string
+        },
+        last_edit_time: {
+            $date: string
+        },
+        author_id: number;
+        author_name: string;
+        editor_id?: number;
+        editor_name?: string;
+        active: boolean;
+        version: string;
+    };
+
+    public type_information: {
+        type_id: number;
+        type_name: string;
+        type_label: string;
+        creation_time: {
+            $date: string
+        },
+        author_id: number;
+        author_name: string;
+        active: boolean;
+        version: string;
+        icon: string;
+        acl: AccessControlList;
+    };
+
+    public fields: any[];
+    public sections: any[];
+    public summaries: any[];
+    public summary_line: string;
+    public externals: any[];
 }

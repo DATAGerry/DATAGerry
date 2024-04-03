@@ -11,92 +11,103 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+
+import { ReplaySubject, takeUntil } from 'rxjs';
+
 import { Group } from '../../../../management/models/group';
-import { AccessControlList } from '../../../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-type-acl-step',
-  templateUrl: './type-acl-step.component.html',
-  styleUrls: ['./type-acl-step.component.scss']
+    selector: 'cmdb-type-acl-step',
+    templateUrl: './type-acl-step.component.html',
+    styleUrls: ['./type-acl-step.component.scss']
 })
 export class TypeAclStepComponent extends TypeBuilderStepComponent implements OnInit, OnDestroy {
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  @Input() public groups: Array<Group> = [];
+    private wasEmpty: boolean = true;
+    public form: UntypedFormGroup;
 
-  private wasEmpty: boolean = true;
+    @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
 
-  @Input('typeInstance')
-  public set TypeInstance(instance: CmdbType) {
-    this.typeInstance = instance;
-    if (this.typeInstance.acl) {
-      this.form.patchValue(this.typeInstance.acl);
+    @Input() public groups: Array<Group> = [];
+
+/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
+
+    @Input('typeInstance')
+    public set TypeInstance(instance: CmdbType) {
+        this.typeInstance = instance;
+
+        if (this.typeInstance.acl) {
+            this.form.patchValue(this.typeInstance.acl);
+        }
+
     }
 
-  }
 
-  @Output() public isEmpty: EventEmitter<boolean> = new EventEmitter<boolean>();
-
-  public form: UntypedFormGroup;
-
-  constructor() {
-    super();
-    this.form = new UntypedFormGroup({
-      activated: new UntypedFormControl(false),
-      groups: new UntypedFormGroup({
-        includes: new UntypedFormGroup({})
-      })
-    });
-  }
+    public get activatedStatus(): boolean {
+        return this.form.get('activated').value;
+    }
 
 
-  public get activatedStatus(): boolean {
-    return this.form.get('activated').value;
-  }
+    public get groupsControl(): UntypedFormGroup {
+        return this.form.get('groups') as UntypedFormGroup;
+    }
 
-  public get groupsControl(): UntypedFormGroup {
-    return this.form.get('groups') as UntypedFormGroup;
-  }
+    public get includesControl(): UntypedFormGroup {
+        return this.groupsControl.get('includes') as UntypedFormGroup;
+    }
 
-  public get includesControl(): UntypedFormGroup {
-    return this.groupsControl.get('includes') as UntypedFormGroup;
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  public onAddChange(event) {
-    this.wasEmpty = (!event[0] || event[0].length === 0) && !event[1];
-    this.isEmpty.emit(this.wasEmpty);
-  }
+    constructor() {
+        super();
 
-  public ngOnInit(): void {
-    this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      if (!this.form.get('activated').value) {
-        this.isEmpty.emit(true);
-        this.validateChange.emit(true);
-      } else {
+        this.form = new UntypedFormGroup({
+            activated: new UntypedFormControl(false),
+            groups: new UntypedFormGroup({
+                includes: new UntypedFormGroup({})
+            })
+        });
+    }
+
+
+    public ngOnInit(): void {
+        this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
+            if (!this.form.get('activated').value) {
+                this.isEmpty.emit(true);
+                this.validateChange.emit(true);
+            } else {
+                this.isEmpty.emit(this.wasEmpty);
+                this.validateChange.emit(this.form.valid);
+            }
+        });
+
+        this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
+            this.typeInstance.acl = this.form.getRawValue() as AccessControlList;
+        });
+    }
+
+
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+
+    public onAddChange(event) {
+        this.wasEmpty = (!event[0] || event[0].length === 0) && !event[1];
         this.isEmpty.emit(this.wasEmpty);
-        this.validateChange.emit(this.form.valid);
-      }
-    });
-    this.form.valueChanges.pipe(takeUntil(this.subscriber)).subscribe(() => {
-      this.typeInstance.acl = this.form.getRawValue() as AccessControlList;
-    });
-  }
-
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
-
+    }
 }

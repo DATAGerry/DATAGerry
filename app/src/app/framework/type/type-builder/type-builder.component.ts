@@ -33,7 +33,7 @@ import { Group } from '../../../management/models/group';
 import { User } from '../../../management/models/user';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
-import { AccessControlList } from '../../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -119,12 +119,17 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         };
 
         this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
-        .subscribe((response: APIGetMultiResponse) => {
-            this.groups = [...response.results as Array<Group>];
-        }, () => { }
-            , () => {
-            this.checkAclGroupExist();
-            });
+        .subscribe({
+            next: (response: APIGetMultiResponse) => {
+                this.groups = [...response.results as Array<Group>];
+            },
+            error: (error) => {
+                console.log(error)
+            },
+            complete:() => {
+                this.checkAclGroupExist();
+                }
+        });
 
         const typesCallParameters: CollectionParameters = {
         filter: undefined,
@@ -157,13 +162,13 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
      */
     private checkAclGroupExist(): void {
         if (this.typeInstance.acl && this.typeInstance.acl.groups && this.typeInstance.acl.groups.includes && this.groups) {
-        Object.keys(this.typeInstance.acl.groups.includes).forEach((key) => {
-            const found = this.groups.find(g => g.public_id === Number(key));
+            Object.keys(this.typeInstance.acl.groups.includes).forEach((key) => {
+                const found = this.groups.find(g => g.public_id === Number(key));
 
-            if (!found) {
-                this.toast.error(`The group for the ACL setting does not exist: GroupID: ${key}`);
-            }
-        });
+                if (!found) {
+                    this.toast.error(`The group for the ACL setting does not exist: GroupID: ${key}`);
+                }
+            });
         }
     }
 
