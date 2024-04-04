@@ -19,7 +19,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 
-import { EditorModule } from '@tinymce/tinymce-angular';
+import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { ArchwizardModule } from '@rg-software/angular-archwizard';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -66,6 +66,13 @@ import { DocapiBuilderStyleStepComponent } from './docapi-builder/docapi-builder
         LayoutModule,
         TableModule,
         FontAwesomeModule
+    ],
+    providers: [
+        {
+            provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'
+        }
+
+
     ]
 })
 export class DocapiModule {

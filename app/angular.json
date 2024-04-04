@@ -58,7 +58,12 @@
                                 "glob": "**/*",
                                 "input": "./node_modules/tinymce/plugins/",
                                 "output": "/assets/tinymce/plugins/"
-                            }
+                            },
+                            {
+                                "glob": "**/*",
+                                "input": "node_modules/tinymce",
+                                "output": "/tinymce/"
+                               }
                         ],
                         "styles": ["src/styles.scss"],
                         "scripts": [

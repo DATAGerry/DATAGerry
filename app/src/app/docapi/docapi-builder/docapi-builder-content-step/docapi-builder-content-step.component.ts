@@ -55,7 +55,7 @@ export class DocapiBuilderContentStepComponent {
   public templateHelperData: any;
 
   public editorConfig = {
-    base_url: '/assets/tinymce',
+    base_url: '/tinymce',
     suffix: '.min',
     height: 500,
     menubar: false,
