@@ -1,4 +1,4 @@
-
+<!-- 
 <div class="dropdown">
   <div class="dropdown-toggle total-title d-flex justify-object-view-items"
        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -22,4 +22,23 @@
       </div>
     </div>
   </ng-container>
+</div> -->
+<div class="dropdown">
+  <button mat-icon-button [matMenuTriggerFor]="menu" class="custom-button">
+    <div class="dropdown-toggle total-title d-flex justify-object-view-items" aria-haspopup="true" aria-expanded="false">
+      <div class="icon"><i class="fa fa-file-pdf"></i></div>
+      <div class="name"><strong class="text-uppercase">Documents</strong> <span>Total {{docs?.length}}</span></div>
+    </div>
+  </button>
 </div>
+<mat-menu #menu="matMenu">
+  <ng-container *ngIf="docs?.length > 0; else noDocs">
+    <button mat-menu-item *ngFor="let doc of docs" (click)="downloadDocument(doc.public_id, renderResult.object_information?.object_id, doc.name)">
+      {{ doc.label }}
+    </button>
+  </ng-container>
+  <ng-template #noDocs>
+    <button mat-menu-item disabled>No documents available</button>
+  </ng-template>
+</mat-menu>
+

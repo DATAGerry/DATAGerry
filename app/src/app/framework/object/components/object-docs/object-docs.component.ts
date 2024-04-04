@@ -20,8 +20,10 @@ import { Component, OnChanges, Input, SimpleChanges } from '@angular/core';
 
 import { RenderResult } from '../../../models/cmdb-render';
 import { DocTemplate } from '../../../../docapi/models/cmdb-doctemplate';
-import { DocapiService } from '../../../../docapi/docapi.service';
+import { DocapiService } from '../../../../docapi/docapi.service';
 import { FileSaverService } from 'ngx-filesaver';
+import { MatDialog } from '@angular/material/dialog';
+
 
 @Component({
   selector: 'cmdb-object-docs',
@@ -33,13 +35,13 @@ export class ObjectDocsComponent implements OnChanges {
   @Input() renderResult: RenderResult;
   docs: DocTemplate[];
 
-  constructor(private docapiService: DocapiService, private fileSaverService: FileSaverService) { }
+  constructor(private docapiService: DocapiService, private fileSaverService: FileSaverService, private dialog: MatDialog) { }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes.renderResult && this.renderResult) {
-        this.docapiService.getObjectDocTemplateList(this.renderResult.type_information.type_id)
-          .subscribe((docs: DocTemplate[]) => {
-            this.docs = docs;
+      this.docapiService.getObjectDocTemplateList(this.renderResult.type_information.type_id)
+        .subscribe((docs: DocTemplate[]) => {
+          this.docs = docs;
         });
     }
   }
@@ -52,6 +54,17 @@ export class ObjectDocsComponent implements OnChanges {
 
   public saveFile(data: any, filename: string) {
     this.fileSaverService.save(data.body, filename);
+  }
+
+  openDocumentDialog(): void {
+    const dialogRef = this.dialog.open(ObjectDocsComponent, {
+      width: '400px',
+      data: { docs: this.docs }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
   }
 
 }
