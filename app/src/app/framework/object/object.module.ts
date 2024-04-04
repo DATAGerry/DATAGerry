@@ -18,6 +18,9 @@
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatIconModule } from '@angular/material/icon';
+
 
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
@@ -132,7 +135,9 @@ import { ObjectBulkChangeCompleteComponent } from './object-bulk-change/object-b
         RenderModule,
         UsersModule,
         TableModule,
-        NgxPaginationModule
+        NgxPaginationModule,
+        MatMenuModule,
+        MatIconModule
     ],
     exports: [
         ObjectViewRenderComponent,
