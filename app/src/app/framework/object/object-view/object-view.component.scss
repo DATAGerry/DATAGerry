@@ -1,3 +1,7 @@
 .docsWidget:empty {
   display: none;
 }
+
+.object-view-navbar>div:not(:first-child) {
+  cursor: pointer;
+}
