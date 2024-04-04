@@ -24,7 +24,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
 import { ArchwizardModule } from '@rg-software/angular-archwizard';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../modules/auth/auth.module';
 import { DocapiRoutingModule } from './docapi-routing.module';
 import { LayoutModule } from '../layout/layout.module';
 import { TableModule } from '../layout/table/table.module';
@@ -71,8 +71,6 @@ import { DocapiBuilderStyleStepComponent } from './docapi-builder/docapi-builder
         {
             provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js'
         }
-
-
     ]
 })
 export class DocapiModule {

@@ -28,7 +28,7 @@ import { NgbDatepickerModule } from '@ng-bootstrap/ng-bootstrap';
 import { SectionTemplateRoutingModule } from './section-template-routing.module';
 import { BuilderModule } from '../type/builder/builder.module';
 import { ToastModule } from 'src/app/layout/toast/toast.module';
-import { AuthModule } from 'src/app/auth/auth.module';
+import { AuthModule } from 'src/app/modules/auth/auth.module';
 
 import { SectionTemplateService } from './services/section-template.service';
 
@@ -42,34 +42,29 @@ import { SectionTemplateCloneModalComponent } from './layout/modals/section-temp
 
 @NgModule({
     declarations:[
-      SectionTemplateComponent,
-      SectionTemplateBuilderComponent,
-      SectionTemplateAddComponent,
-      SectionTemplateDeleteModalComponent,
-      SectionTemplateTransformModalComponent,
-      SectionTemplateCloneModalComponent
+        SectionTemplateComponent,
+        SectionTemplateBuilderComponent,
+        SectionTemplateAddComponent,
+        SectionTemplateDeleteModalComponent,
+        SectionTemplateTransformModalComponent,
+        SectionTemplateCloneModalComponent
     ],
     imports: [
-      SectionTemplateRoutingModule,
-      CommonModule,
-      FontAwesomeModule,
-      FormsModule,
-      ReactiveFormsModule,
-      NgSelectModule,
-      NgbDatepickerModule,
-      DndModule,
-      BuilderModule,
-      MatCheckboxModule,
-      ToastModule,
-      AuthModule
-    ],
-    exports: [
-
+        SectionTemplateRoutingModule,
+        CommonModule,
+        FontAwesomeModule,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        NgbDatepickerModule,
+        DndModule,
+        BuilderModule,
+        MatCheckboxModule,
+        ToastModule,
+        AuthModule
     ],
     providers:[
-      SectionTemplateService
+        SectionTemplateService
     ]
 })
-export class SectionTemplateModule {
-    
-}
+export class SectionTemplateModule {}

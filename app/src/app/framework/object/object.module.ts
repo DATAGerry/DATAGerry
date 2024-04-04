@@ -21,7 +21,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIconModule } from '@angular/material/icon';
 
-
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
@@ -32,7 +31,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { ObjectRoutingModule } from './object-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { RenderModule } from '../render/render.module';
-import { AuthModule } from '../../auth/auth.module';
+import { AuthModule } from '../../modules/auth/auth.module';
 import { UsersModule } from '../../management/users/users.module';
 import { TableModule } from '../../layout/table/table.module';
 
@@ -146,5 +145,4 @@ import { ObjectBulkChangeCompleteComponent } from './object-bulk-change/object-b
         ObjectLogUserComponent
     ]
 })
-export class ObjectModule {
-}
+export class ObjectModule {}

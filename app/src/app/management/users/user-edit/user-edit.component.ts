@@ -11,87 +11,86 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { UserFormComponent } from '../components/user-form/user-form.component';
-import { ReplaySubject } from 'rxjs';
-import { Group } from '../../models/group';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { ReplaySubject, takeUntil } from 'rxjs';
+
 import { UserService } from '../../services/user.service';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { takeUntil } from 'rxjs/operators';
+import { PermissionService } from '../../../modules/auth/services/permission.service';
+
+import { UserFormComponent } from '../components/user-form/user-form.component';
+import { Group } from '../../models/group';
 import { User } from '../../models/user';
-import { ActivatedRoute, Router } from '@angular/router';
-import { PermissionService } from '../../../auth/services/permission.service';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-user-edit',
-  templateUrl: './user-edit.component.html',
-  styleUrls: ['./user-edit.component.scss']
+    selector: 'cmdb-user-edit',
+    templateUrl: './user-edit.component.html',
+    styleUrls: ['./user-edit.component.scss']
 })
 export class UserEditComponent implements OnInit, OnDestroy {
 
-  /**
-   * UserFormComponent for static inserting of parameters.
-   */
-  @ViewChild(UserFormComponent, { static: true }) userFormComponent: UserFormComponent;
+    // UserFormComponent for static inserting of parameters
+    @ViewChild(UserFormComponent, { static: true }) userFormComponent: UserFormComponent;
 
-  /**
-   * Component un-subscriber.
-   */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Selected user
-   */
-  public user: User;
+    public user: User;
 
-  /**
-   * List of possible groups.
-   */
-  public groups: Array<Group> = [];
+    // List of possible groups
+    public groups: Array<Group> = [];
 
-  /**
-   * Group of user while loaded.
-   */
+    // Group of user while loaded
+    public userGroup: Group;
 
-  public userGroup: Group;
+    // List of possible auth providers
+    public providers: Array<any> = [];
 
-  /**
-   * List of possible auth providers.
-   */
-  public providers: Array<any> = [];
+    private typeEditRightName = 'base.framework.type.edit';
+    public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) ||
+                           this.permissionService.hasExtendedRight(this.typeEditRightName);
 
-  private typeEditRightName = 'base.framework.type.edit';
-  public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) || this.permissionService.hasExtendedRight(this.typeEditRightName);
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-  constructor(private route: ActivatedRoute, private router: Router, private userService: UserService,
-              private toastService: ToastService, private permissionService: PermissionService) {
-    this.user = this.route.snapshot.data.user as User;
-    this.groups = this.route.snapshot.data.groups as Array<Group>;
-    this.userGroup = this.groups.find(group => group.public_id === this.user.group_id);
-    this.providers = this.route.snapshot.data.providers as Array<any>;
-  }
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private userService: UserService,
+        private toastService: ToastService,
+        private permissionService: PermissionService
+    ) {
+        this.user = this.route.snapshot.data.user as User;
+        this.groups = this.route.snapshot.data.groups as Array<Group>;
+        this.userGroup = this.groups.find(group => group.public_id === this.user.group_id);
+        this.providers = this.route.snapshot.data.providers as Array<any>;
+    }
 
-  public ngOnInit(): void {
-    this.userFormComponent.form.removeControl('password');
-  }
 
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
+    public ngOnInit(): void {
+        this.userFormComponent.form.removeControl('password');
+    }
 
-  public save(user: User): void {
-    const editUser = Object.assign(this.user, user);
-    this.userService.putUser(this.user.public_id, editUser).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
 
-      this.toastService.success(`User ${ apiUser.user_name } was updated`);
-      this.router.navigate(['/', 'management', 'users']);
-    });
-  }
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
 
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+
+    public save(user: User): void {
+        const editUser = Object.assign(this.user, user);
+        this.userService.putUser(this.user.public_id, editUser).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
+            this.toastService.success(`User ${ apiUser.user_name } was updated`);
+            this.router.navigate(['/', 'management', 'users']);
+        });
+    }
 }

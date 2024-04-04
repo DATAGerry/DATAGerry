@@ -21,7 +21,7 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable, map } from 'rxjs';
 
 import { GroupService } from '../services/group.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../modules/auth/services/auth.service';
 
 import { Group } from '../models/group';
 import { APIGetMultiResponse } from '../../services/models/api-response';

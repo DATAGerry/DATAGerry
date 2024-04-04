@@ -22,11 +22,11 @@ import { ActivatedRoute, Data } from '@angular/router';
 import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { ToastService } from '../../layout/toast/toast.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../modules/auth/services/auth.service';
 import { GroupService } from '../../management/services/group.service';
 
-import { AuthProvider } from '../../auth/models/providers';
-import { AuthSettings } from '../../auth/models/settings';
+import { AuthProvider } from '../../modules/auth/models/providers';
+import { AuthSettings } from '../../modules/auth/models/settings';
 import { Group } from '../../management/models/group';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
@@ -47,17 +47,22 @@ export class AuthSettingsComponent implements OnInit, OnDestroy {
 
     public groups: Array<Group> = [];
 
+/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
+
     public get providersArray(): UntypedFormArray {
         return this.authConfigForm.get('providers') as UntypedFormArray;
     }
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private authSettingsService: AuthService,
-                        private activateRoute: ActivatedRoute,
-                        private groupService: GroupService,
-                        private toast: ToastService) {
-
+    public constructor(
+        private authSettingsService: AuthService,
+        private activateRoute: ActivatedRoute,
+        private groupService: GroupService,
+        private toast: ToastService
+    ) {
         this.authConfigForm = new UntypedFormGroup({
             _id: new UntypedFormControl('auth'),
             enable_external: new UntypedFormControl(false),

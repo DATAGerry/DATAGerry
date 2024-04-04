@@ -25,16 +25,16 @@ import { LayoutModule } from './layout/layout.module';
 import { ToastModule } from './layout/toast/toast.module';
 import { AppRoutingModule } from './app-routing.module';
 import { MainModule } from './main/main.module';
-import { AuthModule } from './auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 
 import { PreviousRouteService } from './services/previous-route.service';
 import { RequestCacheService } from './services/request-cache.service';
-import { SessionTimeoutService } from './auth/services/session-timeout.service';
+import { SessionTimeoutService } from './modules/auth/services/session-timeout.service';
 import { TreeManagerService } from './services/tree-manager.service';
 import { ObjectService } from './framework/services/object.service';
 
 import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
-import { BasicAuthInterceptor } from './auth/interceptors/basic-auth.interceptor';
+import { BasicAuthInterceptor } from './modules/auth/interceptors/basic-auth.interceptor';
 import { APICachingInterceptor } from './services/api-cache.interceptor';
 
 import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';

@@ -22,7 +22,9 @@ import { ReplaySubject, Subscription, takeUntil } from 'rxjs';
 
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { UserService } from '../../../management/services/user.service';
 
+import { User } from '../../../management/models/user';
 import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
@@ -38,6 +40,8 @@ import { AccessControlPermission } from 'src/app/modules/acl/acl.types';
 export class SidebarComponent implements OnInit, OnDestroy {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+
+    user: User;
 
     //Category data
     public categoryTree: CmdbCategoryTree;
@@ -64,34 +68,40 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private sidebarService: SidebarService,
-                private typeService: TypeService,
-                private renderer: Renderer2,
-                private elementRef: ElementRef) {
-
+    constructor(
+        private sidebarService: SidebarService,
+        private typeService: TypeService,
+        private renderer: Renderer2,
+        private elementRef: ElementRef,
+        private userService: UserService
+    ) {
         this.categoryTreeSubscription = new Subscription();
         this.unCategorizedTypesSubscription = new Subscription();
         this.filterTermSubscription = new Subscription();
+        this.user = this.userService.getCurrentUser();
     }
 
 
     public ngOnInit(): void {
         this.renderer.addClass(document.body, 'sidebar-fixed');
-        this.sidebarService.loadCategoryTree();
-        this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable()
-        .subscribe((categoryTree: CmdbCategoryTree) => {
-            this.categoryTree = categoryTree;
 
-            this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false)
-            .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-                this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-            });
+        if(this.user) {
+            this.sidebarService.loadCategoryTree();
+            this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable()
+            .subscribe((categoryTree: CmdbCategoryTree) => {
+                this.categoryTree = categoryTree;
 
-            this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
-            .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-                this.typeList = apiResponse.results as Array<CmdbType>;
+                this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false)
+                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                    this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+                });
+
+                this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
+                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                    this.typeList = apiResponse.results as Array<CmdbType>;
+                });
             });
-        });
+        }
 
         this.selectedMenu = this.sidebarService.selectedMenu;
     }

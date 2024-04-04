@@ -11,62 +11,62 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-import { PermissionGuard } from '../auth/guards/permission.guard';
-import { ManagementComponent } from './management.component';
+
+import { PermissionGuard } from '../modules/auth/guards/permission.guard';
 import { UserSettingsResolver } from './user-settings/resolvers/user-settings-resolver.service';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Overview',
-      right: 'base.user-management.*'
-    },
-    component: ManagementComponent
-  },
-  {
-    path: 'users',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Users',
-      right: 'base.user-management.user.view'
-    },
-    resolve: {
-      userSetting: UserSettingsResolver
-    },
-    loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
-  },
-  {
-    path: 'groups',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Groups',
-      right: 'base.user-management.group.view'
-    },
-    loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
-  },
-  {
-    path: 'rights',
-    data: {
-      breadcrumb: 'Rights',
-    },
-    loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
-  }
-];
+import { ManagementComponent } from './management.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
+const routes: Routes = [
+    {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Overview',
+            right: 'base.user-management.*'
+        },
+        component: ManagementComponent
+    },
+    {
+        path: 'users',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Users',
+            right: 'base.user-management.user.view'
+        },
+        resolve: {
+            userSetting: UserSettingsResolver
+        },
+        loadChildren: () => import('./users/users.module').then(m => m.UsersModule)
+    },
+    {
+        path: 'groups',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Groups',
+            right: 'base.user-management.group.view'
+        },
+        loadChildren: () => import('./groups/groups.module').then(m => m.GroupsModule)
+    },
+    {
+        path: 'rights',
+        data: {
+            breadcrumb: 'Rights',
+        },
+        loadChildren: () => import('./rights/rights.module').then(m => m.RightsModule)
+    }
+];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class ManagementRoutingModule {
-}
+export class ManagementRoutingModule {}

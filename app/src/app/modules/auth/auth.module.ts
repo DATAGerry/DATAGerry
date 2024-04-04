@@ -23,28 +23,31 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { SessionTimeoutService } from './services/session-timeout.service';
 
 import { PermissionLinkDirective } from './directives/permission-link.directive';
-
 import { PermissionGuard } from './guards/permission.guard';
 
-import { LoginComponent } from './login.component';
-import { SessionTimeoutNotificationModalComponent } from './modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
+import { LoginComponent } from './login/login.component';
+import { SessionTimeoutModalComponent } from './modals/session-timeout-modal/session-timeout-modal.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
-  declarations: [LoginComponent, PermissionLinkDirective, SessionTimeoutNotificationModalComponent],
-  exports: [
-    PermissionLinkDirective
-  ],
-  imports: [
-    CommonModule,
-    FormsModule,
-    RouterModule,
-    ReactiveFormsModule,
-  ],
-  providers: [
-    PermissionGuard,
-    SessionTimeoutService
-  ]
+    declarations: [
+        LoginComponent,
+        PermissionLinkDirective,
+        SessionTimeoutModalComponent
+    ],
+    exports: [
+        PermissionLinkDirective
+    ],
+    imports: [
+        CommonModule,
+        FormsModule,
+        RouterModule,
+        ReactiveFormsModule,
+    ],
+    providers: [
+        PermissionGuard,
+        SessionTimeoutService
+    ]
 })
 export class AuthModule {
 }

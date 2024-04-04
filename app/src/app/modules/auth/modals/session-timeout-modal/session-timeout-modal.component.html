@@ -1,0 +1,44 @@
+<div class="modal-header bg-primary text-white">
+    <h4 class="modal-title">
+        <i class="fas fa-exclamation-triangle"></i> Session timeout! <b>{{remainingTime}}</b>
+    </h4>
+    <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Close')">
+        <span aria-hidden="true">X</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    Your session will expire shortly. You will then be logged out automatically.
+    If you want to extend your session, enter your password in the field below.
+    <hr/>
+    <form [formGroup]="form" class="needs-validation" novalidate>
+        <div class="form-row">
+            <div class="col-9">
+                <input
+                    type="password"
+                    formControlName="password"
+                    class="form-control"
+                    placeholder="Enter your password..."
+                    aria-label="Password"
+                    autocomplete="off"
+                    required
+                >
+                <span>
+                    <small *ngIf="error" class="text-danger">
+                        {{error}}
+                    </small>
+                </span>
+            </div>
+            <div class="col-3">
+                <button
+                    type="button"
+                    class="btn btn-block btn-primary"
+                    (click)="onRenew()"
+                    [disabled]="form.invalid"
+                >
+                    Renew
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

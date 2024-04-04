@@ -16,50 +16,43 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
-import { AuthService } from '../services/auth.service';
+import { PermissionService } from '../services/permission.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
-export class AuthGuard  {
+export class PermissionGuard  {
 
-    constructor(private router: Router, private authenticationService: AuthService) {
+    public constructor(
+        private permissionService: PermissionService
+    ) {
+
     }
 
 
     public canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot):
         Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-            const currentUser = this.authenticationService.currentUserValue;
-            const currentUserToken = this.authenticationService.currentUserTokenValue;
-
-            if (currentUser && currentUserToken) {
-                return true;
-            }
-
-            console.log('NO USER -> REDIRECT TO LOGIN');
-            this.authenticationService.logout();
-
-            return false;
+            const right: string = next.data.right as string;
+            return this.hasRequiredPermission(right);
     }
 
 
     public canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot):
         Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-            const currentUser = this.authenticationService.currentUserValue;
-            const currentUserToken = this.authenticationService.currentUserTokenValue;
+            const right: string = childRoute.data.right as string;
+            return this.hasRequiredPermission(right);
+    }
 
-            if (currentUser && currentUserToken) {
-                return true;
-            }
 
-            console.log('NO USER -> REDIRECT TO LOGIN');
-            this.authenticationService.logout();
-            this.router.navigate( ['auth']);
-
-            return false;
+    public hasRequiredPermission(right: string): boolean {
+        if (right === undefined || this.permissionService.hasRight(right)) {
+            return true;
+        } else {
+            return this.permissionService.hasExtendedRight(right);
+        }
     }
 }

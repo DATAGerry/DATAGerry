@@ -21,7 +21,7 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { UserService } from '../services/user.service';
-import { AuthService } from '../../auth/services/auth.service';
+import { AuthService } from '../../modules/auth/services/auth.service';
 
 import { User } from '../models/user';
 /* ------------------------------------------------------------------------------------------------------------------ */

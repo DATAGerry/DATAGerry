@@ -25,7 +25,7 @@ import { ArchwizardModule } from '@rg-software/angular-archwizard';
 
 import { ExportRoutingModule } from './export-routing.module';
 import { LayoutModule } from '../layout/layout.module';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../modules/auth/auth.module';
 
 import { ExportComponent } from './export.component';
 import { ExportTypesComponent } from './export-types/export-types.component';
@@ -48,4 +48,4 @@ import { ExportObjectsComponent } from './export-objects/export-objects.componen
         AuthModule
     ]
 })
-export class ExportModule { }
+export class ExportModule {}

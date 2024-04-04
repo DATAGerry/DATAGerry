@@ -32,7 +32,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 
 import { SearchBarModule } from '../search/search-bar/search-bar.module';
 import { ToastModule } from './toast/toast.module';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../modules/auth/auth.module';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
 import { TableModule } from './table/table.module';
@@ -59,7 +59,6 @@ import { BreadcrumbComponent } from './structure/breadcrumb/breadcrumb.component
 import { IconPickerComponent } from './helpers/icon-picker/icon-picker.component';
 import { ChartsComponent } from './components/charts/charts.component';
 import { IntroComponent } from './intro/intro.component';
-import { StepByStepIntroComponent } from './intro/step-by-step-intro/step-by-step-intro.component';
 import { BranchInfoModalComponent } from './intro/branch-info-modal/branch-info-modal.component';
 import { ProfileInfoModalComponent } from './intro/profile-info-modal/profile-info-modal.component';
 import { SidebarTypeComponent } from './structure/sidebar/sidebar-type.component';
@@ -105,7 +104,6 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
         FooterComponent,
         IconPickerComponent,
         ChartsComponent,
-        StepByStepIntroComponent,
         BranchInfoModalComponent,
         ProfileInfoModalComponent,
         FileSizePipe,
