@@ -26,7 +26,7 @@ import { FileSaverService } from 'ngx-filesaver';
 
 import { TypeService } from '../services/type.service';
 import { FileService } from '../../export/export.service';
-import { PermissionService } from '../../auth/services/permission.service';
+import { PermissionService } from '../../modules/auth/services/permission.service';
 import { convertResourceURL, UserSettingsService } from '../../management/user-settings/services/user-settings.service';
 import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 
@@ -38,87 +38,81 @@ import { UserSetting } from '../../management/user-settings/models/user-setting'
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-type',
-  templateUrl: './type.component.html',
-  styleUrls: ['./type.component.scss']
+    selector: 'cmdb-type',
+    templateUrl: './type.component.html',
+    styleUrls: ['./type.component.scss']
 })
 export class TypeComponent implements OnInit, OnDestroy {
 
-  /**
-   * HTML ID of the table.
-   * Used for user settings and table-states
-   */
-  public readonly id: string = 'type-list-table';
+    // HTML ID of the table. Used for user settings and table-states
+    public readonly id: string = 'type-list-table';
 
-  // Global un-subscriber for http calls to the rest backend.
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    // Global un-subscriber for http calls to the rest backend.
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  // Current category collection
-  public types: Array<CmdbType> = [];
-  public typesAPIResponse: APIGetMultiResponse<CmdbType>;
-  public totalTypes: number = 0;
+    // Current category collection
+    public types: Array<CmdbType> = [];
+    public typesAPIResponse: APIGetMultiResponse<CmdbType>;
+    public totalTypes: number = 0;
 
-  // Type selection
-  public selectedTypes: Array<CmdbType> = [];
-  public selectedTypeIDs: Array<number> = [];
+    // Type selection
+    public selectedTypes: Array<CmdbType> = [];
+    public selectedTypeIDs: Array<number> = [];
 
+    // Table Template: active column
+    @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+    // Table Template: Type name column
+    @ViewChild('typeNameTemplate', { static: true }) typeNameTemplate: TemplateRef<any>;
+    // Table Template: Type actions column
+    @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+    // Table Template: Type clean column
+    @ViewChild('cleanTemplate', { static: true }) cleanTemplate: TemplateRef<any>;
+    // Table Template: Type date column
+    @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
+    // Table Template: user column
+    @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
 
-  // Table Template: active column
-  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+    // Table columns definition
+    public columns: Array<Column>;
 
-  // Table Template: Type name column
-  @ViewChild('typeNameTemplate', { static: true }) typeNameTemplate: TemplateRef<any>;
+    // Table selection enabled
+    public selectEnabled: boolean = false;
 
-  // Table Template: Type actions column
-  @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+    // Begin with first page
+    public readonly initPage: number = 1;
+    public page: number = this.initPage;
 
-  // Table Template: Type clean column
-  @ViewChild('cleanTemplate', { static: true }) cleanTemplate: TemplateRef<any>;
+    // Max number of types per site
+    private readonly initLimit: number = 10;
+    public limit: number = this.initLimit;
 
-  // Table Template: Type date column
-  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
+    // Filter query from the table search input
+    public filter: string;
 
+    // Default sort filter
+    public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
-  // Table Template: user column
-  @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
+    // Loading indicator
+    public loading: boolean = false;
 
-  // Table columns definition
-  public columns: Array<Column>;
-
-  // Table selection enabled
-  public selectEnabled: boolean = false;
-
-  // Begin with first page
-  public readonly initPage: number = 1;
-  public page: number = this.initPage;
-
-
-  // Max number of types per site
-  private readonly initLimit: number = 10;
-  public limit: number = this.initLimit;
-
-  // Filter query from the table search input
-  public filter: string;
-
-  // Default sort filter
-  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
-
-  // Loading indicator
-  public loading: boolean = false;
-
-  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
-
-  public tableStates: Array<TableState> = [];
+    public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+    public tableStates: Array<TableState> = [];
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private typeService: TypeService, private fileService: FileService, private route: ActivatedRoute,
-                private permissionService: PermissionService, private fileSaverService: FileSaverService,
-                private datePipe: DatePipe, private router: Router,
-                private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-                private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
-        this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
+    constructor(
+        private typeService: TypeService,
+        private fileService: FileService,
+        private route: ActivatedRoute,
+        private permissionService: PermissionService,
+        private fileSaverService: FileSaverService,
+        private datePipe: DatePipe,
+        private router: Router,
+        private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+        private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>
+    ) {
 
+        this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
             if (data.userSetting) {
                 const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
                 .find(payloads => payloads.id === this.id);
@@ -127,7 +121,6 @@ export class TypeComponent implements OnInit, OnDestroy {
             } else {
                 this.tableStates = [];
                 this.tableStateSubject.next(undefined);
-
                 const statePayload: TableStatePayload = new TableStatePayload(this.id, []);
                 const resource: string = convertResourceURL(this.router.url.toString());
                 const userSetting = this.userSettingsService.createUserSetting<TableStatePayload>(resource, [statePayload]);
@@ -135,6 +128,7 @@ export class TypeComponent implements OnInit, OnDestroy {
             }
         });
     }
+
 
   /**
    * Starts the component and init the table
@@ -211,7 +205,6 @@ export class TypeComponent implements OnInit, OnDestroy {
         ] as Array<Column>;
 
         const cleanRight = 'base.framework.type.clean';
-
         if (this.permissionService.hasRight(cleanRight) || this.permissionService.hasExtendedRight(cleanRight)) {
             this.columns.push({
                 display: 'Clean',
@@ -226,7 +219,6 @@ export class TypeComponent implements OnInit, OnDestroy {
         }
 
         const exportRight = 'base.export.type.*';
-
         if (this.permissionService.hasRight(exportRight) || this.permissionService.hasExtendedRight(exportRight)) {
             this.selectEnabled = true;
         }
@@ -386,7 +378,6 @@ export class TypeComponent implements OnInit, OnDestroy {
      * @param search
      */
     public onSearchChange(search: any): void {
-
         if (search) {
             this.filter = search;
         } else {

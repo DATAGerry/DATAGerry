@@ -25,7 +25,7 @@ import { DndModule } from 'ngx-drag-drop';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { NgbProgressbarModule, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../modules/auth/auth.module';
 import { TableModule } from '../layout/table/table.module';
 import { UsersModule } from '../management/users/users.module';
 import { LogSettingsModule } from '../settings/log-settings/log-settings.module';
@@ -101,5 +101,4 @@ import { ExportdJobBaseStepComponent } from './exportd-job-settings-builder/expo
         RenderModule
     ]
 })
-export class ExportdModule {
-}
+export class ExportdModule {}

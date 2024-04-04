@@ -21,7 +21,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
-import { AuthModule } from '../../auth/auth.module';
+import { AuthModule } from '../../modules/auth/auth.module';
 import { UsersRoutingModule } from './users-routing.module';
 import { PasswordStrengthMeterModule } from '../../layout/password-strength-meter/password-strength-meter.module';
 import { LayoutModule } from '../../layout/layout.module';
@@ -83,5 +83,4 @@ import { UserTableListComponent } from './components/user-table-list/user-table-
         RenderModule,
     ]
 })
-export class UsersModule {
-}
+export class UsersModule {}

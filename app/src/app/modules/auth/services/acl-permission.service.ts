@@ -31,6 +31,7 @@ export class AclPermissionService {
 
 
 /* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
+
     constructor(private authService: AuthService) {
 
     }

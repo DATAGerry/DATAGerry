@@ -25,7 +25,7 @@ import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { LayoutModule } from '../../layout/layout.module';
-import { AuthModule } from '../../auth/auth.module';
+import { AuthModule } from '../../modules/auth/auth.module';
 import { TableModule } from '../../layout/table/table.module';
 import { UsersModule } from '../users/users.module';
 import { AclModule } from 'src/app/modules/acl/acl.module';
@@ -77,5 +77,4 @@ import { GroupAclComponent } from './group-acl/group-acl.component';
         NgbTooltipModule
     ]
 })
-export class GroupsModule {
-}
+export class GroupsModule {}

@@ -18,7 +18,7 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { PermissionGuard } from '../auth/guards/permission.guard';
+import { PermissionGuard } from '../modules/auth/guards/permission.guard';
 
 import { AboutComponent } from './components/about/about.component';
 import { LicenseComponent } from './components/license/license.component';
@@ -31,21 +31,21 @@ const routes: Routes = [
         pathMatch: 'full',
         canActivate: [PermissionGuard],
         data: {
-        breadcrumb: 'Overview',
+            breadcrumb: 'Overview',
         },
         component: InfoComponent
     },
     {
         path: 'about',
         data: {
-        breadcrumb: 'About'
+            breadcrumb: 'About'
         },
         component: AboutComponent
     },
     {
         path: 'license',
         data: {
-        breadcrumb: 'License'
+            breadcrumb: 'License'
         },
         component: LicenseComponent
     }
@@ -59,4 +59,4 @@ const routes: Routes = [
         RouterModule
     ]
 })
-export class InfoRoutingModule { }
+export class InfoRoutingModule {}

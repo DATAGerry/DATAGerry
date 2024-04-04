@@ -11,34 +11,35 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { ProviderResolver } from '../../modules/auth/resolvers/provider-resolver.service';
+
 import { AuthSettingsComponent } from './auth-settings.component';
-import { ProviderResolver } from '../../auth/resolvers/provider-resolver.service';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    data: {
-      breadcrumb: 'Config',
-      right: 'base.system.edit'
-    },
-    resolve: {
-      providers: ProviderResolver
-    },
-    component: AuthSettingsComponent
-  }
+    {
+        path: '',
+        pathMatch: 'full',
+        data: {
+            breadcrumb: 'Config',
+            right: 'base.system.edit'
+        },
+        resolve: {
+            providers: ProviderResolver
+        },
+        component: AuthSettingsComponent
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class AuthSettingsRoutingModule {
-}
+export class AuthSettingsRoutingModule {}

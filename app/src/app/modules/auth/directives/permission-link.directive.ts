@@ -30,9 +30,8 @@ import { AccessControlList } from 'src/app/modules/acl/acl.types';
 export class PermissionLinkDirective {
 
     private rightNames: string[] = [];
-    private requirements: string[] | string ;
+    private requirements: string | string[];
     private acl: AccessControlList;
-
 
     @Input('permissionLinkRequirements') set permissionLinkRequirements(requirements: string | string[]) {
         this.requirements = requirements;
@@ -62,10 +61,12 @@ export class PermissionLinkDirective {
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private templateRef: TemplateRef<any>,
-                private viewContainer: ViewContainerRef,
-                private permissionService: PermissionService,
-                private aclPermissionService: AclPermissionService) {
+    constructor(
+        private templateRef: TemplateRef<any>,
+        private viewContainer: ViewContainerRef,
+        private permissionService: PermissionService,
+        private aclPermissionService: AclPermissionService
+    ) {
 
     }
 
@@ -100,7 +101,7 @@ export class PermissionLinkDirective {
         this.viewContainer.clear();
 
         if (this.checkPermission()) {
-        this.viewContainer.createEmbeddedView(this.templateRef);
+            this.viewContainer.createEmbeddedView(this.templateRef);
         }
     }
 }

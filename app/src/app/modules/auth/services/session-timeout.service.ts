@@ -11,20 +11,22 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable, OnDestroy } from '@angular/core';
-import { AuthService } from './auth.service';
-import { interval, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { Token } from '../models/token';
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
-import { SessionTimeoutNotificationModalComponent } from '../modals/session-timeout-notification-modal/session-timeout-notification-modal.component';
-import { ToastService } from '../../layout/toast/toast.service';
 
+import { interval, Observable, ReplaySubject, Subject, Subscription } from 'rxjs';
+
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+
+import { AuthService } from './auth.service';
+import { ToastService } from '../../../layout/toast/toast.service';
+
+import { Token } from '../models/token';
+import { SessionTimeoutModalComponent } from '../modals/session-timeout-modal/session-timeout-modal.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 @Injectable({
   providedIn: 'root'
 })
@@ -164,7 +166,7 @@ export class SessionTimeoutService implements OnDestroy {
    * @private
    */
   private notifyPossibleTimeout() {
-    this.notificationModalRef = this.modal.open(SessionTimeoutNotificationModalComponent);
+    this.notificationModalRef = this.modal.open(SessionTimeoutModalComponent);
     this.notificationModalRef.componentInstance.remainingTime$ = this.sessionTimeoutRemaining;
     this.notificationModalRef.result.then(
       (result) => {

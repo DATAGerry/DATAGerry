@@ -11,22 +11,22 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { AuthProvider } from './providers';
 
 const defaultAuthSettings = {
-  _id: 'auth',
-  enable_external: false,
-  token_lifetime: 1500
+    _id: 'auth',
+    enable_external: false,
+    token_lifetime: 1500
 };
 
+
 export class AuthSettings {
-  public readonly _id: string = defaultAuthSettings._id;
-  public enable_external: boolean = defaultAuthSettings.enable_external;
-  public token_lifetime: number = defaultAuthSettings.token_lifetime;
-  public providers: Array<AuthProvider> = [];
+    public readonly _id: string = defaultAuthSettings._id;
+    public enable_external: boolean = defaultAuthSettings.enable_external;
+    public token_lifetime: number = defaultAuthSettings.token_lifetime;
+    public providers: Array<AuthProvider> = [];
 }

@@ -21,15 +21,18 @@ import { ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
 import { Observable } from 'rxjs';
 
 import { AuthService } from '../services/auth.service';
+
 import { AuthProvider } from '../models/providers';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ProviderResolver  {
 
     constructor(private authService: AuthService) {
+
     }
+
 
     resolve(route: ActivatedRouteSnapshot, state: RouterStateSnapshot):
         Observable<Array<AuthProvider>> | Promise<Array<AuthProvider>> | Array<AuthProvider> {

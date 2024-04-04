@@ -11,127 +11,115 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
-import { AuthProvider } from '../../../../auth/models/providers';
 import { UntypedFormArray, UntypedFormControl, UntypedFormGroup } from '@angular/forms';
+
+import { AuthProvider } from '../../../../modules/auth/models/providers';
 import { Group } from '../../../../management/models/group';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-ldap-authentication-provider-form',
-  templateUrl: './ldap-authentication-provider-form.component.html',
-  styleUrls: ['./ldap-authentication-provider-form.component.scss']
+    selector: 'cmdb-ldap-authentication-provider-form',
+    templateUrl: './ldap-authentication-provider-form.component.html',
+    styleUrls: ['./ldap-authentication-provider-form.component.scss']
 })
 export class LdapAuthenticationProviderFormComponent {
 
-  /**
-   * The configuration form for the ldap auth provider.
-   */
-  public form: UntypedFormGroup;
+    // The configuration form for the ldap auth provider
+    public form: UntypedFormGroup;
 
-  /**
-   * The parent holder of the auth settings provider array.
-   */
-  public parent: UntypedFormArray;
+    // The parent holder of the auth settings provider array
+    public parent: UntypedFormArray;
 
-  /**
-   * Auth provider type.
-   */
-  public provider: AuthProvider;
+    // Auth provider type
+    public provider: AuthProvider;
 
-  /**
-   * List of a possible mapping groups.
-   */
-  @Input() public groups: Array<Group> = [];
+    // List of a possible mapping groups
+    @Input() public groups: Array<Group> = [];
 
-  @Input('parent')
-  public set Parent(form: UntypedFormArray) {
-    this.parent = form;
-    this.parent.insert(1, new UntypedFormGroup({
-      class_name: new UntypedFormControl('LdapAuthenticationProvider'),
-      config: this.form
-    }));
-  }
+/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
 
-  @Input('provider')
-  public set Provider(provider: AuthProvider) {
-    this.provider = provider;
-    if (provider) {
-      provider.config.groups.mapping.forEach((value, index) => {
-        const formGroup = new UntypedFormGroup({
-          group_dn: new UntypedFormControl(value.group_dn),
-          group_id: new UntypedFormControl(value.group_id)
-        });
-        this.groupMappingControl.insert(index, formGroup);
-      });
-
+    @Input('parent')
+    public set Parent(form: UntypedFormArray) {
+        this.parent = form;
+        this.parent.insert(1, new UntypedFormGroup({
+            class_name: new UntypedFormControl('LdapAuthenticationProvider'),
+            config: this.form
+        }));
     }
-    this.form.patchValue(provider.config);
-  }
 
-  constructor() {
-    this.form = new UntypedFormGroup({
-      active: new UntypedFormControl(false),
-      default_group: new UntypedFormControl(null),
-      server_config: new UntypedFormGroup({
-        host: new UntypedFormControl(),
-        port: new UntypedFormControl(null),
-        use_ssl: new UntypedFormControl(false)
-      }),
-      connection_config: new UntypedFormGroup({
-        user: new UntypedFormControl(),
-        password: new UntypedFormControl(),
-        version: new UntypedFormControl(null)
-      }),
-      search: new UntypedFormGroup({
-        basedn: new UntypedFormControl(),
-        searchfilter: new UntypedFormControl()
-      }),
-      groups: new UntypedFormGroup({
-        active: new UntypedFormControl(false),
-        searchfiltergroup: new UntypedFormControl(),
-        mapping: new UntypedFormArray([])
-      })
-    });
-  }
+    @Input('provider')
+    public set Provider(provider: AuthProvider) {
+        this.provider = provider;
+        if (provider) {
+            provider.config.groups.mapping.forEach((value, index) => {
+                const formGroup = new UntypedFormGroup({
+                    group_dn: new UntypedFormControl(value.group_dn),
+                    group_id: new UntypedFormControl(value.group_id)
+                });
+                this.groupMappingControl.insert(index, formGroup);
+            });
+        }
 
-  /**
-   * Ldap server config control.
-   */
-  public get serverConfigControl(): UntypedFormGroup {
-    return this.form.get('server_config') as UntypedFormGroup;
-  }
+        this.form.patchValue(provider.config);
+    }
 
-  /**
-   * Ldap connection config control.
-   */
-  public get connectionConfigControl(): UntypedFormGroup {
-    return this.form.get('connection_config') as UntypedFormGroup;
-  }
+    // Ldap server config control
+    public get serverConfigControl(): UntypedFormGroup {
+        return this.form.get('server_config') as UntypedFormGroup;
+    }
 
-  /**
-   * Ldap user search control.
-   */
-  public get searchControl(): UntypedFormGroup {
-    return this.form.get('search') as UntypedFormGroup;
-  }
+    // Ldap connection config control
+    public get connectionConfigControl(): UntypedFormGroup {
+        return this.form.get('connection_config') as UntypedFormGroup;
+    }
 
-  /**
-   * Ldap groups control.
-   */
-  public get groupsControl(): UntypedFormGroup {
-    return this.form.get('groups') as UntypedFormGroup;
-  }
+    // Ldap user search control
+    public get searchControl(): UntypedFormGroup {
+        return this.form.get('search') as UntypedFormGroup;
+    }
 
-  /**
-   * Nested ldap groups mapping form array.
-   */
-  public get groupMappingControl(): UntypedFormArray {
-    return this.groupsControl.get('mapping') as UntypedFormArray;
-  }
+    // Ldap groups control
+    public get groupsControl(): UntypedFormGroup {
+        return this.form.get('groups') as UntypedFormGroup;
+    }
 
+    // Nested ldap groups mapping form array
+    public get groupMappingControl(): UntypedFormArray {
+        return this.groupsControl.get('mapping') as UntypedFormArray;
+    }
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+    constructor() {
+        this.form = new UntypedFormGroup({
+            active: new UntypedFormControl(false),
+            default_group: new UntypedFormControl(null),
+            server_config: new UntypedFormGroup({
+                host: new UntypedFormControl(),
+                port: new UntypedFormControl(null),
+                use_ssl: new UntypedFormControl(false)
+             }),
+            connection_config: new UntypedFormGroup({
+                user: new UntypedFormControl(),
+                password: new UntypedFormControl(),
+                version: new UntypedFormControl(null)
+            }),
+            search: new UntypedFormGroup({
+                basedn: new UntypedFormControl(),
+                searchfilter: new UntypedFormControl()
+            }),
+            groups: new UntypedFormGroup({
+                active: new UntypedFormControl(false),
+                searchfiltergroup: new UntypedFormControl(),
+                mapping: new UntypedFormArray([])
+            })
+        });
+    }
 }

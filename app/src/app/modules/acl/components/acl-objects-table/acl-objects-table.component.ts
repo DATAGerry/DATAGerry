@@ -21,7 +21,7 @@ import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { TypeService } from 'src/app/framework/services/type.service';
-import { PermissionService } from 'src/app/auth/services/permission.service';
+import { PermissionService } from 'src/app/modules/auth/services/permission.service';
 
 import { Group } from 'src/app/management/models/group';
 import { CmdbType } from 'src/app/framework/models/cmdb-type';
@@ -54,16 +54,12 @@ export class AclObjectsTableComponent implements OnInit, OnDestroy {
 
     // Table Template: Type name column.
     @ViewChild('typeNameTemplate', { static: true }) public typeNameTemplate: TemplateRef<any>;
-
     // Table Template: Type ACL column.
     @ViewChild('aclActivateTemplate', { static: true }) public aclActivateTemplate: TemplateRef<any>;
-
     // Table Template: Type ACL permissions column.
     @ViewChild('aclPermissionsTemplate', { static: true }) public aclPermissionsTemplate: TemplateRef<any>;
-
     // Table Template: Only active button.
     @ViewChild('activatedButtonTemplate', { static: true }) public activatedButtonTemplate: TemplateRef<any>;
-
     // Table Template: Type edit action column.
     @ViewChild('aclTypeEditTemplate', { static: true }) public aclTypeEditTemplate: TemplateRef<any>;
 

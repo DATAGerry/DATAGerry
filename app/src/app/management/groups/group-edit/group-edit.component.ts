@@ -21,7 +21,7 @@ import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { GroupService } from '../../services/group.service';
 import { ToastService } from '../../../layout/toast/toast.service';
-import { PermissionService } from '../../../auth/services/permission.service';
+import { PermissionService } from '../../../modules/auth/services/permission.service';
 
 import { Group } from '../../models/group';
 import { GroupFormComponent } from '../components/group-form/group-form.component';
@@ -49,12 +49,13 @@ export class GroupEditComponent implements OnInit, OnDestroy {
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private route: ActivatedRoute,
-                private router: Router,
-                private groupService: GroupService,
-                private toastService: ToastService,
-                private permissionService: PermissionService) {
-
+    constructor(
+        private route: ActivatedRoute,
+        private router: Router,
+        private groupService: GroupService,
+        private toastService: ToastService,
+        private permissionService: PermissionService
+    ) {
         this.rights = this.route.snapshot.data.rights as Array<Right>;
         this.group = this.route.snapshot.data.group as Group;
     }

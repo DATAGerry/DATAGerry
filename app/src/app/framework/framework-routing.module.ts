@@ -17,60 +17,62 @@
 */
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { PermissionGuard } from '../modules/auth/guards/permission.guard';
+
 import { FrameworkComponent } from './framework.component';
-import { PermissionGuard } from '../auth/guards/permission.guard';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Overview'
+    {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Overview'
+        },
+        component: FrameworkComponent
     },
-    component: FrameworkComponent
-  },
-  {
-    path: 'object',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Object',
-      right: 'base.framework.object.view'
+    {
+        path: 'object',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Object',
+            right: 'base.framework.object.view'
+        },
+        loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
     },
-    loadChildren: () => import('./object/object.module').then(m => m.ObjectModule),
-  },
-  {
-    path: 'type',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Type',
-      right: 'base.framework.type.view'
+    {
+        path: 'type',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Type',
+            right: 'base.framework.type.view'
+        },
+        loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
     },
-    loadChildren: () => import('./type/type.module').then(m => m.TypeModule),
-  },
-  {
-    path: 'category',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Category',
-      right: 'base.framework.category.view'
+    {
+        path: 'category',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Category',
+            right: 'base.framework.category.view'
+        },
+        loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
     },
-    loadChildren: () => import('./category/category.module').then(m => m.CategoryModule),
-  },
-  {
-    path: 'section_templates',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Section Templates',
-      right: 'base.framework.type.view'
-    },
-    loadChildren: () => import('./section_templates/section-template.module').then(m => m.SectionTemplateModule),
-  }
+    {
+        path: 'section_templates',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Section Templates',
+            right: 'base.framework.type.view'
+        },
+        loadChildren: () => import('./section_templates/section-template.module').then(m => m.SectionTemplateModule),
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class FrameworkRoutingModule { }
+export class FrameworkRoutingModule {}

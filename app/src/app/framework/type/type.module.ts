@@ -26,7 +26,7 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { IconPickerModule } from 'ngx-icon-picker';
 
-import { AuthModule } from '../../auth/auth.module';
+import { AuthModule } from '../../modules/auth/auth.module';
 import { TypeRoutingModule } from './type-routing.module';
 import { LayoutModule } from '../../layout/layout.module';
 import { RenderModule } from '../render/render.module';
@@ -51,7 +51,6 @@ import {
   TypeBuilderStepComponent,
   TypeBuilderStepValidStatusComponent
 } from './type-builder/type-builder-step.component';
-
 import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-preview-step.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -75,24 +74,23 @@ import { TypePreviewStepComponent } from './type-builder/type-preview-step/type-
         TypeBuilderStepValidStatusComponent,
         TypePreviewStepComponent,
     ],
-        imports: [
-            CommonModule,
-            TypeRoutingModule,
-            LayoutModule,
-            ReactiveFormsModule,
-            ArchwizardModule,
-            QRCodeModule,
-            NgSelectModule,
-            RenderModule,
-            BuilderModule,
-            FormsModule,
-            NgbModule,
-            FontAwesomeModule,
-            AuthModule,
-            TableModule,
-            IconPickerModule,
-            UsersModule
-        ]
+    imports: [
+        CommonModule,
+        TypeRoutingModule,
+        LayoutModule,
+        ReactiveFormsModule,
+        ArchwizardModule,
+        QRCodeModule,
+        NgSelectModule,
+        RenderModule,
+        BuilderModule,
+        FormsModule,
+        NgbModule,
+        FontAwesomeModule,
+        AuthModule,
+        TableModule,
+        IconPickerModule,
+        UsersModule
+    ]
 })
-export class TypeModule {
-}
+export class TypeModule {}

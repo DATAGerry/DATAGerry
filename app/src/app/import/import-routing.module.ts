@@ -11,51 +11,52 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { PermissionGuard } from '../modules/auth/guards/permission.guard';
+
 import { ImportComponent } from './import.component';
 import { ImportObjectsComponent } from './import-objects/import-objects.component';
 import { ImportTypesComponent } from './import-types/import-types.component';
-import { PermissionGuard } from '../auth/guards/permission.guard';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Overview'
+    {
+        path: '',
+        pathMatch: 'full',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Overview'
+        },
+        component: ImportComponent
     },
-    component: ImportComponent
-  },
-  {
-    path: 'object',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Object',
-      right: 'base.import.object.*'
+    {
+        path: 'object',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Object',
+            right: 'base.import.object.*'
+        },
+        component: ImportObjectsComponent
     },
-    component: ImportObjectsComponent
-  },
-  {
-    path: 'type',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Type',
-      right: 'base.import.type.*'
-    },
-    component: ImportTypesComponent
-  }
+    {
+        path: 'type',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Type',
+            right: 'base.import.type.*'
+        },
+        component: ImportTypesComponent
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class ImportRoutingModule {
-}
+export class ImportRoutingModule {}

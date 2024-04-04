@@ -11,62 +11,64 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { PermissionGuard } from '../modules/auth/guards/permission.guard';
+
 import { SettingsComponent } from './settings.component';
-import { PermissionGuard } from '../auth/guards/permission.guard';
 import { DateSettingsComponent } from './date-settings/date-settings.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    canActivate: [PermissionGuard],
-    data: {
-      breadcrumb: 'Overview',
-      right: 'base.system.view'
+    {
+        path: '',
+        canActivate: [PermissionGuard],
+        data: {
+            breadcrumb: 'Overview',
+            right: 'base.system.view'
+        },
+        component: SettingsComponent
     },
-    component: SettingsComponent
-  },
-  {
-    path: 'system',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'System'
+    {
+        path: 'system',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'System'
+        },
+        loadChildren: () => import('./system/system.module').then(m => m.SystemModule)
     },
-    loadChildren: () => import('./system/system.module').then(m => m.SystemModule)
-  },
-  {
-    path: 'logs',
-    data: {
-      breadcrumb: 'Logs'
+    {
+        path: 'logs',
+        data: {
+            breadcrumb: 'Logs'
+        },
+        loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
     },
-    loadChildren: () => import('./log-settings/log-settings.module').then(m => m.LogSettingsModule)
-  },
-  {
-    path: 'auth',
-    canActivateChild: [PermissionGuard],
-    data: {
-      breadcrumb: 'Authentication'
+    {
+        path: 'auth',
+        canActivateChild: [PermissionGuard],
+        data: {
+            breadcrumb: 'Authentication'
+        },
+        loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
     },
-    loadChildren: () => import('./auth-settings/auth-settings.module').then(m => m.AuthSettingsModule)
-  },
-  {
-    path: 'regional-settings',
-    data: {
-      breadcrumb: 'Regional Settings',
-      right: 'base.system.edit'
-    },
-    component: DateSettingsComponent
-  }
+    {
+        path: 'regional-settings',
+        data: {
+            breadcrumb: 'Regional Settings',
+            right: 'base.system.edit'
+        },
+        component: DateSettingsComponent
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class SettingsRoutingModule { }
+export class SettingsRoutingModule {}

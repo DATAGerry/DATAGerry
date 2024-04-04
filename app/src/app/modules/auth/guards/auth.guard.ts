@@ -16,40 +16,57 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree } from '@angular/router';
+import { ActivatedRouteSnapshot, RouterStateSnapshot, UrlTree, Router } from '@angular/router';
 
 import { Observable } from 'rxjs';
 
-import { PermissionService } from '../services/permission.service';
+import { AuthService } from '../services/auth.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
-export class PermissionGuard  {
+export class AuthGuard  {
 
-    public constructor(private permissionService: PermissionService) {
+    constructor(
+        private router: Router,
+        private authService: AuthService
+    ) {
+
     }
 
 
     public canActivate(next: ActivatedRouteSnapshot, state: RouterStateSnapshot):
         Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-            const right: string = next.data.right as string;
-            return this.hasRequiredPermission(right);
+            return this.checkUser();
     }
 
 
     public canActivateChild(childRoute: ActivatedRouteSnapshot, state: RouterStateSnapshot):
         Observable<boolean | UrlTree> | Promise<boolean | UrlTree> | boolean | UrlTree {
-            const right: string = childRoute.data.right as string;
-            return this.hasRequiredPermission(right);
+            return this.checkUser(true);
     }
 
 
-    public hasRequiredPermission(right: string): boolean {
-        if (right === undefined || this.permissionService.hasRight(right)) {
+    /**
+     * Checks if user exists
+     * @param navigate (boolean): True if user should be navigated to login page
+     * @returns True if User exists, else False
+     */
+    private checkUser(navigate: boolean = false) {
+        const currentUser = this.authService.currentUserValue;
+        const currentUserToken = this.authService.currentUserTokenValue;
+
+        if (currentUser && currentUserToken) {
             return true;
-        } else {
-            return this.permissionService.hasExtendedRight(right);
         }
+
+        console.log('NO USER -> REDIRECT TO LOGIN');
+        this.authService.logout();
+
+        if(navigate){
+            this.router.navigate(['auth']);
+        }
+
+        return false;
     }
 }

@@ -31,7 +31,7 @@ import { TypeModule } from '../framework/type/type.module';
 import { RenderModule } from '../framework/render/render.module';
 import { CategoryModule } from '../framework/category/category.module';
 import { TableModule } from '../layout/table/table.module';
-import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../modules/auth/auth.module';
 
 import { MappingControlPipe } from './import-objects/type-mapping/mapping-control.pipe';
 
@@ -93,5 +93,4 @@ import { FailedImportTableComponent } from './import-objects/import-complete/fai
         AuthModule
     ]
 })
-export class ImportModule {
-}
+export class ImportModule {}
