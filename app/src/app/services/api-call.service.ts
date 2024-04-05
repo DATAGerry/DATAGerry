@@ -15,27 +15,41 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpEvent, HttpHandler, HttpHeaders,
-         HttpInterceptor, HttpParams, HttpRequest } from '@angular/common/http';
+import {
+    HttpClient,
+    HttpErrorResponse,
+    HttpEvent,
+    HttpHandler,
+    HttpHeaders,
+    HttpInterceptor,
+    HttpParams,
+    HttpRequest
+} from '@angular/common/http';
 
-import { Observable, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { Observable, throwError, catchError } from 'rxjs';
 
-import { ConnectionService } from '../connect/connection.service';
+import { ConnectionService } from '../modules/connect/services/connection.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 declare type HttpObserve = 'body' | 'events' | 'response';
 export const resp: HttpObserve = 'response';
 
+/* --------------------------------------------------- INTERFACES --------------------------------------------------- */
+
+export interface ApiServicePrefix {
+    servicePrefix: string;
+}
+
+
 export const httpObserveOptions = {
-  headers: new HttpHeaders({
-    'Content-Type': 'application/json'
-  }),
-  params: {},
-  observe: resp
+    headers: new HttpHeaders({
+        'Content-Type': 'application/json'
+    }),
+    params: {},
+    observe: resp
 };
+
 
 export const httpObservePostOptions = {
   headers: new HttpHeaders({
@@ -45,108 +59,128 @@ export const httpObservePostOptions = {
   observe: resp
 };
 
+
 export const httpFileOptions = {
-  headers: new HttpHeaders({}),
-  params: {},
-  observe: resp,
-  responseType: 'blob'
+    headers: new HttpHeaders({}),
+    params: {},
+    observe: resp,
+    responseType: 'blob'
 };
+
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable({
   providedIn: 'root'
 })
 export class ApiCallService {
 
-  private readonly apiPrefix = 'rest';
-  private readonly apiURL: string;
+    private readonly apiPrefix = 'rest';
+    private readonly apiURL: string;
 
-  public static handleError(err: HttpErrorResponse) {
-    if (err.error instanceof ErrorEvent) {
-      console.error('An error occurred:', err.error.message);
-    } else {
-      console.error(
-        `Backend returned code ${ err.status }, ` +
-        `body was: ${ err.error }`);
+
+    public static handleError(err: HttpErrorResponse) {
+        if (err.error instanceof ErrorEvent) {
+            console.error('An error occurred:', err.error.message);
+        } else {
+            console.error(
+                `Backend returned code ${ err.status }, ` +
+                `body was: ${ err.error }`
+            );
+        }
+        return throwError(() => err);
     }
-    return throwError(err);
-  }
 
-  constructor(private http: HttpClient, private connectionService: ConnectionService) {
-    this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
-  }
 
-  public callHead<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.head<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
-  }
+    constructor(private http: HttpClient, private connectionService: ConnectionService) {
+        this.apiURL = `${ this.connectionService.currentConnection }/${ this.apiPrefix }/`;
+    }
 
-  public callGet<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
-  }
+/* -------------------------------------------------- HTTP METHODS -------------------------------------------------- */
 
-  public callPost<T>(route: string, data, httpPostOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
-  }
+    public callHead<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.head<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
+    }
 
-  public callPut<T>(route: string, data, httpPutOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.put<T>(this.apiURL + route, data, httpPutOptions).pipe(catchError(ApiCallService.handleError));
-  }
 
-  public callPatch<T>(route: string, data, httpPatchOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.patch<T>(this.apiURL + route, data, httpPatchOptions).pipe(catchError(ApiCallService.handleError));
-  }
+    public callGet<T>(route: string, httpGetOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.get<T>(this.apiURL + route, httpGetOptions).pipe(catchError(ApiCallService.handleError));
+    }
 
-  public callDelete<T>(route: string, httpDeleteOptions: any = httpObserveOptions): Observable<any> {
-    return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
-  }
 
-  public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
-    /**
-     * @deprecated @SD please refactor and remove this.
-     */
-    return this.http.delete<T>(this.apiURL + route, params);
-  }
+    public callPost<T>(route: string, data, httpPostOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.post<T>(this.apiURL + route, data, httpPostOptions).pipe(catchError(ApiCallService.handleError));
+    }
 
-  public readCookies(name: string) {
-    const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
-    return result ? result[1] : 'true';
-  }
+
+    public callPut<T>(route: string, data, httpPutOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.put<T>(this.apiURL + route, data, httpPutOptions).pipe(catchError(ApiCallService.handleError));
+    }
+
+
+    public callPatch<T>(route: string, data, httpPatchOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.patch<T>(this.apiURL + route, data, httpPatchOptions).pipe(catchError(ApiCallService.handleError));
+    }
+
+
+    public callDelete<T>(route: string, httpDeleteOptions: any = httpObserveOptions): Observable<any> {
+        return this.http.delete<T>(this.apiURL + route, httpDeleteOptions).pipe(catchError(ApiCallService.handleError));
+    }
+
+    public callDeleteManyRoute<T>(route: string, params?: any): Observable<any> {
+        /**
+         * @deprecated @SD please refactor and remove this.
+         */
+        return this.http.delete<T>(this.apiURL + route, params);
+    }
+
+
+    public readCookies(name: string) {
+        const result = new RegExp('(?:^|; )' + encodeURIComponent(name) + '=([^;]*)').exec(document.cookie);
+        return result ? result[1] : 'true';
+    }
 }
 
-export interface ApiServicePrefix {
-  servicePrefix: string;
-}
+
 
 export class HttpInterceptorHandler implements HttpHandler {
-  constructor(private next: HttpHandler, private interceptor: HttpInterceptor) {
-  }
+    constructor(private next: HttpHandler, private interceptor: HttpInterceptor) {
 
-  handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
-    return this.interceptor.intercept(req, this.next);
-  }
+    }
+
+    handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
+        return this.interceptor.intercept(req, this.next);
+    }
 }
 
 
 export class HttpProtocolHelper {
+    /**
+     * Creates a copy of the passing HTTP-Protocol with the desired http parameters
+     * @param httpProtocol HTTP protocol
+     * @param filter Evaluation which data should be fetched. (A generic query filter based)
+     * @param limit The max number of resources returned (pageSize).
+     * @param sort The query element which is used as the sort id (nested resources are possible via (.) dot).
+     * @param order The order sequence in which `way` the sort should be returned.
+     * @param page The current page. N number of elements will be skip based on (limit * page)
+     */
+    static createHttpProtocolOptions(
+            httpProtocol,
+            filter?: any,
+            limit?: number,
+            sort?: string,
+            order?: number,
+            page?: number) {
 
-  /**
-   * Creates a copy of the passing HTTP-Protocol with the desired http parameters
-   * @param httpProtocol HTTP protocol
-   * @param filter Evaluation which data should be fetched. (A generic query filter based)
-   * @param limit The max number of resources returned (pageSize).
-   * @param sort The query element which is used as the sort id (nested resources are possible via (.) dot).
-   * @param order The order sequence in which `way` the sort should be returned.
-   * @param page The current page. N number of elements will be skip based on (limit * page)
-   */
-  static createHttpProtocolOptions(httpProtocol, filter?: any, limit?: number, sort?: string, order?: number,
-                                   page?: number) {
-    const options = Object.assign(this, httpProtocol);
-    let httpParams: HttpParams = new HttpParams();
-    httpParams = httpParams.set('filter', filter === undefined || filter === 'undefined' ? undefined : filter);
-    httpParams = httpParams.set('limit', limit === undefined ? '0' : limit.toString());
-    httpParams = httpParams.set('sort', sort === undefined ? 'public_id' : sort);
-    httpParams = httpParams.set('order', order === undefined ? '1' : order.toString());
-    httpParams = httpParams.set('page', page === undefined ? '1' : page.toString());
-    options.params = httpParams;
-    return options;
-  }
+        const options = Object.assign(this, httpProtocol);
+
+        let httpParams: HttpParams = new HttpParams();
+        httpParams = httpParams.set('filter', filter === undefined || filter === 'undefined' ? undefined : filter);
+        httpParams = httpParams.set('limit', limit === undefined ? '0' : limit.toString());
+        httpParams = httpParams.set('sort', sort === undefined ? 'public_id' : sort);
+        httpParams = httpParams.set('order', order === undefined ? '1' : order.toString());
+        httpParams = httpParams.set('page', page === undefined ? '1' : page.toString());
+        options.params = httpParams;
+
+        return options;
+    }
 }
