@@ -19,7 +19,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 
 import { ReplaySubject, takeUntil } from 'rxjs';
 
-import { ConnectionService } from '../../../connect/connection.service';
+import { ConnectionService } from '../../../modules/connect/services/connection.service';
 import { SessionTimeoutService } from '../../../modules/auth/services/session-timeout.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 

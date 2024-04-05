@@ -19,7 +19,7 @@ import { Injectable } from '@angular/core';
 import { isDevMode } from '@angular/core';
 import { HttpBackend, HttpClient } from '@angular/common/http';
 
-import { BehaviorSubject, Observable } from 'rxjs';
+import { BehaviorSubject, Observable, lastValueFrom } from 'rxjs';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable({
@@ -34,32 +34,7 @@ export class ConnectionService {
   private connectionStatus: boolean = false;
   private http: HttpClient;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    public constructor(private backend: HttpBackend) {
-        this.http = new HttpClient(backend);
-        this.connectionSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('connection')));
-        this.connection = this.connectionSubject.asObservable();
-
-        if (this.currentConnection === null) {
-            this.setDefaultConnection();
-        }
-        try {
-            const connectionStatusPromise = this.connect();
-            connectionStatusPromise.then(status => {
-                this.connectionStatus = status;
-
-                if (this.connectionStatus === false) {
-                    localStorage.removeItem('connection');
-                    this.connectionSubject.next(null);
-                }
-        });
-        } catch (e) {
-            this.connectionStatus = false;
-            localStorage.removeItem('connection');
-            this.connectionSubject.next(null);
-        }
-    }
-
+/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
 
     public get status(): boolean {
         return this.connectionStatus;
@@ -70,51 +45,85 @@ export class ConnectionService {
         return this.connectionSubject.value;
     }
 
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
+    public constructor(private backend: HttpBackend) {
+        this.http = new HttpClient(backend);
+        this.connectionSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('connection')));
+        this.connection = this.connectionSubject.asObservable();
+
+        if (this.currentConnection === null) {
+            this.setDefaultConnection();
+        }
+
+        try {
+            const connectionStatusPromise = this.connect();
+            connectionStatusPromise.then(status => {
+                this.connectionStatus = status;
+
+                if (this.connectionStatus === false) {
+                    localStorage.removeItem('connection');
+                    this.connectionSubject.next(null);
+                }
+            });
+        } catch (e) {
+            this.connectionStatus = false;
+            localStorage.removeItem('connection');
+            this.connectionSubject.next(null);
+        }
+    }
+
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     private setDefaultConnection() {
         if (isDevMode()) {
-        this.setConnectionURL('http', '127.0.0.1', this.devPort);
+            this.setConnectionURL('http', '127.0.0.1', this.devPort);
         } else {
-        this.setConnectionURL(
-            window.location.protocol.substring(0, window.location.protocol.length - 1),
-            window.location.hostname,
-            +window.location.port
-        );
+            this.setConnectionURL(
+                window.location.protocol.substring(0, window.location.protocol.length - 1),
+                window.location.hostname,
+                +window.location.port
+            );
         }
     }
 
 
     public async testConnection() {
         try {
-        await this.connect();
-        return true;
+            await this.connect();
+            return true;
         } catch (e) {
-        return false;
+            return false;
         }
     }
 
 
     private async connect() {
         console.log(`### CONNECTION TRY with URL: ${this.currentConnection}/rest/ ###`);
-        return await this.http.get<any>(`${this.currentConnection}/rest/`).toPromise();
+        const conn_result$ = this.http.get<any>(`${this.currentConnection}/rest/`);
+
+        return await lastValueFrom(conn_result$);
     }
 
 
     public async testCustomURL(protocol: string, host: string, port: number) {
         const customURL = `${protocol}://${host}:${port}/rest/`;
         console.log(`Trying to connect to backend @ ${customURL}`);
-        return await this.http.get<any>(customURL).toPromise();
+        const conn_test_result$ = this.http.get<any>(customURL);
+
+        return await lastValueFrom(conn_test_result$);
     }
 
 
     public setConnectionURL(protocol: string, host: string, port: number) {
         let href = '';
+
         if (port === 0) {
-        href = `${protocol}://${host}`;
+            href = `${protocol}://${host}`;
         } else {
-        href = `${protocol}://${host}:${port}`;
+            href = `${protocol}://${host}:${port}`;
         }
+
         localStorage.setItem('connection', JSON.stringify(href));
         this.connectionSubject.next(href);
     }

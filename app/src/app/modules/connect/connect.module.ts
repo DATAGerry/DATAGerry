@@ -11,25 +11,32 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
-import { ConnectComponent } from './connect.component';
+import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
 
-const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    component: ConnectComponent
-  }
-];
+import { ConnectRoutingModule } from './connect-routing.module';
+
+import { ConnectionService } from './services/connection.service';
+
+import { ConnectComponent } from './connect.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    declarations: [
+        ConnectComponent
+    ],
+    imports: [
+        CommonModule,
+        ConnectRoutingModule,
+        ReactiveFormsModule,
+    ],
+    providers: [
+        ConnectionService
+    ]
 })
-export class ConnectRoutingModule { }
+export class ConnectModule {}

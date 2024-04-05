@@ -18,8 +18,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
 
-import { LoginComponent } from './modules/auth/login/login.component';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
+
+import { LoginComponent } from './modules/auth/login/login.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
@@ -28,7 +29,7 @@ const routes: Routes = [
         data: {
             view: 'embedded'
         },
-        loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
+        loadChildren: () => import('./modules/connect/connect.module').then(m => m.ConnectModule)
     },
     {
         path: 'auth',

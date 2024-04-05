@@ -26,7 +26,7 @@ import { NgbModal, NgbModalOptions } from '@ng-bootstrap/ng-bootstrap';
 import { NgxIndexedDBService } from 'ngx-indexed-db';
 
 import { PermissionService } from './permission.service';
-import { ConnectionService } from '../../../connect/connection.service';
+import { ConnectionService } from '../../connect/services/connection.service';
 import { ApiCallService, ApiServicePrefix, httpObserveOptions } from '../../../services/api-call.service';
 import { SpecialService } from '../../../framework/services/special.service';
 
