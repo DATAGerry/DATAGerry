@@ -15,31 +15,12 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import { InfoRoutingModule } from './info-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-
-import { AboutComponent } from './components/about/about.component';
-import { LicenseComponent } from './components/license/license.component';
-import { InfoComponent } from './info.component';
+import { Component } from '@angular/core';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-@NgModule({
-    declarations: [
-        AboutComponent,
-        LicenseComponent,
-        InfoComponent
-    ],
-    imports: [
-        CommonModule,
-        LayoutModule,
-        InfoRoutingModule,
-        FontAwesomeModule
-    ]
+@Component({
+    selector: 'cmdb-about',
+    templateUrl: './about.component.html',
+    styleUrls: ['./about.component.scss']
 })
-export class InfoModule {
-}
+export class AboutComponent {}

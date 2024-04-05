@@ -18,25 +18,16 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { PermissionGuard } from '../modules/auth/guards/permission.guard';
+import { PermissionGuard } from '../auth/guards/permission.guard';
 
 import { AboutComponent } from './components/about/about.component';
 import { LicenseComponent } from './components/license/license.component';
-import { InfoComponent } from './info.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
     {
-        path: '',
-        pathMatch: 'full',
-        canActivate: [PermissionGuard],
-        data: {
-            breadcrumb: 'Overview',
-        },
-        component: InfoComponent
-    },
-    {
         path: 'about',
+        canActivate: [PermissionGuard],
         data: {
             breadcrumb: 'About'
         },
@@ -52,11 +43,7 @@ const routes: Routes = [
 ];
 
 @NgModule({
-    imports: [
-        RouterModule.forChild(routes)
-    ],
-    exports: [
-        RouterModule
-    ]
+    imports: [ RouterModule.forChild(routes) ],
+    exports: [ RouterModule ]
 })
 export class InfoRoutingModule {}
