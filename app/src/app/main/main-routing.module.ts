@@ -112,7 +112,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../info/info.module').then(m => m.InfoModule)
+        loadChildren: () => import('../modules/info/info.module').then(m => m.InfoModule)
     },
     {
         path: 'filemanager',
@@ -131,15 +131,6 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         loadChildren: () => import('../exportd/exportd.module').then(m => m.ExportdModule)
-    },
-    {
-        path: 'debug',
-        data: {
-            breadcrumb: 'Debug'
-        },
-        canActivate: [AuthGuard],
-        canActivateChild: [AuthGuard],
-        loadChildren: () => import('../debug/debug.module').then(m => m.DebugModule)
     }
 ];
 
