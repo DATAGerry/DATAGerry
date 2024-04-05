@@ -118,12 +118,6 @@ export class DocapiBuilderContentStepComponent {
     }
 
 
-    ngOnInit(): void {
-        tinymce.init({
-            selector: 'editor',
-            license_key: 'gpl'
-        });
-    }
 
 
     public get content() {
