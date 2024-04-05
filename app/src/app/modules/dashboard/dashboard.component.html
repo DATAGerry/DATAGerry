@@ -19,24 +19,35 @@
     />
 </ng-template>
 
-    <div style="max-width: 99% !important;">
-        <div class="card">
-            <cmdb-dashcard
-                name="Objects"
-                [numbers]=objectCount
-                linkRoute="/framework/object/"
-                icon="fa fa-cube"
-            />
-            <div class="card-body">
-                <cmdb-charts
-                    [dataLabels]="labelsObject"
-                    [dataItems]="itemsObject"
-                    [labelColors]="colorsObject"
-                />
+<div style="max-width: 99% !important;">
+    <div class="card">
+        <a routerLink="/framework/object/">
+            <div class="dash-card primary">
+                <i class="fa fa-cube"></i>
+                <div class="count-section">
+                    <div id="count-numbers">{{objectCount}}</div>
+                    <div id="count-name">Objects</div>
+                </div>
             </div>
+        </a>
+        <!-- <cmdb-dashcard
+            name="Objects"
+            [numbers]=objectCount
+            linkRoute=""
+            icon=""
+        /> -->
+        <div class="card-body">
+            <cmdb-charts
+                [dataLabels]="labelsObject"
+                [dataItems]="itemsObject"
+                [labelColors]="colorsObject"
+            />
         </div>
     </div>
+</div>
+
 <hr/>
+
 <ng-container *ngIf="newestObjects">
     <h2>Newest objects</h2>
     <cmdb-table
@@ -55,7 +66,9 @@
         (pageChange)="onNewestPageChange($event)"
     />
 </ng-container>
+
 <hr/>
+
 <ng-container *ngIf="latestObjects">
     <h2>Last modified objects</h2>
     <cmdb-table

@@ -19,14 +19,14 @@ import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/c
 
 import { ReplaySubject, takeUntil } from 'rxjs';
 
-import { ObjectService } from '../framework/services/object.service';
-import { ToastService } from '../layout/toast/toast.service';
-import { SidebarService } from '../layout/services/sidebar.service';
+import { ObjectService } from '../../framework/services/object.service';
+import { ToastService } from '../../layout/toast/toast.service';
+import { SidebarService } from '../../layout/services/sidebar.service';
 
-import { APIGetMultiResponse } from '../services/models/api-response';
-import { RenderResult } from '../framework/models/cmdb-render';
-import { Column } from '../layout/table/table.types';
-import { CollectionParameters } from '../services/models/api-parameter';
+import { APIGetMultiResponse } from '../../services/models/api-response';
+import { RenderResult } from '../../framework/models/cmdb-render';
+import { Column } from '../../layout/table/table.types';
+import { CollectionParameters } from '../../services/models/api-parameter';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -38,13 +38,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // Table Template: Dashboard active column
     @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
-
     // Table Template: Dashboard user column
     @ViewChild('userTemplate', { static: true }) userTemplate: TemplateRef<any>;
-
     // Table Template: Dashboard action column
     @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
-
     // Table Template: Dashboard date column
     @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
 
@@ -79,7 +76,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     constructor(
         private objectService: ObjectService,
         private toastService: ToastService,
-        private sidebarService: SidebarService) {
+        private sidebarService: SidebarService
+    ) {
 
     }
 
@@ -216,11 +214,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.newestLoading = true;
         const apiParameters: CollectionParameters = { page: this.newestPage, limit: 10, order: -1 };
         this.objectService.getNewestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
-            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-                this.newestObjects = apiResponse.results as Array<RenderResult>;
-                this.newestObjectsCount = apiResponse.total;
-            }, () => { }, () => {
-                this.newestLoading = false;
+            .subscribe({
+                next: (apiResponse: APIGetMultiResponse<RenderResult>) => {
+                    this.newestObjects = apiResponse.results as Array<RenderResult>;
+                    this.newestObjectsCount = apiResponse.total;
+                },
+                error: (error) => {
+                    this.toastService.error(`Error while loading newest objects: ${error}`);
+                },
+                complete: () => {
+                    this.newestLoading = false;
+                }
             });
     }
 
@@ -229,29 +233,35 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.latestLoading = true;
         const apiParameters: CollectionParameters = { page: this.latestPage, limit: 10, order: -1 };
         this.objectService.getLatestObjects(apiParameters).pipe(takeUntil(this.unSubscribe))
-            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-                this.latestObjects = apiResponse.results as Array<RenderResult>;
-                this.latestObjectsCount = apiResponse.total;
-            }, () => { }, () => {
-                this.latestLoading = false;
+            .subscribe({
+                next: (apiResponse: APIGetMultiResponse<RenderResult>) => {
+                    this.latestObjects = apiResponse.results as Array<RenderResult>;
+                    this.latestObjectsCount = apiResponse.total;
+                },
+                error: (error) => {
+                    this.toastService.error(`Error while loading latest objects: ${error}`);
+                },
+                complete: () => {
+                    this.latestLoading = false;
+                }
             });
     }
 
 
     public onObjectDelete(value: RenderResult) {
         this.objectService.deleteObject(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
-            .subscribe(() => {
-                this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
-                this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
-                    this.loadLatestObjects();
-                    this.loadNewestObjects();
+            .subscribe({
+                next: () => {
+                    this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
+                    this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+                        this.loadLatestObjects();
+                        this.loadNewestObjects();
+                    });
+                },
+                error: (error) => {
+                    this.toastService.error(`Error while deleting object ${value.object_information.object_id}: ${error}`);
                 }
-                );
-            },
-                (error) => {
-                    this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
-                }
-            );
+            });
     }
 
 
@@ -262,33 +272,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
      */
     public onObjectDeleteWithLocations(value: RenderResult) {
         this.objectService.deleteObjectWithLocations(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
-            .subscribe(() => {
-                this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
-                this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
-                    this.loadLatestObjects();
-                    this.loadNewestObjects();
-                });
-            },
-            (error) => {
-                this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
-            }
-            );
+            .subscribe({
+                next: () => {
+                    this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
+                    this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+                        this.loadLatestObjects();
+                        this.loadNewestObjects();
+                    });
+                },
+                error: (error) => {
+                    this.toastService.error(`Error while deleting object ${value.object_information.object_id} 
+                                             with locations: ${error}`);
+                }
+            });
     }
 
 
     public onObjectDeleteWithObjects(value: RenderResult) {
         this.objectService.deleteObjectWithChildren(value.object_information.object_id).pipe(takeUntil(this.unSubscribe))
-            .subscribe(() => {
-                this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
-                this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
-                    this.loadLatestObjects();
-                    this.loadNewestObjects();
-                });
-            },
-            (error) => {
-                this.toastService.error(`Error while deleting object ${value.object_information.object_id} | Error: ${error}`);
-            }
-            );
+            .subscribe({
+                next: () => {
+                    this.toastService.success(`Object ${value.object_information.object_id} was deleted successfully`);
+                    this.sidebarService.updateTypeCounter(value.type_information.type_id).then(() => {
+                        this.loadLatestObjects();
+                        this.loadNewestObjects();
+                    });
+                },
+                error: (error) => {
+                    this.toastService.error(`Error while deleting object ${value.object_information.object_id}
+                                             with child objects: ${error}`);
+                }
+            });
     }
 
 /* ----------------------------------------------- OBJECT API - HELPER ---------------------------------------------- */
