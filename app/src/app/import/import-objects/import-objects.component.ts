@@ -27,34 +27,34 @@ import { ImporterConfig, ImporterFile, ImportResponse } from './import-object.mo
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-import-objects',
-  templateUrl: './import-objects.component.html',
-  styleUrls: ['./import-objects.component.scss']
+    selector: 'cmdb-import-objects',
+    templateUrl: './import-objects.component.html',
+    styleUrls: ['./import-objects.component.scss']
 })
 export class ImportObjectsComponent implements OnInit, OnDestroy {
 
-  private fileReader: FileReader;
-  public typeInstance: CmdbType = undefined;
+    private fileReader: FileReader;
+    public typeInstance: CmdbType = undefined;
 
-  // Importer Data
-  private importerSubscription: Subscription;
-  public importerFile: ImporterFile = {} as ImporterFile;
-  public importerConfig: ImporterConfig = {} as ImporterConfig;
-  // at the moment only MAPPING
-  public defaultImporterConfig: any;
+    // Importer Data
+    private importerSubscription: Subscription;
+    public importerFile: ImporterFile = {} as ImporterFile;
+    public importerConfig: ImporterConfig = {} as ImporterConfig;
+    // at the moment only MAPPING
+    public defaultImporterConfig: any;
 
-  // Parser Data
-  private parseDataSubscription: Subscription;
-  public parserConfig: any = undefined;
-  public parsedData: any = undefined;
+    // Parser Data
+    private parseDataSubscription: Subscription;
+    public parserConfig: any = undefined;
+    public parsedData: any = undefined;
 
-  // Mapping
-  public mapping: [] = undefined;
+    // Mapping
+    public mapping: [] = undefined;
 
-  // Import Response
-  public importResponse: ImportResponse = undefined;
+    // Import Response
+    public importResponse: ImportResponse = undefined;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
     public constructor(private importService: ImportService, public sidebarService: SidebarService) {
         this.fileReader = new FileReader();
         this.importerSubscription = new Subscription();
@@ -78,18 +78,18 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
         this.parseDataSubscription.unsubscribe();
     }
 
-/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     public formatChange(format: string) {
         this.importerFile.fileFormat = format;
         const defaultImporterConfig = this.importService.getObjectImporterDefaultConfig(this.importerFile.fileFormat)
-        .subscribe({
-            next: (defaultConfig: any) => {
+            .subscribe({
+                next: (defaultConfig: any) => {
                     this.defaultImporterConfig = defaultConfig;
                 },
-            error: (error) => console.error(error),
-            complete: () => defaultImporterConfig.unsubscribe()
-        })
+                error: (error) => console.error(error),
+                complete: () => defaultImporterConfig.unsubscribe()
+            })
     }
 
 
@@ -101,7 +101,9 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
 
     public parserConfigChange(config: any) {
-        this.parserConfig = config;
+        setTimeout(() => {
+            this.parserConfig = config;
+        }, 0)
     }
 
 
@@ -129,12 +131,13 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
 
     public onParseData() {
         this.parseDataSubscription = this.importService.postObjectParser(
-        this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe({
-            next: (parsedData) => {
-                this.parsedData = parsedData;
-            },
-            error: (error) => console.error(error)
-        });
+            this.importerFile.file, this.importerFile.fileFormat, this.parserConfig).subscribe({
+                next: (parsedData) => {
+                    this.parsedData = parsedData;
+                    // this.cdr.detectChanges();
+                },
+                error: (error) => console.error(error)
+            });
     }
 
 
@@ -146,9 +149,9 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
         }
 
         this.importService.importObjects(this.importerFile.file,
-                                         this.importerFile.fileFormat,
-                                         this.parserConfig,
-                                         runtimeConfig)
+            this.importerFile.fileFormat,
+            this.parserConfig,
+            runtimeConfig)
             .subscribe({
                 next: (importResponse) => {
                     this.importResponse = importResponse;
@@ -160,6 +163,6 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
                     this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
                 }
             }
-        );
+            );
     }
 }
