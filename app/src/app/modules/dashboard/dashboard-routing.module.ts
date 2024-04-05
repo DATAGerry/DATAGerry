@@ -16,36 +16,20 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { NgModule } from '@angular/core';
-import { CommonModule } from '@angular/common';
-
-import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-
-import { DashboardRoutingModule } from './dashboard-routing.module';
-import { LayoutModule } from '../layout/layout.module';
-import { RenderModule } from '../framework/render/render.module';
-import { UsersModule } from '../management/users/users.module';
-import { ObjectModule } from '../framework/object/object.module';
-import { TableModule } from '../layout/table/table.module';
+import { Routes, RouterModule } from '@angular/router';
 
 import { DashboardComponent } from './dashboard.component';
-import { DashcardComponent } from './components/dashcard/dashcard.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+const routes: Routes = [
+    {
+      path: '',
+      component: DashboardComponent
+    },
+];
+
 @NgModule({
-    declarations: [
-        DashboardComponent,
-        DashcardComponent
-    ],
-    imports: [
-        CommonModule,
-        LayoutModule,
-        DashboardRoutingModule,
-        FontAwesomeModule,
-        RenderModule,
-        UsersModule,
-        ObjectModule,
-        TableModule
-    ]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class DashboardModule {
-}
+export class DashboardRoutingModule {}
