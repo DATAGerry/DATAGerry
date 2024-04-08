@@ -90,6 +90,7 @@ def get_default_importer_config(importer_type):
 @importer_object_blueprint.route('/parser', methods=['GET'])
 @login_required
 def get_parser():
+    LOGGER.info("API ==> get_parser() called")
     """TODO: document"""
     parser = [parser for parser in __OBJECT_PARSER__]
     return make_response(parser)
@@ -110,9 +111,11 @@ def get_default_parser_config(parser_type: str):
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
 @login_required
-@right_required('base.import.object.*')
-def parse_objects():
+@insert_request_user
+# @right_required('base.import.object.*')
+def parse_objects(request_user: UserModel):
     """TODO: document"""
+    # TODO: check if request user has the permission 'base.import.object.*'
     # Check if file exists
     request_file: FileStorage = get_file_in_request('file', request.files)
     # Load parser config

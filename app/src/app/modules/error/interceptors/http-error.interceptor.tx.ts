@@ -21,7 +21,7 @@ import { Router } from '@angular/router';
 
 import { Observable, throwError, catchError } from 'rxjs';
 
-import { AuthService } from '../../modules/auth/services/auth.service';
+import { AuthService } from '../../auth/services/auth.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable()
@@ -35,15 +35,6 @@ export class HttpErrorInterceptor implements HttpInterceptor {
     public readonly NOT_ACCEPTABLE: number = 406;
     public readonly PAGE_GONE: number = 410;
     public readonly INTERNAL_SERVER_ERROR: number = 500;
-
-    private readonly INFO_ERRORS: number[] = [
-        this.BAD_REQUEST,
-        this.NOT_FOUND,
-        this.METHOD_NOT_ALLOWED,
-        this.NOT_ACCEPTABLE,
-        this.PAGE_GONE,
-        this.FORBIDDEN
-    ];
 
     private readonly REDIRECT_ERRORS: number[] = [
         this.CONNECTION_REFUSED,
