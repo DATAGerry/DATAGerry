@@ -11,23 +11,35 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
+import { NgModule } from '@angular/core';
+import { Routes, RouterModule } from '@angular/router';
 
-import { Component, OnInit } from '@angular/core';
+import { ErrorComponent } from './error.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
+const routes: Routes = [
+    {
+        path: '',
+        pathMatch: 'full',
+        data: {
+            breadcrumb: 'Not found'
+        },
+        redirectTo: 'dashboard'
+    },
+    {
+        path: ':statusCode',
+        data: {
+            breadcrumb: 'Status'
+        },
+        component: ErrorComponent
+    }
+];
 
-@Component({
-  selector: 'cmdb-error-not-found',
-  templateUrl: './error-not-found.component.html',
-  styleUrls: ['./error-not-found.component.scss']
+@NgModule({
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class ErrorNotFoundComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-}
+export class ErrorRoutingModule {}

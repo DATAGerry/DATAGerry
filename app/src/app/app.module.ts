@@ -33,7 +33,7 @@ import { SessionTimeoutService } from './modules/auth/services/session-timeout.s
 import { TreeManagerService } from './services/tree-manager.service';
 import { ObjectService } from './framework/services/object.service';
 
-import { HttpErrorInterceptor } from './error/interceptors/http-error.interceptor.tx';
+import { HttpErrorInterceptor } from './modules/error/interceptors/http-error.interceptor.tx';
 import { BasicAuthInterceptor } from './modules/auth/interceptors/basic-auth.interceptor';
 import { APICachingInterceptor } from './services/api-cache.interceptor';
 

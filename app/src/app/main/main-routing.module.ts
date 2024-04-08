@@ -40,7 +40,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../error/error.module').then(m => m.ErrorModule)
+        loadChildren: () => import('../modules/error/error.module').then(m => m.ErrorModule)
     },
     {
         path: 'search',
