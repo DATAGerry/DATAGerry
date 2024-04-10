@@ -18,6 +18,7 @@ This module contains the implementation of CmdbObject, which is representing
 an object in Datagarry.
 """
 import logging
+from typing import Union
 from dateutil.parser import parse
 
 from cmdb.framework.cmdb_dao import CmdbDAO
@@ -89,6 +90,11 @@ class CmdbObject(CmdbDAO):
             'type': 'list',
             'required': True,
             'default': [],
+        },
+        'multi_data_sections': {
+            'type': 'list',
+            'required': False,
+            'default': [],
         }
     }
 
@@ -99,6 +105,7 @@ class CmdbObject(CmdbDAO):
                  author_id,
                  active,
                  fields: list,
+                 multi_data_sections: list = None,
                  last_edit_time=None,
                  editor_id: int = None,
                  status: int = None,
@@ -126,6 +133,7 @@ class CmdbObject(CmdbDAO):
         self.editor_id = editor_id
         self.active = active
         self.fields = fields
+        self.multi_data_sections = multi_data_sections or []
         super().__init__(**kwargs)
 
 
@@ -157,7 +165,8 @@ class CmdbObject(CmdbDAO):
             last_edit_time=last_edit_time,
             editor_id=data.get('editor_id', None),
             active=data.get('active'),
-            fields=data.get('fields', [])
+            fields=data.get('fields', []),
+            multi_data_sections=data.get('multi_data_sections', [])
         )
 
 
@@ -175,6 +184,7 @@ class CmdbObject(CmdbDAO):
             'editor_id': instance.editor_id,
             'active': instance.active,
             'fields': instance.fields,
+            'multi_data_sections': instance.multi_data_sections
         }
 
 
@@ -228,7 +238,7 @@ class CmdbObject(CmdbDAO):
         raise FieldNotFoundError
 
 
-    def get_value(self, field) -> (str, None):
+    def get_value(self, field) -> Union[str, None]:
         """Get value of a field
 
         Args:
@@ -272,13 +282,4 @@ class TypeNotSetError(CMDBError):
     """
     def __init__(self, public_id):
         self.message = f'The object (ID: {public_id}) is not connected with a input_type'
-        super(CMDBError, self).__init__(self.message)
-
-
-class NoFoundFieldValueError(CMDBError):
-    """
-    Error when field does not exists
-    """
-    def __init__(self, field_name):
-        self.message = f"Field value does not exists {field_name}"
         super(CMDBError, self).__init__(self.message)
