@@ -19,8 +19,11 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
+import { MatTreeModule } from '@angular/material/tree';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
 
+import { FaIconLibrary, FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 import { fas } from '@fortawesome/free-solid-svg-icons';
 import { far } from '@fortawesome/free-regular-svg-icons';
 import { fab } from '@fortawesome/free-brands-svg-icons';
@@ -30,15 +33,13 @@ import { NgbActiveModal, NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { QRCodeModule } from 'angularx-qrcode';
 import { NgxPaginationModule } from 'ngx-pagination';
 
-import { SearchBarModule } from '../search/search-bar/search-bar.module';
+import { SearchBarModule } from '../modules/search-bar/search-bar.module';
 import { ToastModule } from './toast/toast.module';
 import { AuthModule } from '../modules/auth/auth.module';
 import { RenderModule } from '../framework/render/render.module';
 import { FileexplorerModule } from './components/file-explorer/fileexplorer.module';
 import { TableModule } from './table/table.module';
-import {MatTreeModule} from '@angular/material/tree';
-import {MatIconModule} from '@angular/material/icon';
-import {MatButtonModule} from '@angular/material/button';
+
 
 import { BreadcrumbService } from './structure/breadcrumb/breadcrumb.service';
 
@@ -135,7 +136,7 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
         LowercaseDirective,
         FileDragDropDirective,
         TableSortEventDirective,
-        PreventDoubleSubmitDirective,
+        PreventDoubleSubmitDirective
     ],
     exports: [
         FileExplorerComponent,
@@ -160,7 +161,7 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
         NameGuidePipe,
         LowercaseDirective,
         FileDragDropDirective,
-        PreventDoubleSubmitDirective,
+        PreventDoubleSubmitDirective
     ],
     imports: [
         CommonModule,
@@ -181,7 +182,7 @@ import { TypeSelectComponent } from './components/type-select/type-select.compon
         NgxPaginationModule,
         MatTreeModule,
         MatButtonModule,
-        MatIconModule,
+        MatIconModule
     ],
     providers: [
         BreadcrumbService,

@@ -1,0 +1,154 @@
+<form [formGroup]="searchBarForm" id="search-bar">
+    <cmdb-search-bar-tags
+        *ngFor="let tag of tags"
+        [tag]="tag"
+        (changeEmitter)="updateTag($event)"
+        (deleteEmitter)="removeTag($event)"
+    >
+        {{tag.searchLabel}}
+    </cmdb-search-bar-tags>
+
+    <input
+        class="search-input"
+        type="text"
+        autofocus
+        [formControl]="inputControl"
+        tabindex="1"
+        (keyup.enter)="callSearch()"
+        (keydown.backspace)="removeLastTag()"
+        (keydown.tab)="addTag('text', $event)"
+        (keyup.arrowDown)="setFocusOnElement(2)"
+    />
+
+    <div class="search-bar-append">
+        <button
+            *ngIf="tags.length > 0"
+            (click)="clearAll()"
+            type="button"
+        >
+            <span>X</span>
+        </button>
+        <button (click)="callSearch()" type="button">
+            <i class="fas fa-search"></i>
+        </button>
+    </div>
+
+    <ul
+        #inputDropdown
+        *ngIf="inputControl.value.toString().length > 0"
+        id="search-bar-accordion"
+        class="accordion"
+    >
+        <li
+            #tabText
+            tabindex="2"
+            (keyup.arrowUp)="setFocusOnElement(1)"
+            (keyup.arrowDown)="arrowDown(tabText.tabIndex)"
+            (keyup.enter)="addTag('text')"
+            (click)="addTag('text')"
+        >
+            <span>
+                <button class="btn btn-link" type="button">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+                <i>Text</i>: {{inputControl.value}} -
+                <i>({{possibleTextResults.active}}<i *ngIf="possibleTextResults.inactive > 0"> +
+                {{possibleTextResults.inactive}} inactive</i>)</i>
+            </span>
+        </li>
+        <li
+            #tabText
+            tabindex="3"
+            *ngIf="possibleRegexResults.total > 0"
+            (keyup.arrowUp)="setFocusOnElement(2)"
+            (keyup.arrowDown)="arrowDown(tabText.tabIndex)"
+            (keyup.enter)="addTag('regex')"
+            (click)="addTag('regex')"
+        >
+            <span>
+                <button class="btn btn-link" type="button">
+                    <i class="fas fa-angle-double-right"></i>
+                </button>
+                <i>Regex</i>: {{inputControl.value}} -
+                <i>({{possibleRegexResults.active}}<i *ngIf="possibleRegexResults.inactive > 0"> +
+                {{possibleRegexResults.inactive}} inactive</i>)</i>
+            </span>
+        </li>
+        <li
+            #tabType
+            tabindex="4"
+            *ngIf="possibleTypes && possibleTypes.length > 0"
+            (keyup.arrowUp)="arrowUp(tabType.tabIndex)"
+            (keyup.arrowDown)="arrowDown(tabType.tabIndex)"
+            (keyup.enter)="addTag('type', possibleTypes)"
+            (keyup.arrowRight)="openDropdown(tabType.tabIndex)"
+        >
+            <span>
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#search-bar-collapse-type">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <span
+                    (keyup.enter)="addTag('type', possibleTypes)"
+                    (click)="addTag('type', possibleTypes)"
+                >
+                    <i>Types</i>: {{inputControl.value}} - <i>({{possibleTypes.length}})</i>
+                </span>
+            </span>
+            <ul #inputSubDropdown id="search-bar-collapse-type" class="collapse" data-parent="#search-bar-accordion">
+                <li
+                    #subTabType
+                    *ngFor="let possibleType of possibleTypes; let i = index"
+                    [tabindex]="(6+i)"
+                    (keyup.arrowUp)="arrowUp(subTabType.tabIndex)"
+                    (keyup.arrowDown)="arrowDown(subTabType.tabIndex)"
+                    (keyup.enter)="addTag('type', [possibleType])"
+                    (click)="addTag('type', [possibleType])"
+                >
+                    <i class="{{possibleType?.render_meta['icon']}}"></i>{{possibleType?.label}}
+                </li>
+            </ul>
+        </li>
+        <li
+            #tabCate tabindex="6"
+            *ngIf="possibleCategories && possibleCategories.length > 0"
+            (keyup.arrowUp)="arrowUp(tabCate.tabIndex)"
+            (keyup.enter)="addTag('category', possibleCategories)"
+            (keyup.arrowRight)="openDropdown(tabCate.tabIndex)"
+        >
+            <span>
+                <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#search-bar-collapse-categories">
+                    <i class="fas fa-angle-right"></i>
+                </button>
+                <span
+                    (click)="addTag('category', possibleCategories)"
+                    (keyup.enter)="addTag('category', possibleCategories)"
+                >
+                    <i>Categories</i>: {{inputControl.value}} - <i>({{possibleCategories.length}})</i>
+                </span>
+            </span>
+            <ul id="search-bar-collapse-categories" class="collapse" data-parent="#search-bar-accordion">
+                <li
+                    #subTabCate
+                    *ngFor="let possibleCategory of possibleCategories; let i = index"
+                    [tabindex]="(7+i)"
+                    (keyup.arrowUp)="arrowUp(subTabCate.tabIndex)"
+                    (keyup.arrowDown)="arrowDown(subTabCate.tabIndex)"
+                    (click)="addTag('category', [possibleCategory])"
+                    (keyup.enter)="addTag('category', [possibleCategory])"
+                >
+                    {{possibleCategory?.label}}
+                </li>
+            </ul>
+        </li>
+        <li class="alert alert-info alert-dismissible fade show mb-0">
+            <strong><fa-icon icon="info-circle" class="text-primary"></fa-icon></strong>
+            Enter your search terms, after each search term use
+            <span class="badge badge-warning w-auto">TAB</span>
+            to <span class="badge badge-warning w-auto">ENTER</span>
+            the next term, press <span class="badge badge-warning w-auto">ENTER</span> to start the search
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">X</span>
+            </button>
+        </li>
+    </ul>
+</form>

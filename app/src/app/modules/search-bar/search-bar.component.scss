@@ -1,0 +1,156 @@
+@import 'src/scss/variables';
+
+$search-bar-width: 100%;
+$search-input-font-size: 0.8rem;
+
+:host {
+  display: inline-block;
+  width: $search-bar-width;
+  height: $input-height;
+  line-height: $input-line-height;
+  color: $input-color;
+  background-color: $input-bg;
+  background-clip: padding-box;
+}
+
+#search-bar {
+
+  padding: $input-padding-y $input-padding-x;
+  border: $input-border-width solid $input-border-color;
+
+  @include border-radius($input-border-radius, 0);
+  @include transition($input-transition);
+
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+
+  cmdb-search-bar-tags {
+    position: relative;
+    margin-right: .4rem;
+    min-width: 0;
+
+    &:first-child {
+      margin-left: -$input-padding-y;
+    }
+
+    &:last-child {
+      margin-left: .2rem;
+    }
+  }
+
+  .search-input {
+    margin-left: 0;
+    border: 0;
+    padding: 0;
+    position: relative;
+    min-width: 40px;
+    flex: 1 1 0%;
+    font-size: $search-input-font-size;
+    outline: none;
+  }
+
+  .search-bar-append {
+    display: flex;
+
+    button {
+      border: 0;
+      background: 0;
+      padding: 0;
+      color: $gray-500;
+      margin-left: .3rem;
+
+      &:hover {
+        color: $gray-700;
+      }
+    }
+  }
+
+}
+
+ul#search-bar-accordion {
+
+  &:focus {
+    display: block !important;
+  }
+
+  //display: none;
+  font-size: 0.8rem;
+  font-weight: 500;
+  list-style: none;
+  padding-left: 0;
+  background: $white;
+  position: absolute;
+  width: 100%;
+  max-height: 70vh;
+  overflow: auto;
+  height: auto;
+  top: 100%;
+  bottom: auto;
+  left: 0;
+  margin-left: -$input-border-width;
+  border: $input-border-width solid $input-border-color;
+
+  li {
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+
+    &:hover, &:focus {
+      span {
+        background: $gray-200;
+      }
+    }
+  }
+
+  ul {
+    list-style: inherit;
+    padding-left: inherit;
+
+    &#search-bar-collapse-type {
+      > li {
+        > i {
+          margin-right: 5px;
+        }
+      }
+    }
+
+    > li {
+      padding-left: 33px;
+      padding-top: 1px;
+      padding-bottom: 1px;
+      cursor: pointer;
+
+      &:hover, &:focus {
+        background: $gray-200;
+      }
+    }
+  }
+
+  span {
+    display: inline-block;
+    width: 100%;
+    cursor: pointer;
+
+    > span {
+      display: inline;
+    }
+
+    &:hover {
+      background: $gray-200;
+    }
+
+    &:focus {
+      background: $gray-200;
+    }
+
+    i {
+      font-weight: 700;
+    }
+  }
+}
+
+.search-input:focus ~ #search-bar-accordion {
+  display: block !important;
+}
