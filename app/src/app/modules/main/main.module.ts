@@ -20,13 +20,13 @@ import { CommonModule } from '@angular/common';
 
 import { NgxIndexedDBModule } from 'ngx-indexed-db';
 
-import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
+import { userSettingsDBConfig } from '../../management/user-settings/user-settings.module';
 import { MainRoutingModule } from './main-routing.module';
-import { DashboardModule } from '../modules/dashboard/dashboard.module';
+import { DashboardModule } from '../dashboard/dashboard.module';
 
-import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
-import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
-import { DateSettingsService } from '../settings/services/date-settings.service';
+import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
+import { UserSettingsService } from '../../management/user-settings/services/user-settings.service';
+import { DateSettingsService } from '../../settings/services/date-settings.service';
 
 
 /* ------------------------------------------------------------------------------------------------------------------ */
