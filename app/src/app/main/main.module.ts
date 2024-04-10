@@ -11,35 +11,41 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
+import { NgxIndexedDBModule } from 'ngx-indexed-db';
+
+import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
 import { MainRoutingModule } from './main-routing.module';
 import { DashboardModule } from '../modules/dashboard/dashboard.module';
-import { NgxIndexedDBModule } from 'ngx-indexed-db';
-import { userSettingsDBConfig } from '../management/user-settings/user-settings.module';
+
 import { UserSettingsDBService } from '../management/user-settings/services/user-settings-db.service';
 import { UserSettingsService } from '../management/user-settings/services/user-settings.service';
 import { DateSettingsService } from '../settings/services/date-settings.service';
 
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 @NgModule({
-  declarations: [],
-  exports: [],
-  imports: [
-    CommonModule,
-    NgxIndexedDBModule.forRoot(userSettingsDBConfig),
-    MainRoutingModule,
-    DashboardModule,
-  ],
-  providers: [UserSettingsDBService, UserSettingsService, DateSettingsService]
+    imports: [
+        CommonModule,
+        NgxIndexedDBModule.forRoot(userSettingsDBConfig),
+        MainRoutingModule,
+        DashboardModule
+    ],
+    providers: [
+        UserSettingsDBService,
+        UserSettingsService,
+        DateSettingsService
+    ]
 })
 export class MainModule {
+    constructor(private dateSettingsService: DateSettingsService) {
 
-  constructor(private dateSettingsService: DateSettingsService) {
-
-  }
+    }
 }
