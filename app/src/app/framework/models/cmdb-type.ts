@@ -32,6 +32,20 @@ export interface CmdbTypeSection {
 }
 
 
+export interface CmdbMultiDataSection {
+    type: string;
+    name: string;
+    label: string;
+    fields?: Array<any>;
+    multi_data_sections?: Array<any>;
+    reference?: {
+        type_id: number;
+        section_name: string;
+        selected_fields?: Array<string>;
+    };
+}
+
+
 export interface CmdbTypeExternalLink {
     name: string;
     href: string;

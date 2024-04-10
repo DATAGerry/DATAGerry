@@ -29,6 +29,7 @@ export class CmdbObject implements CmdbDao {
   public editor_id?: number;
   public active: boolean;
   public fields: any[];
+  public multi_data_sections: any[];
   public creation_time: any;
   public last_edit_time: any;
   public author_name?: string;
