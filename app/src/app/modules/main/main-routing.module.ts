@@ -18,9 +18,9 @@
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { AuthGuard } from '../modules/auth/guards/auth.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
 
-import { DashboardComponent } from '../modules/dashboard/dashboard.component';
+import { DashboardComponent } from '../dashboard/dashboard.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
@@ -40,7 +40,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../modules/error/error.module').then(m => m.ErrorModule)
+        loadChildren: () => import('../error/error.module').then(m => m.ErrorModule)
     },
     {
         path: 'search',
@@ -49,7 +49,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../modules/search/search.module').then(m => m.SearchModule)
+        loadChildren: () => import('../search/search.module').then(m => m.SearchModule)
     },
     {
         path: 'framework',
@@ -58,7 +58,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../framework/framework.module').then(m => m.FrameworkModule)
+        loadChildren: () => import('../../framework/framework.module').then(m => m.FrameworkModule)
     },
     {
         path: 'import',
@@ -67,7 +67,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../import/import.module').then(m => m.ImportModule)
+        loadChildren: () => import('../../import/import.module').then(m => m.ImportModule)
     },
     {
         path: 'export',
@@ -76,7 +76,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../export/export.module').then(m => m.ExportModule)
+        loadChildren: () => import('../../export/export.module').then(m => m.ExportModule)
     },
     {
         path: 'management',
@@ -85,7 +85,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../management/management.module').then(m => m.ManagementModule),
+        loadChildren: () => import('../../management/management.module').then(m => m.ManagementModule),
     },
     {
         path: 'docapi',
@@ -94,7 +94,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../docapi/docapi.module').then(m => m.DocapiModule)
+        loadChildren: () => import('../../docapi/docapi.module').then(m => m.DocapiModule)
     },
     {
         path: 'settings',
@@ -103,7 +103,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../settings/settings.module').then(m => m.SettingsModule)
+        loadChildren: () => import('../../settings/settings.module').then(m => m.SettingsModule)
     },
     {
         path: 'info',
@@ -112,7 +112,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../modules/info/info.module').then(m => m.InfoModule)
+        loadChildren: () => import('../info/info.module').then(m => m.InfoModule)
     },
     {
         path: 'filemanager',
@@ -121,7 +121,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../filemanager/filemanager.module').then(m => m.FilemanagerModule)
+        loadChildren: () => import('../../filemanager/filemanager.module').then(m => m.FilemanagerModule)
     },
     {
         path: 'exportd',
@@ -130,7 +130,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../exportd/exportd.module').then(m => m.ExportdModule)
+        loadChildren: () => import('../../exportd/exportd.module').then(m => m.ExportdModule)
     }
 ];
 

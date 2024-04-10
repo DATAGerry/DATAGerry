@@ -24,7 +24,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { LayoutModule } from './layout/layout.module';
 import { ToastModule } from './layout/toast/toast.module';
 import { AppRoutingModule } from './app-routing.module';
-import { MainModule } from './main/main.module';
+import { MainModule } from './modules/main/main.module';
 import { AuthModule } from './modules/auth/auth.module';
 
 import { PreviousRouteService } from './services/previous-route.service';
@@ -73,7 +73,8 @@ import { AppComponent } from './app.component';
         { provide: HTTP_INTERCEPTORS, useClass: HttpErrorInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: APICachingInterceptor, multi: true }
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [
+        AppComponent
+    ]
 })
-export class AppModule {
-}
+export class AppModule {}
