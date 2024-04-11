@@ -37,7 +37,7 @@ export interface CmdbMultiDataSection {
     name: string;
     label: string;
     fields?: Array<any>;
-    multi_data_sections?: Array<any>;
+    hidden_fields?: Array<any>;
     reference?: {
         type_id: number;
         section_name: string;
@@ -57,7 +57,7 @@ export interface CmdbTypeExternalLink {
 
 export interface CmdbTypeMeta {
     icon: string;
-    sections: Array<CmdbTypeSection>;
+    sections: Array<CmdbTypeSection | CmdbMultiDataSection>;
     externals: Array<CmdbTypeExternalLink>;
     summary: CmdbTypeSummary;
 }

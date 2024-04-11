@@ -238,6 +238,10 @@ class TypeModel(CmdbDAO):
                                 'type': 'string',
                                 'required': True
                             },
+                            "hidden_fields": {
+                                'type': 'list',
+                                'required': False
+                            },
                             "reference": {
                                 'type': 'dict',
                                 'empty': True,
