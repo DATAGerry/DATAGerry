@@ -192,7 +192,7 @@
                                 [data]="section"
                             >
                             </cmdb-config-edit>
-                            <ng-container *ngIf="section.type === 'section'">
+                            <ng-container *ngIf="section.type === 'section' || section.type === 'multi-data-section'"                            >
                                 <p>Fields:</p>
                                 <div [dndDropzone]="['inputs']" [dndDisableDropIf]="isGlobalSection(section)" (dndDrop)="onFieldDrop($event, section)">
                                     <div *ngIf="section.fields.length == 0" class="empty-section" data-content="Drop controls here">
