@@ -26,6 +26,7 @@ import { ChoiceFieldEditComponent } from './choice/choice-field-edit.component';
 import { CheckFieldEditComponent } from './choice/check-field-edit.component';
 import { DateFieldEditComponent } from './date-time/date-field-edit.component';
 import { SectionRefFieldEditComponent } from './section/section-ref-field-edit.component';
+import { SectionMultiFieldEditComponent } from './section/section-multi-field-edit.component';
 
 export const configComponents: { [type: string]: any } = {
   'text': TextFieldEditComponent,
@@ -42,4 +43,5 @@ export const configComponents: { [type: string]: any } = {
   'select': ChoiceFieldEditComponent,
   'date': DateFieldEditComponent,
   'ref-section': SectionRefFieldEditComponent,
+  'multi-data-section': SectionFieldEditComponent
 };

@@ -25,6 +25,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { TextFieldEditComponent } from './configs/text/text-field-edit.component';
 import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
+import { SectionMultiFieldEditComponent } from './configs/section/section-multi-field-edit.component';
 import { TextareaEditComponent } from './configs/text/textarea-edit.component';
 import { RefFieldEditComponent } from './configs/special/ref-field-edit.component';
 import { LocationFieldEditComponent } from './configs/special/location-field-edit.component';
@@ -60,6 +61,7 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
     BuilderComponent,
     TextFieldEditComponent,
     SectionFieldEditComponent,
+    SectionMultiFieldEditComponent,
     TextareaEditComponent,
     RefFieldEditComponent,
     LocationFieldEditComponent,
