@@ -11,33 +11,41 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { ReactiveFormsModule } from '@angular/forms';
+
+import { DndModule } from 'ngx-drag-drop';
 
 import { AuthSettingsRoutingModule } from './auth-settings-routing.module';
-import { AuthSettingsComponent } from './auth-settings.component';
-import { ReactiveFormsModule } from '@angular/forms';
 import { RenderModule } from '../../framework/render/render.module';
+
 import { ActiveProvidersPipe } from './active-providers.pipe';
+
+import { AuthSettingsComponent } from './auth-settings.component';
 import { LdapAuthenticationProviderFormComponent } from './providers/ldap-authentication-provider-form/ldap-authentication-provider-form.component';
 import { LocalAuthenticationProviderFormComponent } from './providers/local-authentication-provider-form/local-authentication-provider-form.component';
 import { LdapProviderFormGroupMappingComponent } from './providers/ldap-authentication-provider-form/ldap-provider-form-group-mapping/ldap-provider-form-group-mapping.component';
-import { DndModule } from 'ngx-drag-drop';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
-  declarations: [AuthSettingsComponent, ActiveProvidersPipe, LdapAuthenticationProviderFormComponent, LocalAuthenticationProviderFormComponent, LdapProviderFormGroupMappingComponent],
-  imports: [
-    CommonModule,
-    AuthSettingsRoutingModule,
-    ReactiveFormsModule,
-    RenderModule,
-    DndModule
-  ]
+    declarations: [
+        AuthSettingsComponent,
+        ActiveProvidersPipe,
+        LdapAuthenticationProviderFormComponent,
+        LocalAuthenticationProviderFormComponent,
+        LdapProviderFormGroupMappingComponent
+    ],
+    imports: [
+        CommonModule,
+        AuthSettingsRoutingModule,
+        ReactiveFormsModule,
+        RenderModule,
+        DndModule
+    ]
 })
-export class AuthSettingsModule {
-}
+export class AuthSettingsModule {}
