@@ -26,6 +26,7 @@ export class MultiSectionContent implements StructureContent {
     name: string;
     fields: Array<any> = [];
     type: string = 'multi-data-section';
+    hidden_fields: Array<any> = [];
 
     constructor() {
         this.type = 'multi-data-section';
