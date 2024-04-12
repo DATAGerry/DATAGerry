@@ -35,14 +35,15 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
 
   protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public regexControl: UntypedFormControl = new UntypedFormControl(undefined, ValidRegexValidator);
-  public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public regexControl: UntypedFormControl = new UntypedFormControl(undefined, ValidRegexValidator);
+    public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
   private initialValue: string;
   isValid$ = true;
@@ -55,6 +56,7 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
 
     public ngOnInit(): void {
         this.form.addControl('required', this.requiredControl);
+        this.form.addControl('hideField', this.hideFieldControl);
         this.form.addControl('name', this.nameControl);
         this.form.addControl('label', this.labelControl);
         this.form.addControl('description', this.descriptionControl);
