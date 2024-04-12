@@ -19,6 +19,24 @@
 import { CmdbDao } from './cmdb-dao';
 
 
+export interface MultiDataSectionFieldValue {
+  field_id: string;
+  value: any;
+}
+
+
+export interface MultiDataSectionSet {
+  multi_data_id: number;
+  data: MultiDataSectionFieldValue[];
+}
+
+
+export interface MultiDataSectionEntry {
+  section_id: string;
+  values: MultiDataSectionSet[];
+}
+
+
 export class CmdbObject implements CmdbDao {
 
   public public_id: number;
