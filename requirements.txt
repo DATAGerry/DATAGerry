@@ -18,7 +18,7 @@ Flask==3.0.2
 Flask-Cors==4.0.0
 gunicorn==21.2.0
 html5lib==1.1
-idna==3.6
+idna==3.7
 imagesize==1.4.1
 iniconfig==2.0.0
 isort==5.13.2
