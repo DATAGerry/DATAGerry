@@ -25,24 +25,27 @@ import { ValidationService } from '../../../services/validation.service';
 import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
-  selector: 'cmdb-check-field-edit',
-  templateUrl: './check-field-edit.component.html'
+    selector: 'cmdb-check-field-edit',
+    templateUrl: './check-field-edit.component.html'
 })
 export class CheckFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
-  // Component un-subscriber
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    // Component un-subscriber
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl('');
-  public valueControl: UntypedFormControl = new UntypedFormControl(false);
-  public helperTextControl: UntypedFormControl = new UntypedFormControl('');
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl('');
+    public valueControl: UntypedFormControl = new UntypedFormControl(false);
+    public helperTextControl: UntypedFormControl = new UntypedFormControl('');
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor(private validationService: ValidationService) {
         super();
@@ -50,7 +53,6 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
 
 
     public ngOnInit(): void {
-
         this.data.options = [{
             name: 'option-1',
             label: 'Option 1'
@@ -61,6 +63,7 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
         this.form.addControl('description', this.descriptionControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('helperText', this.helperTextControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
@@ -71,7 +74,6 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
-
         if (this.form.controls[control].hasValidator(Validators.required)) {
             let valid = this.form.controls[control].valid;
             this.isValid$ = this.isValid$ && valid;

@@ -41,11 +41,14 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
   public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
   public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
   public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+  public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
   private initialValue: string;
   isValid$ = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
     public constructor(private validationService: ValidationService) {
         super();
     }
@@ -60,6 +63,7 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
         this.form.addControl('placeholder', this.placeholderControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('helperText', this.helperTextControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);

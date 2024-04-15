@@ -22,7 +22,6 @@ import { NgxIndexedDBModule } from 'ngx-indexed-db';
 
 import { userSettingsDBConfig } from '../../management/user-settings/user-settings.module';
 import { MainRoutingModule } from './main-routing.module';
-import { DashboardModule } from '../dashboard/dashboard.module';
 
 import { UserSettingsDBService } from '../../management/user-settings/services/user-settings-db.service';
 import { UserSettingsService } from '../../management/user-settings/services/user-settings.service';
@@ -35,8 +34,7 @@ import { DateSettingsService } from '../../settings/services/date-settings.servi
     imports: [
         CommonModule,
         NgxIndexedDBModule.forRoot(userSettingsDBConfig),
-        MainRoutingModule,
-        DashboardModule
+        MainRoutingModule
     ],
     providers: [
         UserSettingsDBService,
@@ -44,8 +42,4 @@ import { DateSettingsService } from '../../settings/services/date-settings.servi
         DateSettingsService
     ]
 })
-export class MainModule {
-    constructor(private dateSettingsService: DateSettingsService) {
-
-    }
-}
+export class MainModule {}

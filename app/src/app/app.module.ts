@@ -19,13 +19,18 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+
+import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
 import { LayoutModule } from './layout/layout.module';
 import { ToastModule } from './layout/toast/toast.module';
 import { AppRoutingModule } from './app-routing.module';
 import { MainModule } from './modules/main/main.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { RenderModule } from './framework/render/render.module';
+import { UsersModule } from './management/users/users.module';
+import { ObjectModule } from './framework/object/object.module';
+import { TableModule } from './layout/table/table.module';
 
 import { PreviousRouteService } from './services/previous-route.service';
 import { RequestCacheService } from './services/request-cache.service';
@@ -40,20 +45,26 @@ import { APICachingInterceptor } from './services/api-cache.interceptor';
 import { DateFormatterPipe } from './layout/pipes/date-formatter.pipe';
 
 import { AppComponent } from './app.component';
-/* -------------------------------------------------------------------------- */
+import { DashboardComponent } from './components/dashboard/dashboard.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 
 @NgModule({
     declarations: [
         AppComponent,
+        DashboardComponent
     ],
     imports: [
         CommonModule,
         BrowserModule,
-        BrowserAnimationsModule,
         HttpClientModule,
         MainModule,
         AuthModule,
+        FontAwesomeModule,
+        RenderModule,
+        UsersModule,
+        ObjectModule,
+        TableModule,
         LayoutModule,
         ToastModule,
         AppRoutingModule

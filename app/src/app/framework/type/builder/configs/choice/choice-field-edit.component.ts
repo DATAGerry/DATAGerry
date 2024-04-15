@@ -26,26 +26,27 @@ import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-choice-field-edit',
-  templateUrl: './choice-field-edit.component.html'
+    selector: 'cmdb-choice-field-edit',
+    templateUrl: './choice-field-edit.component.html'
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl('');
-  public helperTextControl: UntypedFormControl = new UntypedFormControl('');
-  public optionsControl: UntypedFormControl = new UntypedFormControl([]);
-  public valueControl: UntypedFormControl = new UntypedFormControl();
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl('');
+    public helperTextControl: UntypedFormControl = new UntypedFormControl('');
+    public optionsControl: UntypedFormControl = new UntypedFormControl([]);
+    public valueControl: UntypedFormControl = new UntypedFormControl();
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
-  // Add able options for choice selection
-  public options: Array<any> = [];
+    // Add able options for choice selection
+    public options: Array<any> = [];
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
@@ -73,13 +74,13 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
         this.form.addControl('helperText', this.helperTextControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('options', this.optionsControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
     }
-
 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 

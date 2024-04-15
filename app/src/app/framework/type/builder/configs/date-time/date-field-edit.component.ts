@@ -15,18 +15,18 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2, ViewChild } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
 import { ReplaySubject } from 'rxjs';
 
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
-import { DateSettingsService } from '../../../../../settings/services/date-settings.service';
 import { ValidationService } from '../../../services/validation.service';
 
-import { ConfigEditBaseComponent } from '../config.edit';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
+
+import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -48,6 +48,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
     public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
     public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
     private initialValue: string;
     isValid$ = true;
@@ -57,26 +58,23 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     @ViewChild('dateInputHidden') dateInputHidden: ElementRef<HTMLInputElement>;
     isDatePickerVisible = true;
 
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-
-    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    constructor(private dateSettingsService: DateSettingsService, private validationService: ValidationService,
-        private renderer: Renderer2, private elementRef: ElementRef) {
+    constructor( private validationService: ValidationService ) {
         super();
     }
 
 
     public ngOnInit(): void {
-        // this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
-        //     this.datePlaceholder = dateSettings.date_format;
-        // });
-
         this.form.addControl('required', this.requiredControl);
         this.form.addControl('name', this.nameControl);
         this.form.addControl('label', this.labelControl);
         this.form.addControl('description', this.descriptionControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('helperText', this.helperTextControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
@@ -90,7 +88,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.subscriber.complete();
     }
 
-    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -115,10 +113,10 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.isValid$ = true;
     }
 
+
     /**
      * Toggles the input type between 'date' and 'text' on double click.
      */
-
     onDblClick(event: MouseEvent) {
         const inputElement = event.target as HTMLInputElement;
         if (inputElement.type === 'date') {
@@ -130,6 +128,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         }
     }
 
+
     /**
      * Changes the input type back to 'date' when the input element loses focus,
      * if the current type is 'text'.
@@ -140,6 +139,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
             inputElement.type = 'date';
         }
     }
+
 
     /**
      * Resets the date to null.

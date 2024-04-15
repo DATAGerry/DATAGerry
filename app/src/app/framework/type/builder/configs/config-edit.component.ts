@@ -37,34 +37,35 @@ import { ConfigEditBaseComponent } from './config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-config-edit',
-  templateUrl: './config-edit.component.html',
-  styleUrls: ['./config-edit.component.scss']
+    selector: 'cmdb-config-edit',
+    templateUrl: './config-edit.component.html',
+    styleUrls: ['./config-edit.component.scss']
 })
 export class ConfigEditComponent implements OnInit, OnDestroy {
 
-  public modes: typeof CmdbMode = CmdbMode;
+    public modes: typeof CmdbMode = CmdbMode;
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public form: UntypedFormGroup;
+    public form: UntypedFormGroup;
 
-  @Input() public mode: CmdbMode = CmdbMode.Create;
-  @Input() public data: any;
+    @Input() public mode: CmdbMode = CmdbMode.Create;
+    @Input() public data: any;
 
-  @Input() public fields: Array<any> = [];
-  @Input() public sections: Array<any> = [];
-  @Input() public types: Array<CmdbType> = [];
+    @Input() public fields: Array<any> = [];
+    @Input() public sections: Array<any> = [];
+    @Input() public types: Array<CmdbType> = [];
+    @Input() public fieldSectionType: string;
 
-  @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
+    @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
 
-  private component: any;
-  private componentRef: ComponentRef<any>;
+    private component: any;
+    private componentRef: ComponentRef<any>;
 
-  fieldChangesSubscription: Subscription;
+    fieldChangesSubscription: Subscription;
 
-  // Changed values emitter of components created
-  @Output() valuesChanged: EventEmitter<any> = new EventEmitter();
+    // Changed values emitter of components created
+    @Output() valuesChanged: EventEmitter<any> = new EventEmitter();
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
     constructor(private resolver: ComponentFactoryResolver) {
@@ -83,6 +84,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
         this.componentRef.instance.form = this.form;
         this.componentRef.instance.sections = this.sections;
         this.componentRef.instance.fields = this.fields;
+        this.componentRef.instance.fieldSectionType = this.fieldSectionType;
 
         this.fieldChangesSubscription = this.componentRef.instance.fieldChanges$.subscribe(
             (data : any) => this.fieldValueChanged(data)
@@ -105,6 +107,4 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
     public fieldValueChanged(data: any){
         this.valuesChanged.emit(data);
     }
-
-
 }
