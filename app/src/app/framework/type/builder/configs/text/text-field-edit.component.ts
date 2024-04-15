@@ -22,18 +22,19 @@ import { ReplaySubject } from 'rxjs';
 
 import { ValidationService } from '../../../services/validation.service';
 
-import { ConfigEditBaseComponent } from '../config.edit';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
+
+import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-text-field-edit',
-  templateUrl: './text-field-edit.component.html',
-  styleUrls: ['./text-field-edit.component.scss']
+    selector: 'cmdb-text-field-edit',
+    templateUrl: './text-field-edit.component.html',
+    styleUrls: ['./text-field-edit.component.scss']
 })
 export class TextFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
     public requiredControl: UntypedFormControl = new UntypedFormControl(false);
     public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
@@ -45,10 +46,13 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
     public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
     constructor(private validationService: ValidationService) {
         super();
     }

@@ -33,24 +33,25 @@ import { nameConvention } from '../../../../layout/directives/name.directive';
 })
 export abstract class ConfigEditBaseComponent {
 
-  protected abstract subscriber: ReplaySubject<void>;
+    protected abstract subscriber: ReplaySubject<void>;
 
-  // Cmdb modes for template usage
-  public MODES = CmdbMode;
+    // Cmdb modes for template usage
+    public MODES = CmdbMode;
 
-  public abstract nameControl: UntypedFormControl;
-  public abstract labelControl: UntypedFormControl;
+    public abstract nameControl: UntypedFormControl;
+    public abstract labelControl: UntypedFormControl;
 
-  @Input() public mode: CmdbMode = CmdbMode.Create;
-  @Input() public form: UntypedFormGroup;
-  @Input() public data: any;
-  @Input() public sections: Array<any>;
-  @Input() public fields: Array<any> = [];
-  @Input() public types: Array<CmdbType> = [];
-  @Input() public groups: Array<Group> = [];
-  @Input() public users: Array<User> = [];
+    @Input() public fieldSectionType: string;
+    @Input() public mode: CmdbMode = CmdbMode.Create;
+    @Input() public form: UntypedFormGroup;
+    @Input() public data: any;
+    @Input() public sections: Array<any>;
+    @Input() public fields: Array<any> = [];
+    @Input() public types: Array<CmdbType> = [];
+    @Input() public groups: Array<Group> = [];
+    @Input() public users: Array<User> = [];
 
-  public fieldChanges$ = new Subject();
+    public fieldChanges$ = new Subject();
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 

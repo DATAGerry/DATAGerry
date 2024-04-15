@@ -20,7 +20,7 @@ import { Routes, RouterModule } from '@angular/router';
 
 import { AuthGuard } from '../auth/guards/auth.guard';
 
-import { DashboardComponent } from '../dashboard/dashboard.component';
+import { DashboardComponent } from '../../components/dashboard/dashboard.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [

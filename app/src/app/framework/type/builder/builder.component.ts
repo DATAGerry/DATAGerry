@@ -71,11 +71,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public newSections: Array<CmdbTypeSection> = [];
     public newFields: Array<CmdbTypeSection> = [];
 
-    @Input()
-    public sectionTemplates: Array<CmdbSectionTemplate> = [];
-
-    @Input()
-    public globalSectionTemplates: Array<CmdbSectionTemplate> = [];
+    @Input() public sectionTemplates: Array<CmdbSectionTemplate> = [];
+    @Input() public globalSectionTemplates: Array<CmdbSectionTemplate> = [];
 
     public selectedGlobalSectionTemplates: Array<CmdbSectionTemplate> = [];
     public globalSectionTemplateFields: Array<string> = [];
@@ -132,7 +129,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         new Controller('location', new LocationControl())
     ];
 
-    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private modalService: NgbModal, private validationService: ValidationService) {
         this.typeInstance = new CmdbType();
@@ -151,7 +150,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.subscriber.next();
         this.subscriber.complete();
     }
-
 
 /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
 
@@ -311,7 +309,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
-
+        console.log("onFieldDrop section", section);
         if (this.isGlobalSection(section)) {
             return;
         }
@@ -410,7 +408,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
     }
 
-    /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
+/* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any) {
         return this.isGlobalField(field.name) ? "none" : "move";
@@ -623,8 +621,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         return true;
     }
 
-
-    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     public isNewSection(section: CmdbTypeSection): boolean {
         return this.newSections.indexOf(section) > -1;
