@@ -68,6 +68,10 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
+
+        if(this.hiddenStatus) {
+            this.hideFieldControl.setValue(true);
+        }
     }
 
 

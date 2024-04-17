@@ -81,6 +81,10 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+
+        if(this.hiddenStatus) {
+            this.hideFieldControl.setValue(true);
+        }
     }
 
 

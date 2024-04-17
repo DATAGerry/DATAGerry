@@ -56,6 +56,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
     @Input() public sections: Array<any> = [];
     @Input() public types: Array<CmdbType> = [];
     @Input() public fieldSectionType: string;
+    @Input() public hiddenStatus: boolean;
 
     @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
 
@@ -85,6 +86,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
         this.componentRef.instance.sections = this.sections;
         this.componentRef.instance.fields = this.fields;
         this.componentRef.instance.fieldSectionType = this.fieldSectionType;
+        this.componentRef.instance.hiddenStatus = this.hiddenStatus;
 
         this.fieldChangesSubscription = this.componentRef.instance.fieldChanges$.subscribe(
             (data : any) => this.fieldValueChanged(data)
