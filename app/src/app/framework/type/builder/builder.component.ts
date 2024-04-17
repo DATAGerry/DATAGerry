@@ -291,8 +291,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.render_meta.sections[sectionIndex] = section;
     }
 
+
     /**
      * Updates the hidden_fields array of a section if the identifier was changed during the CREATE mode
+     * 
      * @param previousName the identifier before the new value
      * @param newName the new value of the identifier
      */
@@ -307,6 +309,18 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         }
     }
 
+
+    public getFieldHiddenState(section: CmdbTypeSection | CmdbMultiDataSection, field: any): boolean{
+        if (section.type == "multi-data-section"){
+            if((section as CmdbMultiDataSection).hidden_fields?.includes(field.name)){
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        return false;
+    }
 
     private getSectionOfField(fieldName: string) {
         let index = 0;

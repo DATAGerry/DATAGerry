@@ -273,6 +273,7 @@
                                                         [sections]="sections"
                                                         [data]="field"
                                                         [fieldSectionType]="section.type"
+                                                        [hiddenStatus]="getFieldHiddenState(section, field)"
                                                         (valuesChanged)="onFieldChange($event)"
                                                     />
                                                 </div>

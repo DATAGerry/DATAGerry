@@ -42,6 +42,7 @@ export abstract class ConfigEditBaseComponent {
     public abstract labelControl: UntypedFormControl;
 
     @Input() public fieldSectionType: string;
+    @Input() public hiddenStatus: boolean;
     @Input() public mode: CmdbMode = CmdbMode.Create;
     @Input() public form: UntypedFormGroup;
     @Input() public data: any;
