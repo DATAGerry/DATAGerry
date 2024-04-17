@@ -16,7 +16,7 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Component, HostListener, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Location } from '@angular/common';
@@ -33,6 +33,8 @@ import { CmdbObject } from '../../models/cmdb-object';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
+import { relativeTimeRounding } from 'moment-timezone';
+import { Column } from 'src/app/layout/table/table.types';
 /* -------------------------------------------------------------------------- */
 
 
@@ -56,6 +58,13 @@ export class ObjectEditComponent implements OnInit {
   public selectedLocation: number = -1;
   public locationTreeName: string;
   public locationForObjectExists: boolean = false;
+
+  // Table Template: Type actions column
+  @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+
+  public fields: Array<any> = [];
+  // Table columns definition
+  columns: Array<Column> = [];
 
   /* -------------------------------------------------------------------------- */
   /*                                 LIFE CYCLE                                 */
@@ -82,7 +91,9 @@ export class ObjectEditComponent implements OnInit {
 
   public ngOnInit(): void {
     this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-      this.renderResult = rr;
+      this.renderResult = {
+        ...rr, sections: rr.sections.filter(sec => sec.type !== 'multi-data-section')
+      }
       this.activeState = this.renderResult.object_information.active;
     },
       error => {
@@ -95,8 +106,52 @@ export class ObjectEditComponent implements OnInit {
 
         this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
           this.typeInstance = value;
+          this.fields = value.fields
+          this.isMultiDataSection(value.render_meta?.sections, value.fields)
         });
       });
+  }
+
+
+  /**
+   * Determines if a section is a multi-data section and generates corresponding columns for display.
+   * 
+   * @param sectionFields Array of fields describing the section
+   * @param fields Array of all available fields
+   */
+  isMultiDataSection(sectionFields, fields) {
+
+    let actionsColumn: Column = {
+      display: 'Actions',
+      name: 'actions',
+      data: 'actions',
+      searchable: false,
+      sortable: false,
+      fixed: true,
+      template: this.actionsTemplate,
+      cssClasses: ['text-center'],
+      cellClasses: ['actions-buttons']
+    };
+
+    this.columns = sectionFields
+      .filter(field => field.type === 'multi-data-section')
+      .map(field => {
+        const filteredFields = fields.filter(fld => field.fields.includes(fld.name));
+
+        // Map the filtered fields to columns
+        const columns = filteredFields.map(fld => ({
+          display: fld.label,
+          name: fld.name,
+          type: fld.type,
+
+        }));
+
+        return columns;
+      })
+      .flat();
+
+    this.columns.push(actionsColumn);
+
   }
 
 

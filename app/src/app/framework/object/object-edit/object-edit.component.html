@@ -30,6 +30,8 @@
       </div>
       <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode" 
       [renderForm]="renderForm"> </cmdb-render>
+      <hr />
+      <cmdb-table  [columns]="columns" ></cmdb-table>
       <hr/>
       <form [formGroup]="commitForm" class="renderForm needs-validation" novalidate autocomplete="off">
         <fieldset class="log-comment">
