@@ -190,11 +190,12 @@
                                 [sections]="sections"
                                 [fields]="typeInstance.fields"
                                 [data]="section"
+                                (valuesChanged)="onFieldChange($event)"
                             />
-                            <ng-container *ngIf="section.type === 'section' || section.type === 'multi-data-section'"                            >
+                            <ng-container *ngIf="section.type === 'section' || section.type === 'multi-data-section'">
                                 <p>Fields:</p>
                                 <div
-                                    [dndDropzone]="['inputs']"
+                                    [dndDropzone]="getInputType(section.type)"
                                     [dndDisableDropIf]="isGlobalSection(section)"
                                     (dndDrop)="onFieldDrop($event, section)"
                                 >
@@ -208,7 +209,7 @@
                                     </div>
                                     <ng-container *ngFor="let field of section.fields; let y = index">
                                         <div 
-                                            [dndEffectAllowed]="getDnDEffectAllowedForField(field)"
+                                            [dndEffectAllowed]="getDnDEffectAllowedForField(field, section)"
                                             dndType="inputs"
                                             [dndDraggable]="field"
                                             (dndMoved)="onFieldDragged(field, section)"

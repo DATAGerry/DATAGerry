@@ -32,6 +32,7 @@ import { ConfigEditBaseComponent } from '../config.edit';
 @Component({
     selector: 'cmdb-date-field-edit',
     templateUrl: './date-field-edit.component.html',
+    styleUrls: ['./date-field-edit.component.scss'],
     providers: [
         { provide: NgbDateAdapter, useClass: NgbStringAdapter },
         { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
@@ -101,9 +102,15 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName": type,
-            "fieldName": this.nameControl.value
+            "inputName":type,
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "date"
         });
+
+        if(type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item)

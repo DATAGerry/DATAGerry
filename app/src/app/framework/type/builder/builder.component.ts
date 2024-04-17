@@ -47,7 +47,7 @@ import { CheckboxControl } from './controls/choice/checkbox.control';
 import { CmdbMode } from '../../modes.enum';
 import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
-import { CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
+import { CmdbMultiDataSection, CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { CmdbSectionTemplate } from '../../models/cmdb-section-template';
@@ -270,16 +270,93 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
+     * Sets and unsets a hidden field in the -ulti-data-ssection property 'hidden_fields'
+     * 
+     * @param data the new values which need to be processed
+     */
+    private handleHideFields(data: any){
+        let sectionIndex: number = this.getSectionOfField(data.fieldName);
+        let section: CmdbMultiDataSection = this.typeInstance.render_meta.sections[sectionIndex];
+        
+        if (!("hidden_fields" in section)) {
+            section.hidden_fields = [];
+        } 
+
+        if (data.newValue == true){
+            section.hidden_fields.push(data.fieldName);
+        } else {
+            section.hidden_fields = section.hidden_fields.filter(hiddenField => hiddenField != data.fieldName);
+        }
+
+        this.typeInstance.render_meta.sections[sectionIndex] = section;
+    }
+
+    /**
+     * Updates the hidden_fields array of a section if the identifier was changed during the CREATE mode
+     * @param previousName the identifier before the new value
+     * @param newName the new value of the identifier
+     */
+    private updateHiddenFields(previousName: string, newName: string) {
+        let sectionIndex: number = this.getSectionOfField(previousName);
+        let section: CmdbMultiDataSection = this.typeInstance.render_meta.sections[sectionIndex];
+
+        if(section.hidden_fields?.includes(previousName)) {
+            section.hidden_fields = section.hidden_fields.filter(hiddenField => hiddenField != previousName);
+            section.hidden_fields.push(newName);
+            this.typeInstance.render_meta.sections[sectionIndex] = section;
+        }
+    }
+
+
+    private getSectionOfField(fieldName: string) {
+        let index = 0;
+
+        for (let aSection of this.typeInstance.render_meta.sections) {
+            for (let aField of aSection.fields) {
+                if (aField.name == fieldName){
+                    return index;
+                }
+            }
+
+            index ++;
+        }
+
+        //no section found for field
+        return -1;
+    }
+
+    /**
      * Handles changes to field properties and updates them
      * @param data new data for field
      */
     private handleFieldChanges(data: any) {
+        if (data.inputName == "hideField"){
+            this.handleHideFields(data);
+            return;
+        }
+
         const newValue: any = data.newValue;
         const inputName: string = data.inputName;
-        const fieldName: string = data.fieldName;
+        let fieldName: string = data.fieldName;
 
-        if (inputName != 'name') {
-            const index: number = this.getFieldIndexForName(fieldName);
+        if (data.inputName == "name") {
+            fieldName = data.previousName;
+        }
+
+        let index = -1;
+
+        if (data.elementType == "section" || data.elementType == "multi-data-section") {
+            index = this.getSectionIndexForName(fieldName);
+            if (index >= 0) {
+                this.typeInstance.render_meta.sections[index][inputName] = newValue;
+            }
+        } else {
+            if (data.inputName == "name") {
+                this.updateHiddenFields(data.previousName, data.newValue);
+            }
+
+            index = this.getFieldIndexForName(fieldName);
+
             if (index >= 0) {
                 this.typeInstance.fields[index][inputName] = newValue;
             }
@@ -308,8 +385,28 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Retrieves the index of a section in the typeinstance
+     * 
+     * @param targetName name of the field which is searched
+     * @returns (int): Index of the field. -1 of no field with this name is found
+     */
+    private getSectionIndexForName(targetName: string): number {
+        let index = 0;
+
+        for (let aSection of this.typeInstance.render_meta.sections) {
+            if (aSection.name == targetName) {
+                return index;
+            } else {
+                index += 1;
+            }
+        }
+
+        return -1;
+    }
+
+
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
-        console.log("onFieldDrop section", section);
         if (this.isGlobalSection(section)) {
             return;
         }
@@ -429,6 +526,22 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * This prevents the special control "Location" to be placed inside an multi-data-section
+     * 
+     * @param sectionType 
+     * @returns allowed types for a section
+     */
+    public getInputType(sectionType: string){
+        if (sectionType == "multi-data-section") {
+            return ['inputs'];
+        }
+
+        return ['inputs', 'location'];
+
+    }
+
+
     public getSectionCollapseIcon(section: CmdbTypeSection) {
         return this.isGlobalSection(section) ? ['far', 'eye'] : ['far', 'edit'];
     }
@@ -478,7 +591,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
-     * Checks if the gieldName is in the List of global field names
+     * Checks if the fieldName is in the List of global field names
      * 
      * @param fieldName Name of the field which should be checked
      * @returns True if it is in the List

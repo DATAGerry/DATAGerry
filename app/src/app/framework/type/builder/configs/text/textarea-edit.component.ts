@@ -90,8 +90,14 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
         this.fieldChanges$.next({
             "newValue": event,
             "inputName":type,
-            "fieldName": this.nameControl.value
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "textarea"
         });
+
+        if(type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item);
