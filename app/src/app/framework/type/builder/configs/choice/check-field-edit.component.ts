@@ -26,7 +26,8 @@ import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
     selector: 'cmdb-check-field-edit',
-    templateUrl: './check-field-edit.component.html'
+    templateUrl: './check-field-edit.component.html',
+    styleUrls: ['./check-field-edit.component.scss']
 })
 export class CheckFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
@@ -85,8 +86,14 @@ export class CheckFieldEditComponent extends ConfigEditBaseComponent implements 
         this.fieldChanges$.next({
             "newValue": event,
             "inputName":type,
-            "fieldName": this.nameControl.value
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "checkbox"
         });
+
+        if(type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item);

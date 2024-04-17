@@ -76,16 +76,20 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     isLabelValid = true;
     isValid$: Observable<boolean>;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private router: Router,
-                       private typeService: TypeService,
-                       private toast: ToastService,
-                       private userService: UserService,
-                       private groupService: GroupService,
-                       private sidebarService: SidebarService,
-                       private validationService: ValidationService,
-                       private changeDetector: ChangeDetectorRef) {
+    public constructor(
+        private router: Router,
+        private typeService: TypeService,
+        private toast: ToastService,
+        private userService: UserService,
+        private groupService: GroupService,
+        private sidebarService: SidebarService,
+        private validationService: ValidationService,
+        private changeDetector: ChangeDetectorRef
+    ) {
 
     }
 
@@ -210,7 +214,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             });
         } else if (this.mode === CmdbMode.Edit) {
             saveTypeInstance.editor_id = this.userService.getCurrentUser().public_id;
-
             this.typeService.putType(saveTypeInstance).subscribe({
                 next:(updateResp: CmdbType) => {
                     this.toast.success(`Type was successfully edited: TypeID: ${updateResp.public_id}`);

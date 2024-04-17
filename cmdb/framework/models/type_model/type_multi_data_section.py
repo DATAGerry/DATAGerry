@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This class represents a type field section
+This class represents a TypeMultiDataSection
 Extends: TypeSection
 """
 import logging
@@ -25,11 +25,11 @@ from cmdb.framework.models.type_model import TypeSection
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                   MultiDataSection                                                   #
+#                                               TypeMultiDataSection                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-class MultiDataSection(TypeSection):
+class TypeMultiDataSection(TypeSection):
     """
-    This class represents a MultiDataSection
+    This class represents a TypeMultiDataSection
     Extends: TypeSection
     """
 
@@ -46,15 +46,15 @@ class MultiDataSection(TypeSection):
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
     @classmethod
-    def from_data(cls, data: dict) -> "MultiDataSection":
+    def from_data(cls, data: dict) -> "TypeMultiDataSection":
         """
-        Generates a MultiDataSection object from a dict
+        Generates a TypeMultiDataSection object from a dict
 
         Args:
-            data (dict): Data with which the MultiDataSection should be instantiated
+            data (dict): Data with which the TypeMultiDataSection should be instantiated
 
         Returns:
-            MultiDataSection: MultiDataSection class with given data
+            TypeMultiDataSection: TypeMultiDataSection class with given data
         """
         return cls(
             type = data.get('type'),
@@ -66,15 +66,15 @@ class MultiDataSection(TypeSection):
 
 
     @classmethod
-    def to_json(cls, instance: "MultiDataSection") -> dict:
+    def to_json(cls, instance: "TypeMultiDataSection") -> dict:
         """
-        Returns a MultiDataSection as JSON representation
+        Returns a TypeMultiDataSection as JSON representation
 
         Args:
-            instance (MultiDataSection): MultiDataSection which should be transformed
+            instance (TypeMultiDataSection): TypeMultiDataSection which should be transformed
 
         Returns:
-            dict: JSON representation of the given MultiDataSection
+            dict: JSON representation of the given TypeMultiDataSection
         """
         return {
             'type': instance.type,

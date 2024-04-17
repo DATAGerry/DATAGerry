@@ -36,62 +36,66 @@ import { nameConvention } from '../../../../../layout/directives/name.directive'
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-ref-field-edit',
-  templateUrl: './ref-field-edit.component.html',
-  styleUrls: ['./ref-field-edit.component.scss'],
+    selector: 'cmdb-ref-field-edit',
+    templateUrl: './ref-field-edit.component.html',
+    styleUrls: ['./ref-field-edit.component.scss'],
 })
 export class RefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
-  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+    public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
 
-  // Type list for reference selection
-  public typesAPIResponse: APIGetMultiResponse<CmdbType>;
-  public typeList: Array<CmdbType> = [];
-  public filteredTypeList: CmdbType[] = [];
-  public totalTypes: number = 0;
+    // Type list for reference selection
+    public typesAPIResponse: APIGetMultiResponse<CmdbType>;
+    public typeList: Array<CmdbType> = [];
+    public filteredTypeList: CmdbType[] = [];
+    public totalTypes: number = 0;
 
-  //type loading indicator
-  public typeLoading: boolean = false;
+    //type loading indicator
+    public typeLoading: boolean = false;
 
-  public readonly initPage: number = 1;
-  public page: number = this.initPage;
+    public readonly initPage: number = 1;
+    public page: number = this.initPage;
 
-  // Filter query from the table search input.
-  public filter: string;
+    // Filter query from the table search input.
+    public filter: string;
 
-  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
-  // Nested summaries
-  public summaries: any[] = [];
+    // Nested summaries
+    public summaries: any[] = [];
 
-  // Object list for default reference value
-  public objectList: RenderResult[];
+    // Object list for default reference value
+    public objectList: RenderResult[];
 
-  public typesParams: CollectionParameters = {
-    filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
-  };
+    public typesParams: CollectionParameters = {
+        filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
 
-  // Reference form control
-  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
-    type_id: this.typeControl,
-  });
+    // Reference form control
+    public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
+        type_id: this.typeControl,
+    });
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private typeService: TypeService,
+    constructor(
+        private typeService: TypeService,
         private objectService: ObjectService,
         private toast: ToastService,
         private cd: ChangeDetectorRef,
-        private validationService: ValidationService) {
+        private validationService: ValidationService
+    ) {
         super();
     }
 
@@ -135,8 +139,14 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         this.fieldChanges$.next({
             "newValue": event,
             "inputName":type,
-            "fieldName": this.nameControl.value
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "ref"
         });
+
+        if(type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
     }
 
 
@@ -192,19 +202,21 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
         this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
         .pipe(tap(() => this.typeLoading = false))
-        .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-            this.typeList = [...apiResponse.results as Array<CmdbType>];
-            this.totalTypes = apiResponse.total;
-            this.prepareSummaries();
-            this.cd.markForCheck();
-        },
-        (err) => this.toast.error(err),
-        () => {
-            if (this.data.ref_types) {
-                this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
-                    this.objectList = res;
-                    this.cd.markForCheck();
-                });
+        .subscribe({
+            next: (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.typeList = [...apiResponse.results as Array<CmdbType>];
+                this.totalTypes = apiResponse.total;
+                this.prepareSummaries();
+                this.cd.markForCheck();
+            },
+            error: (err) => this.toast.error(err),
+            complete: () => {
+                if (this.data.ref_types) {
+                    this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+                        this.objectList = res;
+                        this.cd.markForCheck();
+                    });
+                }
             }
         });
     }

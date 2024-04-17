@@ -27,7 +27,8 @@ import { ConfigEditBaseComponent } from '../config.edit';
 
 @Component({
     selector: 'cmdb-choice-field-edit',
-    templateUrl: './choice-field-edit.component.html'
+    templateUrl: './choice-field-edit.component.html',
+    styleUrls: ['./choice-field-edit.component.scss']
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
@@ -124,8 +125,14 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
         this.fieldChanges$.next({
             "newValue": event,
             "inputName":type,
-            "fieldName": this.nameControl.value
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "choise"
         });
+
+        if(type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item);

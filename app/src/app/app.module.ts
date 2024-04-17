@@ -19,6 +19,7 @@ import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
 
@@ -48,7 +49,6 @@ import { AppComponent } from './app.component';
 import { DashboardComponent } from './components/dashboard/dashboard.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-
 @NgModule({
     declarations: [
         AppComponent,
@@ -57,6 +57,7 @@ import { DashboardComponent } from './components/dashboard/dashboard.component';
     imports: [
         CommonModule,
         BrowserModule,
+        BrowserAnimationsModule,
         HttpClientModule,
         MainModule,
         AuthModule,

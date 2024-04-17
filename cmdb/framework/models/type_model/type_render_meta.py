@@ -24,6 +24,7 @@ from cmdb.framework.models.type_model import TypeSection, \
                                              TypeSummary, \
                                              TypeFieldSection, \
                                              TypeReferenceSection
+from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -60,6 +61,8 @@ class TypeRenderMeta:
             section_type = section.get('type', 'section')
             if section_type == 'section':
                 sections.append(TypeFieldSection.from_data(section))
+            elif section_type == 'multi-data-section':
+                sections.append(TypeMultiDataSection.from_data(section))
             elif section_type == 'ref-section':
                 sections.append(TypeReferenceSection.from_data(section))
             else:

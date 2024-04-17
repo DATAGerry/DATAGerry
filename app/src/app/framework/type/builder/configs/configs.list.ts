@@ -39,5 +39,5 @@ export const configComponents: { [type: string]: any } = {
     'select': ChoiceFieldEditComponent,
     'date': DateFieldEditComponent,
     'ref-section': SectionRefFieldEditComponent,
-    'multi-data-section': SectionFieldEditComponent
+    'multi-data-section': SectionMultiFieldEditComponent
 };
