@@ -94,7 +94,7 @@ const routes: Routes = [
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../../docapi/docapi.module').then(m => m.DocapiModule)
+        loadChildren: () => import('../docapi/docapi.module').then(m => m.DocapiModule)
     },
     {
         path: 'settings',
