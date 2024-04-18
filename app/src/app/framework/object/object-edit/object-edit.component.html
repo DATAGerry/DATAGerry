@@ -31,7 +31,18 @@
       <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode" 
       [renderForm]="renderForm"> </cmdb-render>
       <hr />
+<<<<<<< Updated upstream
       <cmdb-table  [columns]="columns" ></cmdb-table>
+=======
+      <form  >
+        <fieldset>
+          <legend *ngIf="columns && columns.length > 0">{{columns[0]?.name}}</legend>
+          <div class="table-column">
+            <cmdb-table  [columns]="columns" ></cmdb-table>
+          </div>
+        </fieldset>
+      </form>
+>>>>>>> Stashed changes
       <hr/>
       <form [formGroup]="commitForm" class="renderForm needs-validation" novalidate autocomplete="off">
         <fieldset class="log-comment">
