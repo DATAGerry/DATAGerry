@@ -31,9 +31,10 @@
       <cmdb-render [renderResult]="renderResult" [typeInstance]="typeInstance" [mode]="mode" 
       [renderForm]="renderForm"> </cmdb-render>
       <hr />
+      <cmdb-table  [columns]="columns" ></cmdb-table>
       <form  >
         <fieldset>
-          <legend>{{columns[0].name}}</legend>
+          <legend *ngIf="columns && columns.length > 0">{{columns[0]?.name}}</legend>
           <div class="table-column">
             <cmdb-table  [columns]="columns" ></cmdb-table>
           </div>
