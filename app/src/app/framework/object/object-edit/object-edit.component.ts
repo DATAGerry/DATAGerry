@@ -141,7 +141,7 @@ export class ObjectEditComponent implements OnInit {
         // Map the filtered fields to columns
         const columns = filteredFields.map(fld => ({
           display: fld.label,
-          name: fld.name,
+          name: field.label,
           type: fld.type,
 
         }));
