@@ -5,17 +5,8 @@
 }
 
 .active-control {
-
-  &:checked~.custom-control-label::before {
-    background-color: green;
-    border-color: green;
-  }
-
-}
-
-
-.table-column {
-  border-style: inset;
-  border-width: 0.5px;
-  padding: 15px;
+    &:checked~.custom-control-label::before {
+        background-color: green;
+        border-color: green;
+    }
 }

@@ -1,0 +1,64 @@
+<form [formGroup]="configForm">
+    <div class="form-group row">
+        <label class="col-3 col-form-label">
+            Delimiter:
+        </label>
+        <div class="col-9">
+            <input name="delimiter" type="text" class="form-control" formControlName="delimiter">
+            <span class="form-text text-muted">
+                The delimiting character
+            </span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-3 col-form-label">
+            Newline:
+        </label>
+        <div class="col-9">
+            <input name="newline" type="text" class="form-control" formControlName="newline">
+            <span class="form-text text-muted">
+                Default: empty - The newline sequence Must be one of \r, \n, or \r\n
+            </span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-3 col-form-label">
+            Quote Char:
+        </label>
+        <div class="col-9">
+            <input name="quoteChar" type="text" class="form-control" formControlName="quoteChar">
+            <span class="form-text text-muted">
+                The character used to quote fields
+            </span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-3 col-form-label">
+            Escape Char:
+        </label>
+        <div class="col-9">
+            <input name="escapeChar" type="text" class="form-control" formControlName="escapeChar">
+            <span class="form-text text-muted">
+                The character used to escape the quote character within a field
+            </span>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-3 col-form-label">
+            Header:
+        </label>
+        <div class="col-9">
+            <div class="custom-control custom-switch">
+                <input id="header" name="header" type="checkbox" class="custom-control-input" formControlName="header">
+                <label class="custom-control-label" for="header"></label>
+            </div>
+            <span class="form-text text-muted">
+                If true, the first row of parsed data will be interpreted as field names
+            </span>
+        </div>
+    </div>
+</form>
