@@ -27,7 +27,7 @@
         <button class="btn btn-primary prev" type="button" awPreviousStep>
             Previous
         </button>
-        <button class="btn btn-primary next" type="button" awNextStep [disabled]="typeStepFormValid">
+        <button class="btn btn-primary next" type="button" awNextStep [disabled]="!typeStep.typeValid || !typeStep.typeChildValid">
             Next
         </button>
     </aw-wizard-step>
