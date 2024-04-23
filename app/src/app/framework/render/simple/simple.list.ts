@@ -11,11 +11,10 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { TextSimpleComponent } from './text/text-simple.component';
 import { PasswordSimpleComponent } from './text/password-simple.component';
 import { CheckboxSimpleComponent } from './choice/checkbox-simple.component';
@@ -25,21 +24,17 @@ import { RefSimpleComponent } from './special/ref-simple.component';
 import { LocationSimpleComponent } from './special/location-simple.component';
 import { DateSimpleComponent } from './date/date-simple.component';
 import { RefSectionSimpleComponent } from './special/ref-section-simple.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 export const simpleComponents: { [type: string]: any } = {
-  'text': TextSimpleComponent,
-  'password': PasswordSimpleComponent,
-  'email': TextSimpleComponent,
-  'tel': TextSimpleComponent,
-  'textarea': TextSimpleComponent,
-  'number': TextSimpleComponent,
-  'href': TextSimpleComponent,
-  'checkbox': CheckboxSimpleComponent,
-  'radio': RadioSimpleComponent,
-  'select': SelectSimpleComponent,
-  'ref': RefSimpleComponent,
-  'location': LocationSimpleComponent,
-  'date': DateSimpleComponent,
-  'debug': TextSimpleComponent,
-  'ref-section-field': RefSectionSimpleComponent
+    'text': TextSimpleComponent,
+    'password': PasswordSimpleComponent,
+    'textarea': TextSimpleComponent,
+    'checkbox': CheckboxSimpleComponent,
+    'radio': RadioSimpleComponent,
+    'select': SelectSimpleComponent,
+    'ref': RefSimpleComponent,
+    'location': LocationSimpleComponent,
+    'date': DateSimpleComponent,
+    'ref-section-field': RefSectionSimpleComponent
 };

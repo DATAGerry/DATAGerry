@@ -15,21 +15,21 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input, } from '@angular/core';
 
 import { BaseSectionComponent } from '../base-section/base-section.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-field-section',
-  templateUrl: './field-section.component.html',
-  styleUrls: ['./field-section.component.scss']
+    selector: 'cmdb-field-section',
+    templateUrl: './field-section.component.html',
+    styleUrls: ['./field-section.component.scss']
 })
 export class FieldSectionComponent extends BaseSectionComponent {
+    @Input() objectID: number;
 
-  @Input() objectID: number;
 
-  constructor() {
-    super();
-  }
+    constructor() {
+        super();
+    }
 }

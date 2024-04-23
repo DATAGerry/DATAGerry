@@ -11,14 +11,15 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
+
 import { CmdbTypeSection } from '../../../models/cmdb-type';
 import { BaseSectionComponent } from '../base-section/base-section.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
     selector: 'cmdb-sections-factory',
@@ -26,8 +27,6 @@ import { BaseSectionComponent } from '../base-section/base-section.component';
     styleUrls: ['./sections-factory.component.scss']
 })
 export class SectionsFactoryComponent extends BaseSectionComponent {
-
     @Input() public sections: Array<CmdbTypeSection> = [];
     @Input() objectID: number;
-
 }

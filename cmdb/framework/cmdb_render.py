@@ -31,6 +31,7 @@ from cmdb.utils.error import CMDBError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
+from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 from cmdb.user_management.user_manager import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -247,7 +248,7 @@ class CmdbRender:
             return field_map
 
         for idx, section in enumerate(self.type_instance.render_meta.sections):
-            if isinstance(section, TypeFieldSection):
+            if isinstance(section, (TypeFieldSection, TypeMultiDataSection)):
                 for section_field in section.fields:
                     field = {}
                     try:
