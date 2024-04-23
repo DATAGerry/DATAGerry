@@ -51,11 +51,13 @@ import { ObjectBulkInputAppendsComponent } from './components/object-bulk-input-
 import { RenderFieldComponent } from './fields/components.fields';
 import { RefSectionComponent } from './fields/section/ref-section.component';
 import { FieldSectionComponent } from './sections/field-section/field-section.component';
+import { MultiDataSectionComponent } from './sections/multi-data-section/multi-data-section.component';
 import { BaseSectionComponent } from './sections/base-section/base-section.component';
 import { ReferenceSectionComponent } from './sections/reference-section/reference-section.component';
 import { SectionsFactoryComponent } from './sections/sections-factory/sections-factory.component';
 import { DateFormatterPipe } from '../../layout/pipes/date-formatter.pipe';
 import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.component';
+import { TableModule } from 'src/app/layout/table/table.module';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -67,6 +69,7 @@ import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.c
         ReactiveFormsModule,
         RouterModule,
         FontAwesomeModule,
+        TableModule
     ],
     declarations: [
         RenderComponent,
@@ -96,6 +99,7 @@ import { RefSectionSimpleComponent } from './simple/special/ref-section-simple.c
         RenderFieldComponent,
         RefSectionComponent,
         FieldSectionComponent,
+        MultiDataSectionComponent,
         BaseSectionComponent,
         ReferenceSectionComponent,
         SectionsFactoryComponent,

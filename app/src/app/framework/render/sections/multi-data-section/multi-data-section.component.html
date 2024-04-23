@@ -1,0 +1,47 @@
+<hr/>
+
+<fieldset>
+    <legend>{{section?.label}}</legend>
+
+    <button type="button" class="btn btn-success btn-sm mr-1 add-row-button" (click)="onAddRowClicked()">
+        <i class="fas fa-plus"></i> Add
+    </button>
+
+    <cmdb-table
+        [columns]="multiDataColumns"
+        [items]="multiDataValues"
+        [pageSizeEnabled]="false"
+        [totalItems]="totalCount"
+        [searchEnabled]="false"
+    />
+</fieldset>
+
+
+<ng-template #actionsTemplate>
+    <div class="actions-div">
+        <span>
+        <button
+            class="btn btn-sm btn-link"
+            title="Preview Row"
+        >
+            <i class="far fa-eye"></i>
+        </button>
+    </span>
+    <span>
+        <button
+        class="btn btn-sm btn-link"
+        title="Edit Row"
+        >
+            <i class="fas fa-edit"></i>
+        </button>
+    </span>
+    <span>
+        <button
+            class="btn btn-sm btn-link"
+            title="Delete Row"
+        >
+            <i class="fas fa-trash-alt"></i>
+        </button>
+    </span>
+    </div>
+</ng-template>

@@ -11,78 +11,71 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
-import { CmdbTypeSection } from '../../../models/cmdb-type';
-import { CmdbMode } from '../../../modes.enum';
 import { UntypedFormGroup } from '@angular/forms';
 
+import { CmdbTypeSection } from '../../../models/cmdb-type';
+import { CmdbMode } from '../../../modes.enum';
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 @Component({
-  selector: 'cmdb-base-section',
-  templateUrl: './base-section.component.html',
-  styleUrls: ['./base-section.component.scss']
+    selector: 'cmdb-base-section',
+    templateUrl: './base-section.component.html',
+    styleUrls: ['./base-section.component.scss']
 })
 export class BaseSectionComponent {
+    public MODES = CmdbMode;
 
-  /**
-   * Modes for html usage.
-   */
-  public MODES = CmdbMode;
+    // Form for every object create or edit
+    @Input() public form: UntypedFormGroup;
+    // Separated form for things like bulk change. Saves changes
+    @Input() public changeForm: UntypedFormGroup;
 
-  /**
-   * Form for every object create or edit.
-   */
-  @Input() public form: UntypedFormGroup;
+    @Input() public fields: Array<any> = [];
+    public values: Array<any> = [];
 
-  /**
-   * Separated form for things like bulk change. Saves changes.
-   */
-  @Input() public changeForm: UntypedFormGroup;
+    @Input() public mode: CmdbMode = CmdbMode.View;
+    @Input() public section: CmdbTypeSection;
 
-  @Input() public fields: Array<any> = [];
-
-  public values: Array<any> = [];
-
-  @Input('values')
-  public set Values(val: Array<any>) {
-    if (val) {
-      this.values = val;
-    }
-  }
-
-  @Input() public mode: CmdbMode = CmdbMode.View;
-  @Input() public section: CmdbTypeSection;
-
-  constructor() {
-  }
-
-  public getFieldByName(name: string) {
-    const field: any = this.fields.find(f => f.name === name);
-    switch (field.type) {
-      case 'ref': {
-        field.default = parseInt(field.default, 10);
-        break;
-      }
-      default: {
-        if (!field.default) {
-          field.default = field.value;
+/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
+    @Input('values')
+    public set Values(val: Array<any>) {
+        if (val) {
+            this.values = val;
         }
-        break;
-      }
     }
-    return field;
-  }
 
-  public getValueByName(name: string) {
-    const fieldFound = this.values.find(field => field.name === name);
-    if (fieldFound === undefined) {
-      return undefined;
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+
+    public getFieldByName(name: string) {
+        const field: any = this.fields.find(f => f.name === name);
+        switch (field.type) {
+            case 'ref': {
+                field.default = parseInt(field.default, 10);
+                break;
+            }
+            default: {
+                if (!field.default) {
+                    field.default = field.value;
+                }
+                break;
+            }
+        }
+        return field;
     }
-    return fieldFound.value;
-  }
 
+
+    public getValueByName(name: string) {
+        const fieldFound = this.values.find(field => field.name === name);
+    
+        if (fieldFound === undefined) {
+            return undefined;
+        }
+
+        return fieldFound.value;
+    }
 }
