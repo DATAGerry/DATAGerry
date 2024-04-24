@@ -1,5 +1,3 @@
-<hr/>
-
 <fieldset>
     <legend>{{section?.label}}</legend>
 
@@ -7,7 +5,8 @@
         <i class="fas fa-plus"></i> Add
     </button>
 
-    <cmdb-table
+    <cmdb-table 
+        *ngIf="!updateRequired"
         [columns]="multiDataColumns"
         [items]="multiDataValues"
         [pageSizeEnabled]="false"
@@ -16,32 +15,13 @@
     />
 </fieldset>
 
-
-<ng-template #actionsTemplate>
-    <div class="actions-div">
-        <span>
-        <button
-            class="btn btn-sm btn-link"
-            title="Preview Row"
-        >
-            <i class="far fa-eye"></i>
-        </button>
-    </span>
-    <span>
-        <button
-        class="btn btn-sm btn-link"
-        title="Edit Row"
-        >
-            <i class="fas fa-edit"></i>
-        </button>
-    </span>
-    <span>
-        <button
-            class="btn btn-sm btn-link"
-            title="Delete Row"
-        >
-            <i class="fas fa-trash-alt"></i>
-        </button>
-    </span>
-    </div>
+<ng-template #actionsTemplate let-item="item">
+    <cmdb-multi-data-actions
+        [data]="item"
+        (previewRowEmitter)="onRowPreview($event)"
+        (editRowEmitter)="onRowEdit($event)"
+        (deleteRowEmitter)="onRowDelete($event)"
+    />
 </ng-template>
+
+<hr/>

@@ -58,11 +58,15 @@ export class ObjectTableActionsComponent implements OnDestroy {
 
     private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private locationService: LocationService, 
-                private objectService: ObjectService, 
-                private modalService: NgbModal) {
+    constructor(
+        private locationService: LocationService, 
+        private objectService: ObjectService, 
+        private modalService: NgbModal
+    ) {
 
     }
 
@@ -82,7 +86,6 @@ export class ObjectTableActionsComponent implements OnDestroy {
      * Open the preview modal
      */
     public openPreviewModal(): void {
-        console.log("result", this.result);
         this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
         this.modalRef.componentInstance.renderResult = this.result;
     }
