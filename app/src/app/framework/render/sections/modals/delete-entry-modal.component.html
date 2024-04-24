@@ -1,0 +1,15 @@
+<div class="modal-header bg-primary text-white">
+    <h4 class="modal-title">Delete Data Set</h4>
+    <button type="button" class="close" (click)="activeModal.close(false)">
+        <span>&times;</span>
+    </button>
+</div>
+
+<div class="modal-body">
+    Are you sure you want to delete this data set?
+</div>
+
+<div class="modal-footer">
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close(false)">Close</button>
+    <button type="submit" class="btn btn-danger" (click)="activeModal.close(true)">Delete</button>
+</div>
