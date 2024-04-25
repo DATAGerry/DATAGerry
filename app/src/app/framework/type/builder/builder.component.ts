@@ -15,14 +15,16 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { ChangeDetectionStrategy,
-         Component,
-         EventEmitter,
-         Input,
-         OnChanges,
-         OnDestroy,
-         Output,
-         SimpleChanges } from '@angular/core';
+import {
+    ChangeDetectionStrategy,
+    Component,
+    EventEmitter,
+    Input,
+    OnChanges,
+    OnDestroy,
+    Output,
+    SimpleChanges
+} from '@angular/core';
 
 import { ReplaySubject } from 'rxjs';
 
@@ -139,7 +141,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     ngOnChanges(changes: SimpleChanges): void {
-        if(this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0){
+        if (this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0) {
             this.initGlobalFieldsList();
             this.setSelectedGlobalTemplates();
         }
@@ -183,13 +185,13 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         let sectionData = event.data;
 
         //check if it is a section template
-        if('is_global' in sectionData){
+        if ('is_global' in sectionData) {
 
-            if(sectionData.is_global){
+            if (sectionData.is_global) {
                 this.selectedGlobalSectionTemplates.push(sectionData);
 
                 let index = 0;
-                for(let sectionIndex in this.globalSectionTemplates){
+                for (let sectionIndex in this.globalSectionTemplates) {
                     const aTemplate = this.globalSectionTemplates[sectionIndex];
 
                     if (aTemplate.name == sectionData.name) {
@@ -233,6 +235,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 this.setSectionTemplateFields(event.data);
             }
         }
+
+        this.validationService.setSectionValid(sectionData.name, sectionData.fields.length > 0);
     }
 
 
@@ -274,15 +278,15 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * 
      * @param data the new values which need to be processed
      */
-    private handleHideFields(data: any){
+    private handleHideFields(data: any) {
         let sectionIndex: number = this.getSectionOfField(data.fieldName);
         let section: CmdbMultiDataSection = this.typeInstance.render_meta.sections[sectionIndex];
-        
+
         if (!("hidden_fields" in section)) {
             section.hidden_fields = [];
-        } 
+        }
 
-        if (data.newValue == true){
+        if (data.newValue == true) {
             section.hidden_fields.push(data.fieldName);
         } else {
             section.hidden_fields = section.hidden_fields.filter(hiddenField => hiddenField != data.fieldName);
@@ -302,7 +306,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         let sectionIndex: number = this.getSectionOfField(previousName);
         let section: CmdbMultiDataSection = this.typeInstance.render_meta.sections[sectionIndex];
 
-        if(section.hidden_fields?.includes(previousName)) {
+        if (section.hidden_fields?.includes(previousName)) {
             section.hidden_fields = section.hidden_fields.filter(hiddenField => hiddenField != previousName);
             section.hidden_fields.push(newName);
             this.typeInstance.render_meta.sections[sectionIndex] = section;
@@ -310,9 +314,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    public getFieldHiddenState(section: CmdbTypeSection | CmdbMultiDataSection, field: any): boolean{
-        if (section.type == "multi-data-section"){
-            if((section as CmdbMultiDataSection).hidden_fields?.includes(field.name)){
+    public getFieldHiddenState(section: CmdbTypeSection | CmdbMultiDataSection, field: any): boolean {
+        if (section.type == "multi-data-section") {
+            if ((section as CmdbMultiDataSection).hidden_fields?.includes(field.name)) {
                 return true;
             } else {
                 return false;
@@ -327,12 +331,12 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
         for (let aSection of this.typeInstance.render_meta.sections) {
             for (let aField of aSection.fields) {
-                if (aField.name == fieldName){
+                if (aField.name == fieldName) {
                     return index;
                 }
             }
 
-            index ++;
+            index++;
         }
 
         //no section found for field
@@ -344,7 +348,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param data new data for field
      */
     private handleFieldChanges(data: any) {
-        if (data.inputName == "hideField"){
+        if (data.inputName == "hideField") {
             this.handleHideFields(data);
             return;
         }
@@ -442,6 +446,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             this.typeInstance.render_meta.sections = [...this.sections];
             this.typeInstance.fields.push(fieldData);
             this.typeInstance.fields = [...this.typeInstance.fields];
+            this.validationService.setSectionValid(section.name, true);
         }
     }
 
@@ -496,6 +501,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             this.sections.splice(index, 1);
             this.typeInstance.render_meta.sections.splice(index, 1);
             this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+
+            this.validationService.setSectionValid(item.name, true);
         }
     }
 
@@ -517,9 +524,16 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         }
 
         this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
+
+        let numberOfFields = section.fields.length > 0;
+
+        if (!numberOfFields) {
+            this.validationService.setSectionValid(section.name, false);
+        }
     }
 
-/* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
+
+    /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any) {
         return this.isGlobalField(field.name) ? "none" : "move";
@@ -546,7 +560,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param sectionType 
      * @returns allowed types for a section
      */
-    public getInputType(sectionType: string){
+    public getInputType(sectionType: string) {
         if (sectionType == "multi-data-section") {
             return ['inputs'];
         }
@@ -748,7 +762,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         return true;
     }
 
-/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     public isNewSection(section: CmdbTypeSection): boolean {
         return this.newSections.indexOf(section) > -1;
