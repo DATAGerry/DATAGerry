@@ -153,13 +153,23 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
                     this.parentID = val;
                 }
 
-                if (val === undefined || val == null) { val = ''; }
-                this.objectInstance.fields.push({
-                    name: field,
-                    value: val
-                });
+                if (val === undefined || val == null) { 
+                    val = '';
+                }
+
+                //set the multi data section
+                if(field.startsWith('dg-mds-')) {
+                    this.objectInstance.multi_data_sections.push(val);
+                } else {
+                    //just set the field
+                    this.objectInstance.fields.push({
+                        name: field,
+                        value: val
+                    });
+                }
+
             });
-            
+
             let newID = null;
             this.objectService.postObject(this.objectInstance).pipe(takeUntil(this.subscriber))
             .subscribe({
