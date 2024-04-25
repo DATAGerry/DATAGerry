@@ -75,10 +75,11 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     isNameValid = true;
     isLabelValid = true;
     isValid$: Observable<boolean>;
+    isSectionValid$: Observable<boolean>;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(
         private router: Router,
@@ -96,6 +97,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
 
     public ngOnInit(): void {
         this.isValid$ = this.validationService.getIsValid();
+        this.isSectionValid$ = this.validationService.overallSectionValidity();
 
         if (this.mode === CmdbMode.Create) {
             this.typeInstance = new CmdbType();
@@ -123,30 +125,30 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         };
 
         this.groupService.getGroups(groupsCallParameters).pipe(takeUntil(this.subscriber))
-        .subscribe({
-            next: (response: APIGetMultiResponse) => {
-                this.groups = [...response.results as Array<Group>];
-            },
-            error: (error) => {
-                console.log(error)
-            },
-            complete:() => {
-                this.checkAclGroupExist();
+            .subscribe({
+                next: (response: APIGetMultiResponse) => {
+                    this.groups = [...response.results as Array<Group>];
+                },
+                error: (error) => {
+                    console.log(error)
+                },
+                complete: () => {
+                    this.checkAclGroupExist();
                 }
-        });
+            });
 
         const typesCallParameters: CollectionParameters = {
-        filter: undefined,
-        limit: 0,
-        sort: 'public_id',
-        order: 1,
-        page: 1,
-        projection: { public_id: 1, name: 1, label: 1, render_meta: 1 }
+            filter: undefined,
+            limit: 0,
+            sort: 'public_id',
+            order: 1,
+            page: 1,
+            projection: { public_id: 1, name: 1, label: 1, render_meta: 1 }
         };
         this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
-        .subscribe((response: APIGetMultiResponse) => {
-            this.types = response.results as Array<CmdbType>;
-        });
+            .subscribe((response: APIGetMultiResponse) => {
+                this.types = response.results as Array<CmdbType>;
+            });
 
         this.changeDetector.detectChanges();
     }
@@ -157,7 +159,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         this.subscriber.complete();
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
      * Check ACL group assignment.
@@ -209,16 +211,16 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                     this.toast.success(`Type was successfully created: TypeID: ${newTypeID}`);
                 },
                 error: (error) => {
-                        this.toast.error(`${error}`);
+                    this.toast.error(`${error}`);
                 }
             });
         } else if (this.mode === CmdbMode.Edit) {
             saveTypeInstance.editor_id = this.userService.getCurrentUser().public_id;
             this.typeService.putType(saveTypeInstance).subscribe({
-                next:(updateResp: CmdbType) => {
+                next: (updateResp: CmdbType) => {
                     this.toast.success(`Type was successfully edited: TypeID: ${updateResp.public_id}`);
-                    this.router.navigate(['/framework/type/'], 
-                                         { queryParams: { typeEditSuccess: updateResp.public_id } });
+                    this.router.navigate(['/framework/type/'],
+                        { queryParams: { typeEditSuccess: updateResp.public_id } });
                 },
                 error: (error) => {
                     this.toast.error(`${error}`);
