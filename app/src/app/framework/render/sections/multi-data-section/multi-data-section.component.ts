@@ -16,6 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
+import { UntypedFormControl } from '@angular/forms';
 
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
@@ -25,6 +26,7 @@ import { PreviewModalComponent } from 'src/app/framework/type/builder/modals/pre
 import { CmdbType } from 'src/app/framework/models/cmdb-type';
 import { MultiDataSectionEntry, MultiDataSectionFieldValue, MultiDataSectionSet } from 'src/app/framework/models/cmdb-object';
 import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.component';
+
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -51,6 +53,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         ]
     };
 
+    mdsTable = new UntypedFormControl('');
+
     // Table Template: Type actions column
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
@@ -67,6 +71,10 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
     ngOnInit(): void {
         this.initMultiDataSection();
+        this.addFieldControls();
+
+        console.log("this.formatedDataSection", this.formatedDataSection);
+
         this.setColumns();
         this.configureSectionData();
     }
@@ -88,6 +96,22 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.formatedDataSection.section_id = this.section.name;
     }
 
+
+    addFieldControls(){
+        //add the controls for all fields of mds
+        for(let aField of this.fields){
+            if (this.section.fields.includes(aField.name)) {
+                const fieldControl = new UntypedFormControl('');
+
+                this.form.addControl(aField.name, fieldControl);
+
+            }
+        }
+
+        //add the mds-Control
+        this.form.addControl("dg-mds-"+this.section.name, this.mdsTable);
+        this.mdsTable.patchValue(this.formatedDataSection);
+    }
 
     setColumns(){
         for(let aField of this.fields){
@@ -177,6 +201,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         }
 
         this.formatedDataSection.values.push(newDataSet);
+
+        this.mdsTable.patchValue(this.formatedDataSection);
     }
 
 
@@ -206,6 +232,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         setTimeout(() => {
             this.updateRequired = false
         }, 0);
+
+        this.mdsTable.patchValue(this.formatedDataSection);
     }
 
 
@@ -242,6 +270,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.formatedDataSection.values = this.formatedDataSection.values.filter(
                                             (dataSet) => dataSet.multi_data_id != multiDataID
                                           );
+
+        this.mdsTable.patchValue(this.formatedDataSection);
     }
 
 /* -------------------------------------------------- HANDLE EVENTS ------------------------------------------------- */

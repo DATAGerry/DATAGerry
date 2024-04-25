@@ -8,16 +8,17 @@
         <div class="col-sm-2 text-right" *ngIf="typeInstance">
             <div class="btn-group p-1" role="group">
                 <button
+                type="button"
+                class="btn btn-outline-danger mr-2"
+                routerLink="/framework/object/type/{{typeInstance?.public_id}}"
+                >Cancel</button>
+
+                <button
                     type="submit"
-                    class="btn btn-outline-success mr-2"
+                    class="btn btn-success mr-2"
                     (click)="saveObject()"
                     [disabled]="!renderForm.valid"
                 >Save</button>
-                <button
-                    type="button"
-                    class="btn btn-outline-danger mr-2"
-                    routerLink="/framework/object/type/{{typeInstance?.public_id}}"
-                >Cancel</button>
             </div>
         </div>
     </div>
@@ -77,15 +78,16 @@
                 </p>
                 <div class="btn-group" role="group">
                     <button
-                        type="submit"
-                        class="btn btn-outline-success mr-2"
-                        [disabled]="!renderForm.valid"
-                    >Save</button>
-                    <button
                         type="button"
                         class="btn btn-outline-danger mr-2"
                         routerLink="/framework/object/type/{{typeInstance?.public_id}}"
                     >Cancel</button>
+
+                    <button
+                        type="submit"
+                        class="btn btn-success mr-2"
+                        [disabled]="!renderForm.valid"
+                    >Save</button>
                 </div>
             </div>
         </div>
