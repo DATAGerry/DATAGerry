@@ -65,5 +65,5 @@ sphinxcontrib-qthelp==1.0.7
 sphinxcontrib-serializinghtml==1.1.10
 urllib3==2.2.1
 webencodings==0.5.1
-Werkzeug==3.0.1
+Werkzeug==3.0.3
 xhtml2pdf==0.2.15
