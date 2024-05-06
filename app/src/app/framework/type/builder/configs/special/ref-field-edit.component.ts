@@ -83,11 +83,12 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     });
 
     private initialValue: string;
+    private identifierInitialValue: string;
     isValid$ = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor(
         private typeService: TypeService,
@@ -112,6 +113,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         this.triggerAPICall();
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value
 
         if (this.form.get('ref_types').invalid) {
             this.isValid$ = false
@@ -119,7 +121,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
 
         setTimeout(() => {
             this.onInputChange();
-        },0);
+        }, 0);
     }
 
 
@@ -128,7 +130,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         this.subscriber.complete();
     }
 
-/* ----------------------------------------------- ON_CHANGES SECTION ----------------------------------------------- */
+    /* ----------------------------------------------- ON_CHANGES SECTION ----------------------------------------------- */
 
     /**
      * Feed the subject with changes to field properties
@@ -138,13 +140,13 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     onRefInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "ref"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
     }
@@ -191,37 +193,37 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 
-/* --------------------------------------------------- API SECTION -------------------------------------------------- */
+    /* --------------------------------------------------- API SECTION -------------------------------------------------- */
 
     public triggerAPICall() {
         this.typeLoading = true;
 
         this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
-        .pipe(tap(() => this.typeLoading = false))
-        .subscribe({
-            next: (apiResponse: APIGetMultiResponse<CmdbType>) => {
-                this.typeList = [...apiResponse.results as Array<CmdbType>];
-                this.totalTypes = apiResponse.total;
-                this.prepareSummaries();
-                this.cd.markForCheck();
-            },
-            error: (err) => this.toast.error(err),
-            complete: () => {
-                if (this.data.ref_types) {
-                    this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
-                        this.objectList = res;
-                        this.cd.markForCheck();
-                    });
+            .pipe(tap(() => this.typeLoading = false))
+            .subscribe({
+                next: (apiResponse: APIGetMultiResponse<CmdbType>) => {
+                    this.typeList = [...apiResponse.results as Array<CmdbType>];
+                    this.totalTypes = apiResponse.total;
+                    this.prepareSummaries();
+                    this.cd.markForCheck();
+                },
+                error: (err) => this.toast.error(err),
+                complete: () => {
+                    if (this.data.ref_types) {
+                        this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+                            this.objectList = res;
+                            this.cd.markForCheck();
+                        });
+                    }
                 }
-            }
-        });
+            });
     }
 
-/* ------------------------------------------------- SUMMARY SECTION ------------------------------------------------ */
+    /* ------------------------------------------------- SUMMARY SECTION ------------------------------------------------ */
 
     /**
      * Structure of the Summaries depending on the selected types
@@ -278,7 +280,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
         nestedSummary.icon = type.render_meta.icon;
     }
 
-/* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {

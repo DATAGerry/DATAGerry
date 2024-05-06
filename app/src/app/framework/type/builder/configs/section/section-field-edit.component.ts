@@ -37,11 +37,12 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
     private initialValue: string;
+    private identifierInitialValue: string;
     isValid$ = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private validationService: ValidationService) {
         super();
@@ -57,6 +58,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.disableControlsOnGlobal(this.labelControl);
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
     }
 
     public ngOnDestroy(): void {
@@ -64,7 +66,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.subscriber.complete();
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -77,13 +79,13 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "section"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
 
@@ -91,7 +93,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 }
