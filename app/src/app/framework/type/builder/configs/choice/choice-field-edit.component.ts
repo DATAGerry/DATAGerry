@@ -48,8 +48,9 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
 
     private initialValue: string;
     isValid$ = true;
+    private identifierInitialValue: string;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(private validationService: ValidationService) {
         super();
@@ -81,13 +82,14 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
 
-        if(this.hiddenStatus) {
+        if (this.hiddenStatus) {
             this.hideFieldControl.setValue(true);
         }
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     /**
      * Adds a new option with default prefix
@@ -128,13 +130,13 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "choise"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
 
@@ -142,7 +144,7 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 }

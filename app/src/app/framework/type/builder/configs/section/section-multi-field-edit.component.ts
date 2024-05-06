@@ -37,11 +37,12 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
     private initialValue: string;
+    private identifierInitialValue: string;
     isValid$ = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private validationService: ValidationService) {
         super();
@@ -57,6 +58,7 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.disableControlsOnGlobal(this.labelControl);
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
     }
 
 
@@ -65,7 +67,7 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.subscriber.complete();
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -78,21 +80,21 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "multi-data-section"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
-        
+
         for (let item in this.form.controls) {
             this.hasValidator(item)
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 }

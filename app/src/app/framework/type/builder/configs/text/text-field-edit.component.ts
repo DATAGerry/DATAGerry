@@ -49,9 +49,11 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     private initialValue: string;
     isValid$ = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    private identifierInitialValue: string;
+
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor(private validationService: ValidationService) {
         super();
@@ -73,8 +75,9 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
 
-        if(this.hiddenStatus) {
+        if (this.hiddenStatus) {
             this.hideFieldControl.setValue(true);
         }
 
@@ -86,7 +89,7 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -99,13 +102,13 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "text"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
 
@@ -113,7 +116,8 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
-  }
+    }
+
 }

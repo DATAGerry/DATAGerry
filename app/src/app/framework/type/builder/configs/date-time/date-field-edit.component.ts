@@ -52,6 +52,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
     private initialValue: string;
+    private identifierInitialValue: string;
     isValid$ = true;
     date: Date;
 
@@ -59,11 +60,11 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     @ViewChild('dateInputHidden') dateInputHidden: ElementRef<HTMLInputElement>;
     isDatePickerVisible = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor( private validationService: ValidationService ) {
+    constructor(private validationService: ValidationService) {
         super();
     }
 
@@ -81,8 +82,9 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
 
-        if(this.hiddenStatus) {
+        if (this.hiddenStatus) {
             this.hideFieldControl.setValue(true);
         }
     }
@@ -93,7 +95,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -106,13 +108,13 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "date"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
 
@@ -120,7 +122,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
             this.hasValidator(item)
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 

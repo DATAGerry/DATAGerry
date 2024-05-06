@@ -25,30 +25,32 @@ import { ValidationService } from '../../../services/validation.service';
 import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
-  selector: 'cmdb-textarea-edit',
-  templateUrl: './textarea-edit.component.html',
-  styleUrls: ['./textarea-edit.component.scss']
+    selector: 'cmdb-textarea-edit',
+    templateUrl: './textarea-edit.component.html',
+    styleUrls: ['./textarea-edit.component.scss']
 })
 export class TextareaEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public rowsControl: UntypedFormControl = new UntypedFormControl(5);
-  public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public rowsControl: UntypedFormControl = new UntypedFormControl(5);
+    public placeholderControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    private identifierInitialValue: string;
+    isValid$ = true;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
     public constructor(private validationService: ValidationService) {
         super();
     }
@@ -68,8 +70,9 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
 
-        if(this.hiddenStatus) {
+        if (this.hiddenStatus) {
             this.hideFieldControl.setValue(true);
         }
     }
@@ -80,7 +83,7 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -93,13 +96,13 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
+            "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
             "elementType": "textarea"
         });
 
-        if(type == "name") {
+        if (type == "name") {
             this.initialValue = this.nameControl.value;
         }
 
@@ -107,7 +110,7 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 }
