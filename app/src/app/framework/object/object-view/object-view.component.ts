@@ -56,7 +56,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
 
 
     public ngOnDestroy(): void {
-        //DAT-774
         this.unsubscribe.complete();
     }
 

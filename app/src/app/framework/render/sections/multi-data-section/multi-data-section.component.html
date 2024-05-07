@@ -1,9 +1,11 @@
 <fieldset>
     <legend>{{section?.label}}</legend>
 
-    <button type="button" class="btn btn-success btn-sm mr-1 add-row-button" (click)="onAddRowClicked()">
-        <i class="fas fa-plus"></i> Add
-    </button>
+    @if(showAddButton()) {
+        <button type="button" class="btn btn-success btn-sm mr-1 add-row-button" (click)="onAddRowClicked()">
+            <i class="fas fa-plus"></i> Add
+        </button>
+    }
 
     <cmdb-table
         *ngIf="!updateRequired"

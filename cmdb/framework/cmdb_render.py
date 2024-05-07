@@ -68,6 +68,7 @@ class RenderResult(RenderVisualization):
         self.summaries: list = []
         self.summary_line: str = ''
         self.externals: list = []
+        self.multi_data_sections: list = []
 
 
 class CmdbRender:
@@ -149,12 +150,18 @@ class CmdbRender:
             render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
+            render_result = self.__set_multi_data_sections(render_result)
         except CMDBError as error:
             import traceback
             traceback.print_exc()
             raise RenderError(f'Error while generating a CMDBResult: {str(error)}') from error
         return render_result
 
+
+    def __set_multi_data_sections(self, render_result: RenderResult) -> RenderResult:
+        render_result.multi_data_sections = self.object_instance.multi_data_sections
+
+        return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:

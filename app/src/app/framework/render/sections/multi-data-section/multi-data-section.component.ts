@@ -26,6 +26,8 @@ import { PreviewModalComponent } from 'src/app/framework/type/builder/modals/pre
 import { CmdbType } from 'src/app/framework/models/cmdb-type';
 import { MultiDataSectionEntry, MultiDataSectionFieldValue, MultiDataSectionSet } from 'src/app/framework/models/cmdb-object';
 import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.component';
+import { RenderResult } from 'src/app/framework/models/cmdb-render';
+import { CmdbMode } from 'src/app/framework/modes.enum';
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -36,18 +38,19 @@ import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.componen
 })
 export class MultiDataSectionComponent extends BaseSectionComponent implements OnInit, OnDestroy{
     @Input() public typeInstance: CmdbType;
+    @Input() public renderResult: RenderResult;
     public updateRequired = false;
 
     public multiDataColumns: Column[] = [];
     public multiDataValues = [];
     public totalCount: number = 0;
 
-    maxIndex: number = 0; 
     formatedDataSection: MultiDataSectionEntry = {
         "section_id": "",
+        "highest_id": 0,
         "values": [
             {
-                "multi_data_id": this.maxIndex,
+                "multi_data_id": 0,
                 "data": []
             }
         ]
@@ -70,13 +73,20 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     ngOnInit(): void {
+        console.log("MultiDataSectionComponent");
+        console.log("mode", this.mode);
+        console.log("renderResult", this.renderResult);
+        console.log("fields", this.fields);
+        console.log("section", this.section);
+        console.log("typeInstance", this.typeInstance);
+
         this.initMultiDataSection();
         this.addFieldControls();
 
-        console.log("this.formatedDataSection", this.formatedDataSection);
-
         this.setColumns();
         this.configureSectionData();
+
+        this.setMdsValues();
     }
 
 
@@ -89,11 +99,46 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     initMultiDataSection() {
-        this.formatedDataSection = {
-            "section_id": this.section.name,
-            "values": []
+        if (this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
+            for (let aSection of this.renderResult.multi_data_sections) {
+                if (aSection.section_id == this.section.name) {
+                    this.formatedDataSection.section_id = aSection.section_id;
+                    this.formatedDataSection.highest_id = aSection.highest_id;
+                    this.formatedDataSection.values = aSection.values;
+                }
+            }
+        } else {
+            this.formatedDataSection = {
+                "section_id": this.section.name,
+                "highest_id": 0,
+                "values": []
+            }
         }
-        this.formatedDataSection.section_id = this.section.name;
+    }
+
+
+    getNextMultiDataID() {
+        return this.formatedDataSection.highest_id;
+    }
+
+
+    incrementNextMultiDataID() {
+        this.formatedDataSection.highest_id += 1;
+    }
+
+
+    setMdsValues() {
+        for (let aValue of this.formatedDataSection.values) {
+            let initialData = {}
+
+            initialData['dg-multiDataRowIndex'] = aValue.multi_data_id;
+
+            for (let aDataSet of aValue.data) {
+                initialData[aDataSet.name] = aDataSet.value;
+            }
+
+            this.multiDataValues.push(initialData);
+        }
     }
 
 
@@ -102,9 +147,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         for(let aField of this.fields){
             if (this.section.fields.includes(aField.name)) {
                 const fieldControl = new UntypedFormControl('');
-
                 this.form.addControl(aField.name, fieldControl);
-
             }
         }
 
@@ -113,9 +156,9 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.mdsTable.patchValue(this.formatedDataSection);
     }
 
+
     setColumns(){
         for(let aField of this.fields){
-
             if (this.section.fields.includes(aField.name)) {
                 let fieldColumn: Column = {
                     display: aField.label,
@@ -129,37 +172,28 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     
                 this.multiDataColumns.push(fieldColumn);
             }
-
-
-            // if(aField?.value) {
-            //     fieldValues[aField.name] = aField.value;
-            // }
         }
-
-        // if(Object.keys(fieldValues).length > 0){
-        //     this.multiDataValues.push(fieldValues);
-    
-        //     this.totalCount = this.multiDataValues.length;
-        // }
 
         this.addActionColumn();
     }
 
 
     public addActionColumn() {
-        let actionsColumn: Column = {
-            display: 'Actions',
-            name: 'actions',
-            data: 'actions',
-            searchable: false,
-            sortable: false,
-            fixed: true,
-            template: this.actionsTemplate,
-            style: { width: '130px' },
-            cssClasses: ['text-center']
-        };
-
-        this.multiDataColumns.push(actionsColumn);
+        if (this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit) {
+            let actionsColumn: Column = {
+                display: 'Actions',
+                name: 'actions',
+                data: 'actions',
+                searchable: false,
+                sortable: false,
+                fixed: true,
+                template: this.actionsTemplate,
+                style: { width: '130px' },
+                cssClasses: ['text-center']
+            };
+    
+            this.multiDataColumns.push(actionsColumn);
+        }
     }
 
 
@@ -172,8 +206,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         for (let sectionFieldIndex in this.section.fields){
             const aSectionFieldName = this.section.fields[sectionFieldIndex];
 
-            for(let fieldIndex in this.typeInstance.fields) {
-                const aField = this.typeInstance.fields[fieldIndex];
+            for(let fieldIndex in this.fields) {
+                const aField = this.fields[fieldIndex];
 
                 if (aField.name == aSectionFieldName) {
                     this.modalSection['fields'].push(aField);
@@ -186,7 +220,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
     private setFormattedData(newValues: any){
         let newDataSet: MultiDataSectionSet = {
-            "multi_data_id": this.maxIndex,
+            "multi_data_id": this.getNextMultiDataID(),
             "data": []
         }
 
@@ -194,20 +228,17 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             let dataElement: MultiDataSectionFieldValue = {
                 "name": field_id,
                 "value": newValues[field_id]
-
             }
 
             newDataSet.data.push(dataElement);
         }
 
         this.formatedDataSection.values.push(newDataSet);
-
         this.mdsTable.patchValue(this.formatedDataSection);
     }
 
 
     private modifyFormattedData(newValues: any, multiDataID: number) {
-        console.log("edited values:", newValues);
         // first update the formatedDataSection
         for (let aDataSet of this.formatedDataSection.values) {
             if (aDataSet.multi_data_id == multiDataID){
@@ -274,9 +305,27 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.mdsTable.patchValue(this.formatedDataSection);
     }
 
+
+    resetModalValues() {
+        for (let aField of this.modalSection.fields) {
+            console.log("aField", aField);
+
+            if("value" in aField){
+                delete aField["value"];
+            }
+        }
+    }
+
+
+    showAddButton() {
+        return this.mode != CmdbMode.View;
+    }
+
 /* -------------------------------------------------- HANDLE EVENTS ------------------------------------------------- */
 
     public onAddRowClicked(){
+        console.log("add row this.modalSection", this.modalSection);
+        this.resetModalValues();
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
         this.modalRef.componentInstance.sections = [this.modalSection];
         this.modalRef.componentInstance.saveValues = true;
@@ -285,12 +334,14 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             if (values){
                 this.setFormattedData(values);
 
-                values['dg-multiDataRowIndex']= this.maxIndex;
+                values['dg-multiDataRowIndex'] = this.getNextMultiDataID();
 
-                this.maxIndex++;
+                this.incrementNextMultiDataID();
 
                 this.multiDataValues.push(values);
                 this.totalCount = this.multiDataValues.length;
+
+                this.form.markAsDirty();
             }
         });
     }
@@ -300,7 +351,6 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
         this.modalRef.componentInstance.activateViewMode = true;
         this.modalRef.componentInstance.sections = [this.getModalSectionData(rowIndex)];
-
     }
 
 
@@ -313,6 +363,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
             if (values){
                 this.modifyFormattedData(values, rowIndex);
+                this.form.markAsDirty();
             }
         });
     }
@@ -322,11 +373,11 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.modalRef = this.modalService.open(DeleteEntryModalComponent);
 
         this.modalRef.result.then((deleteConfirm: boolean) => {
-
             if(deleteConfirm){
                 this.removeFromFormValues(rowIndex);
                 this.removeDataSet(rowIndex);
-            } 
+                this.form.markAsDirty();
+            }
         });
     }
 }

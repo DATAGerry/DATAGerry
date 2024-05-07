@@ -33,6 +33,7 @@ export interface MultiDataSectionSet {
 
 export interface MultiDataSectionEntry {
     section_id: string;
+    highest_id: number;
     values: MultiDataSectionSet[];
 }
 
