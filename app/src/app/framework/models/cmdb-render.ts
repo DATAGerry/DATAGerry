@@ -60,4 +60,5 @@ export class RenderResult {
     public summaries: any[];
     public summary_line: string;
     public externals: any[];
+    public multi_data_sections: any[];
 }

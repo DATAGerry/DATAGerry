@@ -27,7 +27,7 @@ import { SidebarService } from 'src/app/layout/services/sidebar.service';
 import { LocationService } from '../../services/location.service';
 
 import { CmdbMode } from '../../modes.enum';
-import { CmdbObject } from '../../models/cmdb-object';
+import { CmdbObject, MultiDataSectionEntry } from '../../models/cmdb-object';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
@@ -129,6 +129,20 @@ export class ObjectEditComponent implements OnInit {
     }
 
 
+    /**
+     * Adds the MultiDataSectionEntry data to the object instance
+     * @param multiDataSection (MultiDataSectionEntry):  the new data of the section 
+     */
+    handleMultiDataSection(multiDataSection: MultiDataSectionEntry){
+        for (let aSection of this.objectInstance.multi_data_sections){
+            if (aSection.section_id == multiDataSection.section_id) {
+                aSection.highest_id = multiDataSection.highest_id;
+                aSection.values = multiDataSection.values;
+            }
+        }
+    }
+
+
     public editObject(): void {
         this.renderForm.markAllAsTouched();
 
@@ -140,7 +154,9 @@ export class ObjectEditComponent implements OnInit {
 
                 if (key == 'dg_location') {
                     this.selectedLocation = val;
-                }  else if (key == 'locationTreeName') {
+                } else if (key.startsWith('dg-mds-')) {
+                    this.handleMultiDataSection(val);
+                } else if (key == 'locationTreeName') {
                     this.locationTreeName = val;
                     return;
                 } else if (key == 'locationForObjectExists') {

@@ -19,6 +19,7 @@ import { Component, Input } from '@angular/core';
 
 import { CmdbType, CmdbTypeSection } from '../../../models/cmdb-type';
 import { BaseSectionComponent } from '../base-section/base-section.component';
+import { RenderResult } from 'src/app/framework/models/cmdb-render';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -30,4 +31,6 @@ export class SectionsFactoryComponent extends BaseSectionComponent {
     @Input() public sections: Array<CmdbTypeSection> = [];
     @Input() objectID: number;
     @Input() public typeInstance: CmdbType;
+    @Input() public renderResult: RenderResult;
+
 }
