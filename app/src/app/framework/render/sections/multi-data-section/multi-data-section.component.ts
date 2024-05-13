@@ -23,7 +23,7 @@ import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { BaseSectionComponent } from '../base-section/base-section.component';
 import { Column } from 'src/app/layout/table/table.types';
 import { PreviewModalComponent } from 'src/app/framework/type/builder/modals/preview-modal/preview-modal.component';
-import { CmdbType } from 'src/app/framework/models/cmdb-type';
+import { CmdbMultiDataSection, CmdbType } from 'src/app/framework/models/cmdb-type';
 import { MultiDataSectionEntry, MultiDataSectionFieldValue, MultiDataSectionSet } from 'src/app/framework/models/cmdb-object';
 import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.component';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
@@ -39,8 +39,8 @@ import { CmdbMode } from 'src/app/framework/modes.enum';
 export class MultiDataSectionComponent extends BaseSectionComponent implements OnInit, OnDestroy{
     @Input() public typeInstance: CmdbType;
     @Input() public renderResult: RenderResult;
-    public updateRequired = false;
 
+    public updateRequired = false;
     public multiDataColumns: Column[] = [];
     public multiDataValues = [];
     public totalCount: number = 0;
@@ -73,13 +73,6 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     ngOnInit(): void {
-        console.log("MultiDataSectionComponent");
-        console.log("mode", this.mode);
-        console.log("renderResult", this.renderResult);
-        console.log("fields", this.fields);
-        console.log("section", this.section);
-        console.log("typeInstance", this.typeInstance);
-
         this.initMultiDataSection();
         this.addFieldControls();
 
@@ -98,7 +91,10 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
-    initMultiDataSection() {
+    /**
+     * Initialises the MultiDataSectionEntry which will be submited
+     */
+    initMultiDataSection(): void {
         if (this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
             for (let aSection of this.renderResult.multi_data_sections) {
                 if (aSection.section_id == this.section.name) {
@@ -117,17 +113,28 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    getNextMultiDataID() {
+    /**
+     * Retrieves the next ID for a MultiDataSet
+     * 
+     * @returns (number): the next ID for a MultiDataSet
+     */
+    getNextMultiDataID(): number {
         return this.formatedDataSection.highest_id;
     }
 
 
-    incrementNextMultiDataID() {
+    /**
+     * Incrementy the highest ID for MultiDataSets
+     */
+    incrementNextMultiDataID(): void {
         this.formatedDataSection.highest_id += 1;
     }
 
 
-    setMdsValues() {
+    /**
+     * Sets the values of the MultiDataSets for the table
+     */
+    setMdsValues(): void {
         for (let aValue of this.formatedDataSection.values) {
             let initialData = {}
 
@@ -142,7 +149,10 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    addFieldControls(){
+    /**
+     * Adds all FieldControls for the Form-Popups
+     */
+    addFieldControls(): void {
         //add the controls for all fields of mds
         for(let aField of this.fields){
             if (this.section.fields.includes(aField.name)) {
@@ -157,9 +167,22 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    setColumns(){
+    /**
+     * Checks if a Field is a hidden field
+     * @param fieldName (string): identifier of the Field which should be checked
+     * @returns (boolean): True if it is a hidden field, else False
+     */
+    isHiddenField(fieldName: string): boolean {
+        return (this.section as CmdbMultiDataSection).hidden_fields?.includes(fieldName);
+    }
+
+
+    /**
+     * Sets the columns of the table
+     */
+    setColumns(): void{
         for(let aField of this.fields){
-            if (this.section.fields.includes(aField.name)) {
+            if (this.section.fields.includes(aField.name) && !this.isHiddenField(aField.name)) {
                 let fieldColumn: Column = {
                     display: aField.label,
                     name: aField.name,
@@ -178,6 +201,9 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
+    /**
+     * Adds the actions column to the table
+     */
     public addActionColumn() {
         if (this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit) {
             let actionsColumn: Column = {
@@ -197,6 +223,9 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
+    /**
+     * Formats data for the modal sections
+     */
     private configureSectionData() {
         this.modalSection['type'] = this.section.type;
         this.modalSection['name'] = this.section.name;
@@ -292,12 +321,22 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    removeFromFormValues(multiDataID: number){
+    /**
+     * Removes a MultiDataSet with the given MultiDataID from the table values
+     * 
+     * @param multiDataID (number): MultiDataID of MultiDataSet
+     */
+    removeFromTableValues(multiDataID: number): void {
         this.multiDataValues = this.multiDataValues.filter((rowData) => rowData['dg-multiDataRowIndex'] != multiDataID);
     }
 
 
-    removeDataSet(multiDataID: number){
+    /**
+     * Removes a MultiDataSet with the given MultiDataID from the current values
+     * 
+     * @param multiDataID (number): MultiDataID of MultiDataSet
+     */
+    removeDataSet(multiDataID: number): void {
         this.formatedDataSection.values = this.formatedDataSection.values.filter(
                                             (dataSet) => dataSet.multi_data_id != multiDataID
                                           );
@@ -306,10 +345,11 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    resetModalValues() {
+    /**
+     * Resets all values for modals so the create popup is empty
+     */
+    resetModalValues(): void {
         for (let aField of this.modalSection.fields) {
-            console.log("aField", aField);
-
             if("value" in aField){
                 delete aField["value"];
             }
@@ -317,14 +357,20 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    showAddButton() {
-        return this.mode != CmdbMode.View;
+    /**
+     * Decides if the add button should be showed above the table
+     * @returns (boolean): True if the add button should be showed about the table, else False
+     */
+    showAddButton(): boolean {
+        return this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit;
     }
 
 /* -------------------------------------------------- HANDLE EVENTS ------------------------------------------------- */
 
-    public onAddRowClicked(){
-        console.log("add row this.modalSection", this.modalSection);
+    /**
+     * Opens empty popup form to create a now table row
+     */
+    public onAddRowClicked(): void{
         this.resetModalValues();
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
         this.modalRef.componentInstance.sections = [this.modalSection];
@@ -347,14 +393,24 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    public onRowPreview(rowIndex: any) {
+    /**
+     * Opens popup to show preview of all values of the MultiDataSet
+     * 
+     * @param rowIndex (number): MultiDataID of MultiDataSet
+     */
+    public onRowPreview(rowIndex: number): void {
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
         this.modalRef.componentInstance.activateViewMode = true;
         this.modalRef.componentInstance.sections = [this.getModalSectionData(rowIndex)];
     }
 
 
-    public onRowEdit(rowIndex: any) {
+    /**
+     * Opens popup to edit edit current values of the MultiDataSet
+     * 
+     * @param rowIndex (number): MultiDataID of MultiDataSet
+     */
+    public onRowEdit(rowIndex: number): void {
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
         this.modalRef.componentInstance.saveValues = true;
         this.modalRef.componentInstance.sections = [this.getModalSectionData(rowIndex)];
@@ -369,12 +425,17 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    public onRowDelete(rowIndex: any) {
+    /**
+     * Opens popup to confim deletion of a MultiDataSet
+     * 
+     * @param rowIndex (number): MultiDataID of MultiDataSet
+     */
+    public onRowDelete(rowIndex: number): void {
         this.modalRef = this.modalService.open(DeleteEntryModalComponent);
 
         this.modalRef.result.then((deleteConfirm: boolean) => {
             if(deleteConfirm){
-                this.removeFromFormValues(rowIndex);
+                this.removeFromTableValues(rowIndex);
                 this.removeDataSet(rowIndex);
                 this.form.markAsDirty();
             }
