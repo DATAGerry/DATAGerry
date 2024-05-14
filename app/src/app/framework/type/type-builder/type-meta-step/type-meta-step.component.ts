@@ -16,54 +16,56 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import {
-  ChangeDetectionStrategy,
-  Component,
-  DoCheck,
-  Input,
-  IterableDiffer,
-  IterableDiffers,
-  OnDestroy,
-  OnInit } from '@angular/core';
+    ChangeDetectionStrategy,
+    Component,
+    DoCheck,
+    Input,
+    IterableDiffer,
+    IterableDiffers,
+    OnDestroy,
+    OnInit
+} from '@angular/core';
 import { AbstractControl, UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 
 import { ReplaySubject } from 'rxjs';
-import { takeUntil} from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { CmdbType } from '../../../models/cmdb-type';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-type-meta-step',
-  templateUrl: './type-meta-step.component.html',
-  styleUrls: ['./type-meta-step.component.scss'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+    selector: 'cmdb-type-meta-step',
+    templateUrl: './type-meta-step.component.html',
+    styleUrls: ['./type-meta-step.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TypeMetaStepComponent extends TypeBuilderStepComponent implements DoCheck, OnInit, OnDestroy {
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public summaryForm: UntypedFormGroup;
-  public externalsForm: UntypedFormGroup;
+    public summaryForm: UntypedFormGroup;
+    public externalsForm: UntypedFormGroup;
 
-  public hasInter: boolean = false;
+    public hasInter: boolean = false;
 
-  public fields: Array<any> = [];
-  public summaries: Array<any> = [];
-  private iterableDiffer: IterableDiffer<any>;
+    public fields: Array<any> = [];
+    public summaries: Array<any> = [];
+    private iterableDiffer: IterableDiffer<any>;
+    public filteredFields: Array<any> = [];
 
-  @Input('typeInstance')
-  public set TypeInstance(instance: CmdbType) {
+    @Input('typeInstance')
+    public set TypeInstance(instance: CmdbType) {
         if (instance) {
             this.typeInstance = instance;
             this.summaries = [...this.typeInstance.fields];
-            this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
+            this.fields = [{ label: 'Object ID', name: 'object_id' }, ...this.typeInstance.fields];
             this.summaryForm.patchValue(this.typeInstance.render_meta.summary);
             this.externalsForm.get('name').setValidators(this.listNameValidator());
         }
-  }
+    }
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(private iterableDiffers: IterableDiffers) {
         super();
@@ -95,7 +97,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
         this.externalsForm.get('href').valueChanges.pipe(takeUntil(this.subscriber)).subscribe((href: string) => {
             this.hasInter = this.occurrences(href, '{}') > 0;
         });
-      }
+    }
 
 
     public ngOnDestroy(): void {
@@ -103,7 +105,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public get external_name() {
         return this.externalsForm.get('name');
@@ -145,7 +147,7 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     public deleteExternal(data) {
         const index: number = this.typeInstance.render_meta.externals.indexOf(data);
         if (index !== -1) {
-        this.typeInstance.render_meta.externals.splice(index, 1);
+            this.typeInstance.render_meta.externals.splice(index, 1);
         }
     }
 
@@ -153,13 +155,26 @@ export class TypeMetaStepComponent extends TypeBuilderStepComponent implements D
     public ngDoCheck(): void {
         const changes = this.iterableDiffer.diff(this.typeInstance.fields);
         if (changes) {
+
+            let filteredFieldNames = [...this.typeInstance.render_meta.sections]
+                .filter(section => section.type !== "multi-data-section")
+                .flatMap(mp => mp.fields);
+
+            if (Array.isArray(filteredFieldNames) && filteredFieldNames.length > 0 && typeof filteredFieldNames[0] === 'object') {
+                filteredFieldNames = filteredFieldNames.map(field => field.name);
+            }
+
+            this.filteredFields = this.typeInstance.fields.filter(field =>
+                filteredFieldNames.includes(field.name)
+            );
+
             let summaries = this.summaryFields.value;
             changes.forEachRemovedItem(record => {
                 summaries = summaries?.filter(f => f !== record.item.name);
             });
 
-            this.summaries = [...this.typeInstance.fields];
-            this.fields = [{label: 'Object ID', name: 'object_id'}, ...this.typeInstance.fields];
+            this.summaries = [...this.filteredFields];
+            this.fields = [{ label: 'Object ID', name: 'object_id' }, ...this.typeInstance.fields];
             this.typeInstance.render_meta.summary.fields = summaries;
             this.summaryFields.patchValue(summaries);
         }
