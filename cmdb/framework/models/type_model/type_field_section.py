@@ -18,6 +18,7 @@ This class represents a type field section
 Extends: TypeSection
 """
 import logging
+import json
 
 from cmdb.framework.models.type_model import TypeSection
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -86,3 +87,7 @@ class TypeFieldSection(TypeSection):
             list: All fields of the section
         """
         return self.fields
+
+
+    def __str__(self):
+        return json.dumps(TypeFieldSection.to_json(self))

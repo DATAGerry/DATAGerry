@@ -18,6 +18,7 @@ This class represents a TypeMultiDataSection
 Extends: TypeSection
 """
 import logging
+import json
 
 from cmdb.framework.models.type_model import TypeSection
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -27,6 +28,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                               TypeMultiDataSection                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
+
 class TypeMultiDataSection(TypeSection):
     """
     This class represents a TypeMultiDataSection
@@ -104,3 +106,7 @@ class TypeMultiDataSection(TypeSection):
             list: All hidden fields of the section
         """
         return self.fields
+
+
+    def __str__(self):
+        return json.dumps(TypeMultiDataSection.to_json(self))
