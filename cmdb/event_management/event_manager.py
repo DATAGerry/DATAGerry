@@ -302,7 +302,8 @@ class EventReceiverAmqp(threading.Thread):
             self.__channel.exchange_declare(exchange=self.__config_exchange, exchange_type="topic")
             queue_name = ""
             if self.__process_id:
-                queue_name = "{}.{}".format(self.__config_exchange, self.__process_id)
+                queue_name = f"{self.__config_exchange}.{self.__process_id}"
+
             queue_declare_result = self.__channel.queue_declare(queue=queue_name, exclusive=True)
             queue_handler = queue_declare_result.method.queue
             for event_type in self.__event_types:

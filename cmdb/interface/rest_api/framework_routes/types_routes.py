@@ -35,6 +35,7 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
     DeleteSingleResponse, make_api_response
 
 from cmdb.framework.cmdb_location import CmdbLocation
+from cmdb.framework.cmdb_object import CmdbObject
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -174,6 +175,8 @@ def update_type(public_id: int, data: dict):
         UpdateSingleResponse: With update result of the new updated type.
     """
     try:
+        unchanged_type = type_manager.get(public_id)
+
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
@@ -187,7 +190,7 @@ def update_type(public_id: int, data: dict):
     updated_type = type_manager.get(public_id)
     locations_with_type = locations_manager.get_locations_by(type_id=public_id)
 
-    data = {
+    loc_data = {
         'type_label': updated_type.label,
         'type_icon': updated_type.render_meta.icon,
         'type_selectable': updated_type.selectable_as_parent
@@ -195,7 +198,14 @@ def update_type(public_id: int, data: dict):
 
     location: CmdbLocation
     for location in locations_with_type:
-        locations_manager.update({'public_id':location.public_id}, data)
+        locations_manager.update({'public_id':location.public_id}, loc_data)
+
+    # check and update all multi data sections for the type if required
+    updated_objects = type_manager.handle_mutli_data_sections(unchanged_type, data)
+
+    an_object: CmdbObject
+    for an_object in updated_objects:
+        object_manager._update(object_manager.collection, {'public_id': an_object.public_id}, CmdbObject.to_json(an_object))
 
     return api_response.make_response()
 

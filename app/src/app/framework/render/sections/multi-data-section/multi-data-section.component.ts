@@ -15,6 +15,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+import * as moment from 'moment';
+
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
@@ -28,7 +30,6 @@ import { MultiDataSectionEntry, MultiDataSectionFieldValue, MultiDataSectionSet 
 import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.component';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
 import { CmdbMode } from 'src/app/framework/modes.enum';
-
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -73,6 +74,8 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     ngOnInit(): void {
+        console.log("this.renderResult", this.renderResult);
+        console.log("this.typeInstance", this.typeInstance);
         this.initMultiDataSection();
         this.addFieldControls();
 
@@ -253,19 +256,108 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             "data": []
         }
 
-        for (let field_id in newValues) {
-            let dataElement: MultiDataSectionFieldValue = {
-                "name": field_id,
-                "value": newValues[field_id]
-            }
+        for (let fieldID in newValues) {
+            let formattedValue = this.formatFieldValue(fieldID, newValues);
 
+            let dataElement: MultiDataSectionFieldValue = {
+                "name": fieldID,
+                "value": formattedValue
+            }
+            newValues[fieldID] = formattedValue;
             newDataSet.data.push(dataElement);
         }
 
         this.formatedDataSection.values.push(newDataSet);
         this.mdsTable.patchValue(this.formatedDataSection);
+
+        return newValues;
     }
 
+/* ------------------------------------------------ FIELD FORMATTING ------------------------------------------------ */
+
+    private formatFieldValue(fieldID: string, newValues:any){
+        let fieldType = this.getFieldType(fieldID);
+
+        switch (fieldType) {
+            case "date": {
+                if(newValues[fieldID]) {
+                    const defaultDate = moment.utc(newValues[fieldID]);
+                    return defaultDate.isValid() ? moment.tz(defaultDate, "UTC").format("YYYY-MM-DD") : newValues[fieldID];
+                }
+                
+                break;
+            }
+            case "select": {
+                if (newValues[fieldID]) {
+                    return this.getOptionLabel(fieldID, newValues[fieldID]);
+                }
+                break;
+            }
+            case "radio": {
+                if (newValues[fieldID]) {
+                    return this.getOptionLabel(fieldID, newValues[fieldID]);
+                }
+                break;
+            }
+        }
+
+        return  newValues[fieldID];
+    }
+
+
+    private getOptionLabel(fieldID: string, value: string) {
+        let fieldOptions = this.getField(fieldID)["options"];
+
+        for (let option of fieldOptions) {
+            if ( option["name"] == value) {
+                console.log("return optionLabel:", option["label"]);
+                return option["label"];
+            }
+        }
+
+        return undefined;
+    }
+
+
+    private getTypeFields() {
+        let typeFields = this.typeInstance.fields;
+
+        if (this.mode == CmdbMode.Edit) {
+            typeFields = this.renderResult.fields;
+        }
+
+        return typeFields;
+    }
+
+
+    private getField(fieldID: string) {
+        let targetField = {};
+
+        for (let aField of this.getTypeFields()) {
+            if (aField["name"] == fieldID) {
+                targetField = aField;
+                break;
+            }
+        }
+
+        return targetField;
+    }
+
+
+    private getFieldType(fieldID: string): string {
+        let fieldType = "text";
+
+        for (let aField of this.getTypeFields()) {
+            if (aField["name"] == fieldID) {
+                fieldType = aField["type"];
+                break;
+            }
+        }
+
+        return fieldType;
+    }
+
+/* ------------------------------------------------- TABLE HANDLING ------------------------------------------------- */
 
     private modifyFormattedData(newValues: any, multiDataID: number) {
         // first update the formatedDataSection
@@ -378,7 +470,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
         this.modalRef.result.then((values: any) => {
             if (values){
-                this.setFormattedData(values);
+                values = this.setFormattedData(values);
 
                 values['dg-multiDataRowIndex'] = this.getNextMultiDataID();
 
