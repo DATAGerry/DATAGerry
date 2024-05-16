@@ -51,6 +51,24 @@ export class ObjectBulkChangeEditorComponent {
    */
   @Input() public type: CmdbType;
 
+  filteredData: any;
+
+
+  ngOnInit(): void {
+    const filterMDSFields = this.type.render_meta.sections.filter(tp => tp.type !== 'multi-data-section').flatMap(field => field.fields)
+    const filteredFields = this.type.fields.filter(field => filterMDSFields.includes(field.name))
+
+    this.filteredData = {
+      ...this.type,
+      render_meta: {
+        ...this.type.render_meta,
+        sections: this.type.render_meta.sections.filter(section => section.type !== "multi-data-section")
+      },
+      fields: filteredFields
+    };
+
+  }
+
   /**
    * Get the field by its name from the type.
    * @param name
