@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+
 from typing import List
 
 from flask import current_app, abort, request
@@ -27,7 +29,7 @@ from cmdb.user_management.managers.setting_manager import UserSettingsManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 user_settings_blueprint = APIBlueprint('user_settings', __name__)
-
+LOGGER = logging.getLogger(__name__)
 
 @user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
 def get_user_settings(user_id: int):
@@ -137,7 +139,18 @@ def update_setting(user_id: int, resource: str, data: dict):
     settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
     try:
         setting = UserSettingModel.from_data(data=data)
-        settings_manager.update(user_id=user_id, resource=resource, setting=setting)
+
+        setting_found = True
+        try:
+            settings_manager.get_user_setting(user_id=user_id, resource=data.get('resource'))
+        except ManagerGetError:
+            setting_found = False
+
+        if setting_found:
+            settings_manager.update(user_id=user_id, resource=resource, setting=setting)
+        else:
+            settings_manager.insert(data)
+
         api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err)
