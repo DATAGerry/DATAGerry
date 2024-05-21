@@ -140,6 +140,22 @@ class CmdbRender:
         return self._generate_result(level)
 
 
+    def get_mds_reference(self, field_value: int) -> dict:
+        """TODO: document"""
+        return self.__merge_references({"value": field_value})
+
+
+    def is_ref_field(self, field_name):
+        """TODO: document"""
+        type_fields = self.type_instance.fields
+
+        for field in type_fields:
+            if field["type"] == "ref" and field["name"] == field_name:
+                return True
+
+        return False
+
+
     def _generate_result(self, level: int) -> RenderResult:
         render_result = RenderResult()
 

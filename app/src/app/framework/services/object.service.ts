@@ -188,6 +188,18 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     }
 
 
+    public getObjectMdsReferences<R>(publicID:number): Observable<R> {
+        const options = this.options;
+        options.params = new HttpParams();
+
+        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/mds_reference`, options).pipe(
+            map((apiResponse) => {
+                return apiResponse.body;
+            })
+        );
+    }
+
+
     /**
      * Get the newest objects
      * @param params
