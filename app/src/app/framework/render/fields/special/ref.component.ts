@@ -17,7 +17,7 @@
 */
 import { Component, OnDestroy, OnInit } from '@angular/core';
 
-import { BehaviorSubject, ReplaySubject, takeUntil } from 'rxjs';
+import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
@@ -41,8 +41,8 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
     private unsubscribe: ReplaySubject<void> = new ReplaySubject<void>();
     public objectList: Array<RenderResult> = [];
     public refObject: RenderResult;
-    public changedReference: BehaviorSubject<any> = new BehaviorSubject<any>(undefined);
     public protect: boolean = false;
+    private mdsInteraction: boolean;
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                     LIFE CYCLE                                                     */
@@ -54,6 +54,23 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
 
 
     public ngOnInit(): void {
+        this.mdsInteraction = false;
+
+                //This is for MDS sections
+        if(this.mode == CmdbMode.View) {
+            if(this.data.value && !this.data?.reference){
+                this.objectService.getObjectMdsReferences(this.data.value).subscribe({
+                    next: (result) => {
+                        this.data.reference = result;
+                        this.mdsInteraction = true;
+                    },
+                    error: (error) => {
+                        console.error(error);
+                    }
+                });
+            }
+        }
+
         this.data.default = parseInt(this.data.default, 10);
 
         if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
@@ -76,6 +93,23 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
                 });
             }
         }
+
+        //TODO: this is for MDS sections and it should be Edit-Mode instead of Create-Mode
+        if(this.mode == CmdbMode.Create) {
+            if(this.data.value && !this.data?.reference){
+                this.objectService.getObject(this.data.value, false).pipe(takeUntil(this.unsubscribe))
+                .subscribe({
+                    next: (refObject: RenderResult) => {
+                        this.refObject = refObject;
+                        this.mdsInteraction = true;
+                    },
+                    error: (error) => {
+                        console.error(error);
+                    }
+                });
+            }
+        }
+
 
         if (this.data.reference && this.data.reference.object_id !== '' && this.data.reference.object_id !== 0) {
             if (typeof this.data.reference === 'string' || this.mode === CmdbMode.Create || this.mode === CmdbMode.Bulk) {
@@ -100,6 +134,10 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
             this.modalRef.close();
         }
 
+        if (this.mdsInteraction) {
+            this.data.reference = undefined;
+        }
+
         this.unsubscribe.next();
         this.unsubscribe.complete();
     }
@@ -107,6 +145,7 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
 /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     groupByFn = (item) => item.type_information.type_label;
+
 
     groupValueFn = (_: string, children: any[]) => ({
         name: children[0].type_information.type_label,

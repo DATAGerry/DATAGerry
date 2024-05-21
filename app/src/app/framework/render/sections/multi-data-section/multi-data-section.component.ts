@@ -74,8 +74,6 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     ngOnInit(): void {
-        console.log("this.renderResult", this.renderResult);
-        console.log("this.typeInstance", this.typeInstance);
         this.initMultiDataSection();
         this.addFieldControls();
 
@@ -310,7 +308,6 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
         for (let option of fieldOptions) {
             if ( option["name"] == value) {
-                console.log("return optionLabel:", option["label"]);
                 return option["label"];
             }
         }
