@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: ducoment"""
+import logging
 import csv
 import io
 import json
@@ -36,6 +37,8 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
 object_manager = CmdbObjectManager(database_manager=database_manager)
@@ -160,6 +163,7 @@ class CsvExportType(BaseExporterFormat):
 
         return self.csv_writer([*header, *columns], rows)
 
+
     def csv_writer(self, header, rows, dialect=csv.excel):
         """TODO: ducoment"""
         csv_file = io.StringIO()
@@ -180,6 +184,7 @@ class JsonExportType(BaseExporterFormat):
     DESCRIPTION = "Export as JSON"
     ACTIVE = True
 
+
     def export(self, data: List[RenderResult], *args):
         """Exports data as .json file
 
@@ -189,7 +194,6 @@ class JsonExportType(BaseExporterFormat):
         Returns:
             Json file containing the data
         """
-        # init values
         meta = False
         view = 'native'
 
@@ -204,6 +208,10 @@ class JsonExportType(BaseExporterFormat):
             # init columns
             columns = obj.fields
 
+            multi_data_sections = []
+            if len(obj.multi_data_sections) > 0:
+                multi_data_sections = obj.multi_data_sections
+
             # Export only the shown fields chosen by the user
             if meta and view == ExporterConfigType.render.name:
                 _meta = json.loads(meta)
@@ -215,21 +223,45 @@ class JsonExportType(BaseExporterFormat):
             for head in header:
                 head = 'object_id' if head == 'public_id' else head
                 if head == 'type_label':
-                    output_element.update(
-                        {head: obj.type_information[head]}
-                    )
+                    output_element.update({head: obj.type_information[head]})
                 else:
-                    output_element.update(
-                        {head: obj.object_information[head]}
-                    )
-            output_element.update({'fields': []})
+                    output_element.update({head: obj.object_information[head]})
+
 
             # get object fields
+            output_element.update({'fields': []})
             for field in columns:
                 output_element['fields'].append({
                     'name': field.get('name'),
                     'value': ExperterUtils.summary_renderer(obj, field, view)
                 })
+
+            if len(multi_data_sections) > 0:
+                output_element.update({'multi_data_sections': []})
+
+                for index, mds in enumerate(multi_data_sections):
+                    # set first level items
+                    output_element['multi_data_sections'].append({
+                        'section_id': mds.get('section_id'),
+                        'highest_id': mds.get('highest_id')
+                    })
+                    output_element['multi_data_sections'][index].update({'values': []})
+
+                    #set values
+                    values = mds.get('values')
+                    for val_index, value in enumerate(values):
+                        output_element['multi_data_sections'][index]['values'].append({
+                             'multi_data_id': value.get('multi_data_id')
+                        })
+                        output_element['multi_data_sections'][index]['values'][val_index].update({'data': []})
+
+                        #set all data
+                        data = value.get('data')
+                        for data_set in data:
+                            output_element['multi_data_sections'][index]['values'][val_index]['data'].append({
+                                'name': data_set.get('name'),
+                                'value': data_set.get('value')
+                            })
 
             output.append(output_element)
 
@@ -262,7 +294,6 @@ class XlsxExportType(BaseExporterFormat):
             workbook.save(tmp.name)
             tmp.seek(0)
             return tmp.read()
-
 
 
     def create_xls_object(self, data: List[RenderResult], args):
@@ -341,6 +372,7 @@ class XlsxExportType(BaseExporterFormat):
 
         return workbook
 
+
     def __normalize_sheet_title(self, input_data):
         return re.sub('[\\*?:/\[\]]', '_', input_data)
 
@@ -353,6 +385,7 @@ class XmlExportType(BaseExporterFormat):
     ICON = "file-alt"
     DESCRIPTION = "Export as XML"
     ACTIVE = True
+
 
     def export(self, data: List[RenderResult], *args):
         """Exports object_list as .xml file

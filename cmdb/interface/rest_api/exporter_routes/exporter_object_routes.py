@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 
 from flask import abort, jsonify, current_app
 
@@ -29,6 +30,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
 exporter_blueprint = APIBlueprint('exporter', __name__)
 
 
@@ -50,10 +52,11 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
         _config = ExporterConfig(parameters=params, options=params.optional)
         _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] \
             else params.optional.get('classname', 'JsonExportType')
-
         exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
+
         exporter = BaseExportWriter(exporter_class, _config)
-        exporter.from_database(database_manager=current_app.database_manager, user=request_user,
+        exporter.from_database(database_manager=current_app.database_manager,
+                               user=request_user,
                                permission=AccessControlPermission.READ)
     except TypeNotFoundError as error:
         return abort(400, error.message)

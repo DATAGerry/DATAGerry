@@ -563,7 +563,8 @@ class RenderList:
                 type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 render_user=self.request_user,
-                object_manager=self.object_manager, ref_render=self.ref_render)
+                object_manager=self.object_manager,
+                ref_render=self.ref_render)
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:
