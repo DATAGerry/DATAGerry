@@ -75,7 +75,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.user_management_routes.groups_routes import groups_blueprint
     from cmdb.interface.rest_api.user_management_routes.rights_routes import rights_blueprint
     from cmdb.interface.rest_api.search_routes import search_blueprint
-    from cmdb.interface.rest_api.exporter_routes.export_object_routes import export_blueprint
     from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
     from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
     from cmdb.interface.rest_api.logs_routes import logs_blueprint
@@ -85,7 +84,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
     from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
     from cmdb.interface.rest_api.external_systems_routes import external_system
-    from cmdb.interface.rest_api.doc_routes import doc_blueprint
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
@@ -104,8 +102,7 @@ def register_blueprints(app):
     app.register_blueprint(groups_blueprint, url_prefix='/groups')
     app.register_blueprint(rights_blueprint, url_prefix='/rights')
     app.register_blueprint(search_blueprint)
-    app.register_blueprint(export_blueprint, url_prefix='/exporter')
-    app.register_blueprint(exporter_blueprint, url_prefix='/exporter/')
+    app.register_blueprint(exporter_blueprint, url_prefix='/exporter')
     app.register_blueprint(type_export_blueprint)
     app.register_blueprint(logs_blueprint, url_prefix='/logs')
     app.register_blueprint(settings_blueprint)
@@ -115,7 +112,6 @@ def register_blueprints(app):
     app.register_blueprint(exportd_log_blueprint)
     app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
-    app.register_blueprint(doc_blueprint, url_prefix='/doc')
     app.register_blueprint(docs_blueprint, url_prefix='/docs')
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)

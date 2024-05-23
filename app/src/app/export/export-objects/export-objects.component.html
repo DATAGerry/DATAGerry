@@ -1,60 +1,78 @@
-<cmdb-content-header
-  title="Export Objects">
-</cmdb-content-header>
+<cmdb-content-header title="Export Objects" />
+
 <form [formGroup]="formExport" (ngSubmit)="exportObjectByTypeID()">
-  <div class="card">
-    <div class="card-body">
-      <div class="form-group">
-        <label for="typeChooser">Select Object Type <span class="required">*</span></label>
-        <ng-select id="typeChooser"
-                   [items]="typeList"
-                   required
-                   bindLabel="label"
-                   bindValue="public_id"
-                   placeholder="Choose your option"
-                   formControlName="type">
+    <div class="card">
+        <div class="card-body">
+            <div class="form-group">
+                <label for="typeChooser">
+                    Select Object Type <span class="required">*</span>
+                </label>
 
-          <ng-template ng-label-tmp let-item="item">
-            <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
-            #{{item?.public_id}}
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item">
-            <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}}
-            #{{item?.public_id}}
-          </ng-template>
-        </ng-select>
+                <ng-select
+                    id="typeChooser"
+                    [items]="typeList"
+                    required
+                    bindLabel="label"
+                    bindValue="public_id"
+                    placeholder="Choose your option"
+                    formControlName="type"
+                >
+                    <ng-template ng-label-tmp let-item="item">
+                        <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}} #{{item?.public_id}}
+                    </ng-template>
+                    <ng-template ng-option-tmp let-item="item">
+                        <i class="{{item?.render_meta?.icon}}"></i> {{item?.label}} #{{item?.public_id}}
+                    </ng-template>
+                </ng-select>
 
-        <!-- error block -->
-        <div class="cross-validation-error-message alert alert-danger" *ngIf="isVisible && type.errors?.required">
-          Please enter type
+                <!-- error block -->
+                <div
+                    *ngIf="isVisible && type.errors?.required"
+                    class="cross-validation-error-message alert alert-danger"
+                >
+                    Please enter type
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="formatChooser">
+                    Output format <span class="required">*</span>
+                </label>
+
+                <ng-select
+                    id="formatChooser"
+                    [items]="formatList"
+                    required
+                    bindLabel="label"
+                    bindValue="extension"
+                    placeholder="Choose your option"
+                    formControlName="format"
+                >
+                    <ng-template ng-label-tmp let-item="item">
+                        <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
+                    </ng-template>
+                    <ng-template ng-option-tmp let-item="item">
+                        <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
+                    </ng-template>
+                </ng-select>
+
+                <!-- error block -->
+                <div
+                    *ngIf="isVisible && format.errors?.required"
+                    class="cross-validation-error-message alert alert-danger"
+                >
+                    Please enter format
+                </div>
+            </div>
+
+            <button
+                type="button"
+                class="btn btn-primary float-right"
+                [disabled]="!formExport.valid"
+                (click)="this.exportObjectByTypeID()"
+            >
+                Go!
+            </button>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label for="formatChooser">Output format <span class="required">*</span></label>
-        <ng-select id="formatChooser"
-                   [items]="formatList"
-                   required
-                   bindLabel="label"
-                   bindValue="extension"
-                   placeholder="Choose your option"
-                   formControlName="format">
-
-          <ng-template ng-label-tmp let-item="item">
-            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
-          </ng-template>
-          <ng-template ng-option-tmp let-item="item">
-            <fa-icon icon="{{item.icon}}"></fa-icon> {{item.label}}
-          </ng-template>
-        </ng-select>
-        <!-- error block -->
-        <div class="cross-validation-error-message alert alert-danger" *ngIf="isVisible && format.errors?.required">
-          Please enter format
-        </div>
-      </div>
-      <button type="button" class="btn btn-primary float-right"
-              (click)="this.exportObjectByTypeID()"
-              [disabled]="!formExport.valid">Go!</button>
     </div>
-  </div>
 </form>

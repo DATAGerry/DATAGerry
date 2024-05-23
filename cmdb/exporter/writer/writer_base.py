@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 import datetime
 import time
 
@@ -31,6 +32,7 @@ from cmdb.utils.error import CMDBError
 
 from cmdb.utils.helpers import load_class
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
 class SupportedExporterExtension:
     """Supported export extensions for exporting (csv, json, xlsx, xml)"""
@@ -67,7 +69,7 @@ class SupportedExporterExtension:
         return _list
 
 
-class BaseExportWriter:
+class  BaseExportWriter:
     """TODO: document"""
 
     def __init__(self, export_format: BaseExporterFormat, export_config: ExporterConfig):
@@ -95,9 +97,11 @@ class BaseExportWriter:
                                                         limit=0, skip=0,
                                                         user=user, permission=permission).results
 
-            self.data = RenderList(object_list=_result, request_user=user, database_manager=database_manager,
-                                   object_manager=dep_object_manager, ref_render=True).render_result_list(raw=False)
-
+            self.data = RenderList(object_list=_result,
+                                   request_user=user,
+                                   database_manager=database_manager,
+                                   object_manager=dep_object_manager,
+                                   ref_render=True).render_result_list(raw=False)
         except CMDBError as err:
             return abort(400, err)
 

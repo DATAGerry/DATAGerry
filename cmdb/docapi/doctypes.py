@@ -18,20 +18,6 @@ import io
 from xhtml2pdf import pisa
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocumentType:
-    """TODO: document"""
-    FILE_EXTENSION = None
-    ICON = None
-    LABEL = None
-
-    def __init__(self):
-        pass
-
-    def create_doc(self, input_data):
-        """TODO: document"""
-        pass
-
-
 class PdfDocumentType:
     """TODO: document"""
     FILE_EXTENSION = "pdf"
