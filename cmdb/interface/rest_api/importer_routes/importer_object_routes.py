@@ -90,7 +90,6 @@ def get_default_importer_config(importer_type):
 @importer_object_blueprint.route('/parser', methods=['GET'])
 @login_required
 def get_parser():
-    LOGGER.info("API ==> get_parser() called")
     """TODO: document"""
     parser = [parser for parser in __OBJECT_PARSER__]
     return make_response(parser)

@@ -114,8 +114,10 @@ class ObjectImporter(BaseImporter):
     def _generate_objects(self, parsed: ObjectParserResponse, *args, **kwargs) -> list:
         """Generate a list of all data from the parser.
         The implementation of the object generation should be written in the sub class"""
-        object_instance_list: [dict] = []
+        LOGGER.info("DAT-864 ObjectImporter _generate_objects() called")
+        object_instance_list: list[dict] = []
         for entry in parsed.entries:
+            # LOGGER.info(f"DAT-864 ObjectImporter entry: {entry}")
             object_instance_list.append(self.generate_object(entry, *args, **kwargs))
         return object_instance_list
 
@@ -131,23 +133,19 @@ class ObjectImporter(BaseImporter):
         Args:
             import_objects: list of all objects for import - or output of _generate_objects()
         """
+        LOGGER.info("DAT-864 _import() called")
         run_config = self.get_config()
 
-        success_imports: [ImportSuccessMessage] = []
-        failed_imports: [ImportFailedMessage] = []
+        success_imports: list[ImportSuccessMessage] = []
+        failed_imports: list[ImportFailedMessage] = []
 
         current_import_index = run_config.start_element
         importer_counter = 0
         import_objects_length: int = len(import_objects)
 
-        LOGGER.info('Starting import of %s objects', import_objects_length)
         while current_import_index < import_objects_length:
-
             current_import_object: dict = import_objects[current_import_index]
-            LOGGER.debug('Current working object: %s', current_import_object)
-
             current_public_id: (int, None) = current_import_object.get('public_id')
-            LOGGER.debug('Current working public id: %s', current_public_id)
 
             # Object has PublicID and can not overwrite
             if current_public_id is not None and not run_config.overwrite_public:
@@ -160,12 +158,10 @@ class ObjectImporter(BaseImporter):
             # Object has no PublicID <- assign new
             if not current_public_id:
                 current_public_id = self.object_manager.get_new_id(CmdbObject.COLLECTION)
-                LOGGER.debug('Assign new PublicID: %s', current_public_id)
                 current_import_object.update({'public_id': current_public_id})
             # else assign given PublicID
             else:
                 current_public_id = current_import_object.get('public_id')
-                LOGGER.debug('Assign given PublicID: %s', current_public_id)
 
             # Insert data
             try:
