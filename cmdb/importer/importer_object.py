@@ -50,10 +50,21 @@ class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
 
     MANUALLY_MAPPING = False
 
-    def __init__(self, type_id: int, mapping: Mapping = None, start_element: int = 0, max_elements: int = 0,
-                 overwrite_public: bool = True, *args, **kwargs):
-        super().__init__(type_id=type_id, mapping=mapping, start_element=start_element,
-                                                       max_elements=max_elements, overwrite_public=overwrite_public)
+    def __init__(self,
+                 type_id: int,
+                 mapping: Mapping = None,
+                 start_element: int = 0,
+                 max_elements: int = 0,
+                 overwrite_public: bool = True,
+                 *args,
+                 **kwargs):
+        super().__init__(
+            type_id=type_id,
+            mapping=mapping,
+            start_element=start_element,
+            max_elements=max_elements,
+            overwrite_public=overwrite_public
+        )
 
 
 class JsonObjectImporter(ObjectImporter, JSONContent):
@@ -65,8 +76,13 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                  parser: JsonObjectParser = None,
                  object_manager: CmdbObjectManager = None,
                  request_user: UserModel = None):
-        super().__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
-                                                 object_manager=object_manager, request_user=request_user)
+        super().__init__(
+            file=file,
+            file_type=self.FILE_TYPE,
+            config=config, parser=parser,
+            object_manager=object_manager,
+            request_user=request_user
+        )
 
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
@@ -81,6 +97,10 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             'version': '1.0.0',
             'creation_time': datetime.now(timezone.utc)
         }
+
+        if 'multi_data_sections' in entry:
+            working_object['multi_data_sections'] = entry['multi_data_sections']
+
         map_properties = mapping.get('properties')
 
         for prop in map_properties:
@@ -93,26 +113,30 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                     entry_field['value'] = ImproveObject.improve_boolean(entry_field['value'])
                 entry_field['value'] = ImproveObject.improve_date(entry_field['value'])
                 working_object.get('fields').append(entry_field)
+
         return working_object
 
 
     def _map_element(self, prop, entry: dict, working: dict):
         mapping: dict = self.config.get_mapping()
         map_ident: dict = mapping.get('properties')
+
         if map_ident:
             idx_ident = map_ident.get(prop)
             if idx_ident:
                 value = entry.get(idx_ident)
                 if value is not None:
                     working.update({prop: value})
+
         return working
 
 
     def start_import(self) -> ImporterObjectResponse:
+        """TODO: document"""
         parsed_response: JsonObjectParserResponse = self.parser.parse(self.file)
         type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
 
-        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
+        import_objects: list[dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
 
         return import_result
@@ -223,9 +247,9 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         except ParserRuntimeError as err:
             raise ImportRuntimeError(self.__class__.__name__, err) from err
 
-        type_instance_fields: List[dict] = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        type_instance_fields: list[dict] = self.object_manager.get_type(self.config.get_type_id()).get_fields()
 
-        import_objects: [dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
+        import_objects: list[dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
 
         return import_result

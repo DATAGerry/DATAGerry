@@ -54,7 +54,10 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
     // Import Response
     public importResponse: ImportResponse = undefined;
 
-    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
     public constructor(private importService: ImportService, public sidebarService: SidebarService) {
         this.fileReader = new FileReader();
         this.importerSubscription = new Subscription();
