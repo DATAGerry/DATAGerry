@@ -59,7 +59,7 @@ export class RefComponent extends RenderFieldComponent implements OnInit, OnDest
                 //This is for MDS sections
         if(this.mode == CmdbMode.View) {
             if(this.data.value && !this.data?.reference){
-                this.objectService.getObjectMdsReferences(this.data.value).subscribe({
+                this.objectService.getObjectMdsReference(this.data.value).subscribe({
                     next: (result) => {
                         this.data.reference = result;
                         this.mdsInteraction = true;

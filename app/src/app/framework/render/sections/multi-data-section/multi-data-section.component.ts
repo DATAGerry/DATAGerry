@@ -22,6 +22,8 @@ import { UntypedFormControl } from '@angular/forms';
 
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
+import { ObjectService } from 'src/app/framework/services/object.service';
+
 import { BaseSectionComponent } from '../base-section/base-section.component';
 import { Column } from 'src/app/layout/table/table.types';
 import { PreviewModalComponent } from 'src/app/framework/type/builder/modals/preview-modal/preview-modal.component';
@@ -30,6 +32,8 @@ import { MultiDataSectionEntry, MultiDataSectionFieldValue, MultiDataSectionSet 
 import { DeleteEntryModalComponent } from '../modals/delete-entry-modal.component';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
 import { CmdbMode } from 'src/app/framework/modes.enum';
+import { CollectionParameters } from 'src/app/services/models/api-parameter';
+import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -40,6 +44,9 @@ import { CmdbMode } from 'src/app/framework/modes.enum';
 export class MultiDataSectionComponent extends BaseSectionComponent implements OnInit, OnDestroy{
     @Input() public typeInstance: CmdbType;
     @Input() public renderResult: RenderResult;
+
+    public referenceSummaries: any;
+    public refTypesSummaries: any = {};
 
     public updateRequired = false;
     public multiDataColumns: Column[] = [];
@@ -68,19 +75,26 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                     LIFE CYCLE                                                     */
 /* ------------------------------------------------------------------------------------------------------------------ */
-    constructor(private modalService: NgbModal) {
+    constructor(private modalService: NgbModal, private objectService: ObjectService) {
         super();
     }
 
 
     ngOnInit(): void {
+        this.retrieveRefTypesSummaryLines(this.getRefTypes());
+
         this.initMultiDataSection();
         this.addFieldControls();
 
         this.setColumns();
         this.configureSectionData();
 
-        this.setMdsValues();
+        if(this.mode == CmdbMode.View){
+            this.getSummaryLines();
+        } else {
+            this.setMdsValues();
+        }
+
     }
 
 
@@ -141,12 +155,155 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
             initialData['dg-multiDataRowIndex'] = aValue.multi_data_id;
 
-            for (let aDataSet of aValue.data) {
-                initialData[aDataSet.name] = aDataSet.value;
+            if (this.mode == CmdbMode.View) {
+                for (let aDataSet of aValue.data) {
+                    if(this.isRefField(aDataSet.name)) {
+                        initialData[aDataSet.name] = this.referenceSummaries[aDataSet.value];
+                    } else {
+                        initialData[aDataSet.name] = aDataSet.value;
+                    }
+                }
+            } else {
+                for (let aDataSet of aValue.data) {
+                    initialData[aDataSet.name] = aDataSet.value;
+                }
             }
+
+
 
             this.multiDataValues.push(initialData);
         }
+    }
+
+
+    getRefTypes() {
+        let refTypes = []
+
+        if (this.typeInstance) {
+            for (let field of this.typeInstance.fields) {
+                if (field.type == 'ref' && field.ref_types) {
+                    refTypes = [...refTypes, ... field.ref_types];
+                }
+            }
+        }
+        else if(this.renderResult) {
+            for (let field of this.renderResult.fields) {
+                if (field.type == 'ref' && field.ref_types) {
+                    refTypes = [...refTypes, ... field.ref_types];
+                }
+            }
+        }
+
+        return refTypes;
+    }
+
+
+    retrieveRefTypesSummaryLines(refTypes: any) {
+        if (refTypes) {
+            const params: CollectionParameters = {
+                filter: [{ $match: { type_id: { $in: refTypes } } }],
+                limit: 0,
+                sort: 'public_id',
+                order: 1,
+                page: 1
+            };
+
+            this.objectService.getObjects(params)
+            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+                let objectList = apiResponse.results;
+
+                for (let refObject of apiResponse.results) {
+                    if(refObject.summary_line) {
+                        let summaryLine = `${refObject.type_information.type_label} #${refObject.object_information.object_id} - `;
+                        summaryLine += refObject.summary_line;
+                        this.refTypesSummaries[refObject.object_information.object_id] = summaryLine;
+                    } else {
+                        this.refTypesSummaries[refObject.object_information.object_id] = `${refObject.type_information.type_label} #${refObject.object_information.object_id}`;
+                    }
+                    
+                }
+            });
+        }
+    }
+
+
+    getSummaryLines() {
+        //if this object has MDS
+        if(this.mode == CmdbMode.View) {
+            let refIDs = this.getFieldReferences(this.renderResult.multi_data_sections);
+
+            if(refIDs.length > 0){
+                this.objectService.getObjectMdsReferences(refIDs[0], refIDs).subscribe({
+                    next: (result) => {
+                        this.referenceSummaries = this.convertToSummaryLines(result);
+                        this.setMdsValues();
+                    },
+                    error: (error) => {
+                        console.error(error);
+                    }
+                });
+            }
+        }
+    }
+
+
+    getFieldReferences(multiDataSections: any) {
+        let refIDs = []
+
+        for(let section of multiDataSections) {
+            for (let value of (section.values)) {
+                for (let dataSet of value.data) {
+                    if (this.isRefField(dataSet.name) && dataSet.value) {
+                        refIDs.push(dataSet.value);
+                    }
+                }
+            }
+        }
+
+        return refIDs;
+    }
+
+
+    isRefField(fieldName: string): boolean {
+        if (this.mode == CmdbMode.View) {
+            for (let aField of this.renderResult.fields) {
+                if (aField.name == fieldName) {
+                    return aField.type == 'ref';
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    convertToSummaryLines(refData: any){
+        let summaryLines = {}
+        for (let refID in refData) {
+            let refDataSet = refData[refID];
+
+            let summaryLine = `${refDataSet["type_label"]} #${refDataSet["object_id"]}`;
+
+            if (refDataSet["summaries"].length > 0) {
+                summaryLine += " -"
+                
+                for (let summary of refDataSet["summaries"]) {
+                    if (summary["value"]) {
+                        summaryLine += ` ${summary["value"]} |`;
+                    } else {
+                        summaryLine += ` None |`
+                    }
+                    
+                }
+
+                // Remove the last '|' from the string
+                summaryLine = summaryLine.substring(0, summaryLine.length -1);
+            }
+
+            summaryLines[refID] = summaryLine;
+        }
+
+        return summaryLines;
     }
 
 
@@ -294,6 +451,12 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             case "radio": {
                 if (newValues[fieldID]) {
                     return this.getOptionLabel(fieldID, newValues[fieldID]);
+                }
+                break;
+            }
+            case "ref": {
+                if (newValues[fieldID] && this.refTypesSummaries) {
+                    return this.refTypesSummaries[newValues[fieldID]];
                 }
                 break;
             }
