@@ -274,12 +274,14 @@ class ObjectManager(ManagerBase):
             -> IterationResult[CmdbObject]:
         """TODO: document"""
         query = []
+
         if isinstance(filter, dict):
             query.append(filter)
         elif isinstance(filter, list):
             query += filter
 
         query.append(Builder.lookup_(_from='framework.types', _local='type_id', _foreign='public_id', _as='type'))
+
         query.append(Builder.unwind_({'path': '$type'}))
 
         field_ref_query = {
@@ -298,8 +300,149 @@ class ObjectManager(ManagerBase):
         query.append(Builder.match_(Builder.or_([field_ref_query, section_ref_query])))
         query.append(Builder.match_({'fields.value': object_.public_id}))
 
-        return self.iterate(filter=query, limit=limit, skip=skip, sort=sort, order=order,
-                            user=user, permission=permission)
+        # limit and skip will be handled when merged with the MDS results in '__merge_mds_references()'
+        result = self.iterate(filter=query,
+                              limit=0,
+                              skip=0,
+                              sort=sort,
+                              order=order,
+                              user=user,
+                              permission=permission)
+        mds_result = self.get_mds_references_for_object(object_, filter)
+
+        merge_result = self.__merge_mds_references(mds_result, result, limit, skip, sort, order)
+
+        return merge_result
+
+
+    def __merge_mds_references(self,
+                             mds_result: list,
+                             obj_result: IterationResult,
+                             limit: int,
+                             skip: int,
+                             sort: str,
+                             order: int):
+        """TODO: document"""
+        try:
+            # first add mds objects to normal references
+            for ref_object in mds_result:
+                tmp_object = CmdbObject.from_data(ref_object)
+                obj_result.results.append(tmp_object)
+
+            obj_result.total = len(obj_result.results)
+
+            # sort all findings according to sort and order
+            descending_order = order == -1
+            try:
+                obj_result.results.sort(key=lambda x: getattr(x, sort), reverse=descending_order)
+            except Exception as err:
+                LOGGER.debug(f"References sorting error: {err}")
+
+            # just keep the given limit of objects if limit > 0
+            if limit > 0:
+                list_length = limit + skip
+
+                # if the list_length is longer than the object_list then just set it to len(object_list)
+                if list_length > len(obj_result.results):
+                    list_length = len(obj_result.results)
+
+                try:
+                    obj_result.results = obj_result.results[skip:list_length]
+                except Exception as err:
+                    LOGGER.debug(f"References list slice error: {err}")
+
+            # obj_result.total = len(obj_result.results)
+        except Exception as err:
+            LOGGER.info(f"__merge_mds_references err: {err}")
+
+        return obj_result
+
+
+    def get_mds_references_for_object(self, referenced_object: CmdbObject, query_filter: dict):
+        """TODO: document"""
+        object_type_id = referenced_object.type_id
+
+        query = []
+
+        if isinstance(query_filter, dict):
+            query.append(query_filter)
+        elif isinstance(query_filter, list):
+            for a_filter in query_filter:
+                if "$match" in a_filter and len(a_filter["$match"]) > 0:
+                    if "type_id" in a_filter["$match"]:
+                        filter_type_id = a_filter["$match"]["type_id"]
+                        del a_filter["$match"]["type_id"]
+                        a_filter["$match"]["public_id"] = filter_type_id
+
+            query += query_filter
+
+        # Get all types which reference this type
+        query.append({'$match': {"$and": [
+                                    {"fields.type": "ref"},
+                                    {"fields.ref_types": object_type_id}
+                                ]}
+                    })
+
+        # Filter the public_id's of these types
+        query.append({'$project': {"public_id": 1, "_id": 0}})
+
+        # Get all objects of these types
+        query.append(Builder.lookup_(_from='framework.objects',
+                                     _local='public_id',
+                                     _foreign='type_id',
+                                     _as='type_objects'))
+
+        # Filter out types which don't have any objects
+        query.append({'$match': {"type_objects.0": {"$exists": True}}})
+
+        # Spread out the arrays
+        query.append(Builder.unwind_({'path': '$type_objects'}))
+
+        # Filter the objects which actually have any multi section data
+        query.append({'$match': {"type_objects.multi_data_sections.0": {"$exists": True}}})
+
+        # Remove the public_id field
+        query.append({'$project': {"type_objects": 1}})
+
+        # Spread out as a list
+        query.append({'$replaceRoot': {"newRoot": '$type_objects'}})
+
+        query.append({'$project': {"_id": 0}})
+
+        # query.append({'$sort': {sort: order}})
+
+        try:
+            results = list(self._aggregate(self.type_manager.collection, query))
+        except ManagerIterationError as err:
+            LOGGER.debug(f"get_mds_references_for_object aggregation err:{err}")
+
+        matching_results = []
+
+        # Check if the mds data references the current object
+        for result in results:
+            try:
+                for mds_entry in result["multi_data_sections"]:
+                    for value in mds_entry["values"]:
+                        for data_set in value["data"]:
+                            if self.__is_ref_field(data_set["name"], result) and \
+                            data_set["value"] == referenced_object.public_id:
+                                matching_results.append(result)
+                                # this result is a match => go back to outer loop
+                                raise StopIteration()
+            except StopIteration:
+                pass
+
+        return matching_results
+
+
+    def __is_ref_field(self, field_name: str, ref_object: dict) -> bool:
+        """TODO: document"""
+        ref_type = self.type_manager.get(ref_object["type_id"])
+        for field in ref_type.fields:
+            if field["name"] == field_name and field["type"] == "ref":
+                return True
+
+        return False
 
 
     def count_objects(self, type_id: int):

@@ -411,9 +411,9 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
-
     except ManagerIterationError as err:
         return abort(400, err)
+
     return api_response.make_response()
 
 
@@ -1002,9 +1002,8 @@ def _fetch_only_active_objs() -> bool:
     """
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
-
-        if value in ['True', 'true']:
-            return True
+        return value in ['True', 'true']
+            
     return False
 
 

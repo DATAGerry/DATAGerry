@@ -15,51 +15,73 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
+
 import { CmdbObject } from '../../../../models/cmdb-object';
 import { RenderResult } from '../../../../models/cmdb-render';
-
+/* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
-  selector: 'cmdb-object-references-type-column',
-  templateUrl: './object-references-type-column.component.html',
-  styleUrls: ['./object-references-type-column.component.scss']
+    selector: 'cmdb-object-references-type-column',
+    templateUrl: './object-references-type-column.component.html',
+    styleUrls: ['./object-references-type-column.component.scss']
 })
 export class ObjectReferencesTypeColumnComponent {
+    public isSectionRef: boolean = false;
+    public isFieldRef: boolean = false;
+    public isMdsRef: boolean = false;
 
-  public isSectionRef: boolean = false;
-  public isFieldRef: boolean = false;
+    // ID of the referenced object
+    @Input() public objectID: number;
 
-  /**
-   * ID of the referenced object.
-   */
-  @Input() public objectID: number;
+    // Reference object
+    public renderResult: CmdbObject | RenderResult;
 
-  /**
-   * Reference object
-   */
-  public renderResult: CmdbObject | RenderResult;
 
-  /**
-   * Reference object setter
-   */
-  @Input('object')
-  public set Object(obj: CmdbObject | RenderResult) {
-    if (obj) {
-      this.renderResult = obj;
-      this.isSectionRef = this.refTypeIsInFields(obj.fields, 'ref-section-field');
-      this.isFieldRef = this.refTypeIsInFields(obj.fields, 'ref');
+    @Input('object')
+    public set Object(obj: CmdbObject | RenderResult) {
+        if (obj) {
+            this.renderResult = obj;
+            this.isSectionRef = this.refTypeIsInFields(obj.fields, 'ref-section-field');
+            this.isFieldRef = this.refTypeIsInFields(obj.fields, 'ref');
+            this.isMdsRef = this.refTypeIsInMDS();
+        }
+
     }
 
-  }
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
-  /**
-   * Check if a ref type is in fields
-   * @param fields
-   * @param type
-   * @private
-   */
-  private refTypeIsInFields(fields: Array<any>, type: string): boolean {
-    return fields.find(f => f.type === type && f.value === this.objectID) !== undefined;
-  }
+    private refTypeIsInMDS(): boolean {
+        if (this.renderResult.multi_data_sections) {
+            for (let mdsEntry of this.renderResult.multi_data_sections) {
+                for (let mdsValue of mdsEntry.values) {
+                    for( let dataSet of mdsValue.data) {
+                        if(dataSet.value == this.objectID && this.isRefField(dataSet.name)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+        }
+
+        return false;
+    }
+
+
+    private isRefField(fieldName: string): boolean {
+        for (let aField of this.renderResult.fields) {
+            if (aField.name == fieldName && aField.type == "ref") {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    /**
+     * Check if a ref type is in fields
+     */
+    private refTypeIsInFields(fields: Array<any>, type: string): boolean {
+        return fields.find(f => f.type === type && f.value === this.objectID) !== undefined;
+    }
 }
