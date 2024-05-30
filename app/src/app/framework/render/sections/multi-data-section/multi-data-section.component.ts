@@ -45,32 +45,36 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     @Input() public typeInstance: CmdbType;
     @Input() public renderResult: RenderResult;
 
-    public referenceSummaries: any;
+    public modalSection: any = {};
+    private modalRef: NgbModalRef;
+
+    //Summary lines of the current referenced objects (For view mode)
+    public currentObjectSummaryLines: any;
+
+    //Dict of all summary lines of objects from  Type 'ref_types'
     public refTypesSummaries: any = {};
 
     public updateRequired = false;
-    public multiDataColumns: Column[] = [];
-    public multiDataValues = [];
-    public totalCount: number = 0;
 
+    // Columns of the MDS-table
+    public multiDataColumns: Column[] = [];
+    // Values of the MDS-Table
+    public tableMultiDataValues = [];
+
+    //Initial MultiDataSectionEntry which will track the values of the form
     formatedDataSection: MultiDataSectionEntry = {
         "section_id": "",
         "highest_id": 0,
-        "values": [
-            {
-                "multi_data_id": 0,
-                "data": []
-            }
-        ]
+        "values": []
     };
 
-    mdsTable = new UntypedFormControl('');
+    //Control containing all the values which should be saved in the database
+    mdsTableControl = new UntypedFormControl('');
 
     // Table Template: Type actions column
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
-    private modalRef: NgbModalRef;
-    public modalSection: any = {};
+
 
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                     LIFE CYCLE                                                     */
@@ -81,20 +85,20 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     ngOnInit(): void {
-        this.retrieveRefTypesSummaryLines(this.getRefTypes());
+        //Init 'refTypesSummaries'
+        this.initRefTypesSummaryLines();
 
-        this.initMultiDataSection();
-        this.addFieldControls();
+        //Init 'formatedDataSection' and fill Values if they exist
+        this.initFormatedDataSection();
 
-        this.setColumns();
-        this.configureSectionData();
+        //Init all controls + form + patchValues
+        this.initFieldControlsAndForm();
 
-        if(this.mode == CmdbMode.View){
-            this.getSummaryLines();
-        } else {
-            this.setMdsValues();
-        }
+        //Init the table
+        this.initTableColumns();
 
+        //Init the Section which will be passed to the popups to display the MDS
+        this.initModalSectionData();
     }
 
 
@@ -104,93 +108,48 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         }
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+/* ------------------------------------------------- REFERENCE SETUP ------------------------------------------------ */
 
     /**
-     * Initialises the MultiDataSectionEntry which will be submited
+     * Retrives all objects of the 'ref_types' and initialises the 'this.refTypesSummaries'
      */
-    initMultiDataSection(): void {
-        if (this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
-            for (let aSection of this.renderResult.multi_data_sections) {
-                if (aSection.section_id == this.section.name) {
-                    this.formatedDataSection.section_id = aSection.section_id;
-                    this.formatedDataSection.highest_id = aSection.highest_id;
-                    this.formatedDataSection.values = aSection.values;
+    initRefTypesSummaryLines(): void {
+        let refTypes: number[] = this.getRefTypes();
+
+        if (refTypes) {
+            const params: CollectionParameters = {
+                filter: [{ $match: { type_id: { $in: refTypes }}}],
+                limit: 0,
+                sort: 'public_id',
+                order: 1,
+                page: 1
+            };
+
+            this.objectService.getObjects(params).subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+                this.setRefTypesSummaries(apiResponse.results);
+                if(this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
+                    this.initTableValuesFromFormatedDataSection();
                 }
-            }
+            });
         } else {
-            this.formatedDataSection = {
-                "section_id": this.section.name,
-                "highest_id": 0,
-                "values": []
+            if(this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
+                this.initTableValuesFromFormatedDataSection();
             }
         }
     }
 
 
     /**
-     * Retrieves the next ID for a MultiDataSet
-     * 
-     * @returns (number): the next ID for a MultiDataSet
+     * Retrieves all 'ref_types' of the objects Type
+     * @returns (Array): All 'ref_types' of the objects Type
      */
-    getNextMultiDataID(): number {
-        return this.formatedDataSection.highest_id;
-    }
+    getRefTypes(): number[] {
+        let refTypes: number[] = []
+        let refTypesSource: CmdbType | RenderResult = this.typeInstance ? this.typeInstance : this.renderResult;
 
-
-    /**
-     * Incrementy the highest ID for MultiDataSets
-     */
-    incrementNextMultiDataID(): void {
-        this.formatedDataSection.highest_id += 1;
-    }
-
-
-    /**
-     * Sets the values of the MultiDataSets for the table
-     */
-    setMdsValues(): void {
-        for (let aValue of this.formatedDataSection.values) {
-            let initialData = {}
-
-            initialData['dg-multiDataRowIndex'] = aValue.multi_data_id;
-
-            if (this.mode == CmdbMode.View) {
-                for (let aDataSet of aValue.data) {
-                    if(this.isRefField(aDataSet.name)) {
-                        initialData[aDataSet.name] = this.referenceSummaries[aDataSet.value];
-                    } else {
-                        initialData[aDataSet.name] = aDataSet.value;
-                    }
-                }
-            } else {
-                for (let aDataSet of aValue.data) {
-                    initialData[aDataSet.name] = aDataSet.value;
-                }
-            }
-
-
-
-            this.multiDataValues.push(initialData);
-        }
-    }
-
-
-    getRefTypes() {
-        let refTypes = []
-
-        if (this.typeInstance) {
-            for (let field of this.typeInstance.fields) {
-                if (field.type == 'ref' && field.ref_types) {
-                    refTypes = [...refTypes, ... field.ref_types];
-                }
-            }
-        }
-        else if(this.renderResult) {
-            for (let field of this.renderResult.fields) {
-                if (field.type == 'ref' && field.ref_types) {
-                    refTypes = [...refTypes, ... field.ref_types];
-                }
+        for (let field of refTypesSource.fields) {
+            if (field.type == 'ref' && field.ref_types) {
+                refTypes = [...refTypes, ... field.ref_types];
             }
         }
 
@@ -198,60 +157,37 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    retrieveRefTypesSummaryLines(refTypes: any) {
-        if (refTypes) {
-            const params: CollectionParameters = {
-                filter: [{ $match: { type_id: { $in: refTypes } } }],
-                limit: 0,
-                sort: 'public_id',
-                order: 1,
-                page: 1
-            };
+    /**
+     * Sets the attribute 'this.refTypesSummaries'
+     * 
+     * @param objectList (RenderResult[]): Array of objects for 'ref_types'
+     */
+    setRefTypesSummaries(objectList: RenderResult[]): void {
+        for (let refObject of objectList) {
+            const refObjectID = refObject.object_information.object_id;
+            const refObjectLabel = refObject.type_information.type_label;
+            const refObjectSummaryLine = refObject.summary_line;
 
-            this.objectService.getObjects(params)
-            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-                let objectList = apiResponse.results;
-
-                for (let refObject of apiResponse.results) {
-                    if(refObject.summary_line) {
-                        let summaryLine = `${refObject.type_information.type_label} #${refObject.object_information.object_id} - `;
-                        summaryLine += refObject.summary_line;
-                        this.refTypesSummaries[refObject.object_information.object_id] = summaryLine;
-                    } else {
-                        this.refTypesSummaries[refObject.object_information.object_id] = `${refObject.type_information.type_label} #${refObject.object_information.object_id}`;
-                    }
-                    
-                }
-            });
-        }
-    }
-
-
-    getSummaryLines() {
-        //if this object has MDS
-        if(this.mode == CmdbMode.View) {
-            let refIDs = this.getFieldReferences(this.renderResult.multi_data_sections);
-
-            if(refIDs.length > 0){
-                this.objectService.getObjectMdsReferences(refIDs[0], refIDs).subscribe({
-                    next: (result) => {
-                        this.referenceSummaries = this.convertToSummaryLines(result);
-                        this.setMdsValues();
-                    },
-                    error: (error) => {
-                        console.error(error);
-                    }
-                });
+            if(refObjectSummaryLine) {
+                this.refTypesSummaries[refObjectID] = `${refObjectLabel} #${refObjectID} - ${refObjectSummaryLine}`;
+            } else {
+                this.refTypesSummaries[refObjectID] = `${refObjectLabel} #${refObjectID}`;
             }
         }
     }
 
 
-    getFieldReferences(multiDataSections: any) {
-        let refIDs = []
+    /**
+     * Retrieves all objectIDs which are referenced in the MultiDataSections of the current object
+     * 
+     * @param multiDataSections All MDS of the current object
+     * @returns (number[]): All referenced objectIDs
+     */
+    getAllReferencedObjectIdsInMDS(multiDataSections: any): number[] {
+        let refIDs: number[] = []
 
         for(let section of multiDataSections) {
-            for (let value of (section.values)) {
+            for (let value of section.values) {
                 for (let dataSet of value.data) {
                     if (this.isRefField(dataSet.name) && dataSet.value) {
                         refIDs.push(dataSet.value);
@@ -264,6 +200,11 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
+    /**
+     * Checks if the type of the Field with the fieldName is of type 'ref
+     * @param fieldName (string): name of the Field
+     * @returns (boolean): True if type of Field is 'ref', else False
+     */
     isRefField(fieldName: string): boolean {
         if (this.mode == CmdbMode.View) {
             for (let aField of this.renderResult.fields) {
@@ -276,42 +217,33 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         return false;
     }
 
+/* -------------------------------------------------- INITIAL SETUP ------------------------------------------------- */
 
-    convertToSummaryLines(refData: any){
-        let summaryLines = {}
-        for (let refID in refData) {
-            let refDataSet = refData[refID];
-
-            let summaryLine = `${refDataSet["type_label"]} #${refDataSet["object_id"]}`;
-
-            if (refDataSet["summaries"].length > 0) {
-                summaryLine += " -"
-                
-                for (let summary of refDataSet["summaries"]) {
-                    if (summary["value"]) {
-                        summaryLine += ` ${summary["value"]} |`;
-                    } else {
-                        summaryLine += ` None |`
-                    }
-                    
+    /**
+     * Initialises the MultiDataSectionEntry which will be submited
+     */
+    initFormatedDataSection(): void {
+        if (this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
+            //Set the already existing values
+            for (let aSection of this.renderResult.multi_data_sections) {
+                if (aSection.section_id == this.section.name) {
+                    this.formatedDataSection.section_id = aSection.section_id;
+                    this.formatedDataSection.highest_id = aSection.highest_id;
+                    this.formatedDataSection.values = aSection.values;
                 }
-
-                // Remove the last '|' from the string
-                summaryLine = summaryLine.substring(0, summaryLine.length -1);
             }
-
-            summaryLines[refID] = summaryLine;
+        } else {
+            // In CmdbMode.Create just the section_id
+            this.formatedDataSection.section_id = this.section.name;
         }
-
-        return summaryLines;
     }
 
 
     /**
-     * Adds all FieldControls for the Form-Popups
+     * Adds all FieldControls for the Form-Popups and initialises the form 
      */
-    addFieldControls(): void {
-        //add the controls for all fields of mds
+    initFieldControlsAndForm(): void {
+        //add the controls for all fields of the MDS
         for(let aField of this.fields){
             if (this.section.fields.includes(aField.name)) {
                 const fieldControl = new UntypedFormControl('');
@@ -320,25 +252,15 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         }
 
         //add the mds-Control
-        this.form.addControl("dg-mds-"+this.section.name, this.mdsTable);
-        this.mdsTable.patchValue(this.formatedDataSection);
+        this.form.addControl("dg-mds-"+this.section.name, this.mdsTableControl);
+        this.mdsTableControl.patchValue(this.formatedDataSection);
     }
 
 
     /**
-     * Checks if a Field is a hidden field
-     * @param fieldName (string): identifier of the Field which should be checked
-     * @returns (boolean): True if it is a hidden field, else False
+     * Sets all columns of MDS-table
      */
-    isHiddenField(fieldName: string): boolean {
-        return (this.section as CmdbMultiDataSection).hidden_fields?.includes(fieldName);
-    }
-
-
-    /**
-     * Sets the columns of the table
-     */
-    setColumns(): void{
+    initTableColumns(): void {
         for(let aField of this.fields){
             if (this.section.fields.includes(aField.name) && !this.isHiddenField(aField.name)) {
                 let fieldColumn: Column = {
@@ -355,14 +277,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             }
         }
 
-        this.addActionColumn();
-    }
-
-
-    /**
-     * Adds the actions column to the table
-     */
-    public addActionColumn() {
+        // Only show the 'Actions'-column in Create- or Edit-Mode
         if (this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit) {
             let actionsColumn: Column = {
                 display: 'Actions',
@@ -382,20 +297,26 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
 
     /**
-     * Formats data for the modal sections
+     * Checks if a Field is a hidden field
+     * @param fieldName (string): identifier of the Field which should be checked
+     * @returns (boolean): True if it is a hidden field, else False
      */
-    private configureSectionData() {
+    isHiddenField(fieldName: string): boolean {
+        return (this.section as CmdbMultiDataSection).hidden_fields?.includes(fieldName);
+    }
+
+
+    /**
+     * Initialises the 'modalSection' property which will be passed to modal popups
+     */
+    private initModalSectionData(): void {
         this.modalSection['type'] = this.section.type;
         this.modalSection['name'] = this.section.name;
         this.modalSection['label'] = this.section.label;
         this.modalSection['fields'] = [];
 
-        for (let sectionFieldIndex in this.section.fields){
-            const aSectionFieldName = this.section.fields[sectionFieldIndex];
-
-            for(let fieldIndex in this.fields) {
-                const aField = this.fields[fieldIndex];
-
+        for (let aSectionFieldName of this.section.fields){
+            for(let aField of this.fields) {
                 if (aField.name == aSectionFieldName) {
                     this.modalSection['fields'].push(aField);
                     continue;
@@ -405,33 +326,210 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    private setFormattedData(newValues: any){
+    /**
+     * Sets the values of the formatedDataSection as values for the table
+     */
+    initTableValuesFromFormatedDataSection(): void {
+
+        for (let aValue of this.formatedDataSection.values) {
+            let initialTableData = {}
+
+            initialTableData['dg-multiDataRowIndex'] = aValue.multi_data_id;
+
+            if (this.mode == CmdbMode.View || this.mode == CmdbMode.Edit) {
+                for (let aDataSet of aValue.data) {
+                    let tmpDict = {};
+                    tmpDict[aDataSet.name] = aDataSet.value;
+
+                    initialTableData[aDataSet.name] = this.formatFieldValue(aDataSet.name, tmpDict);
+
+                }
+            } else {
+                for (let aDataSet of aValue.data) {
+                    initialTableData[aDataSet.name] = aDataSet.value;
+                }
+            }
+
+            this.tableMultiDataValues.push(initialTableData);
+        }
+    }
+
+
+    /**
+     * Decides if the add button should be showed above the table
+     * @returns (boolean): True if the add button should be showed about the table, else False
+     */
+    showAddButton(): boolean {
+        return this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit;
+    }
+
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                   EVENT HANDLING                                                   */
+/* ------------------------------------------------------------------------------------------------------------------ */
+
+    /**
+     * Opens empty popup form to create a now table row
+     */
+    public onAddRowClicked(): void{
+        this.resetModalValues();
+        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
+        this.modalRef.componentInstance.sections = [this.modalSection];
+        this.modalRef.componentInstance.saveValues = true;
+
+        this.modalRef.result.then((values: any) => {
+            if (values){
+                this.addNewValuesToControl(values);
+
+                values = this.formatNewValuesForTable(values);
+                values['dg-multiDataRowIndex'] = this.getCurrentHighestMultiDataID();
+
+                this.tableMultiDataValues.push(values);
+                this.incrementCurrentMultiDataID();
+
+                this.form.markAsDirty();
+            }
+        });
+    }
+
+
+    /**
+     * Opens popup to show preview of all values of the MultiDataSet
+     * 
+     * @param rowIndex (number): multiDataID of MultiDataSet
+     */
+    public onRowPreview(rowIndex: number): void {
+        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
+        this.modalRef.componentInstance.activateViewMode = true;
+        this.modalRef.componentInstance.sections = [this.getModalSectionWithRowData(rowIndex)];
+    }
+
+
+    /**
+     * Opens popup to edit edit current values of the MultiDataSet
+     * 
+     * @param rowIndex (number): MultiDataID of MultiDataSet
+     */
+    public onRowEdit(rowIndex: number): void {
+        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
+        this.modalRef.componentInstance.saveValues = true;
+        this.modalRef.componentInstance.sections = [this.getModalSectionWithRowData(rowIndex)];
+
+        this.modalRef.result.then((values: any) => {
+            if (values){
+                this.updateNewValues(values, rowIndex);
+                this.form.markAsDirty();
+            }
+        });
+    }
+
+
+    /**
+     * Opens popup to confim deletion of a MultiDataSet
+     * 
+     * @param rowIndex (number): MultiDataID of MultiDataSet
+     */
+    public onRowDelete(rowIndex: number): void {
+        this.modalRef = this.modalService.open(DeleteEntryModalComponent);
+
+        this.modalRef.result.then((deleteConfirm: boolean) => {
+            if(deleteConfirm){
+                this.removeDataSet(rowIndex);
+                this.form.markAsDirty();
+            }
+        });
+    }
+
+/* ------------------------------------------- ADD NEW TABLE ENTRY HELPER ------------------------------------------- */
+
+    /**
+     * Resets all values of property 'modalSection' so the 'create'-popup is empty
+     */
+    resetModalValues(): void {
+        for (let aField of this.modalSection.fields) {
+            if("value" in aField){
+                delete aField["value"];
+            }
+        }
+    }
+
+
+    /**
+     * Adds the new values to control
+     * 
+     * @param newValues the new values
+     */
+    private addNewValuesToControl(newValues: any){
         let newDataSet: MultiDataSectionSet = {
-            "multi_data_id": this.getNextMultiDataID(),
+            "multi_data_id": this.getCurrentHighestMultiDataID(),
             "data": []
         }
 
         for (let fieldID in newValues) {
-            let formattedValue = this.formatFieldValue(fieldID, newValues);
-
             let dataElement: MultiDataSectionFieldValue = {
                 "name": fieldID,
-                "value": formattedValue
+                "value": newValues[fieldID]
             }
-            newValues[fieldID] = formattedValue;
+
             newDataSet.data.push(dataElement);
         }
 
         this.formatedDataSection.values.push(newDataSet);
-        this.mdsTable.patchValue(this.formatedDataSection);
+        this.mdsTableControl.patchValue(this.formatedDataSection);
+    }
+
+
+    /**
+     * Formats the new values for table by replacing some values with the corresponding labels or summary lines
+     * 
+     * @param newValues the new values
+     * @return the formatted values
+     */
+    private formatNewValuesForTable(newValues: any) {
+        for (let fieldID in newValues) {
+            let formattedValue = this.formatFieldValue(fieldID, newValues);
+            newValues[fieldID] = formattedValue;
+        }
 
         return newValues;
     }
 
-/* ------------------------------------------------ FIELD FORMATTING ------------------------------------------------ */
+    // /**
+    //  * 
+    //  * @param newValues 
+    //  * @returns 
+    //  */
+    // private addNewValuesToControl(newValues: any){
+    //     let newDataSet: MultiDataSectionSet = {
+    //         "multi_data_id": this.getCurrentHighestMultiDataID(),
+    //         "data": []
+    //     }
 
+    //     for (let fieldID in newValues) {
+    //         let formattedValue = this.formatFieldValue(fieldID, newValues);
+
+    //         let dataElement: MultiDataSectionFieldValue = {
+    //             "name": fieldID,
+    //             "value": formattedValue
+    //         }
+    //         newValues[fieldID] = formattedValue;
+    //         newDataSet.data.push(dataElement);
+    //     }
+
+    //     this.formatedDataSection.values.push(newDataSet);
+    //     this.mdsTableControl.patchValue(this.formatedDataSection);
+
+    //     return newValues;
+    // }
+
+
+    /**
+     * 
+     * @param fieldID 
+     * @param newValues 
+     * @returns 
+     */
     private formatFieldValue(fieldID: string, newValues:any){
-        let fieldType = this.getFieldType(fieldID);
+        let fieldType = this.getTypeOfField(fieldID);
 
         switch (fieldType) {
             case "date": {
@@ -439,7 +537,6 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
                     const defaultDate = moment.utc(newValues[fieldID]);
                     return defaultDate.isValid() ? moment.tz(defaultDate, "UTC").format("YYYY-MM-DD") : newValues[fieldID];
                 }
-                
                 break;
             }
             case "select": {
@@ -466,8 +563,54 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    private getOptionLabel(fieldID: string, value: string) {
-        let fieldOptions = this.getField(fieldID)["options"];
+    /**
+     * Retrives the field_type of the field with the given fieldName
+     * 
+     * @param fieldName (string): name of the field
+     * @returns (string): type of the field
+     */
+    private getTypeOfField(fieldName: string): string {
+        let fieldType = "text";
+
+        for (let aField of this.getAllFieldsOfType()) {
+            if (aField["name"] == fieldName) {
+                fieldType = aField["type"];
+                break;
+            }
+        }
+
+        return fieldType;
+    }
+
+
+    /**
+     * Retrives all fields of the objects Type
+     * 
+     * @returns all fields of the objects Type
+     */
+    private getAllFieldsOfType() {
+        let typeFields: any;
+
+        if(this.typeInstance) {
+            typeFields = this.typeInstance.fields;
+        }
+        else {
+            typeFields = this.renderResult.fields;
+        }
+
+        return typeFields;
+    }
+
+
+    /**
+     * Retrives the option label for an option value
+     * 
+     * @param fieldName name of the field
+     * @param value the option value of the field
+     * @returns 
+     */
+    private getOptionLabel(fieldName: string, value: string) {
+        let fieldOptions = this.getField(fieldName)["options"];
 
         for (let option of fieldOptions) {
             if ( option["name"] == value) {
@@ -479,22 +622,17 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    private getTypeFields() {
-        let typeFields = this.typeInstance.fields;
-
-        if (this.mode == CmdbMode.Edit) {
-            typeFields = this.renderResult.fields;
-        }
-
-        return typeFields;
-    }
-
-
-    private getField(fieldID: string) {
+    /**
+     * Retrives field information for a field with the given fieldName
+     * 
+     * @param fieldName name of the target field
+     * @returns Dict with the field information
+     */
+    private getField(fieldName: string) {
         let targetField = {};
 
-        for (let aField of this.getTypeFields()) {
-            if (aField["name"] == fieldID) {
+        for (let aField of this.getAllFieldsOfType()) {
+            if (aField["name"] == fieldName) {
                 targetField = aField;
                 break;
             }
@@ -504,64 +642,37 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     }
 
 
-    private getFieldType(fieldID: string): string {
-        let fieldType = "text";
-
-        for (let aField of this.getTypeFields()) {
-            if (aField["name"] == fieldID) {
-                fieldType = aField["type"];
-                break;
-            }
-        }
-
-        return fieldType;
-    }
-
-/* ------------------------------------------------- TABLE HANDLING ------------------------------------------------- */
-
-    private modifyFormattedData(newValues: any, multiDataID: number) {
-        // first update the formatedDataSection
-        for (let aDataSet of this.formatedDataSection.values) {
-            if (aDataSet.multi_data_id == multiDataID){
-
-                for(let aField of aDataSet.data){
-                    aField.value = newValues[aField.name];
-                }
-                break;
-            } 
-        }
-
-        // update the multiDataValues
-        for(let multiDataEntry of this.multiDataValues) {
-            if (multiDataEntry['dg-multiDataRowIndex'] == multiDataID) {
-                for (let key in newValues) {
-                    multiDataEntry[key] = newValues[key];
-                }
-            }
-        }
-
-        this.updateRequired = true;
-        setTimeout(() => {
-            this.updateRequired = false
-        }, 0);
-
-        this.mdsTable.patchValue(this.formatedDataSection);
+    /**
+     * Retrieves the current highest ID for a MultiDataSet
+     * 
+     * @returns (number): the current highest ID for a MultiDataSet
+     */
+    getCurrentHighestMultiDataID(): number {
+        return this.formatedDataSection.highest_id;
     }
 
 
-    getDataSet(multiDataID: number) {
-        return  this.formatedDataSection.values.filter((dataSet) => dataSet.multi_data_id == multiDataID)[0].data;
+    /**
+     * Incrementy the current highest ID for MultiDataSets
+     */
+    incrementCurrentMultiDataID(): void {
+        this.formatedDataSection.highest_id += 1;
     }
 
+/* ------------------------------------------- VIEW/EDIT TABLE ROW HELPER ------------------------------------------- */
 
-    getModalSectionData(multiDataID: number){
-        let previewSection = {...this.modalSection};
+    /**
+     * Retrieves the modalSection filled with row data
+     * @param multiDataID multiDataID of the row 
+     * @returns modalSection with row data
+     */
+    getModalSectionWithRowData(multiDataID: number){
+        let modalSectionWithValues = {...this.modalSection};
 
         let dataSet = this.getDataSet(multiDataID);
 
         for (let entry of dataSet){
-
-            for(let aField of previewSection.fields){
+            for(let aField of modalSectionWithValues.fields){
                 if (entry.name == aField.name) {
                     aField['value'] = entry.value;
                     break;
@@ -569,128 +680,82 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
             }
         }
 
-        return previewSection;
+        return modalSectionWithValues;
     }
 
 
     /**
-     * Removes a MultiDataSet with the given MultiDataID from the table values
+     * Retrieves the data of a table row from the formatedDataSection
      * 
-     * @param multiDataID (number): MultiDataID of MultiDataSet
+     * @param multiDataID (number): multiDataID of the target row
+     * @returns dict with the data of the row
      */
-    removeFromTableValues(multiDataID: number): void {
-        this.multiDataValues = this.multiDataValues.filter((rowData) => rowData['dg-multiDataRowIndex'] != multiDataID);
+    getDataSet(multiDataID: number) {
+        return  this.formatedDataSection.values.filter((dataSet) => dataSet.multi_data_id == multiDataID)[0].data;
     }
 
 
     /**
-     * Removes a MultiDataSet with the given MultiDataID from the current values
-     * 
-     * @param multiDataID (number): MultiDataID of MultiDataSet
+     * Updates the new values 
+     * @param newValues 
+     * @param multiDataID 
      */
-    removeDataSet(multiDataID: number): void {
-        this.formatedDataSection.values = this.formatedDataSection.values.filter(
-                                            (dataSet) => dataSet.multi_data_id != multiDataID
-                                          );
+    private updateNewValues(newValues: any, multiDataID: number) {
+        // Update the formatedDataSection
+        for (let aDataSet of this.formatedDataSection.values) {
+            if (aDataSet.multi_data_id == multiDataID){
+                for(let aField of aDataSet.data){
+                    aField.value = newValues[aField.name];
+                }
+                break;
+            } 
+        }
 
-        this.mdsTable.patchValue(this.formatedDataSection);
-    }
+        // Update the form control values
+        this.mdsTableControl.patchValue(this.formatedDataSection);
 
-
-    /**
-     * Resets all values for modals so the create popup is empty
-     */
-    resetModalValues(): void {
-        for (let aField of this.modalSection.fields) {
-            if("value" in aField){
-                delete aField["value"];
+        // Update the tableMultiDataValues
+        for(let tableMultiDataEntry of this.tableMultiDataValues) {
+            if (tableMultiDataEntry['dg-multiDataRowIndex'] == multiDataID) {
+                for (let key in newValues) {
+                    let tmpDict = {};
+                    tmpDict[key] = newValues[key];
+                    tableMultiDataEntry[key] = this.formatFieldValue(key, tmpDict);
+                }
             }
         }
+
+        // // Update the tableMultiDataValues
+        // for(let tableMultiDataEntry of this.tableMultiDataValues) {
+        //     if (tableMultiDataEntry['dg-multiDataRowIndex'] == multiDataID) {
+        //         for (let key in newValues) {
+        //             tableMultiDataEntry[key] = newValues[key];
+        //         }
+        //     }
+        // }
+
+        this.updateRequired = true;
+        setTimeout(() => {
+            this.updateRequired = false
+        }, 0);
     }
 
+/* --------------------------------------------- DELETE TABLE ROW HELPER -------------------------------------------- */
 
     /**
-     * Decides if the add button should be showed above the table
-     * @returns (boolean): True if the add button should be showed about the table, else False
-     */
-    showAddButton(): boolean {
-        return this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit;
-    }
-
-/* -------------------------------------------------- HANDLE EVENTS ------------------------------------------------- */
-
-    /**
-     * Opens empty popup form to create a now table row
-     */
-    public onAddRowClicked(): void{
-        this.resetModalValues();
-        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
-        this.modalRef.componentInstance.sections = [this.modalSection];
-        this.modalRef.componentInstance.saveValues = true;
-
-        this.modalRef.result.then((values: any) => {
-            if (values){
-                values = this.setFormattedData(values);
-
-                values['dg-multiDataRowIndex'] = this.getNextMultiDataID();
-
-                this.incrementNextMultiDataID();
-
-                this.multiDataValues.push(values);
-                this.totalCount = this.multiDataValues.length;
-
-                this.form.markAsDirty();
-            }
-        });
-    }
-
-
-    /**
-     * Opens popup to show preview of all values of the MultiDataSet
+     * Removes a MultiDataSet with the given multiDataID from the table, formattedDataSection and table control
      * 
-     * @param rowIndex (number): MultiDataID of MultiDataSet
+     * @param multiDataID (number): multiDataID of MultiDataSet
      */
-    public onRowPreview(rowIndex: number): void {
-        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
-        this.modalRef.componentInstance.activateViewMode = true;
-        this.modalRef.componentInstance.sections = [this.getModalSectionData(rowIndex)];
-    }
+    removeDataSet(multiDataID: number): void {
+        // Remove dataSet from table values
+        this.tableMultiDataValues = this.tableMultiDataValues.filter((rowData) => rowData['dg-multiDataRowIndex'] != multiDataID);
 
+        //Remove dataSet from formatedDataSection and table control
+        this.formatedDataSection.values = this.formatedDataSection.values.filter(
+            (dataSet) => dataSet.multi_data_id != multiDataID
+          );
 
-    /**
-     * Opens popup to edit edit current values of the MultiDataSet
-     * 
-     * @param rowIndex (number): MultiDataID of MultiDataSet
-     */
-    public onRowEdit(rowIndex: number): void {
-        this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
-        this.modalRef.componentInstance.saveValues = true;
-        this.modalRef.componentInstance.sections = [this.getModalSectionData(rowIndex)];
-
-        this.modalRef.result.then((values: any) => {
-
-            if (values){
-                this.modifyFormattedData(values, rowIndex);
-                this.form.markAsDirty();
-            }
-        });
-    }
-
-
-    /**
-     * Opens popup to confim deletion of a MultiDataSet
-     * 
-     * @param rowIndex (number): MultiDataID of MultiDataSet
-     */
-    public onRowDelete(rowIndex: number): void {
-        this.modalRef = this.modalService.open(DeleteEntryModalComponent);
-
-        this.modalRef.result.then((deleteConfirm: boolean) => {
-            if(deleteConfirm){
-                this.removeFromTableValues(rowIndex);
-                this.removeDataSet(rowIndex);
-                this.form.markAsDirty();
-            }
-        });
+        this.mdsTableControl.patchValue(this.formatedDataSection);
     }
 }

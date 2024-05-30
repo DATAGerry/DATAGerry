@@ -10,9 +10,9 @@
     <cmdb-table
         *ngIf="!updateRequired"
         [columns]="multiDataColumns"
-        [items]="multiDataValues"
+        [items]="tableMultiDataValues"
         [pageSizeEnabled]="false"
-        [totalItems]="multiDataValues.length"
+        [totalItems]="tableMultiDataValues.length"
         [searchEnabled]="false"
     />
 </fieldset>
