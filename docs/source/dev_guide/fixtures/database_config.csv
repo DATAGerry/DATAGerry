@@ -2,6 +2,5 @@ Database,Description,Default value,Optional
 host,IP address,127.0.0.1,-
 port,connection port,27017,-
 database_name,database name,cmdb,-
-connection_timeout,timeout in ms for connection try,2000,-
 username,authentication username,-,only required if the MongoDB database uses a authentication method
 password,authentication password,-,only required if the MongoDB database uses a authentication method

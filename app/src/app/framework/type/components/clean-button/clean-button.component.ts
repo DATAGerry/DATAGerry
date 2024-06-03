@@ -35,16 +35,12 @@ import { CleanupModalComponent } from '../../modals/cleanup-modal/cleanup-modal.
 export class CleanButtonComponent implements OnChanges, OnDestroy {
     // Component un-subscriber
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-
     // Type of the cleanable objects
     @Input() public type: CmdbType;
-
     // Object clean status
     public clean: boolean = false;
-
     // Is the clean status loading
     public loading: boolean = true;
-
     // Cleanup modal
     private modalRef: NgbModalRef;
 

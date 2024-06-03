@@ -324,10 +324,19 @@ class ObjectManager(ManagerBase):
                              order: int):
         """TODO: document"""
         try:
-            # first add mds objects to normal references
+            referenced_ids = []
+
+            # get public_id's of all currently referenced objects
+            for obj in obj_result.results:
+                referenced_ids.append(obj.public_id)
+
+
+            # add mds objects to normal references if they are not already inside
             for ref_object in mds_result:
                 tmp_object = CmdbObject.from_data(ref_object)
-                obj_result.results.append(tmp_object)
+
+                if tmp_object.public_id not in referenced_ids:
+                    obj_result.results.append(tmp_object)
 
             obj_result.total = len(obj_result.results)
 

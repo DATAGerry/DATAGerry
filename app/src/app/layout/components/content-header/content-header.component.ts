@@ -11,32 +11,30 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-content-header',
-  templateUrl: './content-header.component.html',
-  styleUrls: ['./content-header.component.scss']
+    selector: 'cmdb-content-header',
+    templateUrl: './content-header.component.html',
+    styleUrls: ['./content-header.component.scss']
 })
 export class ContentHeaderComponent {
+    @Input() public title: string;
+    @Input() public separator: boolean = true;
 
-  @Input() public title: string;
-  @Input() public separator: boolean = true;
+    public currentIcon: string;
 
-  public currentIcon: string;
+    @Input()
+    public set faIcon(value: string) {
+        this.currentIcon = value === undefined ? 'cube' : value;
+    }
 
-  @Input()
-  public set faIcon(value: string) {
-    this.currentIcon = value === undefined ? 'cube' : value;
-  }
-
-  public get faIcon(): string {
-    return this.currentIcon === undefined ? 'cube' : this.currentIcon;
-  }
-
+    public get faIcon(): string {
+        return this.currentIcon === undefined ? 'cube' : this.currentIcon;
+    }
 }

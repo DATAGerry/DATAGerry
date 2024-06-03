@@ -15,26 +15,28 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+
 import { FrameworkRoutingModule } from './framework-routing.module';
 import { LayoutModule } from '../layout/layout.module';
+
 import { TypeService } from './services/type.service';
+
 import { FrameworkComponent } from './framework.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
-  imports: [
-    CommonModule,
-    LayoutModule,
-    FrameworkRoutingModule
-  ],
-  declarations: [
-    FrameworkComponent,
-  ],
-  providers: [
-    TypeService
-  ]
+    imports: [
+        CommonModule,
+        LayoutModule,
+        FrameworkRoutingModule
+    ],
+    declarations: [
+        FrameworkComponent,
+    ],
+    providers: [
+        TypeService
+    ]
 })
-export class FrameworkModule {
-}
+export class FrameworkModule {}

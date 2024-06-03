@@ -11,23 +11,24 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
+
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-diagnostic-modal',
-  templateUrl: './diagnostic-modal.component.html',
-  styleUrls: ['./diagnostic-modal.component.scss']
+    selector: 'cmdb-diagnostic-modal',
+    templateUrl: './diagnostic-modal.component.html',
+    styleUrls: ['./diagnostic-modal.component.scss']
 })
 export class DiagnosticModalComponent {
+    @Input() data: any;
 
-  @Input() data: any;
+    constructor(public activeModal: NgbActiveModal) {
 
-  constructor(public activeModal: NgbActiveModal) { }
-
+    }
 }
