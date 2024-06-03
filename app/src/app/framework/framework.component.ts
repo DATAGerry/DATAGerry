@@ -11,17 +11,15 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component } from '@angular/core';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-framework',
-  templateUrl: './framework.component.html',
-  providers: []
+    selector: 'cmdb-framework',
+    templateUrl: './framework.component.html'
 })
-export class FrameworkComponent {
-}
+export class FrameworkComponent {}

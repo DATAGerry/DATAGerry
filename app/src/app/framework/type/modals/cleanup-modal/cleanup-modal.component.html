@@ -1,26 +1,28 @@
 <div class="modal-header bg-primary text-white">
-  <h4 class="modal-title">
-    <fa-icon icon="broom"></fa-icon>
-    Cleanup Objects of type {{type.label}}
-  </h4>
-  <button type="button" class="close" (click)="activeModal.close()">
-    <span class="white-text">&times;</span>
-  </button>
+    <h4 class="modal-title">
+        <fa-icon icon="broom"></fa-icon> Cleanup Objects of type {{type.label}}
+    </h4>
+    <button type="button" class="close" (click)="activeModal.close()">
+        <span class="white-text">&times;</span>
+    </button>
 </div>
+
 <div class="modal-body">
-  <div class="card-body">
-    <p>Do you want to clean up the objects of this type?</p>
-    <p>It affects a total of <strong>{{numberOfObjects}}</strong> objects.</p>
-    <hr />
-    <div class="alert alert-warning" role="alert">
-      Cleaning up the objects cannot be undone!
+    <div class="card-body">
+        <p>Do you want to clean up the objects of this type?</p>
+        <p>It affects a total of <strong>{{numberOfObjects}}</strong> objects.</p>
+
+        <hr />
+
+        <div class="alert alert-warning" role="alert">
+            Cleaning up the objects cannot be undone!
+        </div>
     </div>
-  </div>
 </div>
+
 <div class="modal-footer">
-  <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close')">Close</button>
-  <button type="submit" class="btn btn-outline-primary" [disabled]="cleaning" (click)="clean()">
-    <span class="spinner-border spinner-border-sm" *ngIf="cleaning"></span>
-    Clean!
-  </button>
+    <button type="button" class="btn btn-outline-dark" (click)="activeModal.close('Close')">Close</button>
+    <button type="submit" class="btn btn-danger" [disabled]="cleaning" (click)="clean()">
+        <span class="spinner-border spinner-border-sm" *ngIf="cleaning"></span> Clean!
+    </button>
 </div>

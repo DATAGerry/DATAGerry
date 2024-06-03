@@ -11,21 +11,19 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, HostBinding, Input } from '@angular/core';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'div[ui-block], span[ui-block]',
-  templateUrl: './block.component.html',
-  styleUrls: ['./block.component.scss']
+    selector: 'div[ui-block], span[ui-block]',
+    templateUrl: './block.component.html',
+    styleUrls: ['./block.component.scss']
 })
 export class BlockComponent {
-
-  @HostBinding('class.content-block') content: boolean = true;
-  @Input() blocked: boolean = false;
-
+    @HostBinding('class.content-block') content: boolean = true;
+    @Input() blocked: boolean = false;
 }
