@@ -1003,7 +1003,7 @@ def _fetch_only_active_objs() -> bool:
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
         return value in ['True', 'true']
-            
+
     return False
 
 
