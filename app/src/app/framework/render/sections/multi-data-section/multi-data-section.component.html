@@ -10,10 +10,12 @@
     <cmdb-table
         *ngIf="!updateRequired"
         [columns]="multiDataColumns"
-        [items]="tableMultiDataValues"
+        [items]="currentMultiDataValues"
         [pageSizeEnabled]="false"
         [totalItems]="tableMultiDataValues.length"
         [searchEnabled]="false"
+        [pageSize]="pageSizeLimit"
+        (pageChange)="onPageChange($event)"
     />
 </fieldset>
 

@@ -432,8 +432,10 @@ class ObjectManager(ManagerBase):
             try:
                 for mds_entry in result["multi_data_sections"]:
                     for value in mds_entry["values"]:
+                        data_set: dict
                         for data_set in value["data"]:
                             if self.__is_ref_field(data_set["name"], result) and \
+                            "value" in data_set.keys() and \
                             data_set["value"] == referenced_object.public_id:
                                 matching_results.append(result)
                                 # this result is a match => go back to outer loop

@@ -48,17 +48,27 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     public modalSection: any = {};
     private modalRef: NgbModalRef;
 
-    //Summary lines of the current referenced objects (For view mode)
+    // Summary lines of the current referenced objects (For view mode)
     public currentObjectSummaryLines: any;
 
-    //Dict of all summary lines of objects from  Type 'ref_types'
+    // Dict of all summary lines of objects from  Type 'ref_types'
     public refTypesSummaries: any = {};
 
+    // Helper to update values in table
     public updateRequired = false;
 
     // Columns of the MDS-table
     public multiDataColumns: Column[] = [];
-    // Values of the MDS-Table
+
+    //Pagesize of elements
+    public pageSizeLimit = 10;
+    // Current page of table
+    public currentPage = 1;
+
+    // Current 10 values which should be displayed
+    public currentMultiDataValues = [];
+
+    // All Values of the MDS-Table
     public tableMultiDataValues = [];
 
     //Initial MultiDataSectionEntry which will track the values of the form
@@ -352,6 +362,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
 
             this.tableMultiDataValues.push(initialTableData);
         }
+        this.setValuesForPagination();
     }
 
 
@@ -384,6 +395,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
                 values['dg-multiDataRowIndex'] = this.getCurrentHighestMultiDataID();
 
                 this.tableMultiDataValues.push(values);
+                this.setValuesForPagination();
                 this.incrementCurrentMultiDataID();
 
                 this.form.markAsDirty();
@@ -437,6 +449,16 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
                 this.form.markAsDirty();
             }
         });
+    }
+
+
+    /**
+     * Called when the page is changed and emits the new page
+     * @param newPage (number): the new page
+     */
+    public onPageChange(newPage: number) {
+        this.currentPage = newPage;
+        this.setValuesForPagination();
     }
 
 /* ------------------------------------------- ADD NEW TABLE ENTRY HELPER ------------------------------------------- */
@@ -493,33 +515,32 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         return newValues;
     }
 
-    // /**
-    //  * 
-    //  * @param newValues 
-    //  * @returns 
-    //  */
-    // private addNewValuesToControl(newValues: any){
-    //     let newDataSet: MultiDataSectionSet = {
-    //         "multi_data_id": this.getCurrentHighestMultiDataID(),
-    //         "data": []
-    //     }
 
-    //     for (let fieldID in newValues) {
-    //         let formattedValue = this.formatFieldValue(fieldID, newValues);
+    /**
+     * Sets the values according to pagination
+     */
+    setValuesForPagination() {
+        //Case: there are less then 10 elements
+        if(this.tableMultiDataValues.length < this.pageSizeLimit) {
+            this.currentMultiDataValues = this.tableMultiDataValues;
+        } else { //Case: there are more then 10 elements
+            if(this.currentPage == 1) {
+                //Just take the first 10 elements
+                this.currentMultiDataValues = this.tableMultiDataValues.slice(0, this.pageSizeLimit);
+            } else {
+                // calculate the 10 elements of the page (example for page 2)
+                let pageLowerLimit = (this.currentPage -1) * this.pageSizeLimit; //E: (2-1) * 10 = 10
+                let pageUpperLimit = this.currentPage * this.pageSizeLimit; //E: 2 * 10 = 20
 
-    //         let dataElement: MultiDataSectionFieldValue = {
-    //             "name": fieldID,
-    //             "value": formattedValue
-    //         }
-    //         newValues[fieldID] = formattedValue;
-    //         newDataSet.data.push(dataElement);
-    //     }
+                // If the pageUpperlimit is more than the total number of elements, then set it to total number of elements
+                if (pageUpperLimit > this.tableMultiDataValues.length) {
+                    pageUpperLimit = this.tableMultiDataValues.length;
+                }
 
-    //     this.formatedDataSection.values.push(newDataSet);
-    //     this.mdsTableControl.patchValue(this.formatedDataSection);
-
-    //     return newValues;
-    // }
+                this.currentMultiDataValues = this.tableMultiDataValues.slice(pageLowerLimit, pageUpperLimit);
+            }
+        }
+    }
 
 
     /**
@@ -724,15 +745,9 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
                 }
             }
         }
+        this.setValuesForPagination();
 
-        // // Update the tableMultiDataValues
-        // for(let tableMultiDataEntry of this.tableMultiDataValues) {
-        //     if (tableMultiDataEntry['dg-multiDataRowIndex'] == multiDataID) {
-        //         for (let key in newValues) {
-        //             tableMultiDataEntry[key] = newValues[key];
-        //         }
-        //     }
-        // }
+
 
         this.updateRequired = true;
         setTimeout(() => {
@@ -750,6 +765,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
     removeDataSet(multiDataID: number): void {
         // Remove dataSet from table values
         this.tableMultiDataValues = this.tableMultiDataValues.filter((rowData) => rowData['dg-multiDataRowIndex'] != multiDataID);
+        this.setValuesForPagination();
 
         //Remove dataSet from formatedDataSection and table control
         this.formatedDataSection.values = this.formatedDataSection.values.filter(
