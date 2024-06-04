@@ -32,8 +32,12 @@ import { APIGetMultiResponse } from '../../../services/models/api-response';
         return (control: UntypedFormControl) => {
             return timer(time).pipe(switchMap(() => {
                 return docApiService.checkDocTemplateExists(control.value).pipe(
-                    map(() => {
-                        return { docTemplateExists: true };
+                    map((response) => {
+                        if(response?.body?.name == control.value) {
+                            return { docTemplateExists: true};
+                        } else {
+                            return null;
+                        }
                     }),
                     catchError(() => {
                         return new Promise(resolve => {
