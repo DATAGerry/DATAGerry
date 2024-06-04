@@ -37,6 +37,9 @@ export class DocapiBuilderTypeStepComponent implements OnInit {
             if (data.template_parameters) {
                 this.typeParamPreData = data.template_parameters;
             }
+
+            this.checkTypeChildValid();
+
         }
     }
 
@@ -56,9 +59,18 @@ export class DocapiBuilderTypeStepComponent implements OnInit {
 
     @Output() public formValidEmitter: EventEmitter<boolean>;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /**
+    * Updates the validity of the child components based on the type parameter
+    */
+    private checkTypeChildValid() {
+        this.typeChildValid = this.typeParamComponent ? this.typeParamComponent.formValid : true;
+        this.formValidEmitter.emit(this.typeValid && this.typeChildValid);
+    }
+
+
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor() {
         // setup form
