@@ -15,9 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 
 # set environment variables
-BUILDVAR_VERSION = 2.1.0
-BUILDVAR_VERSION_EXT = 2.1.0
-BUILDVAR_DOCKER_TAG = 2.1.0
+BUILDVAR_VERSION = 2.2.0
+BUILDVAR_VERSION_EXT = 2.2.0
+BUILDVAR_DOCKER_TAG = 2.2.0
 BIN_PYINSTALLER = pyinstaller
 BIN_SPHINX = sphinx-build
 BIN_PYTEST = pytest
@@ -86,6 +86,7 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.updater.versions.updater_20200408 \
 		--hidden-import cmdb.updater.versions.updater_20200512 \
 		--hidden-import cmdb.updater.versions.updater_20200513 \
+		--hidden-import cmdb.updater.versions.updater_20240603 \
 		--hidden-import cmdb.exportd \
 		--hidden-import cmdb.exportd.service \
 		--hidden-import cmdb.exportd.externals \
