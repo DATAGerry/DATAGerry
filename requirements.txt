@@ -15,7 +15,7 @@ docutils==0.20.1
 et-xmlfile==1.1.0
 flake8==7.0.0
 Flask==3.0.2
-Flask-Cors==4.0.0
+Flask-Cors==4.0.1
 gunicorn==21.2.0
 html5lib==1.1
 idna==3.6
