@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
 
 import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
@@ -27,9 +27,9 @@ import { RenderResult } from '../../models/cmdb-render';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-view',
-  templateUrl: './object-view.component.html',
-  styleUrls: ['./object-view.component.scss']
+    selector: 'cmdb-object-view',
+    templateUrl: './object-view.component.html',
+    styleUrls: ['./object-view.component.scss']
 })
 export class ObjectViewComponent implements OnInit, OnDestroy {
 
@@ -40,8 +40,8 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
     // Current type from the route resolve.
     private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
 
-/* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
-    constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
+    /* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
+    constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private changesRef: ChangeDetectorRef) {
         this.activateRoute.data.subscribe((data: Data) => {
             this.objectViewSubject.next(data.object as RenderResult);
         });
@@ -54,12 +54,16 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
         });
     }
 
+    ngAfterViewInit(): void {
+        this.changesRef.detectChanges();
+    }
+
 
     public ngOnDestroy(): void {
         this.unsubscribe.complete();
     }
 
-/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     @HostListener('window:scroll')
     onWindowScroll() {
