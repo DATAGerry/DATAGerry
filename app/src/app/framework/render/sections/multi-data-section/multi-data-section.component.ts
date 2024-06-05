@@ -423,7 +423,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
      */
     public onRowEdit(rowIndex: number): void {
         this.modalRef = this.modalService.open(PreviewModalComponent, { scrollable: true, size: 'lg' });
-        this.modalRef.componentInstance.saveValues = true;
+        this.modalRef.componentInstance.editValues = true;
         this.modalRef.componentInstance.sections = [this.getModalSectionWithRowData(rowIndex)];
 
         this.modalRef.result.then((values: any) => {

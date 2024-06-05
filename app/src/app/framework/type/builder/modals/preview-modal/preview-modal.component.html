@@ -1,8 +1,11 @@
 <div class="modal-content">
     <div class="modal-header">
 
-        @if(saveValues){
-            <h4 class="modal-title">Add new values</h4>
+        @if(saveValues) {
+            <h4 class="modal-title">Add new entry</h4>
+        }
+        @else if(editValues) {
+            <h4 class="modal-title">Edit entry</h4>
         }
         @else {
             <h4 class="modal-title">Preview</h4>
@@ -33,7 +36,16 @@
                 type="button"
                 class="btn btn-success"
                 (click)="activeModal.close(renderForm.value)"
-                [disabled]="!renderForm.valid">Add</button>
+                [disabled]="!renderForm.valid"
+            >Add</button>
+        </div>
+        <div *ngIf="editValues">
+            <button
+                type="button"
+                class="btn btn-success"
+                (click)="activeModal.close(renderForm.value)"
+                [disabled]="!renderForm.valid"
+            >OK</button>
         </div>
         
     </div>

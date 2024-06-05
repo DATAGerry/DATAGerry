@@ -30,6 +30,7 @@ import { CmdbMode } from '../../../../modes.enum';
 export class PreviewModalComponent {
     @Input() sections: any[];
     @Input() saveValues: boolean = false;
+    @Input() editValues: boolean = false;
     @Input() activateViewMode: boolean = false;
 
     public renderForm: UntypedFormGroup;
