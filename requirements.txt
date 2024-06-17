@@ -63,7 +63,7 @@ sphinxcontrib-httpdomain==1.8.1
 sphinxcontrib-jsmath==1.0.1
 sphinxcontrib-qthelp==1.0.7
 sphinxcontrib-serializinghtml==1.1.10
-urllib3==2.2.1
+urllib3==2.2.2
 webencodings==0.5.1
 Werkzeug==3.0.1
 xhtml2pdf==0.2.15
