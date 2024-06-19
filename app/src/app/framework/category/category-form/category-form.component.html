@@ -150,10 +150,10 @@
                             id="category-types"
                             dndDropzone
                             class="drop-zone"
-                            data-content="Drop type here"
+                            data-content="Drop types here"
                             (dndDrop)="onDrop($event, assignedTypes, true)"
                         >
-                            <div class="drop-zone" dndPlaceholderRef data-content="Drop type here">
+                            <div class="drop-zone" dndPlaceholderRef data-content="Drop types here">
                             </div>
                             <ng-container *ngFor="let type of assignedTypes">
                                 <li

@@ -1,17 +1,16 @@
 .. _admin-guide:
 
-###########
-Admin Guide
-###########
+############
+Admin Manual
+############
 
 .. toctree::
-    :maxdepth: 2
     :numbered:
 
     setup
-    configuration
     gettingstarted
     framework
+    advanced-concepts
     exportd
     docapi
     user-management
