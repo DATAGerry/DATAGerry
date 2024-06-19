@@ -16,6 +16,7 @@
         [totalItems]="tableMultiDataValues.length"
         [searchEnabled]="false"
         [pageSize]="pageSizeLimit"
+        [paginationEnabled]="showPagination()"
         (pageChange)="onPageChange($event)"
     />
 </fieldset>

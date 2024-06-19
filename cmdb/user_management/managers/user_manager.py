@@ -100,13 +100,12 @@ class UserManager(ManagerBase):
 
     def get_many(self, query: Query = None) -> List[UserModel]:
         """
-        Get a collection of users by a query. Passing no query means all users.
+        Get a collection of users by a query. Passing no query means all users
 
         Args:
-            query (Query): A database query for filtering.
-
+            query (Query): A database query for filtering
         Returns:
-            List[UserModel]: A list of all users which matches the query.
+            List[UserModel]: A list of all users which matches the query
         """
         query = query or {}
         results = self._get(self.collection, filter=query)
@@ -115,14 +114,12 @@ class UserManager(ManagerBase):
 
     def insert(self, user: Union[UserModel, dict]) -> PublicID:
         """
-        Insert a single user into the system.
+        Insert a single user into the system
 
         Args:
-            user (dict): Raw data of the user.
-
+            user (dict): Raw data of the user
         Notes:
-            If no public id was given, the database manager will auto insert the next available ID.
-
+            If no public id was given, the database manager will auto insert the next available ID
         Returns:
             int: The Public ID of the new inserted user
         """
@@ -133,15 +130,15 @@ class UserManager(ManagerBase):
 
     def update(self, public_id: Union[PublicID, int], user: Union[UserModel, dict]):
         """
-        Update a existing user in the system.
+        Update a existing user in the system
 
         Args:
-            public_id (int): PublicID of the user in the system.
+            public_id (int): PublicID of the user in the system
             user(UserModel): Instance or dict of UserModel
 
         Notes:
-            If a UserModel instance was passed as user argument, \
-            it will be auto converted via the model `to_dict` method.
+            If a UserModel instance was passed as user argument,
+            it will be auto converted via the model `to_dict` method
         """
         if isinstance(user, UserModel):
             user = UserModel.to_dict(user)

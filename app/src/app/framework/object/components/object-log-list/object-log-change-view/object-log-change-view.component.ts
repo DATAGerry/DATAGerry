@@ -40,7 +40,7 @@ export class ObjectLogChangeViewComponent {
         if (value && !Array.isArray(value)) {
             const before = value.old;
             const after = value.new;
-            //DAT-774
+
             if (isArray(before) && isArray(after)) {
                 value.old = before.sort((a, b) => (a.name > b.name) ? 1 : -1);
                 value.new = after.sort((a, b) => (a.name > b.name) ? 1 : -1);

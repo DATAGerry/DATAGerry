@@ -374,6 +374,36 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         return this.mode == CmdbMode.Create || this.mode == CmdbMode.Edit;
     }
 
+
+    /**
+     * Only shows the pagination if there are more than 10 entries in the MDS table
+     * @returns Boolean if there are more than 10 entries in the MDS table
+     */
+    showPagination(): boolean {
+        return this.tableMultiDataValues.length > 10;
+    }
+
+
+    calculateCurrentPage(action: string = ""): void {
+        if (action == "create") {
+            let maxPageSize = Math.ceil(this.tableMultiDataValues.length / 10);
+            
+            if( this.currentPage < maxPageSize) {
+                this.currentPage = maxPageSize;
+                this.setValuesForPagination();
+            }
+        }
+
+        if (action == "delete") {
+            let maxPageSize = Math.floor(this.tableMultiDataValues.length / 10);
+
+            if (this.currentPage > maxPageSize) {
+                this.currentPage = maxPageSize;
+                this.setValuesForPagination();
+            } 
+        }
+    }
+
 /* ------------------------------------------------------------------------------------------------------------------ */
 /*                                                   EVENT HANDLING                                                   */
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -397,6 +427,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
                 this.tableMultiDataValues.push(values);
                 this.setValuesForPagination();
                 this.incrementCurrentMultiDataID();
+                this.calculateCurrentPage("create");
 
                 this.form.markAsDirty();
             }
@@ -446,6 +477,7 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         this.modalRef.result.then((deleteConfirm: boolean) => {
             if(deleteConfirm){
                 this.removeDataSet(rowIndex);
+                this.calculateCurrentPage("delete");
                 this.form.markAsDirty();
             }
         });

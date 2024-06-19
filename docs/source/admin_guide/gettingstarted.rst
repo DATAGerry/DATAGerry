@@ -1,34 +1,27 @@
 ***************
 Getting Started
 ***************
-This page describes the concept of DATAGERRY and explains the usage of the **DATAGERRY Assistant** for a quick start.
 
-.. note::
-  For a detailed explanation on how to use DATAGERRY follow this link to the
-  :doc:`Framework page </admin_guide/framework>`
+DATAGERRY is a versatile asset management tool (or CMDB) that empowers users to define their own data models and store
+information in **Objects**. An **Object** represents entities such as routers, servers, locations, or maintenance
+contracts, each comprising multiple fields (e.g., management IP, hostname of a router) with specific data types.
+Examples of data types include text, checkbox, date, dropdown, and more, allowing for flexible and detailed
+data management tailored to individual organizational needs.
 
-| 
+In DATAGERRY, the blueprint for an **Object** is defined by a **Type**. Each **Type** dictates the following details
+for all **Objects** belonging to it:
 
-=======================================================================================================================
-
-| 
-
-Concept of DATAGERRY
-====================
-DATAGERRY is an asset management tool (or CMDB), where you can define the data model on your own and store information
-in **Objects**. An **Object** can be for example a router, server, location or maintenance contract and
-consists of multiple fields (e.g. management IP, hostname, ... of a router). Each field has a specific data type. A
-data type could be for example text, checkbox, date, dropdown and many more.
-
-The blueprint for an **Object** is defined in a **Type**. They define the following details for all **Objects**
-of that **Type**:
-
- * Fields and their data type
+ * Fields and their respective data type
+ * Sections to logically group fields
  * Type icon
  * Type name
- * External links
 
-The type definition can be changed at any time, even if **Objects** of that **Type** already exist.
+
+The type definition can be modified at any time, even if **Objects** of that **Type** already exist.
+
+.. note::
+  For detailed guidance on how to use DATAGERRY, please refer to this link:
+  :doc:`Basic Concepts of DATAGERRY </admin_guide/framework>`
 
 | 
 
@@ -38,9 +31,10 @@ The type definition can be changed at any time, even if **Objects** of that **Ty
 
 DATAGERRY Assistant
 ===================
-The **DATAGERRY Assistant** helps you get started with DATAGERRY with some simple steps. It will popup when you start
-DATAGERRY for the first time or can alternatively be accessed by pressing **Toolbox => Assistant**  in the top right
-corner (in the case that you first want to explore DATAGERRY on your own).
+The **DATAGERRY Assistant** simplifies your introduction to DATAGERRY through straightforward steps. It automatically
+launches the first time you start DATAGERRY. Alternatively, you can access it anytime by clicking on
+**Toolbox => Assistant** in the top-right corner, allowing you to explore DATAGERRY independently before using the
+Assistant.
 
 .. figure:: img/assistant_toolbox.png
     :width: 300
@@ -50,8 +44,10 @@ corner (in the case that you first want to explore DATAGERRY on your own).
 
 | 
 
-After starting the **DATAGERRY Assistant** you will have the possibility to choose between different common branches
-which are used by CMDB's. It is possible to select multiple branches or even all of them.
+=======================================================================================================================
+
+After launching the **DATAGERRY Assistant** , you will have the option to choose from various commonly used branches
+typical of CMDBs. You can select multiple branches or even choose all of them.
 
 .. figure:: img/assistant_branches.png
     :width: 700
@@ -61,9 +57,11 @@ which are used by CMDB's. It is possible to select multiple branches or even all
 
 | 
 
-After pressing the “Continue”-Button there will be several profiles displayed depending on the selected branches.
-Each profile holds a set of types commonly used for these kinds of assets. Here it is further possible to adjust
-your requirements by selecting/deselecting profiles.
+=======================================================================================================================
+
+After clicking the **"Continue"** - Button, several profiles will be displayed based on the selected branches. Each
+profile includes a predefined set of types commonly used for these types of assets. Here, you can further customize
+your requirements by selecting or deselecting profiles.
 
 .. figure:: img/assistant_profiles.png
     :width: 700
@@ -73,10 +71,11 @@ your requirements by selecting/deselecting profiles.
 
 | 
 
-Once hitting the “Create”-Button all **Types** from the selected profiles will be created and you will be
-redirected to the type overview (alternatively accessed by pressing **Framework => Types** in the top right corner).
-The created **Types** will also be visible in the sidebar grouped in **Categories** (depedending on the selected
-branches and profiles).
+=======================================================================================================================
+
+After clicking the **“Create”** - Button all **Types** from the selected profiles will be generated, and you will be
+redirected to the type overview (accessible via **Framework => Types** in the top right corner). The newly created
+**Types** will also appear in the sidebar, grouped by **Categories** based on the selected branches and profiles.
 
 .. figure:: img/assistant_types_table.png
     :width: 1000
@@ -86,9 +85,12 @@ branches and profiles).
 
 | 
 
-In this table you can access the configurations of the created **Types** by hitting the “Edit”-Icon in the
-“Actions”-column and get a first impression of how **Types** are structured in DATAGERRY. You can also create
-new **Types** by pressing the green “+Add”-button above the table and adjust DATAGERRY to your requirements.
+=======================================================================================================================
+
+In the table, you can access the configurations of the created **Types** by clicking the **"Edit"** icon in the
+**'Actions'** column. This allows you to gain a first impression of how **Types** are structured in DATAGERRY.
+Additionally, you can create new **Types** by clicking the **"+Add"** button located above the table, enabling you to
+customize DATAGERRY to meet your specific requirements.
 
 .. figure:: img/assistant_type_editing.png
     :width: 1000

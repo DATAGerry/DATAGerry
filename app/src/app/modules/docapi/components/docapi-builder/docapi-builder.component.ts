@@ -52,49 +52,91 @@ export class DocapiBuilderComponent {
     @ViewChild(DocapiBuilderStyleStepComponent, { static: true })
     public styleStep: DocapiBuilderStyleStepComponent;
 
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private docapiService: DocapiService, private router: Router, private toast: ToastService) {
+    constructor(
+        private docapiService: DocapiService,
+        private router: Router,
+        private toast: ToastService
+    ) {
 
     }
 
+/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
-    public saveDoc() {
-        if (this.mode === CmdbMode.Create) {
+    /**
+     * Saves the document based on the current mode (Create or Edit).
+     * Initializes the document instance if in Create mode.
+     * Updates the document instance with form values.
+     * Handles the API call for creating or editing the document.
+     */
+    public saveDoc(): void {
+        if (!this.docInstance && this.mode === CmdbMode.Create) {
             this.docInstance = new DocTemplate();
         }
 
-        this.docInstance.name = this.settingsStep.settingsForm.get('name').value;
-        this.docInstance.label = this.settingsStep.settingsForm.get('label').value;
-        this.docInstance.active = this.settingsStep.settingsForm.get('active').value;
-        this.docInstance.description = this.settingsStep.settingsForm.get('description').value;
-        this.docInstance.template_type = this.typeStep.typeForm.get('template_type').value;
-        this.docInstance.template_parameters = this.typeStep.typeParamComponent.typeParamForm.value;
-        this.docInstance.template_data = this.contentStep.contentForm.get('template_data').value;
-        this.docInstance.template_style = this.styleStep.styleForm.get('template_style').value;
+        this.updateDocInstance();
 
         if (this.mode === CmdbMode.Create) {
-            let newId = null;
-
-            this.docapiService.postDocTemplate(this.docInstance).subscribe({
-                next: publicIdResp => {
-                    newId = publicIdResp;
-                    this.router.navigate(['/docapi/'], { queryParams: { docAddSuccess: newId } });
-                },
-                error: (error) => {
-                    console.error(error);
-                }
-            });
-
+            this.handleCreateMode();
         } else if (this.mode === CmdbMode.Edit) {
-            this.docapiService.putDocTemplate(this.docInstance).subscribe({
-                next: (updateResp: DocTemplate) => {
-                    this.toast.success(`DocAPI document successfully edited: ${ updateResp.public_id }`);
-                    this.router.navigate(['/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
-                },
-                error: (error) => {
-                    console.error(error);
-                }
-            });
+            this.handleEditMode();
         }
+    }
+
+
+    /**
+     * Updates the document instance properties with values from the form.
+     */
+    private updateDocInstance(): void {
+        const { settingsForm } = this.settingsStep;
+        const { typeForm, typeParamComponent } = this.typeStep;
+        const { contentForm } = this.contentStep;
+        const { styleForm } = this.styleStep;
+    
+        this.docInstance.name = settingsForm.get('name').value;
+        this.docInstance.label = settingsForm.get('label').value;
+        this.docInstance.active = settingsForm.get('active').value;
+        this.docInstance.description = settingsForm.get('description').value;
+        this.docInstance.template_type = typeForm.get('template_type').value;
+        this.docInstance.template_parameters = typeParamComponent.typeParamForm.value;
+        this.docInstance.template_data = contentForm.get('template_data').value;
+        this.docInstance.template_style = styleForm.get('template_style').value;
+    }
+
+
+    /**
+     * Handles the creation of a new document by making an API call.
+     * On success, navigates to the document list with a success query parameter.
+     */
+    private handleCreateMode(): void {
+        this.docapiService.postDocTemplate(this.docInstance).subscribe({
+            next: (publicIdResp: string) => {
+                this.toast.success("DocAPI document successfully created!");
+                this.router.navigate(['/docapi/'], { queryParams: { docAddSuccess: publicIdResp } });
+            },
+            error: (error: any) => {
+                console.error(error);
+            }
+        });
+    }
+
+
+    /**
+     * Handles the editing of an existing document by making an API call.
+     * On success, shows a success toast and navigates to the document list with a success query parameter.
+     */
+    private handleEditMode(): void {
+        this.docapiService.putDocTemplate(this.docInstance).subscribe({
+            next: (updateResp: DocTemplate) => {
+                this.toast.success(`DocAPI document successfully edited: ${updateResp.public_id}`);
+                this.router.navigate(['/docapi/'], { queryParams: { docEditSuccess: updateResp.public_id } });
+            },
+            error: (error: any) => {
+                console.error(error);
+            }
+        });
     }
 }
