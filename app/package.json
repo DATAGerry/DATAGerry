@@ -56,7 +56,7 @@
     "rxjs": "^7.8.1",
     "semver": "^7.6.0",
     "socket.io-parser": "^4.2.4",
-    "tinymce": "^7.0.0",
+    "tinymce": "^7.2.0",
     "tslib": "^2.6.2",
     "uuid": "^9.0.1",
     "zone.js": "^0.14.4",
