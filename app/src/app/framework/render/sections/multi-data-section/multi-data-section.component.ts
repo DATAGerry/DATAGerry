@@ -15,8 +15,6 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import * as moment from 'moment';
-
 import { Component, Input, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
@@ -587,8 +585,13 @@ export class MultiDataSectionComponent extends BaseSectionComponent implements O
         switch (fieldType) {
             case "date": {
                 if(newValues[fieldID]) {
-                    const defaultDate = moment.utc(newValues[fieldID]);
-                    return defaultDate.isValid() ? moment.tz(defaultDate, "UTC").format("YYYY-MM-DD") : newValues[fieldID];
+                    const newDate = new Date(newValues[fieldID]["$date"]);
+
+                    const year = newDate.getFullYear();
+                    const month = (newDate.getMonth() + 1).toString().padStart(2, '0');
+                    const day = newDate.getDate().toString().padStart(2, '0');
+
+                    return `${year}-${month}-${day}`;
                 }
                 break;
             }
