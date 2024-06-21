@@ -107,6 +107,10 @@ class TypeModel(CmdbDAO):
                         'type': 'string',
                         'required': True
                     },
+                    "rows": {
+                        'type': 'integer',
+                        'required': False
+                    },
                     "label": {
                         'type': 'string',
                         'required': True
@@ -233,6 +237,10 @@ class TypeModel(CmdbDAO):
                             "label": {
                                 'type': 'string',
                                 'required': True
+                            },
+                            "hidden_fields": {
+                                'type': 'list',
+                                'required': False
                             },
                             "reference": {
                                 'type': 'dict',

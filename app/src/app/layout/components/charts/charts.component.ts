@@ -11,17 +11,19 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input, AfterViewInit, AfterViewChecked, ViewChild } from '@angular/core';
+
 import { BehaviorSubject } from 'rxjs';
 // IMPORTANT
 // chartjs-plugin-datalabel must be loaded after the Chart.js library!
-import { Chart } from 'chart.js';
+import { Chart, registerables } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+Chart.register(...registerables);
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
   selector: 'cmdb-charts',
@@ -30,56 +32,72 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 })
 export class ChartsComponent implements AfterViewInit, AfterViewChecked {
 
-  @ViewChild('chartcanvas', {static : false})
-  public chartRef;
+  @ViewChild('chartcanvas', {static : false}) public chartRef;
 
-  @Input() chartType: string;
   @Input() labelColors: any[];
-  @Input() chartOptions: {};
   private chart;
 
   private labels = new BehaviorSubject<any[]>([]);
+
   @Input() set dataLabels(value: string[]) {
     this.labels.next(value);
   }
 
-  get dataLabels() {
-    return this.labels.getValue();
-  }
+    get dataLabels() {
+        return this.labels.getValue();
+    }
 
-  private items = new BehaviorSubject<any[]>([]);
-  @Input() set dataItems(value: any[]) {
-    this.items.next(value);
-  }
+    private items = new BehaviorSubject<any[]>([]);
+    @Input() set dataItems(value: any[]) {
+        this.items.next(value);
+    }
 
-  get dataItems() {
-    return this.items.getValue();
-  }
+    get dataItems() {
+        return this.items.getValue();
+    }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  ngAfterViewInit() {
-    this.chart = new Chart(this.chartRef.nativeElement, {
-      plugins: [ChartDataLabels],
-      type: this.chartType,
-      data: {
-        datasets: [{
-          backgroundColor: this.labelColors,
-          datalabels: {
-            color: '#FFF', font: { size: 15 }
-          },
-        }],
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-      }
-    });
-    this.chart.data.labels = this.dataLabels;
-    this.chart.data.datasets[0].data = this.dataItems;
-    this.chart.options = this.chartOptions;
-    this.chart.update(true);
-  }
+    ngAfterViewInit() {
+        this.chart = new Chart(this.chartRef.nativeElement,
+            {
+                type: 'bar',
+                data: {
+                    labels: this.dataLabels,
+                    datasets: [
+                        {
+                            data: this.dataItems,
+                            backgroundColor: this.labelColors,
+                            datalabels: {
+                                color: '#FFF', font: { size: 15 }
+                            }
+                        }
+                    ],
+                },
+                options: {
+                    animation: false,
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            }
+        );
 
-  ngAfterViewChecked() {
-    this.chart.update(true);
-  }
+        this.chart.update(true);
+    }
+
+    ngAfterViewChecked() {
+        this.chart.update(true);
+    }
 }

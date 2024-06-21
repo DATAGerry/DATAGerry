@@ -188,7 +188,8 @@ class EventSenderAmqp(threading.Thread):
                 exchange=self.__config_exchange,
                 exchange_type="topic"
             )
-        except pika.exceptions.AMQPConnectionError:
+        except pika.exceptions.AMQPConnectionError as err:
+            LOGGER.debug("pika.exceptions.AMQPConnectionError: %s", err)
             LOGGER.error("%s: EventSenderAmqp connection error", self.__process_id)
             self.__flag_shutdown.set()
 
@@ -211,7 +212,8 @@ class EventSenderAmqp(threading.Thread):
                 except queue.Empty:
                     self.__connection.process_data_events()
             # handle AMQP connection errors
-            except pika.exceptions.AMQPConnectionError:
+            except pika.exceptions.AMQPConnectionError as err:
+                LOGGER.debug("pika.exceptions.AMQPConnectionError: %s", err)
                 LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()
 
@@ -302,7 +304,8 @@ class EventReceiverAmqp(threading.Thread):
             self.__channel.exchange_declare(exchange=self.__config_exchange, exchange_type="topic")
             queue_name = ""
             if self.__process_id:
-                queue_name = "{}.{}".format(self.__config_exchange, self.__process_id)
+                queue_name = f"{self.__config_exchange}.{self.__process_id}"
+
             queue_declare_result = self.__channel.queue_declare(queue=queue_name, exclusive=True)
             queue_handler = queue_declare_result.method.queue
             for event_type in self.__event_types:
@@ -310,7 +313,8 @@ class EventReceiverAmqp(threading.Thread):
 
             # register callback function for event handling
             self.__channel.basic_consume(self.__process_event_cb, queue=queue_handler, no_ack=True)
-        except AMQPConnectionError:
+        except AMQPConnectionError as err:
+            LOGGER.debug("AMQPConnectionError: %s", err)
             LOGGER.error("%s: EventReceiverAmqp connection error",self.__process_id)
             self.__flag_shutdown.set()
 
@@ -325,6 +329,7 @@ class EventReceiverAmqp(threading.Thread):
                 self.__connection.add_timeout(2, self.__check_shutdown_flag)
                 self.__channel.start_consuming()
             # handle AMQP connection errors
-            except AMQPConnectionError:
+            except AMQPConnectionError as err:
+                LOGGER.debug("AMQPConnectionError: %s", err)
                 LOGGER.warning("connection to broker lost, try to reconnect...")
                 self.__init_connection()

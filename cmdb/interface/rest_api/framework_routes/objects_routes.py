@@ -288,6 +288,76 @@ def group_objects_by_type_id(value, request_user: UserModel):
     return make_response(result)
 
 
+@objects_blueprint.route('/<int:public_id>/mds_reference', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@insert_request_user
+def get_object_mds_reference(public_id: int, request_user: UserModel):
+    """TODO: document"""
+    try:
+        referenced_object: CmdbObject = manager.get(public_id,
+                                                    user=request_user,
+                                                    permission=AccessControlPermission.READ)
+
+        referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
+
+    except ManagerGetError as err:
+        return abort(404, err)
+
+    try:
+        mds_reference = CmdbRender(object_instance=referenced_object,
+                    type_instance=referenced_type,
+                    render_user=request_user,
+                    object_manager=object_manager,
+                    ref_render=True).get_mds_reference(public_id)
+
+    except RenderError as err:
+        LOGGER.error(err)
+        return abort(500)
+
+    return make_response(mds_reference)
+
+
+
+@objects_blueprint.route('/<int:public_id>/mds_references', methods=['GET'])
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
+@insert_request_user
+def get_object_mds_references(public_id: int, request_user: UserModel):
+    """TODO: document"""
+    summary_lines = {}
+
+    object_id_list = request.args.get('objectIDs').split(",")
+    object_ids = [int(obj_id) for obj_id in object_id_list]
+
+    if not len(object_ids) > 0:
+        object_ids = [public_id]
+
+    for object_id in object_ids:
+        try:
+            referenced_object: CmdbObject = manager.get(object_id,
+                                                        user=request_user,
+                                                        permission=AccessControlPermission.READ)
+
+            referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
+
+        except ManagerGetError as err:
+            return abort(404, err)
+
+        try:
+            mds_reference = CmdbRender(object_instance=referenced_object,
+                        type_instance=referenced_type,
+                        render_user=request_user,
+                        object_manager=object_manager,
+                        ref_render=True).get_mds_reference(object_id)
+
+            summary_lines[object_id] = mds_reference
+
+        except RenderError as err:
+            LOGGER.error(err)
+            return abort(500)
+
+    return make_response(summary_lines)
+
+
 @objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
@@ -341,9 +411,9 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
-
     except ManagerIterationError as err:
         return abort(400, err)
+
     return api_response.make_response()
 
 
@@ -932,9 +1002,8 @@ def _fetch_only_active_objs() -> bool:
     """
     if request.args.get('onlyActiveObjCookie') is not None:
         value = request.args.get('onlyActiveObjCookie')
+        return value in ['True', 'true']
 
-        if value in ['True', 'true']:
-            return True
     return False
 
 

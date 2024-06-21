@@ -1,21 +1,23 @@
 <h1>Delete type: {{typeInstance?.label}}</h1><hr />
 <dl class="row">
-  <dt class="col-sm-2">Name</dt>
-  <dd class="col-sm-10">{{typeInstance?.name}}</dd>
+    <dt class="col-sm-2">Name</dt>
+    <dd class="col-sm-10">{{typeInstance?.name}}</dd>
 
-  <dt class="col-sm-2">Label</dt>
-  <dd class="col-sm-10">{{typeInstance?.label}}</dd>
+    <dt class="col-sm-2">Label</dt>
+    <dd class="col-sm-10">{{typeInstance?.label}}</dd>
 
-  <dt class="col-sm-2">Description</dt>
-  <dd class="col-sm-10 text-truncate">{{typeInstance?.description}}</dd>
+    <dt class="col-sm-2">Description</dt>
+    <dd class="col-sm-10 text-truncate">{{typeInstance?.description}}</dd>
 
-  <dt class="col-sm-2">Number of objects</dt>
-  <dd class="col-sm-10">{{numberOfObjects}}</dd>
+    <dt class="col-sm-2">Number of objects</dt>
+    <dd class="col-sm-10">{{numberOfObjects}}</dd>
 </dl>
 
 <hr />
+
+<button routerLink="{{prevRoute.getPreviousUrl()}}" class="back-button btn btn-outline-dark ml-3">Back to Type List</button>
 <button class="btn btn-danger" [class.disabled]="numberOfObjects > 0" (click)="open()">Delete</button>
-<a routerLink="{{prevRoute.getPreviousUrl()}}" class="btn btn-outline-secondary ml-3">Back to previous site</a>
+
 <div>
   <label id="error_message" *ngIf="numberOfObjects > 0">Deletion is only possible if there are no objects of this type!</label>
 </div>

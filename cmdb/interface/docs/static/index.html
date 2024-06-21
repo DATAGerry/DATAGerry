@@ -37,16 +37,22 @@
                 <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction/welcome.html">Welcome to DATAGERRY</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction/license.html">License</a></li>
 </ul>
-<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<p class="caption" role="heading"><span class="caption-text">Admin Manual</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="admin_guide/index.html">Admin Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="admin_guide/index.html">Admin Manual</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Dev Guide</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="dev_guide/index.html">Development Guide</a></li>
 </ul>
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="api/rest/index.html">REST</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">License</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction/license.html">License</a></li>
 </ul>
 
             
@@ -85,105 +91,121 @@
   <section id="datagerry-documentation">
 <h1>DATAGERRY Documentation<a class="headerlink" href="#datagerry-documentation" title="Link to this heading">¶</a></h1>
 <img alt="_images/introduction_datagerry.png" src="_images/introduction_datagerry.png" />
-<p>DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the
-definition of object types to the user.</p>
+<p>DATAGERRY is an enterprise-grade, open-source CMDB that empowers users by allowing
+complete customization of data types.</p>
+<div class="line-block">
+<div class="line"><br /></div>
+</div>
+<hr class="docutils" />
 <div class="toctree-wrapper compound" id="introduction">
 <p class="caption" role="heading"><span class="caption-text">Introduction</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="introduction/welcome.html">Welcome to DATAGERRY</a></li>
-<li class="toctree-l1"><a class="reference internal" href="introduction/license.html">License</a></li>
 </ul>
 </div>
-<div class="toctree-wrapper compound" id="guides">
-<p class="caption" role="heading"><span class="caption-text">Guides</span></p>
+<hr class="docutils" />
+<div class="toctree-wrapper compound" id="admin-manual">
+<p class="caption" role="heading"><span class="caption-text">Admin Manual</span></p>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="admin_guide/index.html">Admin Guide</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="admin_guide/index.html">Admin Manual</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="admin_guide/setup.html">1. Setup</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#requirements">1.1. Requirements</a></li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-docker-image">1.2. Setup via Docker Image</a></li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-rpm">1.3. Setup via RPM</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-mongodb">1.3.1. Setup MongoDB</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-rabbitmq">1.3.2. Setup RabbitMQ</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-datagerry">1.3.3. Setup DATAGERRY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#configuration">1.2. Configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-docker-image">1.3. Setup via Docker Image</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-rpm">1.4. Setup via RPM</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-mongodb">1.4.1. Setup MongoDB</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-rabbitmq">1.4.2. Setup RabbitMQ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#setup-datagerry">1.4.3. Setup DATAGERRY</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-tar-gz-archive">1.4. Setup via tar.gz archive</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id1">1.4.1. Setup MongoDB</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id2">1.4.2. Setup RabbitMQ</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id3">1.4.3. Setup DATAGERRY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-tar-gz-archive">1.5. Setup via tar.gz archive</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id1">1.5.1. Setup MongoDB</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id2">1.5.2. Setup RabbitMQ</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/setup.html#id3">1.5.3. Setup DATAGERRY</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-deb-package">1.5. Setup via deb-package</a></li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setting-up-nginx-as-reverse-proxy">1.6. Setting up Nginx as reverse proxy</a></li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#update-datagerry">1.7. Update DATAGERRY</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setup-via-deb-package">1.6. Setup via deb-package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#setting-up-nginx-as-reverse-proxy">1.7. Setting up Nginx as reverse proxy</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/setup.html#updating-datagerry">1.8. Updating DATAGERRY</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="admin_guide/configuration.html">2. Configuration</a></li>
-<li class="toctree-l2"><a class="reference internal" href="admin_guide/gettingstarted.html">3. Getting Started</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/gettingstarted.html#concept-of-datagerry">3.1. Concept of DATAGERRY</a></li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/gettingstarted.html#datagerry-assistant">3.2. DATAGERRY Assistant</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin_guide/gettingstarted.html">2. Getting Started</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/gettingstarted.html#datagerry-assistant">2.1. DATAGERRY Assistant</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="admin_guide/framework.html">4. Framework</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-categories">4.1. Managing Categories</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#categories-overview">4.1.1. Categories overview</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#create-a-category">4.1.2. Create a Category</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#edit-delete-a-category">4.1.3. Edit/Delete a Category</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin_guide/framework.html">3. Basic Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-categories">3.1. Managing Categories</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#categories-overview">3.1.1. Categories overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#create-a-category">3.1.2. Create a Category</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#edit-delete-a-category">3.1.3. Edit/Delete a Category</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-types">4.2. Managing Types</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#adding-editing-a-type">4.2.1. Adding/Editing a Type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#special-controls">4.2.2. Special Controls</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#reference-section">4.2.3. Reference Section</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#changing-an-existing-type">4.2.4. Changing an existing Type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#importing-exporting-types">4.2.5. Importing/Exporting Types</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-types">3.2. Managing Types</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#adding-a-type">3.2.1. Adding a Type</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#step-1-basic-information">3.2.1.1. Step 1 - Basic information</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#step-2-content">3.2.1.2. Step 2 - Content</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#step-3-meta-optional">3.2.1.3. Step 3 - Meta(Optional)</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#step-4-acl-optional">3.2.1.4. Step 4 - ACL (Optional)</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-objects">4.3. Managing Objects</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#active-und-inactive-objects">4.3.1. Active und Inactive Objects</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#object-tables-search-filter">4.3.2. Object tables search / filter</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#table-search">4.3.2.1. Table search</a></li>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#table-filter">4.3.2.2. Table filter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#editing-deleting-a-type">3.2.2. Editing/Deleting a Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#importing-exporting-types">3.2.3. Importing/Exporting Types</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#bulk-change-of-objects">4.3.3. Bulk change of Objects</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#exporting-objects">4.3.4. Exporting Objects</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#importing-objects">4.3.5. Importing Objects</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#csv-import">4.3.5.1. CSV Import</a></li>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#json">4.3.5.2. JSON</a></li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#managing-objects">3.3. Managing Objects</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#active-und-inactive-objects">3.3.1. Active und Inactive Objects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#object-tables-search-filter">3.3.2. Object tables search / filter</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#table-search">3.3.2.1. Table search</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#table-filter">3.3.2.2. Table filter</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#access-control">4.4. Access Control</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#access-control-list">4.4.1. Access Control List</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#permissions">4.4.1.1. Permissions</a></li>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#acl-vs-system-rights">4.4.1.2. ACL vs. System-Rights</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#object-acl">4.4.2. Object ACL</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#configure-object-acl">4.4.2.1. Configure Object ACL</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#bulk-change-of-objects">3.3.3. Bulk change of Objects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#exporting-objects">3.3.4. Exporting Objects</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#importing-objects">3.3.5. Importing Objects</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#csv-import">3.3.5.1. CSV Import</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#json">3.3.5.2. JSON</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#locations">4.5. Locations</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#initialise-location-functionality-for-a-type">4.5.1. Initialise Location-Functionality for a Type</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#configure-a-location-for-an-object">4.5.2. Configure a Location for an Object</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="admin_guide/framework.html#section-templates">4.6. Section templates</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#section-templates-overview">4.6.1. Section Templates Overview</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#creating-section-templates">4.6.2. Creating Section Templates</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#using-section-templates">4.6.3. Using Section Templates</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#section-template-types">4.6.4. Section Template Types</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#standard-section-templates">4.6.4.1. Standard Section Templates</a></li>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#global-section-templates">4.6.4.2. Global Section Templates</a></li>
-<li class="toctree-l5"><a class="reference internal" href="admin_guide/framework.html#predefined-section-templates">4.6.4.3. Predefined Section Templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="admin_guide/advanced-concepts.html">4. Advanced Concepts</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/advanced-concepts.html#section-templates">4.1. Section Templates</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#section-templates-overview">4.1.1. Section Templates Overview</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#creating-section-templates">4.1.2. Creating Section Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#using-section-templates">4.1.3. Using Section Templates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#section-template-types">4.1.4. Section Template Types</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#standard-section-templates">4.1.4.1. Standard Section Templates</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#global-section-templates">4.1.4.2. Global Section Templates</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#predefined-section-templates">4.1.4.3. Predefined Section Templates</a></li>
 </ul>
 </li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#section-templates-table-actions">4.6.5. Section Templates - Table Actions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="admin_guide/framework.html#section-templates-rights">4.6.6. Section Templates - Rights</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#section-templates-table-actions">4.1.5. Section Templates - Table Actions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#section-templates-rights">4.1.6. Section Templates - Rights</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/advanced-concepts.html#multi-data-sections-mds">4.2. Multi Data Sections (MDS)</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#adding-mds-to-types">4.2.1. Adding MDS to Types</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#adding-fields-to-mds">4.2.2. Adding Fields to MDS</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#adding-objects-with-mds">4.2.3. Adding Objects with MDS</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/advanced-concepts.html#locations">4.3. Locations</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#initialise-location-functionality-for-a-type">4.3.1. Initialise Location-Functionality for a Type</a></li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#configure-a-location-for-an-object">4.3.2. Configure a Location for an Object</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="admin_guide/advanced-concepts.html#access-control">4.4. Access Control</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#access-control-list">4.4.1. Access Control List</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#permissions">4.4.1.1. Permissions</a></li>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#acl-vs-system-rights">4.4.1.2. ACL vs. System-Rights</a></li>
+</ul>
+</li>
+<li class="toctree-l4"><a class="reference internal" href="admin_guide/advanced-concepts.html#object-acl">4.4.2. Object ACL</a><ul>
+<li class="toctree-l5"><a class="reference internal" href="admin_guide/advanced-concepts.html#configure-object-acl">4.4.2.1. Configure Object ACL</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -241,6 +263,12 @@ definition of object types to the user.</p>
 </li>
 </ul>
 </li>
+</ul>
+</div>
+<hr class="docutils" />
+<div class="toctree-wrapper compound" id="dev-guide">
+<p class="caption" role="heading"><span class="caption-text">Dev Guide</span></p>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="dev_guide/index.html">Development Guide</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="dev_guide/setup.html">1. Setup a development system</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="dev_guide/setup.html#install-python">1.1. Install Python</a></li>
@@ -260,12 +288,8 @@ definition of object types to the user.</p>
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="dev_guide/setup.html#starting-the-backend-and-frontend">1.5. Starting the backend and frontend</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="dev_guide/setup.html#starting-datagerry">1.5.1. Starting DATAGERRY</a><ul>
-<li class="toctree-l5"><a class="reference internal" href="dev_guide/setup.html#generate-clean-database">1.5.1.1. Generate clean database</a></li>
-<li class="toctree-l5"><a class="reference internal" href="dev_guide/setup.html#insert-test-data-optional">1.5.1.2. Insert test data (optional)</a></li>
-</ul>
-</li>
-<li class="toctree-l4"><a class="reference internal" href="dev_guide/setup.html#starting-angular-frontend">1.5.2. Starting angular frontend</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="dev_guide/setup.html#starting-python-backend">1.5.1. Starting Python backend</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dev_guide/setup.html#starting-angular-frontend">1.5.2. Starting Angular frontend</a><ul>
 <li class="toctree-l5"><a class="reference internal" href="dev_guide/setup.html#installation">1.5.2.1. Installation</a></li>
 <li class="toctree-l5"><a class="reference internal" href="dev_guide/setup.html#development-server">1.5.2.2. Development server</a></li>
 <li class="toctree-l5"><a class="reference internal" href="dev_guide/setup.html#build">1.5.2.3. Build</a></li>
@@ -278,7 +302,7 @@ definition of object types to the user.</p>
 <li class="toctree-l2"><a class="reference internal" href="dev_guide/repository.html">2. GIT Repository</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="dev_guide/repository.html#branches">2.1. Branches</a></li>
 <li class="toctree-l3"><a class="reference internal" href="dev_guide/repository.html#creating-a-release">2.2. Creating a Release</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="dev_guide/repository.html#latest-symlink">2.2.1. latest symlink</a></li>
+<li class="toctree-l4"><a class="reference internal" href="dev_guide/repository.html#latest-symlink">2.2.1. Latest symlink</a></li>
 </ul>
 </li>
 </ul>
@@ -352,6 +376,7 @@ definition of object types to the user.</p>
 </li>
 </ul>
 </div>
+<hr class="docutils" />
 <div class="toctree-wrapper compound" id="api">
 <p class="caption" role="heading"><span class="caption-text">API</span></p>
 <ul>
@@ -386,6 +411,13 @@ definition of object types to the user.</p>
 </li>
 </ul>
 </li>
+</ul>
+</div>
+<hr class="docutils" />
+<div class="toctree-wrapper compound" id="license">
+<p class="caption" role="heading"><span class="caption-text">License</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction/license.html">License</a></li>
 </ul>
 </div>
 </section>

@@ -15,10 +15,10 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, HostListener, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { UntypedFormControl, UntypedFormGroup } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Location } from '@angular/common';
 
 import { ObjectService } from '../../services/object.service';
 import { ToastService } from '../../../layout/toast/toast.service';
@@ -26,186 +26,249 @@ import { TypeService } from '../../services/type.service';
 import { SidebarService } from 'src/app/layout/services/sidebar.service';
 import { LocationService } from '../../services/location.service';
 
-
 import { CmdbMode } from '../../modes.enum';
-import { CmdbObject } from '../../models/cmdb-object';
+import { CmdbObject, MultiDataSectionEntry } from '../../models/cmdb-object';
 import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { APIUpdateMultiResponse } from '../../../services/models/api-response';
-/* -------------------------------------------------------------------------- */
-
+import { Column } from 'src/app/layout/table/table.types';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-edit',
-  templateUrl: './object-edit.component.html',
-  styleUrls: ['./object-edit.component.scss']
+    selector: 'cmdb-object-edit',
+    templateUrl: './object-edit.component.html',
+    styleUrls: ['./object-edit.component.scss']
 })
 export class ObjectEditComponent implements OnInit {
+    public mode: CmdbMode = CmdbMode.Edit;
+    public objectInstance: CmdbObject;
+    public typeInstance: CmdbType;
+    public renderResult: RenderResult;
+    public renderForm: UntypedFormGroup;
+    public commitForm: UntypedFormGroup;
+    private objectID: number;
+    public activeState: boolean;
 
-  public mode: CmdbMode = CmdbMode.Edit;
-  public objectInstance: CmdbObject;
-  public typeInstance: CmdbType;
-  public renderResult: RenderResult;
-  public renderForm: UntypedFormGroup;
-  public commitForm: UntypedFormGroup;
-  private objectID: number;
-  public activeState : boolean;
+    public selectedLocation: number = -1;
+    public locationTreeName: string;
+    public locationForObjectExists: boolean = false;
 
+    // Table Template: Type actions column
+    @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
-  public selectedLocation: number = -1;
-  public locationTreeName: string;
-  public locationForObjectExists: boolean = false;
+    public fields: Array<any> = [];
+    // Table columns definition
+    columns: Array<Column> = [];
 
-/* -------------------------------------------------------------------------- */
-/*                                 LIFE CYCLE                                 */
-/* -------------------------------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-  constructor(private objectService: ObjectService,
-              private typeService: TypeService,
-              private route: ActivatedRoute,
-              private router: Router,
-              private toastService: ToastService,
-              private locationService: LocationService,
-              private sidebarService : SidebarService){
-      this.route.params.subscribe((params) => {
-          this.objectID = params.publicID;
-      });
+    constructor(
+        private objectService: ObjectService,
+        private typeService: TypeService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private toastService: ToastService,
+        private locationService: LocationService,
+        private sidebarService: SidebarService,
+        private _location: Location
+    ) {
+        this.route.params.subscribe((params) => {
+            this.objectID = params.publicID;
+        });
 
-      this.renderForm = new UntypedFormGroup({});
-      this.commitForm = new UntypedFormGroup({
-          comment: new UntypedFormControl('')
-      });
-  }
+        this.renderForm = new UntypedFormGroup({});
 
-  public ngOnInit(): void {
-      this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
-          this.renderResult = rr;
-          this.activeState = this.renderResult.object_information.active;
-      },
-      error => {
-          console.error(error);
-      },
-      () => {
-          this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
-              this.objectInstance = ob;
-          });
-
-          this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-              this.typeInstance = value;
-          });
-      });
-  }
-
-  @HostListener('window:scroll', ['$event'])
-  onWindowScroll($event) {
-    const dialog = document.getElementById('object-form-action');
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog.style.visibility = 'visible';
-    } else {
-      dialog.style.visibility = 'hidden';
-    }
-  }
-
-  public editObject(): void {
-    this.renderForm.markAllAsTouched();
-    if (this.renderForm.valid) {
-      const patchValue = [];
-
-      Object.keys(this.renderForm.value).forEach((key: string) => {
-        let val = this.renderForm.value[key];
-
-        if(key == 'dg_location'){
-          this.selectedLocation = val; 
-        }
-        else if(key == 'locationTreeName'){
-          this.locationTreeName = val; 
-          return;
-        } else if(key == 'locationForObjectExists'){
-          this.locationForObjectExists = String(val).toLowerCase() === 'true' ? true : false;
-          return;
-        }
-
-        if (val === undefined || val == null) { 
-          val = ''; 
-          
-          if(key == "dg_location"){
-            patchValue.push({
-              name: key,
-              value: null
-            });
-          }
-
-        } else {
-          patchValue.push({
-            name: key,
-            value: val
-          });
-        }
-      });
-
-      this.handleLocation(this.objectInstance.public_id, this.selectedLocation, this.locationTreeName, this.objectInstance.type_id);
-
-      this.objectInstance.fields = patchValue;
-      this.objectInstance.comment = this.commitForm.get('comment').value;
-      this.objectInstance.active = this.activeState;
-      this.objectService.putObject(this.objectID, this.objectInstance).subscribe((res: APIUpdateMultiResponse) => {
-        if (res.failed.length === 0) {
-          this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
-            this.sidebarService.ReloadSideBarData();
-            this.toastService.success('Object was successfully updated!');
-            this.router.navigate(['/framework/object/view/' + this.objectID]);
-          });
-        } else {
-          for (const err of res.failed) {
-            this.toastService.error(err.error_message);
-          }
-          this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
-        }
-      }, error => {
-        this.toastService.error(error);
-        this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
-      });
-    }
-  }
-
-  public toggleChange() {
-    this.activeState = this.activeState !== true;
-    this.renderForm.markAsDirty();
+        this.commitForm = new UntypedFormGroup({
+            comment: new UntypedFormControl('')
+        });
     }
 
-  private handleLocation(object_id: number, parent: number, name: string = "", type_id: number){
-      let params = {
-        "object_id": object_id,
-        "parent": parent,
-        "name": name,
-        "type_id": type_id 
-      }
 
-    //a parent is selected and there is no existing location for this object => create it
-    if(parent && parent > 0 && !this.locationForObjectExists){
-      this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
-      }, error => {
-        this.toastService.error(error);
-      });
-      return;
-    }
+    public ngOnInit(): void {
+        this.objectService.getObject(this.objectID).subscribe({
+            next: (rr: RenderResult) => {
+                this.renderResult = rr;
+                this.activeState = this.renderResult.object_information.active;
+            },
+            error: error => {
+                console.error(error);
+            },
+            complete: () => {
+                this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
+                    this.objectInstance = ob;
+                });
     
-    //a parent is selected and location for this object exists => update existing location
-    if(parent && parent > 0 && this.locationForObjectExists) {
-      this.locationService.updateLocationForObject(params).subscribe((res: APIUpdateMultiResponse) => {
-      }, error => {
-        this.toastService.error(error);
-      });
-      return;
+                this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+                    this.typeInstance = value;
+                });
+            }
+        });
     }
 
-    //parent is removed but location still exists => delete location
-    if(!parent && this.locationForObjectExists){
-      this.locationService.deleteLocationForObject(object_id).subscribe((res: APIUpdateMultiResponse) => {
-      }, error => {
-        this.toastService.error(error);
-      });
-      return;
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+
+    @HostListener('window:scroll', ['$event'])
+    onWindowScroll($event) {
+        const dialog = document.getElementById('object-form-action');
+
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            dialog.style.visibility = 'visible';
+        } else {
+            dialog.style.visibility = 'hidden';
+        }
     }
-  }
+
+
+    /**
+     * Function to handle navigating back in the browser history
+     */
+    backClicked() {
+        this._location.back();
+    }
+
+
+    /**
+     * Adds the MultiDataSectionEntry data to the object instance
+     * @param multiDataSection (MultiDataSectionEntry):  the new data of the section 
+     */
+    handleMultiDataSection(multiDataSection: MultiDataSectionEntry){
+        for (let aSection of this.objectInstance.multi_data_sections){
+            if (aSection.section_id == multiDataSection.section_id) {
+                aSection.highest_id = multiDataSection.highest_id;
+                aSection.values = multiDataSection.values;
+            }
+        }
+    }
+
+
+    public editObject(): void {
+        this.renderForm.markAllAsTouched();
+
+        if (this.renderForm.valid) {
+            const patchValue = [];
+
+            Object.keys(this.renderForm.value).forEach((key: string) => {
+                let val = this.renderForm.value[key];
+
+                if (key == 'dg_location') {
+                    this.selectedLocation = val;
+                } else if (key.startsWith('dg-mds-')) {
+                    this.handleMultiDataSection(val);
+                } else if (key == 'locationTreeName') {
+                    this.locationTreeName = val;
+                    return;
+                } else if (key == 'locationForObjectExists') {
+                    this.locationForObjectExists = String(val).toLowerCase() === 'true' ? true : false;
+                    return;
+                }
+
+                if (val === undefined || val == null) {
+                    val = '';
+
+                    if (key == "dg_location") {
+                        patchValue.push({
+                            name: key,
+                            value: null
+                        });
+                    }
+                } else {
+                    patchValue.push({
+                        name: key,
+                        value: val
+                    });
+                }
+            });
+
+            this.handleLocation(this.objectInstance.public_id,
+                                this.selectedLocation,
+                                this.locationTreeName,
+                                this.objectInstance.type_id);
+
+            this.objectInstance.fields = patchValue;
+            this.objectInstance.comment = this.commitForm.get('comment').value;
+            this.objectInstance.active = this.activeState;
+
+            this.objectService.putObject(this.objectID, this.objectInstance).subscribe({
+                next: (res: APIUpdateMultiResponse) => {
+                    if (res.failed.length === 0) {
+                        this.objectService.changeState(this.objectID, this.activeState).subscribe((resp: boolean) => {
+                            this.sidebarService.ReloadSideBarData();
+                            this.toastService.success('Object was successfully updated!');
+                            this.router.navigate(['/framework/object/view/' + this.objectID]);
+                        });
+                    } else {
+                        for (const err of res.failed) {
+                            this.toastService.error(err.error_message);
+                        }
+    
+                        this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
+                    }
+                },
+                error: error => {
+                    this.toastService.error(error);
+                    this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
+                }
+            });
+        }
+    }
+
+
+    public toggleChange() {
+        this.activeState = this.activeState !== true;
+        this.renderForm.markAsDirty();
+    }
+
+
+    private handleLocation(object_id: number, parent: number, name: string = "", type_id: number) {
+        let params = {
+            "object_id": object_id,
+            "parent": parent,
+            "name": name,
+            "type_id": type_id
+        }
+
+        //a parent is selected and there is no existing location for this object => create it
+        if (parent && parent > 0 && !this.locationForObjectExists) {
+            this.locationService.postLocation(params).subscribe({
+                next: () => {
+
+                },
+                error: error => {
+                    this.toastService.error(error);
+                }
+            });
+
+            return;
+        }
+
+        //a parent is selected and location for this object exists => update existing location
+        if (parent && parent > 0 && this.locationForObjectExists) {
+            this.locationService.updateLocationForObject(params).subscribe({
+                next: () => {
+
+                },
+                error: error => {
+                    this.toastService.error(error);
+                }
+            });
+
+            return;
+        }
+
+        //parent is removed but location still exists => delete location
+        if (!parent && this.locationForObjectExists) {
+            this.locationService.deleteLocationForObject(object_id).subscribe({
+                next: () => {
+
+                },
+                error: error => {
+                    this.toastService.error(error);
+                }
+            });
+
+            return;
+        }
+    }
 }

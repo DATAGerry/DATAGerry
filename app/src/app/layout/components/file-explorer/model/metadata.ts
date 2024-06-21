@@ -22,7 +22,6 @@ import {CmdbDao} from '../../../../framework/models/cmdb-dao';
 export class FileMetadata implements CmdbDao {
 
   // a set of data that describes and gives information about other data.
-  // tslint:disable:variable-name
   public readonly public_id: number;
   public reference: number | number[];
   public reference_type: string;
@@ -31,7 +30,6 @@ export class FileMetadata implements CmdbDao {
   public parent: number;
   public author_id: number;
   public permission: any;
-  // tslint:enable:variable-name
 
   public constructor(init?: Partial<FileMetadata>) {
     Object.assign(this, init);

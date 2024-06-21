@@ -11,29 +11,39 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { CmdbMode } from '../../../../modes.enum';
 import { UntypedFormGroup } from '@angular/forms';
 
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+
+import { CmdbMode } from '../../../../modes.enum';
+/* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
-  selector: 'cmdb-preview-modal',
-  templateUrl: './preview-modal.component.html',
-  styleUrls: ['./preview-modal.component.scss']
+    selector: 'cmdb-preview-modal',
+    templateUrl: './preview-modal.component.html',
+    styleUrls: ['./preview-modal.component.scss']
 })
 export class PreviewModalComponent {
+    @Input() sections: any[];
+    @Input() saveValues: boolean = false;
+    @Input() editValues: boolean = false;
+    @Input() activateViewMode: boolean = false;
 
-  @Input() sections: any[];
-  public renderForm: UntypedFormGroup;
-  public modes = CmdbMode;
+    public renderForm: UntypedFormGroup;
+    public modes = CmdbMode;
 
-  constructor(public activeModal: NgbActiveModal) {
-    this.renderForm = new UntypedFormGroup({});
-  }
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
+    constructor(public activeModal: NgbActiveModal) {
+        this.renderForm = new UntypedFormGroup({});
+    }
+
+
+    getViewMode() {
+        return this.activateViewMode ? CmdbMode.View : CmdbMode.Create
+    }
 }

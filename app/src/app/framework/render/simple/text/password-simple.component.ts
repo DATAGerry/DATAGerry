@@ -11,29 +11,31 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component } from '@angular/core';
 import { RenderFieldComponent} from '../../fields/components.fields';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  templateUrl: './password-simple.component.html',
-  styleUrls: ['./password-simple.component.scss']
+    templateUrl: './password-simple.component.html',
+    styleUrls: ['./password-simple.component.scss']
 })
 export class PasswordSimpleComponent extends RenderFieldComponent {
 
-  public showData: boolean = false;
+    public showData: boolean = false;
 
-  public toggle() {
-    this.showData = !this.showData;
-  }
-
-  constructor() {
-    super();
-  }
+    constructor() {
+        super();
+    }
 
 
+    public toggle(event: MouseEvent) {
+        this.showData = !this.showData;
+
+        event.stopPropagation();
+        event.preventDefault();
+    }
 }

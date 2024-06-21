@@ -9,15 +9,22 @@ process management independently of the development environment.
 .. contents:: Table of Contents
     :local:
 
+
 Install Python
 ==============
-DataGerry is written in Python 3.9+. This is also the only dependency which is absolutely
-necessary to start the program. Python 2 is not supported. Older versions than Python 3.9 may run,
-but are not officially supported. The installation of Python 3 is different depending on the operating system.
+The backend of DATAGERRY is currently using Python 3.9.x. This is also the only dependency which is absolutely
+necessary to start the program. Older versions than Python 3.9 may run,
+but are not supported. The installation of Python 3 is different depending on the operating system.
 Please see at the official documentation for details: `Download Python | Python.org <https://www.python.org/downloads/>`_
 
 .. note::
-    We are using Python 3.9.x or higher, which is not compatible with Python 2.x.
+    Currently Python 3.9.x is used for development, which is not compatible with Python 2.x.
+
+| 
+
+=======================================================================================================================
+
+| 
 
 Clone repository
 ================
@@ -26,6 +33,7 @@ Clone the git repository from our official mirror:
 .. code:: bash
 
     git clone https://github.com/DATAGerry/DATAGerry
+
 
 Install requirements
 --------------------
@@ -36,28 +44,42 @@ To install the python requirements run:
 
     pip install -r requirements.txt
 
+| 
+
+=======================================================================================================================
+
+| 
 
 Setting up third party dependencies
 ===================================
+Here is an overview of of third party dependencies.
+
 
 MongoDB
 -------
 MongoDB is a document-oriented NoSQL database. It is used to store content and the program uses necessary data.
 See the official installation guide for details: `Install MongoDB Community Edition <https://docs.mongodb.com/manual/administration/install-community/>`_
 
+
 RabbitMQ
 --------
 RabbitMQ is an open source message broker software that implements the Advanced Message Queuing Protocol (AMQP).
 See the official installation guide for details: `Downloading and Installing RabbitMQ <https://www.rabbitmq.com/download.html#installation-guides>`_
 
+| 
+
+=======================================================================================================================
+
+| 
 
 Modify configuration file
 =========================
-Default file is ``etc/cmdb.conf``.
+The default configuration file can be fund at ``etc/cmdb.conf`` inside the DATAGERRY repository.
 The default configuration should look like this:
 
 .. include:: ../../../etc/cmdb.conf
     :literal:
+
 
 Database config
 ---------------
@@ -69,6 +91,7 @@ Configuration section for the MongoDB database.
     :stub-columns: 1
     :align: left
 
+
 Webserver config
 ----------------
 Configuration section for the web(rest)-server.
@@ -79,67 +102,69 @@ Configuration section for the web(rest)-server.
     :stub-columns: 1
     :align: left
 
+
 Message queueing config
 -----------------------
 Configuration section for the message queueing server.
 
-.. csv-table:: message queueing config section table
+.. csv-table:: Message queueing config section table
     :file: fixtures/message_queueing_config.csv
     :header-rows: 1
     :stub-columns: 1
     :align: left
 
+| 
+
+=======================================================================================================================
+
+| 
+
 Starting the backend and frontend
 =================================
 For a development environment, the frontend must be started independently of the backend,
 since these systems are only connected during the compile process.
-If only one development of the backend is desired, the frontend can be ignored.
+If only the development of the backend is desired, the frontend can be ignored.
 This will then display only one placeholder page.
 
-Starting DATAGERRY
-------------------
+
+Starting Python backend
+-----------------------
 To start DATAGERRY you can use the following command.
 
 .. code-block:: bash
 
     ./datagerry -s -d
 
-.. note::
-    For development it is recommended to start the system in debug mode.
-
-Generate clean database
-^^^^^^^^^^^^^^^^^^^^^^^
-To generate an empty database, start the CMDB with the ``--setup`` parameter.
-This starts a startup routine. During the startup, the database structure is created and a query to the
-admin user is started. In addition, the asymmetric key pair is generated and stored in the database`.
-
-.. note::
-    Datagerry is terminated after successful setup, no matter which parameter is used to start it.
-
-.. warning::
-    If an already existing database is specified in the configuration, this database will be deleted!
-
-Insert test data (optional)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Optionally DATAGERRY can be filled with fictitious test data.
+Alternatively the backend can be started from the ROOT folder of the DATAGERRY repository with the following command
 
 .. code-block:: bash
 
-    ./datagerry --test
+    python3 -m cmdb -s -d
 
-Starting angular frontend
+.. note::
+    For development it is recommended to start the system in debug mode by using the ``-d`` flag.
+
+| 
+
+=======================================================================================================================
+
+| 
+
+Starting Angular frontend
 -------------------------
-This frontend was generated with [Angular CLI](https://github.com/angular/angular-cli) version 15.2.4.
+This frontend is developed with Angular Version 17.
 
 Installation
 ^^^^^^^^^^^^
-Run ``npm install``
+Run ``npm install`` inside the ``app`` folder to install all dependencies.
+Angular requires node version 18 and npm version 10.
 
 Development server
 ^^^^^^^^^^^^^^^^^^
-Run ``ng serve`` for a dev server. Navigate to ``http://localhost:4200/``.
-The app will automatically reload if you change any of the source files.
+Run ``ng serve`` inside the ``app`` folder to start the frontend. Navigate to ``http://localhost:4200/``.
+The app will automatically reload if you change any of the frontend source files.
 
 Build
-^^^^^^^^
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `--prod` flag for a production build.
+^^^^^
+Run ``ng build`` to build the project. The build artifacts will be stored in the ``dist/`` directory.
+Use the ``--prod`` flag for a production build.

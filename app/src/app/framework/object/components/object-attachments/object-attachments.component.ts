@@ -48,12 +48,11 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
     config.keyboard = false;
   }
 
+
   public ngOnInit(): void {
-    this.fileService.getAllFilesList(this.metadata).subscribe((resp: APIGetMultiResponse<FileElement>) => {
-      this.attachments = resp.results;
-      this.attachmentsTotal = resp.total;
-    });
+    this.fetchAttachments()
   }
+
 
   public ngOnDestroy(): void {
     if (this.modalRef) {
@@ -61,11 +60,21 @@ export class ObjectAttachmentsComponent implements OnInit, OnDestroy {
     }
   }
 
+
   public showAttachments() {
     this.modalRef = this.modalService.open(AttachmentsListModalComponent);
     this.modalRef.componentInstance.metadata = this.metadata;
     this.modalRef.result.then((result) => {
-      this.attachmentsTotal = result.total;
+      this.fetchAttachments()
     });
   }
+
+
+  private fetchAttachments(): void {
+    this.fileService.getAllFilesList(this.metadata).subscribe((resp: APIGetMultiResponse<FileElement>) => {
+      this.attachments = resp.results;
+      this.attachmentsTotal = this.attachments.length;
+    });
+  }
+
 }

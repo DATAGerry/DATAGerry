@@ -15,39 +15,35 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { ControlsCommon, ControlsContent } from '../controls.common';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 class LocationContent implements ControlsContent {
+    helperText: string;
+    name: string;
+    placeholder: string;
+    required: boolean;
+    type: string;
+    value: any;
+    label: string;
+    typeID: number | number[];
 
-  helperText: string;
-  name: string;
-  placeholder: string;
-  required: boolean;
-  type: string;
-  value: any;
-  label: string;
-  typeID: number | number[];
-
-  public constructor() {
-    this.type = 'location';
-    this.name = 'dg_location';
-    this.label = 'Location';
-  }
-
+    public constructor() {
+        this.type = 'location';
+        this.name = 'dg_location';
+        this.label = 'Location';
+    }
 }
+
 
 export class LocationControl extends ControlsCommon {
+    public name: string = 'location';
+    public label: string  = 'Location';
+    public icon: string  = 'fas fa-globe';
+    public dndType: string = 'location';
 
-  public name: string = 'location';
-  public label: string  = 'Location';
-  public icon: string  = 'fas fa-globe';
-  public dndType: string = 'inputs';
-
-  public content(): LocationContent {
-    return new LocationContent();
-  }
+    public content(): LocationContent {
+        return new LocationContent();
+    }
 
 }
-
-

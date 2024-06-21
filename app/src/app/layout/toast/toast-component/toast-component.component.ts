@@ -59,7 +59,6 @@ export class ToastComponentComponent {
    * @param toast the toast which is affected
    */
   waitTillDisposal(time: number, toast) {
-    // tslint:disable-next-line:only-arrow-functions
     function delay(ms: number) {
       return new Promise( resolve => {
         setTimeout(resolve, ms);

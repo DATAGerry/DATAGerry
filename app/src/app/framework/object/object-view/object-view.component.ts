@@ -11,66 +11,71 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Data } from '@angular/router';
+
+import { BehaviorSubject, Subject, takeUntil } from 'rxjs';
+
 import { ObjectService } from '../../services/object.service';
+
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
-import { BehaviorSubject, Subject } from 'rxjs';
-import {take, takeUntil} from 'rxjs/operators';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-view',
-  templateUrl: './object-view.component.html',
-  styleUrls: ['./object-view.component.scss']
+    selector: 'cmdb-object-view',
+    templateUrl: './object-view.component.html',
+    styleUrls: ['./object-view.component.scss']
 })
 export class ObjectViewComponent implements OnInit, OnDestroy {
 
-  public mode: CmdbMode = CmdbMode.View;
-  public renderResult: RenderResult;
+    public mode: CmdbMode = CmdbMode.View;
+    public renderResult: RenderResult;
+    private unsubscribe = new Subject();
 
-  /**
-   * Component un-subscriber.
-   */
-  private unsubscribe = new Subject();
+    // Current type from the route resolve.
+    private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
 
-  /**
-   * Current type from the route resolve.
-   */
-  private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
-
-  constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute) {
-    this.activateRoute.data.subscribe((data: Data) => {
-      this.objectViewSubject.next(data.object as RenderResult);
-    });
-  }
-
-  public ngOnInit(): void {
-    this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe)).subscribe((result) => {
-      this.renderResult = result;
-    });
-  }
-
-  @HostListener('window:scroll')
-  onWindowScroll() {
-    const dialog = document.getElementsByClassName('object-view-navbar') as HTMLCollectionOf<any>;
-    dialog[0].id = 'object-form-action';
-    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-      dialog[0].style.visibility = 'visible';
-      dialog[0].classList.add('shadow');
-    } else {
-      dialog[0].classList.remove('shadow');
-      dialog[0].id = '';
+    /* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
+    constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private changesRef: ChangeDetectorRef) {
+        this.activateRoute.data.subscribe((data: Data) => {
+            this.objectViewSubject.next(data.object as RenderResult);
+        });
     }
-  }
 
-  public ngOnDestroy(): void {
-    this.unsubscribe.next();
-    this.unsubscribe.complete();
-  }
+
+    public ngOnInit(): void {
+        this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe)).subscribe((result) => {
+            this.renderResult = result;
+        });
+    }
+
+    ngAfterViewInit(): void {
+        this.changesRef.detectChanges();
+    }
+
+
+    public ngOnDestroy(): void {
+        this.unsubscribe.complete();
+    }
+
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+
+    @HostListener('window:scroll')
+    onWindowScroll() {
+        const dialog = document.getElementsByClassName('object-view-navbar') as HTMLCollectionOf<any>;
+        dialog[0].id = 'object-form-action';
+
+        if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+            dialog[0].style.visibility = 'visible';
+            dialog[0].classList.add('shadow');
+        } else {
+            dialog[0].classList.remove('shadow');
+            dialog[0].id = '';
+        }
+    }
 }

@@ -1,0 +1,55 @@
+<span class="d-flex justify-content-between">
+    <h1>DocAPI Document Templates</h1>
+</span>
+
+<hr/>
+
+<cmdb-info-box [message]="messageBlock"/>
+
+<ng-template #addButton>
+    <button
+        type="button"
+        *permissionLink="['base.docapi.template.add']"
+        class="btn btn-success btn-sm mr-1"
+        [routerLink]="['/docapi/add']"
+    >
+        <i class="fas fa-plus"></i> Add
+    </button>
+</ng-template>
+
+<cmdb-table
+    [items]="templates"
+    [columns]="columns"
+    [page]="page"
+    [sort]="sort"
+    [id]="'docapi-list-datatable'"
+    [stateEnabled]="false"
+    [emptyMessage]="'No doc templates were found!'"
+    [customButtons]="[addButton]"
+    [totalItems]="totalTemplates"
+    [selectEnabled]="selectEnabled"
+    [loading]="loading"
+    [pageSize]="limit"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)"
+    (searchChange)="onSearchChange($event)"
+/>
+
+<ng-template #actionsTemplate let-item="item">
+    <div class="d-flex justify-content-center">
+        <a
+            *permissionLink="['base.docapi.template.edit']"
+            class="ml-1 text-dark mr-1"
+            [routerLink]="['/docapi/edit/', item?.public_id]"
+        >
+            <fa-icon [icon]="['far', 'edit']"></fa-icon>
+        </a>
+        <a
+            *permissionLink="['base.docapi.template.delete']"
+            class="ml-1 text-dark mr-1"
+        >
+            <fa-icon [icon]="['far', 'trash-alt']" (click)="delDocTemplate(item?.public_id)"></fa-icon>
+        </a>
+    </div>
+</ng-template>

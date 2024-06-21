@@ -11,29 +11,32 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ExportRoutingModule } from './export-routing.module';
-import { ExportComponent } from './export.component';
-import { ExportTypesComponent } from './export-types/export-types.component';
-import { LayoutModule } from '../layout/layout.module';
-import { ArchwizardModule } from 'angular-archwizard';
 import { ReactiveFormsModule } from '@angular/forms';
-import { ExportObjectsComponent } from './export-objects/export-objects.component';
+
 import { NgSelectModule } from '@ng-select/ng-select';
 import { FontAwesomeModule } from '@fortawesome/angular-fontawesome';
-import { AuthModule } from '../auth/auth.module';
+import { ArchwizardModule } from '@rg-software/angular-archwizard';
 
+import { ExportRoutingModule } from './export-routing.module';
+import { LayoutModule } from '../layout/layout.module';
+import { AuthModule } from '../modules/auth/auth.module';
+
+import { ExportComponent } from './export.component';
+import { ExportTypesComponent } from './export-types/export-types.component';
+import { ExportObjectsComponent } from './export-objects/export-objects.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 @NgModule({
-  declarations: [
-    ExportComponent,
-    ExportTypesComponent,
-    ExportObjectsComponent],
+    declarations: [
+        ExportComponent,
+        ExportTypesComponent,
+        ExportObjectsComponent
+    ],
     imports: [
         CommonModule,
         LayoutModule,
@@ -45,4 +48,4 @@ import { AuthModule } from '../auth/auth.module';
         AuthModule
     ]
 })
-export class ExportModule { }
+export class ExportModule {}

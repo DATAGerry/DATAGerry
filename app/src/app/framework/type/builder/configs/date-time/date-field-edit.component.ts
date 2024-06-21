@@ -15,67 +15,78 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
 
 import { NgbDateAdapter, NgbDateParserFormatter } from '@ng-bootstrap/ng-bootstrap';
 
-import { DateSettingsService } from '../../../../../settings/services/date-settings.service';
 import { ValidationService } from '../../../services/validation.service';
 
-import { ConfigEditBaseComponent } from '../config.edit';
 import { CustomDateParserFormatter, NgbStringAdapter } from '../../../../../settings/date-settings/date-settings-formatter.service';
+
+import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-date-field-edit',
-  templateUrl: './date-field-edit.component.html',
-  providers: [
-    { provide: NgbDateAdapter, useClass: NgbStringAdapter },
-    { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
-  ]
+    selector: 'cmdb-date-field-edit',
+    templateUrl: './date-field-edit.component.html',
+    styleUrls: ['./date-field-edit.component.scss'],
+    providers: [
+        { provide: NgbDateAdapter, useClass: NgbStringAdapter },
+        { provide: NgbDateParserFormatter, useClass: CustomDateParserFormatter }
+    ]
 })
 export class DateFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public datePlaceholder = 'YYYY-MM-DD';
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    public datePlaceholder = 'YYYY-MM-DD';
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    private identifierInitialValue: string;
+    isValid$ = true;
+    date: Date;
 
+    @ViewChild('dateInputVisible') dateInputVisible: ElementRef<HTMLInputElement>;
+    @ViewChild('dateInputHidden') dateInputHidden: ElementRef<HTMLInputElement>;
+    isDatePickerVisible = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
-    constructor(private dateSettingsService: DateSettingsService, private validationService: ValidationService) {
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+
+    constructor(private validationService: ValidationService) {
         super();
     }
 
 
     public ngOnInit(): void {
-        this.dateSettingsService.getDateSettings().pipe(takeUntil(this.subscriber)).subscribe((dateSettings: any) => {
-            this.datePlaceholder = dateSettings.date_format;
-        });
-
         this.form.addControl('required', this.requiredControl);
         this.form.addControl('name', this.nameControl);
         this.form.addControl('label', this.labelControl);
         this.form.addControl('description', this.descriptionControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('helperText', this.helperTextControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
+
+        if (this.hiddenStatus) {
+            this.hideFieldControl.setValue(true);
+        }
     }
 
 
@@ -84,7 +95,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     public hasValidator(control: string): void {
         if (this.form.controls[control].hasValidator(Validators.required)) {
@@ -97,16 +108,49 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
-            "fieldName": this.nameControl.value
+            "inputName": type,
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "date"
         });
+
+        if (type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item)
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
+    }
+
+
+    /**
+     * Toggles the input type between 'date' and 'text' on double click.
+     */
+    onDblClick(event: MouseEvent) {
+        const inputElement = event.target as HTMLInputElement;
+        if (inputElement.type === 'date') {
+            inputElement.type = 'text';
+
+            setTimeout(() => {
+                inputElement.select();
+            });
+        }
+    }
+
+
+    /**
+     * Changes the input type back to 'date' when the input element loses focus,
+     * if the current type is 'text'.
+     */
+    onFocusOut(event: FocusEvent) {
+        const inputElement = event.target as HTMLInputElement;
+        if (inputElement.type === 'text') {
+            inputElement.type = 'date';
+        }
     }
 
 

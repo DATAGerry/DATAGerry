@@ -19,7 +19,6 @@
 import { Directive, HostBinding, Input } from '@angular/core';
 
 @Directive({
-  // tslint:disable-next-line:directive-selector
   selector: 'tbody[table-body]'
 })
 export class TableBodyDirective {

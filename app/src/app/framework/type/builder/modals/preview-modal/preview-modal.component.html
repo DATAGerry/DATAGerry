@@ -1,7 +1,17 @@
 <div class="modal-content">
     <div class="modal-header">
-        <h4 class="modal-title">Preview</h4>
-        <button type="button" class="close" aria-label="Close" (click)="activeModal.dismiss('Cross click')">
+
+        @if(saveValues) {
+            <h4 class="modal-title">Add new entry</h4>
+        }
+        @else if(editValues) {
+            <h4 class="modal-title">Edit entry</h4>
+        }
+        @else {
+            <h4 class="modal-title">Preview</h4>
+        }
+
+        <button type="button" class="close" aria-label="Close" (click)="activeModal.close(false)">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
@@ -11,7 +21,7 @@
                 <legend>{{section?.label}}</legend>
                 <div *ngFor="let field of section?.fields">
                     <cmdb-render-element
-                        [mode]="modes.Create"
+                        [mode]="getViewMode()"
                         [parentFormGroup]="renderForm"
                         [data]="field">
                     </cmdb-render-element>
@@ -20,6 +30,23 @@
         </form>
     </div>
     <div class="modal-footer">
-        <button type="button" class="btn btn-outline-primary" (click)="activeModal.close('Close click')">Close</button>
+        <button type="button" class="btn btn-outline-danger" (click)="activeModal.close(false)">Close</button>
+        <div *ngIf="saveValues">
+            <button
+                type="button"
+                class="btn btn-success"
+                (click)="activeModal.close(renderForm.value)"
+                [disabled]="!renderForm.valid"
+            >Add</button>
+        </div>
+        <div *ngIf="editValues">
+            <button
+                type="button"
+                class="btn btn-success"
+                (click)="activeModal.close(renderForm.value)"
+                [disabled]="!renderForm.valid"
+            >OK</button>
+        </div>
+        
     </div>
 </div>

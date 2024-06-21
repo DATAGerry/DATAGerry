@@ -47,7 +47,6 @@ class MetaView {
 export class ObjectViewMetaComponent {
 
   public meteObject: MetaView = null;
-  // tslint:disable-next-line:variable-name
   private _renderResult: any;
 
   @Input('renderResult')

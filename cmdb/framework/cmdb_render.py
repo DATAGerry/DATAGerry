@@ -31,6 +31,7 @@ from cmdb.utils.error import CMDBError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
+from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 from cmdb.user_management.user_manager import UserModel
 from cmdb.user_management.managers.user_manager import UserManager
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -67,6 +68,7 @@ class RenderResult(RenderVisualization):
         self.summaries: list = []
         self.summary_line: str = ''
         self.externals: list = []
+        self.multi_data_sections: list = []
 
 
 class CmdbRender:
@@ -138,6 +140,22 @@ class CmdbRender:
         return self._generate_result(level)
 
 
+    def get_mds_reference(self, field_value: int) -> dict:
+        """TODO: document"""
+        return self.__merge_references({"value": field_value})
+
+
+    def is_ref_field(self, field_name):
+        """TODO: document"""
+        type_fields = self.type_instance.fields
+
+        for field in type_fields:
+            if field["type"] == "ref" and field["name"] == field_name:
+                return True
+
+        return False
+
+
     def _generate_result(self, level: int) -> RenderResult:
         render_result = RenderResult()
 
@@ -148,12 +166,18 @@ class CmdbRender:
             render_result = self.__set_sections(render_result)
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
+            render_result = self.__set_multi_data_sections(render_result)
         except CMDBError as error:
             import traceback
             traceback.print_exc()
             raise RenderError(f'Error while generating a CMDBResult: {str(error)}') from error
         return render_result
 
+
+    def __set_multi_data_sections(self, render_result: RenderResult) -> RenderResult:
+        render_result.multi_data_sections = self.object_instance.multi_data_sections
+
+        return render_result
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
@@ -247,7 +271,7 @@ class CmdbRender:
             return field_map
 
         for idx, section in enumerate(self.type_instance.render_meta.sections):
-            if isinstance(section, TypeFieldSection):
+            if isinstance(section, (TypeFieldSection, TypeMultiDataSection)):
                 for section_field in section.fields:
                     field = {}
                     try:
@@ -539,7 +563,8 @@ class RenderList:
                 type_instance=self.object_manager.get_type(passed_object.type_id),
                 object_instance=passed_object,
                 render_user=self.request_user,
-                object_manager=self.object_manager, ref_render=self.ref_render)
+                object_manager=self.object_manager,
+                ref_render=self.ref_render)
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:

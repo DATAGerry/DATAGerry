@@ -1,0 +1,86 @@
+<ng-template #activeTemplate let-data="data">
+    <div class="text-center">
+        <cmdb-active-badge [activeStatus]="data"/>
+    </div>
+</ng-template>
+
+<ng-template #userTemplate let-data="data">
+    <cmdb-user-compact [userID]="data"/>
+</ng-template>
+
+<ng-template #actionTemplate let-item="item">
+    <cmdb-object-table-actions
+        [publicID]="item.object_information.object_id"
+        [result]="item"
+        [acl]="item.type_information.acl"
+        (deleteObjectsEmitter)="onObjectDeleteWithObjects(item)"
+        (deleteLocationsEmitter)="onObjectDeleteWithLocations(item)"
+        (deleteEmitter)="onObjectDelete(item)"
+    />
+</ng-template>
+
+<div style="max-width: 99% !important;">
+    <div class="card">
+        <a routerLink="/framework/object/">
+            <div class="dash-card primary">
+                <i class="fa fa-cube"></i>
+                <div class="count-section">
+                    <div id="count-numbers">{{objectCount}}</div>
+                    <div id="count-name">Objects</div>
+                </div>
+            </div>
+        </a>
+        <div class="card-body">
+            <cmdb-charts
+                [dataLabels]="labelsObject"
+                [dataItems]="itemsObject"
+                [labelColors]="colorsObject"
+            />
+        </div>
+    </div>
+</div>
+
+<hr/>
+
+<ng-container *ngIf="newestObjects">
+    <h2>Newest objects</h2>
+    <cmdb-table
+        [id]="'dashboard-newest-table'"
+        [items]="newestObjects"
+        [totalItems]="newestObjectsCount"
+        [loading]="newestLoading"
+        [columns]="newestTableColumns"
+        [sortable]="false"
+        [searchEnabled]="false"
+        [pageSize]="10"
+        [loadingEnabled]="true"
+        [emptyMessage]="'No newest objects!'"
+        [pageSizeEnabled]="false"
+        [paginationEnabled]="true"
+        (pageChange)="onNewestPageChange($event)"
+    />
+</ng-container>
+
+<hr/>
+
+<ng-container *ngIf="latestObjects">
+    <h2>Last modified objects</h2>
+    <cmdb-table
+        [id]="'dashboard-latest-table'"
+        [items]="latestObjects"
+        [totalItems]="latestObjectsCount"
+        [loading]="latestLoading"
+        [columns]="latestTableColumns"
+        [sortable]="false"
+        [searchEnabled]="false"
+        [pageSize]="10"
+        [loadingEnabled]="true"
+        [emptyMessage]="'No modified objects!'"
+        [pageSizeEnabled]="false"
+        (pageChange)="onLatestPageChange($event)"
+    />
+</ng-container>
+
+<ng-template #dateTemplate let-data="data">
+    {{data | dateFormatter}}
+</ng-template>

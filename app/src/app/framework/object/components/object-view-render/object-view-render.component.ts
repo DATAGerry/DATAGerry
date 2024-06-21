@@ -11,35 +11,33 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, Input } from '@angular/core';
-import { CmdbMode } from '../../../modes.enum';
-import { CmdbType } from '../../../models/cmdb-type';
-import { CmdbObject } from '../../../models/cmdb-object';
 import { UntypedFormGroup } from '@angular/forms';
+
+import { CmdbMode } from '../../../modes.enum';
 import { RenderResult } from '../../../models/cmdb-render';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-view-render',
-  templateUrl: './object-view-render.component.html',
-  styleUrls: ['./object-view-render.component.scss']
+    selector: 'cmdb-object-view-render',
+    templateUrl: './object-view-render.component.html',
+    styleUrls: ['./object-view-render.component.scss']
 })
 export class ObjectViewRenderComponent {
+    @Input() public mode: CmdbMode = CmdbMode.View;
+    @Input() public renderResult: RenderResult;
 
-  @Input() public mode: CmdbMode = CmdbMode.View;
-  @Input() public renderResult: RenderResult;
+    public renderForm: UntypedFormGroup;
+    public fieldsGroups: UntypedFormGroup;
 
-  public renderForm: UntypedFormGroup;
-  public fieldsGroups: UntypedFormGroup;
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  public constructor() {
-    this.renderForm = new UntypedFormGroup({});
-    this.fieldsGroups = new UntypedFormGroup({});
-  }
-
-
+    public constructor() {
+        this.renderForm = new UntypedFormGroup({});
+        this.fieldsGroups = new UntypedFormGroup({});
+    }
 }

@@ -1,23 +1,29 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "baseUrl": "./",
-    "downlevelIteration": true,
-    "outDir": "./dist/out-tsc",
-    "sourceMap": true,
-    "declaration": false,
-    "module": "esnext",
-    "moduleResolution": "node",
-    "experimentalDecorators": true,
-    "importHelpers": true,
-    "target": "ES2022",
-    "typeRoots": [
-      "node_modules/@types"
-    ],
-    "lib": [
-      "es2018",
-      "dom"
-    ],
-    "useDefineForClassFields": false
-  }
+    "compileOnSave": false,
+    "compilerOptions": {
+        "baseUrl": "./",
+        "downlevelIteration": true,
+        "outDir": "./dist/out-tsc",
+        "sourceMap": true,
+        "declaration": false,
+        "module": "esnext",
+        "moduleResolution": "node",
+        "experimentalDecorators": true,
+        "importHelpers": true,
+        "target": "ES2022",
+        "typeRoots": [
+            "node_modules/@types"
+        ],
+        "lib": [
+            "ESNext",
+            "dom"
+        ],
+        "useDefineForClassFields": false
+    },
+    // "angularCompilerOptions": {
+    //     "strictTemplates": true,
+    //     "preserveWhitespaces": true,
+    //     "enableI18nLegacyMessageIdFormat": false,
+    //     "strictInjectionParameters": true,
+    // }
 }

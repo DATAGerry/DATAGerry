@@ -28,8 +28,8 @@ import { ToastService } from '../../../layout/toast/toast.service';
 import { SidebarService } from '../../../layout/services/sidebar.service';
 import { UserSettingsDBService } from '../../../management/user-settings/services/user-settings-db.service';
 import {
-  convertResourceURL,
-  UserSettingsService
+    convertResourceURL,
+    UserSettingsService
 } from '../../../management/user-settings/services/user-settings.service';
 
 import { CmdbType } from '../../models/cmdb-type';
@@ -46,88 +46,88 @@ import { SupportedExporterExtension } from '../../../export/export-objects/model
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-objects-by-type',
-  templateUrl: './objects-by-type.component.html',
-  styleUrls: ['./objects-by-type.component.scss']
+    selector: 'cmdb-objects-by-type',
+    templateUrl: './objects-by-type.component.html',
+    styleUrls: ['./objects-by-type.component.scss']
 })
 export class ObjectsByTypeComponent implements OnInit, OnDestroy {
 
-  /**
-   * HTML ID of the table
-   * Used for user settings and table-states
-   */
-  public readonly id: string = 'table-objects-type';
+    /**
+     * HTML ID of the table
+     * Used for user settings and table-states
+     */
+    public readonly id: string = 'table-objects-type';
 
-  @ViewChild(TableComponent) objectsTableComponent: TableComponent<RenderResult>;
+    @ViewChild(TableComponent) objectsTableComponent: TableComponent<RenderResult>;
 
-  @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
-  @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
-  @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
-  @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
+    @ViewChild('activeTemplate', { static: true }) activeTemplate: TemplateRef<any>;
+    @ViewChild('fieldTemplate', { static: true }) fieldTemplate: TemplateRef<any>;
+    @ViewChild('dateTemplate', { static: true }) dateTemplate: TemplateRef<any>;
+    @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  public results: Array<RenderResult> = [];
-  public selectedObjects: Array<RenderResult> = [];
-  public selectedObjectsIDs: Array<number> = [];
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    public results: Array<RenderResult> = [];
+    public selectedObjects: Array<RenderResult> = [];
+    public selectedObjectsIDs: Array<number> = [];
 
-  public totalResults: number = 0;
+    public totalResults: number = 0;
 
-  // Current type from the route resolve
-  private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
+    // Current type from the route resolve
+    private typeSubject: BehaviorSubject<CmdbType> = new BehaviorSubject<CmdbType>(undefined);
 
 
-  // Getter for the type definition from the typeSubject
-  public get type(): CmdbType {
-      return this.typeSubject.getValue() as CmdbType;
-  }
+    // Getter for the type definition from the typeSubject
+    public get type(): CmdbType {
+        return this.typeSubject.getValue() as CmdbType;
+    }
 
-  public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
-  public tableStates: Array<TableState> = [];
+    public tableStateSubject: BehaviorSubject<TableState> = new BehaviorSubject<TableState>(undefined);
+    public tableStates: Array<TableState> = [];
 
-  public get tableState(): TableState {
-    return this.tableStateSubject.getValue() as TableState;
-  }
+    public get tableState(): TableState {
+        return this.tableStateSubject.getValue() as TableState;
+    }
 
-  // Objects loading flag
-  public loading: boolean = false;
+    // Objects loading flag
+    public loading: boolean = false;
 
-  public mode: CmdbMode = CmdbMode.Simple;
-  public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
+    public mode: CmdbMode = CmdbMode.Simple;
+    public sort: Sort = { name: 'public_id', order: SortDirection.DESCENDING } as Sort;
 
-   // Filter search term from table search
-  public search_term: string;
+    // Filter search term from table search
+    public search_term: string;
 
-  private collectionFilterParameter: any[] = [];
+    private collectionFilterParameter: any[] = [];
 
-  public selectReset: Array<RenderResult> = [];
-  public initialVisibleColumns: Array<string> = [];
-  public columns: Array<Column>;
-  public readonly initPage: number = 1;
-  public page: number = this.initPage;
-  private readonly initLimit: number = 25;
-  public limit: number = this.initLimit;
+    public selectReset: Array<RenderResult> = [];
+    public initialVisibleColumns: Array<string> = [];
+    public columns: Array<Column>;
+    public readonly initPage: number = 1;
+    public page: number = this.initPage;
+    private readonly initLimit: number = 25;
+    public limit: number = this.initLimit;
 
-  public formatList: any[] = [];
-  private deleteManyModalRef: NgbModalRef;
+    public formatList: any[] = [];
+    private deleteManyModalRef: NgbModalRef;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(private router: Router,
-                private route: ActivatedRoute,
-                private objectService: ObjectService,
-                private fileService: FileService,
-                private fileSaverService: FileSaverService,
-                private toastService: ToastService,
-                private sidebarService: SidebarService,
-                private modalService: NgbModal,
-                private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
-                private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
+        private route: ActivatedRoute,
+        private objectService: ObjectService,
+        private fileService: FileService,
+        private fileSaverService: FileSaverService,
+        private toastService: ToastService,
+        private sidebarService: SidebarService,
+        private modalService: NgbModal,
+        private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
+        private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>) {
 
         this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
             if (data.userSetting) {
                 const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
-                .find(payloads => payloads.id === this.id);
-    
+                    .find(payloads => payloads.id === this.id);
+
                 this.tableStates = userSettingPayloads.tableStates;
                 this.tableStateSubject.next(userSettingPayloads.currentState);
             } else {
@@ -142,7 +142,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             this.typeSubject.next(data.type as CmdbType);
         });
 
-        this.fileService.callFileFormatRoute().subscribe(data => {this.formatList = data;});
+        this.fileService.callFileFormatRoute().subscribe(data => { this.formatList = data; });
     }
 
 
@@ -158,7 +158,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         this.subscriber.complete();
     }
 
-/* ---------------------------------------------- TODO - SORT FUNCTIONS --------------------------------------------- */
+    /* ---------------------------------------------- TODO - SORT FUNCTIONS --------------------------------------------- */
 
     /**
      * Reload the table
@@ -200,6 +200,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         const fields = type.fields || [];
         const summaryFields = type.render_meta.summary.fields || [];
 
+        const myFields: string[] = type.render_meta.sections
+            .filter(newfilter => newfilter.type !== 'multi-data-section')
+            .flatMap(fields => fields.fields.map(field => field));
+
+        const newFields: any[] = fields
+            .filter(newField => myFields.includes(newField.name));
+
         const columns = [
             {
                 display: 'Active',
@@ -222,7 +229,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             }
         ] as Array<Column>;
 
-        for (const field of fields) {
+        newFields.map(field => {
             columns.push({
                 display: field.label,
                 name: `fields.${field.name}`,
@@ -243,7 +250,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                 },
                 template: this.fieldTemplate
             } as Column);
-        }
+        });
 
         columns.push({
             display: 'Author',
@@ -323,11 +330,11 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         };
 
         this.objectService.getObjects(params).pipe(takeUntil(this.subscriber))
-        .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
-            this.results = apiResponse.results as Array<RenderResult>;
-            this.totalResults = apiResponse.total;
-            this.loading = false;
-        });
+            .subscribe((apiResponse: APIGetMultiResponse<RenderResult>) => {
+                this.results = apiResponse.results as Array<RenderResult>;
+                this.totalResults = apiResponse.total;
+                this.loading = false;
+            });
     }
 
 
@@ -393,7 +400,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                         $reduce: {
                             input: '$data.fields',
                             initialValue: [],
-                            in: { 
+                            in: {
                                 $setUnion: ['$$value', '$$this']
                             }
                         }
@@ -524,7 +531,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             query.push({
                 $match: {
                     $or: or
-                } });
+                }
+            });
         }
 
         let params: CollectionParameters
@@ -552,7 +560,7 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                 this.results = apiResponse.results as Array<RenderResult>;
                 this.totalResults = apiResponse.total;
                 this.loading = false;
-        });
+            });
     }
 
 
@@ -565,11 +573,13 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     private elementMatchFields(content: string | boolean, field?: string, input: string = 'references') {
         const value = typeof content === 'boolean' ? content : { $regex: String(content), $options: 'ism' };
 
-        return  {[input]: {
-                    $elemMatch: {
-                        name: field, value 
-                    }
-                }};
+        return {
+            [input]: {
+                $elemMatch: {
+                    name: field, value
+                }
+            }
+        };
     }
 
 
@@ -591,8 +601,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
     private referenceFieldQuery(query: any[]) {
 
         if (query.find(x => x.hasOwnProperty('$lookup') ||
-        x.hasOwnProperty('$project') ||
-        x.hasOwnProperty('$group'))) {
+            x.hasOwnProperty('$project') ||
+            x.hasOwnProperty('$group'))) {
             return query;
         }
 
@@ -884,8 +894,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                                         and.push({ active: column.data });
                                     } else {
                                         and.push(this.elementMatchFields(Boolean(JSON.parse(column.data)),
-                                                                        column.name.slice(7),
-                                                                        'fields'));
+                                            column.name.slice(7),
+                                            'fields'));
                                     }
                                 } catch (e) { }
                                 break;
@@ -896,8 +906,8 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                                     and.push(this.searchRegexProperty('public_id', column.data));
                                 } else {
                                     and.push(this.elementMatchFields(column.data,
-                                                                    'fields' === prefix ? name : column.name,
-                                                                    'fields'));
+                                        'fields' === prefix ? name : column.name,
+                                        'fields'));
                                 }
                                 break;
                         }
@@ -992,9 +1002,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
         }
 
         this.fileService.callExportRoute(exportAPI, see.view)
-        .subscribe(res => {
-            this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
-        });
+            .subscribe(res => {
+                this.fileSaverService.save(res.body, new Date().toISOString() + '.' + see.label);
+            });
     }
 
 
@@ -1004,9 +1014,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
             this.sidebarService.updateTypeCounter(this.type.public_id);
             this.loadObjects();
         },
-        (error) => {
-            this.toastService.error(`Error while deleting object ${publicID} | Error: ${error}`);
-        });
+            (error) => {
+                this.toastService.error(`Error while deleting object ${publicID} | Error: ${error}`);
+            });
     }
 
 
@@ -1024,33 +1034,33 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                             this.objectsTableComponent.selectedItems = [];
                             this.loadObjects();
                         },
-                        (response) => this.toastService.error(response.error)
+                            (response) => this.toastService.error(response.error)
                         );
-                    }
+                }
             });
         }
     }
 
 
-    public onObjectDeleteWithLocations(objectID: number){
+    public onObjectDeleteWithLocations(objectID: number) {
         this.objectService.deleteObjectWithLocations(objectID).pipe(takeUntil(this.subscriber))
-        .subscribe(() => {
-            this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
-            this.loadObjects();
-        },
-        (error) => {
-            this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
-        });
+            .subscribe(() => {
+                this.toastService.success(`Object ${objectID} and child locations were deleted successfully`);
+                this.loadObjects();
+            },
+                (error) => {
+                    this.toastService.error(`Error while deleting object ${objectID} | Error: ${error}`);
+                });
     }
 
-    public onObjectDeleteWithObjects(objectID: number){
+    public onObjectDeleteWithObjects(objectID: number) {
         this.objectService.deleteObjectWithChildren(objectID).pipe(takeUntil(this.subscriber))
-        .subscribe(() => {
-            this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
-            this.loadObjects();
-        },
-        (error) => {
-            this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
-        });
+            .subscribe(() => {
+                this.toastService.success(`Object ${objectID} and child locations were deleted successfully`);
+                this.loadObjects();
+            },
+                (error) => {
+                    this.toastService.error(`Error while deleting object ${objectID} | Error: ${error}`);
+                });
     }
 }

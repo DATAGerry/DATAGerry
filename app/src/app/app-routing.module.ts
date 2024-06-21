@@ -11,48 +11,51 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule, PreloadAllModules } from '@angular/router';
-import { LoginComponent } from './auth/login.component';
-import { AuthGuard } from './auth/guards/auth.guard';
+
+import { AuthGuard } from './modules/auth/guards/auth.guard';
+
+import { LoginComponent } from './modules/auth/login/login.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-
-  {
-    path: 'connect',
-    data: {
-      view: 'embedded'
+    {
+        path: 'connect',
+        data: {
+            view: 'embedded'
+        },
+        loadChildren: () => import('./modules/connect/connect.module').then(m => m.ConnectModule)
     },
-    loadChildren: () => import('./connect/connect.module').then(m => m.ConnectModule)
-  },
-  {
-    path: 'auth',
-    data: {
-      view: 'embedded'
+    {
+        path: 'auth',
+        data: {
+            view: 'embedded'
+        },
+        component: LoginComponent
     },
-    component: LoginComponent
-  },
-  {
-    path: '',
-    canActivate: [AuthGuard],
-    canActivateChild: [AuthGuard],
-    loadChildren: () => import('./main/main.module').then(m => m.MainModule)
-  },
-  {
-    path: '**',
-    redirectTo: 'error/404'
-  }
+    {
+        path: '',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        loadChildren: () => import('./modules/main/main.module').then(m => m.MainModule)
+    },
+    {
+        path: '**',
+        redirectTo: 'error/404'
+    }
 ];
 
-
 @NgModule({
-  imports: [RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })],
-  exports: [RouterModule]
+    imports: [
+        RouterModule.forRoot(routes, { preloadingStrategy: PreloadAllModules, enableTracing: false })
+    ],
+    exports: [
+        RouterModule
+    ]
 })
-export class AppRoutingModule {
-}
+export class AppRoutingModule {}

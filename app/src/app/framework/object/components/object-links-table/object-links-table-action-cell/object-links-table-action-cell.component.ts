@@ -11,40 +11,41 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { CmdbLink } from '../../../../models/cmdb-link';
 import { LinkService } from '../../../../services/link.service';
-import { AccessControlList } from '../../../../../acl/acl.types';
+
+import { CmdbLink } from '../../../../models/cmdb-link';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-links-table-action-cell',
-  templateUrl: './object-links-table-action-cell.component.html',
-  styleUrls: ['./object-links-table-action-cell.component.scss']
+    selector: 'cmdb-object-links-table-action-cell',
+    templateUrl: './object-links-table-action-cell.component.html',
+    styleUrls: ['./object-links-table-action-cell.component.scss']
 })
 export class ObjectLinksTableActionCellComponent {
 
-  public link: CmdbLink;
+    public link: CmdbLink;
 
-  @Input() public objectID: number;
-  @Input() public acl: AccessControlList;
+    @Input() public objectID: number;
+    @Input() public acl: AccessControlList;
 
-  public partnerLinkID: number;
+    public partnerLinkID: number;
 
-  @Input('link')
-  public set Link(link: CmdbLink) {
-    this.link = link;
-    this.partnerLinkID = this.linkService.getPartnerID(this.objectID, link);
-  }
+    @Input('link')
+    public set Link(link: CmdbLink) {
+        this.link = link;
+        this.partnerLinkID = this.linkService.getPartnerID(this.objectID, link);
+    }
 
-  @Output() deleteEmitter: EventEmitter<CmdbLink> = new EventEmitter();
+    @Output() deleteEmitter: EventEmitter<CmdbLink> = new EventEmitter();
 
-  constructor(private linkService: LinkService) {
-  }
+    constructor(private linkService: LinkService) {
 
-
+    }
 }

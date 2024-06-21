@@ -115,10 +115,15 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
                     this.newLocationParentID = this.renderForm.get(field).value;
                 }
 
-                newObjectInstance.fields.push({
-                    name: field,
-                    value: this.renderForm.get(field).value
-                });
+                console.log("field", field);
+                if(field.startsWith("dg-mds-")){
+                    newObjectInstance.multi_data_sections.push(this.renderForm.get(field).value)
+                } else {
+                    newObjectInstance.fields.push({
+                        name: field,
+                        value: this.renderForm.get(field).value
+                    });
+                }
             });
 
             let ack = null;
@@ -146,7 +151,7 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
             .subscribe((response: RenderResult) => {
                 this.originalLocationData = response;
 
-                /** Set the inital name for the location for copying and creating a new one */
+                // Set the inital name for the location for copying and creating a new one
                 this.locationService.locationTreeName = this.originalLocationData['name'];
             });
     }
@@ -160,8 +165,7 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
             "type_id": this.typeInstance.public_id 
         }
 
-        this.locationService.postLocation(params)
-            .subscribe((res: APIUpdateMultiResponse) => {
+        this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
                 this.locationService.locationTreeName = "";
             },
             error => {
@@ -170,9 +174,7 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
         );
     }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                   HELPER SECTION                                                   */
-/* ------------------------------------------------------------------------------------------------------------------ */
+/* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
 
     @HostListener('window:scroll')
     onWindowScroll() {

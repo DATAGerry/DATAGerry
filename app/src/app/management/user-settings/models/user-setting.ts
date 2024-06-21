@@ -11,40 +11,40 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { ObjectStoreSchema } from 'ngx-indexed-db/lib/ngx-indexed-db.meta';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 export const userSettingsSchema: ObjectStoreSchema[] = [
-  { name: 'resource', keypath: 'resource', options: { unique: true } },
-  { name: 'user_id', keypath: 'user_id', options: { unique: false } },
-  { name: 'payloads', keypath: 'payloads', options: { unique: false } },
-  { name: 'setting_type', keypath: 'setting_type', options: { unique: false } }
+    { name: 'resource', keypath: 'resource', options: { unique: true } },
+    { name: 'user_id', keypath: 'user_id', options: { unique: false } },
+    { name: 'payloads', keypath: 'payloads', options: { unique: false } },
+    { name: 'setting_type', keypath: 'setting_type', options: { unique: false } }
 ];
 
 /**
  * Basic user setting class. Wrapper class for all CRUD functions with the API.
  */
 export class UserSetting<P = UserSettingPayload> {
+    static readonly USER_SETTING_TYPE = 'APPLICATION';
 
-  static readonly USER_SETTING_TYPE = 'APPLICATION';
+    public readonly resource: string;
+    public readonly user_id: number;
+    public payloads: Array<P>;
+    public readonly setting_type: string = UserSetting.USER_SETTING_TYPE;
 
-  public readonly resource: string;
-  public readonly user_id: number;
-  public payloads: Array<P>;
-  public readonly setting_type: string = UserSetting.USER_SETTING_TYPE;
 
-  constructor(resource: string, user_id: number, payloads: Array<P> = []) {
-    this.resource = resource;
-    this.user_id = user_id;
-    this.payloads = payloads;
-  }
+    constructor(resource: string, user_id: number, payloads: Array<P> = []) {
+        this.resource = resource;
+        this.user_id = user_id;
+        this.payloads = payloads;
+    }
 }
 
-// tslint:disable-next-line:no-empty-interface
+
 export interface UserSettingPayload {
-  id: string;
+    id: string;
 }

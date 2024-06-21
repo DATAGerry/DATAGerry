@@ -19,7 +19,6 @@
 import { CmdbDao } from './cmdb-dao';
 
 export class CmdbStatus implements CmdbDao {
-  // tslint:disable-next-line:variable-name
   public readonly public_id: number;
   public name: string;
   public label: string;

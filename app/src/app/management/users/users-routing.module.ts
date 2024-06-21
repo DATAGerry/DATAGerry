@@ -11,85 +11,86 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
+
+import { GroupsResolver, OwnGroupResolver } from '../resolvers/group-resolver.service';
+import { ProviderResolver } from '../../modules/auth/resolvers/provider-resolver.service';
+import { OwnUserResolver, UserResolver } from '../resolvers/user-resolver.service';
+
 import { UserViewComponent } from './user-view/user-view.component';
 import { UsersComponent } from './users.component';
 import { UserAddComponent } from './user-add/user-add.component';
-import { GroupsResolver, OwnGroupResolver } from '../resolvers/group-resolver.service';
 import { UserEditComponent } from './user-edit/user-edit.component';
-import { ProviderResolver } from '../../auth/resolvers/provider-resolver.service';
-import { OwnUserResolver, UserResolver } from '../resolvers/user-resolver.service';
 import { UserDeleteComponent } from './user-delete/user-delete.component';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 const routes: Routes = [
-  {
-    path: '',
-    pathMatch: 'full',
-    data: {
-      breadcrumb: 'List',
-      right: 'base.user-management.user.view'
+    {
+        path: '',
+        pathMatch: 'full',
+        data: {
+            breadcrumb: 'List',
+            right: 'base.user-management.user.view'
+        },
+        component: UsersComponent
     },
-    component: UsersComponent
-  },
-  {
-    path: 'view',
-    data: {
-      breadcrumb: 'View',
-      right: 'base.user-management.user.view',
+    {
+        path: 'view',
+        data: {
+            breadcrumb: 'View',
+            right: 'base.user-management.user.view',
+        },
+        resolve: {
+            user: OwnUserResolver,
+            group: OwnGroupResolver
+        },
+        component: UserViewComponent
     },
-    resolve: {
-      user: OwnUserResolver,
-      group: OwnGroupResolver
+    {
+        path: 'add',
+        data: {
+            breadcrumb: 'Add',
+            right: 'base.user-management.user.add'
+        },
+        resolve: {
+            groups: GroupsResolver,
+            providers: ProviderResolver
+        },
+        component: UserAddComponent
     },
-    component: UserViewComponent
-  },
-  {
-    path: 'add',
-    data: {
-      breadcrumb: 'Add',
-      right: 'base.user-management.user.add'
+    {
+        path: 'edit/:publicID',
+        data: {
+            breadcrumb: 'Edit',
+            right: 'base.user-management.user.edit'
+        },
+        resolve: {
+            user: UserResolver,
+            groups: GroupsResolver,
+            providers: ProviderResolver
+        },
+        component: UserEditComponent
     },
-    resolve: {
-      groups: GroupsResolver,
-      providers: ProviderResolver
-    },
-    component: UserAddComponent
-  },
-  {
-    path: 'edit/:publicID',
-    data: {
-      breadcrumb: 'Edit',
-      right: 'base.user-management.user.edit'
-    },
-    resolve: {
-      user: UserResolver,
-      groups: GroupsResolver,
-      providers: ProviderResolver
-    },
-    component: UserEditComponent
-  },
-  {
-    path: 'delete/:publicID',
-    data: {
-      breadcrumb: 'Delete',
-      right: 'base.user-management.user.delete'
-    },
-    resolve: {
-      user: UserResolver
-    },
-    component: UserDeleteComponent
-  }
+    {
+        path: 'delete/:publicID',
+        data: {
+            breadcrumb: 'Delete',
+            right: 'base.user-management.user.delete'
+        },
+        resolve: {
+            user: UserResolver
+        },
+        component: UserDeleteComponent
+    }
 ];
 
 @NgModule({
-  imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+    imports: [RouterModule.forChild(routes)],
+    exports: [RouterModule]
 })
-export class UsersRoutingModule {
-}
+export class UsersRoutingModule {}

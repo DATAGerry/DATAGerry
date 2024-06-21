@@ -36,23 +36,25 @@ class APIProjection:
 
 
     @staticmethod
-    def __validate_inclusion(projection: dict, match: int = 1) -> list:
+    def __validate_inclusion(projection: dict, match: int = 1) -> list[str]:
         """
-        Validation helper function the check the projection inclusion.
+        Validation helper function to check the projection inclusion
+        
         Args:
             projection (dict): Projection parameters
-            match: matching value in dict or list.
+            match (int): Matching value in dict or list. Must be 0 or 1.
 
         Returns:
-            List of all values with the matching parameters.
+            list[str]: List of all keys with the matching parameters
 
         Raises:
-            ValueError: if value is not 0 or 1.
+            ValueError: If match is not 0 or 1
         """
-        if 0 <= match <= 1:
-            return [key for key, value in projection.items() if value == match]
+        if match not in [0, 1]:
+            raise ValueError('Projection parameter must be 0 or 1.')
 
-        raise ValueError('Projection parameter must be 0 or 1.')
+        return [key for key, value in projection.items() if value == match]
+
 
 
     @property

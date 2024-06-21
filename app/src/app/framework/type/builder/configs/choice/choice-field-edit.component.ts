@@ -26,28 +26,31 @@ import { ConfigEditBaseComponent } from '../config.edit';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-choice-field-edit',
-  templateUrl: './choice-field-edit.component.html'
+    selector: 'cmdb-choice-field-edit',
+    templateUrl: './choice-field-edit.component.html',
+    styleUrls: ['./choice-field-edit.component.scss']
 })
 export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements OnInit {
 
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public descriptionControl: UntypedFormControl = new UntypedFormControl('');
-  public helperTextControl: UntypedFormControl = new UntypedFormControl('');
-  public optionsControl: UntypedFormControl = new UntypedFormControl([]);
-  public valueControl: UntypedFormControl = new UntypedFormControl();
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public descriptionControl: UntypedFormControl = new UntypedFormControl('');
+    public helperTextControl: UntypedFormControl = new UntypedFormControl('');
+    public optionsControl: UntypedFormControl = new UntypedFormControl([]);
+    public valueControl: UntypedFormControl = new UntypedFormControl();
+    public hideFieldControl: UntypedFormControl = new UntypedFormControl(false);
 
-  // Add able options for choice selection
-  public options: Array<any> = [];
+    // Add able options for choice selection
+    public options: Array<any> = [];
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
+    private identifierInitialValue: string;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(private validationService: ValidationService) {
         super();
@@ -73,15 +76,20 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
         this.form.addControl('helperText', this.helperTextControl);
         this.form.addControl('value', this.valueControl);
         this.form.addControl('options', this.optionsControl);
+        this.form.addControl('hideField', this.hideFieldControl);
 
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
 
         this.initialValue = this.nameControl.value;
+        this.identifierInitialValue = this.nameControl.value;
+
+        if (this.hiddenStatus) {
+            this.hideFieldControl.setValue(true);
+        }
     }
 
-
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     /**
      * Adds a new option with default prefix
@@ -122,15 +130,21 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
-            "inputName":type,
-            "fieldName": this.nameControl.value
+            "inputName": type,
+            "fieldName": this.nameControl.value,
+            "previousName": this.initialValue,
+            "elementType": "choise"
         });
+
+        if (type == "name") {
+            this.initialValue = this.nameControl.value;
+        }
 
         for (let item in this.form.controls) {
             this.hasValidator(item);
         }
 
-        this.validationService.setIsValid(this.initialValue, this.isValid$);
+        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
     }
 }

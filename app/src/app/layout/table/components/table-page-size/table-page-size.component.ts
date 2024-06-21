@@ -38,7 +38,6 @@ export interface PageLengthEntry {
 }
 
 @Component({
-  // tslint:disable-next-line:component-selector
   selector: 'table-page-size',
   templateUrl: './table-page-size.component.html',
   styleUrls: ['./table-page-size.component.scss'],

@@ -16,7 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { CmdbDao } from './cmdb-dao';
-import { AccessControlList } from '../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export interface CmdbTypeSection {
@@ -24,6 +24,20 @@ export interface CmdbTypeSection {
     name: string;
     label: string;
     fields?: Array<any>;
+    reference?: {
+        type_id: number;
+        section_name: string;
+        selected_fields?: Array<string>;
+    };
+}
+
+
+export interface CmdbMultiDataSection {
+    type: string;
+    name: string;
+    label: string;
+    fields?: Array<any>;
+    hidden_fields?: Array<any>;
     reference?: {
         type_id: number;
         section_name: string;
@@ -43,7 +57,7 @@ export interface CmdbTypeExternalLink {
 
 export interface CmdbTypeMeta {
     icon: string;
-    sections: Array<CmdbTypeSection>;
+    sections: Array<CmdbTypeSection | CmdbMultiDataSection>;
     externals: Array<CmdbTypeExternalLink>;
     summary: CmdbTypeSummary;
 }

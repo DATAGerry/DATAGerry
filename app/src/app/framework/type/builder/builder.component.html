@@ -174,6 +174,9 @@
                             >
                                 <fa-icon [icon]="getSectionCollapseIcon(section)"></fa-icon>
                             </button>
+                            <!-- <button class="btn btn-link mr-1" type="button">
+                                <fa-icon [icon]="['fas', 'paint-brush']"></fa-icon>
+                            </button> -->
                             <button class="btn btn-link mr-1" type="button" dndHandle>
                                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                             </button>
@@ -190,11 +193,15 @@
                                 [sections]="sections"
                                 [fields]="typeInstance.fields"
                                 [data]="section"
-                            >
-                            </cmdb-config-edit>
-                            <ng-container *ngIf="section.type === 'section'">
+                                (valuesChanged)="onFieldChange($event)"
+                            />
+                            <ng-container *ngIf="section.type === 'section' || section.type === 'multi-data-section'">
                                 <p>Fields:</p>
-                                <div [dndDropzone]="['inputs']" [dndDisableDropIf]="isGlobalSection(section)" (dndDrop)="onFieldDrop($event, section)">
+                                <div
+                                    [dndDropzone]="getInputType(section.type)"
+                                    [dndDisableDropIf]="isGlobalSection(section)"
+                                    (dndDrop)="onFieldDrop($event, section)"
+                                >
                                     <div *ngIf="section.fields.length == 0" class="empty-section" data-content="Drop controls here">
                                     </div>
                                     <div 
@@ -205,7 +212,7 @@
                                     </div>
                                     <ng-container *ngFor="let field of section.fields; let y = index">
                                         <div 
-                                            [dndEffectAllowed]="getDnDEffectAllowedForField(field)"
+                                            [dndEffectAllowed]="getDnDEffectAllowedForField(field, section)"
                                             dndType="inputs"
                                             [dndDraggable]="field"
                                             (dndMoved)="onFieldDragged(field, section)"
@@ -268,9 +275,10 @@
                                                         [types]="types"
                                                         [sections]="sections"
                                                         [data]="field"
+                                                        [fieldSectionType]="section.type"
+                                                        [hiddenStatus]="getFieldHiddenState(section, field)"
                                                         (valuesChanged)="onFieldChange($event)"
-                                                    >
-                                                    </cmdb-config-edit>
+                                                    />
                                                 </div>
                                             </div>
                                         </div>

@@ -1,0 +1,10 @@
+.custom-button {
+    border: none;
+    background-color: transparent;
+    color: gray;
+}
+
+.custom-button:hover {
+    background-color: transparent; // Keep the background color transparent on hover
+    color: lightgray;
+}

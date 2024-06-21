@@ -23,7 +23,7 @@ from .type_section import TypeSection
 from .type_field_section import TypeFieldSection
 from .type_reference_section_entry import TypeReferenceSectionEntry
 from .type_reference_section import TypeReferenceSection
-from.type_render_meta import TypeRenderMeta
+from .type_render_meta import TypeRenderMeta
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [

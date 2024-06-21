@@ -18,8 +18,7 @@
 import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { LocationService } from 'src/app/framework/services/location.service';
 import { ObjectService } from 'src/app/framework/services/object.service';
@@ -27,43 +26,48 @@ import { ObjectService } from 'src/app/framework/services/object.service';
 import { ObjectPreviewModalComponent } from '../../modals/object-preview-modal/object-preview-modal.component';
 import { ObjectDeleteModalComponent } from '../../modals/object-delete-modal/object-delete-modal.component';
 import { RenderResult } from '../../../models/cmdb-render';
-import { AccessControlList } from '../../../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-table-actions',
-  templateUrl: './object-table-actions.component.html',
-  styleUrls: ['./object-table-actions.component.scss']
+    selector: 'cmdb-object-table-actions',
+    templateUrl: './object-table-actions.component.html',
+    styleUrls: ['./object-table-actions.component.scss']
 })
 export class ObjectTableActionsComponent implements OnDestroy {
 
-  // Component wide un-subscriber
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    // Component wide un-subscriber
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  // Public id of the object
-  @Input() public publicID: number;
+    // Public id of the object
+    @Input() public publicID: number;
 
-  // Rendered object
-  @Input() public result: RenderResult;
+    // Rendered object
+    @Input() public result: RenderResult;
 
-  @Input() public acl: AccessControlList;
+    @Input() public acl: AccessControlList;
 
-  // Emitter when element was deleted.
-  @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
+    // Emitter when element was deleted.
+    @Output() public deleteEmitter: EventEmitter<number> = new EventEmitter<number>();
 
-  // Emitters when element was deleted with required location handling
-  @Output() public deleteObjectsEmitter: EventEmitter<number> = new EventEmitter<number>();
-  @Output() public deleteLocationsEmitter: EventEmitter<number> = new EventEmitter<number>();
+    // Emitters when element was deleted with required location handling
+    @Output() public deleteObjectsEmitter: EventEmitter<number> = new EventEmitter<number>();
+    @Output() public deleteLocationsEmitter: EventEmitter<number> = new EventEmitter<number>();
 
-  private modalRef: NgbModalRef;
+    private modalRef: NgbModalRef;
 
-  private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
+    private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+/* ------------------------------------------------------------------------------------------------------------------ */
+/*                                                     LIFE CYCLE                                                     */
+/* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private locationService: LocationService, 
-                private objectService: ObjectService, 
-                private modalService: NgbModal) {
+    constructor(
+        private locationService: LocationService, 
+        private objectService: ObjectService, 
+        private modalService: NgbModal
+    ) {
+
     }
 
 
@@ -79,10 +83,9 @@ export class ObjectTableActionsComponent implements OnDestroy {
 /* -------------------------------------------------- MODAL SECTION ------------------------------------------------- */
 
     /**
-     * Open the preview modal.
+     * Open the preview modal
      */
     public openPreviewModal(): void {
-        console.log("result", this.result);
         this.modalRef = this.modalService.open(ObjectPreviewModalComponent, { size: 'lg' });
         this.modalRef.componentInstance.renderResult = this.result;
     }
@@ -91,15 +94,17 @@ export class ObjectTableActionsComponent implements OnDestroy {
     public handleDelete(publicID: number){
         // first check if the object has a location which is parent to child locations
         this.locationService.getChildren(publicID).pipe(takeUntil(this.locationSubscription))
-        .subscribe((children: RenderResult[]) => {
-            if(children && children.length > 0){
-              this.deleteWithLocations(publicID);
-            } else {
-              this.deleteObject(publicID);
+        .subscribe({
+            next: (children: RenderResult[]) => {
+                if(children && children.length > 0){
+                    this.deleteWithLocations(publicID);
+                } else {
+                    this.deleteObject(publicID);
+                }
+            },
+            error: (error) => {
+                console.error("Error:", error);
             }
-        },
-        (error) => {
-            console.error("Error:", error);
         });
     }
 

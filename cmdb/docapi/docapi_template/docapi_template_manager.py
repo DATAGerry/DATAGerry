@@ -101,10 +101,12 @@ class DocapiTemplateManager(CmdbManagerBase):
         """TODO: document"""
         try:
             templates = self._get_many(collection=DocapiTemplate.COLLECTION, limit=1, **requirements)
+
             if len(templates) > 0:
                 return DocapiTemplate(**templates[0])
 
-            raise DocapiGetError('More than 1 type matches this requirement')
+            if not len(templates) == 0:
+                raise DocapiGetError('More than 1 type matches this requirement')
         except Exception as err:
             LOGGER.debug("DocapiGetError: %s", err)
             raise DocapiGetError(err) from err

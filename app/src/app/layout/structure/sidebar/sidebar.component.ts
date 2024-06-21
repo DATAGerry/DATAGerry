@@ -18,164 +18,168 @@
 import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
-import { ReplaySubject, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject, Subscription, takeUntil } from 'rxjs';
 
 import { TypeService } from '../../../framework/services/type.service';
 import { SidebarService } from '../../services/sidebar.service';
+import { UserService } from '../../../management/services/user.service';
 
+import { User } from '../../../management/models/user';
 import { CmdbCategoryTree } from '../../../framework/models/cmdb-category';
 import { CmdbType } from '../../../framework/models/cmdb-type';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { CollectionParameters } from '../../../services/models/api-parameter';
-import { AccessControlPermission } from "../../../acl/acl.types";
-/* -------------------------------------------------------------------------- */
+import { AccessControlPermission } from 'src/app/modules/acl/acl.types';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-sidebar',
-  templateUrl: './sidebar.component.html',
-  styleUrls: ['./sidebar.component.scss'],
+    selector: 'cmdb-sidebar',
+    templateUrl: './sidebar.component.html',
+    styleUrls: ['./sidebar.component.scss'],
 })
 export class SidebarComponent implements OnInit, OnDestroy {
 
-  // Global un-subscriber for http calls to the rest backend.
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  //Category data
-  public categoryTree: CmdbCategoryTree;
-  private categoryTreeSubscription: Subscription;
+    user: User;
 
-  //Types params
-  public typesParams: CollectionParameters = {
-    filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
-  };
+    //Category data
+    public categoryTree: CmdbCategoryTree;
+    private categoryTreeSubscription: Subscription;
 
-  //Type data
-  public typeList: CmdbType[] = [];
-  public unCategorizedTypes: CmdbType[] = [];
-  private unCategorizedTypesSubscription: Subscription;
+    //Types params
+    public typesParams: CollectionParameters = {
+        filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
 
-  //Filter
-  public filterTerm: UntypedFormControl = new UntypedFormControl('');
-  private filterTermSubscription: Subscription;
+    //Type data
+    public typeList: CmdbType[] = [];
+    public unCategorizedTypes: CmdbType[] = [];
+    private unCategorizedTypesSubscription: Subscription;
 
-  // String representation of currently selected tab menu in sidebar (Default is Categories)
-  selectedMenu: string;
+    //Filter
+    public filterTerm: UntypedFormControl = new UntypedFormControl('');
+    private filterTermSubscription: Subscription;
 
-  isExpanded: boolean = false
+    // String representation of currently selected tab menu in sidebar (Default is Categories)
+    selectedMenu: string;
 
-  /* ------------------------------------------------------------------------------------------------------------------ */
-  /*                                                     LIFE CYCLE                                                     */
-  /* ------------------------------------------------------------------------------------------------------------------ */
+    isExpanded: boolean = false
 
-  constructor(private sidebarService: SidebarService,
-    private typeService: TypeService,
-    private renderer: Renderer2,
-    private elementRef: ElementRef) {
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    this.categoryTreeSubscription = new Subscription();
-    this.unCategorizedTypesSubscription = new Subscription();
-    this.filterTermSubscription = new Subscription();
-
-  }
-
-
-
-  public ngOnInit(): void {
-    this.renderer.addClass(document.body, 'sidebar-fixed');
-    this.sidebarService.loadCategoryTree();
-    this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable().subscribe((categoryTree: CmdbCategoryTree) => {
-      this.categoryTree = categoryTree;
-      this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false).subscribe(
-        (apiResponse: APIGetMultiResponse<CmdbType>) => {
-          this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-        });
-
-      this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber)).subscribe(
-        (apiResponse: APIGetMultiResponse<CmdbType>) => {
-          this.typeList = apiResponse.results as Array<CmdbType>;
-        });
-    });
-
-    this.selectedMenu = this.sidebarService.selectedMenu;
-  }
+    constructor(
+        private sidebarService: SidebarService,
+        private typeService: TypeService,
+        private renderer: Renderer2,
+        private elementRef: ElementRef,
+        private userService: UserService
+    ) {
+        this.categoryTreeSubscription = new Subscription();
+        this.unCategorizedTypesSubscription = new Subscription();
+        this.filterTermSubscription = new Subscription();
+        this.user = this.userService.getCurrentUser();
+    }
 
 
+    public ngOnInit(): void {
+        this.renderer.addClass(document.body, 'sidebar-fixed');
 
-  public ngOnDestroy(): void {
-    this.categoryTreeSubscription.unsubscribe();
-    this.unCategorizedTypesSubscription.unsubscribe();
-    this.filterTermSubscription.unsubscribe();
-    this.renderer.removeClass(document.body, 'sidebar-fixed');
-  }
+        if(this.user) {
+            this.sidebarService.loadCategoryTree();
+            this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable()
+            .subscribe((categoryTree: CmdbCategoryTree) => {
+                this.categoryTree = categoryTree;
 
-  /* ------------------------------------------------------------------------------------------------------------------ */
-  /*                                                  SIDEBAR HANDLING                                                  */
-  /* ------------------------------------------------------------------------------------------------------------------ */
+                this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false)
+                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                    this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+                });
 
-  /**
-   * Toggles the activated menu tabs (categories and locations)
-   * 
-   * @param selection :string = String representation of the selected menu
-   */
-  onSidebarMenuClicked(selection: HTMLDivElement) {
-    let newValue = selection.getAttribute('value');
-    this.selectedMenu = newValue;
-    this.sidebarService.selectedMenu = newValue;
-  }
-
-  /**
- * Toggle the expansion state of the sidebar and dynamically update its width and related styles.
- * This function is called when the user clicks on the expand/collapse button.
- */
-
-  onExpandClicked() {
-
-    // Toggle the expansion state
-    this.isExpanded = !this.isExpanded;
-
-    // Dynamically set the width of the sidebar
-    const newWidth = this.isExpanded ? '500px' : '230px';
-    this.setSidebarWidth(newWidth);
-
-    // Update dynamic styles based on the new width
-    this.updateDynamicStyles(newWidth);
-  }
-
-
-  private setSidebarWidth(newWidth: string) {
-    const sidebar = this.elementRef.nativeElement.querySelector('#sidebar');
-    this.renderer.setStyle(sidebar, 'width', newWidth);
-  }
-
-
-  private updateDynamicStyles(newWidth: string) {
-    const styles = `
-      .sidebar-fixed #main {
-        margin-left: ${newWidth};
-        margin-top: $navbar-height;
-      }
-  
-      @media (max-width: 767.98px) {
-        .sidebar-fixed #main {
-          margin-left: 0;
+                this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
+                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                    this.typeList = apiResponse.results as Array<CmdbType>;
+                });
+            });
         }
-      }
-    `;
 
-    let styleElement = document.getElementById('custom-styles') as HTMLStyleElement;
-    if (!styleElement) {
-      styleElement = document.createElement('style');
-      styleElement.id = 'custom-styles';
-      document.head.appendChild(styleElement);
+        this.selectedMenu = this.sidebarService.selectedMenu;
     }
-    styleElement.textContent = styles;
 
-    const main = this.elementRef.nativeElement.querySelector('.sidebar-fixed #main');
-    if (main) {
-      this.renderer.setStyle(main, 'margin-left', newWidth);
+
+    public ngOnDestroy(): void {
+        this.categoryTreeSubscription.unsubscribe();
+        this.unCategorizedTypesSubscription.unsubscribe();
+        this.filterTermSubscription.unsubscribe();
+        this.renderer.removeClass(document.body, 'sidebar-fixed');
     }
-  }
+
+/* ------------------------------------------------ SIDEBAR HANDLING ------------------------------------------------ */
+
+    /**
+     * Toggles the activated menu tabs (categories and locations)
+     * 
+     * @param selection :string = String representation of the selected menu
+     */
+    onSidebarMenuClicked(selection: HTMLDivElement) {
+        let newValue = selection.getAttribute('value');
+        this.selectedMenu = newValue;
+        this.sidebarService.selectedMenu = newValue;
+    }
 
 
+    /**
+     * Toggle the expansion state of the sidebar and dynamically update its width and related styles.
+     * This function is called when the user clicks on the expand/collapse button.
+     */
+    onExpandClicked() {
+
+        // Toggle the expansion state
+        this.isExpanded = !this.isExpanded;
+
+        // Dynamically set the width of the sidebar
+        const newWidth = this.isExpanded ? '500px' : '230px';
+        this.setSidebarWidth(newWidth);
+
+        // Update dynamic styles based on the new width
+        this.updateDynamicStyles(newWidth);
+    }
+
+
+
+    private setSidebarWidth(newWidth: string) {
+        const sidebar = this.elementRef.nativeElement.querySelector('#sidebar');
+        this.renderer.setStyle(sidebar, 'width', newWidth);
+    }
+
+
+    private updateDynamicStyles(newWidth: string) {
+        const styles = `
+        .sidebar-fixed #main {
+            margin-left: ${newWidth};
+            margin-top: $navbar-height;
+        }
+    
+        @media (max-width: 767.98px) {
+            .sidebar-fixed #main {
+            margin-left: 0;
+            }
+        }
+        `;
+
+        let styleElement = document.getElementById('custom-styles') as HTMLStyleElement;
+
+        if (!styleElement) {
+            styleElement = document.createElement('style');
+            styleElement.id = 'custom-styles';
+            document.head.appendChild(styleElement);
+        }
+
+        styleElement.textContent = styles;
+        const main = this.elementRef.nativeElement.querySelector('.sidebar-fixed #main');
+
+        if (main) {
+            this.renderer.setStyle(main, 'margin-left', newWidth);
+        }
+    }
 }

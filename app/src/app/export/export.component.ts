@@ -11,23 +11,17 @@
 * but WITHOUT ANY WARRANTY; without even the implied warranty of
 * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 * GNU Affero General Public License for more details.
-
+*
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-
-import { Component, OnInit } from '@angular/core';
-
+import { Component } from '@angular/core';
+/* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
-  selector: 'cmdb-export',
-  templateUrl: './export.component.html',
-  styleUrls: ['./export.component.scss']
+    selector: 'cmdb-export',
+    templateUrl: './export.component.html',
+    styleUrls: ['./export.component.scss']
 })
-export class ExportComponent implements OnInit {
-
-  constructor() { }
-
-  ngOnInit() {
-  }
+export class ExportComponent {
 
 }

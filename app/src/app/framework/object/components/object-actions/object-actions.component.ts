@@ -18,8 +18,7 @@
 import {Component, Input, OnDestroy} from '@angular/core';
 import { Router } from '@angular/router';
 
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { ReplaySubject, takeUntil } from 'rxjs';
 
 import { NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 
@@ -29,7 +28,7 @@ import { SidebarService } from 'src/app/layout/services/sidebar.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 
 import { RenderResult } from '../../../models/cmdb-render';
-import { AccessControlList } from '../../../../acl/acl.types';
+import { AccessControlList } from 'src/app/modules/acl/acl.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -39,13 +38,13 @@ import { AccessControlList } from '../../../../acl/acl.types';
 })
 export class ObjectActionsComponent implements OnDestroy {
 
-  @Input() renderResult: RenderResult;
-  @Input() acl: AccessControlList;
+    @Input() renderResult: RenderResult;
+    @Input() acl: AccessControlList;
 
-  public subscriber: ReplaySubject<void>;
-  private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
+    public subscriber: ReplaySubject<void>;
+    private locationSubscription: ReplaySubject<void> = new ReplaySubject<void>();
 
-  private modalRef: NgbModalRef;
+    private modalRef: NgbModalRef;
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
@@ -54,6 +53,7 @@ export class ObjectActionsComponent implements OnDestroy {
                 private sidebarService: SidebarService, 
                 private toastService: ToastService, 
                 private router: Router ) {
+
         this.subscriber = new ReplaySubject<void>();
     }
 
@@ -77,15 +77,17 @@ export class ObjectActionsComponent implements OnDestroy {
     public handleDelete(publicID: number){
         // first check if the object has a location which is parent to child locations
         this.locationService.getChildren(publicID).pipe(takeUntil(this.locationSubscription))
-        .subscribe((children: RenderResult[]) => {
-            if(children && children.length > 0){
-                this.deleteWithLocations(publicID);
-            } else {
-                this.deleteObject(publicID);
+        .subscribe({
+            next: (children: RenderResult[]) => {
+                if(children && children.length > 0){
+                    this.deleteWithLocations(publicID);
+                } else {
+                    this.deleteObject(publicID);
+                }
+            },
+            error:  (error) => {
+                console.error("Error:", error);
             }
-        },
-        (error) => {
-            console.error("Error:", error);
         });
     }
 
@@ -97,21 +99,25 @@ export class ObjectActionsComponent implements OnDestroy {
      */
     public deleteObject(publicID: number) {
         this.modalRef = this.objectService.openModalComponent(
-          'Delete Object',
-          'Are you sure you want to delete this Object?',
-          'Cancel',
-          'Delete');
+            'Delete Object',
+            'Are you sure you want to delete this Object?',
+            'Cancel',
+            'Delete'
+        );
 
         this.modalRef.result.then((result) => {
             if (result) {
-                this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
-                    this.toastService.success(`Object ${ this.renderResult.object_information.object_id } was deleted succesfully!`);
-                    this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
-                    this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
-                },
-                (error) => {
-                  this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } | Error: ${ error }`);
-                  console.log(error);
+                this.objectService.deleteObject(publicID).pipe(takeUntil(this.subscriber))
+                .subscribe({
+                    next: () => {
+                        this.toastService.success(`Object ${ this.renderResult.object_information.object_id } was deleted succesfully!`);
+                        this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
+                        this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+                    },
+                    error: (error) => {
+                        this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } | Error: ${ error }`);
+                        console.log(error);
+                    }
                 });
             }
         });
@@ -127,31 +133,37 @@ export class ObjectActionsComponent implements OnDestroy {
       this.modalRef = this.objectService.openLocationModalComponent();
 
       this.modalRef.result.then((result) => {
-          //delete all child objects with their locations
-          if(result == 'objects'){
-            this.objectService.deleteObjectWithChildren(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
-                this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
-                this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
-                this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
-            },
-            (error) => {
-              this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
-              console.log(error);
-            });
-          }
+            //delete all child objects with their locations
+            if(result == 'objects'){
+                this.objectService.deleteObjectWithChildren(publicID).pipe(takeUntil(this.subscriber))
+                .subscribe({
+                    next: () => {
+                        this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
+                        this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
+                        this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+                    },
+                    error: (error) => {
+                        this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
+                        console.log(error);
+                    }
+                });
+            }
 
-          //delete only locations of children
-          if(result == 'locations'){
-              this.objectService.deleteObjectWithLocations(publicID).pipe(takeUntil(this.subscriber)).subscribe(() => {
-                  this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
-                  this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
-                  this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
-              },
-              (error) => {
-                this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
-                console.log(error);
-              });
-          }
+            //delete only locations of children
+            if(result == 'locations'){
+                this.objectService.deleteObjectWithLocations(publicID).pipe(takeUntil(this.subscriber))
+                .subscribe({
+                    next: () => {
+                        this.toastService.success(`Object ${ this.renderResult.object_information.object_id } and child locations were deleted succesfully!`);
+                        this.router.navigate(['/framework/object/type/' + this.renderResult.type_information.type_id]);
+                        this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+                    },
+                    error: (error) => {
+                        this.toastService.error(`Error while deleting object ${ this.renderResult.object_information.object_id } and child locations | Error: ${ error }`);
+                        console.log(error);
+                    }
+                });
+            }
       });
     }
 }

@@ -15,191 +15,203 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-
 import { Component, EventEmitter, HostListener, OnDestroy, OnInit, Output, ViewChild } from '@angular/core';
-import { TypeService } from '../../services/type.service';
-import { CmdbType } from '../../models/cmdb-type';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
-import { BehaviorSubject, Observable, ReplaySubject } from 'rxjs';
+import { ActivatedRoute, Router } from '@angular/router';
+
+import { BehaviorSubject, Observable, ReplaySubject, takeUntil } from 'rxjs';
+
+import { TypeService } from '../../services/type.service';
+import { UserService } from '../../../management/services/user.service';
+import { ObjectService } from '../../services/object.service';
+import { SidebarService } from '../../../layout/services/sidebar.service';
+import { ToastService } from '../../../layout/toast/toast.service';
+import { LocationService } from '../../services/location.service';
+
+import { CmdbType } from '../../models/cmdb-type';
 import { CmdbMode } from '../../modes.enum';
 import { RenderComponent } from '../../render/render.component';
 import { CmdbObject } from '../../models/cmdb-object';
-import { UserService } from '../../../management/services/user.service';
-import { ObjectService } from '../../services/object.service';
-import { ActivatedRoute, Router } from '@angular/router';
-import { SidebarService } from '../../../layout/services/sidebar.service';
-import { AccessControlPermission } from '../../../acl/acl.types';
-import { ToastService } from '../../../layout/toast/toast.service';
-import { takeUntil } from 'rxjs/operators';
-import { LocationService } from '../../services/location.service';
-import { APIUpdateMultiResponse } from '../../../services/models/api-response';
+import { AccessControlPermission } from 'src/app/modules/acl/acl.types';
+/* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-add',
-  templateUrl: './object-add.component.html',
-  styleUrls: ['./object-add.component.scss']
+    selector: 'cmdb-object-add',
+    templateUrl: './object-add.component.html',
+    styleUrls: ['./object-add.component.scss']
 })
 export class ObjectAddComponent implements OnInit, OnDestroy {
+    private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public typeList: CmdbType[] = [];
-  public typeIDForm: UntypedFormGroup;
-  private typeIDSubject: BehaviorSubject<number>;
-  public typeID: Observable<number>;
-  public typeInstance: CmdbType;
-  public mode: CmdbMode = CmdbMode.Create;
-  public objectInstance: CmdbObject;
-  public renderForm: UntypedFormGroup;
-  public fieldsGroups: UntypedFormGroup;
+    public typeList: CmdbType[] = [];
+    public typeIDForm: UntypedFormGroup;
+    private typeIDSubject: BehaviorSubject<number>;
+    public typeID: Observable<number>;
+    public typeInstance: CmdbType;
+    public mode: CmdbMode = CmdbMode.Create;
+    public objectInstance: CmdbObject;
+    public renderForm: UntypedFormGroup;
+    public fieldsGroups: UntypedFormGroup;
 
-  @Output() parentSubmit = new EventEmitter<any>();
-  @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
+    @Output() parentSubmit = new EventEmitter<any>();
+    @ViewChild(RenderComponent, {static: false}) render: RenderComponent;
 
-  /**
-   * Global un-subscriber for http calls to the rest backend.
-   */
-  private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
-  private parentID: number;
+    private parentID: number;
 
+/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-  /* ------------------------------------------------------------------------------------------------------------------ */
-  /*                                                     LIFE CYCLE                                                     */
-  /* ------------------------------------------------------------------------------------------------------------------ */
+    constructor(private router: Router, 
+                private typeService: TypeService, 
+                private objectService: ObjectService, 
+                private userService: UserService, 
+                private route: ActivatedRoute,
+                private sidebarService: SidebarService,
+                private locationService: LocationService, 
+                private toastService: ToastService) {
 
-  constructor(private router: Router, 
-              private typeService: TypeService, 
-              private objectService: ObjectService, 
-              private userService: UserService, 
-              private route: ActivatedRoute,
-              private sidebarService: SidebarService,
-              private locationService: LocationService, 
-              private toastService: ToastService) {
+        this.objectInstance = new CmdbObject();
+        this.typeIDSubject = new BehaviorSubject<number>(null);
 
-    this.objectInstance = new CmdbObject();
-    this.typeIDSubject = new BehaviorSubject<number>(null);
-
-    this.route.params.subscribe((params) => {
-      if (params.publicID !== undefined) {
-        this.typeIDSubject.next(+params.publicID);
-      }
-    });
-
-    this.typeID = this.typeIDSubject.asObservable();
-
-    this.typeID.pipe(takeUntil(this.subscriber)).subscribe(selectedTypeID => {
-      if (selectedTypeID !== null) {
-        this.typeService.getType(selectedTypeID).subscribe((typeInstance: CmdbType) => {
-          this.typeInstance = typeInstance;
+        this.route.params.subscribe((params) => {
+            if (params.publicID !== undefined) {
+                this.typeIDSubject.next(+params.publicID);
+            }
         });
-      }
-    });
 
-    this.fieldsGroups = new UntypedFormGroup({});
-    this.renderForm = new UntypedFormGroup({
-      active: new UntypedFormControl(true)
-    });
-  }
+        this.typeID = this.typeIDSubject.asObservable();
 
-  public ngOnInit(): void {
-    this.typeService.getTypeList(AccessControlPermission.CREATE).pipe(takeUntil(this.subscriber)).subscribe((typeList: CmdbType[]) => {
-      this.typeList = typeList;
-    }, 
-    (error) => {
-      this.toastService.error(error);
-    });
+        this.typeID.pipe(takeUntil(this.subscriber)).subscribe(selectedTypeID => {
+            if (selectedTypeID !== null) {
+                this.typeService.getType(selectedTypeID).subscribe((typeInstance: CmdbType) => {
+                    this.typeInstance = typeInstance;
+                });
+            }
+        });
 
-    this.typeIDForm = new UntypedFormGroup({
-      typeID: new UntypedFormControl(null, Validators.required)
-    });
-
-  }
+        this.fieldsGroups = new UntypedFormGroup({});
+        this.renderForm = new UntypedFormGroup({
+            active: new UntypedFormControl(true)
+        });
+    }
 
 
-  public ngOnDestroy(): void {
-    this.typeIDSubject.unsubscribe();
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
-
-
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                       METHODS                                                      */
-/* ------------------------------------------------------------------------------------------------------------------ */
-
-  public get formTypeID() {
-    return this.typeIDForm.get('typeID').value;
-  }
-
-  public useTypeID() {
-    this.typeIDSubject.next(this.formTypeID);
-  }
-
-  public get currentTypeID() {
-    return this.typeIDSubject.value;
-  }
-
-
-  public saveObject() {
-      this.renderForm.markAllAsTouched();
-
-      if (this.renderForm.valid) {
-          this.objectInstance.type_id = this.currentTypeID;
-          this.objectInstance.version = '1.0.0';
-          this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
-        
-          this.objectInstance.fields = [];
-          this.render.renderForm.removeControl('active');
-
-          Object.keys(this.render.renderForm.controls).forEach(field => {
-              let val = this.renderForm.value[field];
-
-              if(field == 'dg_location'){
-                this.parentID = val;
-              }
-
-              if (val === undefined || val == null) { val = ''; }
-              this.objectInstance.fields.push({
-                  name: field,
-                  value: val
-              });
-          });
-        
-          let newID = null;
-          this.objectService.postObject(this.objectInstance).pipe(takeUntil(this.subscriber)).subscribe(newObjectID => {
-                newID = newObjectID;
-                this.createLocation(newID);
-            },
-            (e) => {
-                console.error(e);
+    public ngOnInit(): void {
+        this.typeService.getTypeList(AccessControlPermission.CREATE).pipe(takeUntil(this.subscriber))
+        .subscribe({
+            next: (typeList: CmdbType[]) => {
+                this.typeList = typeList;
             }, 
-            () => {
-                this.router.navigate(['/framework/object/view/' + newID]);
-                this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
-                this.toastService.success(`Object ${ newID } was created succesfully!`);
+            error: (error) => {
+                this.toastService.error(error);
+            }
+        });
+
+        this.typeIDForm = new UntypedFormGroup({
+            typeID: new UntypedFormControl(null, Validators.required)
+        });
+    }
+
+
+    public ngOnDestroy(): void {
+        this.typeIDSubject.unsubscribe();
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+
+    public get formTypeID() {
+        return this.typeIDForm.get('typeID').value;
+    }
+
+
+    public useTypeID() {
+        this.typeIDSubject.next(this.formTypeID);
+    }
+
+
+    public get currentTypeID() {
+        return this.typeIDSubject.value;
+    }
+
+
+    public saveObject() {
+        this.renderForm.markAllAsTouched();
+
+        if (this.renderForm.valid) {
+            this.objectInstance.type_id = this.currentTypeID;
+            this.objectInstance.version = '1.0.0';
+            this.objectInstance.author_id = this.userService.getCurrentUser().public_id;
+            
+            this.objectInstance.fields = [];
+            this.render.renderForm.removeControl('active');
+
+            Object.keys(this.render.renderForm.controls).forEach(field => {
+                let val = this.renderForm.value[field];
+
+                if(field == 'dg_location'){
+                    this.parentID = val;
+                }
+
+                if (val === undefined || val == null) { 
+                    val = '';
+                }
+
+                //set the multi data section
+                if(field.startsWith('dg-mds-')) {
+                    this.objectInstance.multi_data_sections.push(val);
+                } else {
+                    //just set the field
+                    this.objectInstance.fields.push({
+                        name: field,
+                        value: val
+                    });
+                }
+
             });
-      }
-  }
 
-  private createLocation(newObjectID: number){
-    let params = {
-      "object_id": newObjectID,
-      "parent": this.parentID,
-      "name": this.locationService.locationTreeName,
-      "type_id": this.objectInstance.type_id 
+            let newID = null;
+            this.objectService.postObject(this.objectInstance).pipe(takeUntil(this.subscriber))
+            .subscribe({
+                next: newObjectID => {
+                    newID = newObjectID;
+                    this.createLocation(newID);
+                },
+                error: (e) => {
+                    console.error(e);
+                },
+                complete: () => {
+                    this.router.navigate(['/framework/object/view/' + newID]);
+                    this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
+                    this.toastService.success(`Object ${ newID } was created succesfully!`);
+                }
+            });
+        }
     }
 
-    if(this.parentID){
-      this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
-        this.locationService.locationTreeName = "";
-      }, error => {
-        this.toastService.error(error);
-      });
+
+    private createLocation(newObjectID: number){
+        let params = {
+        "object_id": newObjectID,
+        "parent": this.parentID,
+        "name": this.locationService.locationTreeName,
+        "type_id": this.objectInstance.type_id 
+        }
+
+        if(this.parentID){
+            this.locationService.postLocation(params)
+            .subscribe({
+                next: () => {
+                    this.locationService.locationTreeName = "";
+                },
+                error: error => {
+                    this.toastService.error(error);
+                }
+            });
+        }
     }
 
-  }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                   HELPER SECTION                                                   */
-/* ------------------------------------------------------------------------------------------------------------------ */
     @HostListener('window:scroll')
     onWindowScroll() {
         const dialog = document.getElementById('object-form-action');
@@ -212,5 +224,4 @@ export class ObjectAddComponent implements OnInit, OnDestroy {
             }
         }
     }
-
 }

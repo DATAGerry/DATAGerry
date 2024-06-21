@@ -4,22 +4,42 @@ DATAGERRY Documentation
 
 .. image:: introduction/img/introduction_datagerry.png
 
-DATAGERRY is an enterprise-grade OpenSource CMDB, which completely leaves the
-definition of object types to the user.
+DATAGERRY is an enterprise-grade, open-source CMDB that empowers users by allowing
+complete customization of data types.
+
+| 
+
+=======================================================================================================================
 
 .. toctree::
     introduction/welcome
-    introduction/license
     :caption: Introduction
     :name: introduction
 
+=======================================================================================================================
+
 .. toctree::
     admin_guide/index
+    :caption: Admin Manual
+    :name: admin_manual
+
+=======================================================================================================================
+
+.. toctree::
     dev_guide/index
-    :caption: Guides
-    :name: guides
+    :caption: Dev Guide
+    :name: dev_guide
+
+=======================================================================================================================
 
 .. toctree::
     api/rest/index
     :caption: API
     :name: api
+
+=======================================================================================================================
+
+.. toctree::
+    introduction/license
+    :caption: License
+    :name: license

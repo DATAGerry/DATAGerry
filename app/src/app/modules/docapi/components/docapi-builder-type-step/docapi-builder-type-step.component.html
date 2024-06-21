@@ -1,0 +1,36 @@
+<div class="mt-3">
+    <div class="row">
+        <div class="col">
+            <form [formGroup]="typeForm" id="typeForm" class="needs-validation" novalidate autocomplete="off">
+                <div class="form-group">
+                    <label for="docTypeInput">Template Type: <span class="required">*</span></label>
+                    <ng-select
+                        id="docTypeInput"
+                        [items]="docTypeSelect"
+                        bindLabel="label"
+                        bindValue="content"
+                        formControlName="template_type"
+                    >
+                        <ng-template ng-option-tmp let-item="item" let-index="index">
+                            {{item.label}} : {{item.description}}
+                        </ng-template>
+                    </ng-select>
+                    <small id="docTypeInputHelp" class="form-text text-muted">
+                        Choose your Template type
+                    </small>
+                    <div class="clearfix"></div>
+                </div>
+            </form>
+
+            <ng-container [ngSwitch]="typeForm.get('template_type').value">
+                <cmdb-docapi-builder-type-step-object
+                    *ngSwitchCase="'OBJECT'"
+                    [preData]="typeParamPreData"
+                    [mode]="mode"
+                    #typeparam
+                    (formValidationEmitter)="typeChildValid = $event"
+                />
+            </ng-container>
+        </div>
+    </div>
+</div>
