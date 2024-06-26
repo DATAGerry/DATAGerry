@@ -44,7 +44,7 @@ pyinstaller==6.5.0
 pyinstaller-hooks-contrib==2024.3
 pylint==3.1.0
 pymongo==4.6.2
-PyMySQL==1.1.0
+PyMySQL==1.1.1
 pyOpenSSL==24.1.0
 pytest==8.1.1
 pytest-cov==4.1.0
