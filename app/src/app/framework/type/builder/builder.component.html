@@ -159,7 +159,9 @@
                 dndEffectAllowed="copyMove"
                 dndType="sections"
                 [dndDraggable]="section"
-                (dndMoved)="onDragged(section, sections, 'move')"
+                [dragData]="{ section, index: x }"
+                (dndStart)="onDragStart($event, x)"
+                (dndMoved)="onDragged(section, sections, 'move', x)"
             >
                 <div class="card">
                     <div class="card-header" [ngClass]="{'global-section-item': isGlobalSection(section)}">
@@ -180,7 +182,7 @@
                             <button class="btn btn-link mr-1" type="button" dndHandle>
                                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                             </button>
-                            <button class="btn btn-link" type="button" (click)="removeSection(section)">
+                            <button class="btn btn-link" type="button" (click)="removeSection(section, x)">
                                 <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                             </button>
                         </span>
