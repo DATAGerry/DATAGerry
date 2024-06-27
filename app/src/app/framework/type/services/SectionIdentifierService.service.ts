@@ -16,6 +16,14 @@ export class SectionIdentifierService {
     constructor() { }
 
 
+    /**
+     * Adds a new section at a specified index, adjusting subsequent sections' indices if necessary.
+     * 
+     * @param initialValue - The initial identifier of the section.
+     * @param newValue - The new identifier of the section.
+     * @param index - The position at which to insert the new section.
+     * @returns Whether the addition was successful.
+     */
     addSection(initialValue: string, newValue: string, index: number): boolean {
         if (this.sectionExists(newValue)) {
             this.checkGlobalValidity();
@@ -35,24 +43,27 @@ export class SectionIdentifierService {
     }
 
 
+    /**
+     * Updates an existing section's identifier.
+     * 
+     * @param initialValue - The initial identifier of the section to update.
+     * @param newValue - The new identifier to assign to the section.
+     * @returns Whether the update was successful.
+     */
     updateSection(initialValue: string, newValue: string): boolean {
-        console.log('update section')
-        if (!this.sections[initialValue]) {
 
+        if (!this.sections[initialValue]) {
             this.checkGlobalValidity();
             return false;
         }
 
-        const oldNewValue = this.sections[initialValue].newValue;
+        // const oldNewValue = this.sections[initialValue].newValue;
         const oldIndex = this.sections[initialValue].index;
 
         // Temporarily remove the current section to avoid self-comparison
         delete this.sections[initialValue];
 
         if (this.sectionExists(newValue)) {
-            // Re-add the section with the original value
-
-            console.log('update section22')
             // this.sections[initialValue] = { newValue: oldNewValue, index: oldIndex };
             this.sections[initialValue] = { newValue, index: oldIndex };
             this.checkGlobalValidity();
@@ -66,16 +77,31 @@ export class SectionIdentifierService {
     }
 
 
+    /**
+     * Checks if a section with a specified identifier exists.
+     * 
+     * @param newValue - The identifier to check for existence.
+     * @returns Whether the section exists.
+     */
     sectionExists(newValue: string): boolean {
         return Object.values(this.sections).some(section => section.newValue === newValue);
     }
 
 
+    /**
+     * Retrieves all sections managed by the service.
+     * 
+     * @returns An object containing all sections.
+     */
     getSections(): { [initialValue: string]: Section } {
         return this.sections;
     }
 
-
+    /**
+     * Removes a section at a specified index and adjusts the indices of subsequent sections.
+     * 
+     * @param index - The index of the section to remove.
+     */
     removeSection(index: number): void {
         const sectionEntries = Object.entries(this.sections);
         const sectionToRemove = sectionEntries.find(([_, section]) => section.index === index);
@@ -98,6 +124,12 @@ export class SectionIdentifierService {
     }
 
 
+    /**
+     * Updates the indices of sections after a drag-and-drop operation.
+     * 
+     * @param draggedIndex - The initial index of the dragged section.
+     * @param newIndex - The new index where the section is dropped.
+     */
     updateSectionIndexes(draggedIndex: number, newIndex: number): void {
         if (Math.abs(draggedIndex - newIndex) === 1 && draggedIndex < newIndex) {
             return;
@@ -143,28 +175,42 @@ export class SectionIdentifierService {
     }
 
 
+    /**
+    * Sets the validity status of the identifier.
+    * 
+    * @param isValid - The validity status to set.
+    */
     private setIsIdentifierValid(isValid: boolean): void {
         this.isIdentifierValidSubject.next(isValid);
     }
 
 
+    /**
+     * Retrieves an observable that indicates the validity status of the identifier.
+     * 
+     * @returns An observable of the validity status.
+     */
     getIsIdentifierValid(): Observable<boolean> {
         return this.isIdentifierValidSubject.asObservable();
     }
 
-
+    /**
+     * Checks the global validity of the section identifiers by ensuring all are unique.
+     */
     private checkGlobalValidity(): void {
         const newValues = Object.values(this.sections).map(section => section.newValue);
         const uniqueValues = new Set(newValues);
         const isValid = newValues.length === uniqueValues.size;
 
-        console.log('newValues:', newValues);
-        console.log('uniqueValues:', uniqueValues);
-        console.log('checkGlobalValidity isValid:', isValid);
-
         this.setIsIdentifierValid(isValid);
     }
 
+    /**
+     * Retrieves the index where a section is dropped.
+     * 
+     * @param index - The index where a section is dropped (optional).
+     * @returns The dropped index.
+     */
     getDroppedIndex(index?: number): number {
         return index;
     }
