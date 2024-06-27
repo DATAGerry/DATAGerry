@@ -54,6 +54,7 @@ import { PreviewModalComponent } from './modals/preview-modal/preview-modal.comp
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { CmdbSectionTemplate } from '../../models/cmdb-section-template';
 import { MultiSectionControl } from './controls/multi-section.control';
+import { SectionIdentifierService } from '../services/SectionIdentifierService.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 declare var $: any;
 
@@ -67,9 +68,13 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
     public MODES: typeof CmdbMode = CmdbMode;
 
+    private eventIndex: number;
+    private onSectionMoveIndex: number;
+
     public sections: Array<any> = [];
     public typeInstance: CmdbType;
-  
+    public sectionIdenfier: Array<String> = [];
+    public initialIdentifier: string = '';
     public newSections: Array<CmdbTypeSection> = [];
     public newFields: Array<CmdbTypeSection> = [];
 
@@ -84,6 +89,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     @Input() public users: Array<User> = [];
     @Input() public types: Array<CmdbType> = [];
     @Input() public valid: boolean = true;
+
 
     @Input('typeInstance')
     public set TypeInstance(instance: CmdbType) {
@@ -131,13 +137,18 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         new Controller('location', new LocationControl())
     ];
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private modalService: NgbModal, private validationService: ValidationService) {
+
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+
+    public constructor(private modalService: NgbModal, private validationService: ValidationService,
+        public sectionIdentifierService: SectionIdentifierService) {
         this.typeInstance = new CmdbType();
     }
+
+
 
 
     ngOnChanges(changes: SimpleChanges): void {
@@ -145,15 +156,17 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             this.initGlobalFieldsList();
             this.setSelectedGlobalTemplates();
         }
+
     }
 
 
     ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.sectionIdentifierService;
     }
 
-/* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
+    /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
 
     private addRefSectionSelectionField(refSection: CmdbTypeSection): void {
         refSection.fields = [];
@@ -175,6 +188,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.fields = [...this.typeInstance.fields];
     }
 
+
+    onDragStart(event: DragEvent, index: number) {
+        this.onSectionMoveIndex = index;
+    }
 
     /**
      * Handels dropping any kind of section in the drop area
@@ -223,8 +240,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 this.newSections.push(sectionData);
             }
 
+            if (event.dropEffect === 'move') {
+                this.eventIndex = event.index;
+            }
+
             this.sections.splice(index, 0, sectionData);
             this.typeInstance.render_meta.sections = [...this.sections];
+            this.sectionIdentifierService.getDroppedIndex(index);
+            this.sectionIdentifierService.addSection(sectionData.name, sectionData.name, index);
 
             if (sectionData.type === 'ref-section' && event.dropEffect === 'copy') {
                 this.addRefSectionSelectionField(sectionData as CmdbTypeSection);
@@ -357,7 +380,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         const inputName: string = data.inputName;
         let fieldName: string = data.fieldName;
 
-        if (data.inputName == "name") {
+        if (data.inputName === "name") {
             fieldName = data.previousName;
         }
 
@@ -434,6 +457,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         if (section && (event.dropEffect === 'copy' || event.dropEffect === 'move')) {
             let index = event.index;
 
+            this.initialIdentifier = section.name;
             if (typeof index === 'undefined') {
                 index = section.fields.length;
             }
@@ -467,18 +491,22 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    public onDragged(item: any, list: any[], effect: DropEffect) {
+    public onDragged(item: any, list: any[], effect: DropEffect, index1: number) {
+
+
         if (effect === 'move') {
             const index = list.indexOf(item);
             list.splice(index, 1);
             this.sections = list;
             this.typeInstance.render_meta.sections = [...this.sections];
+            this.sectionIdentifierService.updateSectionIndexes(this.onSectionMoveIndex, this.eventIndex);
         }
     }
 
 
-    public removeSection(item: CmdbTypeSection) {
+    public removeSection(item: CmdbTypeSection, indexs: any) {
         this.handleGlobalTemplates(item);
+        this.sectionIdentifierService.removeSection(indexs);
 
         const index: number = this.typeInstance.render_meta.sections.indexOf(item);
 

@@ -9,7 +9,7 @@
                 name-guideline
                 (ngModelChange)="onInputChange($event, 'name')"
                 [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
-                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"
+                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched) || !isIdentifierValid}"
             >
             <small class="form-text text-muted float-left">Use a unique identifier</small>
             <div *ngIf="nameControl.invalid && (nameControl.dirty || nameControl.touched)" class="invalid-feedback">

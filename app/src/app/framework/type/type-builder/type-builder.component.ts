@@ -18,7 +18,7 @@
 import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
-import { Observable, ReplaySubject, takeUntil } from 'rxjs';
+import { Observable, ReplaySubject, Subscription, takeUntil } from 'rxjs';
 
 import { TypeService } from '../../services/type.service';
 import { UserService } from '../../../management/services/user.service';
@@ -34,6 +34,7 @@ import { User } from '../../../management/models/user';
 import { CollectionParameters } from '../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../services/models/api-response';
 import { AccessControlList } from 'src/app/modules/acl/acl.types';
+import { SectionIdentifierService } from '../services/SectionIdentifierService.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -77,6 +78,9 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     isValid$: Observable<boolean>;
     isSectionValid$: Observable<boolean>;
 
+    public isIdentifierValid: boolean;
+    private subscription: Subscription;
+
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -89,7 +93,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         private groupService: GroupService,
         private sidebarService: SidebarService,
         private validationService: ValidationService,
-        private changeDetector: ChangeDetectorRef
+        private changeDetector: ChangeDetectorRef,
+        private sectionIdentifierService: SectionIdentifierService
     ) {
 
     }
@@ -98,6 +103,11 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.isValid$ = this.validationService.getIsValid();
         this.isSectionValid$ = this.validationService.overallSectionValidity();
+
+        this.subscription = this.sectionIdentifierService.getIsIdentifierValid().subscribe(isValid => {
+            this.isIdentifierValid = isValid;
+
+        });
 
         if (this.mode === CmdbMode.Create) {
             this.typeInstance = new CmdbType();
@@ -157,6 +167,9 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
