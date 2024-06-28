@@ -57,18 +57,24 @@ export class ValidationService {
         );
         this.isValid$.next(overallValidity);
     }
+
+
+    /**
+     * Updates a section's key in the sectionValidity map.
+     * 
+     * @param prevKey - The previous identifier of the section.
+     * @param newKey - The new identifier of the section.
+     * @returns Whether the update was successful.
+     */
+    updateSectionKey(prevKey: string, newKey: string) {
+        if (this.sectionValidity.has(prevKey)) {
+            const isValid = this.sectionValidity.get(prevKey);
+            this.sectionValidity.delete(prevKey);
+            this.sectionValidity.set(newKey, isValid!);
+            const overallValidity = Array.from(this.sectionValidity.values()).every(
+                (isValid) => isValid
+            );
+            this.sectionValidity$.next(overallValidity);
+        }
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
