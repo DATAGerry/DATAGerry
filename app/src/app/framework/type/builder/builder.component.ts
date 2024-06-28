@@ -371,6 +371,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param data new data for field
      */
     private handleFieldChanges(data: any) {
+
+        if (data.elementType == 'section') {
+            this.validationService.updateSectionKey(data.previousName, data.fieldName)
+        }
         if (data.inputName == "hideField") {
             this.handleHideFields(data);
             return;
