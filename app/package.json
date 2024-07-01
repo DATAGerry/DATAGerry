@@ -47,7 +47,7 @@
     "jszip": "^3.10.1",
     "moment-timezone": "^0.5.45",
     "ngx-drag-drop": "^17.0.0",
-    "ngx-filesaver": "^17.0.0",
+    "ngx-filesaver": "^18.0.0",
     "ngx-icon-picker": "^1.11.2",
     "ngx-indexed-db": "^18.0.0",
     "ngx-pagination": "^6.0.3",
