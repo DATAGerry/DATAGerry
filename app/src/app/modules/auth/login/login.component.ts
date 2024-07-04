@@ -102,6 +102,7 @@ export class LoginComponent implements OnInit, OnDestroy {
         this.loginSubscription = this.authenticationService.login(userName, userPW).pipe(first())
             .subscribe({
                 next: (response: LoginResponse) => {
+
                     this.userSettingsDB.syncSettings();
 
                     this.permissionService.storeUserRights(response.user.group_id).pipe(first())

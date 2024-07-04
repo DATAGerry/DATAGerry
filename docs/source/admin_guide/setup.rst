@@ -140,6 +140,8 @@ Setup via RPM
 For Red Hat Enterprise Linux (RHEL) and RHEL-based systems such as CentOS or Oracle Linux,
 we offer an RPM file for installing DATAGERRY.
 
+Link to RPM Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
+
 The following RHEL/CentOS versions are supported and tested:
 
  * **RHEL/CentOS 9**
@@ -211,8 +213,8 @@ To access the DATAGERRY frontend, use the following parameters:
 
 | 
 
-Setup via tar.gz archive
-========================
+Setup via tar.gz/zip archive
+============================
 For all non rpm based Linux distributions, we provide a tar.gz archive with a setup shell script. Systemd is a
 requirement for that setup. This should work on most distributions, and is tested with the following distributions:
 
@@ -244,6 +246,18 @@ setup RabbitMQ for your distribution.
 
 Setup DATAGERRY
 ---------------
+Link to zip Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
+
+Extract the provided zip archive and execute the setup script as root:
+
+.. code-block:: console
+
+    $ unzip datagerry-<version>.zip
+    $ cd datagerry
+    $ sudo ./setup.sh
+
+**OR**
+
 Extract the provided tar.gz archive and execute the setup script as root:
 
 .. code-block:: console
@@ -288,6 +302,8 @@ the `MongoDB-Homepage <https://www.mongodb.com/docs/v6.0/tutorial/install-mongod
 
 The next step is to download the deb-package and install it via the following command (execute the command in the
 folder where the deb-package is).
+
+Link to deb Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
 
 .. code-block:: console
 

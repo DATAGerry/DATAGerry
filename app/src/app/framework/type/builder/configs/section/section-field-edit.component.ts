@@ -23,6 +23,7 @@ import { ReplaySubject } from 'rxjs';
 import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { SectionIdentifierService } from '../../../services/SectionIdentifierService.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -39,12 +40,14 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     private initialValue: string;
     private identifierInitialValue: string;
     isValid$ = true;
+    public currentValue: string;
+    public isIdentifierValid: boolean = true;
 
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private validationService: ValidationService) {
+    public constructor(private validationService: ValidationService, private sectionIdentifier: SectionIdentifierService) {
         super();
     }
 
@@ -59,6 +62,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
         this.identifierInitialValue = this.nameControl.value;
+        this.currentValue = this.identifierInitialValue;
     }
 
     public ngOnDestroy(): void {
@@ -82,11 +86,12 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
             "inputName": type,
             "fieldName": this.nameControl.value,
             "previousName": this.initialValue,
-            "elementType": "section"
+            "elementType": "section",
         });
 
-        if (type == "name") {
-            this.initialValue = this.nameControl.value;
+        if (type === "name") {
+            const newName = this.nameControl.value;
+            this.initialValue = newName;
         }
 
         for (let item in this.form.controls) {
@@ -95,5 +100,18 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
         this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
+
+        this.updateSectionValue(this.nameControl.value)
+    }
+
+
+    updateSectionValue(newValue: string): void {
+        const isValid = this.sectionIdentifier.updateSection(this.identifierInitialValue, newValue);
+        if (!isValid) {
+            this.isIdentifierValid = false
+        } else {
+            this.currentValue = newValue;
+            this.isIdentifierValid = true;
+        }
     }
 }

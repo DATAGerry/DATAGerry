@@ -23,6 +23,7 @@ import { ReplaySubject } from 'rxjs';
 import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { SectionIdentifierService } from '../../../services/SectionIdentifierService.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -39,12 +40,14 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     private initialValue: string;
     private identifierInitialValue: string;
     isValid$ = true;
+    public currentValue: string;
+    public isIdentifierValid: boolean = true;
 
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private validationService: ValidationService) {
+    public constructor(private validationService: ValidationService, private sectionIdentifierService: SectionIdentifierService) {
         super();
     }
 
@@ -59,6 +62,8 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.patchData(this.data, this.form);
         this.initialValue = this.nameControl.value;
         this.identifierInitialValue = this.nameControl.value;
+
+        this.currentValue = this.identifierInitialValue;
     }
 
 
@@ -96,5 +101,18 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
 
         this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
+
+        this.updateSectionValue(this.nameControl.value)
+    }
+
+
+    updateSectionValue(newValue: string): void {
+        const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
+        if (!isValid) {
+            this.isIdentifierValid = false
+        } else {
+            this.currentValue = newValue;
+            this.isIdentifierValid = true;
+        }
     }
 }

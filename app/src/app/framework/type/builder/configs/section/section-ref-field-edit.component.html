@@ -10,7 +10,7 @@
                 name-guideline
                 required
                 [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
-                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"
+                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched) || !isIdentifierValid}"
             >
             <small class="form-text text-muted">Use a unique identifier</small>
         </div>

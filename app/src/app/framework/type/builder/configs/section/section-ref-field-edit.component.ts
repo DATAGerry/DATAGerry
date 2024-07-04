@@ -23,11 +23,12 @@ import { CollectionParameters } from '../../../../../services/models/api-paramet
 import { TypeService } from '../../../../services/type.service';
 import { takeUntil } from 'rxjs/operators';
 import { APIGetMultiResponse } from '../../../../../services/models/api-response';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 import { CmdbMode } from '../../../../modes.enum';
 import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { ToastService } from "../../../../../layout/toast/toast.service";
 import { ValidationService } from '../../../services/validation.service';
+import { SectionIdentifierService } from '../../../services/SectionIdentifierService.service';
 
 @Component({
   selector: 'cmdb-section-ref-field-edit',
@@ -114,7 +115,13 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   private previousNameControlValue: string = '';
   private initialValue: string;
 
-  constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService) {
+  public currentValue: string;
+  public isIdentifierValid: boolean = true;
+  private subscription: Subscription;
+  private identifierInitialValue: string;
+
+  constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService,
+    private sectionIdentifierService: SectionIdentifierService) {
     super();
   }
 
@@ -148,6 +155,8 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
     this.initialValue = this.nameControl.value;
     this.previousNameControlValue = this.nameControl.value;
+
+    this.currentValue = this.identifierInitialValue;
   }
 
   private loadPresetType(publicID: number): void {
@@ -265,4 +274,14 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
   }
 
 
+  updateSectionValue(newValue: string): void {
+    const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
+    if (!isValid) {
+      this.isIdentifierValid = false
+
+    } else {
+      this.currentValue = newValue;
+      this.isIdentifierValid = true;
+    }
+  }
 }
