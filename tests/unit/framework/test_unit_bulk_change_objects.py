@@ -20,6 +20,9 @@ from http import HTTPStatus
 
 from pytest import fixture
 
+from pymongo.mongo_client import MongoClient
+from pymongo.collection import Collection
+
 from cmdb.framework import TypeModel, CmdbObject
 from cmdb.framework.models.type_model import TypeSummary
 from cmdb.framework.models.type_model import TypeFieldSection, TypeRenderMeta
@@ -27,8 +30,8 @@ from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
 # -------------------------------------------------------------------------------------------------------------------- #
 
-@fixture(scope='module')
-def example_type():
+@fixture(scope='module', name="example_type")
+def fixture_example_type():
     """TODO: document"""
     return TypeModel(
         public_id=1, name='test', label='Test', author_id=1, creation_time=datetime.now(),
@@ -53,8 +56,8 @@ def example_type():
     )
 
 
-@fixture(scope='module')
-def example_object():
+@fixture(scope='module', name="example_object")
+def fixture_example_object():
     """TODO: document"""
     return CmdbObject(
         public_id=1, type_id=1, status=True, creation_time=datetime.now(timezone.utc),
@@ -68,8 +71,8 @@ def example_object():
     )
 
 
-@fixture(scope='module')
-def change_object() -> dict:
+@fixture(scope='module', name="change_object")
+def fixture_change_object() -> dict:
     """
     The 'active' property must be undefined.
     This setting is required for object validation via CmdbObject.SCHEMA Validation
@@ -88,11 +91,9 @@ def change_object() -> dict:
     }
 
 
-@fixture(scope='module')
-def collection(connector, database_name):
+@fixture(scope='module', name="collection")
+def fixture_collection(connector, database_name):
     """TODO: document"""
-    from pymongo.mongo_client import MongoClient
-    from pymongo.collection import Collection
     client: MongoClient = connector.client
     collection: Collection = client.get_database(database_name).get_collection(TypeModel.COLLECTION)
     return collection
