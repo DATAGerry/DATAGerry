@@ -232,8 +232,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             }
 
             for (const el of this.sections) {
-                const collapseCard = ($('#' + el.name) as any);
-                collapseCard.collapse('hide');
+                if (el.name && el.name.trim()) {
+                    const collapseCard = $('#' + el.name);
+                    collapseCard.collapse('hide');
+                }
             }
 
             if (event.dropEffect === 'copy') {
