@@ -19,23 +19,24 @@ from datetime import datetime
 import pytest
 
 from cmdb.user_management import UserGroupModel, RightManager, UserModel
+
+from cmdb.user_management import rights
 # -------------------------------------------------------------------------------------------------------------------- #
 
-@pytest.fixture(scope="session")
-def right_manager():
+@pytest.fixture(scope="session", name="right_manager")
+def fixture_right_manager():
     """TODO: document"""
-    from cmdb.user_management import rights
     return RightManager(rights)
 
 
-@pytest.fixture(scope="session")
-def full_access_group(right_manager: RightManager):
+@pytest.fixture(scope="session", name="full_access_group")
+def fixture_full_access_group(right_manager: RightManager):
     "TODO: document"
     return UserGroupModel(public_id=1, name='full', label='Full', rights=[right_manager.get('base.*')])
 
 
-@pytest.fixture(scope="session")
-def none_access_group():
+@pytest.fixture(scope="session", name="none_access_group")
+def fixture_none_access_group():
     """TODO: document"""
     return UserGroupModel(public_id=2, name='none', label='None')
 

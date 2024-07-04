@@ -20,8 +20,8 @@ from cmdb.database.mongo_connector import MongoConnector
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
-@pytest.fixture(scope="session")
-def mongodb_parameters(request):
+@pytest.fixture(scope="session", name="mongodb_parameters")
+def fixture_mongodb_parameters(request):
     """TODO: document"""
     return request.config.getoption('--mongodb-host'), \
            request.config.getoption('--mongodb-port'), \
