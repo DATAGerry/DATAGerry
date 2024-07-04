@@ -517,13 +517,20 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    public removeSection(item: CmdbTypeSection, indexs: any) {
-        if (this.activeIndex === indexs) {
+    /**
+     * Removes a section from the typeInstance and updates the relevant metadata and fields.
+     *
+     * @param item The section item to be removed.
+     * @param sectionIndex The index of the section to be removed.
+     */
+    public removeSection(item: CmdbTypeSection, sectionIndex: number) {
+
+        if (this.activeIndex === sectionIndex) {
             this.activeIndex = null
         }
 
         this.handleGlobalTemplates(item);
-        this.sectionIdentifierService.removeSection(indexs);
+        this.sectionIdentifierService.removeSection(sectionIndex);
 
         const index: number = this.typeInstance.render_meta.sections.indexOf(item);
 
