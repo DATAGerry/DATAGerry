@@ -160,9 +160,8 @@
                 dndType="sections"
                 [dndDraggable]="section"
                 [dragData]="{ section, index: x }"
-                (dndStart)="onDragStart($event, x)"
-                (dndMoved)="onDragged(section, sections, 'move', x)"
-            >
+                (dndStart)="onDragStart(x)"
+                (dndMoved)="onSectionDragged(section, sections, 'move', x)">
                 <div class="card">
                     <div class="card-header" [ngClass]="{'global-section-item': isGlobalSection(section)}">
                         <fa-icon [icon]="['far', 'object-group']"></fa-icon>
@@ -188,7 +187,7 @@
                         </span>
                     </div>
                     <div class="collapse show" id="section-{{x}}{{section.name}}">
-                        <div class="card-body">
+                        <div class="card-body"  (click)="setActiveIndex(x)"  >
                             <cmdb-config-edit 
                                 [types]="types"
                                 [mode]="getSectionMode(section, mode)"
