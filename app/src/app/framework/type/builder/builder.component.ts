@@ -70,6 +70,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
     private eventIndex: number;
     private onSectionMoveIndex: number;
+    private activeIndex: number | null = null;
 
     public sections: Array<any> = [];
     public typeInstance: CmdbType;
@@ -150,13 +151,15 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
 
+    setActiveIndex(index: number) {
+        this.activeIndex = index;
+    }
 
     ngOnChanges(changes: SimpleChanges): void {
         if (this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0) {
             this.initGlobalFieldsList();
             this.setSelectedGlobalTemplates();
         }
-
     }
 
 
@@ -189,7 +192,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    onDragStart(event: DragEvent, index: number) {
+    onDragStart(index: number) {
+        this.activeIndex = null
         this.onSectionMoveIndex = index;
     }
 
@@ -199,6 +203,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param event DropEvent containing the section as data
      */
     public onSectionDrop(event: DndDropEvent): void {
+        event.event.preventDefault;
         let sectionData = event.data;
 
         //check if it is a section template
@@ -392,7 +397,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
         if (data.elementType == "section" || data.elementType == "multi-data-section") {
             index = this.getSectionIndexForName(fieldName);
-            if (index >= 0) {
+
+            if (this.activeIndex !== null) {
+                this.typeInstance.render_meta.sections[this.activeIndex][inputName] = newValue;
+            }
+            else if (index >= 0) {
                 this.typeInstance.render_meta.sections[index][inputName] = newValue;
             }
         } else {
@@ -495,7 +504,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    public onDragged(item: any, list: any[], effect: DropEffect, index1: number) {
+    public onSectionDragged(item: any, list: any[], effect: DropEffect) {
 
 
         if (effect === 'move') {
@@ -508,9 +517,20 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-    public removeSection(item: CmdbTypeSection, indexs: any) {
+    /**
+     * Removes a section from the typeInstance and updates the relevant metadata and fields.
+     *
+     * @param item The section item to be removed.
+     * @param sectionIndex The index of the section to be removed.
+     */
+    public removeSection(item: CmdbTypeSection, sectionIndex: number) {
+
+        if (this.activeIndex === sectionIndex) {
+            this.activeIndex = null
+        }
+
         this.handleGlobalTemplates(item);
-        this.sectionIdentifierService.removeSection(indexs);
+        this.sectionIdentifierService.removeSection(sectionIndex);
 
         const index: number = this.typeInstance.render_meta.sections.indexOf(item);
 
