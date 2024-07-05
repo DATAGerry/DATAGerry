@@ -24,6 +24,7 @@ import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
 import { SectionIdentifierService } from '../../../services/SectionIdentifierService.service';
+import { CmdbMode } from 'src/app/framework/modes.enum';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -101,7 +102,9 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
         this.isValid$ = true;
 
-        this.updateSectionValue(this.nameControl.value)
+        if (this.mode === CmdbMode.Create) {
+            this.updateSectionValue(this.nameControl.value)
+        }
     }
 
 
