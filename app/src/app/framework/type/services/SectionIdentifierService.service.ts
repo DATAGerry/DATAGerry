@@ -17,6 +17,16 @@ export class SectionIdentifierService {
 
 
     /**
+    * Resets the identifiers for all sections and updates the validity status.
+    */
+    public resetIdentifiers() {
+        this.sections = {};
+        this.setIsIdentifierValid(true);
+        this.checkGlobalValidity();
+    }
+
+
+    /**
      * Adds a new section at a specified index, adjusting subsequent sections' indices if necessary.
      * 
      * @param initialValue - The initial identifier of the section.

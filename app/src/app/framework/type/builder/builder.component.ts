@@ -166,7 +166,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
-        this.sectionIdentifierService;
+        this.sectionIdentifierService.resetIdentifiers();
     }
 
     /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
