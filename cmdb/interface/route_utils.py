@@ -142,7 +142,14 @@ def insert_request_user(func):
             return abort(401)
         try:
             user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+
+            if current_app.cloud_mode:
+                database = decrypted_token['DATAGERRY']['value']['user']['database']
+                user_manager = UserManager(current_app.database_manager, database)
         except ValueError:
+            return abort(401)
+        except Exception as err:
+            LOGGER.debug("HINT: Uncatched error type in insert_request_user(): %s", type(err))
             return abort(401)
         user = user_manager.get(user_id)
         kwargs.update({'request_user': user})

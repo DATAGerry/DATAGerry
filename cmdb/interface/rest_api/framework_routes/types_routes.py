@@ -36,22 +36,23 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 
 from cmdb.framework.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_object import CmdbObject
-
+from cmdb.interface.route_utils import insert_request_user
+from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
 
-type_manager = TypeManager(database_manager=current_app.database_manager)
 locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
 object_manager = ObjectManager(current_app.database_manager)
 deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
 @types_blueprint.parse_parameters(TypeIterationParameters)
-def get_types(params: TypeIterationParameters):
+def get_types(params: TypeIterationParameters, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
@@ -70,6 +71,11 @@ def get_types(params: TypeIterationParameters):
         ManagerGetError: If the collection could not be found.
 
     """
+    if current_app.cloud_mode:
+        type_manager = TypeManager(current_app.database_manager, request_user.database)
+    else:
+        type_manager = TypeManager(database_manager=current_app.database_manager)
+
     body = request.method == 'HEAD'
     view = params.active
     if view:
@@ -108,6 +114,8 @@ def get_type(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of a TypeModel.
     """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+
     try:
         type_ = type_manager.get(public_id)
     except ManagerGetError:
@@ -134,6 +142,8 @@ def insert_type(data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new type and its public_id.
     """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+
     data.setdefault('creation_time', datetime.now(timezone.utc))
     possible_id = data.get('public_id', None)
     if possible_id:
@@ -174,6 +184,8 @@ def update_type(public_id: int, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated type.
     """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+
     try:
         unchanged_type = type_manager.get(public_id)
 
@@ -229,6 +241,8 @@ def delete_type(public_id: int):
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+
     try:
         objects_count = object_manager.count_objects(public_id)
 
@@ -259,6 +273,8 @@ def count_objects(public_id: int):
     Args:
         public_id (int): public_id of the type
     """
+    type_manager = TypeManager(database_manager=current_app.database_manager)
+
     try:
         objects_count = object_manager.count_objects(public_id)
     except ManagerGetError as err:

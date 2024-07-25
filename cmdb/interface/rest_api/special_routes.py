@@ -25,10 +25,9 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.utils.error import CMDBError
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
 from cmdb.errors.manager import ManagerInsertError
+from cmdb.interface.route_utils import insert_request_user
+from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
-
-with current_app.app_context():
-    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
 
 LOGGER = logging.getLogger(__name__)
 special_blueprint = RootBlueprint('special_rest', __name__, url_prefix='/special')
@@ -36,14 +35,21 @@ special_blueprint = RootBlueprint('special_rest', __name__, url_prefix='/special
 
 @special_blueprint.route('intro', methods=['GET'])
 @special_blueprint.route('/intro', methods=['GET'])
+@insert_request_user
 @login_required
-def get_intro_starter():
+def get_intro_starter(request_user: UserModel):
     """
     Creates steps for intro and checks if there are any objects, categories or types in the DB
 
     Returns:
         _type_: Steps and if there are any objects, types and categories in the database
     """
+    if current_app.cloud_mode:
+        object_manager: CmdbObjectManager = CmdbObjectManager(database_manager=current_app.database_manager,
+                                                              database=request_user.database)
+    else:
+        object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
+
     try:
         steps = []
         categories_total = len(object_manager.get_categories())
@@ -78,9 +84,10 @@ def get_intro_starter():
 
 
 @special_blueprint.route('/profiles', methods=['POST'])
+@insert_request_user
 @special_blueprint.parse_assistant_parameters()
 @login_required
-def create_initial_profiles(data: str):
+def create_initial_profiles(data: str, request_user: UserModel):
     """
     Creates all profiles selected in the assistant
 
@@ -90,6 +97,12 @@ def create_initial_profiles(data: str):
     Returns:
         _type_: list of created public_ids of types
     """
+    if current_app.cloud_mode:
+        object_manager: CmdbObjectManager = CmdbObjectManager(database_manager=current_app.database_manager,
+                                                              database=request_user.database)
+    else:
+        object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager)
+
     profiles = data['data'].split('#')
 
     categories_total = len(object_manager.get_categories())

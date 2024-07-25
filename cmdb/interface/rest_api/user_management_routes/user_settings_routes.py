@@ -26,13 +26,16 @@ from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSi
 from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
 from cmdb.user_management.managers.setting_manager import UserSettingsManager
+from cmdb.interface.route_utils import insert_request_user
+from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 user_settings_blueprint = APIBlueprint('user_settings', __name__)
 LOGGER = logging.getLogger(__name__)
 
 @user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
-def get_user_settings(user_id: int):
+@insert_request_user
+def get_user_settings(user_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a complete collection of resources.
 
@@ -48,7 +51,11 @@ def get_user_settings(user_id: int):
     Raises:
         ManagerGetError: If the collection/resources could not be found.
     """
-    settings_manager = UserSettingsManager(database_manager=current_app.database_manager)
+    if current_app.cloud_mode:
+        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
+    else:
+        settings_manager = UserSettingsManager(current_app.database_manager)
+
     try:
         settings: List[UserSettingModel] = settings_manager.get_user_settings(user_id=user_id)
         raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
@@ -60,7 +67,8 @@ def get_user_settings(user_id: int):
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
-def get_user_setting(user_id: int, resource: str):
+@insert_request_user
+def get_user_setting(user_id: int, resource: str, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a single user setting resource.
 
@@ -77,7 +85,11 @@ def get_user_setting(user_id: int, resource: str):
     Returns:
         GetSingleResponse: Which includes the json data of a UserSettingModel.
     """
-    settings_manager = UserSettingsManager(database_manager=current_app.database_manager)
+    if current_app.cloud_mode:
+        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
+    else:
+        settings_manager = UserSettingsManager(current_app.database_manager)
+
     try:
         setting: UserSettingModel = settings_manager.get_user_setting(user_id, resource)
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
@@ -88,8 +100,9 @@ def get_user_setting(user_id: int, resource: str):
 
 
 @user_settings_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
-def insert_setting(user_id: int, data: dict):
+def insert_setting(user_id: int, data: dict, request_user: UserModel):
     """
     HTTP `POST` route for insert a single user setting resource.
 
@@ -104,7 +117,11 @@ def insert_setting(user_id: int, data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new user and its identifier.
     """
-    settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
+    if current_app.cloud_mode:
+        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
+    else:
+        settings_manager = UserSettingsManager(current_app.database_manager)
+
     try:
         settings_manager.insert(data)
         setting: UserSettingModel = settings_manager.get_user_setting(user_id=user_id,
@@ -119,8 +136,9 @@ def insert_setting(user_id: int, data: dict):
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
+@insert_request_user
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
-def update_setting(user_id: int, resource: str, data: dict):
+def update_setting(user_id: int, resource: str, data: dict, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for update a single user setting resource.
 
@@ -136,7 +154,11 @@ def update_setting(user_id: int, resource: str, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated user setting.
     """
-    settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
+    if current_app.cloud_mode:
+        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
+    else:
+        settings_manager = UserSettingsManager(current_app.database_manager)
+
     try:
         setting = UserSettingModel.from_data(data=data)
 
@@ -161,7 +183,8 @@ def update_setting(user_id: int, resource: str, data: dict):
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['DELETE'])
-def delete_setting(user_id: int, resource: str):
+@insert_request_user
+def delete_setting(user_id: int, resource: str, request_user: UserModel):
     """
     HTTP `DELETE` route for delete a single user setting resource.
 
@@ -176,7 +199,11 @@ def delete_setting(user_id: int, resource: str):
     Returns:
         DeleteSingleResponse: Delete result with the deleted setting as data.
     """
-    settings_manager: UserSettingsManager = UserSettingsManager(database_manager=current_app.database_manager)
+    if current_app.cloud_mode:
+        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
+    else:
+        settings_manager = UserSettingsManager(current_app.database_manager)
+
     try:
         deleted_setting = settings_manager.delete(user_id=user_id, resource=resource)
         api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)

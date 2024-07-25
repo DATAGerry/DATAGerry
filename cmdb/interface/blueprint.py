@@ -61,6 +61,11 @@ class APIBlueprint(Blueprint):
                                 return abort(401)
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+
+                                if current_app.cloud_mode:
+                                    database = decrypted_token['DATAGERRY']['value']['user']['database']
+                                    user_manager = UserManager(current_app.database_manager, database)
+
                                 user_dict: dict = UserModel.to_dict(user_manager.get(user_id))
 
                                 if excepted:

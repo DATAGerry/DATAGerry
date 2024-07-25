@@ -58,11 +58,13 @@ def main(args: Namespace):
         LOGGER.info("DATAGERRY starting...")
 
         _activate_debug(args)
+        __activate_cloud_mode(args)
         _init_config_reader(args.config_file)
 
-        if args.start:
+        if args.start and not args.cloud:
             try:
                 dbm: DatabaseManagerMongo = _check_database()
+
                 if not dbm:
                     raise DatabaseConnectionError('Could not establish connection to db')
 
@@ -73,10 +75,10 @@ def main(args: Namespace):
                 sys.exit(1)
 
         # check db-settings and run update if needed
-        if args.start:
+        if args.start and not args.cloud:
             _start_check_routines(dbm)
 
-        if args.keys:
+        if args.keys and not args.cloud:
             _start_key_routine(dbm)
 
         if args.start:
@@ -119,8 +121,9 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
         # check db-settings
     try:
         check_status = check_routine.checker()
+        LOGGER.info(f"_start_check_routines check_status: {check_status}")
     except Exception as error:
-        LOGGER.error(error)
+        LOGGER.error(f"_start_check_routines error: {error}")
         check_status = check_routine.get_check_status()
         LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
 
@@ -206,6 +209,12 @@ def build_arg_parser() -> Namespace:
                          dest='keys',
                          help="init keys")
 
+    _parser.add_argument('--cloud',
+                         action='store_true',
+                         default=False,
+                         dest='cloud',
+                         help="init cloud mode")
+
     _parser.add_argument('-d',
                          '--debug',
                          action='store_true',
@@ -238,6 +247,13 @@ def _activate_debug(args: Namespace):
         LOGGER.warning("DEBUG mode enabled")
 
 
+def __activate_cloud_mode(args: Namespace):
+    """ Activates cloud mode if set"""
+    if args.cloud:
+        cmdb.__CLOUD_MODE__ = True
+        LOGGER.info("CLOUD MODE enabled")
+
+
 def _init_config_reader(config_file: str):
     """
     Initialises the config file reader
@@ -246,8 +262,10 @@ def _init_config_reader(config_file: str):
     """
     path, filename = os.path.split(config_file)
 
-    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME:
         SystemConfigReader.RUNNING_CONFIG_NAME = filename
+
+    if path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
         SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
 
     SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)

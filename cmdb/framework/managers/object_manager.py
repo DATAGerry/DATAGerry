@@ -155,7 +155,9 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
 class ObjectManager(ManagerBase):
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo, event_queue: Union[Queue, Event] = None):
+    def __init__(self, database_manager: DatabaseManagerMongo,
+                 event_queue: Union[Queue, Event] = None,
+                 database: str = None):
         """
         Set the database connection and the queue for sending events.
 
@@ -165,6 +167,10 @@ class ObjectManager(ManagerBase):
         """
         self.event_queue = event_queue
         self.object_builder = ObjectQueryBuilder()
+
+        if database:
+            database_manager.connector.set_database(database)
+
         self.type_manager = TypeManager(database_manager)
         super().__init__(CmdbObject.COLLECTION, database_manager=database_manager)
 

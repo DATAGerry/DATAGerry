@@ -29,8 +29,14 @@ from ...search import Pipeline
 class GroupManager(ManagerBase):
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo = None, right_manager: RightManager = None):
+    def __init__(self, database_manager: DatabaseManagerMongo = None,
+                 right_manager: RightManager = None,
+                 database :str = None):
         self.right_manager: RightManager = right_manager
+
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(UserGroupModel.COLLECTION, database_manager=database_manager)
 
 

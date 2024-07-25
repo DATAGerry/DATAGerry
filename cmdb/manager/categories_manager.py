@@ -48,7 +48,7 @@ class CategoriesManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
         """
         Set the database connection and the queue for sending events
 
@@ -58,6 +58,10 @@ class CategoriesManager(BaseManager):
         """
         self.event_queue = event_queue
         self.query_builder = BaseQueryBuilder()
+
+        if database:
+            dbm.connector.set_database(database)
+
         self.type_manager = TypeManager(dbm)
         super().__init__(CategoryModel.COLLECTION, dbm)
 

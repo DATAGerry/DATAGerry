@@ -40,21 +40,21 @@ from cmdb.interface.response import GetSingleResponse, \
                                     UpdateSingleResponse, \
                                     ErrorBody
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.route_utils import insert_request_user
+from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 categories_blueprint = APIBlueprint('categories', __name__)
 
-
-categories_manager: CategoriesManager = CategoriesManager(current_app.database_manager, current_app.event_queue)
-
 # ---------------------------------------------------- CRUD-CREATE --------------------------------------------------- #
 
 @categories_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
 @categories_blueprint.validate(CategoryModel.SCHEMA)
-def insert_category(data: dict):
+def insert_category(data: dict, request_user: UserModel):
     """
     HTTP `POST` route for insert a category into the database
 
@@ -68,6 +68,8 @@ def insert_category(data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new category and its public_id.
     """
+    categories_manager = get_categories_manager(request_user)
+
     data.setdefault('creation_time', datetime.now(timezone.utc))
 
     try:
@@ -90,9 +92,10 @@ def insert_category(data: dict):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @categories_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters(view='list')
-def get_categories(params: CollectionParameters):
+def get_categories(params: CollectionParameters, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of categories
 
@@ -108,6 +111,8 @@ def get_categories(params: CollectionParameters):
     Raises:
         FrameworkIterationError: If the collection could not be iterated
     """
+    categories_manager = get_categories_manager(request_user)
+
     body = request.method == 'HEAD'
 
     try:
@@ -143,8 +148,9 @@ def get_categories(params: CollectionParameters):
 
 
 @categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@insert_request_user
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
-def get_category(public_id: int):
+def get_category(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route to retrieve a single category
 
@@ -155,6 +161,8 @@ def get_category(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of the CategoryModel
     """
+    categories_manager = get_categories_manager(request_user)
+
     try:
         category_instance = categories_manager.get_one(public_id)
     except ManagerGetError as err:
@@ -171,9 +179,10 @@ def get_category(public_id: int):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@insert_request_user
 @categories_blueprint.protect(auth=True, right='base.framework.category.edit')
 @categories_blueprint.validate(CategoryModel.SCHEMA)
-def update_category(public_id: int, data: dict):
+def update_category(public_id: int, data: dict, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route to update a single category
 
@@ -185,9 +194,12 @@ def update_category(public_id: int, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated category
     """
+    categories_manager = get_categories_manager(request_user)
+
     try:
         category = CategoryModel.from_data(data)
         categories_manager.update({'public_id':public_id}, CategoryModel.to_json(category))
+
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerUpdateError as err:
         LOGGER.debug("ManagerUpdateError: %s", err)
@@ -198,8 +210,9 @@ def update_category(public_id: int, data: dict):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@insert_request_user
 @categories_blueprint.protect(auth=True, right='base.framework.category.delete')
-def delete_category(public_id: int):
+def delete_category(public_id: int, request_user: UserModel):
     """
     HTTP `DELETE` route to delete a single category
 
@@ -211,6 +224,8 @@ def delete_category(public_id: int):
     Returns:
         DeleteSingleResponse: Delete result with the deleted category as data
     """
+    categories_manager = get_categories_manager(request_user)
+
     try:
         category_instance = categories_manager.get_one(public_id)
         categories_manager.delete({'public_id':public_id})
@@ -227,3 +242,13 @@ def delete_category(public_id: int):
         return ErrorBody(400, f"Could not delete the categeory with the ID:{public_id}!").response()
 
     return api_response.make_response()
+
+# -------------------------------------------------- HELPER METHODS -------------------------------------------------- #
+def get_categories_manager(request_user: UserModel):
+    """Retrieves the categories manager based on cloud mode"""
+    if current_app.cloud_mode:
+        return CategoriesManager(current_app.database_manager,
+                                               current_app.event_queue,
+                                               request_user.database)
+
+    return CategoriesManager(current_app.database_manager, current_app.event_queue)

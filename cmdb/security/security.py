@@ -18,6 +18,11 @@ import base64
 import logging
 from Crypto import Random
 from Crypto.Cipher import AES
+
+from flask import current_app
+
+from cmdb import __CLOUD_MODE__, __SYMMETRIC_AES_KEY__
+
 from cmdb.errors.database import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
@@ -91,11 +96,15 @@ class SecurityManager:
 
     def generate_symmetric_aes_key(self):
         """TODO: document"""
+        LOGGER.info("POC => generate_symmetric_aes_key called")
         return self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
 
 
     def get_symmetric_aes_key(self):
         """TODO: document"""
+        if current_app.cloud_mode:
+            return __SYMMETRIC_AES_KEY__
+
         try:
             symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
         except NoDocumentFound:

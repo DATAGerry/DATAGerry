@@ -21,7 +21,7 @@ import multiprocessing
 
 from gunicorn.app.base import BaseApplication
 
-from cmdb import __MODE__
+from cmdb import __MODE__, __CLOUD_MODE__
 import cmdb.process_management.service
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.interface.net_app import create_app
@@ -48,7 +48,11 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
 
     def _run(self):
         # get queue for sending events
-        event_queue = self._event_manager.get_send_queue()
+        if __CLOUD_MODE__:
+            event_queue = None
+        else:
+            event_queue = self._event_manager.get_send_queue()
+
         database_manager = DatabaseManagerMongo(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
