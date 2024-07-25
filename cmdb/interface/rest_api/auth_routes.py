@@ -198,31 +198,31 @@ def check_user_in_mysql_db(mail: str, password: str):
 
     ###
     admin1: dict = {
-        "user_name": "admin1",
-        "password": "admin1",
-        "email": "admin1@mail.de",
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@testgmbh.de",
         "database": "testdb1"
     }
 
     admin2: dict = {
-        "user_name": "admin2",
-        "password": "admin2",
-        "email": "admin2@mail.de",
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@wurstgmbh.de",
         "database": "testdb2"
     }
 
     admin3: dict = {
-        "user_name": "admin3",
-        "password": "admin3",
-        "email": "admin3@mail.de",
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@mustergmbh.de",
         "database": "testdb3"
     }
     ###
 
     users = {
-        "admin1@mail.de": admin1,
-        "admin2@mail.de": admin2,
-        "admin3@mail.de": admin3,
+        "admin@testgmbh.de": admin1,
+        "admin@wurstgmbh.de": admin2,
+        "admin@mustergmbh.de": admin3,
     }
 
     # checks if the user exists
