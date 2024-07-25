@@ -19,7 +19,8 @@ from datetime import datetime, timezone
 from typing import List
 
 from flask import request, current_app, abort
-
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb import __CLOUD_MODE__
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
@@ -34,6 +35,13 @@ from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.user_management.rights import __all__ as rights
+
+from cmdb.search import Query
+from cmdb.user_management import __FIXED_GROUPS__
+from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.security.key.generator import KeyGenerator
 # -------------------------------------------------------------------------------------------------------------------- #
 auth_blueprint = APIBlueprint('auth', __name__)
 
@@ -42,7 +50,9 @@ LOGGER = logging.getLogger(__name__)
 with current_app.app_context():
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
     system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
+    dbm: DatabaseManagerMongo = current_app.database_manager
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @auth_blueprint.route('/settings', methods=['GET'])
 @auth_blueprint.protect(auth=True, right='base.system.view')
@@ -105,35 +115,201 @@ def post_login():
     group_manager: GroupManager = GroupManager(current_app.database_manager, right_manager=RightManager(rights))
     security_manager: SecurityManager = SecurityManager(current_app.database_manager)
     login_data = request.json
+
     if not request.json:
         return abort(400, 'No valid JSON data was provided')
 
     request_user_name = login_data['user_name']
+    # LOGGER.info(f"POC: request_user_name: {request_user_name}")
     request_password = login_data['password']
+    # LOGGER.info(f"POC: request_password: {request_password}")
 
-    auth_module = AuthModule(
-        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-        user_manager=user_manager, group_manager=group_manager,
-        security_manager=security_manager)
-    user_instance = None
+    if __CLOUD_MODE__:
+        #LOGGER.info(f"POC => post_login => __CLOUD_MODE__: {__CLOUD_MODE__}")
+        user_data = check_user_in_mysql_db(request_user_name, request_password)
+        #LOGGER.info(f"POC => user_data: {user_data}")
+        ### login data is invalid
+        if not user_data:
+            return abort(401, 'Could not login')
+
+        ### no db with this name, create it
+        if not check_db_exists(user_data['database']):
+            init_db_routine(user_data['database'])
+            create_new_admin_user(user_data)
+
+        ### Get the user
+        user = retrive_user(user_data)
+
+        # User does not exist
+        if not user:
+            return abort(401, 'Could not login')
+
+        dbm.connector.set_database(user_data['database'])
+        tg = TokenGenerator(dbm)
+        token: bytes = tg.generate_token(
+            payload={
+                'user': {
+                    'public_id': user.get_public_id(),
+                    'database': user.get_database()
+                }
+            }
+        )
+
+        token_issued_at = int(datetime.now(timezone.utc).timestamp())
+        token_expire = int(tg.get_expire_time().timestamp())
+
+        login_response = LoginResponse(user, token, token_issued_at, token_expire)
+        return login_response.make_response()
+
+    else:
+        auth_module = AuthModule(
+            system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+            user_manager=user_manager, group_manager=group_manager,
+            security_manager=security_manager)
+        user_instance = None
+        try:
+            user_instance = auth_module.login(request_user_name, request_password)
+        except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
+            return abort(503, err.message)
+        except Exception as err:
+            return abort(401, err)
+        finally:
+            # If login success generate user instance with token
+            if user_instance:
+                tg = TokenGenerator(database_manager=current_app.database_manager)
+                token: bytes = tg.generate_token(payload={'user': {
+                    'public_id': user_instance.get_public_id()
+                }})
+                token_issued_at = int(datetime.now(timezone.utc).timestamp())
+                token_expire = int(tg.get_expire_time().timestamp())
+
+                login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+                return login_response.make_response()
+
+            # Login not success
+            return abort(401, 'Could not login')
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                        HELPER                                                        #
+# -------------------------------------------------------------------------------------------------------------------- #
+def check_user_in_mysql_db(mail: str, password: str):
+    """Simulates Users in MySQL DB"""
+
+    ###
+    admin1: dict = {
+        "user_name": "admin1",
+        "password": "admin1",
+        "email": "admin1@mail.de",
+        "database": "testdb1"
+    }
+
+    admin2: dict = {
+        "user_name": "admin2",
+        "password": "admin2",
+        "email": "admin2@mail.de",
+        "database": "testdb2"
+    }
+
+    admin3: dict = {
+        "user_name": "admin3",
+        "password": "admin3",
+        "email": "admin3@mail.de",
+        "database": "testdb3"
+    }
+    ###
+
+    users = {
+        "admin1@mail.de": admin1,
+        "admin2@mail.de": admin2,
+        "admin3@mail.de": admin3,
+    }
+
+    # checks if the user exists
+    if mail in users:
+        user = users[mail]
+
+        # checks if the user password is correct
+        if user["password"] == password:
+            return user
+
+    #return None means the login attempt is not correct
+    return None
+
+
+def check_db_exists(db_name: dict):
+    """Checks if the database exists"""
+    return dbm.check_database_exists(db_name)
+
+
+def init_db_routine(db_name: str):
+    """Creates a database with the given name and all corresponding collections
+
+    Args:
+        db_name (str): Name of the database
+    """
+    new_db = dbm.create_database(db_name)
+    LOGGER.info(f"POC => new database_name: {new_db.name}")
+    dbm.connector.set_database(new_db.name)
+    group_manager = GroupManager(dbm)
+
+    #generate framework collections
+    for collection in FRAMEWORK_CLASSES:
+        dbm.create_collection(collection.COLLECTION)
+        # set unique indexes
+        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+    #generate user management collections
+    for collection in USER_MANAGEMENT_COLLECTION:
+        dbm.create_collection(collection.COLLECTION)
+        # set unique indexes
+        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+    #generate ExportdJob management collections
+    for collection in JOB_MANAGEMENT_COLLECTION:
+        dbm.create_collection(collection.COLLECTION)
+        # set unique indexes
+        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+    # Generate groups
+    for group in __FIXED_GROUPS__:
+        group_manager.insert(group)
+
+
+def create_new_admin_user(user_data: dict):
+    """Creates a new admin user"""
+    dbm.connector.set_database(user_data['database'])
+
+    loc_user_manager: UserManager = UserManager(dbm)
+    scm = SecurityManager(dbm)
+
+    user: UserModel = None
     try:
-        user_instance = auth_module.login(request_user_name, request_password)
-    except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
-        return abort(503, err.message)
-    except Exception as err:
-        return abort(401, err)
-    finally:
-        # If login success generate user instance with token
-        if user_instance:
-            tg = TokenGenerator(database_manager=current_app.database_manager)
-            token: bytes = tg.generate_token(payload={'user': {
-                'public_id': user_instance.get_public_id()
-            }})
-            token_issued_at = int(datetime.now(timezone.utc).timestamp())
-            token_expire = int(tg.get_expire_time().timestamp())
+        user: UserModel = loc_user_manager.get_by(Query({'email': user_data['email']}))
+        LOGGER.info(f"POC => retrieved user: {user}")
+    except Exception as err: # Admin user was not found in the database, create a new one
+        admin_user = UserModel(
+            public_id=1,
+            user_name=user_data['user_name'],
+            email=user_data['email'],
+            database=user_data['database'],
+            active=True,
+            group_id=1,
+            registration_time=datetime.now(timezone.utc),
+            password=scm.generate_hmac(user_data['password']),
+        )
 
-            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
-            return login_response.make_response()
+        try:
+            loc_user_manager.insert(admin_user)
+        except Exception as err:
+            LOGGER.error(f"Could not create admin user Error: {err}")
 
-        # Login not success
-        return abort(401, 'Could not login')
+
+def retrive_user(user_data: dict):
+    """Get user from db"""
+    dbm.connector.set_database(user_data['database'])
+    loc_user_manager: UserManager = UserManager(dbm)
+    try:
+        return loc_user_manager.get_by(Query({'email': user_data['email']}))
+    except Exception:
+        return None

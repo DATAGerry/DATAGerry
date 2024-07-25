@@ -14,11 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+
 from queue import Queue
 from flask import Flask
 
+from cmdb import __CLOUD_MODE__
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
+
 
 class BaseCmdbApp(Flask):
     """TODO: document"""
@@ -29,5 +35,6 @@ class BaseCmdbApp(Flask):
         self.database_manager: DatabaseManagerMongo = database_manager
         self.event_queue: Queue = event_queue
         self.temp_folder: str = '/tmp/'
+        self.cloud_mode = __CLOUD_MODE__
 
         super().__init__(import_name)

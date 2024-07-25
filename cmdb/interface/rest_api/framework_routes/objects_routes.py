@@ -127,15 +127,16 @@ def insert_object(request_user: UserModel):
             LOGGER.error("ManagerInsertError: %s", err)
 
     except (TypeError, ObjectInsertError) as err:
-        LOGGER.error(err)
+        LOGGER.error("TypeError, ObjectInsertError: %s", err)
         return abort(400, str(err))
     except (ManagerGetError, ObjectManagerGetError) as err:
-        LOGGER.error(err)
+        LOGGER.error("ManagerGetError, ObjectManagerGetError: %s", err)
         return abort(404, err.message)
     except AccessDeniedError as err:
+        LOGGER.error("AccessDeniedError: %s", err)
         return abort(403, err.message)
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     return make_response(new_object_id)
@@ -159,7 +160,7 @@ def get_object(public_id, request_user: UserModel):
     try:
         type_instance = TypeManager(database_manager=current_app.database_manager).get(object_instance.get_type_id())
     except ObjectManagerGetError as err:
-        LOGGER.error(err.message)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404, err.message)
 
     try:
@@ -171,16 +172,16 @@ def get_object(public_id, request_user: UserModel):
 
         render_result = render.result()
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     return make_response(render_result)
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @objects_blueprint.parse_collection_parameters(view='native')
-@insert_request_user
 def get_objects(params: CollectionParameters, request_user: UserModel):
     """
     Retrieves multiple objects from db regarding the used params
@@ -192,6 +193,13 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): The objects from db fitting the params
     """
+    if current_app.cloud_mode:
+        manager = ObjectManager(database_manager=current_app.database_manager, database=request_user.database)
+        object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue, request_user.database)
+    else:
+        manager = ObjectManager(database_manager=current_app.database_manager)
+        object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+
     view = params.optional.get('view', 'native')
 
     if _fetch_only_active_objs():
@@ -221,6 +229,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             model=CmdbObject.MODEL,
                                             body=request.method == 'HEAD')
         elif view == 'render':
+            if current_app.cloud_mode:
+                current_app.database_manager.connector.set_database(request_user.database)
+
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
                                        database_manager=current_app.database_manager,
@@ -262,10 +273,15 @@ def get_native_object(public_id: int, request_user: UserModel):
 
 
 @objects_blueprint.route('/group/<string:value>', methods=['GET'])
-@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 @insert_request_user
+@objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def group_objects_by_type_id(value, request_user: UserModel):
     """TODO: document"""
+    if current_app.cloud_mode:
+        object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue, request_user.database)
+    else:
+        object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
+
     try:
         filter_state = None
         if _fetch_only_active_objs():
@@ -311,7 +327,7 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
                     ref_render=True).get_mds_reference(public_id)
 
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     return make_response(mds_reference)
@@ -352,7 +368,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
             summary_lines[object_id] = mds_reference
 
         except RenderError as err:
-            LOGGER.error(err)
+            LOGGER.error("RenderError: %s", err)
             return abort(500)
 
     return make_response(summary_lines)
@@ -427,7 +443,7 @@ def get_object_state(public_id: int, request_user: UserModel):
                                                  user=request_user,
                                                  permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
-        LOGGER.debug(err)
+        LOGGER.debug("ObjectManagerGetError: %s", err)
         return abort(404)
     return make_response(found_object.active)
 
@@ -565,20 +581,20 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                 LOGGER.error("ManagerInsertError: %s", err)
 
         except AccessDeniedError as err:
-            LOGGER.error(err)
+            LOGGER.error("AccessDeniedError: %s", err)
             return abort(403)
         except ObjectManagerGetError as err:
-            LOGGER.error(err)
+            LOGGER.error("ObjectManagerGetError: %s", err)
             failed.append(ResponseFailedMessage(error_message=err.message, status=400,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
         except (ManagerGetError, ObjectManagerUpdateError) as err:
-            LOGGER.error(err)
+            LOGGER.error("ManagerGetError, ObjectManagerUpdateError: %s", err)
             failed.append(ResponseFailedMessage(error_message=err.message, status=404,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
         except (CMDBError, RenderError) as error:
-            LOGGER.warning(error)
+            LOGGER.warning("CMDBError, RenderError: %s", error)
             failed.append(ResponseFailedMessage(error_message=str(error.__repr__), status=500,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
@@ -599,7 +615,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         found_object = manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404, err.message)
 
     if found_object.active == state:
@@ -608,9 +624,10 @@ def update_object_state(public_id: int, request_user: UserModel):
         found_object.active = state
         manager.update(public_id, found_object, user=request_user, permission=AccessControlPermission.UPDATE)
     except AccessDeniedError as err:
+        LOGGER.error("AccessDeniedError: %s", err)
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerUpdateError: %s", err)
         return abort(500, err.message)
 
         # get current object state
@@ -621,10 +638,10 @@ def update_object_state(public_id: int, request_user: UserModel):
                                                   type_instance=current_type_instance,
                                                   render_user=request_user).result()
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404)
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     try:
@@ -757,10 +774,10 @@ def delete_object(public_id: int, request_user: UserModel):
             pass
 
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404)
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     try:
@@ -834,10 +851,10 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
             return abort(404)
 
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404)
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     return make_response(deleted)
@@ -899,10 +916,10 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
             return abort(404)
 
     except ObjectManagerGetError as err:
-        LOGGER.error(err)
+        LOGGER.error("ObjectManagerGetError: %s", err)
         return abort(404)
     except RenderError as err:
-        LOGGER.error(err)
+        LOGGER.error("RenderError: %s", err)
         return abort(500)
 
     return make_response(deleted)
@@ -952,10 +969,10 @@ def delete_many_objects(public_ids, request_user: UserModel):
                                                           type_instance=current_type_instance,
                                                           render_user=request_user).result()
             except ObjectManagerGetError as err:
-                LOGGER.error(err)
+                LOGGER.error("ObjectManagerGetError: %s", err)
                 return abort(404)
             except RenderError as err:
-                LOGGER.error(err)
+                LOGGER.error("RenderError: %s", err)
                 return abort(500)
 
             try:

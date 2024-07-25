@@ -35,6 +35,7 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
+from cmdb.interface.route_utils import insert_request_user
 # -------------------------------------------------------------------------------------------------------------------- #
 
 groups_blueprint = APIBlueprint('groups', __name__)
@@ -76,8 +77,9 @@ def get_groups(params: CollectionParameters):
 
 
 @groups_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@insert_request_user
 @groups_blueprint.protect(auth=True, right='base.user-management.group.view')
-def get_group(public_id: int):
+def get_group(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a single group resource.
 
@@ -93,8 +95,11 @@ def get_group(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of a UserGroupModel.
     """
-    group_manager: GroupManager = GroupManager(database_manager=current_app.database_manager,
-                                               right_manager=RightManager(rights))
+    if current_app.cloud_mode:
+        group_manager = GroupManager(current_app.database_manager, RightManager(rights), request_user.database)
+    else:
+        group_manager: GroupManager = GroupManager(current_app.database_manager, RightManager(rights))
+
     try:
         group = group_manager.get(public_id)
     except ManagerGetError as err:

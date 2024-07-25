@@ -49,13 +49,16 @@ class TypeManager(ManagerBase):
     Manager for the type module. Manages the CRUD functions of the types and the iteration over the collection.
     """
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
         """
         Constructor of `TypeManager`
 
         Args:
             database_manager: Connection to the database class.
         """
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(TypeModel.COLLECTION, database_manager=database_manager)
 
 

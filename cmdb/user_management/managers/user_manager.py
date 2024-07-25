@@ -28,7 +28,10 @@ from ...search import Query, Pipeline
 class UserManager(ManagerBase):
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(UserModel.COLLECTION, database_manager=database_manager)
 
 

@@ -43,6 +43,20 @@ class DatabaseManager:
 
 # -------------------------------------------- GENERAL DATABASE OPERATIONS ------------------------------------------- #
 
+    def check_database_exists(self, name:str) -> bool:
+        """Checks if a database with the given name exists
+
+        Args:
+            name (str): Name of the database which should be checked
+
+        Returns:
+            bool: True if database with given name exists, else false
+        """
+        database_names = self.connector.client.list_database_names()
+
+        return name in database_names
+
+
     def create_database(self, name: str) -> Database:
         """Create a new empty database
 

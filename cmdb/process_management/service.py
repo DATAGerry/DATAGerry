@@ -20,6 +20,8 @@ import logging
 import signal
 import sys
 import threading
+
+from cmdb import __CLOUD_MODE__
 import cmdb.event_management.event_manager
 from cmdb.utils.logger import get_logging_conf
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -63,12 +65,16 @@ class AbstractCmdbService:
         self._event_shutdown = threading.Event()
         signal.signal(signal.SIGTERM, self._shutdown)
 
+
         # start event managers
-        self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown,
-                                                                                   self._handle_event,
-                                                                                   self._name,
-                                                                                   self._eventtypes,
-                                                                                   self._multiprocessing)
+        if __CLOUD_MODE__:
+            self._event_manager = None
+        else:
+            self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown,
+                                                                                    self._handle_event,
+                                                                                    self._name,
+                                                                                    self._eventtypes,
+                                                                                    self._multiprocessing)
 
         if self._threaded_service:
             # start daemon logic in own thread

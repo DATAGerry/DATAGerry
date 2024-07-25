@@ -70,8 +70,12 @@ class CmdbObjectManager(CmdbManagerBase):
     """
     class CmdbObjectManager
     """
-    def __init__(self, database_manager=None, event_queue: Queue = None):
+    def __init__(self, database_manager=None, event_queue: Queue = None, database: str = None):
         self._event_queue = event_queue
+
+        if database:
+            database_manager.connector.set_database(database)
+
         self._type_manager = TypeManager(database_manager)
         super().__init__(database_manager)
 

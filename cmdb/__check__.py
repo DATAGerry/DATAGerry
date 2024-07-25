@@ -119,7 +119,7 @@ class CheckRoutine:
                 if collection.COLLECTION not in all_collections:
                     created_collection = self.setup_database_manager.create_collection(collection.COLLECTION)
                     self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                    LOGGER.info("CKECK: Created missing Collection => %s", created_collection)
+                    LOGGER.info("CHECK: Created missing Collection => %s", created_collection)
 
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
 
@@ -163,7 +163,6 @@ class CheckRoutine:
 
     def init_user_management(self):
         """Creates intital groups and admin user"""
-        LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
         scm = SecurityManager(self.setup_database_manager)
         group_manager = GroupManager(self.setup_database_manager)
         user_manager = UserManager(self.setup_database_manager)
@@ -201,7 +200,7 @@ class CheckRoutine:
             current_version = upd_module.settings.version
 
             if new_version > current_version:
-                LOGGER.error(
+                LOGGER.info(
                     """
                     There are new updates available. Updating initialised...
                     Current Updater Version: %s

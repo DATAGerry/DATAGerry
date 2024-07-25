@@ -47,6 +47,13 @@ class MongoConnector:
         self.port: int = port
 
 
+    def set_database(self, db_name: str):
+        """Sets the database of the connector"""
+        try:
+            self.database = self.client.get_database(db_name)
+        except Exception as err:
+            LOGGER.error(f"Can't set connector database with name: {db_name}. Error: {err}")
+
     def connect(self) -> ConnectionStatus:
         """
         Connect to database

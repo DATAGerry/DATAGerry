@@ -90,15 +90,31 @@ class UserModel(CmdbDAO):
             'nullable': True,
             'empty': True,
             'required': False
+        },
+        'database': {
+            'type': 'string',
+            'nullable': True,
+            'empty': True,
+            'required': False
         }
     }
 
     __slots__ = 'public_id', 'user_name', 'active', 'group_id', 'registration_time', 'password', \
-                'image', 'first_name', 'last_name', 'email', 'authenticator'
+                'image', 'first_name', 'last_name', 'database', 'email', 'authenticator'
 
-    def __init__(self, public_id: int, user_name: str, active: bool, group_id: int = None,
-                 registration_time: datetime = None, password: str = None, image: str = None, first_name: str = None,
-                 last_name: str = None, email: str = None, authenticator: str = None):
+    def __init__(self,
+                 public_id: int,
+                 user_name: str,
+                 active: bool,
+                 group_id: int = None,
+                 registration_time: datetime = None,
+                 password: str = None,
+                 database: str = 'test',
+                 image: str = None,
+                 first_name: str = None,
+                 last_name: str = None,
+                 email: str = None,
+                 authenticator: str = None):
 
         self.user_name: str = user_name
         self.active: bool = active
@@ -107,6 +123,7 @@ class UserModel(CmdbDAO):
         self.authenticator: str = authenticator or UserModel.DEFAULT_AUTHENTICATOR
         self.registration_time: datetime = registration_time or datetime.now(timezone.utc)
 
+        self.database = database
         self.email: str = email
         self.password: str = password
         self.image: str = image
@@ -115,6 +132,14 @@ class UserModel(CmdbDAO):
 
         super().__init__(public_id=public_id)
 
+
+    def get_database(self) -> str:
+        """Retrives the database name of the user
+
+        Returns:
+            str: Name of the database
+        """
+        return self.database
 
     def get_display_name(self) -> str:
         """
@@ -140,6 +165,7 @@ class UserModel(CmdbDAO):
             public_id=data.get('public_id'),
             user_name=data.get('user_name'),
             active=data.get('active'),
+            database=data.get('database'),
             group_id=data.get('group_id', None),
             registration_time=reg_date,
             authenticator=data.get('authenticator', None),
@@ -165,6 +191,7 @@ class UserModel(CmdbDAO):
             'group_id': instance.group_id,
             'registration_time': instance.registration_time,
             'authenticator': instance.authenticator,
+            'database': instance.database,
             'email': instance.email,
             'password': instance.password,
             'image': instance.image,

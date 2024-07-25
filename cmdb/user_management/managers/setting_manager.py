@@ -29,12 +29,15 @@ class UserSettingsManager(ManagerBase):
     Manager for user settings CRUD functions.
     """
 
-    def __init__(self, database_manager: DatabaseManagerMongo = None):
+    def __init__(self, database_manager: DatabaseManagerMongo = None, database: str = None):
         """
         Constructor of `UserSettingsManager`
         Args:
             database_manager: Active database connection manager
         """
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(collection=UserSettingModel.COLLECTION, database_manager=database_manager)
 
 
