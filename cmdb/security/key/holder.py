@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb import __CLOUD_MODE__, __ASYMMETRIC_KEY__
+from flask import current_app
+# from cmdb import __CLOUD_MODE__, __ASYMMETRIC_KEY__
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemSettingsReader
@@ -35,16 +36,16 @@ class KeyHolder:
 
     def get_public_key(self):
         """TODO: document"""
-        if __CLOUD_MODE__:
-            return __ASYMMETRIC_KEY__['public']
+        if current_app.cloud_mode:
+            return current_app.asymmetric_key['public']
 
         return self.ssr.get_value('asymmetric_key', 'security')['public']
 
 
     def get_private_key(self):
         """TODO: document"""
-        if __CLOUD_MODE__:
-            return __ASYMMETRIC_KEY__['private']
+        if current_app.cloud_mode:
+            return current_app.asymmetric_key['private']
 
         return self.ssr.get_value('asymmetric_key', 'security')['private']
 

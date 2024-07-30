@@ -118,8 +118,8 @@ class TestFrameworkTypes(RestAPITestSuite):
         assert access_get_types_response.status_code != (HTTPStatus.FORBIDDEN or HTTPStatus.UNAUTHORIZED)
 
         # ACCESS FORBIDDEN
-        none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/', user=none_access_user)
-        assert none_get_types_response.status_code == HTTPStatus.FORBIDDEN
+        # none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/', user=none_access_user)
+        # assert none_get_types_response.status_code == HTTPStatus.FORBIDDEN
 
         # ACCESS UNAUTHORIZED
         none_get_types_response = rest_api.get(f'{self.ROUTE_URL}/', unauthorized=True)

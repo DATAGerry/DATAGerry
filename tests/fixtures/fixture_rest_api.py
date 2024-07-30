@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import pytest
+from cmdb.interface.cmdb_app import BaseCmdbApp
 
 from cmdb.interface.rest_api import create_rest_api
 from tests.utils.flask_test_client import RestAPITestClient
@@ -28,3 +29,11 @@ def rest_api(database_manager, full_access_user):
 
     with api.test_client(database_manager=database_manager, default_auth_user=full_access_user) as client:
         yield client
+
+
+@pytest.fixture(scope="session", autouse=True)
+def app_context():
+    """TODO: document"""
+    current_app = BaseCmdbApp(__name__)
+    with current_app.app_context():
+        yield
