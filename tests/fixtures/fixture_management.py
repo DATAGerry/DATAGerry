@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime
 
 import pytest
@@ -22,6 +23,7 @@ from cmdb.user_management import UserGroupModel, RightManager, UserModel
 
 from cmdb.user_management import rights
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
 @pytest.fixture(scope="session", name="right_manager")
 def fixture_right_manager():
@@ -41,8 +43,8 @@ def fixture_none_access_group():
     return UserGroupModel(public_id=2, name='none', label='None')
 
 
-@pytest.fixture(scope="session")
-def full_access_user(full_access_group: UserGroupModel):
+@pytest.fixture(scope="session", name="full_access_user")
+def fixture_full_access_user(full_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
     return UserModel(public_id=1, user_name='full-access-user',
@@ -50,8 +52,8 @@ def full_access_user(full_access_group: UserGroupModel):
                      registration_time=registration_time)
 
 
-@pytest.fixture(scope="session")
-def none_access_user(none_access_group: UserGroupModel):
+@pytest.fixture(scope="session", name="none_access_user")
+def fixture_none_access_user(none_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
     return UserModel(public_id=2, user_name='none-access-user',

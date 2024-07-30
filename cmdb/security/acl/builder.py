@@ -36,19 +36,27 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        return self.lookup_sub_(
-            from_='framework.types',
-            let_={'type_id': '$object.type_id'},
-            pipeline_=[
-                self.match_(query=self.expr_(expression={
-                    '$eq': [
-                        '$$type_id',
-                        '$public_id'
-                    ]
-                }))
-            ],
-            as_='type'
-        )
+        # return self.lookup_sub_(
+        #     from_='framework.types',
+        #     let_={'type_id': '$object.type_id'},
+        #     pipeline_=[
+        #         self.match_(query=self.expr_(expression={
+        #             '$eq': [
+        #                 '$$type_id',
+        #                 '$public_id'
+        #             ]
+        #         }))
+        #     ],
+        #     as_='type'
+        # )
+        return {
+            '$lookup': {
+                'from': 'framework.types',
+                'localField': 'object.type_id',  # Field in the current collection
+                'foreignField': 'public_id',     # Field in the 'framework.types' collection
+                'as': 'type'
+            }
+        }
 
 
     def _unwind_types(self) -> dict:
@@ -85,19 +93,27 @@ class AccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        return self.lookup_sub_(
-            from_='framework.types',
-            let_={'type_id': '$type_id'},
-            pipeline_=[
-                self.match_(query=self.expr_(expression={
-                    '$eq': [
-                        '$$type_id',
-                        '$public_id'
-                    ]
-                }))
-            ],
-            as_='type'
-        )
+        # return self.lookup_sub_(
+        #     from_='framework.types',
+        #     let_={'type_id': '$type_id'},
+        #     pipeline_=[
+        #         self.match_(query=self.expr_(expression={
+        #             '$eq': [
+        #                 '$$type_id',
+        #                 '$public_id'
+        #             ]
+        #         }))
+        #     ],
+        #     as_='type'
+        # )
+        return {
+            '$lookup': {
+                'from': 'framework.types',
+                'localField': 'type_id',    # Field from the current collection
+                'foreignField': 'public_id', # Field from the 'framework.types' collection
+                'as': 'type'
+            }
+        }
 
 
     def _unwind_types(self) -> dict:

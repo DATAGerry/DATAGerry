@@ -142,12 +142,21 @@ class BaseQueryBuilder(Builder):
             }
         }})
 
-        query.append({"$lookup": {
-            "from": "framework.objects",
-            "let": {"ref_id": "$object_id"},
-            "pipeline": [{'$match': {'$expr': {'$eq': ["$public_id", '$$ref_id']}}}],
-            "as": "object"
-        }})
+        # query.append({"$lookup": {
+        #     "from": "framework.objects",
+        #     "let": {"ref_id": "$object_id"},
+        #     "pipeline": [{'$match': {'$expr': {'$eq': ["$public_id", '$$ref_id']}}}],
+        #     "as": "object"
+        # }})
+
+        query.append({
+            "$lookup": {
+                "from": "framework.objects",
+                "localField": "object_id",
+                "foreignField": "public_id",
+                "as": "object"
+            }
+        })
 
         query.append({'$unwind': {'path': '$object', 'preserveNullAndEmptyArrays': True}})
         query.append({'$match': {'object': {'$exists': object_exists}}})
