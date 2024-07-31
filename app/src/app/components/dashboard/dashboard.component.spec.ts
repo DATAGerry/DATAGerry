@@ -87,6 +87,16 @@ describe('DashboardComponent', () => {
         component.onObjectDelete(mockObject);
         expect(toastServiceMock.error).toHaveBeenCalledWith(`Error while deleting object 1: ${errorMessage}`);
     });
+
+    describe('onLatestPageChange', () => {
+        it('should update latestPage and call loadLatestObjects', () => {
+            spyOn(component, 'loadLatestObjects' as any);
+            const newPage: number = 2;
+            component.onLatestPageChange(newPage);
+            expect(component.latestPage).toBe(newPage);
+            expect(component['loadLatestObjects']).toHaveBeenCalled();
+        });
+    });
 });
 
 
