@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.event_management.event import Event
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
@@ -28,15 +28,18 @@ from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError,
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
+from cmdb.framework.cmdb_render import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 
-class ExportdManagerBase(ExportdJobManagement):
+class ExportdManagerBase(ExportdJobManager):
     """TODO: document"""
-    def __init__(self, job: ExportdJob, object_manager: CmdbObjectManager,
-                 log_manager: ExportdLogManager, event: Event):
+    def __init__(self, job: ExportdJob,
+                 object_manager: CmdbObjectManager,
+                 log_manager: ExportdLogManager,
+                 event: Event):
         self.job = job
         self.event = event
         self.variables = self.__get_exportvars()
@@ -44,26 +47,31 @@ class ExportdManagerBase(ExportdJobManagement):
         self.object_manager = object_manager
         self.log_manager = log_manager
         self.sources = self.__get_sources()
+
         super().__init__(object_manager.dbm)
 
 
     def __get_exportvars(self):
         exportvars = {}
+
         for variable in self.job.get_variables():
             exportvars.update(
                 {variable["name"]: ExportVariable(variable["name"], variable["default"], variable["templates"])})
+
         return exportvars
 
 
     def __get_sources(self):
         sources = []
         sources.append(ExportSource(self.job, object_manager=self.object_manager, event=self.event))
+
         return sources
 
 
     def __get__destinations(self):
         destinations = []
         destination_params = {}
+
         for destination in self.job.get_destinations():
             for param in destination["parameter"]:
                 destination_params.update({param["name"]: param["value"]})
@@ -84,6 +92,7 @@ class ExportdManagerBase(ExportdJobManagement):
         # get cmdb objects from all sources
         cmdb_objects = set()
         exportd_header = ExportdHeader()
+
         for source in self.sources:
             cmdb_objects.update(source.get_objects())
 
@@ -111,6 +120,7 @@ class ExportdManagerBase(ExportdJobManagement):
                     self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
                 except LogManagerInsertError as err:
                     LOGGER.error(err)
+
         return exportd_header
 
 
@@ -141,6 +151,7 @@ class ExportVariable:
         except Exception as ex:
             LOGGER.warning(ex)
             output = ''
+
         return output
 
 
@@ -166,7 +177,6 @@ class ExportSource:
         subset: bool = self.__job.scheduling['event'].get('subset', False)
 
         if subset and self.event.get_param('event') in ['delete']:
-            from cmdb.framework.cmdb_render import RenderResult
             deleted = RenderResult()
             deleted.object_information['object_id'] = self.event.get_param('id')
             deleted.type_information['type_id'] = self.event.get_param('type_id')
@@ -196,6 +206,7 @@ class ExportSource:
             current_objects = self.__obm.get_objects_by(sort="public_id", **{'$or': query})
             result = (RenderList(current_objects, None, database_manager=self.__obm.dbm,
                                  object_manager=self.__obm).render_result_list())
+
         return result
 
 
@@ -211,7 +222,6 @@ class ExportDestination:
     def get_external_system(self):
         """TODO: document"""
         return self.__external_system
-
 
 
 class ExternalSystem:

@@ -19,7 +19,9 @@ Definition of all routes for CmdbSectionTemplates
 import logging
 
 from datetime import datetime, timezone
-from flask import current_app, request
+from flask import request
+
+from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
 from cmdb.errors.manager import ManagerGetError, \
@@ -27,9 +29,6 @@ from cmdb.errors.manager import ManagerGetError, \
                                 ManagerDeleteError, \
                                 ManagerUpdateError, \
                                 ManagerIterationError
-
-from cmdb.manager.categories_manager import CategoriesManager
-
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -42,6 +41,7 @@ from cmdb.interface.response import GetSingleResponse, \
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def insert_category(data: dict, request_user: UserModel):
     Returns:
         InsertSingleResponse: Insert response with the new category and its public_id.
     """
-    categories_manager = get_categories_manager(request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     data.setdefault('creation_time', datetime.now(timezone.utc))
 
@@ -111,7 +111,7 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
     Raises:
         FrameworkIterationError: If the collection could not be iterated
     """
-    categories_manager = get_categories_manager(request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     body = request.method == 'HEAD'
 
@@ -161,7 +161,7 @@ def get_category(public_id: int, request_user: UserModel):
     Returns:
         GetSingleResponse: Which includes the json data of the CategoryModel
     """
-    categories_manager = get_categories_manager(request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     try:
         category_instance = categories_manager.get_one(public_id)
@@ -194,7 +194,7 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
     Returns:
         UpdateSingleResponse: With update result of the new updated category
     """
-    categories_manager = get_categories_manager(request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     try:
         category = CategoryModel.from_data(data)
@@ -224,7 +224,7 @@ def delete_category(public_id: int, request_user: UserModel):
     Returns:
         DeleteSingleResponse: Delete result with the deleted category as data
     """
-    categories_manager = get_categories_manager(request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     try:
         category_instance = categories_manager.get_one(public_id)
@@ -242,13 +242,3 @@ def delete_category(public_id: int, request_user: UserModel):
         return ErrorBody(400, f"Could not delete the categeory with the ID:{public_id}!").response()
 
     return api_response.make_response()
-
-# -------------------------------------------------- HELPER METHODS -------------------------------------------------- #
-def get_categories_manager(request_user: UserModel):
-    """Retrieves the categories manager based on cloud mode"""
-    if current_app.cloud_mode:
-        return CategoriesManager(current_app.database_manager,
-                                               current_app.event_queue,
-                                               request_user.database)
-
-    return CategoriesManager(current_app.database_manager, current_app.event_queue)

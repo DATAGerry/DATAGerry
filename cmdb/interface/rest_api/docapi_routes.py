@@ -16,10 +16,11 @@
 """TODO: document"""
 import logging
 import json
+from bson import json_util
+from flask import abort, request, Response
 
-from flask import abort, request, current_app, Response
+from cmdb.docapi.docapi_base import DocApiManager
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, ErrorBody
@@ -27,41 +28,75 @@ from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.utils.error import CMDBError
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
-from cmdb.docapi.docapi_base import DocApiManager
+
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
-from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
 from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
-with current_app.app_context():
-    docapi_tpl_manager = DocapiTemplateManager(current_app.database_manager, current_app.event_queue)
-    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-
 LOGGER = logging.getLogger(__name__)
 
 docapi_blueprint = RootBlueprint('docapi', __name__, url_prefix='/docapi')
 docs_blueprint = APIBlueprint('docs', __name__)
 
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-# DEFAULT ROUTES
+@docapi_blueprint.route('/template', methods=['POST'])
+@docapi_blueprint.route('/template/', methods=['POST'])
+@login_required
+@insert_request_user
+@right_required('base.docapi.template.add')
+def add_template(request_user: UserModel):
+    """TODO: document"""
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
+    add_data_dump = json.dumps(request.json)
+
+    try:
+        new_tpl_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
+        new_tpl_data['public_id'] = docapi_tpl_manager.get_new_id()
+        new_tpl_data['author_id'] = request_user.get_public_id()
+    except TypeError as err:
+        LOGGER.warning(err)
+        abort(400)
+
+    try:
+        template_instance = DocapiTemplate(**new_tpl_data)
+    except CMDBError as err:
+        LOGGER.debug(err)
+        return abort(400)
+
+    try:
+        ack = docapi_tpl_manager.insert_template(template_instance)
+    except DocapiInsertError as err:
+        LOGGER.debug("DocapiInsertError: %s", err)
+        return ErrorBody(500, str(err)).response()
+
+    return make_response(ack)
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
 @docs_blueprint.route('/template', methods=['GET', 'HEAD'])
+@insert_request_user
 @docs_blueprint.protect(auth=True, right='base.docapi.template.view')
 @docs_blueprint.parse_collection_parameters()
-def get_template_list(params: CollectionParameters):
+def get_template_list(params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
-    template_manager = DocapiTemplateManager(database_manager=current_app.database_manager)
-    body = request.method == 'HEAD'
+    template_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
 
     try:
         iteration_result: IterationResult[DocapiTemplate] = template_manager.get_templates(
             filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+
         types = [DocapiTemplate.to_json(type) for type in iteration_result.results]
+
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=DocapiTemplate.MODEL, body=body)
+                                        url=request.url, model=DocapiTemplate.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
@@ -72,6 +107,8 @@ def get_template_list(params: CollectionParameters):
 @right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: UserModel):
     """TODO: document"""
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
     try:
         filterdict = json.loads(searchfilter)
         tpl = docapi_tpl_manager.get_templates_by(**filterdict)
@@ -92,6 +129,8 @@ def get_template(public_id, request_user: UserModel):
         Returns:
             docapi template
         """
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
     try:
         tpl = docapi_tpl_manager.get_template(public_id)
     except DocapiGetError as err:
@@ -108,43 +147,17 @@ def get_template(public_id, request_user: UserModel):
 @right_required('base.docapi.template.view')
 def get_template_by_name(name: str, request_user: UserModel):
     """TODO: document"""
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
     try:
         tpl = docapi_tpl_manager.get_template_by_name(name=name)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err)
         return ErrorBody(404, str(err)).response()
+
     return make_response(tpl)
 
-
-@docapi_blueprint.route('/template', methods=['POST'])
-@docapi_blueprint.route('/template/', methods=['POST'])
-@login_required
-@insert_request_user
-@right_required('base.docapi.template.add')
-def add_template(request_user: UserModel):
-    """TODO: document"""
-    from bson import json_util
-    add_data_dump = json.dumps(request.json)
-    try:
-        new_tpl_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_tpl_data['public_id'] = docapi_tpl_manager.get_new_id()
-        new_tpl_data['author_id'] = request_user.get_public_id()
-    except TypeError as err:
-        LOGGER.warning(err)
-        abort(400)
-    try:
-        template_instance = DocapiTemplate(**new_tpl_data)
-    except CMDBError as err:
-        LOGGER.debug(err)
-        return abort(400)
-    try:
-        ack = docapi_tpl_manager.insert_template(template_instance)
-    except DocapiInsertError as err:
-        LOGGER.debug("DocapiInsertError: %s", err)
-        return ErrorBody(500, str(err)).response()
-
-    return make_response(ack)
-
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @docapi_blueprint.route('/template', methods=['PUT'])
 @docapi_blueprint.route('/template/', methods=['PUT'])
@@ -153,18 +166,22 @@ def add_template(request_user: UserModel):
 @right_required('base.docapi.template.edit')
 def update_template(request_user: UserModel):
     """TODO: document"""
-    from bson import json_util
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
     add_data_dump = json.dumps(request.json)
     new_tpl_data = None
+
     try:
         new_tpl_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
     except TypeError as err:
         LOGGER.warning(err)
         abort(400)
+
     try:
         update_tpl_instance = DocapiTemplate(**new_tpl_data)
     except CMDBError:
         return abort(400)
+
     try:
         docapi_tpl_manager.update_template(update_tpl_instance, request_user)
     except DocapiUpdateError as err:
@@ -173,6 +190,7 @@ def update_template(request_user: UserModel):
 
     return make_response(update_tpl_instance)
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @docapi_blueprint.route('/template/<int:public_id>/', methods=['DELETE'])
 @docapi_blueprint.route('/template/<int:public_id>', methods=['DELETE'])
@@ -181,6 +199,8 @@ def update_template(request_user: UserModel):
 @right_required('base.docapi.template.delete')
 def delete_template(public_id: int, request_user: UserModel):
     """TODO: document"""
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+
     try:
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
     except DocapiDeleteError as err:
@@ -197,10 +217,11 @@ def delete_template(public_id: int, request_user: UserModel):
 @right_required('base.framework.object.view')
 def render_object_template(public_id: int, object_id: int, request_user: UserModel):
     """TODO: document"""
+    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+
     docapi_manager = DocApiManager(docapi_tpl_manager, object_manager)
     output = docapi_manager.render_object_template(public_id, object_id)
-
-    # Todo: error handling
 
     # return data
     return Response(

@@ -22,6 +22,7 @@ from datetime import datetime, timezone
 from queue import Queue
 from typing import Union
 
+from .base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.event_management.event import Event
@@ -30,15 +31,14 @@ from cmdb.framework.models.log import CmdbObjectLog, LogAction
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
-
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-
-from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
 from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LogsManager(BaseManager):
     """
@@ -46,7 +46,7 @@ class LogsManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
         """
         Set the database connection and the queue for sending events
 
@@ -56,6 +56,10 @@ class LogsManager(BaseManager):
         """
         self.event_queue = event_queue
         self.query_builder = BaseQueryBuilder()
+
+        if database:
+            dbm.connector.set_database(database)
+
         super().__init__(CmdbMetaLog.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
@@ -117,7 +121,6 @@ class LogsManager(BaseManager):
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

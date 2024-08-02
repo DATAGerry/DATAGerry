@@ -16,11 +16,8 @@
 """TODO: document"""
 import logging
 
-from flask import abort, current_app, jsonify, request
+from flask import abort, jsonify, request
 
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdMetaLog
@@ -28,27 +25,29 @@ from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
-from cmdb.interface.route_utils import make_response, login_required, right_required
+from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.utils.error import CMDBError
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
 exportd_log_blueprint = RootBlueprint('exportd_log_rest', __name__, url_prefix='/exportdlog')
 
-with current_app.app_context():
-    exportd_manager = ExportdJobManagement(current_app.database_manager, current_app.event_queue)
-    log_manager = ExportdLogManager(current_app.database_manager)
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @exportd_blueprint.route('/logs', methods=['GET', 'HEAD'])
+@insert_request_user
 @exportd_blueprint.protect(auth=True, right='base.exportd.log.view')
 @exportd_blueprint.parse_collection_parameters()
-def get_exportd_logs(params: CollectionParameters):
+def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
     """Iterate route for exportd logs"""
     body = request.method == 'HEAD'
-    logd_manager = ExportDLogManager(current_app.database_manager)
+
+    logd_manager = ManagerProvider.get_manager(ManagerType.EXPORT_D_LOG_MANAGER, request_user)
 
     try:
         iteration_result: IterationResult[ExportdJobLog] = logd_manager.iterate(
@@ -65,19 +64,22 @@ def get_exportd_logs(params: CollectionParameters):
         return abort(400, err)
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
-# DEFAULT ROUTES
 @exportd_log_blueprint.route('/', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.view')
-def get_log_list():
+def get_log_list(request_user: UserModel):
     """
     get all exportd logs in database
     Returns:
         list of exportd logs
     """
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+
     try:
         log_list = log_manager.get_all_logs()
     except ObjectManagerGetError as e:
@@ -87,28 +89,36 @@ def get_log_list():
     except CMDBError as err:
         LOGGER.info("Error occured in get_log_list(): %s", err)
         return abort(404, jsonify(message='Not Found'))
+
     return make_response(log_list)
 
 
 @exportd_log_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @exportd_log_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.delete')
-def delete_log(public_id: int):
+def delete_log(public_id: int, request_user: UserModel):
     """TODO: document"""
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
     except LogManagerDeleteError:
         return abort(500)
+
     return make_response(delete_ack)
 
 
 @exportd_log_blueprint.route('/job/<int:public_id>/', methods=['GET'])
 @exportd_log_blueprint.route('/job/<int:public_id>', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.view')
-def get_logs_by_jobs(public_id: int):
+def get_logs_by_jobs(public_id: int, request_user: UserModel):
     """TODO: document"""
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+
     try:
         object_logs = log_manager.get_exportd_job_logs(public_id=public_id)
     except ObjectManagerGetError as err:
@@ -116,19 +126,25 @@ def get_logs_by_jobs(public_id: int):
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
+
     return make_response(object_logs)
 
 
 # FIND routes
 @exportd_log_blueprint.route('/job/exists/', methods=['GET'])
 @exportd_log_blueprint.route('/job/exists', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.view')
-def get_logs_with_existing_objects():
+def get_logs_with_existing_objects(request_user: UserModel):
     """TODO: document"""
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOB_MANAGER, request_user)
+
     existing_list = []
     deleted_list = []
     passed_objects = []
+
     try:
         query = {
             'log_type': ExportdJobLog.__name__,
@@ -140,8 +156,10 @@ def get_logs_with_existing_objects():
     except ObjectManagerGetError as err:
         LOGGER.error('Error in get_logs_with_existing_objects: %s', err)
         return abort(404)
+
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
+
     for log in object_logs:
         current_object_id: int = log.job_id
         if current_object_id in existing_list:
@@ -157,20 +175,27 @@ def get_logs_with_existing_objects():
             except (ObjectManagerGetError, Exception):
                 deleted_list.append(current_object_id)
                 continue
+
     if len(passed_objects) < 1:
         return make_response(passed_objects, 204)
+
     return make_response(passed_objects)
 
 
 @exportd_log_blueprint.route('/job/notexists/', methods=['GET'])
 @exportd_log_blueprint.route('/job/notexists', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.view')
-def get_logs_with_deleted_objects():
+def get_logs_with_deleted_objects(request_user: UserModel):
     """TODO: document"""
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOB_MANAGER, request_user)
+
     existing_list = []
     deleted_list = []
     passed_objects = []
+
     try:
         query = {
             'log_type': ExportdJobLog.__name__,
@@ -182,10 +207,13 @@ def get_logs_with_deleted_objects():
     except ObjectManagerGetError as err:
         LOGGER.error('Error in get_logs_with_existing_objects: %s',err)
         return abort(404)
+
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
+
     for log in object_logs:
         current_object_id: int = log.job_id
+
         if current_object_id in existing_list:
             continue
         elif current_object_id in deleted_list:
@@ -199,17 +227,22 @@ def get_logs_with_deleted_objects():
                 deleted_list.append(current_object_id)
                 passed_objects.append(log)
                 continue
+
     if len(passed_objects) < 1:
         return make_response(passed_objects, 204)
+
     return make_response(passed_objects)
 
 
 @exportd_log_blueprint.route('/job/deleted/', methods=['GET'])
 @exportd_log_blueprint.route('/job/deleted', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.exportd.log.view')
-def get_job_delete_logs():
+def get_job_delete_logs(request_user: UserModel):
     """TODO: document"""
+    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+
     try:
         query = {
             'log_type': ExportdJobLog.__name__,
@@ -219,6 +252,7 @@ def get_job_delete_logs():
     except (ObjectManagerGetError, Exception) as err:
         LOGGER.error('Error in get_object_delete_logs: %s', err)
         return abort(404)
+
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
 

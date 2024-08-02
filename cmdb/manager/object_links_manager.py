@@ -21,6 +21,7 @@ from queue import Queue
 from typing import Union
 from datetime import datetime, timezone
 
+from .base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
@@ -29,15 +30,14 @@ from cmdb.framework import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.framework.results import IterationResult
-
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerIterationError
-
-from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
 from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectLinksManager(BaseManager):
     """
@@ -45,7 +45,7 @@ class ObjectLinksManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
         """
         Set the database connection and the queue for sending events
 
@@ -54,6 +54,10 @@ class ObjectLinksManager(BaseManager):
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue
+
+        if database:
+            dbm.connector.set_database(database)
+
         self.query_builder = BaseQueryBuilder()
         self.object_manager = CmdbObjectManager(dbm)  # TODO: Replace when object api is updated
         super().__init__(ObjectLinkModel.COLLECTION, dbm)
@@ -77,8 +81,10 @@ class ObjectLinksManager(BaseManager):
         try:
             if isinstance(link, ObjectLinkModel):
                 link = ObjectLinkModel.to_json(link)
+
             if 'creation_time' not in link:
                 link['creation_time'] = datetime.now(timezone.utc)
+
             if user and permission:
                 self.object_manager.get_object(public_id=link['primary'], user=user, permission=permission)
                 self.object_manager.get_object(public_id=link['secondary'], user=user, permission=permission)
@@ -107,13 +113,11 @@ class ObjectLinksManager(BaseManager):
             count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
 
             aggregation_result = list(self.aggregate(query))
-
             total_cursor = self.aggregate(count_query)
 
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 
@@ -142,7 +146,6 @@ class ObjectLinksManager(BaseManager):
         """
         try:
             link_instance = self.get_one(public_id)
-
             link = ObjectLinkModel.from_data(link_instance)
 
             if user and permission:

@@ -36,8 +36,10 @@ from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
 from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LocationsManager(BaseManager):
     """
@@ -45,7 +47,7 @@ class LocationsManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
         """
         Set the database connection and the queue for sending events
 
@@ -54,6 +56,10 @@ class LocationsManager(BaseManager):
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue
+
+        if database:
+            dbm.connector.set_database(database)
+
         self.query_builder = BaseQueryBuilder()
         self.type_manager = TypeManager(dbm)
         super().__init__(CmdbLocation.COLLECTION, dbm)
@@ -103,7 +109,6 @@ class LocationsManager(BaseManager):
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 
@@ -153,7 +158,6 @@ class LocationsManager(BaseManager):
             location = self.get_one_by({'object_id':object_id})
             if location:
                 location = CmdbLocation(**location)
-
         except Exception as err:
             raise ManagerGetError(str(err)) from err
 
@@ -170,12 +174,12 @@ class LocationsManager(BaseManager):
             list: All locations matching the requirements
         """
         locations_list = []
+
         try:
             locations = self.get_many(**requirements)
 
             for location in locations:
                 locations_list.append(CmdbLocation(**location))
-
         except Exception as err:
             raise ManagerGetError(str(err)) from err
 

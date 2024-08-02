@@ -15,23 +15,27 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from typing import List
 
-from flask import current_app, abort, request
+from flask import abort, request
+
+from cmdb.user_management.managers.setting_manager import UserSettingsManager
 
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSingleResponse, DeleteSingleResponse, \
     UpdateSingleResponse
 from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
-from cmdb.user_management.managers.setting_manager import UserSettingsManager
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
-user_settings_blueprint = APIBlueprint('user_settings', __name__)
 LOGGER = logging.getLogger(__name__)
+
+user_settings_blueprint = APIBlueprint('user_settings', __name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
@@ -51,18 +55,18 @@ def get_user_settings(user_id: int, request_user: UserModel):
     Raises:
         ManagerGetError: If the collection/resources could not be found.
     """
-    if current_app.cloud_mode:
-        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
-    else:
-        settings_manager = UserSettingsManager(current_app.database_manager)
+    settings_manager: UserSettingsManager = ManagerProvider.get_manager(ManagerType.USER_SETTINGS_MANAGER,
+                                                                        request_user)
 
     try:
         settings: List[UserSettingModel] = settings_manager.get_user_settings(user_id=user_id)
         raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
+
         api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,
                                        body=request.method == 'HEAD')
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
@@ -85,17 +89,17 @@ def get_user_setting(user_id: int, resource: str, request_user: UserModel):
     Returns:
         GetSingleResponse: Which includes the json data of a UserSettingModel.
     """
-    if current_app.cloud_mode:
-        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
-    else:
-        settings_manager = UserSettingsManager(current_app.database_manager)
+    settings_manager: UserSettingsManager = ManagerProvider.get_manager(ManagerType.USER_SETTINGS_MANAGER,
+                                                                        request_user)
 
     try:
         setting: UserSettingModel = settings_manager.get_user_setting(user_id, resource)
+
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
                                          model=UserSettingModel.MODEL, body=request.method == 'HEAD')
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
@@ -117,10 +121,8 @@ def insert_setting(user_id: int, data: dict, request_user: UserModel):
     Returns:
         InsertSingleResponse: Insert response with the new user and its identifier.
     """
-    if current_app.cloud_mode:
-        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
-    else:
-        settings_manager = UserSettingsManager(current_app.database_manager)
+    settings_manager: UserSettingsManager = ManagerProvider.get_manager(ManagerType.USER_SETTINGS_MANAGER,
+                                                                        request_user)
 
     try:
         settings_manager.insert(data)
@@ -132,6 +134,7 @@ def insert_setting(user_id: int, data: dict, request_user: UserModel):
         return abort(400, err)
     api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.resource,
                                         url=request.url, model=UserSettingModel.MODEL)
+
     return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
 
 
@@ -154,15 +157,13 @@ def update_setting(user_id: int, resource: str, data: dict, request_user: UserMo
     Returns:
         UpdateSingleResponse: With update result of the new updated user setting.
     """
-    if current_app.cloud_mode:
-        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
-    else:
-        settings_manager = UserSettingsManager(current_app.database_manager)
+    settings_manager: UserSettingsManager = ManagerProvider.get_manager(ManagerType.USER_SETTINGS_MANAGER,
+                                                                        request_user)
 
     try:
         setting = UserSettingModel.from_data(data=data)
-
         setting_found = True
+
         try:
             settings_manager.get_user_setting(user_id=user_id, resource=data.get('resource'))
         except ManagerGetError:
@@ -199,10 +200,8 @@ def delete_setting(user_id: int, resource: str, request_user: UserModel):
     Returns:
         DeleteSingleResponse: Delete result with the deleted setting as data.
     """
-    if current_app.cloud_mode:
-        settings_manager = UserSettingsManager(current_app.database_manager, request_user.database)
-    else:
-        settings_manager = UserSettingsManager(current_app.database_manager)
+    settings_manager: UserSettingsManager = ManagerProvider.get_manager(ManagerType.USER_SETTINGS_MANAGER,
+                                                                        request_user)
 
     try:
         deleted_setting = settings_manager.delete(user_id=user_id, resource=resource)
@@ -211,4 +210,5 @@ def delete_setting(user_id: int, resource: str, request_user: UserModel):
         return abort(404, err)
     except ManagerDeleteError as err:
         return abort(404, err)
+
     return api_response.make_response()

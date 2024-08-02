@@ -36,7 +36,10 @@ LOGGER = logging.getLogger(__name__)
 
 class DocapiTemplateManager(CmdbManagerBase):
     """TODO: document"""
-    def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
+    def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None, database: str = None):
+        if database:
+            database_manager.connector.set_database(database)
+
         self.dbm = database_manager
         self.builder = ManagerQueryBuilder()
         self.collection = DocapiTemplate.COLLECTION

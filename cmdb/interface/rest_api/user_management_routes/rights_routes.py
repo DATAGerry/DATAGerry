@@ -16,13 +16,14 @@
 """TODO: document"""
 from flask import request, abort
 
+from cmdb.user_management.managers.right_manager import RightManager
+
 from cmdb.framework.utils import Model
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse
-from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
 from cmdb.user_management.models.right import _nameToLevel
@@ -30,6 +31,7 @@ from cmdb.user_management.models.right import _nameToLevel
 
 rights_blueprint = APIBlueprint('rights', __name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @rights_blueprint.route('/', methods=['GET', 'HEAD'])
 @rights_blueprint.protect(auth=False, right=None)
@@ -65,6 +67,7 @@ def get_rights(params: CollectionParameters):
         rights = [BaseRight.to_dict(type) for type in iteration_result.results]
         api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
                                         url=request.url, model=Model('Right'), body=request.method == 'HEAD')
+
         return api_response.make_response()
     except ManagerIterationError as err:
         return abort(400, err)
@@ -98,6 +101,7 @@ def get_right(name: str):
         return abort(404, err)
     api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
                                      body=request.method == 'HEAD')
+
     return api_response.make_response()
 
 
@@ -116,4 +120,5 @@ def get_levels():
 
     api_response = GetSingleResponse(_nameToLevel, url=request.url, model=Model('Security-Level'),
                                      body=request.method == 'HEAD')
+
     return api_response.make_response()

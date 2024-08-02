@@ -19,10 +19,10 @@ Definition of all routes for CmdbSectionTemplates
 import json
 import logging
 
-from flask import request, current_app
+from flask import request
 
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response
+from cmdb.interface.route_utils import make_response, insert_request_user
 
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
@@ -39,21 +39,21 @@ from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerDeleteError,\
                                 DisallowedActionError
 from cmdb.errors.database import NoDocumentFound
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 section_template_blueprint = APIBlueprint('section_templates', __name__)
 
-
-template_manager = SectionTemplatesManager(current_app.database_manager, current_app.event_queue)
-
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.add')
 @section_template_blueprint.parse_location_parameters()
-def create_section_template(params: dict):
+def create_section_template(params: dict, request_user: UserModel):
     """
     Creates a CmdbSectionTemplate in the database
 
@@ -62,6 +62,9 @@ def create_section_template(params: dict):
     Returns:
         int: public_id of the created CmdbSectionTemplate
     """
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
+
     try:
         params['public_id'] = template_manager.get_next_public_id()
         params['is_global'] = params['is_global'] in ('true', 'True')
@@ -79,9 +82,10 @@ def create_section_template(params: dict):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 @section_template_blueprint.parse_collection_parameters(view='native')
-def get_all_section_templates(params: CollectionParameters):
+def get_all_section_templates(params: CollectionParameters, request_user: UserModel):
     """Returns all CmdbSectionTemplates based on the params
 
     Args:
@@ -89,6 +93,9 @@ def get_all_section_templates(params: CollectionParameters):
     Returns:
         (GetMultiResponse): All CmdbSectionTemplates considering the params
     """
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
+
     try:
         builder_params: BuilderParameters = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
@@ -110,8 +117,9 @@ def get_all_section_templates(params: CollectionParameters):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>', methods=['GET'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
-def get_section_template(public_id: int):
+def get_section_template(public_id: int, request_user: UserModel):
     """
     Retrieves the CmdbSectionTemplate with the given public_id
     
@@ -119,6 +127,9 @@ def get_section_template(public_id: int):
         public_id (int): public_id of CmdbSectionTemplate which should be retrieved
         request_user (UserModel): User which is requesting the CmdbSectionTemplate
     """
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
+
     try:
         section_template_instance = template_manager.get_section_template(public_id)
     except ManagerGetError as err:
@@ -133,8 +144,9 @@ def get_section_template(public_id: int):
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
-def get_global_section_template_count(public_id: int):
+def get_global_section_template_count(public_id: int, request_user: UserModel):
     """
     Retrives the count of types and objects using this global CmdbSectionTemplate
 
@@ -143,9 +155,11 @@ def get_global_section_template_count(public_id: int):
     Returns:
         dict: Dict with counts of types and objects using this global CmdbSectionTemplate
     """
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
+
     try:
         instance: CmdbSectionTemplate = template_manager.get_section_template(public_id)
-
         counts: dict = template_manager.get_global_template_usage_count(instance.name, instance.is_global)
 
     except ManagerGetError as err:
@@ -157,9 +171,10 @@ def get_global_section_template_count(public_id: int):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.edit')
 @section_template_blueprint.parse_location_parameters()
-def update_section_template(params: dict):
+def update_section_template(params: dict, request_user: UserModel):
     """
     Updates a CmdbSectionTemplate
 
@@ -173,6 +188,9 @@ def update_section_template(params: dict):
     params['fields'] = json.loads(params['fields'])
     params['public_id'] = int(params['public_id'])
     params['type'] = 'section'
+
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
 
     try:
         current_template: CmdbSectionTemplate = template_manager.get_section_template(params['public_id'])
@@ -201,9 +219,13 @@ def update_section_template(params: dict):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>/', methods=['DELETE'])
+@insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.delete')
-def delete_section_template(public_id: int):
+def delete_section_template(public_id: int, request_user: UserModel):
     """TODO: document"""
+    template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
+                                                                            request_user)
+
     try:
         template_instance: CmdbSectionTemplate = template_manager.get_section_template(public_id)
 

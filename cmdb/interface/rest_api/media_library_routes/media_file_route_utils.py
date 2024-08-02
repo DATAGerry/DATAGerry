@@ -20,6 +20,7 @@ import logging
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
+
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -47,6 +48,7 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
 def generate_metadata_filter(element, _request=None, params=None):
     """TODO: document"""
     filter_metadata = {}
+
     try:
         data = params
         if _request:
@@ -54,6 +56,7 @@ def generate_metadata_filter(element, _request=None, params=None):
                 data = json.loads(_request.args.get(element))
             if not data:
                 data = get_element_from_data_request(element, _request)
+
         for key, value in data.items():
             if 'reference' == key and value:
                 if isinstance(value, list):
@@ -81,6 +84,7 @@ def generate_collection_parameters(params: CollectionParameters):
             , builder.regex_('metadata.reference_type', search)
             , builder.regex_('metadata.mime_type', search)
         ]
+
         if search.isdigit():
             _.append({'public_id': int(search)})
             _.append({'metadata.reference': int(search)})
@@ -88,6 +92,7 @@ def generate_collection_parameters(params: CollectionParameters):
             _.append({'metadata.parent': int(search)})
 
         return builder.and_([{'metadata.folder': False}, builder.or_(_)])
+
     return generate_metadata_filter('metadata', params=param)
 
 
@@ -99,7 +104,7 @@ def create_attachment_name(name, index, metadata, media_file_manager):
             name (str): filename of the File
             index (int): counter
             metadata (dict): Metadata for filtering Files from Database
-            media_file_manager (MediaFileManagement): Manager
+            media_file_manager (MediaFileManager): Manager
         Returns:
          New Filename with 'copy_(index)_' - prefix.
     """
@@ -123,7 +128,7 @@ def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
 
         Args:
             public_id (int): Public ID of the File
-            media_file_manager (MediaFileManagement): Manager
+            media_file_manager (MediaFileManager): Manager
             _ids (list(int): List of IDs of the Files
         Returns:
          List of deleted public_id.

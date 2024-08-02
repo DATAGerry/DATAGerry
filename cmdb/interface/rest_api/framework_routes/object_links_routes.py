@@ -17,14 +17,12 @@
 Definition of all routes for object links
 """
 import logging
-from flask import abort, request, current_app
-
-from cmdb.interface.route_utils import insert_request_user
+from flask import abort, request
 
 from cmdb.manager.object_links_manager import ObjectLinksManager
 
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-
 from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -37,19 +35,18 @@ from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInse
 from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 links_blueprint = APIBlueprint('links', __name__)
 
 LOGGER = logging.getLogger(__name__)
 
-object_links_manager = ObjectLinksManager(current_app.database_manager, current_app.event_queue)
-
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @links_blueprint.route('/', methods=['POST'])
-@links_blueprint.protect(auth=True, right='base.framework.object.add')
 @insert_request_user
+@links_blueprint.protect(auth=True, right='base.framework.object.add')
 def insert_link(request_user: UserModel):
     """
     Creates a new object link in the database
@@ -60,6 +57,9 @@ def insert_link(request_user: UserModel):
         InsertSingleResponse: Object containing the created public_id of the new object link
     """
     data = request.json
+
+    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
+                                                                           request_user)
 
     try:
         result_id = object_links_manager.insert_object_link(data, request_user, AccessControlPermission.CREATE)
@@ -84,9 +84,10 @@ def insert_link(request_user: UserModel):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @links_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @links_blueprint.protect(auth=True, right='base.framework.object.view')
 @links_blueprint.parse_collection_parameters()
-def get_links(params: CollectionParameters):
+def get_links(params: CollectionParameters, request_user: UserModel):
     """
     Retrieves all object links with given parameters
 
@@ -96,6 +97,9 @@ def get_links(params: CollectionParameters):
     Returns:
         GetMultiResponse: Retrived object links from db
     """
+    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
+                                                                           request_user)
+
     try:
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
@@ -120,8 +124,8 @@ def get_links(params: CollectionParameters):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @links_blueprint.route('/<int:public_id>', methods=['DELETE'])
-@links_blueprint.protect(auth=True, right='base.framework.object.delete')
 @insert_request_user
+@links_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_link(public_id: int, request_user: UserModel):
     """
     Deletes an object link with the given public_id
@@ -132,6 +136,9 @@ def delete_link(public_id: int, request_user: UserModel):
     Returns:
         DeleteSingleResponse: with the deleted object link
     """
+    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
+                                                                           request_user)
+
     try:
         deleted_link = object_links_manager.delete_object_link(public_id, request_user, AccessControlPermission.DELETE)
 

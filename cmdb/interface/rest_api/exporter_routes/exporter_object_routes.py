@@ -31,8 +31,10 @@ from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
 exporter_blueprint = APIBlueprint('exporter', __name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @exporter_blueprint.route('/extensions', methods=['GET'])
 @login_required
@@ -42,10 +44,9 @@ def get_export_file_types():
 
 
 @exporter_blueprint.route('/', methods=['GET'])
+@insert_request_user
 @exporter_blueprint.protect(auth=True, right='base.framework.object.view')
 @exporter_blueprint.parse_collection_parameters(view='native')
-@insert_request_user
-@insert_request_user
 def export_objects(params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
     try:
@@ -54,7 +55,11 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
             else params.optional.get('classname', 'JsonExportType')
         exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
 
+        if current_app.cloud_mode:
+            current_app.database_manager.connector.set_database(request_user.database)
+
         exporter = BaseExportWriter(exporter_class, _config)
+
         exporter.from_database(database_manager=current_app.database_manager,
                                user=request_user,
                                permission=AccessControlPermission.READ)

@@ -17,9 +17,8 @@
 import json
 import logging
 
-from flask import current_app, request, abort
+from flask import request, abort
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
 from cmdb.search import Search
 from cmdb.search.params import SearchParam
@@ -28,14 +27,14 @@ from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, Quic
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
-    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-
 LOGGER = logging.getLogger(__name__)
+
 search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @search_blueprint.route('/quick/count', methods=['GET'])
 @search_blueprint.route('/quick/count/', methods=['GET'])
@@ -43,21 +42,24 @@ search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 @insert_request_user
 def quick_search_result_counter(request_user: UserModel):
     """TODO: document"""
+    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
     builder = QuickSearchPipelineBuilder()
     only_active = _fetch_only_active_objs()
     pipeline: Pipeline = builder.build(search_term=search_term, user=request_user,
                                        permission=AccessControlPermission.READ,
                                        active_flag=only_active)
+
     try:
         result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
     except Exception as err:
         LOGGER.error('[Search count]: %s',err)
         return abort(400)
+
     if len(result) > 0:
         return make_response(result[0])
-    else:
-        return make_response({'active': 0, 'inactive': 0, 'total': 0})
+
+    return make_response({'active': 0, 'inactive': 0, 'total': 0})
 
 
 @search_blueprint.route('/', methods=['GET', 'POST'])
@@ -65,6 +67,8 @@ def quick_search_result_counter(request_user: UserModel):
 @insert_request_user
 def search_framework(request_user: UserModel):
     """TODO: document"""
+    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
         skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
@@ -73,6 +77,7 @@ def search_framework(request_user: UserModel):
         resolve_object_references: bool = request.args.get('resolve', False)
     except ValueError as err:
         return abort(400, err)
+
     try:
         if request.method == 'GET':
             search_parameters = json.loads(search_params)
@@ -82,8 +87,9 @@ def search_framework(request_user: UserModel):
         else:
             return abort(405)
     except Exception as err:
-        LOGGER.error('[Search Framework]: %s', err)
+        LOGGER.error('[search_framework]: %s', err)
         return abort(400, err)
+
     try:
         searcher = SearcherFramework(manager=object_manager)
         builder = SearchPipelineBuilder()
@@ -95,9 +101,8 @@ def search_framework(request_user: UserModel):
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
                                     resolve=resolve_object_references, permission=AccessControlPermission.READ,
                                     active=only_active)
-
     except Exception as err:
-        LOGGER.error('[Search Framework Rest]: %s',err)
+        LOGGER.error('[search_framework]: %s',err)
         return make_response([], 204)
 
     return make_response(result)
@@ -113,4 +118,5 @@ def _fetch_only_active_objs():
         value = request.args.get('onlyActiveObjCookie')
         if value in ['True', 'true']:
             return True
+
     return False

@@ -24,13 +24,16 @@ from cmdb.search import Pipeline
 
 class ExportDJobManager(ExportDManager):
     """TODO: document"""
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
         """
         Constructor of `ExportDJobManager`
 
         Args:
             database_manager: Connection to the database class.
         """
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(ExportdJob.COLLECTION, database_manager=database_manager)
 
 
@@ -55,10 +58,13 @@ class ExportDJobManager(ExportDManager):
             aggregation_result = list(self._aggregate(self.collection, query))
             total_cursor = self._aggregate(self.collection, count_query)
             total = 0
+
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[ExportdJob] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(ExportdJob)
+
         return iteration_result
