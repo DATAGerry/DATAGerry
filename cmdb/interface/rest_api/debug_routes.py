@@ -13,13 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-
+"""TODO: document"""
 from flask import current_app
 from werkzeug.exceptions import abort
 
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
-
+# -------------------------------------------------------------------------------------------------------------------- #
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 
 with current_app.app_context():

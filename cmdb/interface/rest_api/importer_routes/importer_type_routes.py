@@ -20,34 +20,37 @@ import logging
 from datetime import datetime, timezone
 
 from bson import json_util
-from flask import current_app, request, abort
+from flask import request, abort
+
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.framework.managers.type_manager import TypeManager
 
 from cmdb.framework import TypeModel
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import login_required, make_response
+from cmdb.interface.route_utils import login_required, make_response, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.utils.error import CMDBError
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')
 
 LOGGER = logging.getLogger(__name__)
 
-with current_app.app_context():
-    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-    type_manager = TypeManager(database_manager=current_app.database_manager)
-
-
 @importer_type_blueprint.route('/create/', methods=['POST'])
+@insert_request_user
 @login_required
-def add_type():
+def add_type(request_user: UserModel):
     """TODO: document"""
+    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+
     error_collection = {}
     upload = request.form.get('uploadFile')
     new_type_list = json.loads(upload, object_hook=json_util.object_hook)
+
     for new_type_data in new_type_list:
         try:
             new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
@@ -61,17 +64,20 @@ def add_type():
         except (ManagerInsertError, CMDBError) as err:
             error_collection.update({"public_id": new_type_data['public_id'], "message": err})
 
-    resp = make_response(error_collection)
-    return resp
+    return make_response(error_collection)
 
 
 @importer_type_blueprint.route('/update/', methods=['POST'])
+@insert_request_user
 @login_required
-def update_type():
+def update_type(request_user: UserModel):
     """TODO: document"""
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+
     error_collection = {}
     upload = request.form.get('uploadFile')
     data_dump = json.loads(upload, object_hook=json_util.object_hook)
+
     for add_data_dump in data_dump:
         try:
             update_type_instance = TypeModel.from_data(add_data_dump)
@@ -83,5 +89,4 @@ def update_type():
         except (ManagerGetError, Exception) as err:
             error_collection.update({"public_id": add_data_dump['public_id'], "message": err})
 
-    resp = make_response(error_collection)
-    return resp
+    return make_response(error_collection)

@@ -16,8 +16,7 @@
 """TODO: document"""
 import logging
 from datetime import datetime, timezone
-
-from flask import abort, request, current_app
+from flask import abort, request
 
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager.locations_manager import LocationsManager
@@ -38,14 +37,12 @@ from cmdb.framework.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 types_blueprint = APIBlueprint('types', __name__)
 
-locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
-object_manager = ObjectManager(current_app.database_manager)
-deprecated_object_manager = CmdbObjectManager(database_manager=current_app.database_manager)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
@@ -71,13 +68,10 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
         ManagerGetError: If the collection could not be found.
 
     """
-    if current_app.cloud_mode:
-        type_manager = TypeManager(current_app.database_manager, request_user.database)
-    else:
-        type_manager = TypeManager(database_manager=current_app.database_manager)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
 
-    body = request.method == 'HEAD'
     view = params.active
+
     if view:
         if isinstance(params.filter, dict):
             if params.filter.keys():
@@ -86,22 +80,35 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
                 params.filter = [{'$match': {'active': view}}, {'$match': params.filter}]
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': view}})
+
     try:
         iteration_result: IterationResult[TypeModel] = type_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+                                                                        filter=params.filter,
+                                                                        limit=params.limit,
+                                                                        skip=params.skip,
+                                                                        sort=params.sort,
+                                                                        order=params.order)
+
         types = [TypeModel.to_json(type) for type in iteration_result.results]
-        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=TypeModel.MODEL, body=body)
+
+        api_response = GetMultiResponse(types,
+                                        total=iteration_result.total,
+                                        params=params,
+                                        url=request.url,
+                                        model=TypeModel.MODEL,
+                                        body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
 @types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
-def get_type(public_id: int):
+def get_type(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a single type resource.
 
@@ -114,7 +121,7 @@ def get_type(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of a TypeModel.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
 
     try:
         type_ = type_manager.get(public_id)
@@ -122,13 +129,15 @@ def get_type(public_id: int):
         return abort(404)
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
                                      model=TypeModel.MODEL, body=request.method == 'HEAD')
+
     return api_response.make_response()
 
 
 @types_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.add')
 @types_blueprint.validate(TypeModel.SCHEMA)
-def insert_type(data: dict):
+def insert_type(data: dict, request_user: UserModel):
     """
     HTTP `POST` route for insert a single type resource.
 
@@ -142,10 +151,11 @@ def insert_type(data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new type and its public_id.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
 
     data.setdefault('creation_time', datetime.now(timezone.utc))
     possible_id = data.get('public_id', None)
+
     if possible_id:
         try:
             type_manager.get(public_id=possible_id)
@@ -161,15 +171,20 @@ def insert_type(data: dict):
         return abort(404, err)
     except ManagerInsertError as err:
         return abort(400, err)
-    api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc), url=request.url,
+
+    api_response = InsertSingleResponse(result_id=result_id,
+                                        raw=TypeModel.to_json(raw_doc),
+                                        url=request.url,
                                         model=TypeModel.MODEL)
+
     return api_response.make_response(prefix='types')
 
 
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.edit')
 @types_blueprint.validate(TypeModel.SCHEMA)
-def update_type(public_id: int, data: dict):
+def update_type(public_id: int, data: dict, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for update a single type resource.
 
@@ -184,7 +199,9 @@ def update_type(public_id: int, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated type.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
 
     try:
         unchanged_type = type_manager.get(public_id)
@@ -223,8 +240,9 @@ def update_type(public_id: int, data: dict):
 
 
 @types_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.delete')
-def delete_type(public_id: int):
+def delete_type(public_id: int, request_user: UserModel):
     """
     HTTP `DELETE` route for delete a single type resource.
 
@@ -241,7 +259,10 @@ def delete_type(public_id: int):
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
+    deprecated_object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER,
+                                                                               request_user)
 
     try:
         objects_count = object_manager.count_objects(public_id)
@@ -253,7 +274,6 @@ def delete_type(public_id: int):
         deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
-
     except ManagerGetError as err:
         return abort(404, err)
     except ManagerDeleteError as err:
@@ -265,15 +285,16 @@ def delete_type(public_id: int):
 
 
 @types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
+@insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.read')
-def count_objects(public_id: int):
+def count_objects(public_id: int, request_user: UserModel):
     """
     Return the number of objects in der database with the given public_id as type_id
 
     Args:
         public_id (int): public_id of the type
     """
-    type_manager = TypeManager(database_manager=current_app.database_manager)
+    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
 
     try:
         objects_count = object_manager.count_objects(public_id)

@@ -32,11 +32,15 @@ from cmdb.utils.error import CMDBError
 LOGGER = logging.getLogger(__name__)
 
 
-class MediaFileManagement(CmdbManagerBase):
+class MediaFileManager(CmdbManagerBase):
     """TODO: document"""
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+        if database:
+            database_manager.connector.set_database(database)
+
         self.dbm = database_manager
         self.fs = DatabaseGridFS(self.dbm.connector.database, MediaFile.COLLECTION)
+
         super().__init__(database_manager)
 
 
@@ -52,6 +56,7 @@ class MediaFileManagement(CmdbManagerBase):
         except (MediaFileManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise MediaFileManagerGetError(err=err) from err
+
         return result.read() if blob else result._file
 
 
@@ -67,6 +72,7 @@ class MediaFileManagement(CmdbManagerBase):
                 results.append(MediaFile.to_json(MediaFile(**grid._file)))
         except (CMDBError, MediaFileManagerGetError) as err:
             raise MediaFileManagerGetError(err) from err
+
         return GridFsResponse(results, records_total)
 
 

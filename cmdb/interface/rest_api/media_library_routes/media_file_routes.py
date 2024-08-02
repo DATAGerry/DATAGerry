@@ -18,11 +18,12 @@ import json
 import logging
 
 from bson import json_util
-from flask import abort, request, current_app, Response
+from flask import abort, request, Response
 
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.media_library.media_file_manager import MediaFileManager
+
 from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
-    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError, MediaFileManagement
+    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import UserModel
@@ -34,21 +35,20 @@ from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import 
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
-
-
-with current_app.app_context():
-    media_file_manager = MediaFileManagement(current_app.database_manager)
-    log_manager = ExportdLogManager(current_app.database_manager)
 
 media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix='/media_file')
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @media_file_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 @media_file_blueprint.parse_collection_parameters()
-def get_file_list(params: CollectionParameters):
+def get_file_list(params: CollectionParameters, request_user: UserModel):
     """
     Get all objects in database
 
@@ -61,6 +61,8 @@ def get_file_list(params: CollectionParameters):
     Returns:
         list of files
     """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+
     try:
         metadata = generate_collection_parameters(params=params)
         response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
@@ -68,6 +70,7 @@ def get_file_list(params: CollectionParameters):
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
     except MediaFileManagerGetError as err:
         return abort(404, err.message)
+
     return api_response.make_response()
 
 
@@ -76,36 +79,39 @@ def get_file_list(params: CollectionParameters):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def add_new_file(request_user: UserModel):
-    """ This method saves a file to the specified section of the document for storing workflow data.
-        Any existing value that matches filename and the metadata is deleted. Before saving a value.
-        GridFS document under the specified key is deleted.
+    """
+    This method saves a file to the specified section of the document for storing workflow data.
+    Any existing value that matches filename and the metadata is deleted. Before saving a value.
+    GridFS document under the specified key is deleted.
 
-        For Example:
-            Create a unique media file element:
-             - Folders in the same directory are unique.
-             - The Folder-Name can exist in different directories
+    For Example:
+        Create a unique media file element:
+            - Folders in the same directory are unique.
+            - The Folder-Name can exist in different directories
 
-            Create sub-folders:
-             - Selected folder is considered as parent
+        Create sub-folders:
+            - Selected folder is considered as parent
 
-            This also applies for files
+        This also applies for files
 
-        File:
-            File is stored under 'request.files.get('files')'
+    File:
+        File is stored under 'request.files.get('files')'
 
-        Metadata:
-            Metadata are stored under 'request.form["Metadata"]'
+    Metadata:
+        Metadata are stored under 'request.form["Metadata"]'
 
-        Raises:
-            MediaFileManagerGetError: If the file could not be found.
-            MediaFileManagerInsertError: If something went wrong during insert.
+    Raises:
+        MediaFileManagerGetError: If the file could not be found.
+        MediaFileManagerInsertError: If something went wrong during insert.
 
-        Args:
-          request_user (UserModel): the instance of the started user
+    Args:
+        request_user (UserModel): the instance of the started user
 
-        Returns:
-            New MediaFile.
-        """
+    Returns:
+        New MediaFile.
+    """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+
     try:
         file = get_file_in_request('file')
         filter_metadata = generate_metadata_filter('metadata', request)
@@ -115,6 +121,7 @@ def add_new_file(request_user: UserModel):
         # Check if file exists
         is_exist_file = media_file_manager.exist_file(filter_metadata)
         exist = None
+
         if is_exist_file:
             exist = media_file_manager.get_file(filter_metadata)
             media_file_manager.delete_file(exist['public_id'])
@@ -140,35 +147,38 @@ def add_new_file(request_user: UserModel):
 @insert_request_user
 @right_required('base.framework.object.edit')
 def update_file(request_user: UserModel):
-    """ This method updates a file to the specified section in the document.
-        Any existing value that matches the file name and metadata is taken into account.
-        Furthermore, it is checked whether the current file name already exists in the directory.
-        If this is the case, 'copy_(index)_' is appended as prefix. The method is executed recursively.
-        Exception, if the parameter 'attachment' is passed with the value '{reference':true}', the name is not checked.
+    """
+    This method updates a file to the specified section in the document.
+    Any existing value that matches the file name and metadata is taken into account.
+    Furthermore, it is checked whether the current file name already exists in the directory.
+    If this is the case, 'copy_(index)_' is appended as prefix. The method is executed recursively.
+    Exception, if the parameter 'attachment' is passed with the value '{reference':true}', the name is not checked.
 
-        Note:
-            Create a unique media file element:
-             - Folders in the same directory are unique.
-             - The folder name can exist in different directories
+    Note:
+        Create a unique media file element:
+            - Folders in the same directory are unique.
+            - The folder name can exist in different directories
 
-            Create sub-folders:
-             - Selected folder is considered as parent folder
+        Create sub-folders:
+            - Selected folder is considered as parent folder
 
-            This also applies to files
+        This also applies to files
 
-        Changes:
-            Is stored under 'request.json'
+    Changes:
+        Is stored under 'request.json'
 
-        Raises:
-            MediaFileManagerUpdateError: If something went wrong during update.
+    Raises:
+        MediaFileManagerUpdateError: If something went wrong during update.
 
+    Args:
         Args:
-            Args:
-            request_user (User): the instance of the started user (last modifier)
+        request_user (User): the instance of the started user (last modifier)
 
-        Returns: MediaFile as JSON
+    Returns: MediaFile as JSON
 
-        """
+    """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+
     try:
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -195,20 +205,23 @@ def update_file(request_user: UserModel):
 
 @media_file_blueprint.route('/<string:filename>/', methods=['GET'])
 @media_file_blueprint.route('/<string:filename>', methods=['GET'])
+@insert_request_user
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_file(filename: str):
-    """ This method fetch a file to the specified section of the document.
-        Any existing value that matches the file name and metadata will be considered.
+def get_file(filename: str, request_user: UserModel):
+    """
+    This method fetch a file to the specified section of the document.
+    Any existing value that matches the file name and metadata will be considered.
 
-        Raises:
-            MediaFileManagerGetError: If the file could not be found.
+    Raises:
+        MediaFileManagerGetError: If the file could not be found.
 
-        Args:
-            filename: name must be unique
+    Args:
+        filename: name must be unique
 
-        Returns: MediaFile as JSON
+    Returns: MediaFile as JSON
+    """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
 
-        """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
@@ -223,20 +236,23 @@ def get_file(filename: str):
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
+@insert_request_user
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
-def download_file(filename: str):
-    """ This method download a file to the specified section of the document.
-        Any existing value that matches the file name and metadata will be considered.
+def download_file(filename: str, request_user: UserModel):
+    """
+    This method download a file to the specified section of the document.
+    Any existing value that matches the file name and metadata will be considered.
 
-        Raises:
-            MediaFileManagerGetError: If the file could not be found.
+    Raises:
+        MediaFileManagerGetError: If the file could not be found.
 
-        Args:
-            filename (str): name must be unique
+    Args:
+        filename (str): name must be unique
 
-        Returns: File
+    Returns: File
+    """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
 
-        """
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
@@ -255,11 +271,13 @@ def download_file(filename: str):
 
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
+@insert_request_user
 @media_file_blueprint.protect(auth=True, right='base.framework.object.edit')
-def delete_file(public_id: int):
-    """ This method deletes a file in the specified section of the document for storing workflow data.
-        Any existing value that matches the file name and metadata is deleted. Before saving a value.
-        GridFS document under the specified key is deleted.
+def delete_file(public_id: int, request_user: UserModel):
+    """
+    This method deletes a file in the specified section of the document for storing workflow data.
+    Any existing value that matches the file name and metadata is deleted. Before saving a value.
+    GridFS document under the specified key is deleted.
 
     Raises:
         MediaFileManagerDeleteError: When something went wrong during the deletion.
@@ -270,6 +288,8 @@ def delete_file(public_id: int):
     Returns:
          Delete result with the deleted File as JSON.
     """
+    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+
     try:
         deleted = media_file_manager.get_file(metadata={'public_id': public_id})
         for _id in recursive_delete_filter(public_id, media_file_manager):

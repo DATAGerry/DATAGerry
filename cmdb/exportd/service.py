@@ -25,7 +25,7 @@ from cmdb.event_management.event import Event
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagement
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.system_config import SystemConfigReader
@@ -133,7 +133,7 @@ class ExportdThread(Thread):
 
         self.object_manager = CmdbObjectManager(database_manager=database)
         self.log_manager = ExportdLogManager(database_manager=database)
-        self.exportd_job_manager = ExportdJobManagement(database_manager=database)
+        self.exportd_job_manager = ExportdJobManager(database_manager=database)
         self.user_manager = UserManager(database_manager=database)
 
 

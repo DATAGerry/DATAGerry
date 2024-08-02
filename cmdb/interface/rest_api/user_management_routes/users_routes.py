@@ -17,6 +17,10 @@
 from datetime import datetime, timezone
 from flask import abort, request, current_app
 
+from cmdb.security.security import SecurityManager
+from cmdb.user_management.managers.user_manager import UserManager
+
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.framework.utils import PublicID
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
     ManagerIterationError
@@ -25,18 +29,19 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
-from cmdb.security.security import SecurityManager
 from cmdb.user_management import UserModel
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 users_blueprint = APIBlueprint('users', __name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @users_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.view')
 @users_blueprint.parse_collection_parameters()
-def get_users(params: CollectionParameters):
+def get_users(params: CollectionParameters, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
@@ -53,24 +58,30 @@ def get_users(params: CollectionParameters):
         ManagerIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection/resources could not be found.
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
 
     try:
-        iteration_result: IterationResult[UserModel] = user_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        iteration_result: IterationResult[UserModel] = user_manager.iterate(filter=params.filter,
+                                                                            limit=params.limit,
+                                                                            skip=params.skip,
+                                                                            sort=params.sort,
+                                                                            order=params.order)
         users = [UserModel.to_dict(user) for user in iteration_result.results]
+
         api_response = GetMultiResponse(users, total=iteration_result.total, params=params,
                                         url=request.url, model=UserModel.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
     except ManagerGetError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
 @users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
-def get_user(public_id: int):
+def get_user(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a single user resource.
 
@@ -86,21 +97,26 @@ def get_user(public_id: int):
     Returns:
         GetSingleResponse: Which includes the json data of a UserModel.
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
 
     try:
         user: UserModel = user_manager.get(public_id)
     except ManagerGetError:
         return abort(404)
-    api_response = GetSingleResponse(UserModel.to_dict(user), url=request.url,
-                                     model=UserModel.MODEL, body=request.method == 'HEAD')
+
+    api_response = GetSingleResponse(UserModel.to_dict(user),
+                                     url=request.url,
+                                     model=UserModel.MODEL,
+                                     body=request.method == 'HEAD')
+
     return api_response.make_response()
 
 
 @users_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.add')
 @users_blueprint.validate(UserModel.SCHEMA)
-def insert_user(data: dict):
+def insert_user(data: dict, request_user: UserModel):
     """
     HTTP `POST` route for insert a single user resource.
 
@@ -114,8 +130,9 @@ def insert_user(data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new user and its public_id.
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
     security_manager: SecurityManager = SecurityManager(database_manager=current_app.database_manager)
+
     try:
         data['password'] = security_manager.generate_hmac(data['password'])
         data['registration_time'] = datetime.now(timezone.utc)
@@ -125,15 +142,20 @@ def insert_user(data: dict):
         return abort(404, err)
     except ManagerInsertError as err:
         return abort(400, err)
-    api_response = InsertSingleResponse(result_id=result_id, raw=UserModel.to_dict(user), url=request.url,
+
+    api_response = InsertSingleResponse(result_id=result_id,
+                                        raw=UserModel.to_dict(user),
+                                        url=request.url,
                                         model=UserModel.MODEL)
+
     return api_response.make_response(prefix='users')
 
 
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 @users_blueprint.validate(UserModel.SCHEMA)
-def update_user(public_id: int, data: dict):
+def update_user(public_id: int, data: dict, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for update a single user resource.
 
@@ -148,21 +170,25 @@ def update_user(public_id: int, data: dict):
     Returns:
         UpdateSingleResponse: With update result of the new updated user.
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+
     try:
         user = UserModel.from_data(data=data)
         user_manager.update(public_id=PublicID(public_id), user=user)
+    
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err)
     except ManagerUpdateError as err:
         return abort(400, err)
+
     return api_response.make_response()
 
 
 @users_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.delete')
-def delete_user(public_id: int):
+def delete_user(public_id: int, request_user: UserModel):
     """
     HTTP `DELETE` route for delete a single user resource.
 
@@ -176,7 +202,8 @@ def delete_user(public_id: int):
     Returns:
         DeleteSingleResponse: Delete result with the deleted user as data.
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+
     try:
         deleted_group = user_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
@@ -184,12 +211,14 @@ def delete_user(public_id: int):
         return abort(404, err)
     except ManagerDeleteError as err:
         return abort(404, err)
+
     return api_response.make_response()
 
 
 @users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
+@insert_request_user
 @users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
-def change_user_password(public_id: int):
+def change_user_password(public_id: int, request_user: UserModel):
     """
     HTTP `PATCH` route for updating a single user password.
 
@@ -203,13 +232,14 @@ def change_user_password(public_id: int):
     Returns:
         UpdateSingleResponse: User with new password
     """
-    user_manager: UserManager = UserManager(database_manager=current_app.database_manager)
+    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
     security_manager: SecurityManager = SecurityManager(database_manager=current_app.database_manager)
+
     try:
         user = user_manager.get(public_id=public_id)
         password = security_manager.generate_hmac(request.json.get('password'))
         user.password = password
-        user_manager.update(public_id=PublicID(public_id), user=user)
+        user_manager.update(PublicID(public_id), user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err)

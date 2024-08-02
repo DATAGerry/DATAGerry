@@ -32,11 +32,15 @@ from cmdb.user_management import UserModel
 LOGGER = logging.getLogger(__name__)
 
 
-class ExportdJobManagement(CmdbManagerBase):
+class ExportdJobManager(CmdbManagerBase):
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None):
+    def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None, database: str = None):
         self._event_queue = event_queue
+
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(database_manager)
 
 
@@ -52,6 +56,7 @@ class ExportdJobManagement(CmdbManagerBase):
         except (ExportdJobManagerGetError, Exception) as err:
             LOGGER.error(err)
             raise err
+
         return ExportdJob(**result)
 
 
@@ -63,6 +68,7 @@ class ExportdJobManagement(CmdbManagerBase):
                 job_list.append(ExportdJob(**founded_job))
             except CMDBError:
                 continue
+
         return job_list
 
 
@@ -72,8 +78,8 @@ class ExportdJobManagement(CmdbManagerBase):
             found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
                 return ExportdJob(**found_type_list[0])
-            else:
-                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+
+            raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err) from err
 
@@ -84,8 +90,8 @@ class ExportdJobManagement(CmdbManagerBase):
             found_type_list = self._get_many(collection=ExportdJob.COLLECTION, limit=1, **requirements)
             if len(found_type_list) > 0:
                 return ExportdJob(**found_type_list[0])
-            else:
-                raise ObjectManagerGetError(err='More than 1 type matches this requirement')
+
+            raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except (CMDBError, Exception) as err:
             raise ObjectManagerGetError(err) from err
 
@@ -94,11 +100,13 @@ class ExportdJobManagement(CmdbManagerBase):
         """TODO: document"""
         formatted_filter = {'scheduling.event.active': state}
         job_list = []
+
         for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
             try:
                 job_list.append(ExportdJob(**founded_job))
             except CMDBError:
                 continue
+
         return job_list
 
 
@@ -123,6 +131,7 @@ class ExportdJobManagement(CmdbManagerBase):
                 collection=ExportdJob.COLLECTION,
                 data=new_object.to_database()
             )
+
             if self._event_queue:
                 state = new_object.scheduling["event"]["active"] and new_object.get_active()
                 event = Event("cmdb.exportd.added", {"id": new_object.get_public_id(),
@@ -132,6 +141,7 @@ class ExportdJobManagement(CmdbManagerBase):
                 self._event_queue.put(event)
         except CMDBError as err:
             raise ExportdJobManagerInsertError(err) from err
+
         return ack
 
 
@@ -151,13 +161,14 @@ class ExportdJobManagement(CmdbManagerBase):
             update_object = data
         else:
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
+
         update_object.last_execute_date = datetime.now(timezone.utc)
+
         ack = self._update(
             collection=ExportdJob.COLLECTION,
             public_id=update_object.get_public_id(),
             data=update_object.to_database()
         )
-
 
         if self._event_queue and event_start:
             state = update_object.scheduling["event"]["active"] and update_object.get_active()
@@ -166,6 +177,7 @@ class ExportdJobManagement(CmdbManagerBase):
                                                    "user_id": request_user.get_public_id(),
                                                    "event": 'automatic'})
             self._event_queue.put(event)
+
         return ack.acknowledged
 
 
@@ -178,6 +190,7 @@ class ExportdJobManagement(CmdbManagerBase):
                                                        "user_id": request_user.get_public_id(),
                                                        "event": 'automatic'})
                 self._event_queue.put(event)
+
             return ack
         except Exception as exc:
             raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}') from exc
@@ -190,6 +203,7 @@ class ExportdJobManagement(CmdbManagerBase):
                                                       "user_id": request_user.get_public_id(),
                                                       "event": 'manual'})
             self._event_queue.put(event)
+
         return True
 
 # --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #

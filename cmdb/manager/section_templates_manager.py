@@ -52,7 +52,7 @@ class SectionTemplatesManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
         """
         Set the database connection and the queue for sending events
 
@@ -61,10 +61,15 @@ class SectionTemplatesManager(BaseManager):
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue
+
+        if database:
+            dbm.connector.set_database(database)
+
         self.query_builder = BaseQueryBuilder()
         self.type_manager = TypeManager(dbm)
         self.cmdb_object_manager = CmdbObjectManager(dbm)
         self.object_manager = ObjectManager(dbm, event_queue)
+
         super().__init__(CmdbSectionTemplate.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
@@ -124,7 +129,6 @@ class SectionTemplatesManager(BaseManager):
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 
@@ -188,7 +192,6 @@ class SectionTemplatesManager(BaseManager):
             return counts
 
         counts['types'] = len(found_types.results)
-
         objects_count: int = 0
 
         a_type: TypeModel

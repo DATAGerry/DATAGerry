@@ -17,6 +17,7 @@
 from datetime import datetime, timezone
 from cmdb.framework.cmdb_base import CmdbManagerBase
 
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
 from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
     ObjectManagerDeleteError
@@ -26,7 +27,10 @@ from cmdb.utils.error import CMDBError
 
 class ExportdLogManager(CmdbManagerBase):
     """TODO: document"""
-    def __init__(self, database_manager=None):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(database_manager)
 
 
@@ -34,12 +38,14 @@ class ExportdLogManager(CmdbManagerBase):
     def get_all_logs(self):
         """TODO: document"""
         log_list = []
+
         for found_log in self.dbm.find_all(collection=ExportdMetaLog.COLLECTION):
             try:
                 log_list.append(ExportdLog(**found_log))
             except CMDBError as err:
                 LOGGER.error(err)
                 raise LogManagerGetError(err) from err
+
         return log_list
 
 
@@ -58,6 +64,7 @@ class ExportdLogManager(CmdbManagerBase):
     def get_logs_by(self, sort='public_id', **requirements):
         """TODO: document"""
         ack = []
+
         try:
             logs = self._get_many(collection=ExportdMetaLog.COLLECTION, sort=sort, **requirements)
             for log in logs:
@@ -65,6 +72,7 @@ class ExportdLogManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             LOGGER.error(err)
             raise LogManagerGetError(err) from err
+
         return ack
 
 
@@ -88,6 +96,7 @@ class ExportdLogManager(CmdbManagerBase):
             ack = self._insert(ExportdMetaLog.COLLECTION, ExportdJobLog.to_json(new_log))
         except Exception as err:
             raise LogManagerInsertError(err) from err
+
         return ack
 
 
@@ -103,6 +112,7 @@ class ExportdLogManager(CmdbManagerBase):
         except CMDBError as err:
             LOGGER.error(err)
             raise LogManagerDeleteError(err) from err
+
         return ack
 
 
@@ -125,6 +135,7 @@ class ExportdLogManager(CmdbManagerBase):
         except (CMDBError, Exception) as err:
             LOGGER.error('Error in get_exportd_job_logs: %s',err)
             raise LogManagerGetError(err) from err
+
         return job_list
 
 # --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #

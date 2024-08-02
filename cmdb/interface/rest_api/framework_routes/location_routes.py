@@ -21,7 +21,6 @@ from flask import request, current_app
 
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.user_management import UserModel, UserManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework import CmdbLocation
@@ -40,23 +39,20 @@ from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerDeleteError
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
-    type_manager = TypeManager(current_app.database_manager)
-    user_manager = UserManager(current_app.database_manager)
-    object_manager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-    locations_manager = LocationsManager(current_app.database_manager, current_app.event_queue)
-
 LOGGER = logging.getLogger(__name__)
+
 location_blueprint = APIBlueprint('locations', __name__)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @location_blueprint.route('/', methods=['POST'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
 @location_blueprint.parse_location_parameters()
-@insert_request_user
 def create_location(params: dict, request_user: UserModel):
     """
     Creates a location in the database
@@ -68,6 +64,10 @@ def create_location(params: dict, request_user: UserModel):
     Returns:
         int: public_id of the created location
     """
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+
     location_creation_params= {}
 
     location_creation_params['object_id'] = int(params['object_id'])
@@ -84,6 +84,9 @@ def create_location(params: dict, request_user: UserModel):
 
     if params['name'] == '' or params['name'] is None:
         current_object = object_manager.get_object(int(params['object_id']))
+
+        if current_app.cloud_mode:
+            current_app.database_manager.connector.set_database(request_user.database)
 
         rendered_list = RenderList([current_object], request_user, current_app.database_manager, True,
                                     object_manager ).render_result_list(True)
@@ -104,9 +107,10 @@ def create_location(params: dict, request_user: UserModel):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @location_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 @location_blueprint.parse_collection_parameters(view='native')
-def get_all_locations(params: CollectionParameters):
+def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
     Returns all locations based on the params
 
@@ -117,6 +121,8 @@ def get_all_locations(params: CollectionParameters):
     Returns:
         (Response): All locations considering the params
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     try:
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
         iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(builder_params)
@@ -139,9 +145,10 @@ def get_all_locations(params: CollectionParameters):
 
 
 @location_blueprint.route('/tree', methods=['GET', 'HEAD'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 @location_blueprint.parse_collection_parameters()
-def get_locations_tree(params: CollectionParameters):
+def get_locations_tree(params: CollectionParameters, request_user: UserModel):
     """
     Returns all locations as a location tree
 
@@ -152,6 +159,8 @@ def get_locations_tree(params: CollectionParameters):
     Returns:
         list: locations as a tree
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     try:
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
         iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(builder_params)
@@ -193,8 +202,9 @@ def get_locations_tree(params: CollectionParameters):
 
 
 @location_blueprint.route('/<int:public_id>', methods=['GET'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_location(public_id: int):
+def get_location(public_id: int, request_user: UserModel):
     """
     Returns the selected location for a given public_id
     
@@ -202,6 +212,8 @@ def get_location(public_id: int):
         public_id (int): public_id of location
         request_user (UserModel): User which is requesting the data
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     try:
         location_instance = locations_manager.get_location(public_id)
     except ManagerGetError as err:
@@ -212,8 +224,9 @@ def get_location(public_id: int):
 
 
 @location_blueprint.route('/<int:object_id>/object', methods=['GET'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_location_for_object(object_id: int):
+def get_location_for_object(object_id: int, request_user: UserModel):
     """
     Returns the selected location for a given object_id
     
@@ -221,17 +234,20 @@ def get_location_for_object(object_id: int):
         object_id (int): object_id of object 
         request_user (UserModel): User which is requesting the data
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     try:
         location_instance = locations_manager.get_location_for_object(object_id)
-    except ManagerGetError as err:
+    except ManagerGetError:
         return ErrorBody(404, "Could not retrieve the location from database!").response()
 
     return make_response(location_instance)
 
 
 @location_blueprint.route('/<int:object_id>/parent', methods=['GET'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_parent(object_id: int):
+def get_parent(object_id: int, request_user: UserModel):
     """
     Returns the parent location for a given object_id
     
@@ -240,6 +256,8 @@ def get_parent(object_id: int):
         request_user (UserModel): User which is requesting the data
     """
     parent = None
+
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
 
     try:
         current_location = locations_manager.get_location_for_object(object_id)
@@ -255,8 +273,9 @@ def get_parent(object_id: int):
 
 
 @location_blueprint.route('/<int:object_id>/children', methods=['GET'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-def get_children(object_id: int):
+def get_children(object_id: int, request_user: UserModel):
     """
     Get all children of next level for a given object_id
     
@@ -267,6 +286,8 @@ def get_children(object_id: int):
     Returns:
         (Response): All children of next level for the given object_id
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     children = []
 
     try:
@@ -284,9 +305,9 @@ def get_children(object_id: int):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @location_blueprint.route('/update_location', methods=['PUT', 'PATCH'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
 @location_blueprint.parse_location_parameters()
-@insert_request_user
 def update_location_for_object(params: dict, request_user: UserModel):
     """
     Updates a location
@@ -297,6 +318,9 @@ def update_location_for_object(params: dict, request_user: UserModel):
     Returns:
         UpdateSingleResponse: with acknowledged from database
     """
+    locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+
     location_update_params = {}
 
     object_id = int(params['object_id'])
@@ -304,6 +328,9 @@ def update_location_for_object(params: dict, request_user: UserModel):
 
     if params['name'] == '' or params['name'] is None:
         current_object = object_manager.get_object(object_id)
+
+        if current_app.cloud_mode:
+            current_app.database_manager.connector.set_database(request_user.database)
 
         rendered_list = RenderList([current_object],
                                    request_user,
@@ -329,8 +356,9 @@ def update_location_for_object(params: dict, request_user: UserModel):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @location_blueprint.route('/<int:object_id>/object', methods=['DELETE'])
+@insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
-def delete_location_for_object(object_id: int):
+def delete_location_for_object(object_id: int, request_user: UserModel):
     """
     Deletes a location where the object_id is assigned 
 
@@ -339,6 +367,8 @@ def delete_location_for_object(object_id: int):
     Returns:
         bool: Confirmation for deletion
     """
+    locations_manager:LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
     try:
         current_location_instance = locations_manager.get_location_for_object(object_id)
         location_public_id = current_location_instance.public_id

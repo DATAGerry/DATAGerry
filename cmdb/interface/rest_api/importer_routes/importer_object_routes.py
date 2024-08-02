@@ -17,13 +17,12 @@
 import json
 import logging
 
-from flask import request, abort, current_app
+from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.user_management import UserModel, UserManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
@@ -45,15 +44,10 @@ from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_fil
     get_element_from_data_request, generate_parsed_output, verify_import_access
 
 from cmdb.errors.manager import ManagerInsertError
-
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
-
 LOGGER = logging.getLogger(__name__)
-
-with current_app.app_context():
-    user_manager = UserManager(current_app.database_manager)
-    object_manager: CmdbObjectManager = CmdbObjectManager(current_app.database_manager, current_app.event_queue)
-    logs_manager = LogsManager(current_app.database_manager, current_app.event_queue)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
@@ -83,6 +77,7 @@ def get_default_importer_config(importer_type):
         importer: ObjectImporterConfig = __OBJECT_IMPORTER_CONFIG__[importer_type]
     except IndexError:
         return abort(404)
+
     return make_response({'manually_mapping': importer.MANUALLY_MAPPING})
 
 
@@ -91,7 +86,9 @@ def get_default_importer_config(importer_type):
 @login_required
 def get_parser():
     """TODO: document"""
-    parser = [parser for parser in __OBJECT_PARSER__]
+    # parser = [parser for parser in __OBJECT_PARSER__]
+    parser = list(__OBJECT_PARSER__)
+
     return make_response(parser)
 
 
@@ -110,9 +107,7 @@ def get_default_parser_config(parser_type: str):
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
 @login_required
-@insert_request_user
-# @right_required('base.import.object.*')
-def parse_objects(request_user: UserModel):
+def parse_objects():
     """TODO: document"""
     # TODO: check if request user has the permission 'base.import.object.*'
     # Check if file exists
@@ -158,9 +153,12 @@ def import_objects(request_user: UserModel):
     if not importer_config_request:
         return abort(400, 'No import config was provided')
 
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+
     # Check if type exists
     try:
-        type_manager = TypeManager(database_manager=current_app.database_manager)
         type_ = type_manager.get(importer_config_request.get('type_id'))
         if not type_.active:
             raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
@@ -188,12 +186,14 @@ def import_objects(request_user: UserModel):
         return abort(406, ile.message)
     importer_config = importer_config_class(**importer_config_request)
     LOGGER.debug(importer_config_request)
+
     # Load importer
     try:
         importer_class = load_importer_class('object', file_format)
     except ImporterLoadError as ile:
         return abort(406, ile.message)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
+
     LOGGER.info('Importer %s was loaded', importer_class)
 
     try:
@@ -210,7 +210,6 @@ def import_objects(request_user: UserModel):
     # log all successful imports
     for message in import_response.success_imports:
         try:
-
             # get object state of every imported object
             current_type_instance = object_manager.get_type(importer_config_request.get('type_id'))
             current_object = object_manager.get_object(message.public_id)
@@ -229,6 +228,7 @@ def import_objects(request_user: UserModel):
                 'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
                 'version': current_object.version
             }
+
             logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
