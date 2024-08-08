@@ -252,9 +252,14 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     }
 
     /**
-     * Change the field when the reference changes
-     * @param name
-     */
+    * Change the field when the reference name changes.
+    * 
+    * This method updates the field name in both `this.data.fields` and `this.fields`.
+    * It first tries to find the latest field name if the old name has been updated.
+    * Then, it updates the field name accordingly and also updates `this.data.name` to the new name.
+    * 
+    * @param name The new name for the field.
+    */
     public onNameChange(name: string) {
         let oldName = this.data.name;
 
