@@ -17,13 +17,14 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
+import { AbstractControl, UntypedFormControl, UntypedFormGroup, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { checkTypeExistsValidator, TypeService } from '../../../services/type.service';
 import { CmdbMode } from '../../../modes.enum';
 import { ReplaySubject } from 'rxjs';
 import { TypeBuilderStepComponent } from '../type-builder-step.component';
 import { takeUntil } from 'rxjs/operators';
 import { CmdbType } from '../../../models/cmdb-type';
+import { alphanumericValidator } from './alphanumeric-validator';
 
 
 /**
@@ -38,6 +39,8 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
 
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
   public form: UntypedFormGroup;
+
+
 
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
@@ -56,7 +59,7 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
   constructor(private typeService: TypeService) {
     super();
     this.form = new UntypedFormGroup({
-      name: new UntypedFormControl('', Validators.required),
+      name: new UntypedFormControl('', [Validators.required, alphanumericValidator()]),
       label: new UntypedFormControl('', Validators.required),
       description: new UntypedFormControl(''),
       active: new UntypedFormControl(true),
