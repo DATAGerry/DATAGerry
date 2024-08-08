@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import TypeVar, Generic, List, Union
+from typing import TypeVar, Generic, Union
 
 from cmdb.framework import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -25,7 +25,7 @@ C = TypeVar('C', bound=CmdbDAO)
 class ListResult(Generic[C]):
     """Framework Result for a list call over a collection."""
 
-    def __init__(self, results: List[Union[C, dict]]):
+    def __init__(self, results: list[Union[C, dict]]):
         """
         Constructor of `ListResult`.
 
@@ -41,4 +41,5 @@ class ListResult(Generic[C]):
         """Property setter for total lazy calc"""
         if not self._total:
             self._total = len(self.results)
+
         return self._total

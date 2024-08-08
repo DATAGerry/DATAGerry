@@ -75,7 +75,7 @@ class APIBlueprint(Blueprint):
                                         except KeyError:
                                             return abort(403, f'User has not the required right {right}')
 
-                                        if exe_key not in user_dict.keys():
+                                        if exe_key not in user_dict:
                                             return abort(403, f'User has not the required right {right}')
 
                                         if user_dict[exe_key] == route_parameter:
@@ -90,6 +90,7 @@ class APIBlueprint(Blueprint):
 
         return _protect
 
+
     @classmethod
     def validate(cls, schema=None):
         """TODO: document"""
@@ -103,8 +104,10 @@ class APIBlueprint(Blueprint):
                     validation_result = validator.validate(data)
                 except Exception as err:
                     return abort(400, str(err))
+
                 if not validation_result:
                     return abort(400, {'validation_error': validator.errors})
+
                 return f(data=validator.document, *args, **kwargs)
 
             return _decorate
@@ -132,11 +135,13 @@ class APIBlueprint(Blueprint):
                     )
                 except Exception as e:
                     return abort(400, str(e))
+
                 return f(params=params, *args, **kwargs)
 
             return _decorate
 
         return _parse
+
 
     @classmethod
     def parse_location_parameters(cls, **optional):
@@ -149,10 +154,12 @@ class APIBlueprint(Blueprint):
                     location_args = request.args.to_dict()
                 except Exception as error:
                     return abort(400, str(error))
-                return f(location_args)
-            return _decorate
-        return _parse
 
+                return f(location_args)
+
+            return _decorate
+
+        return _parse
 
 
     @classmethod
@@ -167,7 +174,6 @@ class APIBlueprint(Blueprint):
         Args:
             **optional: dict of optional collection parameters for given route function.
         """
-
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
@@ -197,6 +203,7 @@ class RootBlueprint(Blueprint):
         """
         self.nested_blueprints.append(nested_blueprint)
 
+
     @classmethod
     def parse_assistant_parameters(cls, **optional):
         """TODO: document"""
@@ -207,8 +214,11 @@ class RootBlueprint(Blueprint):
                     location_args = request.args.to_dict()
                 except Exception as error:
                     return abort(400, str(error))
+
                 return f(location_args)
+
             return _decorate
+
         return _parse
 
 

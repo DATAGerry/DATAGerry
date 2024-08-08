@@ -19,7 +19,6 @@ Definition of all routes for objects
 import json
 import copy
 import logging
-from typing import List
 from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
@@ -212,7 +211,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                                         permission=AccessControlPermission.READ)
 
         if view == 'native':
-            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            object_list: list[dict] = [object_.__dict__ for object_ in iteration_result.results]
 
             api_response = GetMultiResponse(object_list,
                                             total=iteration_result.total,
@@ -415,7 +414,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                                                     permission=AccessControlPermission.READ)
 
         if view == 'native':
-            object_list: List[dict] = [object_.__dict__ for object_ in iteration_result.results]
+            object_list: list[dict] = [object_.__dict__ for object_ in iteration_result.results]
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
         elif view == 'render':
@@ -472,7 +471,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 
     try:
         type_instance: TypeModel = type_manager.get(public_id=public_id)
-        objects: List[CmdbObject] = manager.iterate({'type_id': public_id},
+        objects: list[CmdbObject] = manager.iterate({'type_id': public_id},
                                                     limit=0,
                                                     skip=0,
                                                     sort='public_id',
@@ -482,7 +481,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
         return abort(400, err)
 
     type_fields = sorted([field.get('name') for field in type_instance.fields])
-    unstructured: List[dict] = []
+    unstructured: list[dict] = []
 
     for object_ in objects:
         object_fields = [field.get('name') for field in object_.fields]
@@ -865,7 +864,7 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
 
             iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(build_params)
 
-            all_locations: List[dict] = [location_.__dict__ for location_ in iteration_result.results]
+            all_locations: list[dict] = [location_.__dict__ for location_ in iteration_result.results]
             all_children = locations_manager.get_all_children(current_location.public_id, all_locations)
 
             # delete all child locations

@@ -68,12 +68,15 @@ class SystemSettingsWriter(SystemWriter):
     """TODO: document"""
     COLLECTION = 'settings.conf'
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
         """
         Init database writer with DatabaseManagerMongo
         Args:
             database_manager: Database connection
         """
+        if database:
+            database_manager.connector.set_database(database)
+
         super().__init__(database_manager)
 
 
@@ -102,6 +105,7 @@ class SystemSettingsWriter(SystemWriter):
 
         if verify_document != data and data is not None:
             return False
+
         return True
 
 

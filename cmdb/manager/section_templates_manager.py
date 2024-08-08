@@ -109,6 +109,7 @@ class SectionTemplatesManager(BaseManager):
                 permission: AccessControlPermission = None) -> IterationResult[CmdbSectionTemplate]:
         """
         Performs an aggregation on the database
+
         Args:
             builder_params (BuilderParameters): Contains input to identify the target of action
             user (UserModel, optional): User requesting this action
@@ -381,7 +382,7 @@ class SectionTemplatesManager(BaseManager):
 
         Args:
             type_id (int): ID of the type for which the objects should be cleaned
-            section_field_names (list[str]): List of all fields which should be deleted 
+            section_field_names (list[str]): list of all fields which should be deleted 
         """
         section_objects: list = self.cmdb_object_manager.get_objects_by_type(type_id)
 

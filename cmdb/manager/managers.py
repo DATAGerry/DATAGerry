@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import Union, List
+from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
@@ -47,7 +47,7 @@ class ManagerQueryBuilder(Builder):
         self.query = None
 
 
-    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
+    def build(self, filter: Union[list[dict], dict], limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         """
         Converts the parameters from the call to a mongodb aggregation pipeline
@@ -80,7 +80,7 @@ class ManagerQueryBuilder(Builder):
         return self.query
 
 
-    def count(self, filter: Union[List[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
+    def count(self, filter: Union[list[dict], dict], *args, **kwargs) -> Union[Query, Pipeline]:
         """
         Count the number of documents in the stages
         Args:

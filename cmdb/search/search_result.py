@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import TypeVar, Generic, List
+from typing import TypeVar, Generic
 
 from bson import Regex
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -24,36 +24,38 @@ LOGGER = logging.getLogger(__name__)
 
 R: TypeVar = TypeVar('R')
 
-# FIXME
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    SearchResultMap                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SearchResultMap(Generic[R]):
     """Result mapper for Result/Match binding"""
-
-    def __init__(self, result: R, matches: List[str] = None):
+    def __init__(self, result: R, matches: list[str] = None):
         self.result = result
-        self.matches: List[str] = matches
+        self.matches: list[str] = matches
 
 
     def to_json(self) -> dict:
         """Quick convert for the database"""
         return {'result': self.result.__dict__, 'matches': self.matches}
 
-
-# FIXME
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                     SearchResult                                                     #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SearchResult(Generic[R]):
     """Generic search result base"""
 
     def __init__(self,
-                 results: List[R],
+                 results: list[R],
                  total_results: int,
                  groups: list,
                  alive: bool,
                  limit: int,
                  skip: int,
-                 matches_regex: List[str] = None):
+                 matches_regex: list[str] = None):
         """
         Constructor for search result
         Args:
-            results: List of generic search results
+            results: list of generic search results
             total_results: total number of results
             groups: Type groups of objects
             alive: flag if spliced search result has more data in database
@@ -66,7 +68,7 @@ class SearchResult(Generic[R]):
         self.total_results: int = total_results
         self.alive = alive
         self.groups = groups
-        self.results: List[SearchResultMap] = [
+        self.results: list[SearchResultMap] = [
             SearchResultMap[R](result=result, matches=self.find_match_fields(result, matches_regex)) for result in
             results]
 

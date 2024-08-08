@@ -18,7 +18,7 @@ TODO: document
 """
 import json
 import logging
-from typing import Union, List
+from typing import Union
 
 from bson import json_util
 
@@ -43,7 +43,6 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  TypeManager - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class TypeManager(ManagerBase):
     """
     Manager for the type module. Manages the CRUD functions of the types and the iteration over the collection.
@@ -88,6 +87,7 @@ class TypeManager(ManagerBase):
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(TypeModel)
         return iteration_result
@@ -103,7 +103,7 @@ class TypeManager(ManagerBase):
             ListResult
         """
         results = self._get(self.collection, filter=filter)
-        types: List[TypeModel] = [TypeModel.from_data(result) for result in results]
+        types: list[TypeModel] = [TypeModel.from_data(result) for result in results]
         return ListResult(types)
 
 

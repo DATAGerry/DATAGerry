@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import TypeVar, Generic, List, Union, Type
+from typing import TypeVar, Generic, Union, Type
 
 from cmdb.framework import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -25,7 +25,7 @@ C = TypeVar('C', bound=CmdbDAO)
 class IterationResult(Generic[C]):
     """Framework Result for a iteration call over a collection"""
 
-    def __init__(self, results: List[Union[C, dict]], total: int):
+    def __init__(self, results: list[Union[C, dict]], total: int):
         """
         Constructor of IterationResult
         Args:

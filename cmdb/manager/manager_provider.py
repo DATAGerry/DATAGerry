@@ -39,11 +39,14 @@ from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
 from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
+
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_writer import SystemSettingsWriter
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 
-class ManagerType(str, Enum):
+class ManagerType(Enum):
     """Enum of the different Managers which are used by the API routes"""
     CATEGORIES_MANAGER = 'CategoriesManager'
     CMDB_OBJECT_MANAGER = 'CmdbObjectManager'
@@ -62,13 +65,15 @@ class ManagerType(str, Enum):
     EXPORTD_JOB_MANAGER = 'ExportdJobManager'
     EXPORT_D_LOG_MANAGER = 'ExportDLogManager'
     EXPORT_D_JOB_MANAGER = 'ExportDJobManager'
+    SYSTEM_SETTINGS_READER = 'SystemSettingsReader'
+    SYSTEM_SETTINGS_WRITER = 'SystemSettingsWriter'
 
 
 class ManagerProvider:
     """Provides Managers for stateless API route requests"""
 
     @staticmethod
-    def _get_manager_class(manager_type: ManagerType):
+    def __get_manager_class(manager_type: ManagerType):
         """
         Returns the appropriate manager class based on the provided ManagerType
 
@@ -95,21 +100,23 @@ class ManagerProvider:
             ManagerType.OBJECT_LINKS_MANAGER: ObjectLinksManager,
             ManagerType.EXPORTD_JOB_MANAGER: ExportdJobManager,
             ManagerType.EXPORT_D_LOG_MANAGER: ExportDLogManager,
-            ManagerType.EXPORT_D_JOB_MANAGER: ExportDJobManager
+            ManagerType.EXPORT_D_JOB_MANAGER: ExportDJobManager,
+            ManagerType.SYSTEM_SETTINGS_READER: SystemSettingsReader,
+            ManagerType.SYSTEM_SETTINGS_WRITER: SystemSettingsWriter
         }
 
         return manager_classes.get(manager_type)
 
 
     @staticmethod
-    def _get_manager_args(manager_type: ManagerType, request_user: UserModel):
+    def __get_manager_args(manager_type: ManagerType, request_user: UserModel):
         """
-        Returns the appropriate arguments for the manager class based on the provided ManagerType and 'cloud_mode' flag.
+        Returns the appropriate arguments for the manager class based on the provided
+        ManagerType and 'cloud_mode' flag.
 
         Args:
             manager_type (ManagerType): Enum of possible Managers
             request_user (UserModel): The user which is making the API call
-
         Returns:
             tuple: Arguments for the manager class initialization
         """
@@ -141,6 +148,8 @@ class ManagerProvider:
                 ManagerType.TYPE_MANAGER,
                 ManagerType.EXPORT_D_LOG_MANAGER,
                 ManagerType.EXPORT_D_JOB_MANAGER,
+                ManagerType.SYSTEM_SETTINGS_READER,
+                ManagerType.SYSTEM_SETTINGS_WRITER
             ]:
                 return common_args + (request_user.database,)
         else:
@@ -162,6 +171,7 @@ class ManagerProvider:
 
                 return common_args + (right_manager,)
 
+        # Default route where just the dbm is returned
         return common_args
 
 
@@ -176,11 +186,11 @@ class ManagerProvider:
         Returns:
             Manager: Returns the manager of the provided ManagerType
         """
-        manager_class = cls._get_manager_class(manager_type)
+        manager_class = cls.__get_manager_class(manager_type)
 
         if not manager_class:
             LOGGER.error("No manager found for type: %s", manager_type)
             return None
 
-        manager_args = cls._get_manager_args(manager_type, request_user)
+        manager_args = cls.__get_manager_args(manager_type, request_user)
         return manager_class(*manager_args)

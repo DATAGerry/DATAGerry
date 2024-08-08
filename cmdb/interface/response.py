@@ -18,7 +18,7 @@ from json import dumps
 from datetime import datetime, timezone
 from enum import Enum
 from math import ceil
-from typing import List, Union
+from typing import Union
 from flask import make_response as flask_response
 from werkzeug.wrappers import Response
 
@@ -47,6 +47,7 @@ def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2
     response = flask_response(dumps(body, default=default, indent=indent), status)
     response.mimetype = mime or DEFAULT_MIME_TYPE
     response.headers['X-API-Version'] = API_VERSION
+
     return response
 
 
@@ -127,6 +128,7 @@ class BaseAPIResponse:
         """
         if operation_type.value not in set(item.value for item in OperationType):
             raise TypeError(f'{operation_type} is not a valid response operation')
+
         self.operation_type: OperationType = operation_type
         self.url = url or ''
         self.model: Model = model or ''
@@ -191,8 +193,7 @@ class GetSingleResponse(BaseAPIResponse):
             self.result = APIProjector(result, projection).project
         else:
             self.result: dict = result
-        super().__init__(operation_type=OperationType.GET, url=url, model=model,
-                                                body=body)
+        super().__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
 
 
     def make_response(self, *args, **kwargs) -> Response:
@@ -210,6 +211,7 @@ class GetSingleResponse(BaseAPIResponse):
             response = make_api_response(self.export(*args, **kwargs))
         else:
             response = make_api_response(None)
+
         return response
 
 
@@ -227,7 +229,7 @@ class GetMultiResponse(BaseAPIResponse):
     """
     __slots__ = 'results', 'count', 'total', 'parameters', 'pager', 'pagination'
 
-    def __init__(self, results: List[dict], total: int, params: CollectionParameters, url: str = None,
+    def __init__(self, results: list[dict], total: int, params: CollectionParameters, url: str = None,
                  model: Model = None, body: bool = None):
         """
         Constructor of GetMultiResponse.
@@ -241,11 +243,13 @@ class GetMultiResponse(BaseAPIResponse):
             body: If http response should not have a body.
         """
         self.parameters = params
+
         if self.parameters.projection:
             project = APIProjection(self.parameters.projection)
             self.results = APIProjector(results, project).project
         else:
             self.results = results
+
         self.count: int = len(self.results)
         self.total: int = total
 
@@ -253,6 +257,7 @@ class GetMultiResponse(BaseAPIResponse):
             total_pages = 1
         else:
             total_pages = ceil(total / params.limit)
+
         self.pager: APIPager = APIPager(page=params.page, page_size=params.limit,
                                         total_pages=total_pages)
         self.pagination: APIPagination = APIPagination.create(url, self.pager.page, self.pager.total_pages)
@@ -274,21 +279,21 @@ class GetMultiResponse(BaseAPIResponse):
             response = make_api_response(self.export(*args, **kwargs))
         else:
             response = make_api_response(None)
+
         response.headers['X-Total-Count'] = self.total
+
         return response
 
 
     def export(self, text: str = 'json', pagination: bool = True) -> dict:
         """
-        Get the response data as dict.
+        Get the response data as dict
 
         Args:
             text: Currently optional data wrapper.
             pagination: Should the response include pagination data.
-
         Returns:
-            Instance as a dict.
-
+            Instance as a dict
         """
         extra = {}
         if pagination:
@@ -307,20 +312,18 @@ class GetMultiResponse(BaseAPIResponse):
 
 class InsertSingleResponse(BaseAPIResponse):
     """
-    API Response for insert call of a single resource.
+    API Response for insert call of a single resource
     """
-
     def __init__(self, raw: dict, result_id: Union[PublicID, str, int] = None, url: str = None, model: Model = None):
         """
         Constructor of InsertSingleResponse.
 
         Args:
-            result_id: The new public id or a identifier of the inserted resource.
+            result_id: The new public id or a identifier of the inserted resource
             raw: The raw document
             url: The request url.
             model: Data model of the inserted resource.
         """
-
         self.raw: dict = raw
         self.result_id: int = int(result_id)
         super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
@@ -340,6 +343,7 @@ class InsertSingleResponse(BaseAPIResponse):
         """
         response = make_api_response(self.export(), 201)
         response.headers['Location'] = f'{self.url}{self.result_id}'
+
         return response
 
 
@@ -349,7 +353,6 @@ class InsertSingleResponse(BaseAPIResponse):
             'result_id': self.result_id,
             'raw': self.raw
         }, **super().export(*args, **kwargs)}
-
 
 
 class UpdateSingleResponse(BaseAPIResponse):
@@ -387,6 +390,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         """
         response = make_api_response(self.export(), 202)
         response.headers['Location'] = f'{self.url}'
+
         return response
 
 
@@ -404,10 +408,9 @@ class UpdateMultiResponse(BaseAPIResponse):
     """
     API Response for update call of a multiple resources.
     """
-
     __slots__ = 'results', 'failed'
 
-    def __init__(self, results: List[dict], failed: List[ResponseFailedMessage] = None,
+    def __init__(self, results: list[dict], failed: list[ResponseFailedMessage] = None,
                  url: str = None, model: Model = None):
         """
         Constructor of UpdateSingleResponse.
@@ -418,8 +421,8 @@ class UpdateMultiResponse(BaseAPIResponse):
             url: Requested url.
             model: Data model of updated resource.
         """
-        self.results: List[dict] = results
-        self.failed: List[ResponseFailedMessage] = failed or []
+        self.results: list[dict] = results
+        self.failed: list[ResponseFailedMessage] = failed or []
         super().__init__(operation_type=OperationType.UPDATE, url=url, model=model)
 
 
@@ -435,6 +438,7 @@ class UpdateMultiResponse(BaseAPIResponse):
             Instance of Response with http status code 202
         """
         response = make_api_response(self.export(), 202)
+
         return response
 
 
@@ -473,12 +477,13 @@ class DeleteSingleResponse(BaseAPIResponse):
         Args:
             *args:
             **kwargs:
-
         Returns:
             Instance of Response with 204 if raw content was set else 202
         """
         status_code = 204 if not self.raw else 202
+
         return make_api_response(self.export(*args, **kwargs), status_code)
+
 
     def export(self, text: str = 'json') -> dict:
         """
@@ -495,7 +500,7 @@ class GetListResponse(BaseAPIResponse):
     """
     __slots__ = 'results', 'params'
 
-    def __init__(self, results: List[dict], url: str = None, model: Model = None, body: bool = None,
+    def __init__(self, results: list[dict], url: str = None, model: Model = None, body: bool = None,
                  params: APIParameters = None):
 
         self.params = params
@@ -503,7 +508,7 @@ class GetListResponse(BaseAPIResponse):
             projection = APIProjection(self.params.projection)
             self.results = APIProjector(results, projection).project
         else:
-            self.results: List[dict] = results
+            self.results: list[dict] = results
         super().__init__(operation_type=OperationType.GET, url=url, model=model, body=body)
 
 
@@ -522,7 +527,9 @@ class GetListResponse(BaseAPIResponse):
             response = make_api_response(self.export(*args, **kwargs))
         else:
             response = make_api_response(None)
+
         response.headers['X-Total-Count'] = len(self.results)
+
         return response
 
 

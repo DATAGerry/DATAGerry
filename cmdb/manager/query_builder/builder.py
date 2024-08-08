@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List, Any, Union
+from typing import Any, Union
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -39,13 +39,13 @@ class Builder:
 
     # Logical Query Operators
     @classmethod
-    def and_(cls, expressions: List[dict]) -> dict:
+    def and_(cls, expressions: list[dict]) -> dict:
         """Joins query clauses with a logical AND."""
         return {'$and': expressions}
 
 
     @classmethod
-    def or_(cls, expressions: List[dict]) -> dict:
+    def or_(cls, expressions: list[dict]) -> dict:
         """Joins query clauses with a logical OR."""
         return {'$or': expressions}
 
@@ -57,7 +57,7 @@ class Builder:
 
 
     @classmethod
-    def nor_(cls, expressions: List[dict]) -> dict:
+    def nor_(cls, expressions: list[dict]) -> dict:
         """Joins query clauses with a logical NOR."""
         return {'$nor': expressions}
 
@@ -82,7 +82,7 @@ class Builder:
 
 
     @classmethod
-    def in_(cls, field: str, values: List[Any]) -> dict:
+    def in_(cls, field: str, values: list[Any]) -> dict:
         """Matches any of the values specified in an array."""
         return {field: {'$in': values}}
 
@@ -106,7 +106,7 @@ class Builder:
 
 
     @classmethod
-    def nin_(cls, field: str, values: List[Any]) -> dict:
+    def nin_(cls, field: str, values: list[Any]) -> dict:
         """Matches none of the values specified in an array."""
         return {field: {'$nin': values}}
 

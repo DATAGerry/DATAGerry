@@ -18,7 +18,6 @@ Represents a type in DATAGERRY
 Extends: CmdbDAO
 """
 import logging
-from typing import List
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
@@ -37,8 +36,9 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 class TypeModel(CmdbDAO):
     """
-    Model class of the framework type.
-
+    Model class of the framework type
+    Extends: CmdbDAO
+    
     Attributes:
         COLLECTION (Collection):    Name of the database collection.
         MODEL (Model):              Name of the DAO.
@@ -425,7 +425,7 @@ class TypeModel(CmdbDAO):
         return self.label
 
 
-    def get_externals(self) -> List[TypeExternalLink]:
+    def get_externals(self) -> list[TypeExternalLink]:
         """Get the render meta values of externals"""
         return self.render_meta.externals
 
@@ -478,7 +478,7 @@ class TypeModel(CmdbDAO):
         return TypeSummary(fields=complete_field_list)
 
 
-    def get_sections(self) -> List[TypeSection]:
+    def get_sections(self) -> list[TypeSection]:
         """TODO: document"""
         return self.render_meta.sections
 

@@ -110,10 +110,11 @@ def create_attachment_name(name, index, metadata, media_file_manager):
     """
     try:
         if media_file_manager.exist_file(metadata):
-            index += 1  # increment index by 1
-            name = name.replace('copy_({})_'.format(index-1), '')
-            name = 'copy_({})_{}'.format(index, name)
+            index += 1  
+            name = name.replace(f'copy_({index-1})_', '')
+            name = f'copy_({index})_{name}'
             metadata['filename'] = name
+
             return create_attachment_name(name, index, metadata, media_file_manager)
 
         return name

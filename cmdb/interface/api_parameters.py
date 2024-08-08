@@ -16,7 +16,7 @@
 """TODO: document"""
 from enum import Enum
 from json import loads
-from typing import NewType, List, Union
+from typing import NewType, Union
 # -------------------------------------------------------------------------------------------------------------------- #
 
 Parameter = NewType('Parameter', str)
@@ -64,7 +64,7 @@ class CollectionParameters(APIParameters):
     """Rest API class for parameters passed by a http request on a collection route"""
 
     def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
-                 order: int = None, page: int = None, filter: Union[List[dict], dict] = None, **kwargs):
+                 order: int = None, page: int = None, filter: Union[list[dict], dict] = None, **kwargs):
         """
         Constructor of the CollectionParameters.
 
@@ -81,11 +81,12 @@ class CollectionParameters(APIParameters):
         self.sort: str = sort or Parameter('public_id')
         self.order: int = int(order or SortOrder.ASCENDING.value)
         self.page: int = int((page or 1) or page < 1)
+
         if self.limit == 0:
             self.skip = 0
         else:
             self.skip: int = (self.page - 1) * self.limit
-        self.filter: Union[List[dict], dict] = filter or {}
+        self.filter: Union[list[dict], dict] = filter or {}
         super().__init__(query_string=query_string, **kwargs)
 
 

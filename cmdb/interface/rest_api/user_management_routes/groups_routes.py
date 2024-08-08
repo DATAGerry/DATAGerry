@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import List
-
 from flask import request
 
 from cmdb.user_management.managers.group_manager import GroupManager
@@ -40,8 +38,10 @@ from cmdb.user_management.rights import __all__ as rights
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
+
 groups_blueprint = APIBlueprint('groups', __name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @groups_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
@@ -210,7 +210,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
 
     # Check of action is set
     if params.action:
-        users_in_group: List[UserModel] = user_manager.get_many(Query({'group_id': public_id}))
+        users_in_group: list[UserModel] = user_manager.get_many(Query({'group_id': public_id}))
 
         if len(users_in_group) > 0:
             if params.action == GroupDeleteMode.MOVE.value:

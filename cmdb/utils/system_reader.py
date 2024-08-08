@@ -16,7 +16,7 @@
 """
 Collection of system readers which loads configuration files and settings
 """
-from typing import Any, Union, List
+from typing import Any, Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.errors.database import NoDocumentFound
@@ -34,14 +34,13 @@ class SystemReader:
         Args:
             name: key name of value
             section: section identifier
-            default: if value not found return default
         Returns:
             value
         """
         raise NotImplementedError
 
 
-    def get_sections(self) -> List[str]:
+    def get_sections(self) -> list[str]:
         """
         get all sections from config
         Returns:
@@ -68,13 +67,17 @@ class SystemSettingsReader(SystemReader):
     """
     COLLECTION = 'settings.conf'
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
         """
         init system settings reader
         Args:
             database_manager: database managers
         """
-        self.dbm: DatabaseManagerMongo = database_manager
+        if database:
+            database_manager.connector.set_database(database)
+
+        self.dbm = database_manager
+
         super().__init__()
 
 
@@ -88,9 +91,7 @@ class SystemSettingsReader(SystemReader):
         Returns:
             value
         """
-        return self.dbm.find_one_by(
-                        collection=SystemSettingsReader.COLLECTION,
-                        filter={'_id': section})[name]
+        return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter={'_id': section})[name]
 
 
     def get_section(self, section_name: str) -> dict:
@@ -105,10 +106,7 @@ class SystemSettingsReader(SystemReader):
         Returns:
             list of sections inside a config
         """
-        return self.dbm.find_all(
-            collection=SystemSettingsReader.COLLECTION,
-            projection={'_id': 1}
-        )
+        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION, projection={'_id': 1})
 
 
     def get_all_values_from_section(self, section, default=None) -> dict:
@@ -122,10 +120,7 @@ class SystemSettingsReader(SystemReader):
             key value dict of all elements inside section
         """
         try:
-            section_values = self.dbm.find_one_by(
-                collection=SystemSettingsReader.COLLECTION,
-                filter={'_id': section}
-            )
+            section_values = self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter={'_id': section})
         except NoDocumentFound as err:
             if default:
                 return default

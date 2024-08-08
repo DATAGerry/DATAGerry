@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.framework import CategoryModel, TypeModel
 from cmdb.framework.cmdb_errors import ObjectManagerInsertError
@@ -41,8 +40,8 @@ class Update20200512(Updater):
     def start_update(self):
         """TODO: document"""
         collection = CategoryModel.COLLECTION
-        new_categories: List[CategoryModel] = []
-        raw_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
+        new_categories: list[CategoryModel] = []
+        raw_categories_old_structure: list[dict] = self.database_manager.find_all(collection=collection,
                                                                                   filter={})
         for idx, old_raw_category in enumerate(raw_categories_old_structure):
             new_categories.append(self.__convert_category_to_new_structure(old_raw_category, index=idx))
@@ -78,7 +77,7 @@ class Update20200512(Updater):
         return category
 
 
-    def __get_types_in_category(self, category_id: int) -> List[int]:
+    def __get_types_in_category(self, category_id: int) -> list[int]:
         """Get a list of type ids by calling the old structure and load the category_id field from types
         Notes:
             Do not use type_instance.category_id here - doesnt exists anymore

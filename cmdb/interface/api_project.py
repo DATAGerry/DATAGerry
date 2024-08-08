@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import List, Union
+from typing import Union
 
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -26,7 +26,7 @@ class APIProjection:
     __slots__ = 'projection', '__includes', '__has_includes', '__excludes', '__has_excludes'
 
     def __init__(self, projection: Union[dict, list] = None):
-        if isinstance(projection, (list, List)):
+        if isinstance(projection, list):
             projection = dict.fromkeys(projection, 1)
         self.projection = projection or {}
         self.__includes = None
@@ -58,7 +58,7 @@ class APIProjection:
 
 
     @property
-    def includes(self) -> List[str]:
+    def includes(self) -> list[str]:
         """Get all keys which includes (value set to 1)"""
         if not self.__includes:
             self.__includes = APIProjection.__validate_inclusion(self.projection)
@@ -73,7 +73,7 @@ class APIProjection:
 
 
     @property
-    def excludes(self) -> List[str]:
+    def excludes(self) -> list[str]:
         """Get all keys which excludes (value set to 0)"""
         if not self.__excludes:
             self.__excludes = APIProjection.__validate_inclusion(self.projection, match=0)
@@ -93,7 +93,7 @@ class APIProjector:
     """
     __slots__ = '_output', '__data', '__projection'
 
-    def __init__(self, data: Union[dict, List[dict]], projection: APIProjection = None):
+    def __init__(self, data: Union[dict, list[dict]], projection: APIProjection = None):
         self._output = None
         self.__data = data
         self.__projection = projection
@@ -107,7 +107,7 @@ class APIProjector:
         return self._output
 
 
-    def __project_output(self) -> Union[dict, List[dict]]:
+    def __project_output(self) -> Union[dict, list[dict]]:
         """Generate the output from the the api result or results"""
         if not self.__projection:
             return self.__data

@@ -16,8 +16,13 @@
 """TODO: document"""
 import base64
 import logging
+import hashlib
+import hmac
+import json
 from Crypto import Random
 from Crypto.Cipher import AES
+from bson import json_util
+from bson.json_util import dumps
 
 from flask import current_app
 
@@ -43,9 +48,6 @@ class SecurityManager:
 
     def generate_hmac(self, data):
         """TODO: document"""
-        import hashlib
-        import hmac
-
         generated_hash = hmac.new(
             self.get_symmetric_aes_key(),
             bytes(data + self.salt, 'utf-8'),
@@ -64,12 +66,12 @@ class SecurityManager:
         :return:
         """
         if isinstance(raw, list):
-            import json
-            from bson import json_util
             raw = json.dumps(raw, default=json_util.default)
+
         raw = SecurityManager._pad(raw).encode('UTF-8')
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
+
         return base64.b64encode(iv + cipher.encrypt(raw))
 
 
@@ -78,6 +80,7 @@ class SecurityManager:
         enc = base64.b64decode(enc)
         iv = enc[:AES.block_size]
         cipher = AES.new(self.get_symmetric_aes_key(), AES.MODE_CBC, iv)
+
         return SecurityManager._unpad(cipher.decrypt(enc[AES.block_size:])).decode('utf-8')
 
 
@@ -114,5 +117,4 @@ class SecurityManager:
     @staticmethod
     def encode_object_base_64(data: object):
         """TODO: document"""
-        from bson.json_util import dumps
         return base64.b64encode(dumps(data).encode('utf-8')).decode("utf-8")

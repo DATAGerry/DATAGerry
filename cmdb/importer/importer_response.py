@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import List
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class BaseImporterResponse:
@@ -28,8 +27,8 @@ class ImporterObjectResponse(BaseImporterResponse):
     """Response of an bulk object import"""
 
     def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
-        self.success_imports: List[ImportSuccessMessage] = success_imports or []
-        self.failed_imports: List[ImportFailedMessage] = failed_imports or []
+        self.success_imports: list[ImportSuccessMessage] = success_imports or []
+        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
         super().__init__(message=message)
 
 

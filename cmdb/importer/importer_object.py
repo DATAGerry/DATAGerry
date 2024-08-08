@@ -16,7 +16,6 @@
 """TODO: document"""
 import logging
 from datetime import datetime, timezone
-from typing import List
 
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_errors import ObjectManagerGetError
@@ -35,9 +34,14 @@ from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               JsonObjectImporterConfig                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
-    """Importer configuration for JSON files"""
+    """
+    Importer configuration for JSON files
+    Extends: ObjectImporterConfig, JSONContent
+    """
 
     DEFAULT_MAPPING = {
         'properties': {
@@ -87,7 +91,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
         """create the native cmdb object from parsed content"""
-        possible_fields: List[dict] = kwargs['fields']
+        possible_fields: list[dict] = kwargs['fields']
         mapping: dict = self.config.get_mapping()
 
         working_object: dict = {
@@ -134,7 +138,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
     def start_import(self) -> ImporterObjectResponse:
         """TODO: document"""
         parsed_response: JsonObjectParserResponse = self.parser.parse(self.file)
-        type_instance_fields: List = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        type_instance_fields: list = self.object_manager.get_type(self.config.get_type_id()).get_fields()
 
         import_objects: list[dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
@@ -169,7 +173,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
         """TODO: document"""
         try:
-            possible_fields: List[dict] = kwargs['fields']
+            possible_fields: list[dict] = kwargs['fields']
         except (KeyError, IndexError, ValueError) as err:
             raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}') from err
 
@@ -182,9 +186,9 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
             'creation_time': datetime.now(timezone.utc)
         }
         current_mapping = self.get_config().get_mapping()
-        property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
-        field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
-        foreign_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'ref'})
+        property_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
+        field_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
+        foreign_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'ref'})
 
         # field/properties improvement
         improve_object = ImproveObject(entry, property_entries, field_entries, possible_fields)
@@ -223,7 +227,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                     }
                 }
                 LOGGER.debug('[CSV] Ref query: %s', query)
-                founded_objects: List[CmdbObject] = self.object_manager.get_objects_by(**query)
+                founded_objects: list[CmdbObject] = self.object_manager.get_objects_by(**query)
                 LOGGER.debug(founded_objects)
 
                 if len(founded_objects) != 1:
@@ -280,7 +284,7 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
         try:
-            possible_fields: List[dict] = kwargs['fields']
+            possible_fields: list[dict] = kwargs['fields']
         except (KeyError, IndexError, ValueError) as err:
             raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}') from err
 
@@ -293,8 +297,8 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
             'creation_time': datetime.now(timezone.utc)
         }
         current_mapping = self.get_config().get_mapping()
-        property_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
-        field_entries: List[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
+        property_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
+        field_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
 
         # Insert properties
         for property_entry in property_entries:

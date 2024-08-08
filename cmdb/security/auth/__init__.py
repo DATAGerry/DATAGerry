@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Basic Authentication Module"""
 import logging
-from typing import List, Type
+from typing import Type
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
@@ -33,16 +33,18 @@ from cmdb.user_management.managers.user_manager import UserManager, UserModel
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                      AuthModule                                                      #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AuthModule:
     """Authentication module class"""
 
-    __pre_installed_providers: List[AuthenticationProvider] = [
+    __pre_installed_providers: list[AuthenticationProvider] = [
         LocalAuthenticationProvider,
         LdapAuthenticationProvider
     ]
 
-    __installed_providers: List[AuthenticationProvider] = __pre_installed_providers
+    __installed_providers: list[AuthenticationProvider] = __pre_installed_providers
 
     __DEFAULT_SETTINGS__ = {
         '_id': 'auth',
@@ -67,7 +69,7 @@ class AuthModule:
     @staticmethod
     def __init_settings(auth_settings_values: dict) -> AuthSettingsDAO:
         """Merge default values with database entries"""
-        provider_config_list: List[dict] = auth_settings_values.get('providers')
+        provider_config_list: list[dict] = auth_settings_values.get('providers')
         installed_providers = AuthModule.get_installed_providers()
         for provider in installed_providers:
             if not any(p['class_name'] == provider.get_name() for p in provider_config_list):
@@ -126,25 +128,25 @@ class AuthModule:
 
 
     @classmethod
-    def get_installed_providers(cls) -> List['AuthenticationProvider']:
+    def get_installed_providers(cls) -> list['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @classmethod
-    def get_installed_internals(cls) -> List['AuthenticationProvider']:
+    def get_installed_internals(cls) -> list['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @classmethod
-    def get_installed_external(cls) -> List['AuthenticationProvider']:
+    def get_installed_external(cls) -> list['AuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @property
-    def providers(self) -> List['AuthenticationProvider']:
+    def providers(self) -> list['AuthenticationProvider']:
         """Get all installed providers as property list"""
         return AuthModule.__installed_providers
 

@@ -20,7 +20,7 @@ import json
 import logging
 
 from queue import Queue
-from typing import Union, List
+from typing import Union
 from bson import Regex, json_util
 
 from cmdb.database.utils import object_hook
@@ -43,19 +43,20 @@ from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                              ObjectQueryBuilder - CLASS                                              #
+#                                                  ObjectQueryBuilder                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectQueryBuilder(ManagerQueryBuilder):
-    """TODO: document"""
+    """
+    Extends: ManagerQueryBuilder
+    """
 
     def __init__(self):
         super().__init__()
 
 
-    def build(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+    def build(self, filter: Union[list[dict], dict], limit: int, skip: int, sort: str, order: int,
               user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) -> \
             Union[Query, Pipeline]:
         """
@@ -121,7 +122,7 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         return self.query
 
 
-    def count(self, filter: Union[List[dict], dict], user: UserModel = None,
+    def count(self, filter: Union[list[dict], dict], user: UserModel = None,
               permission: AccessControlPermission = None) -> Union[Query, Pipeline]:
         """
         Count the number of documents in the stages
@@ -149,11 +150,13 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
         return self.query
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 ObjectManager - Class                                                #
+#                                                     ObjectManager                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectManager(ManagerBase):
-    """TODO: document"""
+    """
+    Extends: ManagerBase
+    """
 
     def __init__(self, database_manager: DatabaseManagerMongo,
                  event_queue: Union[Queue, Event] = None,
@@ -198,7 +201,7 @@ class ObjectManager(ManagerBase):
         raise ManagerGetError(f'Object with ID: {public_id} not found!')
 
 
-    def iterate(self, filter: Union[List[dict], dict], limit: int, skip: int, sort: str, order: int,
+    def iterate(self, filter: Union[list[dict], dict], limit: int, skip: int, sort: str, order: int,
                 user: UserModel = None, permission: AccessControlPermission = None, *args, **kwargs) \
             -> IterationResult[CmdbObject]:
         """TODO: document"""
@@ -351,7 +354,7 @@ class ObjectManager(ManagerBase):
             try:
                 obj_result.results.sort(key=lambda x: getattr(x, sort), reverse=descending_order)
             except Exception as err:
-                LOGGER.debug(f"References sorting error: {err}")
+                LOGGER.debug("References sorting error: %s", err)
 
             # just keep the given limit of objects if limit > 0
             if limit > 0:
@@ -364,16 +367,16 @@ class ObjectManager(ManagerBase):
                 try:
                     obj_result.results = obj_result.results[skip:list_length]
                 except Exception as err:
-                    LOGGER.debug(f"References list slice error: {err}")
+                    LOGGER.debug("References list slice error: %s", err)
 
             # obj_result.total = len(obj_result.results)
         except Exception as err:
-            LOGGER.info(f"__merge_mds_references err: {err}")
+            LOGGER.info("[__merge_mds_references] Errorr: %s", err)
 
         return obj_result
 
 
-    def get_mds_references_for_object(self, referenced_object: CmdbObject, query_filter: dict):
+    def get_mds_references_for_object(self, referenced_object: CmdbObject, query_filter: Union[dict, list]):
         """TODO: document"""
         object_type_id = referenced_object.type_id
 
@@ -429,7 +432,7 @@ class ObjectManager(ManagerBase):
         try:
             results = list(self._aggregate(self.type_manager.collection, query))
         except ManagerIterationError as err:
-            LOGGER.debug(f"get_mds_references_for_object aggregation err:{err}")
+            LOGGER.debug("[get_mds_references_for_object] aggregation error: %s", err)
 
         matching_results = []
 
@@ -499,7 +502,7 @@ class ObjectManager(ManagerBase):
                                                     order=1
                                             )
 
-        referenced_objects: List[dict] =  [object_.__dict__ for object_ in iteration_result.results]
+        referenced_objects: list[dict] =  [object_.__dict__ for object_ in iteration_result.results]
 
         # Delete the reference in each object and update them
         for refed_object in referenced_objects:

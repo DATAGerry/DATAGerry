@@ -35,8 +35,12 @@ from cmdb.user_management.managers.user_manager import UserManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
 scheduler = sched.scheduler(time.time, time.sleep)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    ExportdService                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     """TODO: document"""
@@ -44,20 +48,23 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
     def __init__(self):
         super().__init__()
         self._name = "exportd"
+
         self._eventtypes = [
             "cmdb.core.object.#",
             "cmdb.core.objects.#",
             "cmdb.core.objecttype.#",
             "cmdb.core.objecttypes.#",
             "cmdb.exportd.#"
-            ]
+        ]
 
 
     def _run(self):
         LOGGER.info("%s: start run", self._name)
+
         while not self._event_shutdown.is_set():
             scheduler.run()
             time.sleep(1)
+
         LOGGER.info("%s: end run", self._name)
 
 
@@ -112,12 +119,14 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
             new_thread = ExportdThread(event=event, state=event.get_param("active") in ['true', True])
             new_thread.start()
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                     ExportdThread                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportdThread(Thread):
-    """TODO: document"""
+    """Extends: Thread"""
 
     def __init__(self, event: Event, state: bool = False):
-
         scr = SystemConfigReader()
         database_options = scr.get_all_values_from_section('Database')
         database = DatabaseManagerMongo(**database_options)
