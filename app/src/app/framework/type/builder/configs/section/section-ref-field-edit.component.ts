@@ -256,11 +256,30 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
    * @param name
    */
   public onNameChange(name: string) {
-    const oldName = this.data.name;
+    let oldName = this.data.name;
+
+    const latestField = this.fields.find(x => x.name.startsWith(oldName));
+    if (latestField) {
+      oldName = latestField.name.replace('-field', '');
+    }
+
     const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
+    if (fieldIdx === -1) {
+      console.error(`Field ${oldName}-field not found in this.data.fields`);
+      return;
+    }
+
     const field = this.fields.find(x => x.name === `${oldName}-field`);
-    this.data.fields[fieldIdx] = `${name}-field`;
-    field.name = `${name}-field`;
+    if (!field) {
+      console.error(`Field object with name ${oldName}-field not found in this.fields`);
+      return;
+    }
+
+    const newFieldName = `${name}-field`;
+    this.data.fields[fieldIdx] = newFieldName;
+    field.name = newFieldName;
+
+    this.data.name = name;
   }
 
 
