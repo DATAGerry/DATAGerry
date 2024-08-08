@@ -17,7 +17,6 @@
 This class represents type render meta
 """
 import logging
-from typing import List
 
 from cmdb.framework.models.type_model import TypeSection, \
                                              TypeExternalLink, \
@@ -35,12 +34,14 @@ LOGGER = logging.getLogger(__name__)
 class TypeRenderMeta:
     """Class of the type models `render_meta` field"""
 
-    def __init__(self, icon: str = None, sections: List[TypeSection] = None,
-                 externals: List[TypeExternalLink] = None,
+    def __init__(self,
+                 icon: str = None,
+                 sections: list[TypeSection] = None,
+                 externals: list[TypeExternalLink] = None,
                  summary: TypeSummary = None):
         self.icon: str = icon
-        self.sections: List[TypeSection] = sections or []
-        self.externals: List[TypeExternalLink] = externals or []
+        self.sections: list[TypeSection] = sections or []
+        self.externals: list[TypeExternalLink] = externals or []
         self.summary: TypeSummary = summary or TypeSummary(fields=None)
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
@@ -56,7 +57,8 @@ class TypeRenderMeta:
         Returns:
             TypeRenderMeta: TypeRenderMeta class with given data
         """
-        sections: List[TypeSection] = []
+        sections: list[TypeSection] = []
+
         for section in data.get('sections', []):
             section_type = section.get('type', 'section')
             if section_type == 'section':
@@ -84,7 +86,6 @@ class TypeRenderMeta:
 
         Args:
             instance (TypeRenderMeta): TypeRenderMeta which should be transformed
-
         Returns:
             dict: JSON representation of the given TypeRenderMeta
         """

@@ -17,9 +17,11 @@
 import logging
 from flask import current_app
 from cmdb.interface.route_utils import login_required, insert_request_user, make_response, right_required
+
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -29,8 +31,8 @@ settings_blueprint = RootBlueprint('settings_rest', __name__, url_prefix='/setti
 with current_app.app_context():
     from cmdb.interface.rest_api.settings_routes.system_routes import system_blueprint
     settings_blueprint.register_nested_blueprint(system_blueprint)
-    system_settings_reader = SystemSettingsReader(database_manager=current_app.database_manager)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @settings_blueprint.route('/<string:section>/', methods=['GET'])
 @settings_blueprint.route('/<string:section>', methods=['GET'])
@@ -39,9 +41,14 @@ with current_app.app_context():
 @right_required('base.system.view')
 def get_settings_from_section(section: str, request_user: UserModel):
     """TODO: document"""
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+
     section_settings = system_settings_reader.get_all_values_from_section(section=section)
+
     if len(section_settings) < 1:
         return make_response([], 204)
+
     return make_response(section_settings)
 
 
@@ -52,7 +59,12 @@ def get_settings_from_section(section: str, request_user: UserModel):
 @right_required('base.system.view')
 def get_value_from_section(section: str, name: str, request_user: UserModel):
     """TODO: document"""
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+
     section_settings = system_settings_reader.get_value(name=name, section=section)
+
     if len(section_settings) < 1:
         return make_response([], 204)
+
     return make_response(section_settings)

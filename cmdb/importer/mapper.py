@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Mapping module. The connection classes of data to the respective memory areas (e.g. fields) are created here."""
 from collections.abc import Iterable
-from typing import List, Iterator, Any
+from typing import Iterator, Any
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class MapEntry:
@@ -52,8 +52,8 @@ class MapEntry:
 class Mapping(Iterable):
     """TODO: document"""
 
-    def __init__(self, entries: List[MapEntry] = None):
-        self.__entries: List[MapEntry] = entries or []
+    def __init__(self, entries: list[MapEntry] = None):
+        self.__entries: list[MapEntry] = entries or []
 
     def __iter__(self) -> Iterator[MapEntry]:
         return iter(self.get_entries())
@@ -63,7 +63,7 @@ class Mapping(Iterable):
 
 
     @classmethod
-    def generate_mapping_from_list(cls, map_list: List[dict]):
+    def generate_mapping_from_list(cls, map_list: list[dict]):
         """TODO: document"""
         maps = Mapping()
         for mapper in map_list:
@@ -71,14 +71,14 @@ class Mapping(Iterable):
         return maps
 
 
-    def get_entries(self) -> List[MapEntry]:
+    def get_entries(self) -> list[MapEntry]:
         """TODO: document"""
         return self.__entries
 
 
-    def get_entries_with_option(self, query: dict) -> List[MapEntry]:
+    def get_entries_with_option(self, query: dict) -> list[MapEntry]:
         """TODO: document"""
-        founded_entries: List[MapEntry] = []
+        founded_entries: list[MapEntry] = []
         for entry in self:
             if entry.has_option(query):
                 founded_entries.append(entry)
@@ -90,7 +90,7 @@ class Mapping(Iterable):
         self.__entries.append(entry)
 
 
-    def add_entries(self, entries: List[MapEntry]):
+    def add_entries(self, entries: list[MapEntry]):
         """TODO: document"""
         self.__entries = self.__entries + entries
 

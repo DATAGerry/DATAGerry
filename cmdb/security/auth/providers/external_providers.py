@@ -18,7 +18,6 @@ import logging
 import re
 
 from datetime import datetime, timezone
-from typing import List
 
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
@@ -114,7 +113,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         return self.__ldap_connection.bind()
 
 
-    def __map_group(self, possible_user_groups: List[str]) -> int:
+    def __map_group(self, possible_user_groups: list[str]) -> int:
         """Get the user group for this user by the ldap user list"""
         user_group = self.config.default_group
         if not self.config.groups['mapping'] or len(self.config.groups['mapping']) == 0 or len(

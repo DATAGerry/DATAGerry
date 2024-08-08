@@ -16,7 +16,6 @@
 """TODO: document"""
 import logging
 from datetime import datetime, timezone
-from typing import List
 
 from flask import request, current_app, abort
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -41,22 +40,25 @@ from cmdb.user_management import __FIXED_GROUPS__
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
-auth_blueprint = APIBlueprint('auth', __name__)
-
 LOGGER = logging.getLogger(__name__)
 
+auth_blueprint = APIBlueprint('auth', __name__)
+
 with current_app.app_context():
-    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
-    system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(current_app.database_manager)
     dbm: DatabaseManagerMongo = current_app.database_manager
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @auth_blueprint.route('/settings', methods=['GET'])
+@insert_request_user
 @auth_blueprint.protect(auth=True, right='base.system.view')
-def get_auth_settings():
+def get_auth_settings(request_user: UserModel):
     """TODO: document"""
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+
     auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
 
@@ -64,11 +66,16 @@ def get_auth_settings():
 
 
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
-@auth_blueprint.protect(auth=True, right='base.system.edit')
 @insert_request_user
+@auth_blueprint.protect(auth=True, right='base.system.edit')
 def update_auth_settings(request_user: UserModel):
     """TODO: document"""
     new_auth_settings_values = request.get_json()
+
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+    system_setting_writer: SystemSettingsWriter = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_WRITER,
+                                                                               request_user)
 
     if not new_auth_settings_values:
         return abort(400, 'No new data was provided')
@@ -87,13 +94,18 @@ def update_auth_settings(request_user: UserModel):
 
 
 @auth_blueprint.route('/providers', methods=['GET'])
-@auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
+@auth_blueprint.protect(auth=True, right='base.system.view')
 def get_installed_providers(request_user: UserModel):
     """TODO: document"""
-    provider_names: List[dict] = []
+    provider_names: list[dict] = []
+
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+
     auth_module = AuthModule(
         system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
+
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
 
@@ -101,10 +113,13 @@ def get_installed_providers(request_user: UserModel):
 
 
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
-@auth_blueprint.protect(auth=True, right='base.system.view')
 @insert_request_user
+@auth_blueprint.protect(auth=True, right='base.system.view')
 def get_provider_config(provider_class: str, request_user: UserModel):
     """TODO: document"""
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+
     auth_module = AuthModule(
         system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
@@ -151,6 +166,7 @@ def post_login():
         dbm.connector.set_database(user_data['database'])
 
         tg = TokenGenerator(dbm)
+
         token: bytes = tg.generate_token(
             payload={
                 'user': {
@@ -166,10 +182,14 @@ def post_login():
 
         return login_response.make_response()
     else:
+        system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
+
         auth_module = AuthModule(
             system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-            user_manager=user_manager, group_manager=group_manager,
+            user_manager=user_manager,
+            group_manager=group_manager,
             security_manager=security_manager)
+
         user_instance = None
 
         try:
@@ -305,7 +325,7 @@ def create_new_admin_user(user_data: dict):
         try:
             loc_user_manager.insert(admin_user)
         except Exception as error:
-            LOGGER.error(f"Could not create admin user Error: {error}")
+            LOGGER.error("Could not create admin user: %s", error)
 
 
 def retrive_user(user_data: dict):

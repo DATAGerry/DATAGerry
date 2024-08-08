@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.search.query import Pipeline
 from cmdb.manager.query_builder.builder import Builder
@@ -54,7 +53,7 @@ class PipelineBuilder(Builder):
 
 
     @pipeline.setter
-    def pipeline(self, pipes: List[dict]):
+    def pipeline(self, pipes: list[dict]):
         self._pipeline = Pipeline(pipes)
 
 

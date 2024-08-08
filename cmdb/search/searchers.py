@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
@@ -34,12 +33,15 @@ from cmdb.framework.utils import PublicID
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              QuickSearchPipelineBuilder                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class QuickSearchPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
     def __init__(self, pipeline: Pipeline = None):
         """Init constructor
+
         Args:
             pipeline: preset a for defined pipeline
         """
@@ -153,9 +155,9 @@ class SearchPipelineBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-    def get_regex_pipes_values(self) -> List[str]:
+    def get_regex_pipes_values(self) -> list[str]:
         """Extract the regex pipes value from the pipeline"""
-        regex_pipes: List[str] = []
+        regex_pipes: list[str] = []
 
         def gen_dict_extract(key, var) -> str:
             for k, v in var.items():
@@ -187,7 +189,7 @@ class SearchPipelineBuilder(PipelineBuilder):
         return regex_pipes
 
 
-    def build(self, params: List[SearchParam],
+    def build(self, params: list[SearchParam],
               obj_manager: CmdbObjectManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
               active_flag: bool = False, *args, **kwargs) -> Pipeline:

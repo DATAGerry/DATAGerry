@@ -13,9 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""The module implements the base for database managers"""
+"""The module implements the base class for database managers"""
 import logging
-from typing import Union, Any, List
+from typing import Union, Any
 
 from pymongo.database import Database
 from pymongo.errors import CollectionInvalid
@@ -28,17 +28,15 @@ from cmdb.errors.database import DatabaseAlreadyExists, DatabaseNotExists, Colle
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    DatabaseManager                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class DatabaseManager:
     """
     Base class for database managers
     """
-
     def __init__(self, connector: MongoConnector):
-        """Constructor of `DatabaseManager`
-        Args:
-            connector (MongoConnector): Database Connector for subclass implementation
-        """
         self.connector: MongoConnector = connector
 
 # -------------------------------------------- GENERAL DATABASE OPERATIONS ------------------------------------------- #
@@ -50,7 +48,7 @@ class DatabaseManager:
             name (str): Name of the database which should be checked
 
         Returns:
-            bool: True if database with given name exists, else false
+            (bool): True if database with given name exists, else False
         """
         database_names = self.connector.client.list_database_names()
 
@@ -96,11 +94,11 @@ class DatabaseManager:
     def create_collection(self, collection_name: str) -> str:
         """
         Creation empty MongoDB collection
-        Args:
-            collection_name: name of collection
 
+        Args:
+            collection_name (str): name of collection
         Returns:
-            collection name
+            (str): Collection name
         """
         try:
             all_collections = self.connector.database.list_collection_names()
@@ -126,25 +124,25 @@ class DatabaseManager:
     def delete_collection(self, collection: str) -> dict[str, Any]:
         """
         Delete MongoDB collection
+
         Args:
             collection (str): collection name
-
         Returns:
             delete ack
         """
         return self.connector.database.drop_collection(collection)
 
 
-    def create_indexes(self, collection: str, indexes: List[IndexModel]) -> List[str]:
+    def create_indexes(self, collection: str, indexes: list[IndexModel]) -> list[str]:
         """Creates indexes for collection"""
         return self.get_collection(collection).create_indexes(indexes)
 
 
     def get_index_info(self, collection: str):
-        """get the max index value"""
+        """Get the max index value"""
         return self.get_collection(collection).index_information()
 
 
     def status(self):
-        """Check if connector has connection."""
+        """Check if connector has connection to MongoDB"""
         return self.connector.is_connected()

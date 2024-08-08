@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import Union, List
+from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.results import IterationResult
@@ -65,7 +65,7 @@ class UserSettingsManager(ManagerBase):
         raise ManagerGetError(f'No setting with the name: {resource} was found!')
 
 
-    def get_user_settings(self, user_id: PublicID, setting_type: UserSettingType = None) -> List[UserSettingModel]:
+    def get_user_settings(self, user_id: PublicID, setting_type: UserSettingType = None) -> list[UserSettingModel]:
         """
         Get all settings from a user by the user_id.
         Args:
@@ -73,7 +73,7 @@ class UserSettingsManager(ManagerBase):
             setting_type(UserSettingType): Optional the type of user settings for filtering.
 
         Returns:
-            - List of UserSettingModel.
+            (list[UserSettingModel]): List of UserSettingModel
         """
         query = {'user_id': user_id}
         if setting_type:

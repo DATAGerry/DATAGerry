@@ -17,8 +17,6 @@
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
 """
-from typing import List
-
 from cmdb.user_management.models.settings import UserSettingModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.right import BaseRight
@@ -33,17 +31,17 @@ from cmdb.user_management.rights import __all__ as rights
 
 right_manager = RightManager(rights)
 
-__COLLECTIONS__: List = [
+__COLLECTIONS__: list = [
     UserModel,
     UserSettingModel,
     UserGroupModel
 ]
 
-__ADMIN_GROUP_RIGHTS__: List[BaseRight] = [
+__ADMIN_GROUP_RIGHTS__: list[BaseRight] = [
     right_manager.get('base.*')
 ]
 
-__USER_GROUP_RIGHTS__: List[BaseRight] = [
+__USER_GROUP_RIGHTS__: list[BaseRight] = [
     right_manager.get('base.framework.object.*'),
     right_manager.get('base.framework.type.view'),
     right_manager.get('base.framework.category.view'),
@@ -53,7 +51,7 @@ __USER_GROUP_RIGHTS__: List[BaseRight] = [
     right_manager.get('base.docapi.template.view')
 ]
 
-__FIXED_GROUPS__: List[UserGroupModel] = [
+__FIXED_GROUPS__: list[UserGroupModel] = [
     UserGroupModel(public_id=1, name='admin', label='Administrator', rights=__ADMIN_GROUP_RIGHTS__),
     UserGroupModel(public_id=2, name='user', label='User', rights=__USER_GROUP_RIGHTS__)
 ]

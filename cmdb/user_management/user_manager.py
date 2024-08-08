@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.errors.database import NoDocumentFound
@@ -31,6 +30,9 @@ from cmdb.security.security import SecurityManager
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                      UserManager                                                     #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManager(CmdbManagerBase):
     """TODO: document"""
@@ -46,7 +48,7 @@ class UserManager(CmdbManagerBase):
         return self.dbm.get_next_public_id(collection)
 
 
-    def get_users(self) -> List[UserModel]:
+    def get_users(self) -> list[UserModel]:
         """Get all users"""
         user_list = []
         for founded_user in self._get_many(collection=UserModel.COLLECTION):
@@ -57,7 +59,7 @@ class UserManager(CmdbManagerBase):
         return user_list
 
 
-    def get_users_by(self, sort='public_id', **requirements) -> List[UserModel]:
+    def get_users_by(self, sort='public_id', **requirements) -> list[UserModel]:
         """Get a list of users by requirement"""
         user_list = []
         users_in_database = self._get_many(collection=UserModel.COLLECTION, sort=sort, **requirements)

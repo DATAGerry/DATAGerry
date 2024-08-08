@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List, Union
+from typing import Union
 
 from cmdb.framework.models import TypeModel
 from cmdb.framework.cmdb_dao import CmdbDAO
@@ -108,14 +108,14 @@ class CategoryModel(CmdbDAO):
 
 
     def __init__(self, public_id: int, name: str, label: str = None, meta: __CategoryMeta = None,
-                 parent: int = None, types: Union[List[int], List[TypeModel]] = None):
+                 parent: int = None, types: Union[list[int], list[TypeModel]] = None):
         self.name: str = name
         self.label: str = label
         self.meta: CategoryModel.__CategoryMeta = meta
         if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
-        self.types: Union[List[int], List[TypeModel]] = types or []
+        self.types: Union[list[int], list[TypeModel]] = types or []
         super(CategoryModel, self).__init__(public_id=public_id)
 
     @classmethod
@@ -185,7 +185,7 @@ class CategoryModel(CmdbDAO):
         return True if self.get_number_of_types() > 0 else False
 
 
-    def get_types(self) -> Union[List[int], List[TypeModel]]:
+    def get_types(self) -> Union[list[int], list[TypeModel]]:
         """Get list of type ids in this category"""
         if not self.types:
             self.types = []
@@ -204,14 +204,14 @@ class CategoryTree:
     class CategoryNode:
         """Class of a category node inside the category tree"""
 
-        def __init__(self, category: CategoryModel, children: List["CategoryTree.CategoryNode"] = None,
-                     types: List[TypeModel] = None):
+        def __init__(self, category: CategoryModel, children: list["CategoryTree.CategoryNode"] = None,
+                     types: list[TypeModel] = None):
             self.category: CategoryModel = category
             self.node_order: int = self.category.get_meta().get_order()
-            self.children: List["CategoryTree.CategoryNode"] = sorted(children or [], key=lambda node: (
+            self.children: list["CategoryTree.CategoryNode"] = sorted(children or [], key=lambda node: (
                                                              node.get_order() is None, node.get_order()))
             # prevent wrong type order
-            self.types: List[TypeModel] = [type_ for id_ in self.category.types for type_ in types if
+            self.types: list[TypeModel] = [type_ for id_ in self.category.types for type_ in types if
                                            id_ == type_.public_id]
 
 
@@ -233,7 +233,7 @@ class CategoryTree:
             return self.node_order
 
 
-        def flatten(self) -> List[CategoryModel]:
+        def flatten(self) -> list[CategoryModel]:
             """Flats a category node and its children"""
             return [self.category] + sum(
                 (c.flatten() for c in self.children),
@@ -246,10 +246,10 @@ class CategoryTree:
             return f'CategoryNode(CategoryID={self.category.public_id})'
 
 
-    def __init__(self, categories: List[CategoryModel], types: List[TypeModel] = None):
+    def __init__(self, categories: list[CategoryModel], types: list[TypeModel] = None):
         self._categories = categories
         self._types = types
-        self._tree: List[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
+        self._tree: list[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
                                                              key=lambda node: (
                                                              node.get_order() is None, node.get_order()))
 
@@ -259,7 +259,7 @@ class CategoryTree:
         return len(self._tree)
 
 
-    def flat(self) -> List[CategoryModel]:
+    def flat(self) -> list[CategoryModel]:
         """Returns a flatted tree with tree like category order"""
         flatted = []
         for node in self.tree:
@@ -268,7 +268,7 @@ class CategoryTree:
 
 
     @property
-    def tree(self) -> List[CategoryNode]:
+    def tree(self) -> list[CategoryNode]:
         """Get the tree"""
         if not self._tree:
             self._tree = CategoryTree.__create_tree(self._categories, types=self._types)
@@ -276,7 +276,7 @@ class CategoryTree:
 
 
     @classmethod
-    def __create_tree(cls, categories, parent: int = None, types: List[TypeModel] = None) -> List[CategoryNode]:
+    def __create_tree(cls, categories, parent: int = None, types: list[TypeModel] = None) -> list[CategoryNode]:
         """
         Generate the category tree from list structure
         Args:
@@ -290,9 +290,9 @@ class CategoryTree:
 
 
     @classmethod
-    def from_data(cls, raw_categories: List[dict]) -> "CategoryTree":
+    def from_data(cls, raw_categories: list[dict]) -> "CategoryTree":
         """Create the category list from raw data"""
-        categories: List[CategoryModel] = [CategoryModel.from_data(category) for category in raw_categories]
+        categories: list[CategoryModel] = [CategoryModel.from_data(category) for category in raw_categories]
         return cls(categories=categories)
 
 

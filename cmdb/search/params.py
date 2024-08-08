@@ -15,11 +15,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                      SearchParam                                                     #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class SearchParam:
     """TODO: document"""
@@ -53,9 +55,9 @@ class SearchParam:
 
 
     @classmethod
-    def from_request(cls, request) -> List['SearchParam']:
+    def from_request(cls, request) -> list['SearchParam']:
         """Build a SearchParamDAO list from http request"""
-        param_list: List[cls] = []
+        param_list: list[cls] = []
         for param in request:
             try:
                 param_list.append(cls(
@@ -68,4 +70,5 @@ class SearchParam:
             except Exception as err:
                 LOGGER.error('[SearchParamDAO](from_request): %s',err)
                 continue
+
         return param_list

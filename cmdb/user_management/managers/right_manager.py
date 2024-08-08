@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from ..models.right import BaseRight
 from ...framework.results import IterationResult
@@ -34,7 +33,7 @@ class RightManager(ManagerBase):
 
 
     @staticmethod
-    def flat_tree(right_tree) -> List[BaseRight]:
+    def flat_tree(right_tree) -> list[BaseRight]:
         """
         Flat the right tree to list
 
@@ -42,9 +41,9 @@ class RightManager(ManagerBase):
             right_tree: Tuple tree of rights
 
         Returns:
-            List[BaseRight]: Flatted right tree
+            list[BaseRight]: Flatted right tree
         """
-        rights: List[BaseRight] = []
+        rights: list[BaseRight] = []
         for right in right_tree:
             if isinstance(right, (tuple, list)):
                 rights = rights + RightManager.flat_tree(right)

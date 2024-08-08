@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from flask import abort, request
 
@@ -45,13 +44,10 @@ def get_user_settings(user_id: int, request_user: UserModel):
 
     Args:
         user_id (int): PublicID of the current user.
-
     Returns:
         GetListResponse: Which includes all of the `UserSettingModel`.
-
     Notes:
         Calling the route over HTTP HEAD method will result in an empty body.
-
     Raises:
         ManagerGetError: If the collection/resources could not be found.
     """
@@ -59,7 +55,7 @@ def get_user_settings(user_id: int, request_user: UserModel):
                                                                         request_user)
 
     try:
-        settings: List[UserSettingModel] = settings_manager.get_user_settings(user_id=user_id)
+        settings: list[UserSettingModel] = settings_manager.get_user_settings(user_id=user_id)
         raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
 
         api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,

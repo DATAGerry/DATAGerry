@@ -17,7 +17,6 @@
 This class represents a type reference section entry
 """
 import logging
-from typing import List
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -25,13 +24,14 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                               TypeReferenceSectionEntry                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
+
 class TypeReferenceSectionEntry:
     """This class represents a type reference section entry"""
 
-    def __init__(self, type_id: int, section_name: str, selected_fields: List[str] = None):
+    def __init__(self, type_id: int, section_name: str, selected_fields: list[str] = None):
         self.type_id: int = type_id
         self.section_name: str = section_name
-        self.selected_fields: List[str] = selected_fields or []
+        self.selected_fields: list[str] = selected_fields or []
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
@@ -42,7 +42,6 @@ class TypeReferenceSectionEntry:
 
         Args:
             data (dict): Data with which the TypeReferenceSectionEntry should be instantiated
-
         Returns:
             TypeReferenceSectionEntry: TypeReferenceSectionEntry class with given data
         """
@@ -60,7 +59,6 @@ class TypeReferenceSectionEntry:
 
         Args:
             instance (TypeReferenceSectionEntry): TypeReferenceSectionEntry which should be transformed
-
         Returns:
             dict: JSON representation of the given TypeReferenceSectionEntry
         """

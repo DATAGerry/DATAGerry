@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import List
-
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -25,10 +23,14 @@ class AuthSettingsDAO:
     __DOCUMENT_IDENTIFIER = 'auth'
     __DEFAULT_EXTERNAL_ENABLED = False
 
-    def __init__(self, providers: List[dict] = None, enable_external: bool = None,
-                 token_lifetime: int = None, *args, **kwargs):
+    def __init__(self,
+                 providers: list[dict] = None,
+                 enable_external: bool = None,
+                 token_lifetime: int = None,
+                 *args,
+                 **kwargs):
         self._id: str = AuthSettingsDAO.__DOCUMENT_IDENTIFIER
-        self.providers: List[dict] = providers or []
+        self.providers: list[dict] = providers or []
         self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
 
@@ -45,7 +47,7 @@ class AuthSettingsDAO:
         return self.token_lifetime
 
 
-    def get_provider_list(self) -> List[dict]:
+    def get_provider_list(self) -> list[dict]:
         """Get the list of providers with config"""
         return self.providers
 

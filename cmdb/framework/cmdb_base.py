@@ -15,13 +15,15 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    CmdbManagerBase                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbManagerBase:
     """
@@ -41,10 +43,10 @@ class CmdbManagerBase:
 
 
     def _count(self, collection: str) -> int:
-        """get the number of objects in given collection
+        """Get the number of objects in given collection
+
         Args:
             collection: Collection name
-
         Returns:
             (int): number of found objects
         """
@@ -118,27 +120,35 @@ class CmdbManagerBase:
         Returns:
         """
         requirements_filter = {}
+
         for k, req in requirements.items():
             requirements_filter.update({k: req})
+
         return self.dbm.find_one_by(collection=collection, filter=requirements_filter)
 
 
-    def _get_many(self, collection: str, sort='public_id', direction: int = -1, limit=0, **requirements: dict) -> \
-            List[dict]:
-        """get all documents from the database which have the passing requirements
+    def _get_many(self,
+                  collection: str,
+                  sort='public_id',
+                  direction: int = -1,
+                  limit=0,
+                  **requirements: dict) -> list[dict]:
+        """
+        Get all documents from the database which have the passing requirements
 
         Args:
             collection (str): name of the database collection
             sort (str): sort by given key - default public_id
             **requirements (dict): dictionary of key value requirement
-
         Returns:
-            list: list of all documents
+            (list): list of all documents
         """
         requirements_filter = {}
         formatted_sort = [(sort, direction)]
+
         for k, req in requirements.items():
             requirements_filter.update({k: req})
+
         return self.dbm.find_all(collection=collection, limit=limit, filter=requirements_filter, sort=formatted_sort)
 
 

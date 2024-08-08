@@ -23,7 +23,6 @@ import tempfile
 import xml.dom.minidom
 import xml.etree.ElementTree as ET
 import zipfile
-from typing import List
 import openpyxl
 
 from cmdb.utils import json_encoding
@@ -44,9 +43,12 @@ database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_fr
 object_manager = CmdbObjectManager(database_manager=database_manager)
 type_manager = TypeManager(database_manager=database_manager)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                     ZipExportType                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class ZipExportType(BaseExporterFormat):
-    """TODO: ducoment"""
+    """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "zip"
     LABEL = "ZIP"
     MULTITYPE_SUPPORT = True
@@ -55,14 +57,13 @@ class ZipExportType(BaseExporterFormat):
     ACTIVE = True
 
 
-    def export(self, data: List[RenderResult], *args):
+    def export(self, data: list[RenderResult], *args):
         """
-        Export a zip file, containing the object list sorted by type in several files.
+        Export a zip file, containing the object list sorted by type in several files
 
         Args:
             data: List of objects to be exported
             args: the filetype with which the objects are stored
-
         Returns:
             zip file containing object files separated by types
         """
@@ -72,10 +73,8 @@ class ZipExportType(BaseExporterFormat):
 
         # Build .zip file
         with zipfile.ZipFile(zipped_file, "a", zipfile.ZIP_DEFLATED, False) as f:
-
             # Enters loop until the object list is empty
             while len(data) > 0:
-
                 # Set what type the loop filters to and makes an empty list
                 type_id = data[len(data) - 1].type_information['type_id']
                 type_name = data[len(data) - 1].type_information['type_name']
@@ -95,15 +94,19 @@ class ZipExportType(BaseExporterFormat):
                 if isinstance(export, str) or isinstance(export, bytes):
                     f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
                 else:
-                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export.getvalue())
+                    f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i),
+                               export.getvalue())
 
         # returns zipped file
         zipped_file.seek(0)
         return zipped_file
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                     CsvExportType                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CsvExportType(BaseExporterFormat):
-    """TODO: ducoment"""
+    """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "csv"
     LABEL = "CSV"
     MULTITYPE_SUPPORT = False
@@ -112,17 +115,14 @@ class CsvExportType(BaseExporterFormat):
     ACTIVE = True
 
 
-    def export(self, data: List[RenderResult], *args):
-
+    def export(self, data: list[RenderResult], *args):
         """ Exports data as .csv file
 
         Args:
             data: The objects to be exported
-
         Returns:
             Csv file containing the data
         """
-
         # init values
         header = ['public_id', 'active']
         columns = [] if not data else [x['name'] for x in data[0].fields]
@@ -148,17 +148,21 @@ class CsvExportType(BaseExporterFormat):
 
             # get object fields as dict:
             obj_fields_dict = {}
+
             for field in obj.fields:
                 obj_field_name = field.get('name')
                 obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
 
             # define output row
             row = []
+
             for head in header:
                 head = 'object_id' if head == 'public_id' else head
                 row.append(str(obj.object_information[head]))
+
             for name in columns:
                 row.append(str(obj_fields_dict.get(name, None)))
+
             rows.append(row)
 
         return self.csv_writer([*header, *columns], rows)
@@ -174,9 +178,12 @@ class CsvExportType(BaseExporterFormat):
         csv_file.seek(0)
         return csv_file
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    JsonExportType                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class JsonExportType(BaseExporterFormat):
-    """TODO: ducoment"""
+    """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "json"
     LABEL = "JSON"
     MULTITYPE_SUPPORT = True
@@ -185,7 +192,7 @@ class JsonExportType(BaseExporterFormat):
     ACTIVE = True
 
 
-    def export(self, data: List[RenderResult], *args):
+    def export(self, data: list[RenderResult], *args):
         """Exports data as .json file
 
         Args:
@@ -207,8 +214,8 @@ class JsonExportType(BaseExporterFormat):
         for obj in data:
             # init columns
             columns = obj.fields
-
             multi_data_sections = []
+
             if len(obj.multi_data_sections) > 0:
                 multi_data_sections = obj.multi_data_sections
 
@@ -220,13 +227,14 @@ class JsonExportType(BaseExporterFormat):
 
             # init output element
             output_element = {}
+
             for head in header:
                 head = 'object_id' if head == 'public_id' else head
+
                 if head == 'type_label':
                     output_element.update({head: obj.type_information[head]})
                 else:
                     output_element.update({head: obj.object_information[head]})
-
 
             # get object fields
             output_element.update({'fields': []})
@@ -249,6 +257,7 @@ class JsonExportType(BaseExporterFormat):
 
                     #set values
                     values = mds.get('values')
+
                     for val_index, value in enumerate(values):
                         output_element['multi_data_sections'][index]['values'].append({
                              'multi_data_id': value.get('multi_data_id')
@@ -278,7 +287,7 @@ class XlsxExportType(BaseExporterFormat):
     ACTIVE = True
 
 
-    def export(self, data: List[RenderResult], *args):
+    def export(self, data: list[RenderResult], *args):
         """Exports object_list as .xlsx file
 
         Args:
@@ -296,7 +305,7 @@ class XlsxExportType(BaseExporterFormat):
             return tmp.read()
 
 
-    def create_xls_object(self, data: List[RenderResult], args):
+    def create_xls_object(self, data: list[RenderResult], args):
         """TODO: ducoment"""
         # create workbook
         workbook = openpyxl.Workbook()
@@ -387,7 +396,7 @@ class XmlExportType(BaseExporterFormat):
     ACTIVE = True
 
 
-    def export(self, data: List[RenderResult], *args):
+    def export(self, data: list[RenderResult], *args):
         """Exports object_list as .xml file
 
         Args:

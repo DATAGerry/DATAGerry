@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
@@ -56,7 +55,7 @@ class UserGroupModel(CmdbDAO):
 
     __slots__ = 'public_id', 'name', 'label', 'rights'
 
-    def __init__(self, public_id: int, name: str, label: str = None, rights: List[BaseRight] = None):
+    def __init__(self, public_id: int, name: str, label: str = None, rights: list[BaseRight] = None):
         self.name: str = name
         self.label: str = label or name.title()
         self.rights: list = rights or []
@@ -64,7 +63,7 @@ class UserGroupModel(CmdbDAO):
 
 
     @classmethod
-    def from_data(cls, data: dict, rights: List[BaseRight] = None) -> "UserGroupModel":
+    def from_data(cls, data: dict, rights: list[BaseRight] = None) -> "UserGroupModel":
         """TODO: document"""
         if rights:
             rights = [right for right in rights if right['name'] in data.get('rights', [])]

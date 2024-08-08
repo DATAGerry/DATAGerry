@@ -21,7 +21,7 @@ The implementation of the managers used is always realized using the respective 
 import logging
 import json
 
-from typing import List, Union
+from typing import Union
 from queue import Queue
 from bson import json_util
 
@@ -47,6 +47,7 @@ from cmdb.user_management import UserModel
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def has_access_control(model: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
     """Check if a user has access to object/objects for a given permission"""
@@ -65,10 +66,13 @@ def verify_access(model: TypeModel, user: UserModel = None, permission: AccessCo
     if not verify:
         raise AccessDeniedError('Protected by ACL permission!')
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   CmdbObjectManager                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbObjectManager(CmdbManagerBase):
     """
-    class CmdbObjectManager
+    Extends: CmdbManagerBase
     """
     def __init__(self, database_manager=None, event_queue: Queue = None, database: str = None):
         self._event_queue = event_queue
@@ -180,8 +184,10 @@ class CmdbObjectManager(CmdbManagerBase):
            """
         ack = []
         agr = []
+
         if match:
             agr.append({'$match': match})
+
         agr.append({
             '$group': {
                 '_id': '$' + value,
@@ -189,9 +195,11 @@ class CmdbObjectManager(CmdbManagerBase):
                 'count': {'$sum': 1},
             }
         })
+
         agr.append({'$sort': {'count': -1}})
 
         objects = self.dbm.aggregate(CmdbObject.COLLECTION, agr)
+
         for obj in objects:
             object_ = CmdbObject(**obj['result'])
             try:
@@ -200,6 +208,7 @@ class CmdbObjectManager(CmdbManagerBase):
             except CMDBError:
                 continue
             ack.append(obj)
+
         return ack
 
 
@@ -380,10 +389,10 @@ class CmdbObjectManager(CmdbManagerBase):
 
 
     #@deprecated
-    def get_all_types(self) -> List[TypeModel]:
+    def get_all_types(self) -> list[TypeModel]:
         """TODO: document"""
         try:
-            raw_types: List[dict] = self._get_many(collection=TypeModel.COLLECTION)
+            raw_types: list[dict] = self._get_many(collection=TypeModel.COLLECTION)
         except Exception as error:
             raise ObjectManagerGetError(err=error) from error
         try:
@@ -443,7 +452,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
 
     #@deprecated
-    def get_categories(self) -> List[CategoryModel]:
+    def get_categories(self) -> list[CategoryModel]:
         """Get all categories as nested list"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort='public_id')
@@ -456,7 +465,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
 
     #@deprecated
-    def get_categories_by(self, sort='public_id', **requirements: dict) -> List[CategoryModel]:
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> list[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
             raw_categories = self._get_many(collection=CategoryModel.COLLECTION, sort=sort, **requirements)

@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import Union, List
+from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.user_management.models.user import UserModel
@@ -101,14 +101,14 @@ class UserManager(ManagerBase):
         raise ManagerGetError(f'User with the query: {query} not found!')
 
 
-    def get_many(self, query: Query = None) -> List[UserModel]:
+    def get_many(self, query: Query = None) -> list[UserModel]:
         """
         Get a collection of users by a query. Passing no query means all users
 
         Args:
             query (Query): A database query for filtering
         Returns:
-            List[UserModel]: A list of all users which matches the query
+            list[UserModel]: A list of all users which matches the query
         """
         query = query or {}
         results = self._get(self.collection, filter=query)

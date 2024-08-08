@@ -17,7 +17,7 @@
 import logging
 
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar, List
+from typing import Generic, TypeVar
 
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.search.query import Query, Pipeline
@@ -50,12 +50,12 @@ class Search(Generic[M], ABC):
 
 
     @abstractmethod
-    def aggregate(self, pipeline: Pipeline, *args, **kwargs) -> List:
+    def aggregate(self, pipeline: Pipeline, *args, **kwargs) -> list:
         """TODO: document"""
         raise NotImplementedError
 
 
     @abstractmethod
-    def search(self, query: Query, *args, **kwargs) -> List:
+    def search(self, query: Query, *args, **kwargs) -> list:
         """TODO: document"""
         raise NotImplementedError

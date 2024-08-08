@@ -16,7 +16,7 @@
 """TODO: document"""
 from enum import Enum
 from json import dumps
-from typing import Any, List
+from typing import Any
 from pymongo import IndexModel
 
 from cmdb.database.utils import default
@@ -129,7 +129,7 @@ class UserSettingModel:
 
     __slots__ = 'resource', 'user_id', 'payloads', 'setting_type'
 
-    def __init__(self, resource: str, user_id: int, payloads: List[UserSettingPayload], setting_type: UserSettingType):
+    def __init__(self, resource: str, user_id: int, payloads: list[UserSettingPayload], setting_type: UserSettingType):
         """
         Constructor of `UserSettingModel`.
 
@@ -141,7 +141,7 @@ class UserSettingModel:
         """
         self.resource: str = resource
         self.user_id: int = user_id
-        self.payloads: List[UserSettingPayload] = payloads
+        self.payloads: list[UserSettingPayload] = payloads
         self.setting_type: UserSettingType = setting_type
 
     @classmethod
