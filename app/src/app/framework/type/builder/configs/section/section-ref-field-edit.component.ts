@@ -31,276 +31,276 @@ import { ValidationService } from '../../../services/validation.service';
 import { SectionIdentifierService } from '../../../services/SectionIdentifierService.service';
 
 @Component({
-  selector: 'cmdb-section-ref-field-edit',
-  templateUrl: './section-ref-field-edit.component.html'
+    selector: 'cmdb-section-ref-field-edit',
+    templateUrl: './section-ref-field-edit.component.html'
 })
 export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  /**
-   * Component un-subscriber.
-   * @protected
-   */
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    /**
+     * Component un-subscriber.
+     * @protected
+     */
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  /**
-   * Name form control.
-   */
-  public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    /**
+     * Name form control.
+     */
+    public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
-  /**
-   * Label form control.
-   */
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    /**
+     * Label form control.
+     */
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
 
-  /**
-   * Type form control.
-   */
-  public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+    /**
+     * Type form control.
+     */
+    public typeControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
-  /**
-   * Type form control.
-   */
-  public sectionNameControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
+    /**
+     * Type form control.
+     */
+    public sectionNameControl: UntypedFormControl = new UntypedFormControl(undefined, Validators.required);
 
-  /**
-   * Type form control.
-   */
-  public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([], Validators.required);
+    /**
+     * Type form control.
+     */
+    public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([], Validators.required);
 
-  /**
-   * Reference form control.
-   */
-  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
-    type_id: this.typeControl,
-    section_name: this.sectionNameControl,
-    selected_fields: this.selectedFieldsControl
-  });
+    /**
+     * Reference form control.
+     */
+    public referenceGroup: UntypedFormGroup = new UntypedFormGroup({
+        type_id: this.typeControl,
+        section_name: this.sectionNameControl,
+        selected_fields: this.selectedFieldsControl
+    });
 
-  /**
-   * Sections from the selected type.
-   */
-  public typeSections: Array<CmdbTypeSection> = [];
+    /**
+     * Sections from the selected type.
+     */
+    public typeSections: Array<CmdbTypeSection> = [];
 
-  /**
-   * Selected section
-   */
-  public selectedSection: CmdbTypeSection;
+    /**
+     * Selected section
+     */
+    public selectedSection: CmdbTypeSection;
 
-  /**
-   * Types load right now?
-   */
-  public loading: boolean = false;
+    /**
+     * Types load right now?
+     */
+    public loading: boolean = false;
 
-  /**
-   * Total number of types.
-   */
-  public totalTypes: number = 0;
+    /**
+     * Total number of types.
+     */
+    public totalTypes: number = 0;
 
-  /**
-   * Current loading page
-   */
-  public currentPage: number = 1;
+    /**
+     * Current loading page
+     */
+    public currentPage: number = 1;
 
-  /**
-   * Max loading pages.
-   * @private
-   */
-  private maxPage: number = 1;
+    /**
+     * Max loading pages.
+     * @private
+     */
+    private maxPage: number = 1;
 
-  /**
-   * Type switch active.
-   */
-  public selectDisabled: boolean = false;
+    /**
+     * Type switch active.
+     */
+    public selectDisabled: boolean = false;
 
-  private previousNameControlValue: string = '';
-  private initialValue: string;
+    private previousNameControlValue: string = '';
+    private initialValue: string;
 
-  public currentValue: string;
-  public isIdentifierValid: boolean = true;
-  private subscription: Subscription;
-  private identifierInitialValue: string;
+    public currentValue: string;
+    public isIdentifierValid: boolean = true;
+    private subscription: Subscription;
+    private identifierInitialValue: string;
 
-  constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService,
-    private sectionIdentifierService: SectionIdentifierService) {
-    super();
-  }
-
-  /**
-   * Generate the type call parameters
-   * @param page
-   * @private
-   */
-  static getApiParameters(page: number = 1): CollectionParameters {
-    return {
-      filter: undefined, limit: 10, sort: 'public_id',
-      order: 1, page
-    } as CollectionParameters;
-  }
-
-  public ngOnInit(): void {
-    this.form.addControl('name', this.nameControl);
-    this.form.addControl('label', this.labelControl);
-    this.form.addControl('reference', this.referenceGroup);
-
-    if (this.mode === CmdbMode.Edit) {
-      if (this.data?.reference?.type_id) {
-        this.loadPresetType(this.data.reference.type_id);
-      }
+    constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService,
+        private sectionIdentifierService: SectionIdentifierService) {
+        super();
     }
 
-    this.disableControlOnEdit(this.nameControl);
-    this.patchData(this.data, this.form);
-
-    this.triggerAPICall();
-
-    this.initialValue = this.nameControl.value;
-    this.previousNameControlValue = this.nameControl.value;
-
-    this.currentValue = this.identifierInitialValue;
-  }
-
-  private loadPresetType(publicID: number): void {
-    this.loading = true;
-    this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: CmdbType) => {
-        this.typeSections = apiResponse.render_meta.sections;
-        this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
-      }, error =>
-        this.toast.error(error.error.message, { headerName: 'Field error: ' + this.nameControl.value }))
-      .add(() => this.loading = false);
-  }
-
-  public triggerAPICall(): void {
-    if (this.maxPage && (this.currentPage <= this.maxPage)) {
-      this.loadTypesFromApi();
-      this.currentPage += 1;
-    }
-  }
-
-  private loadTypesFromApi(): void {
-    this.loading = true;
-    this.typeService.getTypes(SectionRefFieldEditComponent.getApiParameters(this.currentPage)).pipe(takeUntil(this.subscriber))
-      .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-        this.types = [...this.types, ...apiResponse.results as Array<CmdbType>];
-        this.totalTypes = apiResponse.total;
-        this.maxPage = apiResponse.pager.total_pages;
-      }).add(() => this.loading = false);
-  }
-
-  /**
-   * When the selected type change.
-   * Reset a selected section.
-   * @param publicID
-   */
-  public onTypeChange(publicID: number): void {
-    if (publicID) {
-      this.data.reference.type_id = publicID;
-      this.typeSections = this.getSectionsFromType(publicID);
-    } else {
-      this.data.reference.type_id = undefined;
-      this.typeSections = [];
-    }
-    this.unsetReferenceSubData();
-  }
-
-  private unsetReferenceSubData(): void {
-    this.data.reference.section_name = undefined;
-    this.sectionNameControl.setValue(undefined);
-    this.data.reference.selected_fields = undefined;
-    this.selectedFieldsControl.setValue(undefined);
-    this.selectedSection = undefined;
-  }
-
-  /**
-   * Get all sections from a type.
-   * @param typeID
-   */
-  public getSectionsFromType(typeID: number): Array<CmdbTypeSection> {
-    return this.types.find(t => t.public_id === typeID).render_meta.sections;
-  }
-
-  /**
-   * When section selection changed.
-   * @param section
-   */
-  public onSectionChange(section: CmdbTypeSection): void {
-    if (!section) {
-      this.data.reference.section_name = undefined;
-    } else {
-      this.data.reference.section_name = section.name;
-    }
-    this.selectedSection = section;
-    this.data.reference.selected_fields = undefined;
-  }
-
-  public onSectionFieldsChange(fields: Array<string>): void {
-    this.data.reference.selected_fields = fields;
-  }
-
-  /**
-   * Change the field label
-   * @param change
-   * @param idx
-   */
-  public onLabelChange(change: string, idx: string) {
-    this.data[idx] = change;
-    const field = this.fields.find(x => x.name === `${this.data.name}-field`);
-    const fieldIdx = this.data.fields.indexOf(field);
-    if (fieldIdx > -1) {
-      this.data.fields[fieldIdx].label = change;
-    }
-  }
-
-  /**
-   * Change the field when the reference changes
-   * @param name
-   */
-  public onNameChange(name: string) {
-    let oldName = this.data.name;
-
-    const latestField = this.fields.find(x => x.name.startsWith(oldName));
-    if (latestField) {
-      oldName = latestField.name.replace('-field', '');
+    /**
+     * Generate the type call parameters
+     * @param page
+     * @private
+     */
+    static getApiParameters(page: number = 1): CollectionParameters {
+        return {
+            filter: undefined, limit: 10, sort: 'public_id',
+            order: 1, page
+        } as CollectionParameters;
     }
 
-    const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
-    if (fieldIdx === -1) {
-      console.error(`Field ${oldName}-field not found in this.data.fields`);
-      return;
+    public ngOnInit(): void {
+        this.form.addControl('name', this.nameControl);
+        this.form.addControl('label', this.labelControl);
+        this.form.addControl('reference', this.referenceGroup);
+
+        if (this.mode === CmdbMode.Edit) {
+            if (this.data?.reference?.type_id) {
+                this.loadPresetType(this.data.reference.type_id);
+            }
+        }
+
+        this.disableControlOnEdit(this.nameControl);
+        this.patchData(this.data, this.form);
+
+        this.triggerAPICall();
+
+        this.initialValue = this.nameControl.value;
+        this.previousNameControlValue = this.nameControl.value;
+
+        this.currentValue = this.identifierInitialValue;
     }
 
-    const field = this.fields.find(x => x.name === `${oldName}-field`);
-    if (!field) {
-      console.error(`Field object with name ${oldName}-field not found in this.fields`);
-      return;
+    private loadPresetType(publicID: number): void {
+        this.loading = true;
+        this.typeService.getType(publicID).pipe(takeUntil(this.subscriber))
+            .subscribe((apiResponse: CmdbType) => {
+                this.typeSections = apiResponse.render_meta.sections;
+                this.selectedSection = this.typeSections.find(s => s.name === this.data.reference.section_name);
+            }, error =>
+                this.toast.error(error.error.message, { headerName: 'Field error: ' + this.nameControl.value }))
+            .add(() => this.loading = false);
     }
 
-    const newFieldName = `${name}-field`;
-    this.data.fields[fieldIdx] = newFieldName;
-    field.name = newFieldName;
-
-    this.data.name = name;
-  }
-
-
-
-  /**
-   * Destroy component.
-   */
-  public ngOnDestroy(): void {
-    this.subscriber.next();
-    this.subscriber.complete();
-  }
-
-
-  updateSectionValue(newValue: string): void {
-    const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
-    if (!isValid) {
-      this.isIdentifierValid = false
-
-    } else {
-      this.currentValue = newValue;
-      this.isIdentifierValid = true;
+    public triggerAPICall(): void {
+        if (this.maxPage && (this.currentPage <= this.maxPage)) {
+            this.loadTypesFromApi();
+            this.currentPage += 1;
+        }
     }
-  }
+
+    private loadTypesFromApi(): void {
+        this.loading = true;
+        this.typeService.getTypes(SectionRefFieldEditComponent.getApiParameters(this.currentPage)).pipe(takeUntil(this.subscriber))
+            .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                this.types = [...this.types, ...apiResponse.results as Array<CmdbType>];
+                this.totalTypes = apiResponse.total;
+                this.maxPage = apiResponse.pager.total_pages;
+            }).add(() => this.loading = false);
+    }
+
+    /**
+     * When the selected type change.
+     * Reset a selected section.
+     * @param publicID
+     */
+    public onTypeChange(publicID: number): void {
+        if (publicID) {
+            this.data.reference.type_id = publicID;
+            this.typeSections = this.getSectionsFromType(publicID);
+        } else {
+            this.data.reference.type_id = undefined;
+            this.typeSections = [];
+        }
+        this.unsetReferenceSubData();
+    }
+
+    private unsetReferenceSubData(): void {
+        this.data.reference.section_name = undefined;
+        this.sectionNameControl.setValue(undefined);
+        this.data.reference.selected_fields = undefined;
+        this.selectedFieldsControl.setValue(undefined);
+        this.selectedSection = undefined;
+    }
+
+    /**
+     * Get all sections from a type.
+     * @param typeID
+     */
+    public getSectionsFromType(typeID: number): Array<CmdbTypeSection> {
+        return this.types.find(t => t.public_id === typeID).render_meta.sections;
+    }
+
+    /**
+     * When section selection changed.
+     * @param section
+     */
+    public onSectionChange(section: CmdbTypeSection): void {
+        if (!section) {
+            this.data.reference.section_name = undefined;
+        } else {
+            this.data.reference.section_name = section.name;
+        }
+        this.selectedSection = section;
+        this.data.reference.selected_fields = undefined;
+    }
+
+    public onSectionFieldsChange(fields: Array<string>): void {
+        this.data.reference.selected_fields = fields;
+    }
+
+    /**
+     * Change the field label
+     * @param change
+     * @param idx
+     */
+    public onLabelChange(change: string, idx: string) {
+        this.data[idx] = change;
+        const field = this.fields.find(x => x.name === `${this.data.name}-field`);
+        const fieldIdx = this.data.fields.indexOf(field);
+        if (fieldIdx > -1) {
+            this.data.fields[fieldIdx].label = change;
+        }
+    }
+
+    /**
+     * Change the field when the reference changes
+     * @param name
+     */
+    public onNameChange(name: string) {
+        let oldName = this.data.name;
+
+        const latestField = this.fields.find(x => x.name.startsWith(oldName));
+        if (latestField) {
+            oldName = latestField.name.replace('-field', '');
+        }
+
+        const fieldIdx = this.data.fields.indexOf(`${oldName}-field`);
+        if (fieldIdx === -1) {
+            console.error(`Field ${oldName}-field not found in this.data.fields`);
+            return;
+        }
+
+        const field = this.fields.find(x => x.name === `${oldName}-field`);
+        if (!field) {
+            console.error(`Field object with name ${oldName}-field not found in this.fields`);
+            return;
+        }
+
+        const newFieldName = `${name}-field`;
+        this.data.fields[fieldIdx] = newFieldName;
+        field.name = newFieldName;
+
+        this.data.name = name;
+    }
+
+
+
+    /**
+     * Destroy component.
+     */
+    public ngOnDestroy(): void {
+        this.subscriber.next();
+        this.subscriber.complete();
+    }
+
+
+    updateSectionValue(newValue: string): void {
+        const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
+        if (!isValid) {
+            this.isIdentifierValid = false
+
+        } else {
+            this.currentValue = newValue;
+            this.isIdentifierValid = true;
+        }
+    }
 }
