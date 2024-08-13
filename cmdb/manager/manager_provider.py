@@ -42,6 +42,7 @@ from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
 
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.security.security import SecurityManager
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -67,6 +68,7 @@ class ManagerType(Enum):
     EXPORT_D_JOB_MANAGER = 'ExportDJobManager'
     SYSTEM_SETTINGS_READER = 'SystemSettingsReader'
     SYSTEM_SETTINGS_WRITER = 'SystemSettingsWriter'
+    SECURITY_MANAGER = 'SecurityManager'
 
 
 class ManagerProvider:
@@ -102,7 +104,8 @@ class ManagerProvider:
             ManagerType.EXPORT_D_LOG_MANAGER: ExportDLogManager,
             ManagerType.EXPORT_D_JOB_MANAGER: ExportDJobManager,
             ManagerType.SYSTEM_SETTINGS_READER: SystemSettingsReader,
-            ManagerType.SYSTEM_SETTINGS_WRITER: SystemSettingsWriter
+            ManagerType.SYSTEM_SETTINGS_WRITER: SystemSettingsWriter,
+            ManagerType.SECURITY_MANAGER: SecurityManager
         }
 
         return manager_classes.get(manager_type)
@@ -149,7 +152,8 @@ class ManagerProvider:
                 ManagerType.EXPORT_D_LOG_MANAGER,
                 ManagerType.EXPORT_D_JOB_MANAGER,
                 ManagerType.SYSTEM_SETTINGS_READER,
-                ManagerType.SYSTEM_SETTINGS_WRITER
+                ManagerType.SYSTEM_SETTINGS_WRITER,
+                ManagerType.SECURITY_MANAGER
             ]:
                 return common_args + (request_user.database,)
         else:
