@@ -29,6 +29,7 @@ from flask import current_app
 from cmdb.errors.database import NoDocumentFound
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -40,7 +41,10 @@ class SecurityManager:
     DEFAULT_ALG = 'HS512'
     DEFAULT_EXPIRES = int(10)
 
-    def __init__(self, database_manager):
+    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+        if database:
+            database_manager.connector.set_database(database)
+
         self.ssr = SystemSettingsReader(database_manager)
         self.ssw = SystemSettingsWriter(database_manager)
         self.salt = "cmdb"
