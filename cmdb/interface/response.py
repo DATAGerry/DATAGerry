@@ -163,14 +163,14 @@ class BaseAPIResponse:
         }
 
 
-class ErrorBody:
+class ErrorMessage:
     """Used to return errors to frontend"""
     def __init__(self, status: int, error: str):
         self.status = status
         self.error = error
 
     def response(self) -> None:
-        """Creates a Flask-Response which should be returned to the Frontend"""
+        """Creates a Flask-Response which is returned to the Frontend"""
         return make_api_response(self.error, self.status)
 
 

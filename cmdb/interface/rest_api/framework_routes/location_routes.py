@@ -27,7 +27,7 @@ from cmdb.framework import CmdbLocation
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorBody
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.framework.models.location_node import LocationNode
@@ -100,7 +100,7 @@ def create_location(params: dict, request_user: UserModel):
         created_location_id = locations_manager.insert_location(location_creation_params)
     except ManagerInsertError as err:
         LOGGER.debug("ManagerInsertError: %s", err)
-        return ErrorBody(400, "Could not insert the new location in database)!").response()
+        return ErrorMessage(400, "Could not insert the new location in database)!").response()
 
     return make_response(created_location_id)
 
@@ -138,7 +138,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve locations from database!").response()
+        return ErrorMessage(400, "Could not retrieve locations from database!").response()
 
 
     return api_response.make_response()
@@ -196,7 +196,7 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
 
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve locations from database!").response()
+        return ErrorMessage(400, "Could not retrieve locations from database!").response()
 
     return api_response.make_response()
 
@@ -218,7 +218,7 @@ def get_location(public_id: int, request_user: UserModel):
         location_instance = locations_manager.get_location(public_id)
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the location from database!").response()
+        return ErrorMessage(404, "Could not retrieve the location from database!").response()
 
     return make_response(location_instance)
 
@@ -239,7 +239,7 @@ def get_location_for_object(object_id: int, request_user: UserModel):
     try:
         location_instance = locations_manager.get_location_for_object(object_id)
     except ManagerGetError:
-        return ErrorBody(404, "Could not retrieve the location from database!").response()
+        return ErrorMessage(404, "Could not retrieve the location from database!").response()
 
     return make_response(location_instance)
 
@@ -347,7 +347,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         result = locations_manager.update({'object_id': object_id}, location_update_params)
     except ManagerUpdateError as err:
         LOGGER.debug("ManagerUpdateError: %s", err)
-        return ErrorBody(400, f"Could not update the location (E: {err})!").response()
+        return ErrorMessage(400, f"Could not update the location (E: {err})!").response()
 
     api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
 
@@ -376,9 +376,9 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         ack = locations_manager.delete({'public_id':location_public_id})
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the location which should be deleted from the database!").response()
+        return ErrorMessage(404, "Could not retrieve the location which should be deleted from the database!").response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete the location: (E:{err})!").response()
+        return ErrorMessage(400, f"Could not delete the location: (E:{err})!").response()
 
     return make_response(ack)

@@ -41,9 +41,58 @@ from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
+
 types_blueprint = APIBlueprint('types', __name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
+@types_blueprint.route('/', methods=['POST'])
+@insert_request_user
+@types_blueprint.protect(auth=True, right='base.framework.type.add')
+@types_blueprint.validate(TypeModel.SCHEMA)
+def insert_type(data: dict, request_user: UserModel):
+    """
+    HTTP `POST` route for insert a single type resource.
+
+    Args:
+        data (TypeModel.SCHEMA): Insert data of a new type.
+
+    Raises:
+        ManagerGetError: If the inserted resource could not be found after inserting.
+        ManagerInsertError: If something went wrong during insertion.
+
+    Returns:
+        InsertSingleResponse: Insert response with the new type and its public_id.
+    """
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+
+    data.setdefault('creation_time', datetime.now(timezone.utc))
+    possible_id = data.get('public_id', None)
+
+    if possible_id:
+        try:
+            type_manager.get(public_id=possible_id)
+        except ManagerGetError:
+            pass
+        else:
+            return abort(400, f'Type with PublicID {possible_id} already exists.')
+
+    try:
+        result_id: PublicID = type_manager.insert(data)
+        raw_doc = type_manager.get(public_id=result_id)
+    except ManagerGetError as err:
+        return abort(404, err)
+    except ManagerInsertError as err:
+        return abort(400, err)
+
+    api_response = InsertSingleResponse(result_id=result_id,
+                                        raw=TypeModel.to_json(raw_doc),
+                                        url=request.url,
+                                        model=TypeModel.MODEL)
+
+    return api_response.make_response(prefix='types')
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
@@ -133,52 +182,25 @@ def get_type(public_id: int, request_user: UserModel):
     return api_response.make_response()
 
 
-@types_blueprint.route('/', methods=['POST'])
+@types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
 @insert_request_user
-@types_blueprint.protect(auth=True, right='base.framework.type.add')
-@types_blueprint.validate(TypeModel.SCHEMA)
-def insert_type(data: dict, request_user: UserModel):
+@types_blueprint.protect(auth=True, right='base.framework.type.read')
+def count_objects(public_id: int, request_user: UserModel):
     """
-    HTTP `POST` route for insert a single type resource.
-
+    Return the number of objects in der database with the given public_id as type_id
     Args:
-        data (TypeModel.SCHEMA): Insert data of a new type.
-
-    Raises:
-        ManagerGetError: If the inserted resource could not be found after inserting.
-        ManagerInsertError: If something went wrong during insertion.
-
-    Returns:
-        InsertSingleResponse: Insert response with the new type and its public_id.
+        public_id (int): public_id of the type
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-
-    data.setdefault('creation_time', datetime.now(timezone.utc))
-    possible_id = data.get('public_id', None)
-
-    if possible_id:
-        try:
-            type_manager.get(public_id=possible_id)
-        except ManagerGetError:
-            pass
-        else:
-            return abort(400, f'Type with PublicID {possible_id} already exists.')
+    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
 
     try:
-        result_id: PublicID = type_manager.insert(data)
-        raw_doc = type_manager.get(public_id=result_id)
+        objects_count = object_manager.count_objects(public_id)
     except ManagerGetError as err:
         return abort(404, err)
-    except ManagerInsertError as err:
-        return abort(400, err)
 
-    api_response = InsertSingleResponse(result_id=result_id,
-                                        raw=TypeModel.to_json(raw_doc),
-                                        url=request.url,
-                                        model=TypeModel.MODEL)
+    return make_api_response(objects_count)
 
-    return api_response.make_response(prefix='types')
-
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
@@ -238,6 +260,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
 
     return api_response.make_response()
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @types_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
@@ -248,14 +271,11 @@ def delete_type(public_id: int, request_user: UserModel):
 
     Args:
         public_id (int): Public ID of the deletable type
-
     Raises:
         ManagerGetError: When the type with the `public_id` was not found.
         ManagerDeleteError: When something went wrong during the deletion.
-
     Notes:
         Deleting the type will also delete all objects in this type!
-
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
@@ -273,6 +293,7 @@ def delete_type(public_id: int, request_user: UserModel):
         objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
         deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
+
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:
         return abort(404, err)
@@ -282,23 +303,3 @@ def delete_type(public_id: int, request_user: UserModel):
         return abort(400, str(err))
 
     return api_response.make_response()
-
-
-@types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
-@insert_request_user
-@types_blueprint.protect(auth=True, right='base.framework.type.read')
-def count_objects(public_id: int, request_user: UserModel):
-    """
-    Return the number of objects in der database with the given public_id as type_id
-
-    Args:
-        public_id (int): public_id of the type
-    """
-    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-
-    try:
-        objects_count = object_manager.count_objects(public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
-
-    return make_api_response(objects_count)

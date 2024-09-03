@@ -229,17 +229,19 @@ def parse_authorization_header(header):
 
     if auth_type in (b"basic","basic"):
         try:
-            if current_app.cloud_mode:
-                username, password, database = base64.b64decode(auth_info).split(b":", 1)
-            else:
-                username, password = base64.b64decode(auth_info).split(b":", 1)
+            username, password = base64.b64decode(auth_info).split(b":", 1)
 
             with current_app.app_context():
                 username = username.decode("utf-8")
                 password = password.decode("utf-8")
 
                 if current_app.cloud_mode:
-                    database = database.decode("utf-8")
+                    user_data = check_user_in_mysql_db(username, password)
+
+                    if not user_data:
+                        return None
+
+                    current_app.database_manager.connector.set_database(user_data['database'])
 
                 user_manager: UserManager = UserManager(current_app.database_manager)
                 group_manager: GroupManager = GroupManager(current_app.database_manager, RightManager(rights))
@@ -261,14 +263,21 @@ def parse_authorization_header(header):
                 if user_instance:
                     tg = TokenGenerator(current_app.database_manager)
 
-                    return tg.generate_token(payload={
-                                                'user': {
-                                                    'public_id': user_instance.get_public_id()
-                                                }
-                                            })
+                    if current_app.cloud_mode:
+                        return tg.generate_token(payload={
+                                                    'user': {
+                                                        'public_id': user_instance.get_public_id(),
+                                                        'database': user_instance.database
+                                                    }
+                                                })
+                    else:
+                        return tg.generate_token(payload={
+                                                    'user': {
+                                                        'public_id': user_instance.get_public_id()
+                                                    }
+                                                })
 
                 return None
-
         except Exception:
             return None
 
@@ -283,4 +292,49 @@ def parse_authorization_header(header):
         except Exception:
             return None
 
+    return None
+
+# ------------------------------------------------------ HELPER ------------------------------------------------------ #
+
+def check_user_in_mysql_db(mail: str, password: str):
+    """Simulates Users in MySQL DB"""
+
+    ###
+    admin1: dict = {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@testgmbh.de",
+        "database": "testdb1"
+    }
+
+    admin2: dict = {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@wurstgmbh.de",
+        "database": "testdb2"
+    }
+
+    admin3: dict = {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@mustergmbh.de",
+        "database": "testdb3"
+    }
+    ###
+
+    users = {
+        "admin@testgmbh.de": admin1,
+        "admin@wurstgmbh.de": admin2,
+        "admin@mustergmbh.de": admin3,
+    }
+
+    # checks if the user exists
+    if mail in users:
+        user = users[mail]
+
+        # checks if the user password is correct
+        if user["password"] == password:
+            return user
+
+    #return None means the login attempt is not correct
     return None

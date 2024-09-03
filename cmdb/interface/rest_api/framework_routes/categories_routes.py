@@ -37,7 +37,7 @@ from cmdb.interface.response import GetSingleResponse, \
                                     InsertSingleResponse, \
                                     DeleteSingleResponse, \
                                     UpdateSingleResponse, \
-                                    ErrorBody
+                                    ErrorMessage
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
@@ -77,10 +77,10 @@ def insert_category(data: dict, request_user: UserModel):
         new_category = categories_manager.get_one(result_id)
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the created categeory from database!").response()
+        return ErrorMessage(404, "Could not retrieve the created categeory from database!").response()
     except ManagerInsertError as err:
         LOGGER.debug("ManagerInsertError: %s", err)
-        return ErrorBody(400, "Could not insert the new categeory in database)!").response()
+        return ErrorMessage(400, "Could not insert the new categeory in database)!").response()
 
     api_response = InsertSingleResponse(result_id=result_id,
                                     raw=new_category,
@@ -142,7 +142,7 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
                                         body)
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve categories from database!").response()
+        return ErrorMessage(400, "Could not retrieve categories from database!").response()
 
     return api_response.make_response()
 
@@ -167,7 +167,7 @@ def get_category(public_id: int, request_user: UserModel):
         category_instance = categories_manager.get_one(public_id)
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the requested categeory from database!").response()
+        return ErrorMessage(404, "Could not retrieve the requested categeory from database!").response()
 
     api_response = GetSingleResponse(category_instance,
                                      url = request.url,
@@ -203,7 +203,7 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerUpdateError as err:
         LOGGER.debug("ManagerUpdateError: %s", err)
-        return ErrorBody(400, f"Could not update the categeory (E: {err})!").response()
+        return ErrorMessage(400, f"Could not update the categeory (E: {err})!").response()
 
     return api_response.make_response()
 
@@ -236,9 +236,9 @@ def delete_category(public_id: int, request_user: UserModel):
         api_response = DeleteSingleResponse(raw=category_instance, model=CategoryModel.MODEL)
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the child categeories from the database!").response()
+        return ErrorMessage(404, "Could not retrieve the child categeories from the database!").response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete the categeory with the ID:{public_id}!").response()
+        return ErrorMessage(400, f"Could not delete the categeory with the ID:{public_id}!").response()
 
     return api_response.make_response()

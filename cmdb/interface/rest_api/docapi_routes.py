@@ -23,7 +23,7 @@ from cmdb.docapi.docapi_base import DocApiManager
 
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetMultiResponse, ErrorBody
+from cmdb.interface.response import GetMultiResponse, ErrorMessage
 from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.utils.error import CMDBError
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
@@ -70,7 +70,7 @@ def add_template(request_user: UserModel):
         ack = docapi_tpl_manager.insert_template(template_instance)
     except DocapiInsertError as err:
         LOGGER.debug("DocapiInsertError: %s", err)
-        return ErrorBody(500, str(err)).response()
+        return ErrorMessage(500, str(err)).response()
 
     return make_response(ack)
 
@@ -113,7 +113,7 @@ def get_template_list_filtered(searchfilter: str, request_user: UserModel):
         filterdict = json.loads(searchfilter)
         tpl = docapi_tpl_manager.get_templates_by(**filterdict)
     except DocapiGetError as err:
-        return ErrorBody(404, str(err)).response()
+        return ErrorMessage(404, str(err)).response()
 
     return make_response(tpl)
 
@@ -135,7 +135,7 @@ def get_template(public_id, request_user: UserModel):
         tpl = docapi_tpl_manager.get_template(public_id)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err)
-        return ErrorBody(404, str(err)).response()
+        return ErrorMessage(404, str(err)).response()
 
     return make_response(tpl)
 
@@ -153,7 +153,7 @@ def get_template_by_name(name: str, request_user: UserModel):
         tpl = docapi_tpl_manager.get_template_by_name(name=name)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err)
-        return ErrorBody(404, str(err)).response()
+        return ErrorMessage(404, str(err)).response()
 
     return make_response(tpl)
 
@@ -186,7 +186,7 @@ def update_template(request_user: UserModel):
         docapi_tpl_manager.update_template(update_tpl_instance, request_user)
     except DocapiUpdateError as err:
         LOGGER.debug("DocapiUpdateError: %s", err)
-        return ErrorBody(500, str(err)).response()
+        return ErrorMessage(500, str(err)).response()
 
     return make_response(update_tpl_instance)
 
@@ -205,7 +205,7 @@ def delete_template(public_id: int, request_user: UserModel):
         ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
     except DocapiDeleteError as err:
         LOGGER.debug("DocapiDeleteError: %s", err)
-        return ErrorBody(400, str(err)).response()
+        return ErrorMessage(400, str(err)).response()
 
     return make_response(ack)
 

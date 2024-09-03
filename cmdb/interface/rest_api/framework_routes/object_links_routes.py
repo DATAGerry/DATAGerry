@@ -29,7 +29,7 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import DeleteSingleResponse,\
                                     InsertSingleResponse,\
                                     GetMultiResponse,\
-                                    ErrorBody
+                                    ErrorMessage
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 from cmdb.security.acl.errors import AccessDeniedError
@@ -47,7 +47,7 @@ LOGGER = logging.getLogger(__name__)
 @links_blueprint.route('/', methods=['POST'])
 @insert_request_user
 @links_blueprint.protect(auth=True, right='base.framework.object.add')
-def insert_link(request_user: UserModel):
+def create_object_link(request_user: UserModel):
     """
     Creates a new object link in the database
 
@@ -56,23 +56,36 @@ def insert_link(request_user: UserModel):
     Returns:
         InsertSingleResponse: Object containing the created public_id of the new object link
     """
-    data = request.json
+    object_link_creation_data: dict = request.json
+
+    try:
+        primary_id = object_link_creation_data['primary']
+        secondary_id = object_link_creation_data['secondary']
+    except KeyError:
+        return ErrorMessage(400, "The 'primary' or 'secondary' key does not exist in the request data!").response()
 
     object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
                                                                            request_user)
 
+    # Confirm that this exact link does not exist
+    # object_link_params = CollectionParameters(query_string=None, filter={'$and': [{'primary': 1}, {'secondary': 1}]})
+    object_link_exists = object_links_manager.check_link_exists(object_link_creation_data)
+
     try:
-        result_id = object_links_manager.insert_object_link(data, request_user, AccessControlPermission.CREATE)
+        result_id = object_links_manager.insert_object_link(object_link_creation_data,
+                                                            request_user,
+                                                            AccessControlPermission.CREATE)
+
         raw_doc = object_links_manager.get_link(result_id, request_user, AccessControlPermission.CREATE)
     except ManagerInsertError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not create the ObjectLink!").response()
+        return ErrorMessage(400, "Could not create the ObjectLink!").response()
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(400, "Could not retrieve the created ObjectLink!").response()
+        return ErrorMessage(400, "Could not retrieve the created ObjectLink!").response()
     except AccessDeniedError as err:
         LOGGER.debug("AccessDeniedError: %s", err)
-        return ErrorBody(403, "No permission to create an ObjectLink!").response()
+        return ErrorMessage(403, "No permission to create an ObjectLink!").response()
 
     api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
                                         result_id,
@@ -97,11 +110,14 @@ def get_links(params: CollectionParameters, request_user: UserModel):
     Returns:
         GetMultiResponse: Retrived object links from db
     """
+    LOGGER.info("get_links() called")
+    LOGGER.info(f"get_links params: {params}")
     object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
                                                                            request_user)
 
     try:
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+        LOGGER.info(f"get_links builder_params: {builder_params}")
 
         iteration_result: IterationResult[ObjectLinkModel] = object_links_manager.iterate(builder_params)
 
@@ -146,12 +162,12 @@ def delete_link(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(404, "Could not retrieve the ObjectLink which should be deleted!").response()
+        return ErrorMessage(404, "Could not retrieve the ObjectLink which should be deleted!").response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
+        return ErrorMessage(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
     except AccessDeniedError as err:
         LOGGER.debug("AccessDeniedError: %s", err)
-        return ErrorBody(403, "No permission to delete an ObjectLink!").response()
+        return ErrorMessage(403, "No permission to delete an ObjectLink!").response()
 
     return api_response.make_response()

@@ -202,6 +202,9 @@ export class ObjectLinksTableComponent implements OnInit, OnDestroy {
         this.modalRef.result.then(
             (formData: any) => {
                 if (formData) {
+                    // console.log("formData: ", formData);
+                    // delete formData['primary']
+                    // return;
                     this.linkService.postLink(formData).pipe(takeUntil(this.subscriber))
                     .subscribe({
                         next: () => {
@@ -209,7 +212,8 @@ export class ObjectLinksTableComponent implements OnInit, OnDestroy {
                             this.loadLinksFromAPI();
                         },
                         error: (error) => {
-                            this.toast.error(`${error.message}`);
+                            console.log("link error", error);
+                            this.toast.error(`${error.error}`);
                         }
                     });
                 } 
