@@ -17,6 +17,8 @@
 import logging
 from typing import Type
 
+from flask import current_app
+
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.search import Query
 from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
@@ -58,8 +60,10 @@ class AuthModule:
         ]
     }
 
-    def __init__(self, settings: dict, user_manager: UserManager = None,
-                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
+    def __init__(self, settings: dict,
+                 user_manager: UserManager = None,
+                 group_manager: GroupManager = None,
+                 security_manager: SecurityManager = None):
         self.__settings: AuthSettingsDAO = self.__init_settings(settings)
         self.__user_manager = user_manager
         self.__group_manager = group_manager
@@ -189,10 +193,13 @@ class AuthModule:
         Returns:
             UserModel: instance if user was found and password was correct
         """
-        user_name = user_name.lower()
-
         try:
-            user = self.__user_manager.get_by(Query({'user_name': user_name}))
+            if current_app.cloud_mode:
+                user = self.__user_manager.get_by(Query({'email': user_name}))
+            else:
+                user_name = user_name.lower()
+                user = self.__user_manager.get_by(Query({'user_name': user_name}))
+
             provider_class_name = user.authenticator
 
             if not self.provider_exists(provider_class_name):
@@ -203,10 +210,15 @@ class AuthModule:
             provider_config_settings = self.settings.get_provider_settings(provider.get_name())
 
             provider_config_instance = provider_config_class(**provider_config_settings)
-            provider_instance = provider(config=provider_config_instance, user_manager=self.__user_manager,
-                                         group_manager=self.__group_manager, security_manager=self.__security_manager)
+
+            provider_instance = provider(config=provider_config_instance,
+                                         user_manager=self.__user_manager,
+                                         group_manager=self.__group_manager,
+                                         security_manager=self.__security_manager)
+
             if not provider_instance.is_active():
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
+
             if provider_instance.EXTERNAL_PROVIDER and not self.settings.enable_external:
                 raise AuthenticationProviderNotActivated('External providers are deactivated')
 

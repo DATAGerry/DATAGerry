@@ -198,3 +198,16 @@ class UserModel(CmdbDAO):
             'first_name': instance.first_name,
             'last_name': instance.last_name
         }
+
+
+    def __str__(self) -> str:
+        return (
+            f"User(\n"
+            f"public_id: {self.public_id},\n"
+            f"email: {self.email},\n"
+            f"user_name: {self.user_name},\n"
+            f"group_id: {self.group_id},\n"
+            f"authenticator: {self.authenticator},\n"
+            f"database: {self.database}\n"
+            f")"
+        )

@@ -22,7 +22,7 @@ from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import GetMultiResponse, ErrorBody
+from cmdb.interface.response import GetMultiResponse, ErrorMessage
 from cmdb.user_management.models.user import UserModel
 from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
 
@@ -53,7 +53,7 @@ def get_log(public_id: int, request_user: UserModel):
     try:
         requested_log: CmdbObjectLog = logs_manager.get_one(public_id)
     except ManagerGetError:
-        return ErrorBody(404, "Could not retrieve the requested log from database!").response()
+        return ErrorMessage(404, "Could not retrieve the requested log from database!").response()
 
     return make_response(requested_log)
 
@@ -88,7 +88,7 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve existing object logs from database!").response()
+        return ErrorMessage(400, "Could not retrieve existing object logs from database!").response()
 
     return api_response.make_response()
 
@@ -123,7 +123,7 @@ def get_logs_with_deleted_objects(params: CollectionParameters, request_user: Us
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve deleted objects logs from database!").response()
+        return ErrorMessage(400, "Could not retrieve deleted objects logs from database!").response()
 
     return api_response.make_response()
 
@@ -161,7 +161,7 @@ def get_object_delete_logs(params: CollectionParameters, request_user: UserModel
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve the deleted object logs from database!").response()
+        return ErrorMessage(400, "Could not retrieve the deleted object logs from database!").response()
 
     return api_response.make_response()
 
@@ -201,7 +201,7 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, f"Could not retrieve logs for object with ID:{object_id}!").response()
+        return ErrorMessage(400, f"Could not retrieve logs for object with ID:{object_id}!").response()
 
     return api_response.make_response()
 
@@ -237,7 +237,7 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         corresponding_logs = [CmdbObjectLog.to_json(log) for log in logs.results]
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, f"Could not retrieve corresponding logs for ID:{public_id}!").response()
+        return ErrorMessage(400, f"Could not retrieve corresponding logs for ID:{public_id}!").response()
 
     return make_response(corresponding_logs)
 
@@ -261,6 +261,6 @@ def delete_log(public_id: int, request_user: UserModel):
         deleted = logs_manager.delete({'public_id':public_id})
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete the log with the ID:{public_id}!").response()
+        return ErrorMessage(400, f"Could not delete the log with the ID:{public_id}!").response()
 
     return make_response(deleted)

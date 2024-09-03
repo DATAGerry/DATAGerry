@@ -380,11 +380,12 @@ class CmdbObjectManager(CmdbManagerBase):
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
         """TODO: document"""
         ack = self.delete_many(CmdbObject.COLLECTION, filter_query)
-        if self._event_queue:
-            event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
-                                                        "user_id": user.get_public_id(),
-                                                        "event": 'delete'})
-            self._event_queue.put(event)
+        # TODO: RABBIT_MQ
+        # if self._event_queue:
+        #     event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
+        #                                                 "user_id": user.get_public_id(),
+        #                                                 "event": 'delete'})
+        #     self._event_queue.put(event)
         return ack
 
 

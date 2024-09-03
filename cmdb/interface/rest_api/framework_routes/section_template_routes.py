@@ -29,7 +29,7 @@ from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
-from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorBody
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerInsertError,\
@@ -75,7 +75,7 @@ def create_section_template(params: dict, request_user: UserModel):
         created_section_template_id = template_manager.insert_section_template(params)
     except ManagerInsertError as err:
         LOGGER.debug("Exception in section_template_create")
-        return ErrorBody(400, str(err)).response()
+        return ErrorMessage(400, str(err)).response()
 
     return make_response(created_section_template_id)
 
@@ -110,7 +110,7 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("ManagerIterationError: %s", err)
-        return ErrorBody(400, "Could not retrieve SectionTemplates!").response()
+        return ErrorMessage(400, "Could not retrieve SectionTemplates!").response()
 
     return api_response.make_response()
 
@@ -134,7 +134,7 @@ def get_section_template(public_id: int, request_user: UserModel):
         section_template_instance = template_manager.get_section_template(public_id)
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
 
     if not section_template_instance:
         section_template_instance = []
@@ -164,7 +164,7 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
 
     return make_response(counts)
 
@@ -205,12 +205,12 @@ def update_section_template(params: dict, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(400, f"Could not retrieve SectionTemplate with public_id: {params['public_id']}!").response()
+        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {params['public_id']}!").response()
     except ManagerUpdateError as err:
         LOGGER.debug("ManagerUpdateError: %s", err)
-        return ErrorBody(400, f"Could not update SectionTemplate with public_id: {params['public_id']}!").response()
+        return ErrorMessage(400, f"Could not update SectionTemplate with public_id: {params['public_id']}!").response()
     except NoDocumentFound as err:
-        return ErrorBody(404, str(err)).response()
+        return ErrorMessage(404, str(err)).response()
 
     api_response = UpdateSingleResponse(result, None, request.url, CmdbSectionTemplate.MODEL)
 
@@ -240,12 +240,12 @@ def delete_section_template(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorBody(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
     except DisallowedActionError as err:
         LOGGER.debug("DisallowedActionError: %s", err)
-        return ErrorBody(405, str(err)).response()
+        return ErrorMessage(405, str(err)).response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorBody(400, f"Could not delete SectionTemplate with public_id: {public_id}!").response()
+        return ErrorMessage(400, f"Could not delete SectionTemplate with public_id: {public_id}!").response()
 
     return make_response(ack)

@@ -42,7 +42,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import Model
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse, UpdateSingleResponse,\
-    ResponseFailedMessage, ErrorBody
+    ResponseFailedMessage, ErrorMessage
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.errors import AccessDeniedError
@@ -795,7 +795,7 @@ def delete_object(public_id: int, request_user: UserModel):
             child_location = locations_manager.get_one_by({'parent': current_location.public_id})
 
             if child_location and len(child_location) > 0:
-                return ErrorBody(405, "The location of this object has child locations!").response()
+                return ErrorMessage(405, "The location of this object has child locations!").response()
         except ManagerGetError:
             pass
 
@@ -990,7 +990,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
                 location_for_object = locations_manager.get_location_for_object(current_object_instance.public_id)
 
                 if location_for_object:
-                    return ErrorBody(405, """It is not possible to bulk delete objects
+                    return ErrorMessage(405, """It is not possible to bulk delete objects
                                              if any of them has a location""").response()
             except ManagerGetError:
                 pass

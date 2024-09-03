@@ -21,7 +21,6 @@ from queue import Queue
 from typing import Union
 from datetime import datetime, timezone
 
-from .base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
@@ -31,6 +30,8 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.framework.results import IterationResult
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerIterationError
+
+from .base_manager import BaseManager
 from .query_builder.base_query_builder import BaseQueryBuilder
 from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -64,6 +65,7 @@ class ObjectLinksManager(BaseManager):
 
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
     def insert_object_link(self,
                            link: Union[dict, ObjectLinkModel],
                            user: UserModel = None,
@@ -106,10 +108,10 @@ class ObjectLinksManager(BaseManager):
                 user: UserModel = None,
                 permission: AccessControlPermission = None) -> IterationResult[ObjectLinkModel]:
         """
-        Iterate over a collection where the public id exists.
+        Iterate over a collection where the public id exists
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
+            query: list[dict] = self.query_builder.build(builder_params, user, permission)
             count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
 
             aggregation_result = list(self.aggregate(query))
@@ -131,9 +133,9 @@ class ObjectLinksManager(BaseManager):
 
 
     def get_link(self,
-            public_id: int,
-            user: UserModel = None,
-            permission: AccessControlPermission = None) -> ObjectLinkModel:
+                 public_id: int,
+                 user: UserModel = None,
+                 permission: AccessControlPermission = None) -> ObjectLinkModel:
         """
         Get a single object link by its public_id
 
@@ -156,6 +158,23 @@ class ObjectLinksManager(BaseManager):
         except ManagerGetError as err:
             LOGGER.debug("ManagerGetError: %s", err)
             raise ManagerGetError(f'ObjectLinkModel with ID: {public_id} not found!') from err
+
+
+    def check_link_exists(self, criteria: dict) -> bool:
+        """
+        Checks if an object link exists with given primary and secondary public_id
+
+        Args:
+            criteria (dict): Dict with primary and secondary public_id's
+        Returns:
+            bool: True if object link exists, else False
+        """
+        try:
+            link_instance = self.get_one_by(criteria)
+
+            return bool(link_instance)
+        except ManagerGetError:
+            return False
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
