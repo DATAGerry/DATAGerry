@@ -20,7 +20,7 @@ from flask_cors import CORS
 
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
-
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def create_rest_api(database_manager, event_queue):
     """TODO: document"""
@@ -28,7 +28,7 @@ def create_rest_api(database_manager, event_queue):
     app.url_map.strict_slashes = True
 
     # Import App Extensions
-    CORS(app, expose_headers=['X-API-Version', 'X-Total-Count'])
+    CORS(app=app, expose_headers=['X-API-Version', 'X-Total-Count'])
 
     import cmdb
     if cmdb.__MODE__ == 'DEBUG':
@@ -62,6 +62,7 @@ def register_blueprints(app):
     """TODO: document"""
     import cmdb
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
+    from cmdb.interface.rest_api.system_routes.setup_routes import setup_blueprint
     from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
     from cmdb.interface.rest_api.framework_routes.objects_routes import objects_blueprint
     from cmdb.interface.rest_api.framework_routes.object_links_routes import links_blueprint
@@ -89,6 +90,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.special_routes import special_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
+    app.register_blueprint(setup_blueprint, url_prefix='/setup')
     app.register_blueprint(date_blueprint, url_prefix='/date')
     app.register_blueprint(objects_blueprint, url_prefix='/objects')
     app.register_blueprint(links_blueprint, url_prefix='/objects/links')

@@ -68,8 +68,10 @@ def create_object_link(request_user: UserModel):
                                                                            request_user)
 
     # Confirm that this exact link does not exist
-    # object_link_params = CollectionParameters(query_string=None, filter={'$and': [{'primary': 1}, {'secondary': 1}]})
     object_link_exists = object_links_manager.check_link_exists(object_link_creation_data)
+
+    if object_link_exists:
+        return ErrorMessage(400, f"The link between {primary_id} and {secondary_id} already exists!").response()
 
     try:
         result_id = object_links_manager.insert_object_link(object_link_creation_data,
@@ -110,15 +112,11 @@ def get_links(params: CollectionParameters, request_user: UserModel):
     Returns:
         GetMultiResponse: Retrived object links from db
     """
-    LOGGER.info("get_links() called")
-    LOGGER.info(f"get_links params: {params}")
     object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
                                                                            request_user)
 
     try:
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
-        LOGGER.info(f"get_links builder_params: {builder_params}")
-
         iteration_result: IterationResult[ObjectLinkModel] = object_links_manager.iterate(builder_params)
 
         object_links = [ObjectLinkModel.to_json(object_link) for object_link in iteration_result.results]

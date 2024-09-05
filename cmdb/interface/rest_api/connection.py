@@ -34,7 +34,12 @@ with current_app.app_context():
 
 @connection_routes.route('/')
 def connection_response():
-    """TODO: document"""
+    """
+    This route is called when {{url}}/rest/ is called
+
+    Returns:
+        Response: Dict with infos about Datagerry(title, version and connection status of db)
+    """
     resp = {
         'title': __title__,
         'version': __version__,

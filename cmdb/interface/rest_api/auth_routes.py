@@ -33,6 +33,7 @@ from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.rights import __all__ as rights
 
 from cmdb.search import Query
@@ -278,19 +279,19 @@ def init_db_routine(db_name: str):
     dbm.connector.set_database(new_db.name)
     group_manager = GroupManager(dbm)
 
-    #generate framework collections
+    # Generate framework collections
     for collection in FRAMEWORK_CLASSES:
         dbm.create_collection(collection.COLLECTION)
         # set unique indexes
         dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
 
-    #generate user management collections
+    # Generate user management collections
     for collection in USER_MANAGEMENT_COLLECTION:
         dbm.create_collection(collection.COLLECTION)
         # set unique indexes
         dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
 
-    #generate ExportdJob management collections
+    # Generate ExportdJob management collections
     for collection in JOB_MANAGEMENT_COLLECTION:
         dbm.create_collection(collection.COLLECTION)
         # set unique indexes
@@ -299,6 +300,9 @@ def init_db_routine(db_name: str):
     # Generate groups
     for group in __FIXED_GROUPS__:
         group_manager.insert(group)
+
+    # Generate predefined section templates
+    dbm.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
 
 
 def create_new_admin_user(user_data: dict):
