@@ -77,4 +77,18 @@ export class ValidationService {
             this.sectionValidity$.next(overallValidity);
         }
     }
+
+
+    /**
+    * Cleans up the field and section validity maps by resetting them.
+    * This function should be called when the component is destroyed to avoid memory leaks.
+    */
+    cleanup() {
+        this.fieldValidity.clear();
+        this.isValid$.next(true);
+
+        this.sectionValidity.clear();
+        this.sectionValidity$.next(true);
+    }
+
 }

@@ -170,6 +170,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         if (this.subscription) {
             this.subscription.unsubscribe();
         }
+        this.validationService.cleanup();
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
@@ -217,6 +218,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             let newTypeID = null;
             saveTypeInstance.editor_id = undefined;
 
+            console.log('save instance', saveTypeInstance, saveTypeInstance.editor_id)
             this.typeService.postType(saveTypeInstance).subscribe({
                 next: (typeIDResp: CmdbType) => {
                     newTypeID = +typeIDResp.public_id;

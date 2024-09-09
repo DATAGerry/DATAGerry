@@ -87,7 +87,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
         new Controller('ref', new ReferenceControl())
     ];
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         private validationService: ValidationService,
@@ -103,22 +103,22 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
     ngOnInit(): void {
         //EDIT MODE
-        if(this.sectionTemplateID > 0){
+        if (this.sectionTemplateID > 0) {
             this.getSectionTemplate(this.sectionTemplateID);
         }
 
         this.isValid$ = this.validationService.getIsValid();
 
         this.formGroup.controls['isGlobal'].valueChanges.subscribe(isGlobal => {
-            if(isGlobal){
-                if(this.initialSection.name.includes('dg_gst-')){
+            if (isGlobal) {
+                if (this.initialSection.name.includes('dg_gst-')) {
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
                     this.sectionComponent.form.controls['name'].setValue(this.generateSectionTemplateName(isGlobal));
                 }
-            } 
+            }
             else {
-                if(this.initialSection.name.includes('section_template')){
+                if (this.initialSection.name.includes('section_template')) {
                     this.sectionComponent.form.controls['name'].setValue(this.initialSection.name);
                 } else {
                     this.sectionComponent.form.controls['name'].setValue(this.generateSectionTemplateName());
@@ -127,14 +127,18 @@ export class SectionTemplateBuilderComponent implements OnInit {
         });
     }
 
-/* ---------------------------------------------------- API Calls --------------------------------------------------- */
+    public ngOnDestroy(): void {
+        this.validationService.cleanup();
+    }
+
+    /* ---------------------------------------------------- API Calls --------------------------------------------------- */
 
     /**
      * Decides if a section template should be crated or updated
      */
-    public handleSectionTemplate(){
+    public handleSectionTemplate() {
 
-        if(this.sectionTemplateID > 0){
+        if (this.sectionTemplateID > 0) {
             this.updateSectionTemplate();
         } else {
             this.createSectionTemplate();
@@ -145,13 +149,13 @@ export class SectionTemplateBuilderComponent implements OnInit {
     /**
      * Send section template data to backend for creation
      */
-    public createSectionTemplate(){
+    public createSectionTemplate() {
         let params = {
             "name": this.sectionComponent.form.controls['name'].value,
             "label": this.initialSection.label,
             "is_global": this.formGroup.value.isGlobal,
             "predefined": false,
-            "fields": JSON.stringify(this.initialSection.fields) 
+            "fields": JSON.stringify(this.initialSection.fields)
         }
 
         this.sectionTemplateService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
@@ -167,7 +171,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
     /**
      * Send section template data to backend to update the existing section template
      */
-    public updateSectionTemplate(){
+    public updateSectionTemplate() {
         let params = {
             'name': this.initialSection.name,
             'label': this.initialSection.label,
@@ -182,7 +186,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
             this.toastService.success("Section Template updated!");
             this.router.navigate(['/framework/section_templates']);
         },
-        res => this.toastService.error(res.error)
+            res => this.toastService.error(res.error)
         );
     }
 
@@ -192,22 +196,22 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * 
      * @param publicID publicID of section template which should be edited
      */
-    private getSectionTemplate(publicID: number){
+    private getSectionTemplate(publicID: number) {
         this.sectionTemplateService.getSectionTemplate(publicID).subscribe((response: CmdbSectionTemplate) => {
             this.initialSection = response;
             this.formGroup.controls.isGlobal.setValue(this.initialSection.is_global);
-          },
-          apiResponse => this.toastService.error(apiResponse.error)
-          );
+        },
+            apiResponse => this.toastService.error(apiResponse.error)
+        );
     }
 
-/* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
+    /* ------------------------------------------------- EVENT HANDLERS ------------------------------------------------- */
 
     /**
      * Redirects changes to field properties
      * @param data new data for field
      */
-    public onFieldChange(data: any){
+    public onFieldChange(data: any) {
         this.handleFieldChanges(data);
     }
 
@@ -216,14 +220,14 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * Handles changes to field properties and updates them
      * @param data new data for field
      */
-    private handleFieldChanges(data: any){
+    private handleFieldChanges(data: any) {
         const newValue: any = data.newValue;
         const inputName: string = data.inputName;
         const fieldName: string = data.fieldName;
 
-        if(inputName != 'name' && inputName != 'label'){
+        if (inputName != 'name' && inputName != 'label') {
             const index: number = this.getFieldIndexForName(fieldName);
-            if (index >= 0){
+            if (index >= 0) {
                 this.initialSection.fields[index][inputName] = newValue;
             }
         }
@@ -236,19 +240,19 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * @param targetName name of the field which is searched
      * @returns (int): Index of the field. -1 of no field with this name is found
      */
-        private getFieldIndexForName(targetName: string): number{
-            let index = 0;
-            for (let field of this.initialSection.fields){
-                
-                if(field.name == targetName){
-                    return index;
-                } else {
-                    index += 1;
-                }
+    private getFieldIndexForName(targetName: string): number {
+        let index = 0;
+        for (let field of this.initialSection.fields) {
+
+            if (field.name == targetName) {
+                return index;
+            } else {
+                index += 1;
             }
-    
-            return -1;
         }
+
+        return -1;
+    }
 
 
     /**
@@ -304,7 +308,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
         }
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
      * Sets the icon for the different controls
@@ -341,11 +345,11 @@ export class SectionTemplateBuilderComponent implements OnInit {
      * 
      * @returns Unique name for section
      */
-    public generateSectionTemplateName(isGlobal: boolean = false){
-        if(isGlobal){
+    public generateSectionTemplateName(isGlobal: boolean = false) {
+        if (isGlobal) {
             return `dg_gst-${uuidv4()}`;
         }
-        
+
         return `section_template-${uuidv4()}`;
     }
 }

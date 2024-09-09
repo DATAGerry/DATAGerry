@@ -70,6 +70,7 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.validationService.cleanup();
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
