@@ -218,7 +218,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             let newTypeID = null;
             saveTypeInstance.editor_id = undefined;
 
-            console.log('save instance', saveTypeInstance, saveTypeInstance.editor_id)
             this.typeService.postType(saveTypeInstance).subscribe({
                 next: (typeIDResp: CmdbType) => {
                     newTypeID = +typeIDResp.public_id;
