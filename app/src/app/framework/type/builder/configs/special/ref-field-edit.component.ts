@@ -168,6 +168,20 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
                 this.prepareSummaries();
             });
         }
+
+        this.filterSummaries();
+    }
+
+    /**
+     * Filters the summaries based on the reference types available in the data.
+     * Only includes summaries where the type_id exists in the ref_types.
+    */
+    private filterSummaries() {
+        if (this.data.ref_types) {
+            this.summaries = this.summaries.filter(summary =>
+                this.data.ref_types.includes(summary.type_id)
+            );
+        }
     }
 
 
