@@ -128,6 +128,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.validationService.cleanup();
     }
 
     /* ----------------------------------------------- ON_CHANGES SECTION ----------------------------------------------- */

@@ -170,6 +170,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         if (this.subscription) {
             this.subscription.unsubscribe();
         }
+        this.validationService.cleanup();
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */

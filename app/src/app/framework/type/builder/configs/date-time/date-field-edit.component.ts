@@ -93,6 +93,7 @@ export class DateFieldEditComponent extends ConfigEditBaseComponent implements O
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.validationService.cleanup();
     }
 
     /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */

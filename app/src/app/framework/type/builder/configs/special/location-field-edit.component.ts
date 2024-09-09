@@ -33,34 +33,34 @@ import { nameConvention } from '../../../../../layout/directives/name.directive'
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-location-field-edit',
-  templateUrl: './location-field-edit.component.html',
-  styleUrls: ['./location-field-edit.component.scss'],
+    selector: 'cmdb-location-field-edit',
+    templateUrl: './location-field-edit.component.html',
+    styleUrls: ['./location-field-edit.component.scss'],
 })
 export class LocationFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
 
-  // Component un-subscriber.
-  protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    // Component un-subscriber.
+    protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
-  public nameControl: UntypedFormControl = new UntypedFormControl('');
-  public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
-  public typeControl: UntypedFormControl = new UntypedFormControl(undefined);
-  public requiredControl: UntypedFormControl = new UntypedFormControl(false);
-  public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public nameControl: UntypedFormControl = new UntypedFormControl('');
+    public labelControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
+    public typeControl: UntypedFormControl = new UntypedFormControl(undefined);
+    public requiredControl: UntypedFormControl = new UntypedFormControl(false);
+    public summaryControl: UntypedFormControl = new UntypedFormControl(undefined);
 
-  public referenceGroup: UntypedFormGroup = new UntypedFormGroup({ type_id: this.typeControl });
+    public referenceGroup: UntypedFormGroup = new UntypedFormGroup({ type_id: this.typeControl });
 
-  public typesParams: CollectionParameters = {
-    filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
-  };
+    public typesParams: CollectionParameters = {
+        filter: undefined, limit: 0, sort: 'public_id', order: 1, page: 1
+    };
 
-  public selectable_as_parent: boolean = true;
-  public currentTypeID: number;
+    public selectable_as_parent: boolean = true;
+    public currentTypeID: number;
 
-  private initialValue: string;
-  isValid$ = true;
+    private initialValue: string;
+    isValid$ = true;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         private typeService: TypeService,
@@ -83,10 +83,10 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
         this.disableControlOnEdit(this.nameControl);
         this.patchData(this.data, this.form);
 
-        if(this.currentTypeID){
+        if (this.currentTypeID) {
             this.triggerAPICall();
         }
-        
+
         this.initialValue = this.nameControl.value;
 
         if (this.form.controls['label'].invalid) {
@@ -99,23 +99,24 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
         this.setDraggable("true");
         this.subscriber.next();
         this.subscriber.complete();
+        this.validationService.cleanup();
     }
 
 
-/* ---------------------------------------------------- API CALLS --------------------------------------------------- */
+    /* ---------------------------------------------------- API CALLS --------------------------------------------------- */
 
     public triggerAPICall() {
         this.typeService.getType(this.currentTypeID).pipe(takeUntil(this.subscriber))
-        .subscribe(
-            (apiResponse: CmdbType) => {
-                this.selectable_as_parent = apiResponse.selectable_as_parent;
-                this.cd.markForCheck();
-            },
-            (err) => this.toast.error(err)
-        );
+            .subscribe(
+                (apiResponse: CmdbType) => {
+                    this.selectable_as_parent = apiResponse.selectable_as_parent;
+                    this.cd.markForCheck();
+                },
+                (err) => this.toast.error(err)
+            );
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     onInputChange(event: any) {
         for (let item in this.form.controls) {
@@ -141,7 +142,7 @@ export class LocationFieldEditComponent extends ConfigEditBaseComponent implemen
 
 
     private setSelectableAsParent(value: boolean): void {
-        if(this.activeRoute.snapshot.data.type?.selectable_as_parent){
+        if (this.activeRoute.snapshot.data.type?.selectable_as_parent) {
             this.activeRoute.snapshot.data.type.selectable_as_parent = value;
         }
     }

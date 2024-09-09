@@ -167,6 +167,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.subscriber.next();
         this.subscriber.complete();
         this.sectionIdentifierService.resetIdentifiers();
+        this.validationService.cleanup();
     }
 
     /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */

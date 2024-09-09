@@ -69,6 +69,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+        this.validationService.cleanup();
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
