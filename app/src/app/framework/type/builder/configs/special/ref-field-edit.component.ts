@@ -274,11 +274,25 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     }
 
 
+    /**
+     * Handles the change event for the ng-select component.
+     * Updates the corresponding summary item with the selected type's label and icon.
+     * @param type - The selected type object containing the public_id, label, and render_meta.icon.
+    */
     public changeSummaryOption(type: CmdbType) {
+        console.log(type);
+        if (!type) {
+            return;
+        }
         const nestedSummary = this.summaries.find(s => s.type_id === type.public_id);
-        nestedSummary.label = type.label;
-        nestedSummary.icon = type.render_meta.icon;
+        if (nestedSummary) {
+            nestedSummary.label = type.label;
+            nestedSummary.icon = type.render_meta.icon;
+        } else {
+            console.warn('No matching summary found for type_id:', type.public_id);
+        }
     }
+
 
     /* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
 
