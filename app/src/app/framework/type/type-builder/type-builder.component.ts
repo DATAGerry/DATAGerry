@@ -171,6 +171,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             this.subscription.unsubscribe();
         }
         this.validationService.cleanup();
+        this.sectionIdentifierService.resetIdentifiers()
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
