@@ -22,6 +22,7 @@ import { Router } from '@angular/router';
 import { Observable, throwError, catchError } from 'rxjs';
 
 import { AuthService } from '../../auth/services/auth.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Injectable()
@@ -46,7 +47,7 @@ export class HttpErrorInterceptor implements HttpInterceptor {
 /*                                                     LIFE CYLCLE                                                    */
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private router: Router, private authService: AuthService) {
+    constructor(private router: Router, private authService: AuthService,private toastService: ToastService) {
 
     }
 
@@ -56,9 +57,21 @@ export class HttpErrorInterceptor implements HttpInterceptor {
             const statusCode = error.status;
 
             if (this.REDIRECT_ERRORS.indexOf(statusCode) !== -1) {
-                if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
+                // if (statusCode === this.CONNECTION_REFUSED || statusCode === this.INTERNAL_SERVER_ERROR) {
+                //     this.router.navigate(['/connect']);
+                // } else if (statusCode === this.UNAUTHORIZED) {
+                //     this.authService.logout();
+                // } else {
+                //     this.router.navigate(['/error/', statusCode]);
+                // }
+                if (statusCode === this.CONNECTION_REFUSED) {
                     this.router.navigate(['/connect']);
-                } else if (statusCode === this.UNAUTHORIZED) {
+                    this.toastService.error("The connection to the backend has been refused!");
+                }
+                else if (statusCode === this.INTERNAL_SERVER_ERROR) {
+                    this.toastService.error("An internal server error occured!"); 
+                }
+                else if (statusCode === this.UNAUTHORIZED) {
                     this.authService.logout();
                 } else {
                     this.router.navigate(['/error/', statusCode]);

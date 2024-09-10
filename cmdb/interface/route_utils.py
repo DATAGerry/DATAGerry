@@ -158,7 +158,7 @@ def insert_request_user(func):
         except ValueError:
             return abort(401)
         except Exception as err:
-            LOGGER.debug("HINT: Uncatched error type in insert_request_user(): %s", type(err))
+            LOGGER.debug("[insert_request_user] Uncatched error type: %s", type(err))
             return abort(401)
 
         user = user_manager.get(user_id)

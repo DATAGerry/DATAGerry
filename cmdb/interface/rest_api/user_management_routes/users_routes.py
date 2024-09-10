@@ -14,12 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime, timezone
 from flask import abort, request, current_app
 
 from cmdb.security.security import SecurityManager
 from cmdb.user_management.managers.user_manager import UserManager
 
+from cmdb.search import Query
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
@@ -27,7 +29,8 @@ from cmdb.interface.response import GetMultiResponse, \
                                     GetSingleResponse, \
                                     InsertSingleResponse, \
                                     UpdateSingleResponse, \
-                                    DeleteSingleResponse
+                                    DeleteSingleResponse, \
+                                    ErrorMessage
 from cmdb.framework.utils import PublicID
 from cmdb.framework.results import IterationResult
 from cmdb.errors.manager import ManagerGetError, \
@@ -38,6 +41,8 @@ from cmdb.errors.manager import ManagerGetError, \
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 users_blueprint = APIBlueprint('users', __name__)
 
@@ -66,8 +71,34 @@ def insert_user(data: dict, request_user: UserModel):
         data['password'] = security_manager.generate_hmac(data['password'])
         data['registration_time'] = datetime.now(timezone.utc)
 
-        if current_app.cloud_mode:
-            data['database'] = request_user.database
+        try:
+            if current_app.cloud_mode:
+                # Confirm database is available from the request
+                data['database'] = request_user.database
+        except KeyError:
+            return ErrorMessage(400, "The database could not be retrieved!").response()
+
+        try:
+            if current_app.cloud_mode:
+                # Confirm an email was provided when creating the user
+                user_email = data['email']
+
+                if not user_email:
+                    raise KeyError
+        except KeyError:
+            LOGGER.debug("[insert_user] No email was provided!")
+            # return abort(400, "No email was provided!")
+            return ErrorMessage(400, "The email is mandatory to create a new user!").response()
+
+        # Check if email is already exists
+        try:
+            if current_app.cloud_mode:
+                user_with_given_email = user_manager.get_by(Query({'email': user_email}))
+
+                if user_with_given_email:
+                    return ErrorMessage(400, "The email is already in use!").response()
+        except ManagerGetError:
+            pass
 
         result_id: PublicID = user_manager.insert(data)
 
@@ -77,8 +108,7 @@ def insert_user(data: dict, request_user: UserModel):
         return abort(404, err)
     except ManagerInsertError as err:
         return abort(400, err)
-
-    api_response = InsertSingleResponse(result_id, UserModel.to_dict(user), request.url, UserModel.MODEL)
+    api_response = InsertSingleResponse(UserModel.to_dict(user), result_id, request.url, UserModel.MODEL)
 
     return api_response.make_response(prefix='users')
 
