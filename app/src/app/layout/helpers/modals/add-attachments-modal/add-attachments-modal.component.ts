@@ -23,7 +23,7 @@ import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
 import { CollectionParameters } from '../../../../services/models/api-parameter';
 import { APIGetMultiResponse } from '../../../../services/models/api-response';
-import { takeUntil} from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { FileMetadata } from '../../../components/file-explorer/model/metadata';
 import { FileElement } from '../../../components/file-explorer/model/file-element';
@@ -46,16 +46,15 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
   public attachments: FileElement[] = [];
   public recordsTotal: number = 0;
   private dataMaxSize: number = 1024 * 1024 * 50;
-  private readonly defaultApiParameter: CollectionParameters = {page: 1, limit: 100, order: 1};
+  private readonly defaultApiParameter: CollectionParameters = { page: 1, limit: 100, order: 1 };
 
 
   constructor(private fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
+    private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
 
   public ngOnInit(): void {
     this.fileService.getAllFilesList(this.metadata).subscribe((data: APIGetMultiResponse<FileElement>) => {
       this.attachments.push(...data.results);
-      this.recordsTotal = data.total;
     });
   }
 
@@ -74,7 +73,6 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
         } else {
           this.attachments = data.results;
         }
-        this.recordsTotal = data.total;
         this.inProcess = false;
       });
   }
@@ -93,12 +91,15 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
                 if (result) {
                   this.attachments.push(...this.attachments.filter(el => el.filename !== file.name));
                   return true;
-                } else {return false; }
+                } else { return false; }
               });
               promiseModal.then(value => {
-                if (value) {this.postFile(file); }
+                if (value) { this.postFile(file); }
               });
-            } else { this.postFile(file); }
+            } else {
+              this.recordsTotal++
+              this.postFile(file);
+            }
           });
         }
       });
@@ -113,9 +114,9 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
     return new Promise((resolve) => {
       this.fileService.getFileElement(value, this.metadata).pipe(
         takeUntil(this.unSubscribe)).subscribe(
-        () => resolve(true),
-        () => resolve(false)
-      );
+          () => resolve(true),
+          () => resolve(false)
+        );
     });
   }
 
@@ -126,7 +127,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
    */
   private checkFileSizeAllow(file: File): boolean {
     const maxSize = this.dataMaxSize;
-    if ( file.size > maxSize ) {
+    if (file.size > maxSize) {
       this.toast.error(`File size is more then 50 M/Bytes.`);
       return false;
     }
