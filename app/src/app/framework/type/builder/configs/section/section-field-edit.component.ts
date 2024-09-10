@@ -70,6 +70,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.subscriber.next();
         this.subscriber.complete();
         this.validationService.cleanup();
+        this.sectionIdentifier.resetIdentifiers()
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */

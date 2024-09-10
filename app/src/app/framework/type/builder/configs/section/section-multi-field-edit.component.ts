@@ -71,6 +71,7 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.subscriber.next();
         this.subscriber.complete();
         this.validationService.cleanup();
+        this.sectionIdentifierService.resetIdentifiers()
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
