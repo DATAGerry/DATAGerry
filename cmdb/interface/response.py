@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from json import dumps
 from datetime import datetime, timezone
 from enum import Enum
@@ -29,6 +30,10 @@ from cmdb.interface.api_project import APIProjection, APIProjector
 
 from cmdb.interface.api_pagination import APIPagination, APIPager
 from cmdb.interface.route_utils import default
+# -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
@@ -324,9 +329,12 @@ class InsertSingleResponse(BaseAPIResponse):
             url: The request url.
             model: Data model of the inserted resource.
         """
-        self.raw: dict = raw
-        self.result_id: int = int(result_id)
-        super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
+        try:
+            self.raw: dict = raw
+            self.result_id: int = int(result_id)
+            super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
+        except Exception as err:
+            LOGGER.info(f"InsertSingleResponse __init__ error: {err}")
 
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> Response:

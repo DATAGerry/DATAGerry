@@ -19,7 +19,6 @@ from datetime import datetime, timezone
 
 from flask import request, current_app, abort
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb import __CLOUD_MODE__
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO
@@ -146,7 +145,7 @@ def post_login():
     request_user_name = login_data['user_name']
     request_password = login_data['password']
 
-    if __CLOUD_MODE__:
+    if current_app.cloud_mode:
         user_data = check_user_in_mysql_db(request_user_name, request_password)
         ### login data is invalid
         if not user_data:
