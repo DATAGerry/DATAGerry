@@ -53,11 +53,9 @@ def get_file_list(params: CollectionParameters, request_user: UserModel):
     Get all objects in database
 
     Args:
-        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter.
-
+        params (CollectionParameters): Passed parameters over the http query string + optional `view` parameter
     Raises:
-        MediaFileManagerGetError: If the files could not be found.
-
+        MediaFileManagerGetError: If the files could not be found
     Returns:
         list of files
     """
@@ -269,6 +267,7 @@ def download_file(filename: str, request_user: UserModel):
         }
     )
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @media_file_blueprint.route('<int:public_id>', methods=['DELETE'])
 @insert_request_user
@@ -291,10 +290,13 @@ def delete_file(public_id: int, request_user: UserModel):
     media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
 
     try:
-        deleted = media_file_manager.get_file(metadata={'public_id': public_id})
-        for _id in recursive_delete_filter(public_id, media_file_manager):
-            media_file_manager.delete_file(_id)
-    except MediaFileManagerDeleteError:
-        return abort(500)
+        file_to_delete = media_file_manager.get_file(metadata={'public_id': public_id})
 
-    return make_response(deleted)
+        if file_to_delete:
+            for _id in recursive_delete_filter(public_id, media_file_manager):
+                media_file_manager.delete_file(_id)
+    except MediaFileManagerDeleteError as err:
+        LOGGER.debug("[delete_file] MediaFileManagerDeleteError: %s", err)
+        return abort(404)
+
+    return make_response(file_to_delete)

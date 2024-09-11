@@ -16,6 +16,7 @@
 """TODO: document"""
 import json
 import logging
+from typing import Union
 
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
@@ -23,9 +24,12 @@ from werkzeug.wrappers import Request
 
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.media_library.media_file_manager import MediaFileManager
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def get_file_in_request(file_name: str) -> FileStorage:
     """TODO: document"""
@@ -36,7 +40,7 @@ def get_file_in_request(file_name: str) -> FileStorage:
         return abort(400)
 
 
-def get_element_from_data_request(element, _request: Request) -> (dict, None):
+def get_element_from_data_request(element, _request: Request) -> Union[dict, None]:
     """TODO: document"""
     try:
         metadata = json.loads(_request.form.to_dict()[element])
@@ -60,11 +64,11 @@ def generate_metadata_filter(element, _request=None, params=None):
         for key, value in data.items():
             if 'reference' == key and value:
                 if isinstance(value, list):
-                    filter_metadata.update({"metadata.%s" % key: {'$in': value}})
+                    filter_metadata.update({f"metadata.{key}": {'$in': value}})
                 else:
-                    filter_metadata.update({"metadata.%s" % key: {'$in': [int(value)]}})
+                    filter_metadata.update({f"metadata.{key}": {'$in': [int(value)]}})
             else:
-                filter_metadata.update({"metadata.%s" % key: value})
+                filter_metadata.update({f"metadata.{key}": value})
 
     except (IndexError, KeyError, TypeError, Exception) as ex:
         LOGGER.error('Metadata was not provided - Exception: %s', ex)
@@ -122,7 +126,7 @@ def create_attachment_name(name, index, metadata, media_file_manager):
         raise Exception(err) from err
 
 
-def recursive_delete_filter(public_id, media_file_manager, _ids=None) -> []:
+def recursive_delete_filter(public_id: int, media_file_manager: MediaFileManager, _ids=None) -> list:
     """ This method deletes a file in the specified section of the document for storing workflow data.
         Any existing value that matches the file name and metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
