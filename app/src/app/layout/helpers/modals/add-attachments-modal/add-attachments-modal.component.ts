@@ -17,7 +17,6 @@
 */
 
 import { Component, Input, OnDestroy, OnInit } from '@angular/core';
-import { FileSaverService } from 'ngx-filesaver';
 import { NgbActiveModal, NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastService } from '../../../toast/toast.service';
 import { GeneralModalComponent } from '../general-modal/general-modal.component';
@@ -46,10 +45,11 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
   public attachments: FileElement[] = [];
   public recordsTotal: number = 0;
   private dataMaxSize: number = 1024 * 1024 * 50;
+  public newFiles: FileElement[] = [];
   private readonly defaultApiParameter: CollectionParameters = { page: 1, limit: 100, order: 1 };
 
 
-  constructor(private fileService: FileService, private fileSaverService: FileSaverService,
+  constructor(private fileService: FileService,
     private modalService: NgbModal, public activeModal: NgbActiveModal, private toast: ToastService) { }
 
   public ngOnInit(): void {
@@ -139,6 +139,7 @@ export class AddAttachmentsModalComponent implements OnInit, OnDestroy {
    * @param file current file for update
    */
   private postFile(file: any) {
+    this.newFiles.push(file)
     file.inProcess = true;
     this.inProcess = true;
     this.attachments = [file].concat(this.attachments);
