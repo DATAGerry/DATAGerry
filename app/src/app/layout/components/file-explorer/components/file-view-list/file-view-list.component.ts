@@ -21,7 +21,7 @@ import { FileElement, SelectedFileArray } from '../../model/file-element';
 import { BehaviorSubject } from 'rxjs';
 import { FileService } from '../../service/file.service';
 import { FileSaverService } from 'ngx-filesaver';
-import { RenameDialogComponent} from '../../modal/rename-dialog/rename-dialog.component';
+import { RenameDialogComponent } from '../../modal/rename-dialog/rename-dialog.component';
 import { NgbModal, NgbModalConfig } from '@ng-bootstrap/ng-bootstrap';
 import { MoveDialogComponent } from '../../modal/move-dialog/move-dialog.component';
 import { CollectionParameters } from '../../../../../services/models/api-parameter';
@@ -55,7 +55,7 @@ export class FileViewListComponent implements OnChanges {
 
   private elementFiles: FileElement[] = [];
   @Input()
-  set fileElements( value: FileElement[]) {
+  set fileElements(value: FileElement[]) {
     this.elementFiles = value;
   }
 
@@ -74,7 +74,7 @@ export class FileViewListComponent implements OnChanges {
   }
 
   constructor(public fileService: FileService, private fileSaverService: FileSaverService,
-              private modalService: NgbModal, private config: NgbModalConfig) {
+    private modalService: NgbModal, private config: NgbModalConfig) {
     config.backdrop = 'static';
     config.keyboard = false;
   }
@@ -86,13 +86,13 @@ export class FileViewListComponent implements OnChanges {
   }
 
   public onSelect(value: FileElement, event?: Event): void {
-    const array = this.selectedFiles.files.filter( x => x.public_id === value.public_id);
+    const array = this.selectedFiles.files.filter(x => x.public_id === value.public_id);
     if (array.length === 0) {
       this.selectedFiles.files.push(value);
       this.selectedFiles.totalSize = this.selectedFiles.totalSize + value.size;
       if (event) { (event.target as HTMLElement).classList.add('active'); }
     } else {
-      this.selectedFiles.files = this.selectedFiles.files.filter( x => x.public_id !== value.public_id);
+      this.selectedFiles.files = this.selectedFiles.files.filter(x => x.public_id !== value.public_id);
       this.selectedFiles.totalSize = this.selectedFiles.totalSize - value.size;
       if (event) { (event.target as HTMLElement).classList.remove('active'); }
     }
@@ -113,13 +113,13 @@ export class FileViewListComponent implements OnChanges {
    * @param value selected FileElement
    */
   private updateSelectedFileList(value: FileElement): void {
-    this.selectedFiles.files = this.selectedFiles.files.filter( x => x.public_id !== value.public_id);
+    this.selectedFiles.files = this.selectedFiles.files.filter(x => x.public_id !== value.public_id);
     const inputElements: any = $('input[class="selected-file"]:checked');
     inputElements.length > 0 ? inputElements.checked = true : inputElements.checked = false;
   }
 
   public downloadFile(value: FileElement) {
-    const {filename, metadata} = value;
+    const { filename, metadata } = value;
     this.fileService.downloadFile(filename, metadata).subscribe((data: any) => {
       this.fileSaverService.save(data.body, filename);
     });
@@ -150,12 +150,26 @@ export class FileViewListComponent implements OnChanges {
     });
   }
 
+  /**
+ * Deletes a file from the list and updates the UI optimistically.
+ * @param value - The file element to be deleted.
+  */
   public deleteFile(value: FileElement) {
+
+    this.elementFiles = this.elementFiles.filter(file => file.public_id !== value.public_id);
     this.updateSelectedFileList(value);
-    this.fileService.deleteFile(value.public_id, {}).subscribe(() => {
-      this.loadFolderFiles();
+
+    this.fileService.deleteFile(value.public_id, {}).subscribe({
+      next: () => {
+        this.loadFolderFiles();
+      },
+      error: (err) => {
+        this.elementFiles.push(value);
+        this.loadFolderFiles();
+      }
     });
   }
+
 
   private postFileChanges(curr: any): void {
     this.fileService.putFile(curr).subscribe(() => {
