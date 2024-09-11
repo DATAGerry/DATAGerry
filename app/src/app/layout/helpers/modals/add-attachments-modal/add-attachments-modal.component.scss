@@ -38,3 +38,8 @@
     overflow-x: hidden;
   }
 }
+
+.scrollable-container {
+  max-height: 400px; 
+  overflow-y: auto;
+}
