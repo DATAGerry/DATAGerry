@@ -18,6 +18,7 @@ import logging
 
 from datetime import datetime, timezone
 from gridfs.grid_file import GridOutCursor, GridOut
+from gridfs.errors import NoFile
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.database.database_gridfs import DatabaseGridFS
@@ -31,7 +32,9 @@ from cmdb.utils.error import CMDBError
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               MediaFileManager - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class MediaFileManager(CmdbManagerBase):
     """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
@@ -53,9 +56,10 @@ class MediaFileManager(CmdbManagerBase):
         """TODO: document"""
         try:
             result = self.fs.get_last_version(**metadata)
-        except (MediaFileManagerGetError, Exception) as err:
-            LOGGER.error(err)
-            raise MediaFileManagerGetError(err=err) from err
+        except NoFile:
+            return None
+        except Exception as err:
+            LOGGER.debug("[get_file] Exception: %s, ErrorType: %s",err, type(err))
 
         return result.read() if blob else result._file
 
