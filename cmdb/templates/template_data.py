@@ -22,7 +22,9 @@ from cmdb.framework.cmdb_errors import ObjectManagerGetError
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             AbstractTemplateData - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AbstractTemplateData:
     """TODO: document"""
     def __init__(self):
@@ -33,6 +35,9 @@ class AbstractTemplateData:
         return self._template_data
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              ObjectTemplateData - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ObjectTemplateData(AbstractTemplateData):
     """TODO: document"""
 
@@ -54,11 +59,16 @@ class ObjectTemplateData(AbstractTemplateData):
                     # resolve type
                     current_object = self.__object_manager.get_object(field["value"])
                     type_instance = self.__object_manager.get_type(current_object.get_type_id())
-                    cmdb_render_object = CmdbRender(object_instance=current_object, type_instance=type_instance,
-                                                    render_user=None, object_manager=self.__object_manager)
+
+                    cmdb_render_object = CmdbRender(object_instance=current_object,
+                                                    type_instance=type_instance,
+                                                    render_user=None,
+                                                    object_manager=self.__object_manager)
+                    
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 elif field['type'] == 'ref-section-field':
                     data['fields'][field_name] = {'fields': {}}
+
                     for section_ref_field in field['references']['fields']:
                         data['fields'][field_name]['fields'][section_ref_field['name']] = section_ref_field['value']
                 else:
@@ -67,4 +77,5 @@ class ObjectTemplateData(AbstractTemplateData):
                 continue
             except Exception as err:
                 LOGGER.error(err)
+
         return data
