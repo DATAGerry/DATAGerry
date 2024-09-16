@@ -14,13 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from flask import current_app
-# from cmdb import __CLOUD_MODE__, __ASYMMETRIC_KEY__
+
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.utils.error import CMDBError
 from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   KeyHolder - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 class KeyHolder:
     """TODO: document"""
 
