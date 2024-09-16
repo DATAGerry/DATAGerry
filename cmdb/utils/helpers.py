@@ -35,15 +35,6 @@ def debug_print(self):
     return f'Class: {self.__class__.__name__} \nDict:\n{pprint.pformat(self.__dict__)}'
 
 
-def get_config_dir():
-    """
-    get configuration directory
-    Returns:
-        (str): path to the configuration files
-    """
-    return os.path.join(os.path.dirname(__file__), '../../etc/')
-
-
 def load_class(classname):
     """ load and return the class with the given classname """
     # extract class from module

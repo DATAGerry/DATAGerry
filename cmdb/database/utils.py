@@ -27,9 +27,9 @@ import logging
 try:
     import uuid
 
-    _USE_UUID = True
+    USE_UUID = True
 except ImportError:
-    _USE_UUID = False
+    USE_UUID = False
 
 from bson.dbref import DBRef
 from bson.max_key import MaxKey
@@ -81,7 +81,7 @@ def object_hook(dct: dict):
     if "$maxKey" in dct:
         return MaxKey()
 
-    if _USE_UUID and "$uuid" in dct:
+    if USE_UUID and "$uuid" in dct:
         return uuid.UUID(dct["$uuid"])
     return dct
 
@@ -139,7 +139,7 @@ def default(obj):
     if isinstance(obj, Timestamp):
         return {"t": obj.time, "i": obj.inc}
 
-    if _USE_UUID and isinstance(obj, uuid.UUID):
+    if USE_UUID and isinstance(obj, uuid.UUID):
         return {"$uuid": obj.hex}
 
     raise TypeError(f"{obj} is not JSON serializable")

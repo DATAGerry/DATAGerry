@@ -221,9 +221,7 @@ class SetupRoutine:
         try:
             self.setup_database_manager.drop_database(database_name)
         except DatabaseNotExists as err:
-            LOGGER.error(f"DatabaseNotExists: {err}")
-        except Exception as err:
-            LOGGER.info(f"Drop Exception Error: {err}")
+            LOGGER.debug("[__init_database] DatabaseNotExists: %s", err)
 
         # create new database
         self.setup_database_manager.create_database(database_name)

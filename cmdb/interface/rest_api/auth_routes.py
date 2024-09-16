@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -222,45 +223,22 @@ def post_login():
 def check_user_in_mysql_db(mail: str, password: str):
     """Simulates Users in MySQL DB"""
 
-    ###
-    admin1: dict = {
-        "user_name": "admin",
-        "password": "admin",
-        "email": "admin@testgmbh.de",
-        "database": "testdb1"
-    }
+    try:
+        with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
+            users_data = json.load(users_file)
 
-    admin2: dict = {
-        "user_name": "admin",
-        "password": "admin",
-        "email": "admin@wurstgmbh.de",
-        "database": "testdb2"
-    }
+            if mail in users_data:
+                user = users_data[mail]
 
-    admin3: dict = {
-        "user_name": "admin",
-        "password": "admin",
-        "email": "admin@mustergmbh.de",
-        "database": "testdb3"
-    }
-    ###
+                if user["password"] == password:
+                    return user
+            else:
+                return None
 
-    users = {
-        "admin@testgmbh.de": admin1,
-        "admin@wurstgmbh.de": admin2,
-        "admin@mustergmbh.de": admin3,
-    }
 
-    # checks if the user exists
-    if mail in users:
-        user = users[mail]
-
-        # checks if the user password is correct
-        if user["password"] == password:
-            return user
-
-    #return None means the login attempt is not correct
-    return None
+    except Exception as err:
+        LOGGER.debug(f"[get users from file] error: {err} , error type: {type(err)}")
+        return None
 
 
 def check_db_exists(db_name: dict):

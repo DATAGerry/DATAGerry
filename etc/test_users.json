@@ -1,0 +1,20 @@
+{
+    "admin@testgmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@testgmbh.de",
+        "database": "testdb1"
+    },
+    "admin@wurstgmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@wurstgmbh.de",
+        "database": "testdb2"
+    },
+    "admin@mustergmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@mustergmbh.de",
+        "database": "testdb3"
+    }
+}

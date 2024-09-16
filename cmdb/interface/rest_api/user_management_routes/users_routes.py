@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import json
 import logging
 from datetime import datetime, timezone
 from flask import abort, request, current_app
@@ -68,6 +69,7 @@ def insert_user(data: dict, request_user: UserModel):
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
     try:
+        user_password = data['password']
         data['password'] = security_manager.generate_hmac(data['password'])
         data['registration_time'] = datetime.now(timezone.utc)
 
@@ -87,7 +89,6 @@ def insert_user(data: dict, request_user: UserModel):
                     raise KeyError
         except KeyError:
             LOGGER.debug("[insert_user] No email was provided!")
-            # return abort(400, "No email was provided!")
             return ErrorMessage(400, "The email is mandatory to create a new user!").response()
 
         # Check if email is already exists
@@ -99,6 +100,25 @@ def insert_user(data: dict, request_user: UserModel):
                     return ErrorMessage(400, "The email is already in use!").response()
         except ManagerGetError:
             pass
+
+        if current_app.cloud_mode:
+            # Open file and check if user exists
+            with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
+                users_data = json.load(users_file)
+
+                if user_email in users_data:
+                    return ErrorMessage(400, "A user with this email already exists!").response()
+
+            # Create the user in the dict
+            users_data[user_email] = {
+                "user_name": data["user_name"],
+                "password": user_password,
+                "email": data["email"],
+                "database": data["database"]
+            }
+
+            with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
+                json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
 
         result_id: PublicID = user_manager.insert(data)
 

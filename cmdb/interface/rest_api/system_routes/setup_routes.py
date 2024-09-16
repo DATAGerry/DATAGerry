@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """These routes are used to setup databases and the correspondig user in DATAGerry"""
+import json
 import logging
 from datetime import datetime, timezone
 
@@ -82,6 +83,28 @@ def setup_datagerry():
     # Create database and a new admin user
     init_db_routine(database)
     create_new_admin_user(setup_data)
+
+    # Add the user to the users file
+    try:
+        with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
+            users_data = json.load(users_file)
+
+            if email in users_data:
+                return ErrorMessage(400, "A user with this email already exists!").response()
+
+        # Create the user in the dict
+        users_data[email] = {
+            "user_name": user_name,
+            "password": password,
+            "email": email,
+            "database": database
+        }
+
+        with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
+            json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
+    except Exception as err:
+        LOGGER.debug(f"[setup_datagerry] Error: {err}, Type: {type(err)}")
+        return ErrorMessage(400, "There is an issue with the users json file!").response()
 
     return make_response(True)
 

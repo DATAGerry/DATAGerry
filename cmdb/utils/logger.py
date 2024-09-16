@@ -24,6 +24,7 @@ import cmdb
 # -------------------------------------------------------------------------------------------------------------------- #
 
 DEFAULT_LOG_DIR = os.path.join(os.path.dirname(__file__), '../../logs/')
+
 LOGLEVELS = {
     "NOTSET": 0,
     "DEBUG": 10,

@@ -121,11 +121,10 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
         # check db-settings
     try:
         check_status = check_routine.checker()
-        LOGGER.info(f"_start_check_routines check_status: {check_status}")
     except Exception as error:
-        LOGGER.error(f"_start_check_routines error: {error}")
-        check_status = check_routine.get_check_status()
+        LOGGER.debug("[_start_check_routines] Error: %s", error)
         LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
+        check_status = check_routine.get_check_status()
 
     if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
         # run update
