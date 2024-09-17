@@ -27,7 +27,7 @@ export class ValidationService {
         const overallValidity = Array.from(this.fieldValidity.values()).every(
             (isValid) => isValid
         );
-        this.isValid$.next(overallValidity);
+        this.isValid$?.next(overallValidity);
     }
 
 
@@ -36,26 +36,28 @@ export class ValidationService {
         const overallValidity = Array.from(this.sectionValidity.values()).every(
             (isValid) => isValid
         );
-        this.sectionValidity$.next(overallValidity);
+        this.sectionValidity$?.next(overallValidity);
     }
 
 
-    getIsValid() {
-        return this.isValid$.asObservable();
+    getIsValid(): Observable<boolean> {
+        return this.isValid$?.asObservable();
     }
 
 
     overallSectionValidity(): Observable<boolean> {
-        return this.sectionValidity$.asObservable();
+        return this.sectionValidity$?.asObservable();
     }
 
 
     updateFieldValidityOnDeletion(deletedKey: string) {
-        this.fieldValidity.delete(deletedKey);
-        let overallValidity = Array.from(this.fieldValidity.values()).every(
-            (isValid) => isValid
-        );
-        this.isValid$.next(overallValidity);
+        if (this.fieldValidity.has(deletedKey)) {
+            this.fieldValidity.delete(deletedKey);
+            let overallValidity = Array.from(this.fieldValidity.values()).every(
+                (isValid) => isValid
+            );
+            this.isValid$?.next(overallValidity);
+        }
     }
 
 
@@ -74,7 +76,7 @@ export class ValidationService {
             const overallValidity = Array.from(this.sectionValidity.values()).every(
                 (isValid) => isValid
             );
-            this.sectionValidity$.next(overallValidity);
+            this.sectionValidity$?.next(overallValidity);
         }
     }
 
@@ -85,10 +87,10 @@ export class ValidationService {
     */
     cleanup() {
         this.fieldValidity.clear();
-        this.isValid$.next(true);
+        this.isValid$?.next(true);
 
         this.sectionValidity.clear();
-        this.sectionValidity$.next(true);
+        this.sectionValidity$?.next(true);
     }
 
 }
