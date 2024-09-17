@@ -158,6 +158,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
             .subscribe((response: APIGetMultiResponse) => {
                 this.types = response.results as Array<CmdbType>;
+                this.changeDetector.detectChanges();
             });
 
         this.changeDetector.detectChanges();
@@ -170,8 +171,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         if (this.subscription) {
             this.subscription.unsubscribe();
         }
-        this.validationService.cleanup();
-        this.sectionIdentifierService.resetIdentifiers()
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */

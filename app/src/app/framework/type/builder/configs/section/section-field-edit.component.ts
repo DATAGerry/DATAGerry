@@ -18,7 +18,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
-import { ReplaySubject } from 'rxjs';
+import { BehaviorSubject, finalize, ReplaySubject, Subscription } from 'rxjs';
 
 import { ValidationService } from '../../../services/validation.service';
 
@@ -32,7 +32,6 @@ import { CmdbMode } from 'src/app/framework/modes.enum';
     templateUrl: './section-field-edit.component.html'
 })
 export class SectionFieldEditComponent extends ConfigEditBaseComponent implements OnInit, OnDestroy {
-
     protected subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
     public nameControl: UntypedFormControl = new UntypedFormControl('', Validators.required);
@@ -40,9 +39,11 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
     private initialValue: string;
     private identifierInitialValue: string;
-    isValid$ = true;
+    public isValid$ = true;
     public currentValue: string;
     public isIdentifierValid: boolean = true;
+    private activeIndex: number | null = null;
+    private activeIndexSubscription: Subscription;
 
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
@@ -51,7 +52,6 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     public constructor(private validationService: ValidationService, private sectionIdentifier: SectionIdentifierService) {
         super();
     }
-
 
     public ngOnInit(): void {
         this.form.addControl('name', this.nameControl);
@@ -69,8 +69,9 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
-        this.validationService.cleanup();
-        this.sectionIdentifier.resetIdentifiers()
+        if (this.activeIndexSubscription) {
+            this.activeIndexSubscription.unsubscribe();
+        }
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
@@ -110,13 +111,33 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
     }
 
 
+    /**
+     * Updates the section value based on the provided new value.
+     * Validates the section identifier and updates the identifier validity state.
+     * @param newValue - The new value for the section.
+     */
     updateSectionValue(newValue: string): void {
-        const isValid = this.sectionIdentifier.updateSection(this.identifierInitialValue, newValue);
-        if (!isValid) {
-            this.isIdentifierValid = false
-        } else {
-            this.currentValue = newValue;
-            this.isIdentifierValid = true;
-        }
+
+        // Subscribe to getActiveIndex only once and store the latest index
+        this.activeIndexSubscription = this.sectionIdentifier.getActiveIndex().subscribe((index) => {
+            if (index !== null && index !== undefined) {
+                this.activeIndex = index;  // Update the latest active index
+            }
+        });
+
+        setTimeout(() => {
+            if (newValue === this.currentValue) {
+                return;
+            }
+
+            const isValid = this.sectionIdentifier.updateSection(this.activeIndex, newValue);
+
+            if (!isValid) {
+                this.isIdentifierValid = false;
+            } else {
+                this.currentValue = newValue;
+                this.isIdentifierValid = true;
+            }
+        }, 200);
     }
 }

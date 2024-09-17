@@ -12,6 +12,7 @@ interface Section {
 export class SectionIdentifierService {
     private sections: { [initialValue: string]: Section } = {};
     private isIdentifierValidSubject = new BehaviorSubject<boolean>(true);
+    private activeIndexSubject = new BehaviorSubject<number | null>(null);
 
     constructor() { }
 
@@ -54,33 +55,63 @@ export class SectionIdentifierService {
 
 
     /**
+     * Gets the active index as an observable.
+     * @returns Observable<number | null> - The active index or null.
+     */
+    getActiveIndex(): Observable<number> {
+        return this.activeIndexSubject.asObservable();
+    }
+
+
+    /**
+     * Sets the active index.
+     * @param index - The index to be set as active.
+     */
+    setActiveIndex(index: number): void {
+        this.activeIndexSubject.next(index);
+    }
+
+
+    /**
+     * Retrieves the initial value of a section by its index.
+     * @param index - The index to look up.
+     * @returns string | null - The initial value corresponding to the given index, or null if not found.
+     */
+    private getInitialValueByIndex(index: number): string | null {
+        const sectionEntry = Object.entries(this.sections).find(([_, section]) => section.index === index);
+        return sectionEntry ? sectionEntry[0] : null;
+    }
+
+
+    /**
      * Updates an existing section's identifier.
      * 
-     * @param initialValue - The initial identifier of the section to update.
+     * @param newIndex - The index number of the section to update.
      * @param newValue - The new identifier to assign to the section.
      * @returns Whether the update was successful.
      */
-    updateSection(initialValue: string, newValue: string): boolean {
+    updateSection(newIndex: number, newValue: string): boolean {
+        const initialValue = this.getInitialValueByIndex(newIndex);
+
+        if (!initialValue) {
+            this.checkGlobalValidity();
+            return false;
+        }
 
         if (!this.sections[initialValue]) {
             this.checkGlobalValidity();
             return false;
         }
 
-        // const oldNewValue = this.sections[initialValue].newValue;
         const oldIndex = this.sections[initialValue].index;
-
-        // Temporarily remove the current section to avoid self-comparison
         delete this.sections[initialValue];
 
         if (this.sectionExists(newValue)) {
-            // this.sections[initialValue] = { newValue: oldNewValue, index: oldIndex };
             this.sections[initialValue] = { newValue, index: oldIndex };
             this.checkGlobalValidity();
             return false;
         }
 
-        // Re-add the section with the new value
         this.sections[initialValue] = { newValue, index: oldIndex };
         this.checkGlobalValidity();
         return true;
