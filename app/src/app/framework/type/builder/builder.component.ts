@@ -153,6 +153,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
     setActiveIndex(index: number) {
         this.activeIndex = index;
+        this.sectionIdentifierService.setActiveIndex(index);
     }
 
     ngOnChanges(changes: SimpleChanges): void {

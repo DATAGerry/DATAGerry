@@ -117,11 +117,12 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
     public currentValue: string;
     public isIdentifierValid: boolean = true;
-    private subscription: Subscription;
     private identifierInitialValue: string;
+    private activeIndex: number | null = null;
+    private activeIndexSubscription: Subscription;
 
     constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService,
-        private sectionIdentifierService: SectionIdentifierService) {
+        private sectionIdentifier: SectionIdentifierService) {
         super();
     }
 
@@ -295,17 +296,39 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
+
+        if (this.activeIndexSubscription) {
+            this.activeIndexSubscription.unsubscribe();
+        }
     }
 
 
+    /**
+     * Updates the section value based on the provided new value.
+     * Validates the section identifier and updates the identifier validity state.
+     * @param newValue - The new value for the section.
+     */
     updateSectionValue(newValue: string): void {
-        const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
-        if (!isValid) {
-            this.isIdentifierValid = false
 
-        } else {
-            this.currentValue = newValue;
-            this.isIdentifierValid = true;
-        }
+        this.activeIndexSubscription = this.sectionIdentifier.getActiveIndex().subscribe((index) => {
+            if (index !== null && index !== undefined) {
+                this.activeIndex = index;
+            }
+        });
+
+        setTimeout(() => {
+            if (newValue === this.currentValue) {
+                return;
+            }
+
+            const isValid = this.sectionIdentifier.updateSection(this.activeIndex, newValue);
+
+            if (!isValid) {
+                this.isIdentifierValid = false;
+            } else {
+                this.currentValue = newValue;
+                this.isIdentifierValid = true;
+            }
+        }, 200);
     }
 }

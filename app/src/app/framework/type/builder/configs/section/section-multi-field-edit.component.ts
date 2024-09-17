@@ -18,7 +18,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 
 import { ValidationService } from '../../../services/validation.service';
 
@@ -42,12 +42,14 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     isValid$ = true;
     public currentValue: string;
     public isIdentifierValid: boolean = true;
+    private activeIndex: number | null = null;
+    private activeIndexSubscription: Subscription;
 
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private validationService: ValidationService, private sectionIdentifierService: SectionIdentifierService) {
+    public constructor(private validationService: ValidationService, private sectionIdentifier: SectionIdentifierService) {
         super();
     }
 
@@ -70,8 +72,10 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     public ngOnDestroy(): void {
         this.subscriber.next();
         this.subscriber.complete();
-        this.validationService.cleanup();
-        this.sectionIdentifierService.resetIdentifiers()
+
+        if (this.activeIndexSubscription) {
+            this.activeIndexSubscription.unsubscribe();
+        }
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
@@ -108,13 +112,33 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
     }
 
 
+    /**
+     * Updates the section value based on the provided new value.
+     * Validates the section identifier and updates the identifier validity state.
+     * @param newValue - The new value for the section.
+     */
     updateSectionValue(newValue: string): void {
-        const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
-        if (!isValid) {
-            this.isIdentifierValid = false
-        } else {
-            this.currentValue = newValue;
-            this.isIdentifierValid = true;
-        }
+
+        // Subscribe to getActiveIndex only once and store the latest index
+        this.activeIndexSubscription = this.sectionIdentifier.getActiveIndex().subscribe((index) => {
+            if (index !== null && index !== undefined) {
+                this.activeIndex = index;  // Update the latest active index
+            }
+        });
+
+        setTimeout(() => {
+            if (newValue === this.currentValue) {
+                return;
+            }
+
+            const isValid = this.sectionIdentifier.updateSection(this.activeIndex, newValue);
+
+            if (!isValid) {
+                this.isIdentifierValid = false;
+            } else {
+                this.currentValue = newValue;
+                this.isIdentifierValid = true;
+            }
+        }, 200);
     }
 }
