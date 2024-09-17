@@ -150,12 +150,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
-
-    setActiveIndex(index: number) {
-        this.activeIndex = index;
-        this.sectionIdentifierService.setActiveIndex(index);
-    }
-
     ngOnChanges(changes: SimpleChanges): void {
         if (this.globalSectionTemplates.length > 0 && this.globalSectionTemplateFields.length == 0) {
             this.initGlobalFieldsList();
@@ -816,6 +810,16 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         }
 
         return true;
+    }
+
+
+    /**
+     * Sets the active index for the current section and updates the section identifier service.
+     * @param index - The new active index to set.
+     */
+    setActiveIndex(index: number) {
+        this.activeIndex = index;
+        this.sectionIdentifierService.setActiveIndex(index);
     }
 
     /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
