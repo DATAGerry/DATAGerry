@@ -21,6 +21,12 @@ export class ValidationService {
     public sectionValidity = new Map<string, boolean>();
     private sectionValidity$ = new BehaviorSubject<boolean>(true);
 
+    /**
+     * Sets the validity of a specific field.
+     * Updates the overall form validity based on the validity of all fields.
+     * @param key - The field identifier.
+     * @param value - The validity of the field (true if valid, false otherwise).
+     */
     setIsValid(key: string, value: boolean) {
 
         this.fieldValidity.set(key, value);
@@ -30,7 +36,12 @@ export class ValidationService {
         this.isValid$?.next(overallValidity);
     }
 
-
+    /**
+     * Sets the validity of a specific section.
+     * Updates the overall section validity based on the validity of all sections.
+     * @param key - The section identifier.
+     * @param value - The validity of the section (true if valid, false otherwise).
+     */
     setSectionValid(key: string, value: boolean) {
         this.sectionValidity.set(key, value);
         const overallValidity = Array.from(this.sectionValidity.values()).every(
@@ -39,17 +50,26 @@ export class ValidationService {
         this.sectionValidity$?.next(overallValidity);
     }
 
-
+    /**
+     * Returns an observable that emits the overall validity of all fields.
+     * @returns Observable<boolean> - The overall field validity.
+     */
     getIsValid(): Observable<boolean> {
         return this.isValid$?.asObservable();
     }
 
-
+    /**
+     * Returns an observable that emits the overall validity of all sections.
+     * @returns Observable<boolean> - The overall section validity.
+     */
     overallSectionValidity(): Observable<boolean> {
         return this.sectionValidity$?.asObservable();
     }
 
-
+    /**
+     * Removes the validity entry of a deleted field and updates the overall validity.
+     * @param deletedKey - The identifier of the field to delete.
+     */
     updateFieldValidityOnDeletion(deletedKey: string) {
         if (this.fieldValidity.has(deletedKey)) {
             this.fieldValidity.delete(deletedKey);
