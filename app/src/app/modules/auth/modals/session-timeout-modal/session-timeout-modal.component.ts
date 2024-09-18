@@ -68,7 +68,7 @@ export class SessionTimeoutModalComponent implements OnInit, OnDestroy {
 
 
     public ngOnInit(): void {
-        this.isCloudMode = environment.mode === 'cloud';
+        this.isCloudMode = environment.cloudMode;
         this.remainingTime$.pipe(takeUntil(this.subscriber)).subscribe((timeout: string) => this.remainingTime = timeout);
     }
 

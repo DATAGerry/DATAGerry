@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  mode: 'cloud'
+  cloudMode: false
 };
