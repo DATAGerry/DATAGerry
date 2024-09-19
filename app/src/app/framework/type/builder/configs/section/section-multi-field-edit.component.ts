@@ -66,6 +66,10 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.identifierInitialValue = this.nameControl.value;
 
         this.currentValue = this.identifierInitialValue;
+
+        // Subscribe to value changes
+        this.nameControl.valueChanges.subscribe(value => this.onInputChange(value, 'name'));
+        this.labelControl.valueChanges.subscribe(value => this.onInputChange(value, 'label'));
     }
 
 
