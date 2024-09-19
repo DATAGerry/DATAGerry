@@ -19,7 +19,7 @@ This class represents an external link
 import logging
 import re
 
-from cmdb.framework.cmdb_errors import ExternalFillError
+from cmdb.errors.type import ExternalFillError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -120,4 +120,4 @@ class TypeExternalLink:
         try:
             self.href = self.href.format(*inputs)
         except Exception as err:
-            raise ExternalFillError(inputs, err) from err
+            raise ExternalFillError(inputs) from err

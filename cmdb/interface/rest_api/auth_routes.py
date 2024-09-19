@@ -33,7 +33,7 @@ from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.rights import __all__ as rights
 
 from cmdb.search import Query

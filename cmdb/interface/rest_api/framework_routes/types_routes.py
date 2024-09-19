@@ -33,7 +33,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse, make_api_response
 
-from cmdb.framework.cmdb_location import CmdbLocation
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel

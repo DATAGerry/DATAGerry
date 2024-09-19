@@ -30,7 +30,7 @@ from cmdb.search import Query
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import ErrorMessage
 from cmdb.interface.route_utils import make_response
-from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 
 from cmdb.user_management import UserModel, __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES

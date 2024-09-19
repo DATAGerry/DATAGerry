@@ -30,6 +30,7 @@ class AbstractTemplateData:
     def __init__(self):
         self._template_data = {}
 
+
     def get_template_data(self):
         """TODO: document"""
         return self._template_data
@@ -51,6 +52,7 @@ class ObjectTemplateData(AbstractTemplateData):
         data = {}
         data["id"] = cmdb_object.object_information['object_id']
         data["fields"] = {}
+
         for field in cmdb_object.fields:
             try:
                 field_name = field["name"]
@@ -64,7 +66,7 @@ class ObjectTemplateData(AbstractTemplateData):
                                                     type_instance=type_instance,
                                                     render_user=None,
                                                     object_manager=self.__object_manager)
-                    
+
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 elif field['type'] == 'ref-section-field':
                     data['fields'][field_name] = {'fields': {}}

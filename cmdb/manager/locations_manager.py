@@ -25,7 +25,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import CmdbLocation
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel

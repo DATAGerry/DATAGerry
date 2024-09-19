@@ -22,9 +22,9 @@ from typing import Union
 from dateutil.parser import parse
 
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_errors import FieldNotFoundError
 from cmdb.framework.utils import Collection, Model
 
+from cmdb.errors.type import FieldNotFoundError
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -235,6 +235,7 @@ class CmdbObject(CmdbDAO):
                 f['value'] = value
                 return f['name']
             continue
+
         raise FieldNotFoundError
 
 

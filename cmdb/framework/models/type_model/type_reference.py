@@ -19,7 +19,7 @@ This class represents a type reference
 import logging
 import re
 
-from cmdb.framework.cmdb_errors import TypeReferenceLineFillError
+from cmdb.errors.type import TypeReferenceLineFillError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -137,4 +137,4 @@ class TypeReference:
         try:
             self.line = self.line.format(*inputs)
         except Exception as err:
-            raise TypeReferenceLineFillError(inputs, err) from err
+            raise TypeReferenceLineFillError(inputs) from err

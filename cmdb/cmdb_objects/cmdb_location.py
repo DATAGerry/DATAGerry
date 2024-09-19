@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 This module contains the implementation of CmdbLocation, which is representing
-a location in Datagarry.
+a location in Datagarry
 """
 import logging
 

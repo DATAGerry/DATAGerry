@@ -33,9 +33,12 @@ from cmdb.framework.cmdb_render import RenderResult
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              ExportdManagerBase - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ExportdManagerBase(ExportdJobManager):
     """TODO: document"""
+
     def __init__(self, job: ExportdJob,
                  object_manager: CmdbObjectManager,
                  log_manager: ExportdLogManager,
@@ -247,17 +250,14 @@ class ExternalSystem:
 
     def prepare_export(self):
         """TODO: document"""
-        pass
 
 
     def add_object(self, cmdb_object, template_data):
         """TODO: document"""
-        pass
 
 
     def finish_export(self) -> ExportdHeader:
         """TODO: document"""
-        pass
 
 
     def error(self, msg):

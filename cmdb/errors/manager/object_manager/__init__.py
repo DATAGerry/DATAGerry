@@ -13,18 +13,4 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module provides all errors for docapi"""
-from .docapi_errors import DocapiError,\
-                           DocapiGetError,\
-                           DocapiUpdateError,\
-                           DocapiInsertError,\
-                           DocapiDeleteError
-# -------------------------------------------------------------------------------------------------------------------- #
-
-__all__ = [
-    'DocapiError',
-    'DocapiGetError',
-    'DocapiUpdateError',
-    'DocapiInsertError',
-    'DocapiDeleteError'
-]
+"""This module provides all errors from the ObjectManager"""

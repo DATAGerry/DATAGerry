@@ -23,7 +23,7 @@ from cmdb.manager.locations_manager import LocationsManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
-from cmdb.framework import CmdbLocation
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters

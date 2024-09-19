@@ -26,8 +26,8 @@ from pymongo.errors import OperationFailure
 from cmdb.updater import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.errors.system_config import SectionError
-from cmdb.framework.cmdb_location import CmdbLocation
-from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.user_management import __FIXED_GROUPS__

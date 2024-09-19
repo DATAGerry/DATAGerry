@@ -18,7 +18,7 @@ import logging
 
 from flask import abort, jsonify, current_app
 
-from cmdb.framework.cmdb_errors import TypeNotFoundError
+from cmdb.errors.type import TypeNotFoundError
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user
@@ -64,7 +64,7 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
                                user=request_user,
                                permission=AccessControlPermission.READ)
     except TypeNotFoundError as error:
-        return abort(400, error.message)
+        return abort(400, error)
     except ModuleNotFoundError as error:
         return abort(400, error)
     except CMDBError as error:

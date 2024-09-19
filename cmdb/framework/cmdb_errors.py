@@ -17,12 +17,6 @@
 from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class TypeNotFoundError(CMDBError):
-    """TODO: document"""
-    def __init__(self, type_id):
-        self.message = f"Type with ID: {type_id} not found!"
-
-
 class ObjectInsertError(CMDBError):
     """TODO: document"""
     def __init__(self, error):
@@ -33,35 +27,6 @@ class ObjectDeleteError(CMDBError):
     """TODO: document"""
     def __init__(self, msg):
         self.message = f'Something went wrong during delete: {msg}'
-
-
-class ExternalFillError(CMDBError):
-    """Error if href of TypeExternalLink could not filled with input data"""
-    def __init__(self, inputs, error):
-        super().__init__()
-        self.message = f'Href link do not fit with inputs: {inputs}, error: {error}'
-
-
-class TypeReferenceLineFillError(CMDBError):
-    """Error if summary line of TypeReferences could not filled with input data"""
-    def __init__(self, inputs, error):
-        super().__init__()
-        self.message = f'Type reference summary line do not fit with inputs: {inputs}, error: {error}'
-
-
-class FieldInitError(CMDBError):
-    """Error if field could not be initialized"""
-    def __init__(self, field_name):
-        super().__init__()
-        self.message = f'Field {field_name} could not be initialized'
-
-
-class FieldNotFoundError(CMDBError):
-    """Error if field do not exists"""
-
-    def __init__(self, field_name, type_name):
-        super().__init__()
-        self.message = f'Field {field_name} was not found inside input_type: {type_name}'
 
 # -------------------------------------------------- CMDB BASE ERROS ------------------------------------------------- #
 
