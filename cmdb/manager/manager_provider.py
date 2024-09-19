@@ -197,4 +197,5 @@ class ManagerProvider:
             return None
 
         manager_args = cls.__get_manager_args(manager_type, request_user)
+
         return manager_class(*manager_args)

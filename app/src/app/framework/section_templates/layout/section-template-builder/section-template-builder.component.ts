@@ -158,14 +158,12 @@ export class SectionTemplateBuilderComponent implements OnInit {
             "fields": JSON.stringify(this.initialSection.fields)
         }
 
-        console.log("postSectionTemplate called in section-template-builder.component.ts")
         this.sectionTemplateService.postSectionTemplate(params).subscribe({
             next: (res: APIInsertSingleResponse) => {
                 this.toastService.success("Section Template created!");
                 this.router.navigate(['/framework/section_templates']);
             },
             error: (error) => {
-                console.log("error in create section template response", error);
                 this.toastService.error(error);
             }
         });

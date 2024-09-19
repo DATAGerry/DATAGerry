@@ -50,9 +50,9 @@ section_template_blueprint = APIBlueprint('section_templates', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['POST'])
+@section_template_blueprint.parse_location_parameters()
 @insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.add')
-@section_template_blueprint.parse_location_parameters()
 def create_section_template(params: dict, request_user: UserModel):
     """
     Creates a CmdbSectionTemplate in the database

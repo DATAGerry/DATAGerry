@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2024 becon GmbH
 #
@@ -24,8 +23,8 @@ the elements for the database.
 """
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_location import CmdbLocation
-from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 
 from cmdb.framework.models import TypeModel
 from cmdb.framework.models import CategoryModel

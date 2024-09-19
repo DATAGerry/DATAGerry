@@ -50,7 +50,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
 from cmdb.utils.error import CMDBError
 from cmdb.errors.manager import ManagerInsertError
-from cmdb.framework import CmdbLocation
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #

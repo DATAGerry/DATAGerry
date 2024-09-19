@@ -21,18 +21,20 @@ import logging
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
-from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
-from cmdb.framework.cmdb_dao import CmdbDAO, RequiredInitKeyNotFoundError
-from cmdb.framework.cmdb_errors import FieldInitError, FieldNotFoundError
 from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
+from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
+
 from cmdb.utils.error import CMDBError
+from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
+from cmdb.errors.type import FieldNotFoundError, FieldInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                       TypeModel                                                      #
+#                                                   TypeModel - CLASS                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TypeModel(CmdbDAO):
     """
@@ -548,6 +550,7 @@ class TypeModel(CmdbDAO):
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, CMDBError) as err:
-                LOGGER.warning(err.message)
+                LOGGER.debug("[get_field] error: %s, type: %s", err, type(err))
                 raise FieldInitError(name) from err
+
         raise FieldNotFoundError(name, self.name)

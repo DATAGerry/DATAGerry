@@ -13,10 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Event definition
-
-This module defines an internal CMDB event
-"""
+"""This module defines an internal CMDB event"""
 import json
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -36,6 +33,7 @@ class Event:
         """
         self.__event_type = event_type
         self.__params = {}
+
         if params:
             self.__params = params
 
@@ -43,21 +41,24 @@ class Event:
 
     @staticmethod
     def create_event(json_repr):
-        """ Create a new event from json strinf
+        """ Create a new event from json string
 
         Args:
             json_repr: JSON representation of an event
 
-        Returns
+        Returns:
             Event: an event object
         """
         loaded_json = json.loads(json_repr)
         event_type = "default"
         event_params = {}
+
         if "type" in loaded_json:
             event_type = loaded_json["type"]
+
         if "params" in loaded_json:
             event_params = loaded_json["params"]
+
         return Event(event_type, event_params)
 
 
@@ -84,8 +85,10 @@ class Event:
                 does not exist
         """
         output = default
+
         if key in self.__params:
             output = self.__params[key]
+
         return output
 
 
@@ -99,11 +102,12 @@ class Event:
         output = {}
         output["type"] = self.__event_type
         output["params"] = self.__params
-        return json.dumps(output)
 
+        return json.dumps(output)
 
 
     def __str__(self):
         output = f"Event {self.__event_type}"
         output += f"Parameters: {self.__params}"
+
         return output

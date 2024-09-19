@@ -13,18 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module provides all errors for docapi"""
-from .docapi_errors import DocapiError,\
-                           DocapiGetError,\
-                           DocapiUpdateError,\
-                           DocapiInsertError,\
-                           DocapiDeleteError
+"""This module provides all cmdb type errors"""
+from .type_errors import TypeNotFoundError,\
+                         ExternalFillError,\
+                         TypeReferenceLineFillError,\
+                         FieldNotFoundError,\
+                         FieldInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
-    'DocapiError',
-    'DocapiGetError',
-    'DocapiUpdateError',
-    'DocapiInsertError',
-    'DocapiDeleteError'
+    'TypeNotFoundError',
+    'ExternalFillError',
+    'TypeReferenceLineFillError',
+    'FieldNotFoundError',
+    'FieldInitError'
 ]

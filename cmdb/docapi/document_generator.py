@@ -23,7 +23,6 @@ class DocumentGenerator:
 
     def generate_doc(self):
         """TODO: document"""
-        pass
 
 
 class ObjectDocumentGenerator:

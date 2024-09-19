@@ -18,15 +18,17 @@ import logging
 from typing import Union
 from pymongo import IndexModel
 
+from cmdb.cmdb_objects.cmdb_versioning import Versioning
+from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
 from cmdb.framework.utils import Model, Collection
-
-from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import debug_print
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    CmdbDAO - CLASS                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CmdbDAO:
     """The data access object is the basic presentation if objects and
     their necessary dependent classes are to be stored in the database.
@@ -50,12 +52,15 @@ class CmdbDAO:
     COLLECTION: Union[str, Collection] = 'framework.*'
     MODEL: Model = ''
     SCHEMA: dict = {}
+
     __SUPER_INIT_KEYS = [
         'public_id'
     ]
+
     SUPER_INDEX_KEYS = [
         {'keys': [('public_id', DAO_ASCENDING)], 'name': 'public_id', 'unique': True}
     ]
+
     IGNORED_INIT_KEYS = []
     REQUIRED_INIT_KEYS = []
     INDEX_KEYS = []
@@ -71,6 +76,7 @@ class CmdbDAO:
             **kwargs: list of parameters
         """
         self.public_id: int = int(public_id)
+
         for key, value in kwargs.items():
             if key == 'version':
                 self.version = value
@@ -97,22 +103,6 @@ class CmdbDAO:
             raise NoPublicIDError()
 
         return self.public_id
-
-
-    def has_object_id(self) -> bool:
-        """
-        checks if object already has a database _id
-
-        Note:
-            Notice! Database _id is not the same as the public_id
-
-        Returns:
-            True if attribute is set, False otherwise.
-        """
-        if hasattr(self, '_id'):
-            return True
-
-        return False
 
 
     def __new__(cls, *args, **kwargs):
@@ -146,7 +136,7 @@ class CmdbDAO:
     @classmethod
     def get_index_keys(cls):
         """TODO: document"""
-        index_list = list()
+        index_list = []
 
         for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
@@ -189,12 +179,10 @@ class CmdbDAO:
         if not hasattr(self, 'version') or self.version is None:
             raise NoVersionError(self.get_public_id())
 
-        updater_version = _Versioning(
-            *map(int, self.version.split('.'))
-        )
+        updater_version = Versioning(*map(int, self.version.split('.')))
 
-        if not isinstance(updater_version, _Versioning):
-            raise TypeError('Version type must be a _Versioning')
+        if not isinstance(updater_version, Versioning):
+            raise TypeError('Version type must be a Versioning')
 
         if update == self.VERSIONING_MAJOR:
             updater_version.update_major()
@@ -211,11 +199,14 @@ class CmdbDAO:
         Get version number if exists
         Returns:
             version number
+
+        Raiser:
+            NoVersionError: If not self.version
         """
         if self.version:
             return self.version
-        else:
-            raise NoVersionError(self.get_public_id())
+
+        raise NoVersionError(self.get_public_id())
 
 
     def to_database(self) -> dict:
@@ -230,120 +221,3 @@ class CmdbDAO:
 
     def __repr__(self):
         return debug_print(self)
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                  _Versioning - CLASS                                                 #
-# -------------------------------------------------------------------------------------------------------------------- #
-
-class _Versioning:
-    """
-    Helper class for object/type versioning
-    """
-
-    def __init__(self, major: int = 1, minor: int = 0, patch: int = 0):
-        """
-        Args:
-            major: core changes with no compatibility
-            minor: code changes
-            patch: little fixes
-        """
-        self.major = major
-        self.minor = minor
-        self.patch = patch
-
-
-    @property
-    def major(self):
-        """TODO: document"""
-        return self._major
-
-
-    @property
-    def minor(self):
-        """TODO: document"""
-        return self._minor
-
-
-    @property
-    def patch(self):
-        """TODO: document"""
-        return self._patch
-
-
-    @major.setter
-    def major(self, value):
-        if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
-        self._major = value
-
-
-    @minor.setter
-    def minor(self, value):
-        if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
-        self._minor = value
-
-
-    @patch.setter
-    def patch(self, value):
-        if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
-        self._patch = value
-
-
-    def update_major(self) -> int:
-        """TODO: document"""
-        self.major += 1
-        return self.major
-
-
-    def update_minor(self) -> int:
-        """TODO: document"""
-        self.minor += 1
-        return self.minor
-
-
-    def update_patch(self) -> int:
-        """TODO: document"""
-        self.patch += 1
-        return self.patch
-
-
-    def __repr__(self):
-        return f'{self.major}.{self.minor}.{self.patch}'
-
-
-class VersionTypeError(CMDBError):
-    """
-    Error if update step input was wrong
-    """
-    def __init__(self, level, update_input):
-        super().__init__()
-        self.message = f'The version type {update_input} update for {level} is wrong'
-
-
-class NoVersionError(CMDBError):
-    """
-    Error if object from models child class has no version number
-    """
-    def __init__(self, public_id):
-        super().__init__()
-        self.message = f'The object (ID: {public_id}) has no version control'
-
-
-class NoPublicIDError(CMDBError):
-    """
-    Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
-    """
-    def __init__(self):
-        super().__init__()
-        self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'
-
-
-class RequiredInitKeyNotFoundError(CMDBError):
-    """
-    Error if on of the given parameters is missing inside required init keys
-    """
-    def __init__(self, key_name):
-        super().__init__()
-        self.message = f'Following initialization key was not found inside the document: {key_name}'

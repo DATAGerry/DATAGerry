@@ -15,7 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from enum import Enum
-from cmdb.framework.cmdb_dao import CmdbDAO, NoPublicIDError
+
+from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.errors.cmdb_object import NoPublicIDError
 from cmdb.framework.utils import Collection, Model
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 # -------------------------------------------------------------------------------------------------------------------- #

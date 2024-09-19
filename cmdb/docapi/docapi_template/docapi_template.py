@@ -19,7 +19,7 @@ from enum import Enum
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 from cmdb.framework.utils import Model
-from cmdb.errors.docapi import NoPublicIDError
+from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class DocapiTemplateType(Enum):

@@ -19,7 +19,7 @@ from datetime import date
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 from cmdb.media_library.media_file_metadata import FileMetadata
 from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.utils.error import CMDBError
+from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class MediaFile(MediaFileManagementBase):
@@ -139,12 +139,3 @@ class MediaFile(MediaFileManagementBase):
             'upload_date': instance.get_upload_date(),
             'metadata': instance.get_metadata()
         }
-
-
-class NoPublicIDError(CMDBError):
-    """
-    Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS
-    """
-    def __init__(self):
-        super().__init__()
-        self.message = 'The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs'

@@ -20,8 +20,10 @@ from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, \
-    TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
+
+from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
+from cmdb.framework.cmdb_errors import ObjectManagerGetError
+
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager import ManagerGetError
@@ -326,7 +328,7 @@ class CmdbRender:
                     ref_field_name: str = f'{section.name}-field'
                     ref_field = self.type_instance.get_field(ref_field_name)
                 except (FieldInitError, FieldNotFoundError) as err:
-                    LOGGER.warning("%s",err.message)
+                    LOGGER.debug("%s",err)
                     continue
 
                 try:
@@ -426,7 +428,7 @@ class CmdbRender:
                 try:
                     _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 except (FieldInitError, FieldNotFoundError) as error:
-                    LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error.message)
+                    LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error)
 
                 reference.type_id = ref_type.get_public_id()
                 reference.object_id = int(current_field['value'])
@@ -554,7 +556,7 @@ class RenderList:
         self.type_manager = TypeManager(database_manager=database_manager)
         self.user_manager = UserManager(database_manager=database_manager)
 
-    #@timing('RenderList')
+
     def render_result_list(self, raw: bool = False) -> list[Union[RenderResult, dict]]:
         """TODO: document"""
         preparation_objects: list[RenderResult] = []
