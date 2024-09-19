@@ -18,7 +18,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
-import { BehaviorSubject, finalize, ReplaySubject, Subscription } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 
 import { ValidationService } from '../../../services/validation.service';
 
@@ -64,6 +64,10 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.initialValue = this.nameControl.value;
         this.identifierInitialValue = this.nameControl.value;
         this.currentValue = this.identifierInitialValue;
+
+        // Subscribe to value changes
+        this.nameControl.valueChanges.subscribe(value => this.onInputChange(value, 'name'));
+        this.labelControl.valueChanges.subscribe(value => this.onInputChange(value, 'label'));
     }
 
     public ngOnDestroy(): void {

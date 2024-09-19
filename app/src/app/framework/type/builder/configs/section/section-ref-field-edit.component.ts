@@ -158,6 +158,9 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
         this.previousNameControlValue = this.nameControl.value;
 
         this.currentValue = this.identifierInitialValue;
+
+        this.nameControl.valueChanges.subscribe(value => this.onNameChange(value));
+        this.labelControl.valueChanges.subscribe(value => this.onLabelChange(value, 'label'));
     }
 
     private loadPresetType(publicID: number): void {
