@@ -18,29 +18,27 @@ Definition of all routes for CmdbSectionTemplates
 """
 import json
 import logging
-
 from flask import request
-
-from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response, insert_request_user
 
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
+from cmdb.errors.database import NoDocumentFound
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
                                 ManagerGetError,\
                                 ManagerUpdateError,\
                                 ManagerDeleteError,\
                                 DisallowedActionError
-from cmdb.errors.database import NoDocumentFound
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -205,7 +203,7 @@ def update_section_template(params: dict, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {params['public_id']}!").response()
+        return ErrorMessage(400, f"Could not get SectionTemplate with public_id: {params['public_id']}!").response()
     except ManagerUpdateError as err:
         LOGGER.debug("ManagerUpdateError: %s", err)
         return ErrorMessage(400, f"Could not update SectionTemplate with public_id: {params['public_id']}!").response()

@@ -18,8 +18,7 @@ import logging
 
 from flask import abort, jsonify, request
 
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
+
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdMetaLog
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -27,10 +26,16 @@ from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.manager import ManagerIterationError, ManagerGetError
-from cmdb.utils.error import CMDBError
+
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
+from cmdb.manager import ManagerIterationError
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -83,7 +88,7 @@ def get_log_list(request_user: UserModel):
     try:
         log_list = log_manager.get_all_logs()
     except ObjectManagerGetError as e:
-        return abort(400, e.message)
+        return abort(400, e)
     except ModuleNotFoundError as e:
         return abort(400, e)
     except CMDBError as err:

@@ -25,6 +25,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework import TypeModel
@@ -35,12 +36,10 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

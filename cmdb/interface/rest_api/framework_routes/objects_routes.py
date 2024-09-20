@@ -33,8 +33,6 @@ from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.utils import object_hook, default
 from cmdb.framework import CmdbObject, TypeModel
-from cmdb.framework.cmdb_errors import ObjectDeleteError, ObjectInsertError, ObjectManagerGetError, \
-    ObjectManagerUpdateError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
 from cmdb.framework import ObjectLinkModel
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
@@ -45,14 +43,20 @@ from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMul
     ResponseFailedMessage, ErrorMessage
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.manager import ManagerIterationError, ManagerGetError, ManagerUpdateError
-from cmdb.utils.error import CMDBError
-from cmdb.errors.manager import ManagerInsertError
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.manager import ManagerIterationError
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerInsertError, ManagerUpdateError, ManagerGetError
+from cmdb.errors.manager.object_manager import ObjectManagerInsertError,\
+                                               ObjectManagerDeleteError,\
+                                               ObjectManagerUpdateError,\
+                                               ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -118,12 +122,12 @@ def insert_object(request_user: UserModel):
         except ManagerInsertError as err:
             LOGGER.error("ManagerInsertError: %s", err)
 
-    except (TypeError, ObjectInsertError) as err:
-        LOGGER.error("TypeError, ObjectInsertError: %s", err)
+    except (TypeError, ObjectManagerInsertError) as err:
+        LOGGER.error("TypeError, ObjectManagerInsertError: %s", err)
         return abort(400, str(err))
     except (ManagerGetError, ObjectManagerGetError) as err:
         LOGGER.error("ManagerGetError, ObjectManagerGetError: %s", err)
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         LOGGER.error("AccessDeniedError: %s", err)
         return abort(403, err.message)
@@ -148,7 +152,7 @@ def get_object(public_id, request_user: UserModel):
                                                     user=request_user,
                                                     permission=AccessControlPermission.READ)
     except (ObjectManagerGetError, ManagerGetError) as err:
-        return abort(404, err.message)
+        return abort(404, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
 
@@ -156,7 +160,7 @@ def get_object(public_id, request_user: UserModel):
         type_instance = type_manager.get(object_instance.get_type_id())
     except ObjectManagerGetError as err:
         LOGGER.error("ObjectManagerGetError: %s", err)
-        return abort(404, err.message)
+        return abort(404, err)
 
     try:
         render = CmdbRender(object_instance=object_instance,
@@ -599,12 +603,12 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             return abort(403)
         except ObjectManagerGetError as err:
             LOGGER.error("ObjectManagerGetError: %s", err)
-            failed.append(ResponseFailedMessage(error_message=err.message, status=400,
+            failed.append(ResponseFailedMessage(error_message=err, status=400,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
         except (ManagerGetError, ObjectManagerUpdateError) as err:
             LOGGER.error("ManagerGetError, ObjectManagerUpdateError: %s", err)
-            failed.append(ResponseFailedMessage(error_message=err.message, status=404,
+            failed.append(ResponseFailedMessage(error_message=err, status=404,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
         except (CMDBError, RenderError) as error:
@@ -635,7 +639,7 @@ def update_object_state(public_id: int, request_user: UserModel):
         found_object = manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.error("ObjectManagerGetError: %s", err)
-        return abort(404, err.message)
+        return abort(404, err)
 
     if found_object.active == state:
         return make_response(False, 204)
@@ -647,9 +651,9 @@ def update_object_state(public_id: int, request_user: UserModel):
         return abort(403, err.message)
     except ObjectManagerUpdateError as err:
         LOGGER.error("ObjectManagerUpdateError: %s", err)
-        return abort(500, err.message)
+        return abort(500, err)
 
-        # get current object state
+    # get current object state
     try:
         current_type_instance = type_manager.get(found_object.get_type_id())
         current_object_render_result = CmdbRender(object_instance=found_object,
@@ -812,10 +816,10 @@ def delete_object(public_id: int, request_user: UserModel):
 
         ack = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
     except ObjectManagerGetError as err:
-        return abort(400, err.message)
+        return abort(400, err)
     except AccessDeniedError as err:
         return abort(403, err.message)
-    except ObjectDeleteError:
+    except ObjectManagerDeleteError:
         return abort(400)
     except CMDBError:
         return abort(500)
@@ -1017,7 +1021,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
                 ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
                                                         user=request_user,
                                                         permission=AccessControlPermission.DELETE))
-            except ObjectDeleteError:
+            except ObjectManagerDeleteError:
                 return abort(400)
             except AccessDeniedError as err:
                 return abort(403, err.message)
@@ -1040,8 +1044,8 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
         return make_response({'successfully': ack})
 
-    except ObjectDeleteError as error:
-        return jsonify(message='Delete Error', error=error.message)
+    except ObjectManagerDeleteError as error:
+        return jsonify(message='Delete Error', error=error)
     except CMDBError:
         return abort(500)
 
@@ -1069,7 +1073,8 @@ def delete_object_links(public_id: int, request_user: UserModel) -> None:
     Args:
         public_id (int): public_id of the object which is deleted
     """
-    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER, request_user)
+    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
+                                                                           request_user)
 
     object_link_filter: dict = {'$or': [{'primary': public_id}, {'secondary': public_id}]}
 

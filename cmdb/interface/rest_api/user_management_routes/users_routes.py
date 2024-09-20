@@ -34,13 +34,14 @@ from cmdb.interface.response import GetMultiResponse, \
                                     ErrorMessage
 from cmdb.framework.utils import PublicID
 from cmdb.framework.results import IterationResult
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
 from cmdb.errors.manager import ManagerGetError, \
                                 ManagerInsertError, \
                                 ManagerUpdateError, \
                                 ManagerDeleteError, \
                                 ManagerIterationError
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

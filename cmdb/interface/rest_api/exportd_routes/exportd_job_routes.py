@@ -16,17 +16,13 @@
 """TODO: document"""
 import logging
 import json
-
 from datetime import datetime, timezone
 from bson import json_util
-
 from flask import abort, request, jsonify
 
 from cmdb.exportd.exporter_base import ExportdManagerBase
-from cmdb.event_management.event import Event
 
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
-    ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
+from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
 from cmdb.framework.results import IterationResult
@@ -35,11 +31,16 @@ from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.user_management import UserModel
-from cmdb.utils.error import CMDBError
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.utils.error import CMDBError
+from cmdb.manager import ManagerIterationError
+from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
+    ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
+
+from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -85,7 +86,7 @@ def get_exportd_job_list(request_user: UserModel):
     try:
         job_list = exportd_manager.get_all_jobs()
     except ExportdJobManagerGetError as e:
-        return abort(400, e.message)
+        return abort(400, e)
     except ModuleNotFoundError as e:
         return abort(400, e)
     except CMDBError as err:
@@ -129,7 +130,7 @@ def get_type_by_name(name: str, request_user: UserModel):
     try:
         job_instance = exportd_manager.get_job_by_name(name=name)
     except ObjectManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return make_response(job_instance)
 
@@ -300,7 +301,7 @@ def get_job_output_by_id(public_id, request_user: UserModel):
         job = exportd_manager.get_job_by_args(public_id=public_id, exportd_type='PULL')
         resp = worker(job, request_user)
     except ObjectManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return resp
 
@@ -318,7 +319,7 @@ def get_job_output_by_name(name, request_user: UserModel):
         job = exportd_manager.get_job_by_args(name=name, exportd_type='PULL')
         resp = worker(job, request_user)
     except ObjectManagerGetError as err:
-        return abort(404, err.message)
+        return abort(404, err)
 
     return resp
 

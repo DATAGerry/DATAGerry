@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import abort, request
 
 from cmdb.user_management.managers.setting_manager import UserSettingsManager
@@ -23,11 +22,12 @@ from cmdb.user_management.managers.setting_manager import UserSettingsManager
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSingleResponse, DeleteSingleResponse, \
     UpdateSingleResponse
-from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.manager import ManagerDeleteError, ManagerUpdateError, ManagerInsertError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

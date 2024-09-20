@@ -13,44 +13,30 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Contains CmdbDAO object Error Classes"""
-from ..cmdb_error import CMDBError
+"""This module contains the classes of all LogManager errors"""
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class CmdbDAOError(CMDBError):
+class LogManagerError(CMDBError):
     """Base ConfigFile Error"""
     def __init__(self, message: str):
         super().__init__(message)
 
 # -------------------------------------------------- CmdbDAOErrors --------------------------------------------------- #
 
-class NoPublicIDError(CmdbDAOError):
-    """
-    Error if object has no public_id
-    """
-    def __init__(self):
-        super().__init__('The object has no public_id!')
+class LogManagerGetError(LogManagerError):
+    """Raised when Exportd log could not be retrieved"""
+    def __init__(self, err):
+        super().__init__(f'Exportd log could not be retrieved! Error: {err}')
 
 
-class VersionTypeError(CmdbDAOError):
-    """
-    Error if update step input was wrong
-    """
-    def __init__(self, level: str, update_input: str):
-        super().__init__(f'The version type {update_input} update for {level} is wrong')
+class LogManagerInsertError(LogManagerError):
+    """Raised when Exportd log could not be inserted"""
+    def __init__(self, err):
+        super().__init__(f'Exportd log could not be inserted! Error: {err}')
 
 
-class NoVersionError(CmdbDAOError):
-    """
-    Error if object from models child class has no version number
-    """
-    def __init__(self, public_id: int):
-        super().__init__(f'The object (ID: {public_id}) has no version control')
-
-
-class RequiredInitKeyNotFoundError(CmdbDAOError):
-    """
-    Error if on of the given parameters is missing inside required init keys
-    """
-    def __init__(self, key_name: str):
-        super().__init__(f'Following initialization key was not found inside the document: {key_name}')
+class LogManagerDeleteError(LogManagerError):
+    """Raised when Exportd log could not be deleted"""
+    def __init__(self, err):
+        super().__init__(f'Exportd log could not be deleted! Error: {err}')

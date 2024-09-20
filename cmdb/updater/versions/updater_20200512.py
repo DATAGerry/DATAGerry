@@ -17,13 +17,14 @@
 import logging
 
 from cmdb.framework import CategoryModel, TypeModel
-from cmdb.framework.cmdb_errors import ObjectManagerInsertError
 from cmdb.updater.updater import Updater
+
+from cmdb.errors.manager.object_manager import ObjectManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 class Update20200512(Updater):
     """TODO: document"""
 

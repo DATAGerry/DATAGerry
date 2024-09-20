@@ -17,19 +17,12 @@
 Definition of all routes for CmdbSectionTemplates
 """
 import logging
-
 from datetime import datetime, timezone
 from flask import request
 
 from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.errors.manager import ManagerGetError, \
-                                ManagerInsertError, \
-                                ManagerDeleteError, \
-                                ManagerUpdateError, \
-                                ManagerIterationError
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetSingleResponse, \
@@ -42,6 +35,13 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+
+from cmdb.errors.manager import ManagerGetError, \
+                                ManagerInsertError, \
+                                ManagerDeleteError, \
+                                ManagerUpdateError, \
+                                ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

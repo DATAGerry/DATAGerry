@@ -19,6 +19,7 @@ import logging
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.framework.utils import Collection
+
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerGetError,\
                                 ManagerUpdateError,\

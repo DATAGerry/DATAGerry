@@ -17,15 +17,17 @@
 import logging
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.errors.database import NoDocumentFound
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb.framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
+from cmdb.security.security import SecurityManager
+
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.right import BaseRight
+
 from cmdb.utils.error import CMDBError
-from cmdb.security.security import SecurityManager
+
+from cmdb.errors.database import NoDocumentFound
+from cmdb.errors.manager import ManagerDeleteError, ManagerUpdateError, ManagerInsertError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

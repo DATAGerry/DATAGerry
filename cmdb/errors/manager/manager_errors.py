@@ -43,12 +43,14 @@ class ManagerInsertError(ManagerError):
         super().__init__(f'Error while INSERT: {err}')
 
 
+#TODO: Replace with specific Manager errors
 class ManagerUpdateError(ManagerError):
     """Manager exception for update operations"""
     def __init__(self, err: str):
         super().__init__(f'Error while UPDATE: {err}')
 
 
+#TODO: Replace with specific Manager errors
 class ManagerDeleteError(ManagerError):
     """Manager exception for delete operations"""
     def __init__(self, err: str):

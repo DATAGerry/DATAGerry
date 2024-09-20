@@ -19,14 +19,16 @@ import time
 import logging
 from datetime import datetime
 
-from cmdb.updater.updater import Updater
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
+
+from cmdb.updater.updater import Updater
+
+from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 class Update20200214(Updater):
     """TODO: document"""
 
@@ -60,11 +62,11 @@ class Update20200214(Updater):
         self.increase_updater_version(20200214)
 
 
-
     def worker(self, type_):
         """TODO: document"""
         try:
             manager = ObjectManager(database_manager=self.database_manager)  # TODO: Replace when object api is updated
+
             object_list = self.object_manager.get_objects_by_type(type_.public_id)
             matches = type_.matches
 
@@ -78,8 +80,8 @@ class Update20200214(Updater):
                             else:
                                 field['value'] = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
                 manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
-        except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
-            LOGGER.error(err.message)
+        except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
+            LOGGER.error(err)
 
 
     def get_types_by_field_date(self):
@@ -99,5 +101,5 @@ class Update20200214(Updater):
         try:
             return self.object_manager.get_type_aggregate(argument)
         except ObjectManagerGetError as err:
-            LOGGER.error(err.message)
+            LOGGER.error(err)
             return []

@@ -14,16 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime, timezone
 from cmdb.framework.cmdb_base import CmdbManagerBase
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
-    ObjectManagerDeleteError
-from cmdb.exportd.exportd_logs.exportd_log import LOGGER, LogAction
-from cmdb.utils.error import CMDBError
+from cmdb.exportd.exportd_logs.exportd_log import LogAction
+
+from cmdb.errors.manager.log_manager import LogManagerGetError, LogManagerInsertError, LogManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
+
 
 class ExportdLogManager(CmdbManagerBase):
     """TODO: document"""
@@ -34,7 +37,6 @@ class ExportdLogManager(CmdbManagerBase):
         super().__init__(database_manager)
 
 
-    # CRUD functions
     def get_all_logs(self):
         """TODO: document"""
         log_list = []
@@ -42,8 +44,8 @@ class ExportdLogManager(CmdbManagerBase):
         for found_log in self.dbm.find_all(collection=ExportdMetaLog.COLLECTION):
             try:
                 log_list.append(ExportdLog(**found_log))
-            except CMDBError as err:
-                LOGGER.error(err)
+            except Exception as err:
+                LOGGER.debug("[get_all_logs] Exception: %s, Type: %s", err, type(err))
                 raise LogManagerGetError(err) from err
 
         return log_list
@@ -56,8 +58,8 @@ class ExportdLogManager(CmdbManagerBase):
                 collection=ExportdMetaLog.COLLECTION,
                 public_id=public_id
             ))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
+        except Exception as err:
+            LOGGER.debug("[get_log] Exception: %s, Type: %s", err, type(err))
             raise LogManagerGetError(err) from err
 
 
@@ -67,10 +69,11 @@ class ExportdLogManager(CmdbManagerBase):
 
         try:
             logs = self._get_many(collection=ExportdMetaLog.COLLECTION, sort=sort, **requirements)
+
             for log in logs:
                 ack.append(ExportdJobLog.from_data(log))
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
+        except Exception as err:
+            LOGGER.debug("[get_logs_by] Exception: %s, Type: %s", err, type(err))
             raise LogManagerGetError(err) from err
 
         return ack
@@ -95,22 +98,18 @@ class ExportdLogManager(CmdbManagerBase):
             new_log = ExportdJobLog.from_data(log_data)
             ack = self._insert(ExportdMetaLog.COLLECTION, ExportdJobLog.to_json(new_log))
         except Exception as err:
+            LOGGER.debug("[insert_log] Exception: %s, Type: %s", err, type(err))
             raise LogManagerInsertError(err) from err
 
         return ack
-
-
-    def update_log(self, data) -> int:
-        """TODO: document"""
-        raise NotImplementedError
 
 
     def delete_log(self, public_id):
         """TODO: document"""
         try:
             ack = self._delete(ExportdMetaLog.COLLECTION, public_id)
-        except CMDBError as err:
-            LOGGER.error(err)
+        except Exception as err:
+            LOGGER.debug("[delete_log] Exception: %s, Type: %s", err, type(err))
             raise LogManagerDeleteError(err) from err
 
         return ack
@@ -132,30 +131,8 @@ class ExportdLogManager(CmdbManagerBase):
             founded_logs = self.dbm.find_all(ExportdMetaLog.COLLECTION, **query)
             for _ in founded_logs:
                 job_list.append(ExportdLog.from_data(_))
-        except (CMDBError, Exception) as err:
-            LOGGER.error('Error in get_exportd_job_logs: %s',err)
+        except Exception as err:
+            LOGGER.debug("[get_exportd_job_logs] Exception: %s, Type: %s", err, type(err))
             raise LogManagerGetError(err) from err
 
         return job_list
-
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
-
-class LogManagerGetError(ObjectManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class LogManagerInsertError(ObjectManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class LogManagerDeleteError(ObjectManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)

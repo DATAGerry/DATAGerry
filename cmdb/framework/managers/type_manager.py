@@ -19,23 +19,24 @@ TODO: document
 import json
 import logging
 from typing import Union
-
 from bson import json_util
 
-from cmdb.database.utils import object_hook
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
+from cmdb.database.utils import object_hook
 from cmdb.framework import TypeModel
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
 from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Pipeline
 from cmdb.framework.cmdb_object import CmdbObject
-
 import cmdb.framework.cmdb_object_manager as com
 
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerDeleteError, ManagerUpdateError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

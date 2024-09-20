@@ -16,20 +16,21 @@
 """TODO: document"""
 import logging
 import re
-
 from datetime import datetime, timezone
-
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
-from cmdb.search import Query
-from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
-from cmdb.security.auth.auth_providers import AuthenticationProvider
-from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.security.security import SecurityManager
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserModel, UserManager
+
+from cmdb.search import Query
+from cmdb.security.auth.auth_providers import AuthenticationProvider
+from cmdb.security.auth.provider_config import AuthProviderConfig
+
+from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

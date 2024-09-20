@@ -16,9 +16,7 @@
 """TODO: document"""
 import json
 import logging
-
 from datetime import datetime, timezone
-
 from bson import json_util
 from flask import request, abort
 
@@ -29,10 +27,12 @@ from cmdb.framework import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, make_response, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.utils.error import CMDBError
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 importer_type_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/type')

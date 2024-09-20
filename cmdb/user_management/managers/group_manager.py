@@ -16,14 +16,18 @@
 """TODO: document"""
 from typing import Union
 
-from .right_manager import RightManager
-from .. import UserGroupModel
-from ...database.database_manager_mongo import DatabaseManagerMongo
-from ...framework.results import IterationResult
-from ...framework.utils import PublicID
-from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError
-from ...manager.managers import ManagerBase
-from ...search import Pipeline
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.manager.managers import ManagerBase
+
+from cmdb.user_management import UserGroupModel
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.search import Pipeline
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerDeleteError, ManagerUpdateError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class GroupManager(ManagerBase):
@@ -141,6 +145,6 @@ class GroupManager(ManagerBase):
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
 
         if delete_result.deleted_count == 0:
-            raise ManagerDeleteError(err='No group matched this public id')
+            raise ManagerDeleteError('No group matched this public id')
 
         return group

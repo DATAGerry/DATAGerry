@@ -31,16 +31,15 @@ from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, Erro
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.framework.models.location_node import LocationNode
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
                                 ManagerGetError,\
                                 ManagerUpdateError,\
                                 ManagerDeleteError
-
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -376,7 +375,7 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         ack = locations_manager.delete({'public_id':location_public_id})
     except ManagerGetError as err:
         LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorMessage(404, "Could not retrieve the location which should be deleted from the database!").response()
+        return ErrorMessage(404, "Failed to retrieve the location which should be deleted from database!").response()
     except ManagerDeleteError as err:
         LOGGER.debug("ManagerDeleteError: %s", err)
         return ErrorMessage(400, f"Could not delete the location: (E:{err})!").response()

@@ -17,12 +17,16 @@
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.managers import ManagerBase
+
 from cmdb.user_management.models.user import UserModel
-from ...framework.results import IterationResult
-from ...framework.utils import PublicID
-from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerUpdateError
-from ...manager.managers import ManagerBase
-from ...search import Query, Pipeline
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.search import Query, Pipeline
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerDeleteError, ManagerUpdateError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManager(ManagerBase):
@@ -172,5 +176,5 @@ class UserManager(ManagerBase):
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
 
         if delete_result.deleted_count == 0:
-            raise ManagerDeleteError(err='No user matched this public id')
+            raise ManagerDeleteError('No user matched this public id')
         return user

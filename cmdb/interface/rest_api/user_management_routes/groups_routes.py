@@ -21,8 +21,6 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.managers.user_manager import UserManager
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
-from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import CollectionParameters
@@ -32,11 +30,14 @@ from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.search import Query
 from cmdb.user_management import UserModel
-
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 groups_blueprint = APIBlueprint('groups', __name__)

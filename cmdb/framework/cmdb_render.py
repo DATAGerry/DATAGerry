@@ -20,22 +20,23 @@ from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-
-from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
-
+from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.manager import ManagerGetError
-from cmdb.security.acl.errors import AccessDeniedError
+
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.utils.error import CMDBError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
 from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 from cmdb.user_management.user_manager import UserModel
-from cmdb.user_management.managers.user_manager import UserManager
+
+from cmdb.utils.error import CMDBError
+from cmdb.security.acl.errors import AccessDeniedError
+
+from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -458,7 +459,7 @@ class CmdbRender:
                     pass
 
             except ObjectManagerGetError as err:
-                LOGGER.error(err.message)
+                LOGGER.error(err)
             finally:
                 return TypeReference.to_json(reference)
 

@@ -20,16 +20,17 @@ from datetime import datetime, timezone
 import logging
 from typing import Optional
 
-from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
-    ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
+from cmdb.framework import CmdbObject
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
 from cmdb.importer.importer_response import BaseImporterResponse, ImporterObjectResponse, ImportFailedMessage, \
     ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import UserModel
+
+from cmdb.errors.manager.object_manager import ObjectManagerGetError, ObjectManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -172,7 +173,7 @@ class ObjectImporter(BaseImporter):
                 try:
                     self.object_manager.insert_object(current_import_object)
                 except ObjectManagerInsertError as err:
-                    failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
+                    failed_imports.append(ImportFailedMessage(error_message=err, obj=current_import_object))
                     current_import_index += 1
                     continue
                 else:
@@ -180,15 +181,16 @@ class ObjectImporter(BaseImporter):
             else:
                 try:
                     self.object_manager.delete_object(current_public_id, self.request_user)
-                except ObjectManagerDeleteError as err:
-                    failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
+                #TODO: ERROR-FIX
+                except Exception as err:
+                    failed_imports.append(ImportFailedMessage(error_message=err, obj=current_import_object))
                     current_import_index += 1
                     continue
                 else:
                     try:
                         self.object_manager.insert_object(current_import_object)
                     except ObjectManagerInsertError as err:
-                        failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
+                        failed_imports.append(ImportFailedMessage(error_message=err, obj=current_import_object))
                         current_import_index += 1
                         continue
                     else:

@@ -18,11 +18,10 @@ This module contains the implementation of the LogsManager
 """
 import logging
 from datetime import datetime, timezone
-
 from queue import Queue
 from typing import Union
 
-from .base_manager import BaseManager
+from cmdb.manager.base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.event_management.event import Event
@@ -31,9 +30,10 @@ from cmdb.framework.models.log import CmdbObjectLog, LogAction
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

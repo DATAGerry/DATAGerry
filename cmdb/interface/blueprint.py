@@ -16,16 +16,18 @@
 """TODO: document"""
 from functools import wraps
 import logging
-
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
 
-from cmdb.manager import ManagerGetError
+from cmdb.user_management.managers.user_manager import UserManager
+
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
-from cmdb.security.token.validator import TokenValidator, ValidationError
 from cmdb.user_management import UserModel
-from cmdb.user_management.managers.user_manager import UserManager
+
+from cmdb.security.token.validator import TokenValidator, ValidationError
+
+from cmdb.errors.manager import ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

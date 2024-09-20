@@ -17,7 +17,8 @@
 import logging
 
 from cmdb.framework.cmdb_render import CmdbRender
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
+
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

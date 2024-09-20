@@ -20,12 +20,14 @@ from flask import request, abort
 
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.utils.error import CMDBError
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
-from cmdb.errors.manager import ManagerInsertError
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

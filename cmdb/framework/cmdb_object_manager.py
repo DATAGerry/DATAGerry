@@ -27,26 +27,27 @@ from bson import json_util
 
 from cmdb.framework.managers.type_manager import TypeManager
 
-from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
-
 from cmdb.database.utils import object_hook
-
-from cmdb.errors.database import PublicIDAlreadyExists
-from cmdb.errors.type import FieldNotFoundError, FieldInitError
-
 from cmdb.event_management.event import Event
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.framework.models.category import CategoryModel
-from cmdb.framework.cmdb_errors import ObjectInsertError, ObjectDeleteError, ObjectManagerGetError, \
-    ObjectManagerInsertError, ObjectManagerInitError
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Pipeline
 from cmdb.security.acl.control import AccessControlList
-from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
+
+from cmdb.utils.error import CMDBError
+from cmdb.security.acl.errors import AccessDeniedError
+
+from cmdb.errors.database import PublicIDAlreadyExists
+from cmdb.errors.type import FieldNotFoundError, FieldInitError
+from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
+from cmdb.errors.manager.object_manager import ObjectManagerInsertError,\
+                                               ObjectManagerDeleteError,\
+                                               ObjectManagerGetError,\
+                                               ObjectManagerInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -309,7 +310,7 @@ class CmdbObjectManager(CmdbManagerBase):
                                                          "event": 'insert'})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as error:
-            raise ObjectInsertError(error) from error
+            raise ObjectManagerInsertError(error) from error
         return ack
 
 
@@ -377,8 +378,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
-        except (CMDBError, Exception) as error:
-            raise ObjectDeleteError(msg=public_id) from error
+        except (CMDBError, Exception) as err:
+            raise ObjectManagerDeleteError(public_id, err) from err
 
 
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):

@@ -18,27 +18,30 @@ Manages Objects in Datagerry
 """
 import json
 import logging
-
 from queue import Queue
 from typing import Union
 from bson import Regex, json_util
 
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
+
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework import CmdbObject
 from cmdb.framework.cmdb_object_manager import verify_access
-from cmdb.security.acl.errors import AccessDeniedError
-from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
-from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError
 from cmdb.search import Query, Pipeline
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerUpdateError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -216,8 +219,10 @@ class ObjectManager(ManagerBase):
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(CmdbObject)
+
         return iteration_result
 
 
