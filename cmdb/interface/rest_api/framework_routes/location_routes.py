@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Definition of all routes for Locations
-"""
+"""Definition of all routes for Locations"""
 import logging
 from flask import request, current_app
 
@@ -31,16 +29,15 @@ from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, Erro
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.framework.models.location_node import LocationNode
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
                                 ManagerGetError,\
                                 ManagerUpdateError,\
                                 ManagerDeleteError
-
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -99,7 +96,7 @@ def create_location(params: dict, request_user: UserModel):
     try:
         created_location_id = locations_manager.insert_location(location_creation_params)
     except ManagerInsertError as err:
-        LOGGER.debug("ManagerInsertError: %s", err)
+        LOGGER.debug("[ManagerInsertError] ManagerInsertError: %s", err.message)
         return ErrorMessage(400, "Could not insert the new location in database)!").response()
 
     return make_response(created_location_id)
@@ -217,7 +214,7 @@ def get_location(public_id: int, request_user: UserModel):
     try:
         location_instance = locations_manager.get_location(public_id)
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[get_location] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the location from database!").response()
 
     return make_response(location_instance)
@@ -238,7 +235,8 @@ def get_location_for_object(object_id: int, request_user: UserModel):
 
     try:
         location_instance = locations_manager.get_location_for_object(object_id)
-    except ManagerGetError:
+    except ManagerGetError as err:
+        LOGGER.debug("[get_location_for_object] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the location from database!").response()
 
     return make_response(location_instance)
@@ -346,7 +344,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
     try:
         result = locations_manager.update({'object_id': object_id}, location_update_params)
     except ManagerUpdateError as err:
-        LOGGER.debug("ManagerUpdateError: %s", err)
+        LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
         return ErrorMessage(400, f"Could not update the location (E: {err})!").response()
 
     api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
@@ -375,10 +373,10 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
 
         ack = locations_manager.delete({'public_id':location_public_id})
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorMessage(404, "Could not retrieve the location which should be deleted from the database!").response()
+        LOGGER.debug("[delete_location_for_object] ManagerGetError: %s", err.message)
+        return ErrorMessage(404, "Could not retrieve the location which should be deleted!").response()
     except ManagerDeleteError as err:
-        LOGGER.debug("ManagerDeleteError: %s", err)
-        return ErrorMessage(400, f"Could not delete the location: (E:{err})!").response()
+        LOGGER.debug("[delete_location_for_object] ManagerDeleteError: %s", err.message)
+        return ErrorMessage(400, f"Could not delete the location with ID: {object_id} !").response()
 
     return make_response(ack)

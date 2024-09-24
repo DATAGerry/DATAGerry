@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the ObjectLinksManager
-"""
+"""This module contains the implementation of the ObjectLinksManager"""
 import logging
 from queue import Queue
 from typing import Union
@@ -23,17 +21,17 @@ from datetime import datetime, timezone
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.framework.results import IterationResult
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerIterationError
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -93,10 +91,12 @@ class ObjectLinksManager(BaseManager):
 
             new_public_id = self.insert(link)
         except ManagerGetError as err:
-            LOGGER.debug("ManagerGetError: %s", err)
+            #TODO: ERROR-FIX
+            LOGGER.debug("[insert_object_link] ManagerGetError: %s", err.message)
             raise ManagerGetError(err) from err
         except ManagerInsertError as err:
-            LOGGER.debug("ManagerInsertError: %s", err)
+            #TODO: ERROR-FIX
+            LOGGER.debug("[insert_object_link] ManagerInsertError: %s", err.message)
             raise ManagerInsertError(err) from err
 
         return new_public_id

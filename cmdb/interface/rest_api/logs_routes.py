@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Definition of all routes for Logs"""
 import logging
-
 from flask import request
 
 from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
@@ -24,10 +23,10 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, ErrorMessage
 from cmdb.user_management.models.user import UserModel
-from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
-
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -260,7 +259,7 @@ def delete_log(public_id: int, request_user: UserModel):
     try:
         deleted = logs_manager.delete({'public_id':public_id})
     except ManagerDeleteError as err:
-        LOGGER.debug("ManagerDeleteError: %s", err)
+        LOGGER.debug("[delete_log] ManagerDeleteError: %s", err.message)
         return ErrorMessage(400, f"Could not delete the log with the ID:{public_id}!").response()
 
     return make_response(deleted)

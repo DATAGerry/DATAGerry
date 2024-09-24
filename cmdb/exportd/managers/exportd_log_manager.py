@@ -15,11 +15,15 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog
 from cmdb.manager.managers import ManagerBase as ExportDManager
+
+from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog
 from cmdb.framework.results import IterationResult
-from cmdb.manager import ManagerIterationError, ManagerGetError
 from cmdb.search import Pipeline
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportDLogManager(ExportDManager):

@@ -13,15 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the SectionTemplatesManager
-"""
+"""This module contains the implementation of the SectionTemplatesManager"""
 import logging
 from queue import Queue
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework import CategoryModel
@@ -30,14 +29,13 @@ from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerGetError,\
                                 ManagerIterationError,\
                                 ManagerUpdateError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from . query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -163,4 +161,5 @@ class CategoriesManager(BaseManager):
         except ManagerGetError as err:
             raise ManagerGetError(err) from err
         except ManagerUpdateError as err:
+            LOGGER.debug("[reset_children_categories] ManagerUpdateError: %s", err.message)
             raise ManagerUpdateError(err) from err

@@ -13,22 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Definition of all routes for CmdbSectionTemplates
-"""
+"""Definition of all routes for CmdbSectionTemplates"""
 import logging
-
 from datetime import datetime, timezone
 from flask import request
 
 from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.framework.models.category import CategoryModel, CategoryTree
-from cmdb.errors.manager import ManagerGetError, \
-                                ManagerInsertError, \
-                                ManagerDeleteError, \
-                                ManagerUpdateError, \
-                                ManagerIterationError
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -42,12 +34,16 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-# -------------------------------------------------------------------------------------------------------------------- #
 
+from cmdb.errors.manager import ManagerGetError, \
+                                ManagerInsertError, \
+                                ManagerDeleteError, \
+                                ManagerUpdateError, \
+                                ManagerIterationError
+# -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 categories_blueprint = APIBlueprint('categories', __name__)
-
 # ---------------------------------------------------- CRUD-CREATE --------------------------------------------------- #
 
 @categories_blueprint.route('/', methods=['POST'])
@@ -76,10 +72,10 @@ def insert_category(data: dict, request_user: UserModel):
         result_id: int = categories_manager.insert(data)
         new_category = categories_manager.get_one(result_id)
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[insert_category] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the created categeory from database!").response()
     except ManagerInsertError as err:
-        LOGGER.debug("ManagerInsertError: %s", err)
+        LOGGER.debug("[insert_category] ManagerInsertError: %s", err.message)
         return ErrorMessage(400, "Could not insert the new categeory in database)!").response()
 
     api_response = InsertSingleResponse(result_id=result_id,
@@ -166,7 +162,7 @@ def get_category(public_id: int, request_user: UserModel):
     try:
         category_instance = categories_manager.get_one(public_id)
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[get_category] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the requested categeory from database!").response()
 
     api_response = GetSingleResponse(category_instance,
@@ -202,8 +198,8 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
 
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerUpdateError as err:
-        LOGGER.debug("ManagerUpdateError: %s", err)
-        return ErrorMessage(400, f"Could not update the categeory (E: {err})!").response()
+        LOGGER.debug("[update_category] ManagerUpdateError: %s", err.message)
+        return ErrorMessage(400, f"Could not update the categeory with public_id: {public_id}!").response()
 
     return api_response.make_response()
 
@@ -235,10 +231,10 @@ def delete_category(public_id: int, request_user: UserModel):
 
         api_response = DeleteSingleResponse(raw=category_instance, model=CategoryModel.MODEL)
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[delete_category] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the child categeories from the database!").response()
     except ManagerDeleteError as err:
-        LOGGER.debug("ManagerDeleteError: %s", err)
+        LOGGER.debug("[delete_category] ManagerDeleteError: %s", err.message)
         return ErrorMessage(400, f"Could not delete the categeory with the ID:{public_id}!").response()
 
     return api_response.make_response()

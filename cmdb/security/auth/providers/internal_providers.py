@@ -15,18 +15,20 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import current_app
 
-from cmdb.manager import ManagerGetError
-from cmdb.search import Query
-from cmdb.security.auth.auth_providers import AuthenticationProvider
-from cmdb.security.auth.auth_errors import AuthenticationError
-from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import UserModel
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.security.security import SecurityManager
+
+from cmdb.search import Query
+from cmdb.security.auth.auth_providers import AuthenticationProvider
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.user_management import UserModel
+
+from cmdb.security.auth.auth_errors import AuthenticationError
+
+from cmdb.errors.manager import ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -63,6 +65,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         except ManagerGetError as err:
             raise AuthenticationError(LocalAuthenticationProvider.get_name(), err) from err
         login_pass = self.security_manager.generate_hmac(password)
+
         if login_pass == user.password:
             return user
         raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'Password did not matched with hmac!')

@@ -17,12 +17,16 @@
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.managers import ManagerBase
+
 from cmdb.user_management.models.user import UserModel
-from ...framework.results import IterationResult
-from ...framework.utils import PublicID
-from ...manager import ManagerGetError, ManagerIterationError, ManagerDeleteError, ManagerUpdateError
-from ...manager.managers import ManagerBase
-from ...search import Query, Pipeline
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.search import Query, Pipeline
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManager(ManagerBase):
@@ -82,6 +86,7 @@ class UserManager(ManagerBase):
         result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in result.limit(-1):
             return UserModel.from_data(resource_result)
+
         raise ManagerGetError(f'User with ID: {public_id} not found!')
 
 
@@ -98,6 +103,7 @@ class UserManager(ManagerBase):
         result = self._get(self.collection, filter=query, limit=1)
         for resource_result in result.limit(-1):
             return UserModel.from_data(resource_result)
+
         raise ManagerGetError(f'User with the query: {query} not found!')
 
 

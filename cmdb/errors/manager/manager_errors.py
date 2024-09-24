@@ -28,7 +28,8 @@ class ManagerError(CMDBError):
 class ManagerGetError(ManagerError):
     """Manager exception for get operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while GET: {err}')
+        self.message = f'Error while GET: {err}'
+        super().__init__(self.message)
 
 
 class ManagerIterationError(ManagerError):
@@ -40,19 +41,22 @@ class ManagerIterationError(ManagerError):
 class ManagerInsertError(ManagerError):
     """Manager exception for insert operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while INSERT: {err}')
+        self.message = f'Error while INSERT: {err}'
+        super().__init__(self.message)
 
 
 class ManagerUpdateError(ManagerError):
     """Manager exception for update operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while UPDATE: {err}')
+        self.message = f'Error while UPDATE: {err}'
+        super().__init__(self.message)
 
 
 class ManagerDeleteError(ManagerError):
     """Manager exception for delete operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while DELETE: {err}')
+        self.message = f'Error while DELETE: {err}'
+        super().__init__(self.message)
 
 
 class DisallowedActionError(ManagerError):

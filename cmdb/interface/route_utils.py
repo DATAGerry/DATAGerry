@@ -17,30 +17,34 @@
 import base64
 import functools
 import json
+import logging
 from functools import wraps
 from datetime import datetime
-
 from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
 
-from cmdb.errors.manager import ManagerGetError
-from cmdb.security.auth import AuthModule
+from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.security.security import SecurityManager
-from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.security.auth import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.user_management.models.user import UserModel
-from cmdb.user_management.managers.user_manager import UserManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.wraps import LOGGER
 from cmdb.utils import json_encoding
+
+from cmdb.security.token.validator import TokenValidator, ValidationError
+
+from cmdb.errors.manager import ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 DEFAULT_MIME_TYPE = 'application/json'
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def default(obj):
     """Json encoder for database values."""
@@ -192,7 +196,7 @@ def right_required(required_right: str, excepted: dict = None):
                 group: UserGroupModel = group_manager.get(current_user.group_id)
                 has_right = group.has_right(required_right)
             except ManagerGetError:
-                return abort(404, 'Group or right not exists')
+                return abort(404, 'Group or right does not exist!')
 
             if not has_right and not group.has_extended_right(required_right):
                 return abort(403, 'Request user does not have the right for this action')

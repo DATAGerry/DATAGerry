@@ -19,9 +19,12 @@ import time
 import logging
 from datetime import datetime
 
-from cmdb.updater.updater import Updater
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError, CMDBError
 from cmdb.framework.managers.object_manager import ObjectManager
+
+from cmdb.updater.updater import Updater
+
+from cmdb.errors.cmdb_error import CMDBError
+from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -79,7 +82,7 @@ class Update20200214(Updater):
                                 field['value'] = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
                 manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
         except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
-            LOGGER.error(err.message)
+            LOGGER.error("[worker] Error in worker: %s", err.message)
 
 
     def get_types_by_field_date(self):

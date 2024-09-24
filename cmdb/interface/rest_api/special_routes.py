@@ -15,17 +15,18 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import request, abort
 
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.utils.error import CMDBError
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
-from cmdb.errors.manager import ManagerInsertError
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -111,7 +112,8 @@ def create_initial_profiles(data: str, request_user: UserModel):
         profile_assistant = ProfileAssistant()
         created_ids = profile_assistant.create_profiles(profiles)
     except ManagerInsertError as err:
-        return abort(400, err)
+        LOGGER.debug("[create_initial_profiles] ManagerInsertError: %s", err.message)
+        return abort(400, "Could not create initial profiles !")
 
     return make_response(created_ids)
 

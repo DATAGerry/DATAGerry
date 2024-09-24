@@ -16,7 +16,6 @@
 """TODO: document"""
 import json
 import logging
-
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -26,13 +25,8 @@ from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework.cmdb_render import RenderError, CmdbRender
-from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
-    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
-from cmdb.security.acl.errors import AccessDeniedError
-from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
+
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
@@ -42,10 +36,17 @@ from cmdb.interface.route_utils import make_response, insert_request_user, login
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
     get_element_from_data_request, generate_parsed_output, verify_import_access
-
-from cmdb.errors.manager import ManagerInsertError
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
+from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
+    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
+from cmdb.framework.cmdb_render import CmdbRender, RenderError
+
+from cmdb.errors.manager import ManagerInsertError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -166,9 +167,11 @@ def import_objects(request_user: UserModel):
                              _type=type_,
                              _manager=type_manager)
     except ObjectManagerGetError as err:
-        return abort(404, err.message)
-    except AccessDeniedError as err:
-        return abort(403, err.message)
+        #TODO:ERROR-FIX
+        LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
+        return abort(404, "Could not import objects !")
+    except AccessDeniedError:
+        return abort(403, "Access denied for importing objects !")
 
     # Load parser
     try:
@@ -232,12 +235,13 @@ def import_objects(request_user: UserModel):
             logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
 
         except ObjectManagerGetError as err:
-            LOGGER.error(err)
+            LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
             return abort(404)
         except RenderError as err:
             LOGGER.error(err)
             return abort(500)
         except ManagerInsertError as err:
-            LOGGER.error("ManagerInsertError: %s", err)
+            #TODO: ERROR-FIX
+            LOGGER.debug("[import_objects] ManagerInsertError: %s", err.message)
 
     return make_response(import_response)

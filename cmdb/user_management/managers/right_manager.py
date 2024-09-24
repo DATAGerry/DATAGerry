@@ -16,14 +16,22 @@
 """TODO: document"""
 import logging
 
-from ..models.right import BaseRight
-from ...framework.results import IterationResult
-from ...framework.utils import PublicID
-from ...manager import ManagerIterationError, ManagerGetError
-from ...manager.managers import ManagerBase
+from cmdb.manager.managers import ManagerBase
+
+from cmdb.user_management.models.right import BaseRight
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 RightManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class RightManager(ManagerBase):
     """TODO: document"""
 

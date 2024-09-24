@@ -17,9 +17,9 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
+from cmdb.framework import CmdbObject
 from cmdb.importer import JsonObjectParser
 from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
@@ -30,6 +30,8 @@ from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
 from cmdb.user_management import UserModel
+
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

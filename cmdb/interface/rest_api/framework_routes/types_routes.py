@@ -25,19 +25,22 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError, \
-    ManagerIterationError
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse, make_api_response
-
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.manager import ManagerGetError,\
+                                ManagerInsertError,\
+                                ManagerUpdateError,\
+                                ManagerDeleteError,\
+                                ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -52,17 +55,17 @@ types_blueprint = APIBlueprint('types', __name__)
 @types_blueprint.validate(TypeModel.SCHEMA)
 def insert_type(data: dict, request_user: UserModel):
     """
-    HTTP `POST` route for insert a single type resource.
+    HTTP `POST` route for insert a single type resource
 
     Args:
-        data (TypeModel.SCHEMA): Insert data of a new type.
+        data (TypeModel.SCHEMA): Insert data of a new type
 
     Raises:
-        ManagerGetError: If the inserted resource could not be found after inserting.
-        ManagerInsertError: If something went wrong during insertion.
+        ManagerGetError: If the inserted resource could not be found after inserting
+        ManagerInsertError: If something went wrong during insertion
 
     Returns:
-        InsertSingleResponse: Insert response with the new type and its public_id.
+        InsertSingleResponse: Insert response with the new type and its public_id
     """
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
 
@@ -80,10 +83,12 @@ def insert_type(data: dict, request_user: UserModel):
     try:
         result_id: PublicID = type_manager.insert(data)
         raw_doc = type_manager.get(public_id=result_id)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerInsertError as err:
-        return abort(400, err)
+        LOGGER.debug("[insert_type] ManagerInsertError: %s", err.message)
+        return abort(400, "The Type could not be inserted !")
 
     api_response = InsertSingleResponse(result_id=result_id,
                                         raw=TypeModel.to_json(raw_doc),
@@ -148,8 +153,9 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
                                         body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
     return api_response.make_response()
 
@@ -195,8 +201,9 @@ def count_objects(public_id: int, request_user: UserModel):
 
     try:
         objects_count = object_manager.count_objects(public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
     return make_api_response(objects_count)
 
@@ -232,10 +239,12 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
         type_ = TypeModel.from_data(data=data)
         type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerUpdateError as err:
-        return abort(400, err)
+        LOGGER.debug("[update_type] ManagerUpdateError: %s", err.message)
+        return abort(400, f"Type with public_id: {public_id} could not be updated!")
 
     # when types are updated, update all locations with relevant data from this type
     updated_type = type_manager.get(public_id)
@@ -296,10 +305,14 @@ def delete_type(public_id: int, request_user: UserModel):
 
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[delete_type] ManagerGetError: %s", err.message)
+        return abort(404)
     except ManagerDeleteError as err:
-        return abort(400, err)
+        LOGGER.debug("[delete_type] ManagerDeleteError: %s", err.message)
+        return abort(400, f"Could not delete the type with ID: {public_id}")
     except Exception as err:
-        return abort(400, str(err))
+        #TODO: ERROR-FIX
+        return abort(400)
 
     return api_response.make_response()

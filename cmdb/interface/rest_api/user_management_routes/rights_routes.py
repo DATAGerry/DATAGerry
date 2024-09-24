@@ -19,7 +19,7 @@ from flask import request, abort
 from cmdb.user_management.managers.right_manager import RightManager
 
 from cmdb.framework.utils import Model
-from cmdb.errors.manager import ManagerGetError, ManagerIterationError
+
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
@@ -27,6 +27,8 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse
 from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
 from cmdb.user_management.models.right import _nameToLevel
+
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 rights_blueprint = APIBlueprint('rights', __name__)
@@ -71,8 +73,9 @@ def get_rights(params: CollectionParameters):
         return api_response.make_response()
     except ManagerIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
 
 @rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
@@ -97,8 +100,10 @@ def get_right(name: str):
 
     try:
         right = right_manager.get(name)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
+
     api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
                                      body=request.method == 'HEAD')
 

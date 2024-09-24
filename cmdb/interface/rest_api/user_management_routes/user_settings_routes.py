@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import abort, request
 
 from cmdb.user_management.managers.setting_manager import UserSettingsManager
@@ -23,11 +22,12 @@ from cmdb.user_management.managers.setting_manager import UserSettingsManager
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSingleResponse, DeleteSingleResponse, \
     UpdateSingleResponse
-from cmdb.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerUpdateError
 from cmdb.user_management import UserSettingModel
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -60,8 +60,9 @@ def get_user_settings(user_id: int, request_user: UserModel):
 
         api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,
                                        body=request.method == 'HEAD')
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
     return api_response.make_response()
 
@@ -93,8 +94,9 @@ def get_user_setting(user_id: int, resource: str, request_user: UserModel):
 
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
                                          model=UserSettingModel.MODEL, body=request.method == 'HEAD')
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        # TODO: ERROR-FIX
+        return abort(404)
 
     return api_response.make_response()
 
@@ -125,9 +127,11 @@ def insert_setting(user_id: int, data: dict, request_user: UserModel):
         setting: UserSettingModel = settings_manager.get_user_setting(user_id=user_id,
                                                                       resource=data.get('resource'))
     except ManagerGetError as err:
-        return abort(404, err)
+        LOGGER.debug("[insert_setting] ManagerGetError: %s", err.message)
+        return abort(404, "An error occured when creating the setting!")
     except ManagerInsertError as err:
-        return abort(400, err)
+        LOGGER.debug("[insert_setting] ManagerInsertError: %s", err.message)
+        return abort(400, "Could not insert the setting!")
     api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.resource,
                                         url=request.url, model=UserSettingModel.MODEL)
 
@@ -171,10 +175,12 @@ def update_setting(user_id: int, resource: str, data: dict, request_user: UserMo
             settings_manager.insert(data)
 
         api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerUpdateError as err:
-        return abort(400, err)
+        LOGGER.debug("[update_setting] ManagerUpdateError: %s", err.message)
+        return abort(400, f"Setting for resource: {resource} could not be updated!")
 
     return api_response.make_response()
 
@@ -202,9 +208,11 @@ def delete_setting(user_id: int, resource: str, request_user: UserModel):
     try:
         deleted_setting = settings_manager.delete(user_id=user_id, resource=resource)
         api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerDeleteError as err:
-        return abort(404, err)
+        LOGGER.debug("[delete_setting] ManagerDeleteError: %s", err.message)
+        return abort(404, f"Could not delete the setting: {resource} !")
 
     return api_response.make_response()
