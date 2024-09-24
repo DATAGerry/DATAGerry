@@ -13,23 +13,24 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Module of basic importers
-"""
+"""Module of basic importers"""
 from datetime import datetime, timezone
 import logging
 from typing import Optional
 
-from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerInsertError, \
-    ObjectManagerDeleteError
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
+from cmdb.framework import CmdbObject
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
-from cmdb.importer.importer_response import BaseImporterResponse, ImporterObjectResponse, ImportFailedMessage, \
+from cmdb.importer.importer_response import BaseImporterResponse, ImporterObjectResponse, ImportFailedMessage,\
     ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management import UserModel
+
+from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
+                                               ObjectManagerInsertError,\
+                                               ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

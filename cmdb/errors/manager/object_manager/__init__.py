@@ -13,4 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module provides all errors from the ObjectManager"""
+"""This module provides all errors for the ObjectManager"""
+from .object_manager_errors import ObjectManagerInsertError,\
+                                   ObjectManagerDeleteError,\
+                                   ObjectManagerUpdateError,\
+                                   ObjectManagerGetError,\
+                                   ObjectManagerInitError
+# -------------------------------------------------------------------------------------------------------------------- #
+
+__all__ = [
+    'ObjectManagerInsertError',
+    'ObjectManagerDeleteError',
+    'ObjectManagerUpdateError',
+    'ObjectManagerGetError',
+    'ObjectManagerInitError',
+]

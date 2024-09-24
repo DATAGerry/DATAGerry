@@ -15,11 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import abort, jsonify, request
 
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdMetaLog
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -27,10 +24,15 @@ from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.manager import ManagerIterationError, ManagerGetError
-from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.manager import ManagerIterationError
+from cmdb.utils.error import CMDBError
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
+
+from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -63,7 +65,7 @@ def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
     except ManagerIterationError as err:
         return abort(400, err)
     except ManagerGetError as err:
-        return abort(404, err)
+        return abort(404, "Could not retrieve exportd logs!")
 
     return api_response.make_response()
 
@@ -82,10 +84,11 @@ def get_log_list(request_user: UserModel):
 
     try:
         log_list = log_manager.get_all_logs()
-    except ObjectManagerGetError as e:
-        return abort(400, e.message)
-    except ModuleNotFoundError as e:
-        return abort(400, e)
+    except ObjectManagerGetError as err:
+        LOGGER.debug("[get_log_list] ObjectManagerGetError: %s", err.message)
+        return abort(400, "Could not retrieve the log list!")
+    except ModuleNotFoundError as err:
+        return abort(400, err)
     except CMDBError as err:
         LOGGER.info("Error occured in get_log_list(): %s", err)
         return abort(404, jsonify(message='Not Found'))
@@ -122,7 +125,7 @@ def get_logs_by_jobs(public_id: int, request_user: UserModel):
     try:
         object_logs = log_manager.get_exportd_job_logs(public_id=public_id)
     except ObjectManagerGetError as err:
-        LOGGER.error('Error in get_logs_by_jobs: %s',err)
+        LOGGER.debug("[get_logs_by_jobs] ObjectManagerGetError: %s", err.message)
         return abort(404)
     if len(object_logs) < 1:
         return make_response(object_logs, 204)
@@ -154,7 +157,7 @@ def get_logs_with_existing_objects(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
-        LOGGER.error('Error in get_logs_with_existing_objects: %s', err)
+        LOGGER.debug("[get_logs_with_existing_objects] ObjectManagerGetError: %s", err.message)
         return abort(404)
 
     if len(object_logs) < 1:
@@ -205,7 +208,7 @@ def get_logs_with_deleted_objects(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
-        LOGGER.error('Error in get_logs_with_existing_objects: %s',err)
+        LOGGER.debug("[get_logs_with_deleted_objects] ObjectManagerGetError: %s", err.message)
         return abort(404)
 
     if len(object_logs) < 1:
@@ -250,7 +253,7 @@ def get_job_delete_logs(request_user: UserModel):
         }
         object_logs = log_manager.get_logs_by(**query)
     except (ObjectManagerGetError, Exception) as err:
-        LOGGER.error('Error in get_object_delete_logs: %s', err)
+        LOGGER.debug("[get_job_delete_logs] ObjectManagerGetError: %s", err.message)
         return abort(404)
 
     if len(object_logs) < 1:

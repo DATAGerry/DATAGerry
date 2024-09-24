@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the SectionTemplatesManager
-"""
+"""This module contains the implementation of the SectionTemplatesManager"""
 import logging
 from queue import Queue
 from typing import Union
@@ -25,6 +23,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework import TypeModel
@@ -35,17 +34,17 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            SectionTemplatesManager - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SectionTemplatesManager(BaseManager):
     """
     The SectionTemplatesManager handles the interaction between the SectionTemplates-API and the Database
@@ -90,16 +89,16 @@ class SectionTemplatesManager(BaseManager):
         try:
             new_section_template = CmdbSectionTemplate(**data)
         except Exception as error:
-            LOGGER.debug('Error while inserting section template - error: %s', error)
+            LOGGER.debug('[insert_section_template] Error while creating object - error: %s', error)
             raise ManagerInsertError(error) from error
 
         try:
             ack = self.insert(new_section_template.__dict__)
         except Exception as error:
+            LOGGER.debug('[insert_section_template] Error while inserting section template - error: %s', error)
             raise ManagerInsertError(error) from error
 
         return ack
-
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 

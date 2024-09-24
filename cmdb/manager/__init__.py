@@ -15,10 +15,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from typing import Any
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
 from cmdb.framework.utils import Collection
 
 from cmdb.errors.manager import ManagerGetError,\

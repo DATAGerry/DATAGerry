@@ -15,18 +15,19 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from datetime import datetime, timezone
 
-from cmdb.event_management.event import Event
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase
-from cmdb. framework.cmdb_errors import ManagerGetError, ManagerInsertError, ManagerUpdateError, \
-    ManagerDeleteError
-from cmdb.framework.cmdb_errors import ObjectManagerGetError
+
+from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
-from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
+
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError
+from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

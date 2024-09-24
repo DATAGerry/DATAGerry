@@ -18,19 +18,19 @@ Definition of all routes for CmdbSectionTemplates
 """
 import json
 import logging
-
 from flask import request
-
-from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response, insert_request_user
 
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -39,8 +39,6 @@ from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerDeleteError,\
                                 DisallowedActionError
 from cmdb.errors.database import NoDocumentFound
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -74,8 +72,8 @@ def create_section_template(params: dict, request_user: UserModel):
 
         created_section_template_id = template_manager.insert_section_template(params)
     except ManagerInsertError as err:
-        LOGGER.debug("Exception in section_template_create")
-        return ErrorMessage(400, str(err)).response()
+        LOGGER.debug("[create_section_template] ManagerInsertError: %s", err.message)
+        return ErrorMessage(400, "Could not create the section template!").response()
 
     return make_response(created_section_template_id)
 
@@ -133,7 +131,7 @@ def get_section_template(public_id: int, request_user: UserModel):
     try:
         section_template_instance = template_manager.get_section_template(public_id)
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
 
     if not section_template_instance:
@@ -163,7 +161,7 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
         counts: dict = template_manager.get_global_template_usage_count(instance.name, instance.is_global)
 
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
 
     return make_response(counts)
@@ -204,11 +202,11 @@ def update_section_template(params: dict, request_user: UserModel):
             raise NoDocumentFound(template_manager.collection, params['public_id'])
 
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {params['public_id']}!").response()
+        LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
+        return ErrorMessage(400, f"Could not retrieve SectionTemplate with ID: {params['public_id']}!").response()
     except ManagerUpdateError as err:
-        LOGGER.debug("ManagerUpdateError: %s", err)
-        return ErrorMessage(400, f"Could not update SectionTemplate with public_id: {params['public_id']}!").response()
+        LOGGER.debug("[update_section_template] ManagerUpdateError: %s", err.message)
+        return ErrorMessage(400, f"Could not update SectionTemplate with ID: {params['public_id']}!").response()
     except NoDocumentFound as err:
         return ErrorMessage(404, str(err)).response()
 
@@ -239,13 +237,12 @@ def delete_section_template(public_id: int, request_user: UserModel):
         ack: bool = template_manager.delete({'public_id':public_id})
 
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[delete_section_template] ManagerGetError: %s", err.message)
         return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
-    except DisallowedActionError as err:
-        LOGGER.debug("DisallowedActionError: %s", err)
-        return ErrorMessage(405, str(err)).response()
+    except DisallowedActionError:
+        return ErrorMessage(405, f"Disallowed action for section template with ID: {public_id}").response()
     except ManagerDeleteError as err:
-        LOGGER.debug("ManagerDeleteError: %s", err)
+        LOGGER.debug("[delete_section_template] ManagerDeleteError: %s", err)
         return ErrorMessage(400, f"Could not delete SectionTemplate with public_id: {public_id}!").response()
 
     return make_response(ack)

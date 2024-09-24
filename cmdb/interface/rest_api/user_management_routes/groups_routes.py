@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from flask import request
 
 from cmdb.user_management.managers.group_manager import GroupManager
@@ -21,23 +22,26 @@ from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.managers.user_manager import UserManager
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
-from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
-from cmdb.framework.results import IterationResult
-from cmdb.framework.utils import PublicID
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
 from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.search import Query
 from cmdb.user_management import UserModel
-
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
-from cmdb.interface.route_utils import insert_request_user
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 groups_blueprint = APIBlueprint('groups', __name__)
 
@@ -75,8 +79,9 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
                                         url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     except FrameworkIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
     return api_response.make_response()
 
@@ -104,8 +109,10 @@ def get_group(public_id: int, request_user: UserModel):
 
     try:
         group = group_manager.get(public_id)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
+
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
                                      model=UserGroupModel.MODEL, body=request.method == 'HEAD')
 
@@ -135,10 +142,12 @@ def insert_group(data: dict, request_user: UserModel):
     try:
         result_id: PublicID = group_manager.insert(data)
         group = group_manager.get(public_id=result_id)
-    except ManagerGetError as err:
-        return abort(404, err)
     except ManagerInsertError as err:
-        return abort(400, err)
+        LOGGER.debug("[insert_group] ManagerInsertError: %s", err.message)
+        return abort(400, "The group could not be created !")
+    except ManagerGetError as err:
+        LOGGER.debug("[insert_group] ManagerGetError: %s", err.message)
+        return abort(404, "The created group could not be retrieved from database!")
 
     api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group), url=request.url,
                                         model=UserGroupModel.MODEL)
@@ -159,11 +168,11 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
         data (UserGroupModel.SCHEMA): New group data to update.
 
     Raises:
-        ManagerGetError: When the group with the `public_id` was not found.
-        ManagerUpdateError: When something went wrong during the update.
+        ManagerGetError: When the group with the `public_id` was not found
+        ManagerUpdateError: When something went wrong during the update
 
     Returns:
-        UpdateSingleResponse: With update result of the new updated group.
+        UpdateSingleResponse: With update result of the new updated group
     """
     group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
 
@@ -174,10 +183,12 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
         group_manager.update(public_id=PublicID(public_id), group=group_dict)
         api_response = UpdateSingleResponse(result=group_dict, url=request.url,
                                             model=UserGroupModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerUpdateError as err:
-        return abort(400, err)
+        LOGGER.debug("[update_group] ManagerUpdateError: %s", err.message)
+        return abort(400, "Group could not be updated!")
 
     return api_response.make_response()
 
@@ -199,11 +210,11 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
         Based on the params attribute. Users can be moved or deleted.
 
     Raises:
-        ManagerGetError: When the group with the `public_id` was not found.
-        ManagerDeleteError: When something went wrong during the deletion.
+        ManagerGetError: When the group with the `public_id` was not found
+        ManagerDeleteError: When something went wrong during the deletion
 
     Returns:
-        DeleteSingleResponse: Delete result with the deleted group as data.
+        DeleteSingleResponse: Delete result with the deleted group as data
     """
     group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
     user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
@@ -230,14 +241,19 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
                     try:
                         user_manager.delete(user.public_id)
                     except ManagerDeleteError as err:
-                        return abort(400, f'Could not delete user: {user.public_id} | Error: {err}')
+                        LOGGER.debug("[delete_group] ManagerDeleteError_ %s", err.message)
+                        return abort(400, f'Could not delete user with ID: {user.public_id} !')
 
     try:
         deleted_group = group_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[delete_group] ManagerGetError: %s", err.message)
+        return abort(404)
     except ManagerDeleteError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[delete_group] ManagerDeleteError: %s", err.message)
+        return abort(404)
 
     return api_response.make_response()

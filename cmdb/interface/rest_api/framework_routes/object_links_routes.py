@@ -13,9 +13,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Definition of all routes for object links
-"""
+"""Definition of all routes for object links"""
 import logging
 from flask import abort, request
 
@@ -31,11 +29,13 @@ from cmdb.interface.response import DeleteSingleResponse,\
                                     GetMultiResponse,\
                                     ErrorMessage
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
-from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.security.acl.errors import AccessDeniedError
+
+from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 links_blueprint = APIBlueprint('links', __name__)
@@ -80,13 +80,12 @@ def create_object_link(request_user: UserModel):
 
         raw_doc = object_links_manager.get_link(result_id, request_user, AccessControlPermission.CREATE)
     except ManagerInsertError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[create_object_link] ManagerInsertError: %s", err.message)
         return ErrorMessage(400, "Could not create the ObjectLink!").response()
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[create_object_link] ManagerGetError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve the created ObjectLink!").response()
     except AccessDeniedError as err:
-        LOGGER.debug("AccessDeniedError: %s", err)
         return ErrorMessage(403, "No permission to create an ObjectLink!").response()
 
     api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
@@ -130,8 +129,8 @@ def get_links(params: CollectionParameters, request_user: UserModel):
 
     except ManagerIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        return abort(404, "No object links found!")
 
     return api_response.make_response()
 
@@ -159,13 +158,12 @@ def delete_link(public_id: int, request_user: UserModel):
         api_response = DeleteSingleResponse(raw=deleted_link, model=ObjectLinkModel.MODEL)
 
     except ManagerGetError as err:
-        LOGGER.debug("ManagerGetError: %s", err)
+        LOGGER.debug("[delete_link] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the ObjectLink which should be deleted!").response()
     except ManagerDeleteError as err:
-        LOGGER.debug("ManagerDeleteError: %s", err)
+        LOGGER.debug("[delete_link] ManagerDeleteError: %s", err.message)
         return ErrorMessage(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
     except AccessDeniedError as err:
-        LOGGER.debug("AccessDeniedError: %s", err)
         return ErrorMessage(403, "No permission to delete an ObjectLink!").response()
 
     return api_response.make_response()

@@ -16,13 +16,13 @@
 """TODO: document"""
 import logging
 
-from cmdb.errors.cmdb_error import CMDBError
-
 from cmdb.updater.updater import Updater
-from cmdb.framework.cmdb_errors import ObjectManagerGetError, ObjectManagerUpdateError
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.type import TypeModel
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+
+from cmdb.errors.cmdb_error import CMDBError
+from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

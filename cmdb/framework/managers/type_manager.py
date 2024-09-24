@@ -19,23 +19,24 @@ TODO: document
 import json
 import logging
 from typing import Union
-
 from bson import json_util
 
-from cmdb.database.utils import object_hook
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+import cmdb.framework.cmdb_object_manager as com
+from cmdb.manager.managers import ManagerBase
+
+from cmdb.database.utils import object_hook
 from cmdb.framework import TypeModel
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
-from cmdb.manager.managers import ManagerBase
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerIterationError, ManagerUpdateError, ManagerDeleteError
 from cmdb.search import Pipeline
 from cmdb.framework.cmdb_object import CmdbObject
 
-import cmdb.framework.cmdb_object_manager as com
+from cmdb.manager import ManagerIterationError
 
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -120,6 +121,7 @@ class TypeManager(ManagerBase):
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
         for resource_result in cursor_result.limit(-1):
             return TypeModel.from_data(resource_result)
+
         raise ManagerGetError(f'Type with ID: {public_id} not found!')
 
 
@@ -179,8 +181,10 @@ class TypeManager(ManagerBase):
         """
         raw_type: TypeModel = self.get(public_id=public_id)
         delete_result = self._delete(self.collection, filter={'public_id': public_id})
+
         if delete_result.deleted_count == 0:
             raise ManagerDeleteError(err='No type matched this public id')
+
         return raw_type
 
 # -------------------------------------------------- HELPER SECTION -------------------------------------------------- #

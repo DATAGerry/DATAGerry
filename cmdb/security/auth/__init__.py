@@ -16,27 +16,28 @@
 """Basic Authentication Module"""
 import logging
 from typing import Type
-
 from flask import current_app
 
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError
+from cmdb.security.security import SecurityManager
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.user_management.managers.user_manager import UserModel, UserManager
+
 from cmdb.search import Query
-from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
-    AuthenticationError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.security import SecurityManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserManager, UserModel
+from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
+    AuthenticationError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                      AuthModule                                                      #
+#                                                  AuthModule - CLASS                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
 class AuthModule:
     """Authentication module class"""
@@ -246,7 +247,7 @@ class AuthModule:
                 except AuthenticationError:
                     continue
                 except (ManagerGetError, ManagerInsertError) as error:
-                    LOGGER.error('User found by provider but could not be inserted or found %s',error)
+                    LOGGER.debug("User found by provider but could not be inserted or found %s",error.message)
                     continue
 
             raise AuthenticationError('Unknown user could not login.') from err

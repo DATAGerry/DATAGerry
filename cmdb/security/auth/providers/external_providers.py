@@ -16,20 +16,22 @@
 """TODO: document"""
 import logging
 import re
-
 from datetime import datetime, timezone
-
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
+from cmdb.security.security import SecurityManager
+from cmdb.user_management.managers.user_manager import UserModel, UserManager
+from cmdb.user_management.managers.group_manager import GroupManager
+
 from cmdb.search import Query
-from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.security import SecurityManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserModel, UserManager
+
+
+from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
+
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -179,31 +181,38 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                     user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
                 except ManagerUpdateError as err:
                     raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
-        except ManagerGetError as umge:
-            LOGGER.warning('[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: %s', umge)
+        except ManagerGetError as err:
+            #TODO: ERROR-FIX
+            LOGGER.warning('[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: %s', err)
             LOGGER.debug('[LdapAuthenticationProvider] Try creating user: %s', user_name)
             try:
-                new_user_data = dict()
+                new_user_data = {}
                 new_user_data['user_name'] = user_name
                 new_user_data['active'] = True
                 new_user_data['group_id'] = int(user_group_id)
                 new_user_data['registration_time'] = datetime.now(timezone.utc)
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
 
-            except Exception as err:
-                LOGGER.debug('[LdapAuthenticationProvider] %s',err)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
+            except Exception as error:
+                #TODO: ERROR-FIX
+                LOGGER.debug('[LdapAuthenticationProvider] %s',error)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
             LOGGER.debug('[LdapAuthenticationProvider] New user was init')
+
             try:
                 user_id = self.user_manager.insert(new_user_data)
-            except ManagerInsertError as umie:
-                LOGGER.debug('[LdapAuthenticationProvider] %s', umie)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), umie) from umie
+            except ManagerInsertError as error:
+                #TODO: ERROR-FIX
+                LOGGER.debug('[authenticate] ManagerInsertError: %s', error.message)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
+
             try:
                 user_instance: UserModel = self.user_manager.get(public_id=user_id)
-            except ManagerGetError as err:
-                LOGGER.debug('[LdapAuthenticationProvider] %s', err)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
+            except ManagerGetError as error:
+                #TODO: ERROR-FIX
+                LOGGER.debug('[authenticate] ManagerGetError: %s', error.message)
+                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
+
         return user_instance
 
 

@@ -17,10 +17,10 @@
 Collection of different helper classes and functions
 """
 import re
-import os
 import sys
 import importlib
 import pprint
+import inspect
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def debug_print(self):
@@ -41,27 +41,27 @@ def load_class(classname):
     #TODO: check if this regex is correct
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
+
     if match is None:
         raise Exception(f"Could not load class {classname}")
+
     module_name = match.group(1)
     class_name = match.group(2)
     loaded_module = importlib.import_module(module_name)
     loaded_class = getattr(loaded_module, class_name)
+
     return loaded_class
 
 
 def get_module_classes(module_name):
-    """
-        Get all class of an module and return list of classes
-
-    """
-    import inspect
-
+    """Get all class of an module and return list of classes"""
     class_list = []
     loaded_module = importlib.import_module(module_name)
+
     for key, data in inspect.getmembers(loaded_module, inspect.isclass):
         if module_name in str(data):
             class_list.append(key)
+
     return class_list
 
 
@@ -96,11 +96,6 @@ def process_bar(name, total, progress):
     if progress >= 1.:
         progress, status = 1, "\r\n"
     block = int(round(bar_length * progress))
-    text = '\r{}:[{}] {:.0f}% {} {} \n'.format(
-        name,
-        "#" * block + "-" * (bar_length - block),
-        round(progress * 100, 0),
-        through_of,
-        status)
+    text = f'\r{name}:[{"#" * block + "-" * (bar_length - block)}] {progress * 100:.0f}% {through_of} {status} \n'
     sys.stdout.write(text)
     sys.stdout.flush()

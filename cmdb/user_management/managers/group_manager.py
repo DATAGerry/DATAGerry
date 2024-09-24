@@ -16,14 +16,18 @@
 """TODO: document"""
 from typing import Union
 
-from .right_manager import RightManager
-from .. import UserGroupModel
-from ...database.database_manager_mongo import DatabaseManagerMongo
-from ...framework.results import IterationResult
-from ...framework.utils import PublicID
-from ...manager import ManagerDeleteError, ManagerGetError, ManagerIterationError, ManagerUpdateError
-from ...manager.managers import ManagerBase
-from ...search import Pipeline
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.manager.managers import ManagerBase
+
+from cmdb.user_management import UserGroupModel
+from cmdb.framework.results import IterationResult
+from cmdb.framework.utils import PublicID
+from cmdb.search import Pipeline
+
+from cmdb.manager import ManagerIterationError
+
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class GroupManager(ManagerBase):
@@ -65,6 +69,7 @@ class GroupManager(ManagerBase):
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[UserGroupModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(UserGroupModel)
 
@@ -82,8 +87,10 @@ class GroupManager(ManagerBase):
             UserGroupModel: Instance of UserGroupModel with data.
         """
         cursor_result = self._get(self.collection, filter={'public_id': public_id}, limit=1)
+
         for resource_result in cursor_result.limit(-1):
             return UserGroupModel.from_data(resource_result, rights=self.right_manager.rights)
+
         raise ManagerGetError(f'Group with ID: {public_id} not found!')
 
 

@@ -24,21 +24,21 @@ from cmdb.docapi.docapi_base import DocApiManager
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, ErrorMessage
-from cmdb.manager import ManagerIterationError, ManagerGetError
-from cmdb.utils.error import CMDBError
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
-
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
-from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.utils.error import CMDBError
+from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
+
+from cmdb.errors.manager import ManagerIterationError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 docapi_blueprint = RootBlueprint('docapi', __name__, url_prefix='/docapi')
 docs_blueprint = APIBlueprint('docs', __name__)
-
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @docapi_blueprint.route('/template', methods=['POST'])
@@ -94,8 +94,8 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
                                         url=request.url, model=DocapiTemplate.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        return abort(404, "Could not retrieve template list!")
 
     return api_response.make_response()
 

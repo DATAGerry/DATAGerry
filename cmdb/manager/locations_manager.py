@@ -13,28 +13,24 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the LocationsManager
-"""
+"""This module contains the implementation of the LocationsManager"""
 import logging
-
 from queue import Queue
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -133,9 +129,11 @@ class LocationsManager(BaseManager):
         try:
             resource = []
             location = self.get_one(public_id)
+
             if location:
                 resource = CmdbLocation(**location)
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return resource
@@ -156,9 +154,11 @@ class LocationsManager(BaseManager):
         """
         try:
             location = self.get_one_by({'object_id':object_id})
+
             if location:
                 location = CmdbLocation(**location)
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         if not location:
@@ -181,6 +181,7 @@ class LocationsManager(BaseManager):
             for location in locations:
                 locations_list.append(CmdbLocation(**location))
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return locations_list

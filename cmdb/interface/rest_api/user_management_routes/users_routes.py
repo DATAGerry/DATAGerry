@@ -34,13 +34,14 @@ from cmdb.interface.response import GetMultiResponse, \
                                     ErrorMessage
 from cmdb.framework.utils import PublicID
 from cmdb.framework.results import IterationResult
+from cmdb.user_management import UserModel
+from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
 from cmdb.errors.manager import ManagerGetError, \
                                 ManagerInsertError, \
                                 ManagerUpdateError, \
                                 ManagerDeleteError, \
                                 ManagerIterationError
-from cmdb.user_management import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -125,9 +126,12 @@ def insert_user(data: dict, request_user: UserModel):
         #Confirm that user is created
         user = user_manager.get(public_id=result_id)
     except ManagerGetError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[insert_user] ManagerGetError: %s", err.message)
+        return abort(404, "An error occured when creating the user!")
     except ManagerInsertError as err:
-        return abort(400, err)
+        LOGGER.debug("[insert_user] ManagerInsertError: %s", err.message)
+        return abort(400, "Could not create the user in database!")
     api_response = InsertSingleResponse(UserModel.to_dict(user), result_id, request.url, UserModel.MODEL)
 
     return api_response.make_response(prefix='users')
@@ -170,8 +174,9 @@ def get_users(params: CollectionParameters, request_user: UserModel):
                                         body=request.method == 'HEAD')
     except ManagerIterationError as err:
         return abort(400, err)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
 
     return api_response.make_response()
 
@@ -235,10 +240,12 @@ def update_user(public_id: int, data: dict, request_user: UserModel):
         user_manager.update(public_id=PublicID(public_id), user=user)
 
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerUpdateError as err:
-        return abort(400, err)
+        LOGGER.debug("[update_user] ManagerUpdateError: %s", err.message)
+        return abort(400, f"User with piblic_id: {public_id} could not be updated!")
 
     return api_response.make_response()
 
@@ -267,10 +274,12 @@ def change_user_password(public_id: int, request_user: UserModel):
         user.password = password
         user_manager.update(PublicID(public_id), user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
-    except ManagerGetError as err:
-        return abort(404, err)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
     except ManagerUpdateError as err:
-        return abort(400, err)
+        LOGGER.debug("[change_user_password] ManagerUpdateError: %s", err.message)
+        return abort(400, f"Password for user with public_id: {public_id} could not be changed!")
 
     return api_response.make_response()
 
@@ -297,8 +306,12 @@ def delete_user(public_id: int, request_user: UserModel):
         deleted_group = user_manager.delete(public_id=PublicID(public_id))
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
     except ManagerGetError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[delete_user] ManagerGetError: %s", err.message)
+        return abort(404, f"Could not delete user with ID: {public_id} !")
     except ManagerDeleteError as err:
-        return abort(404, err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[delete_user] ManagerDeleteError: %s", err.message)
+        return abort(404, f"Could not delete user with ID: {public_id} !")
 
     return api_response.make_response()

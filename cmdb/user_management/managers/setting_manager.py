@@ -17,11 +17,13 @@
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.managers import ManagerBase
+
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
-from cmdb.manager import ManagerGetError, ManagerDeleteError
-from cmdb.manager.managers import ManagerBase
 from cmdb.user_management.models.settings import UserSettingModel, UserSettingType
+
+from cmdb.errors.manager import ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserSettingsManager(ManagerBase):
@@ -60,8 +62,10 @@ class UserSettingsManager(ManagerBase):
             UserSettingModel: Instance of UserSettingModel with data.
         """
         result = self._get(self.collection, filter={'user_id': user_id, 'resource': resource}, limit=1)
+
         for resource_result in result.limit(-1):
             return UserSettingModel.from_data(resource_result)
+
         raise ManagerGetError(f'No setting with the name: {resource} was found!')
 
 
@@ -129,5 +133,5 @@ class UserSettingsManager(ManagerBase):
         delete_result = self._delete(self.collection, filter={'user_id': user_id, 'resource': resource})
 
         if delete_result.deleted_count == 0:
-            raise ManagerDeleteError(err='No user matched this public id')
+            raise ManagerDeleteError('No user matched this public id')
         return setting
