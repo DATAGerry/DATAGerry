@@ -39,7 +39,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
     private initialValue: string;
     private identifierInitialValue: string;
-    public isValid$ = true;
+    isValid$: boolean = false;
     public currentValue: string;
     public isIdentifierValid: boolean = true;
     private activeIndex: number | null = null;
@@ -68,9 +68,26 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         // Subscribe to value changes
         this.nameControl.valueChanges.subscribe(value => this.onInputChange(value, 'name'));
         this.labelControl.valueChanges.subscribe(value => this.onInputChange(value, 'label'));
+
+        // Initialize only once
+        if (!this.identifierInitialValue) {
+            this.identifierInitialValue = this.nameControl.value;
+        }
+
+        this.isValid$ = this.form.valid;
+
+        // Subscribe to form status changes and update isValid$ based on form validity
+        this.form.statusChanges.subscribe(() => {
+            this.isValid$ = this.form.valid;
+        });
     }
 
     public ngOnDestroy(): void {
+        //   When moving a field, if the identifier changes, delete the old one and add the new one.
+        if (this.identifierInitialValue != this.nameControl.value) {
+            this.validationService.updateFieldValidityOnDeletion(this.identifierInitialValue);
+        }
+
         this.subscriber.next();
         this.subscriber.complete();
         if (this.activeIndexSubscription) {
@@ -80,14 +97,14 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
-    public hasValidator(control: string): void {
-        if (this.form.controls[control].hasValidator(Validators.required)) {
-            let valid = this.form.controls[control].valid;
-            this.isValid$ = this.isValid$ && valid;
-        }
-    }
 
 
+    /**
+     * Handles input changes for the field and emits changes through fieldChanges$.
+     * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+     * @param event - The input event value.
+     * @param type - The type of the input field being changed.
+     */
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
@@ -102,12 +119,10 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
             this.initialValue = newName;
         }
 
-        for (let item in this.form.controls) {
-            this.hasValidator(item);
-        }
-
-        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
-        this.isValid$ = true;
+        setTimeout(() => {
+            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+            this.isValid$ = true;
+        });
 
         if (this.mode === CmdbMode.Create) {
             this.updateSectionValue(this.nameControl.value)
