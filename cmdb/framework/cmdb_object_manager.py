@@ -309,6 +309,7 @@ class CmdbObjectManager(CmdbManagerBase):
                                                          "event": 'insert'})
                 self._event_queue.put(event)
         except (CMDBError, PublicIDAlreadyExists) as error:
+            #TODO: ERROR-FIX
             raise ObjectManagerInsertError(error) from error
 
         return ack

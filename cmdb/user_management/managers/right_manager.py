@@ -22,9 +22,7 @@ from cmdb.user_management.models.right import BaseRight
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 
-from cmdb.manager import ManagerIterationError
-
-from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

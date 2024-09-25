@@ -86,7 +86,7 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
                                         CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_logs_with_existing_objects] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve existing object logs from database!").response()
 
     return api_response.make_response()
@@ -121,7 +121,7 @@ def get_logs_with_deleted_objects(params: CollectionParameters, request_user: Us
                                         CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_logs_with_deleted_objects] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve deleted objects logs from database!").response()
 
     return api_response.make_response()
@@ -159,7 +159,7 @@ def get_object_delete_logs(params: CollectionParameters, request_user: UserModel
                                         CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_object_delete_logs] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve the deleted object logs from database!").response()
 
     return api_response.make_response()
@@ -199,7 +199,7 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
                                         CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_logs_by_object] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, f"Could not retrieve logs for object with ID:{object_id}!").response()
 
     return api_response.make_response()
@@ -235,7 +235,7 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         logs = logs_manager.iterate(builder_params)
         corresponding_logs = [CmdbObjectLog.to_json(log) for log in logs.results]
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_corresponding_object_logs] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, f"Could not retrieve corresponding logs for ID:{public_id}!").response()
 
     return make_response(corresponding_logs)

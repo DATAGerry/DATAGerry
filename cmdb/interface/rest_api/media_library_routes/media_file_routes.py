@@ -16,26 +16,25 @@
 """TODO: document"""
 import json
 import logging
-
 from bson import json_util
 from flask import abort, request, Response
 
 from cmdb.media_library.media_file_manager import MediaFileManager
 
-from cmdb.media_library.media_file_manager import MediaFileManagerGetError, \
-    MediaFileManagerDeleteError, MediaFileManagerUpdateError, MediaFileManagerInsertError
-
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management import UserModel
-
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
     create_attachment_name
-
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
+                                                   MediaFileManagerInsertError,\
+                                                   MediaFileManagerUpdateError,\
+                                                   MediaFileManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -66,8 +65,9 @@ def get_file_list(params: CollectionParameters, request_user: UserModel):
         response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
         output = media_file_manager.get_many(metadata, **response_query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
-    except MediaFileManagerGetError as err:
-        return abort(404, err.message)
+    except MediaFileManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404, "Could not retrive file list!")
 
     return api_response.make_response()
 
@@ -100,7 +100,7 @@ def add_new_file(request_user: UserModel):
 
     Raises:
         MediaFileManagerGetError: If the file could not be found.
-        MediaFileManagerInsertError: If something went wrong during insert.
+        MediaFileManagerInsertError: If something went wrong during insert
 
     Args:
         request_user (UserModel): the instance of the started user
@@ -133,6 +133,7 @@ def add_new_file(request_user: UserModel):
 
         result = media_file_manager.insert_file(data=file, metadata=metadata)
     except (MediaFileManagerInsertError, MediaFileManagerGetError):
+        #TODO: ERROR-FIX
         return abort(500)
 
     api_response = InsertSingleResponse(raw=result, result_id=result['public_id'], url=request.url)
@@ -196,6 +197,7 @@ def update_file(request_user: UserModel):
 
         media_file_manager.updata_file(data)
     except MediaFileManagerUpdateError:
+        #TODO: ERROR-FIX
         return abort(500)
 
     return make_response(data)
@@ -227,8 +229,9 @@ def get_file(filename: str, request_user: UserModel):
             result = media_file_manager.get_file(metadata=filter_metadata)
         else:
             result = None
-    except MediaFileManagerGetError as err:
-        return abort(404, err.message)
+    except MediaFileManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404, f"Could not retrieve file with filename: {filename}")
 
     return make_response(result)
 
@@ -256,6 +259,7 @@ def download_file(filename: str, request_user: UserModel):
         filter_metadata.update({'filename': filename})
         result = media_file_manager.get_file(metadata=filter_metadata, blob=True)
     except MediaFileManagerGetError:
+        #TODO: ERROR-FIX
         return abort(500)
 
     return Response(
@@ -279,7 +283,7 @@ def delete_file(public_id: int, request_user: UserModel):
     GridFS document under the specified key is deleted.
 
     Raises:
-        MediaFileManagerDeleteError: When something went wrong during the deletion.
+        MediaFileManagerDeleteError: When something went wrong during the deletion
 
     Args:
         public_id (int): Public ID of the File
@@ -296,6 +300,7 @@ def delete_file(public_id: int, request_user: UserModel):
             for _id in recursive_delete_filter(public_id, media_file_manager):
                 media_file_manager.delete_file(_id)
     except MediaFileManagerDeleteError as err:
+        #TODO: ERROR-FIX
         LOGGER.debug("[delete_file] MediaFileManagerDeleteError: %s", err)
         return abort(404)
 

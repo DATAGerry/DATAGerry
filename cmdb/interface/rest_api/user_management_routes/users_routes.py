@@ -172,8 +172,9 @@ def get_users(params: CollectionParameters, request_user: UserModel):
                                         url=request.url,
                                         model=UserModel.MODEL,
                                         body=request.method == 'HEAD')
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)

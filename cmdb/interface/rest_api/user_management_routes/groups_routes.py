@@ -36,8 +36,6 @@ from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.framework.managers.error.framework_errors import FrameworkIterationError
-
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -65,7 +63,6 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
         Calling the route over HTTP HEAD method will result in an empty body.
 
     Raises:
-        ManagerIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection/resources could not be found.
     """
     group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
@@ -77,11 +74,13 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
 
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
                                         url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
-    except FrameworkIterationError as err:
-        return abort(400, err)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
+    except Exception:
+        #TODO: ERROR-FIX
+        return abort(400)
+
 
     return api_response.make_response()
 

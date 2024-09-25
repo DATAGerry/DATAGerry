@@ -71,8 +71,9 @@ def get_rights(params: CollectionParameters):
                                         url=request.url, model=Model('Right'), body=request.method == 'HEAD')
 
         return api_response.make_response()
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)

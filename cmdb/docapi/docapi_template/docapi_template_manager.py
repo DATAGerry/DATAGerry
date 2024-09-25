@@ -18,16 +18,17 @@ import logging
 from typing import Union
 from datetime import datetime, timezone
 
-from cmdb.event_management.event import Event
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.cmdb_base import CmdbManagerBase
+
+from cmdb.event_management.event import Event
 from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
-from cmdb.manager import ManagerIterationError
 from cmdb.search import Pipeline
 from cmdb.user_management import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 
+from cmdb.errors.manager import ManagerIterationError
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -57,8 +58,8 @@ class DocapiTemplateManager(CmdbManagerBase):
         try:
             result = self.dbm.find_one(collection=DocapiTemplate.COLLECTION, public_id=public_id)
         except Exception as err:
-            LOGGER.debug("DocapiGetError: %s", err)
-            raise DocapiGetError(err) from err
+            #TODO: ERROR-FIX
+            raise DocapiGetError(str(err)) from err
         return DocapiTemplate(**result)
 
 
@@ -81,6 +82,7 @@ class DocapiTemplateManager(CmdbManagerBase):
                 total = next(total_cursor)['total']
         except Exception as err:
             raise ManagerIterationError(err) from err
+
         iteration_result: IterationResult[DocapiTemplate] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(DocapiTemplate)
 
@@ -96,8 +98,8 @@ class DocapiTemplateManager(CmdbManagerBase):
                 ack.append(DocapiTemplate(**template))
             return ack
         except Exception as err:
-            LOGGER.debug("DocapiGetError: %s", err)
-            raise DocapiGetError(err) from err
+            #TODO: ERROR-FIX
+            raise DocapiGetError(str(err)) from err
 
 
     def get_template_by_name(self, **requirements) -> DocapiTemplate:
@@ -111,8 +113,8 @@ class DocapiTemplateManager(CmdbManagerBase):
             if not len(templates) == 0:
                 raise DocapiGetError('More than 1 type matches this requirement')
         except Exception as err:
-            LOGGER.debug("DocapiGetError: %s", err)
-            raise DocapiGetError(err) from err
+            #TODO: ERROR-FIX
+            raise DocapiGetError(str(err)) from err
 
 
     def insert_template(self, data: Union[DocapiTemplate, dict]) -> int:
@@ -127,8 +129,8 @@ class DocapiTemplateManager(CmdbManagerBase):
             try:
                 new_object = DocapiTemplate(**data)
             except Exception as err:
-                LOGGER.debug("DocapiInsertError: %s", err)
-                raise DocapiInsertError(err) from err
+                #TODO: ERROR-FIX
+                raise DocapiInsertError(str(err)) from err
 
         elif isinstance(data, DocapiTemplate):
             new_object = data
@@ -143,8 +145,8 @@ class DocapiTemplateManager(CmdbManagerBase):
                                                     "user_id": new_object.get_author_id()})
                 self._event_queue.put(event)
         except Exception as err:
-            LOGGER.debug("DocapiInsertError: %s", err)
-            raise DocapiInsertError(err) from err
+            #TODO: ERROR-FIX
+            raise DocapiInsertError(str(err)) from err
         return ack
 
 
@@ -162,13 +164,15 @@ class DocapiTemplateManager(CmdbManagerBase):
         elif isinstance(data, DocapiTemplate):
             update_object = data
         else:
+            #TODO: ERROR-FIX
             raise DocapiUpdateError(f'Could not update template with ID: {data.get_public_id()}')
+
         update_object.last_execute_date = datetime.now(timezone.utc)
         ack = self._update(
                 collection=DocapiTemplate.COLLECTION,
                 public_id=update_object.get_public_id(),
                 data=update_object.to_database()
-            )
+              )
 
         if self._event_queue:
             event = Event("cmdb.docapi.updated", {"id": update_object.get_public_id(),
@@ -189,5 +193,4 @@ class DocapiTemplateManager(CmdbManagerBase):
                 self._event_queue.put(event)
             return ack
         except Exception as err:
-            LOGGER.debug("DocapiDeleteError: %s", err)
             raise DocapiDeleteError(f'Could not delete template with ID: {public_id}') from err

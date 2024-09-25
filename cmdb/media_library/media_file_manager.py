@@ -28,7 +28,10 @@ from cmdb.media_library.media_file import FileMetadata
 
 from cmdb.utils.error import CMDBError
 
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError
+from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
+                                                   MediaFileManagerInsertError,\
+                                                   MediaFileManagerUpdateError,\
+                                                   MediaFileManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -76,7 +79,8 @@ class MediaFileManager(CmdbManagerBase):
             for grid in iterator:
                 results.append(MediaFile.to_json(MediaFile(**grid._file)))
         except (CMDBError, MediaFileManagerGetError) as err:
-            raise MediaFileManagerGetError(err) from err
+            #TODO: ERROR-FIX
+            raise MediaFileManagerGetError(str(err)) from err
 
         return GridFsResponse(results, records_total)
 
@@ -95,8 +99,9 @@ class MediaFileManager(CmdbManagerBase):
                 media_file.write(data)
                 media_file.public_id = self.get_new_id(MediaFile.COLLECTION)
                 media_file.metadata = FileMetadata(**metadata).__dict__
-        except CMDBError as err:
-            raise MediaFileManagerInsertError(err) from err
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise MediaFileManagerInsertError(str(err)) from err
 
         return media_file._file
 
@@ -107,7 +112,7 @@ class MediaFileManager(CmdbManagerBase):
             data['uploadDate'] = datetime.now(timezone.utc)
             self._update(collection='media.libary.files', public_id=data['public_id'], data=data)
         except Exception as err:
-            raise MediaFileManagerUpdateError(err) from err
+            raise MediaFileManagerUpdateError(f"Could not update file. Error: {err}") from err
         return data
 
 
@@ -122,8 +127,9 @@ class MediaFileManager(CmdbManagerBase):
         try:
             file_id = self.fs.get_last_version(**{'public_id': public_id})._id
             self.fs.delete(file_id)
-        except Exception as exc:
-            raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from exc
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from err
 
         return True
 
@@ -139,33 +145,13 @@ class MediaFileManager(CmdbManagerBase):
         return self.fs.exists(**filter_metadata)
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                GridFsResponse - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+#TODO: CLASS-FIX
 class GridFsResponse:
     """TODO: document"""
     def __init__(self, result, total: int = None):
         self.result = result
         self.count = len(result)
         self.total = total or 0
-
-
-class MediaFileManagerGetError(ManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err)
-
-
-class MediaFileManagerInsertError(ManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err)
-
-
-class MediaFileManagerUpdateError(ManagerUpdateError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err)
-
-
-class MediaFileManagerDeleteError(ManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        super().__init__(err)

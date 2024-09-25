@@ -20,10 +20,10 @@ from ..cmdb_error import CMDBError
 class ManagerError(CMDBError):
     """Base Manager Error"""
     def __init__(self, message: str):
+        self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
-
+# -------------------------------------------------- MANAGER ERRORS -------------------------------------------------- #
 
 class ManagerGetError(ManagerError):
     """Manager exception for get operations"""
@@ -35,7 +35,8 @@ class ManagerGetError(ManagerError):
 class ManagerIterationError(ManagerError):
     """Manager exception for iteration operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while ITERATION: {err}')
+        self.message = f'Error while ITERATION: {err}'
+        super().__init__(self.message)
 
 
 class ManagerInsertError(ManagerError):
@@ -62,4 +63,5 @@ class ManagerDeleteError(ManagerError):
 class DisallowedActionError(ManagerError):
     """Manager exception when an illegal action is initiated"""
     def __init__(self, err: str):
-        super().__init__(f'Disallowed Action: {err}')
+        self.message = f'Disallowed Action: {err}'
+        super().__init__(self.message)

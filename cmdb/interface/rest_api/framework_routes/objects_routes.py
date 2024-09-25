@@ -46,11 +46,10 @@ from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.security.acl.errors import AccessDeniedError
-from cmdb.manager import ManagerIterationError
 from cmdb.utils.error import CMDBError
 from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 
-from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError
+from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
                                                ObjectManagerUpdateError,\
                                                ObjectManagerDeleteError,\
@@ -243,8 +242,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         else:
             return abort(401, 'No possible view parameter')
 
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
     except ManagerGetError:
         return abort(404, "No objects found!")
 
@@ -437,8 +437,9 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
 
     return api_response.make_response()
 

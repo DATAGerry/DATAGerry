@@ -23,13 +23,14 @@ from Crypto import Random
 from Crypto.Cipher import AES
 from bson import json_util
 from bson.json_util import dumps
-
 from flask import current_app
 
-from cmdb.errors.database import NoDocumentFound
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
+from cmdb.errors.database import NoDocumentFound
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

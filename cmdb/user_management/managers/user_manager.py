@@ -24,9 +24,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.search import Query, Pipeline
 
-from cmdb.manager import ManagerIterationError
-
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManager(ManagerBase):

@@ -33,14 +33,16 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManagerGetError, \
-    ExportdJobManagerInsertError, ExportdJobManagerUpdateError, ExportdJobManagerDeleteError
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog, LogManagerInsertError
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
 from cmdb.utils.error import CMDBError
-from cmdb.manager import ManagerIterationError
 
-from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
+from cmdb.errors.manager.exportd_job_manager import ExportdJobManagerDeleteError,\
+                                                    ExportdJobManagerUpdateError,\
+                                                    ExportdJobManagerInsertError,\
+                                                    ExportdJobManagerGetError
+from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -85,11 +87,14 @@ def get_exportd_job_list(request_user: UserModel):
 
     try:
         job_list = exportd_manager.get_all_jobs()
-    except ExportdJobManagerGetError as e:
-        return abort(400, e.message)
+    except ExportdJobManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(400, "Could not retrieve job list!")
     except ModuleNotFoundError as e:
+        #TODO: ERROR-FIX
         return abort(400, e)
     except CMDBError as err:
+        #TODO: ERROR-FIX
         LOGGER.info("Error occured in get_exportd_job_list(): %s", err)
         return abort(404, jsonify(message='Not Found'))
 
@@ -111,8 +116,8 @@ def get_exportd_job(public_id, request_user: UserModel):
 
     try:
         job = exportd_manager.get_job(public_id)
-    except ExportdJobManagerGetError as err:
-        LOGGER.error(err)
+    except ExportdJobManagerGetError:
+        #TODO: ERROR-FIX
         return abort(404)
 
     return  make_response(job)
@@ -167,6 +172,7 @@ def add_job(request_user: UserModel):
     try:
         exportd_manager.insert_job(job_instance)
     except ExportdJobManagerInsertError:
+        #TODO: ERROR-FIX
         return abort(500)
 
     # Generate new insert log
@@ -180,7 +186,8 @@ def add_job(request_user: UserModel):
             'message': '',
         }
         log_manager.insert_log(action=LogAction.CREATE, log_type=ExportdJobLog.__name__, **log_params)
-    except LogManagerInsertError as err:
+    except ExportdLogManagerInsertError as err:
+        #TODO: ERROR-FIX
         LOGGER.error(err)
 
     return make_response(ExportdJob.to_json(job_instance))
@@ -213,6 +220,7 @@ def update_job(request_user: UserModel):
     try:
         exportd_manager.update_job(update_job_instance, request_user, False)
     except ExportdJobManagerUpdateError:
+        #TODO: ERROR-FIX
         return abort(500)
 
     # Generate new insert log
@@ -227,7 +235,8 @@ def update_job(request_user: UserModel):
                 'message': '',
             }
             log_manager.insert_log(action=LogAction.EDIT, log_type=ExportdJobLog.__name__, **log_params)
-        except LogManagerInsertError as err:
+        except ExportdLogManagerInsertError as err:
+            #TODO: ERROR-FIX
             LOGGER.error(err)
 
     return make_response(update_job_instance)
@@ -255,8 +264,8 @@ def delete_job(public_id: int, request_user: UserModel):
                 'message': '',
             }
             log_manager.insert_log(action=LogAction.DELETE, log_type=ExportdJobLog.__name__, **log_params)
-        except (ExportdJobManagerGetError, LogManagerInsertError) as err:
-            LOGGER.error(err)
+        except (ExportdJobManagerGetError, ExportdLogManagerInsertError):
+            #TODO: ERROR-FIX
             return abort(404)
 
         ack = exportd_manager.delete_job(public_id=public_id, request_user=request_user)

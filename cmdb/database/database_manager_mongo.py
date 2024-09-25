@@ -17,15 +17,16 @@
 Database Management instance for database actions
 """
 import logging
-
 from pymongo.results import DeleteResult, UpdateResult
+
 from cmdb.database.database_manager import DatabaseManager
 
+from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
 from cmdb.database.mongo_connector import MongoConnector
 from cmdb.database.counter import PublicIDCounter
-from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 from cmdb.database.utils import DESCENDING
-from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
+
+from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -239,7 +240,7 @@ class DatabaseManagerMongo(DatabaseManager):
         for result in cursor_result.limit(-1):
             return result
 
-        raise NoDocumentFound(collection, args)
+        raise NoDocumentFound(collection)
 
 
     def find_one(self, collection: str, public_id: int, *args, **kwargs):

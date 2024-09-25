@@ -13,63 +13,94 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Contains Database Error Classes"""
+"""
+Contains Database Error Classes
+"""
 from pymongo.errors import DuplicateKeyError
 
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class DataBaseError(CMDBError):
-    """Base Database Error"""
+    """
+    Base Database Error
+    """
     def __init__(self, message: str):
+        self.message = message
         super().__init__(message)
 
 # --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
 
 class DatabaseConnectionError(DataBaseError):
-    """Error if connection to database broke up or unable to connect"""
+    """
+    Error if connection to database broke up or unable to connect
+    """
     def __init__(self, db_name: str):
-        super().__init__(f'Could not connect to database {db_name}')
+        self.message = f'Could not connect to database {db_name}'
+        super().__init__(self.message)
 
 
 class ServerTimeoutError(DataBaseError):
-    """Server timeout error if connection is lost"""
+    """
+    Server timeout error if connection is lost
+    """
     def __init__(self, host:str):
-        super().__init__(f'Server Timeout - No connection to database at {host}')
+        self.message = f'Server Timeout - No connection to database at {host}'
+        super().__init__(self.message)
 
 
+#TODO: ERROR-FIX (never used)
 class DatabaseAlreadyExists(DataBaseError):
-    """Error when database already exists"""
+    """
+    Error when database already exists
+    """
     def __init__(self, db_name: str):
-        super().__init__(f'Database with the name {db_name} already exists')
+        self.message = f'Database with the name {db_name} already exists'
+        super().__init__(self.message)
 
 
 class DatabaseNotExists(DataBaseError):
-    """Error when database does not exist"""
+    """
+    Error when database does not exist
+    """
     def __init__(self, db_name: str):
-        super().__init__(f'Database with the name {db_name} doesn`t exists')
+        self.message = f'Database with the name {db_name} doesn`t exists'
+        super().__init__(self.message)
 
 
+#TODO: ERROR-FIX (not used)
 class CollectionAlreadyExists(DataBaseError):
-    """Error if you try to create a collection that alrady exists"""
+    """
+    Error if you try to create a collection that alrady exists
+    """
     def __init__(self, collection_name: str):
-        super().__init__(f"Collection {collection_name} already exists")
+        self.message = f"Collection {collection_name} already exists"
+        super().__init__(self.message)
 
 #TODO: Use the PyMongo error
 class PublicIDAlreadyExists(DuplicateKeyError):
-    """Error if public_id inside database already exists"""
+    """
+    Error if public_id inside database already exists
+    """
     def __init__(self, public_id: int):
-        super().__init__(f"Object with this public id already exists: {public_id}")
+        self.message = f"Object with this public id already exists: {public_id}"
+        super().__init__(self.message)
 
 
 #TODO: Use the Pymongo error
 class NoDocumentFound(DataBaseError):
-    """Error if no document was found"""
-    def __init__(self, collection:str, public_id: int):
-        super().__init__(f"No document with the id {public_id} was found inside {collection}")
+    """
+    Error if no document was found
+    """
+    def __init__(self, collection:str):
+        self.message = f"No document was found inside {collection}"
+        super().__init__(self.message)
 
 
 class DocumentCouldNotBeDeleted(DataBaseError):
-    """Error if document could not be deleted from database"""
+    """
+    Error if document could not be deleted from database
+    """
     def __init__(self, collection: str, public_id: int):
-        super().__init__(f"The document with the id {public_id} could not be deleted inside {collection}")
+        self.message = f"The document with the id {public_id} could not be deleted inside {collection}"
+        super().__init__(self.message)

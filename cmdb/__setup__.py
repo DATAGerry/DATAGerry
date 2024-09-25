@@ -18,27 +18,23 @@ import logging
 from datetime import datetime, timezone
 from enum import Enum
 
-from cmdb.errors.cmdb_error import CMDBError
-from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
+from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.security.security import SecurityManager
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.user_management.managers.user_manager import UserModel, UserManager
 
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-
 from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
-
 from cmdb.security.key.generator import KeyGenerator
-from cmdb.security.security import SecurityManager
-
 from cmdb.user_management import __FIXED_GROUPS__
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.user_management.managers.user_manager import UserManager, UserModel
-from cmdb.user_management.managers.group_manager import GroupManager
-
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+
+from cmdb.errors.cmdb_error import CMDBError
+from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -221,7 +217,7 @@ class SetupRoutine:
         try:
             self.setup_database_manager.drop_database(database_name)
         except DatabaseNotExists as err:
-            LOGGER.debug("[__init_database] DatabaseNotExists: %s", err)
+            LOGGER.debug("[__init_database] DatabaseNotExists: %s", err.message)
 
         # create new database
         self.setup_database_manager.create_database(database_name)

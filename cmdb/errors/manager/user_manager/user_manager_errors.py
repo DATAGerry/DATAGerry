@@ -14,50 +14,54 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+This module contains the classes of all UserManager errors
 """
-from ..cmdb_error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class UserManagerError(CMDBError):
+    """
+    Base UserManager error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class UserManagerGetError(UserManagerError):
     """
-    Error raised when a GET-operation fails
+    Raised when UserManager could not retrieve an user
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f'User could not be retrieved. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+#TODO: ERROR-FIX (not used)
+class UserManagerInsertError(UserManagerError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when UserManager could not create an user
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+    def __init__(self, err):
+        self.message = f'User could not be created. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+#TODO: ERROR-FIX (not used)
+class UserManagerUpdateError(UserManagerError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised when UserManager could not update an user
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+    def __init__(self, err):
+        self.message = f'User could not be updated. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiDeleteError(DocapiError):
+class UserManagerDeleteError(UserManagerError):
     """
-    Error raised when a DELETE-operation fails
+    Raised when UserManager could not delete an user
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+    def __init__(self, err):
+        self.message = f'User could not be deleted. Error: {err}'
         super().__init__(self.message)

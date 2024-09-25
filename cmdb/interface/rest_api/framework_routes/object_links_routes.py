@@ -127,8 +127,9 @@ def get_links(params: CollectionParameters, request_user: UserModel):
                                         ObjectLinkModel.MODEL,
                                         request.method == 'HEAD')
 
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
     except ManagerGetError:
         return abort(404, "No object links found!")
 

@@ -14,17 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all CmdbDAO object errors
+This module provides all errors for the UserManager
 """
-from .cmdb_object_errors import NoPublicIDError,\
-                                VersionTypeError,\
-                                NoVersionError,\
-                                RequiredInitKeyNotFoundError
+from .user_manager_errors import UserManagerGetError,\
+                                 UserManagerInsertError,\
+                                 UserManagerUpdateError,\
+                                 UserManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
-    'NoPublicIDError',
-    'VersionTypeError',
-    'NoVersionError',
-    'RequiredInitKeyNotFoundError'
+    'UserManagerGetError',
+    'UserManagerInsertError',
+    'UserManagerUpdateError',
+    'UserManagerDeleteError',
 ]

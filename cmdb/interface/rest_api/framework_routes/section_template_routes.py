@@ -107,7 +107,8 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         CmdbSectionTemplate.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_all_section_templates] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve SectionTemplates!").response()
 
     return api_response.make_response()
@@ -199,7 +200,7 @@ def update_section_template(params: dict, request_user: UserModel):
             # Apply changes to all types and objects using the template
             template_manager.handle_section_template_changes(params, current_template)
         else:
-            raise NoDocumentFound(template_manager.collection, params['public_id'])
+            raise NoDocumentFound(template_manager.collection)
 
     except ManagerGetError as err:
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
@@ -208,7 +209,7 @@ def update_section_template(params: dict, request_user: UserModel):
         LOGGER.debug("[update_section_template] ManagerUpdateError: %s", err.message)
         return ErrorMessage(400, f"Could not update SectionTemplate with ID: {params['public_id']}!").response()
     except NoDocumentFound as err:
-        return ErrorMessage(404, str(err)).response()
+        return ErrorMessage(404, err.message).response()
 
     api_response = UpdateSingleResponse(result, None, request.url, CmdbSectionTemplate.MODEL)
 

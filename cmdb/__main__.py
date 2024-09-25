@@ -25,6 +25,8 @@ from argparse import ArgumentParser, Namespace
 import os
 import sys
 
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
 import cmdb
 from cmdb import __title__
 from cmdb.__check__ import CheckRoutine
@@ -32,12 +34,10 @@ from cmdb.__update__ import UpdateRoutine
 from cmdb.__setup__ import SetupRoutine
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.system_config import SystemConfigReader
-
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
-from cmdb.errors.cmdb_error import CMDBError
-
 import cmdb.process_management.process_manager
+
+from cmdb.errors.cmdb_error import CMDBError
+from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # setup logging for startup

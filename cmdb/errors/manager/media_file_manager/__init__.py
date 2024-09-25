@@ -13,28 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from typing import Union
-
-from cmdb.errors.manager import ManagerGetError, ManagerDeleteError
+"""
+This module provides all errors for the MediaFileManager
+"""
+from .media_file_manager_errors import MediaFileManagerGetError,\
+                                       MediaFileManagerInsertError,\
+                                       MediaFileManagerUpdateError,\
+                                       MediaFileManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class FrameworkGetError(ManagerGetError):
-    """Generic or basic framework error for managers get operations."""
-
-    def __init__(self, err: Union[Exception, str] = None):
-        super().__init__(err=err)
-
-
-class FrameworkDeleteError(ManagerDeleteError):
-    """Generic or basic framework error for managers delete operations."""
-
-    def __init__(self, err: Union[Exception, str] = None):
-        super().__init__(err=err)
-
-
-class FrameworkIterationError(FrameworkGetError):
-    """Framework error if the iteration over the collection throws an error"""
-
-    def __init__(self, err: Union[Exception, str] = None):
-        super().__init__(err=err)
+__all__ = [
+    'MediaFileManagerGetError',
+    'MediaFileManagerInsertError',
+    'MediaFileManagerUpdateError',
+    'MediaFileManagerDeleteError',
+]

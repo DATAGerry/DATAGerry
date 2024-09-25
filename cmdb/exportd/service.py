@@ -15,23 +15,26 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 import time
 import sched
 from threading import Thread
 from datetime import datetime, timezone
 
-from cmdb.event_management.event import Event
-import cmdb.process_management.service
-import cmdb.exportd.exporter_base
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
-from cmdb.exportd.exportd_job.exportd_job import ExecuteState
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.utils.system_config import SystemConfigReader
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
 from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+
+import cmdb.process_management.service
+import cmdb.exportd.exporter_base
+from cmdb.event_management.event import Event
+from cmdb.exportd.exportd_job.exportd_job import ExecuteState
+from cmdb.utils.system_config import SystemConfigReader
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
+
+
+from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -195,7 +198,8 @@ class ExportdThread(Thread):
                     'message': ['Successful'] if not err else err.args,
                 }
                 self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
-            except LogManagerInsertError as error:
+            except ExportdLogManagerInsertError as error:
+                #TODO: ERROR-FIX
                 LOGGER.error(error)
         finally:
             # update job for UI

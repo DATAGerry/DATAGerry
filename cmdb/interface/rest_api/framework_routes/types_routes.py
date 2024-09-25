@@ -118,7 +118,6 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
         Optional parameters are passed over the function declaration.
 
     Raises:
-        FrameworkIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection could not be found.
 
     """
@@ -151,8 +150,9 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
                                         url=request.url,
                                         model=TypeModel.MODEL,
                                         body=request.method == 'HEAD')
-    except ManagerIterationError as err:
-        return abort(400, err)
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)

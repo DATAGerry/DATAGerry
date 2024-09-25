@@ -18,19 +18,18 @@ Database-Connection
 Real connection to database over a given connector
 """
 import logging
-
 from pymongo import MongoClient
 from pymongo.database import Database
 from pymongo.errors import ConnectionFailure
 
-from cmdb.errors.database import DatabaseConnectionError
+from cmdb.database.connection_status import ConnectionStatus
 
-from .connection_status import ConnectionStatus
+from cmdb.errors.database import DatabaseConnectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 class MongoConnector:
     """
     PyMongo (MongoDB) implementation from connector
@@ -52,7 +51,9 @@ class MongoConnector:
         try:
             self.database = self.client.get_database(db_name)
         except Exception as err:
-            LOGGER.error(f"Can't set connector database with name: {db_name}. Error: {err}")
+            #TODO: ERROR-FIX
+            LOGGER.error("Can't set connector database with name: %s. Error: %s", db_name, err)
+
 
     def connect(self) -> ConnectionStatus:
         """

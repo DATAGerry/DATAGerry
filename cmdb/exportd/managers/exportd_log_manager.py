@@ -21,9 +21,7 @@ from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog
 from cmdb.framework.results import IterationResult
 from cmdb.search import Pipeline
 
-from cmdb.manager import ManagerIterationError
-
-from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportDLogManager(ExportDManager):
