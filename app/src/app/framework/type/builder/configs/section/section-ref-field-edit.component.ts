@@ -65,7 +65,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     /**
      * Type form control.
      */
-    public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([], Validators.required);
+    public selectedFieldsControl: UntypedFormControl = new UntypedFormControl([]);
 
     /**
      * Reference form control.
@@ -120,6 +120,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
     private identifierInitialValue: string;
     private activeIndex: number | null = null;
     private activeIndexSubscription: Subscription;
+    public isValid$ = false;
 
     constructor(private typeService: TypeService, private toast: ToastService, private validationService: ValidationService,
         private sectionIdentifier: SectionIdentifierService) {
@@ -161,6 +162,15 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
 
         this.nameControl.valueChanges.subscribe(value => this.onNameChange(value));
         this.labelControl.valueChanges.subscribe(value => this.onLabelChange(value, 'label'));
+
+        this.isValid$ = this.form.valid;
+
+        // Subscribe to form status changes and update isValid$ based on form validity
+        this.form.statusChanges.subscribe(() => {
+            this.isValid$ = this.form.valid;
+            this.validationService.setIsValid(this.initialValue, this.isValid$);
+
+        });
     }
 
     private loadPresetType(publicID: number): void {
