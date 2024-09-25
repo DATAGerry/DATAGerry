@@ -140,6 +140,12 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     }
 
 
+    /**
+     * Handles input changes for the field and emits changes through fieldChanges$.
+     * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+     * @param event - The input event value.
+     * @param type - The type of the input field being changed.
+     */
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
