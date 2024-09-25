@@ -18,19 +18,18 @@ import logging
 from enum import Enum
 from pymongo.errors import CollectionInvalid
 
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
 from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
-
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.errors.database import ServerTimeoutError
-
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.utils.system_config import SystemConfigReader
-
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+
+from cmdb.errors.database import ServerTimeoutError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

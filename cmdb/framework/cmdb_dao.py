@@ -19,9 +19,10 @@ from typing import Union
 from pymongo import IndexModel
 
 from cmdb.cmdb_objects.cmdb_versioning import Versioning
-from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
 from cmdb.framework.utils import Model, Collection
 from cmdb.utils.helpers import debug_print
+
+from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

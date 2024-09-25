@@ -39,9 +39,8 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 from cmdb.security.acl.errors import AccessDeniedError
-from cmdb.manager import ManagerIterationError
 
-from cmdb.errors.manager import ManagerUpdateError, ManagerGetError
+from cmdb.errors.manager import ManagerUpdateError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -438,7 +437,8 @@ class ObjectManager(ManagerBase):
         try:
             results = list(self._aggregate(self.type_manager.collection, query))
         except ManagerIterationError as err:
-            LOGGER.debug("[get_mds_references_for_object] aggregation error: %s", err)
+            #TODO: ERROR-FIX
+            LOGGER.debug("[get_mds_references_for_object] aggregation error: %s", err.message)
 
         matching_results = []
 

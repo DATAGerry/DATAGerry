@@ -14,50 +14,53 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+This module contains the classes of all MediaFileManager errors
 """
-from ..cmdb_error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class MediaFileManagerError(CMDBError):
+    """
+    Base MediaFileManagerError error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class MediaFileManagerGetError(MediaFileManagerError):
     """
-    Error raised when a GET-operation fails
+    Raised when MediaFileManager could not retrieve a file
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f'File could not be retrieved. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class MediaFileManagerInsertError(MediaFileManagerError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when MediaFileManager could not create a file
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+        self.message = f'File could not be created. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+class MediaFileManagerUpdateError(MediaFileManagerError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised when MediaFileManager could not update a file
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+        self.message = f'File could not be updated. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiDeleteError(DocapiError):
+class MediaFileManagerDeleteError(MediaFileManagerError):
     """
-    Error raised when a DELETE-operation fails
+    Raised when MediaFileManager could not delete a file
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+        self.message = f'File could not be deleted. Error: {err}'
         super().__init__(self.message)
+        

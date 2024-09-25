@@ -27,12 +27,11 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.manager import ManagerIterationError
 from cmdb.utils.error import CMDBError
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerDeleteError
 
-from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
+from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -62,9 +61,11 @@ def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
         types = [ExportdJobLog.to_json(type) for type in iteration_result.results]
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=ExportdMetaLog.MODEL, body=body)
-    except ManagerIterationError as err:
-        return abort(400, err)
-    except ManagerGetError as err:
+    except ManagerIterationError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except ManagerGetError:
+        #TODO: ERROR-FIX
         return abort(404, "Could not retrieve exportd logs!")
 
     return api_response.make_response()
@@ -107,7 +108,8 @@ def delete_log(public_id: int, request_user: UserModel):
 
     try:
         delete_ack = log_manager.delete_log(public_id=public_id)
-    except LogManagerDeleteError:
+    except ExportdLogManagerDeleteError:
+        #TODO: ERROR-FIX
         return abort(500)
 
     return make_response(delete_ack)

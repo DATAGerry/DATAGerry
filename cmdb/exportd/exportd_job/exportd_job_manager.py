@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
@@ -26,13 +27,18 @@ from cmdb.user_management import UserModel
 
 from cmdb.utils.error import CMDBError
 
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
+from cmdb.errors.manager.exportd_job_manager import ExportdJobManagerDeleteError,\
+                                                    ExportdJobManagerUpdateError,\
+                                                    ExportdJobManagerInsertError,\
+                                                    ExportdJobManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               ExportdJobManager - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ExportdJobManager(CmdbManagerBase):
     """TODO: document"""
 
@@ -55,6 +61,7 @@ class ExportdJobManager(CmdbManagerBase):
         try:
             result = self.dbm.find_one(collection=ExportdJob.COLLECTION, public_id=public_id)
         except (ExportdJobManagerGetError, Exception) as err:
+            #TODO: ERROR-FIX
             LOGGER.error(err)
             raise err
 
@@ -111,7 +118,7 @@ class ExportdJobManager(CmdbManagerBase):
         return job_list
 
 
-    def insert_job(self, data: (ExportdJob, dict)) -> int:
+    def insert_job(self, data: Union[ExportdJob, dict]) -> int:
         """
         Insert new ExportdJob Object
         Args:
@@ -123,7 +130,8 @@ class ExportdJobManager(CmdbManagerBase):
             try:
                 new_object = ExportdJob(**data)
             except CMDBError as err:
-                raise ExportdJobManagerInsertError(err) from err
+                #TODO: ERROR-FIX
+                raise ExportdJobManagerInsertError(str(err)) from err
         elif isinstance(data, ExportdJob):
             new_object = data
 
@@ -141,12 +149,13 @@ class ExportdJobManager(CmdbManagerBase):
                                                      "event": 'automatic'})
                 self._event_queue.put(event)
         except CMDBError as err:
-            raise ExportdJobManagerInsertError(err) from err
+            #TODO: ERROR-FIX
+            raise ExportdJobManagerInsertError(str(err)) from err
 
         return ack
 
 
-    def update_job(self, data: (dict, ExportdJob), request_user: UserModel, event_start=True) -> str:
+    def update_job(self, data: Union[dict, ExportdJob], request_user: UserModel, event_start=True) -> str:
         """
         Update new ExportdJob Object
         Args:
@@ -161,6 +170,7 @@ class ExportdJobManager(CmdbManagerBase):
         elif isinstance(data, ExportdJob):
             update_object = data
         else:
+            #TODO: ERROR-FIX
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
 
         update_object.last_execute_date = datetime.now(timezone.utc)
@@ -193,8 +203,8 @@ class ExportdJobManager(CmdbManagerBase):
                 self._event_queue.put(event)
 
             return ack
-        except Exception as exc:
-            raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}') from exc
+        except Exception as err:
+            raise ExportdJobManagerDeleteError(f'Could not delete job with ID: {public_id}. Error: {err}') from err
 
 
     def run_job_manual(self, public_id: int, request_user: UserModel) -> bool:
@@ -206,32 +216,3 @@ class ExportdJobManager(CmdbManagerBase):
             self._event_queue.put(event)
 
         return True
-
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
-
-class ExportdJobManagerGetError(ManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class ExportdJobManagerInsertError(ManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class ExportdJobManagerUpdateError(ManagerUpdateError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class ExportdJobManagerDeleteError(ManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)

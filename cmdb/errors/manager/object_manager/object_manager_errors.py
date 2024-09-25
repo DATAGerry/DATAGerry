@@ -13,48 +13,62 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module contains the classes of all ObjectManager errors"""
+"""
+This module contains the classes of all ObjectManager errors
+"""
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectManagerError(CMDBError):
-    """Base ConfigFile Error"""
+    """
+    Base ObjectManager error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# -------------------------------------------------- CmdbDAOErrors --------------------------------------------------- #
+# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
 
 class ObjectManagerInsertError(ObjectManagerError):
-    """TODO: document"""
+    """
+    Raised when ObjectManager could not insert an object
+    """
     def __init__(self, err):
         self.message = f'Object could not be inserted. Error: {err}'
         super().__init__(self.message)
 
 
 class ObjectManagerDeleteError(ObjectManagerError):
-    """TODO: document"""
+    """
+    Raised when ObjectManager could not delete an object
+    """
     def __init__(self, public_id: int = None, err = None):
         self.message = f'Object with public_id: {public_id} could not be deleted. Error: {err}'
         super().__init__(self.message)
 
 
 class ObjectManagerUpdateError(ObjectManagerError):
-    """Raised when ObjectManager could not update an object"""
+    """
+    Raised when ObjectManager could not update an object
+    """
     def __init__(self, err):
         self.message = f'Object could not be updated. Error: {err}'
         super().__init__(self.message)
 
 
 class ObjectManagerGetError(ObjectManagerError):
-    """TODO: document"""
+    """
+    Raised when ObjectManager could not retrieve an object
+    """
     def __init__(self, err):
         self.message = f'Object could not be retrieved. Error: {err}'
         super().__init__(self.message)
 
 
 class ObjectManagerInitError(ObjectManagerError):
-    """TODO: document"""
+    """
+    Raised when ObjectManager could not initialise an object
+    """
     def __init__(self, err):
         self.message = f'Object could not be initialised. Error: {err}'
         super().__init__(self.message)

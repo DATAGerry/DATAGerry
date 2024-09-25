@@ -14,17 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all CmdbDAO object errors
+This module provides all errors for the ExportdLogManager
 """
-from .cmdb_object_errors import NoPublicIDError,\
-                                VersionTypeError,\
-                                NoVersionError,\
-                                RequiredInitKeyNotFoundError
+from .exportd_log_manager_errors import ExportdLogManagerDeleteError,\
+                                        ExportdLogManagerInsertError,\
+                                        ExportdLogManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
-    'NoPublicIDError',
-    'VersionTypeError',
-    'NoVersionError',
-    'RequiredInitKeyNotFoundError'
+    'ExportdLogManagerDeleteError',
+    'ExportdLogManagerInsertError',
+    'ExportdLogManagerGetError',
 ]

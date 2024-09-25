@@ -16,19 +16,23 @@
 """TODO: document"""
 import logging
 
-from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
+from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
-from cmdb.utils.error import CMDBError
 from cmdb.utils.helpers import load_class
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogManagerInsertError, LogAction, ExportdJobLog
+from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
 from cmdb.framework.cmdb_render import RenderResult
+
+from cmdb.utils.error import CMDBError
+
+from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -121,7 +125,8 @@ class ExportdManagerBase(ExportdJobManager):
                         'message': external_system.msg_string,
                     }
                     self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
-                except LogManagerInsertError as err:
+                except ExportdLogManagerInsertError as err:
+                    #TODO: ERROR-FIX
                     LOGGER.error(err)
 
         return exportd_header

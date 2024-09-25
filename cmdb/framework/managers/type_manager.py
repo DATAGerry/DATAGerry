@@ -34,9 +34,7 @@ from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline
 from cmdb.framework.cmdb_object import CmdbObject
 
-from cmdb.manager import ManagerIterationError
-
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

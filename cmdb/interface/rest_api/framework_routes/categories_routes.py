@@ -104,8 +104,6 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
         You can pass any parameter based on the CollectionParameters.
         Optional parameters are passed over the function declaration.
         The `view` parameter is optional and default `list`, but can be `tree` for the category tree view.
-    Raises:
-        FrameworkIterationError: If the collection could not be iterated
     """
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
@@ -137,7 +135,7 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
                                         CategoryModel.MODEL,
                                         body)
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_categories] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve categories from database!").response()
 
     return api_response.make_response()

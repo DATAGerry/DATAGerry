@@ -14,50 +14,52 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+This module contains the classes of all ExportdJobManager errors
 """
-from ..cmdb_error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class ExportdJobManagerError(CMDBError):
+    """
+    Base ExportdJobManager error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class ExportdJobManagerDeleteError(ExportdJobManagerError):
     """
-    Error raised when a GET-operation fails
+    Raised when ExportdJobManager could not delete a job
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f'Job could not be deleted. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class ExportdJobManagerUpdateError(ExportdJobManagerError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when ExportdJobManager could not update a job
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+    def __init__(self, err):
+        self.message = f'Job could not be updated. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+class ExportdJobManagerInsertError(ExportdJobManagerError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised when ExportdJobManager could not create a job
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+        self.message = f'Job could not be updated. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiDeleteError(DocapiError):
+class ExportdJobManagerGetError(ExportdJobManagerError):
     """
-    Error raised when a DELETE-operation fails
+    Raised when ExportdJobManager could not retrieve a job
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+    def __init__(self, err):
+        self.message = f'Job could not be retrieved. Error: {err}'
         super().__init__(self.message)

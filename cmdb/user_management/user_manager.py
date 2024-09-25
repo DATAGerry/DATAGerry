@@ -23,11 +23,14 @@ from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.right import BaseRight
-
+import cmdb.user_management.rights as all_rights
 from cmdb.utils.error import CMDBError
 
 from cmdb.errors.database import NoDocumentFound
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError
+from cmdb.errors.manager.user_manager import UserManagerGetError,\
+                                             UserManagerInsertError,\
+                                             UserManagerUpdateError,\
+                                             UserManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -80,7 +83,7 @@ class UserManager(CmdbManagerBase):
         try:
             return UserModel.from_data(self._get_by(collection=UserModel.COLLECTION, **requirements))
         except NoDocumentFound as err:
-            raise UserManagerGetError('UserModel not found') from err
+            raise UserManagerGetError('UserModel not found!') from err
 
 
     def get_user_by_name(self, user_name) -> UserModel:
@@ -92,7 +95,8 @@ class UserManager(CmdbManagerBase):
         """TODO: document"""
         try:
             return self._update(collection=UserModel.COLLECTION, public_id=public_id, data=update_params)
-        except (CMDBError, Exception) as err:
+        except Exception as err:
+            #TODO: ERROR-FIX
             raise UserManagerUpdateError(f'Could not update user with ID: {public_id}') from err
 
 
@@ -101,15 +105,17 @@ class UserManager(CmdbManagerBase):
         try:
             return self._update_many(collection=UserModel.COLLECTION, query=query, update=update)
         except Exception as err:
-            raise UserManagerUpdateError(err) from err
+            #TODO: ERROR-FIX
+            raise UserManagerUpdateError(str(err)) from err
 
 
     def delete_user(self, public_id: int) -> bool:
         """TODO: document"""
         try:
             return self._delete(collection=UserModel.COLLECTION, public_id=public_id)
-        except Exception as exc:
-            raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}') from exc
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise UserManagerDeleteError(f'Could not delete user with ID: {public_id}') from err
 
 
     def delete_users_by(self, query: dict):
@@ -117,7 +123,8 @@ class UserManager(CmdbManagerBase):
         try:
             return self.delete_many(collection=UserModel.COLLECTION, filter_query=query).acknowledged
         except Exception as err:
-            raise UserManagerDeleteError(err) from err
+            #TODO: ERROR-FIX
+            raise UserManagerDeleteError(str(err)) from err
 
 
     def get_groups(self) -> list:
@@ -138,7 +145,7 @@ class UserManager(CmdbManagerBase):
             founded_group = self._get(collection=UserGroupModel.COLLECTION, public_id=public_id)
             return UserGroupModel(**founded_group)
         except NoDocumentFound as err:
-            raise UserManagerGetError(err) from err
+            raise UserManagerGetError('Group not found!') from err
 
 
     def get_group_by(self, **requirements) -> UserGroupModel:
@@ -154,9 +161,9 @@ class UserManager(CmdbManagerBase):
         try:
             ack = self._update(collection=UserGroupModel.COLLECTION, public_id=public_id,
                                data=update_params)
-        except (CMDBError, Exception) as err:
-            LOGGER.error(err)
-            raise UserManagerUpdateError(err) from err
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise UserManagerUpdateError(str(err)) from err
         return ack
 
 
@@ -164,8 +171,9 @@ class UserManager(CmdbManagerBase):
         """TODO: document"""
         try:
             return self.dbm.insert(collection=UserGroupModel.COLLECTION, data=insert_group.__dict__)
-        except Exception as exc:
-            raise UserManagerInsertError(insert_group.name) from exc
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise UserManagerInsertError(str(err)) from err
 
 
     def delete_group(self, public_id, user_action: str = None, options: dict = None) -> bool:
@@ -173,24 +181,28 @@ class UserManager(CmdbManagerBase):
         try:
             delete_group: UserGroupModel = self.get_group(public_id)
         except UserManagerGetError as err:
+            #TODO: ERROR-FIX
             raise UserManagerDeleteError(f'Could not find group with ID: {public_id}') from err
 
         try:
             ack = self.dbm.delete(collection=UserGroupModel.COLLECTION, public_id=public_id).acknowledged
-        except Exception as exc:
-            raise UserManagerDeleteError('Could not delete group') from exc
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise UserManagerDeleteError('Could not delete group') from err
 
         # Cleanup user
-        users_in_group: [UserModel] = self.get_users_by(**{'group_id': delete_group.get_public_id()})
+        users_in_group: list[UserModel] = self.get_users_by(**{'group_id': delete_group.get_public_id()})
         if len(users_in_group) > 0:
             if user_action == 'move':
                 if not options.get('group_id'):
+                    #TODO: ERROR-FIX
                     raise UserManagerDeleteError('Not move group was provided!')
                 self.update_users_by(query={'group_id': delete_group.get_public_id()},
                                      update={'group_id': int(options.get('group_id'))})
             elif user_action == 'delete':
                 self.delete_users_by({'group_id': delete_group.get_public_id()})
             else:
+                #TODO: ERROR-FIX
                 raise UserManagerDeleteError('No valid user action was provided')
         return ack
 
@@ -210,8 +222,7 @@ class UserManager(CmdbManagerBase):
 
 
     def _load_rights(self):
-        from cmdb.user_management.rights import __all__
-        return self._load_right_tree(__all__)
+        return self._load_right_tree(all_rights.__all__)
 
 
     def _load_right_tree(self, right_list) -> list:
@@ -240,38 +251,12 @@ class UserManager(CmdbManagerBase):
             selected_right = self.get_right_by_name(right_name)
             chosen_group = self.get_group(group_id)
         except UserManagerGetError:
+            #TODO: ERROR-FIX
             return right_status
 
         right_status = chosen_group.has_right(right_name=right_name)
+
         if not right_status:
             right_status = chosen_group.has_extended_right(right_name=right_name)
+
         return right_status
-
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
-
-class UserManagerGetError(ManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class UserManagerInsertError(ManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class UserManagerUpdateError(ManagerUpdateError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class UserManagerDeleteError(ManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)

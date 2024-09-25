@@ -14,50 +14,43 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+This module contains the classes of all ExportdLogManager errors
 """
-from ..cmdb_error import CMDBError
+from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class ExportdLogManagerError(CMDBError):
+    """
+    Base ExportdLogManager error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class ExportdLogManagerDeleteError(ExportdLogManagerError):
     """
-    Error raised when a GET-operation fails
+    Raised when ExportdLogManager could not delete a ExportdLog
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f'ExportdLog could not be deleted. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class ExportdLogManagerInsertError(ExportdLogManagerError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when ExportdLogManager could not create a ExportdLog
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+        self.message = f'ExportdLog could not be created. Error: {err}'
         super().__init__(self.message)
 
-
-class DocapiUpdateError(DocapiError):
+#TODO: ERROR-FIX (never used)
+class ExportdLogManagerGetError(ExportdLogManagerError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised when ExportdLogManager could not retrieve a ExportdLog
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
-        super().__init__(self.message)
-
-
-class DocapiDeleteError(DocapiError):
-    """
-    Error raised when a DELETE-operation fails
-    """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+    def __init__(self, err):
+        self.message = f'ExportdLog could not be retrieved. Error: {err}'
         super().__init__(self.message)

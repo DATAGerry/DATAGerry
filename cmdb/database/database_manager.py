@@ -62,10 +62,10 @@ class DatabaseManager:
             name (str): Name of the new database.
 
         Raises:
-            DatabaseAlreadyExists: If a database with this name already exists.
+            DatabaseAlreadyExists: If a database with this name already exists
 
         Returns:
-            Database: Instance of the new create database.
+            Database: Instance of the new create database
         """
         if name in self.connector.client.list_database_names():
             raise DatabaseAlreadyExists(name)

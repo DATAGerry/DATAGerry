@@ -134,7 +134,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
                                         request.method == 'HEAD')
 
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_all_locations] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve locations from database!").response()
 
 
@@ -192,7 +192,7 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
                                         request.method == 'HEAD')
 
     except ManagerIterationError as err:
-        LOGGER.debug("ManagerIterationError: %s", err)
+        LOGGER.debug("[get_locations_tree] ManagerIterationError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve locations from database!").response()
 
     return api_response.make_response()

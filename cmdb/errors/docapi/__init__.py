@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module provides all errors for docapi"""
+"""
+This module provides all errors for docapi
+"""
 from .docapi_errors import DocapiError,\
                            DocapiGetError,\
                            DocapiUpdateError,\

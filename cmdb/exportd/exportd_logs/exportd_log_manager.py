@@ -14,21 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime, timezone
 
 from cmdb.framework.cmdb_base import CmdbManagerBase
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
-from cmdb.exportd.exportd_logs.exportd_log import LOGGER, LogAction
+from cmdb.exportd.exportd_logs.exportd_log import LogAction
 
-from cmdb.utils.error import CMDBError
-
-from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
-                                               ObjectManagerInsertError,\
-                                               ObjectManagerGetError
+from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerDeleteError,\
+                                                    ExportdLogManagerInsertError,\
+                                                    ExportdLogManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               ExportdLogManager - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ExportdLogManager(CmdbManagerBase):
     """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
@@ -46,9 +50,10 @@ class ExportdLogManager(CmdbManagerBase):
         for found_log in self.dbm.find_all(collection=ExportdMetaLog.COLLECTION):
             try:
                 log_list.append(ExportdLog(**found_log))
-            except CMDBError as err:
+            except Exception as err:
+                #TODO: ERROR-FIX
                 LOGGER.error(err)
-                raise LogManagerGetError(err) from err
+                raise ExportdLogManagerGetError(str(err)) from err
 
         return log_list
 
@@ -60,9 +65,10 @@ class ExportdLogManager(CmdbManagerBase):
                 collection=ExportdMetaLog.COLLECTION,
                 public_id=public_id
             ))
-        except (CMDBError, Exception) as err:
+        except Exception as err:
+            #TODO:ERROR-FIX
             LOGGER.error(err)
-            raise LogManagerGetError(err) from err
+            raise ExportdLogManagerGetError(str(err)) from err
 
 
     def get_logs_by(self, sort='public_id', **requirements):
@@ -73,9 +79,10 @@ class ExportdLogManager(CmdbManagerBase):
             logs = self._get_many(collection=ExportdMetaLog.COLLECTION, sort=sort, **requirements)
             for log in logs:
                 ack.append(ExportdJobLog.from_data(log))
-        except (CMDBError, Exception) as err:
+        except Exception as err:
+            #TODO: ERROR-FIX
             LOGGER.error(err)
-            raise LogManagerGetError(err) from err
+            raise ExportdLogManagerGetError(str(err)) from err
 
         return ack
 
@@ -99,7 +106,8 @@ class ExportdLogManager(CmdbManagerBase):
             new_log = ExportdJobLog.from_data(log_data)
             ack = self._insert(ExportdMetaLog.COLLECTION, ExportdJobLog.to_json(new_log))
         except Exception as err:
-            raise LogManagerInsertError(err) from err
+            #TODO: ERROR-FIX
+            raise ExportdLogManagerInsertError(str(err)) from err
 
         return ack
 
@@ -113,9 +121,9 @@ class ExportdLogManager(CmdbManagerBase):
         """TODO: document"""
         try:
             ack = self._delete(ExportdMetaLog.COLLECTION, public_id)
-        except CMDBError as err:
-            LOGGER.error(err)
-            raise LogManagerDeleteError(err) from err
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ExportdLogManagerDeleteError(str(err)) from err
 
         return ack
 
@@ -136,30 +144,8 @@ class ExportdLogManager(CmdbManagerBase):
             founded_logs = self.dbm.find_all(ExportdMetaLog.COLLECTION, **query)
             for _ in founded_logs:
                 job_list.append(ExportdLog.from_data(_))
-        except (CMDBError, Exception) as err:
-            LOGGER.error('Error in get_exportd_job_logs: %s',err)
-            raise LogManagerGetError(err) from err
+        except Exception as err:
+            LOGGER.error('Error in get_exportd_job_logs: %s',str(err))
+            raise ExportdLogManagerGetError(str(err)) from err
 
         return job_list
-
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
-
-class LogManagerGetError(ObjectManagerGetError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class LogManagerInsertError(ObjectManagerInsertError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
-
-
-class LogManagerDeleteError(ObjectManagerDeleteError):
-    """TODO: document"""
-    def __init__(self, err):
-        self.err = err
-        super().__init__(err)
