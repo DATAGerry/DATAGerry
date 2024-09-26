@@ -44,16 +44,17 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.framework.cmdb_render import CmdbRender, RenderList
 
-from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.utils.error import CMDBError
-from cmdb.framework.cmdb_render import CmdbRender, RenderList, RenderError
 
+from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
                                                ObjectManagerUpdateError,\
                                                ObjectManagerDeleteError,\
                                                ObjectManagerInsertError
+from cmdb.errors.render import InstanceRenderError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -121,7 +122,7 @@ def insert_object(request_user: UserModel):
 
     except (TypeError, ObjectManagerInsertError) as err:
         #TODO: ERROR-FIX
-        LOGGER.error("TypeError, ObjectManagerInsertError: %s", err.message)
+        LOGGER.error("[insert_object] TypeError, ObjectManagerInsertError: %s", err.message)
         return abort(400, str(err))
     except (ManagerGetError, ObjectManagerGetError) as err:
         #TODO: ERROR-FIX
@@ -129,8 +130,9 @@ def insert_object(request_user: UserModel):
         return abort(404)
     except AccessDeniedError as err:
         return abort(403, "No permission to insert the object !")
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[insert_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(new_object_id)
@@ -170,8 +172,9 @@ def get_object(public_id, request_user: UserModel):
                             ref_render=True)
 
         render_result = render.result()
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[get_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(render_result)
@@ -265,7 +268,8 @@ def get_native_object(public_id: int, request_user: UserModel):
     except ObjectManagerGetError:
         return abort(404)
     except AccessDeniedError as err:
-        return abort(403, err.message)
+        #TODO: ERROR-FIX
+        return abort(403)
 
     return make_response(object_instance)
 
@@ -326,8 +330,9 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
                                    object_manager=object_manager,
                                    ref_render=True).get_mds_reference(public_id)
 
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[get_object_mds_reference] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(mds_reference)
@@ -359,7 +364,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
             referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
 
         except ManagerGetError:
-            #TODO:ERROR-FIX
+            #TODO: ERROR-FIX
             return abort(404)
 
         try:
@@ -371,8 +376,9 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
 
             summary_lines[object_id] = mds_reference
 
-        except RenderError as err:
-            LOGGER.error("RenderError: %s", err)
+        except InstanceRenderError as err:
+            #TODO: ERROR-FIX
+            LOGGER.error("[get_object_mds_references] InstanceRenderError: %s", err.message)
             return abort(500)
 
     return make_response(summary_lines)
@@ -616,9 +622,9 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             failed.append(ResponseFailedMessage(error_message=err.message, status=404,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
-        except (CMDBError, RenderError) as error:
-            LOGGER.warning("CMDBError, RenderError: %s", error)
-            failed.append(ResponseFailedMessage(error_message=str(error.__repr__), status=500,
+        except InstanceRenderError as err:
+            LOGGER.debug("[update_object] InstanceRenderError: %s", err.message)
+            failed.append(ResponseFailedMessage(error_message=err.message, status=500,
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
 
@@ -652,8 +658,9 @@ def update_object_state(public_id: int, request_user: UserModel):
         found_object.active = state
         manager.update(public_id, found_object, user=request_user, permission=AccessControlPermission.UPDATE)
     except AccessDeniedError as err:
+        #TODO: ERROR-FIX
         LOGGER.error("AccessDeniedError: %s", err)
-        return abort(403, err.message)
+        return abort(403)
     except ObjectManagerUpdateError as err:
         LOGGER.error("[update_object_state] ObjectManagerUpdateError: %s", err)
         return abort(500, f"Fatal error when updating object state of public_id: {public_id}")
@@ -668,8 +675,9 @@ def update_object_state(public_id: int, request_user: UserModel):
     except ObjectManagerGetError as err:
         LOGGER.debug("[update_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[update_object_state] InstanceRenderError: %s", err.message)
         return abort(500)
 
     try:
@@ -812,8 +820,9 @@ def delete_object(public_id: int, request_user: UserModel):
     except ObjectManagerGetError as err:
         LOGGER.debug("[delete_object] ObjectManagerGetError: %s", err.message)
         return abort(404)
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[delete_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
     try:
@@ -894,8 +903,9 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
     except ObjectManagerGetError as err:
         LOGGER.debug("[delete_object_with_child_locations] ObjectManagerGetError: %s", err.message)
         return abort(404)
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[delete_object_with_child_locations] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(deleted)
@@ -962,8 +972,9 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     except ObjectManagerGetError as err:
         LOGGER.debug("[delete_object_with_child_objects] ObjectManagerGetError: %s", err.message)
         return abort(404)
-    except RenderError as err:
-        LOGGER.error("RenderError: %s", err)
+    except InstanceRenderError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("[delete_object_with_child_objects] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(deleted)
@@ -1020,8 +1031,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
             except ObjectManagerGetError as err:
                 LOGGER.debug("[delete_many_objects] ObjectManagerGetError: %s", err.message)
                 return abort(404)
-            except RenderError as err:
-                LOGGER.error("RenderError: %s", err)
+            except InstanceRenderError as err:
+                #TODO: ERROR-FIX
+                LOGGER.error("[delete_many_objects] InstanceRenderError: %s", err.message)
                 return abort(500)
 
             try:
@@ -1029,11 +1041,11 @@ def delete_many_objects(public_ids, request_user: UserModel):
                                                         user=request_user,
                                                         permission=AccessControlPermission.DELETE))
             except ObjectManagerDeleteError:
+                #TODO:ERROR-FIX
                 return abort(400)
             except AccessDeniedError as err:
-                return abort(403, err.message)
-            except CMDBError:
-                return abort(500)
+                #TODO:ERROR-FIX
+                return abort(403)
 
             try:
                 # generate log

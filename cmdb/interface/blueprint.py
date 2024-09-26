@@ -24,10 +24,10 @@ from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.user_management import UserModel
-
-from cmdb.security.token.validator import TokenValidator, ValidationError
+from cmdb.security.token.validator import TokenValidator
 
 from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.security import TokenValidationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -59,7 +59,8 @@ class APIBlueprint(Blueprint):
                             token = parse_authorization_header(request.headers['Authorization'])
                             try:
                                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
-                            except ValidationError:
+                            except TokenValidationError:
+                                #TODO: ERROR-FIX
                                 return abort(401)
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']

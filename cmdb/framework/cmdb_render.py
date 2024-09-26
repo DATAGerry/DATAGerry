@@ -32,11 +32,12 @@ from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDa
 from cmdb.user_management.user_manager import UserModel
 
 from cmdb.utils.error import CMDBError
-from cmdb.security.acl.errors import AccessDeniedError
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
+from cmdb.errors.security import AccessDeniedError
+from cmdb.errors.render import ObjectInstanceError, TypeInstanceError, InstanceRenderError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -135,6 +136,7 @@ class CmdbRender:
         """
         if not isinstance(type_instance, TypeModel):
             raise TypeInstanceError()
+
         self._type_instance = type_instance
 
 
@@ -170,10 +172,9 @@ class CmdbRender:
             render_result = self.__set_summaries(render_result)
             render_result = self.__set_external(render_result)
             render_result = self.__set_multi_data_sections(render_result)
-        except CMDBError as error:
-            import traceback
-            traceback.print_exc()
-            raise RenderError(f'Error while generating a CMDBResult: {str(error)}') from error
+        except Exception as err:
+            raise InstanceRenderError(f'Error while generating a CMDBResult: {str(err)}') from err
+
         return render_result
 
 
@@ -351,7 +352,7 @@ class CmdbRender:
                     }
                 except (ManagerGetError, Exception) as err:
                     #TODO: ERROR-FIX
-                    LOGGER.debug("%s",err)
+                    LOGGER.debug("%s",str(err))
                     continue
 
                 if not ref_section:
@@ -415,6 +416,7 @@ class CmdbRender:
                 ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
                                                             permission=AccessControlPermission.READ)
             except AccessDeniedError as err:
+                #TODO: ERROR-FIX
                 return err.message
             except ObjectManagerGetError:
                 return TypeReference.to_json(reference)
@@ -540,7 +542,7 @@ class CmdbRender:
                     ext_link_instance.fill_href(field_list)
                 except ValueError:
                     continue
-            except (CMDBError, Exception):
+            except Exception:
                 continue
             external_list.append(TypeExternalLink.to_json(ext_link_instance))
             render_result.externals = external_list
@@ -576,34 +578,3 @@ class RenderList:
             preparation_objects.append(current_render_result)
 
         return preparation_objects
-
-
-# TODO: transfer errors to seperate class
-class RenderError(CMDBError):
-    """
-    Error class raised when an error occurs during rendering.
-    """
-
-    def __init__(self, message):
-        self.message = f'Error while RENDER: {message}'
-        super(CMDBError, self).__init__(self.message)
-
-
-class TypeInstanceError(CMDBError):
-    """
-    Error class raised when the passed object is not an instance of TypeModel.
-    """
-
-    def __init__(self):
-        self.message = "Wrong type instance"
-        super(CMDBError, self).__init__(self.message)
-
-
-class ObjectInstanceError(CMDBError):
-    """
-    Error class raised when the passed object is not an instance of CmdbObject.
-    """
-
-    def __init__(self):
-        self.message = "Wrong object instance"
-        super(CMDBError, self).__init__(self.message)

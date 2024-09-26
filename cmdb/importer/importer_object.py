@@ -21,7 +21,6 @@ from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework import CmdbObject
 from cmdb.importer import JsonObjectParser
-from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig
@@ -32,6 +31,7 @@ from cmdb.importer.improve_object import ImproveObject
 from cmdb.user_management import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
+from cmdb.errors.importer import ImportRuntimeError, ParserRuntimeError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -177,7 +177,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         try:
             possible_fields: list[dict] = kwargs['fields']
         except (KeyError, IndexError, ValueError) as err:
-            raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}') from err
+            raise ImportRuntimeError(f"[CsvObjectImporter] can't import objects: {err}") from err
 
         working_object: dict = {
             'active': True,
@@ -251,7 +251,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         try:
             parsed_response: CsvObjectParserResponse = self.parser.parse(self.file)
         except ParserRuntimeError as err:
-            raise ImportRuntimeError(self.__class__.__name__, err) from err
+            raise ImportRuntimeError(f"{err.message}") from err
 
         type_instance_fields: list[dict] = self.object_manager.get_type(self.config.get_type_id()).get_fields()
 
@@ -288,7 +288,7 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
         try:
             possible_fields: list[dict] = kwargs['fields']
         except (KeyError, IndexError, ValueError) as err:
-            raise ImportRuntimeError(CsvObjectImporter, f'[CSV] cant import objects: {err}') from err
+            raise ImportRuntimeError(f"[CsvObjectImporter] cant import objects: {str(err)}") from err
 
         working_object: dict = {
             'active': True,
@@ -298,6 +298,7 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
             'version': '1.0.0',
             'creation_time': datetime.now(timezone.utc)
         }
+
         current_mapping = self.get_config().get_mapping()
         property_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'property'})
         field_entries: list[MapEntry] = current_mapping.get_entries_with_option(query={'type': 'field'})
@@ -327,7 +328,7 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
         try:
             parsed_response: ExcelObjectParserResponse = self.parser.parse(self.file)
         except ParserRuntimeError as err:
-            raise ImportRuntimeError(self.__class__.__name__, err) from err
+            raise ImportRuntimeError(f"{err.message}") from err
 
         LOGGER.debug(parsed_response)
 

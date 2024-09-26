@@ -14,50 +14,43 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+Contains Render Error Classes
 """
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class RenderError(CMDBError):
+    """
+    Base Provider Error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------------- DOCAPI ERRORS -------------------------------------------------- #
+# --------------------------------------------------- RENDER ERRORS -------------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class ObjectInstanceError(RenderError):
     """
-    Error raised when a GET-operation fails
+    Raised when the passed object is not an instance of CmdbObject
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+    def __init__(self):
+        self.message = "Not an instance of CmdbObject!"
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class TypeInstanceError(RenderError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when the passed object is not an instance of TypeModel
     """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+    def __init__(self):
+        self.message = "Not an instance of CmdbObject!"
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+class InstanceRenderError(RenderError):
     """
-    Error raised when an UPDATE-operation fails
-    """
-    def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
-        super().__init__(self.message)
-
-
-class DocapiDeleteError(DocapiError):
-    """
-    Error raised when a DELETE-operation fails
+    Raised when an error occurs during rendering
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+        self.message = f"An error occured while rendering. Error: {err}"
         super().__init__(self.message)

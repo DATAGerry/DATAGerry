@@ -14,50 +14,52 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+Contains Provider Error Classes
 """
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class ProviderError(CMDBError):
+    """
+    Base Provider Error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------------- DOCAPI ERRORS -------------------------------------------------- #
+# -------------------------------------------------- PROVIDER ERRORS ------------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class GroupMappingError(ProviderError):
     """
-    Error raised when a GET-operation fails
+    Raised if a LDAP mapping was not found or failed
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f"LDAP mapping failed or was not found. Error: {err}"
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class AuthenticationProviderNotActivated(ProviderError):
     """
-    Error raised when an INSERT-operation fails
+    Raised if auth provider is not activated
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+        self.message = f"Auth provider not activated. Error: {err}"
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+class AuthenticationProviderNotFoundError(ProviderError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised if auth provider does not exist
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+        self.message = f'Provider does not exist or is not installed. Error: {err}'
         super().__init__(self.message)
 
 
-class DocapiDeleteError(DocapiError):
+class AuthenticationError(ProviderError):
     """
-    Error raised when a DELETE-operation fails
+    Raised when user could not be authenticated via provider
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+        self.message = f'Could not authenticate via provider. Error: {err}'
         super().__init__(self.message)

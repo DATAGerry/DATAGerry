@@ -28,15 +28,15 @@ from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 
-
-from cmdb.security.auth.auth_errors import AuthenticationError, GroupMappingError
-
+from cmdb.errors.provider import GroupMappingError, AuthenticationError
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                       LdapAuthenticationProviderConfig - CLASS                                       #
+# -------------------------------------------------------------------------------------------------------------------- #
 class LdapAuthenticationProviderConfig(AuthProviderConfig):
     """TODO: document"""
 
@@ -141,14 +141,14 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             if not ldap_connection_status:
                 raise AuthenticationError('Could not connection to ldap server.')
         except LDAPExceptionError as err:
-            raise AuthenticationError(LdapAuthenticationProvider.get_name(), str(err)) from err
+            raise AuthenticationError(str(err)) from err
 
         user_search_filter = self.config.search['searchfilter'].replace("%username%", user_name)
         user_search_result = self.__ldap_connection.search(self.config.search['basedn'], user_search_filter)
         user_search_result_entries = self.__ldap_connection.entries
 
         if not user_search_result or len(user_search_result_entries) == 0:
-            raise AuthenticationError(LdapAuthenticationProvider.get_name(), 'No matching entry')
+            raise AuthenticationError(f"{LdapAuthenticationProvider.get_name()}: No matching entry!")
 
         user_group_id = self.config.default_group
         group_mapping_active = self.config.groups.get('active', False)
@@ -166,21 +166,22 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         for entry in user_search_result_entries:
             entry_dn = entry.entry_dn
+
             try:
-                Connection(self.__ldap_server, entry_dn, password,
-                           auto_bind=True)
+                Connection(self.__ldap_server, entry_dn, password, auto_bind=True)
             except Exception as err:
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
+                raise AuthenticationError(str(err)) from err
 
         try:
             user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
             if (user_instance.group_id != user_group_id) and group_mapping_active:
                 user_instance.group_id = user_group_id
+
                 try:
                     self.user_manager.update(user_instance.public_id, user_instance)
                     user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
                 except ManagerUpdateError as err:
-                    raise AuthenticationError(LdapAuthenticationProvider.get_name(), err) from err
+                    raise AuthenticationError(str(err)) from err
         except ManagerGetError as err:
             #TODO: ERROR-FIX
             LOGGER.warning('[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: %s', err)
@@ -196,7 +197,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             except Exception as error:
                 #TODO: ERROR-FIX
                 LOGGER.debug('[LdapAuthenticationProvider] %s',error)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
+                raise AuthenticationError(str(error)) from error
             LOGGER.debug('[LdapAuthenticationProvider] New user was init')
 
             try:
@@ -204,14 +205,14 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             except ManagerInsertError as error:
                 #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerInsertError: %s', error.message)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
+                raise AuthenticationError(str(error)) from error
 
             try:
                 user_instance: UserModel = self.user_manager.get(public_id=user_id)
             except ManagerGetError as error:
                 #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerGetError: %s', error.message)
-                raise AuthenticationError(LdapAuthenticationProvider.get_name(), error) from error
+                raise AuthenticationError(str(error)) from error
 
         return user_instance
 

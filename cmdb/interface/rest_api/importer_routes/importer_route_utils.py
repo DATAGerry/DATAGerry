@@ -16,17 +16,18 @@
 """TODO: document"""
 import json
 import logging
-
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request
 
 from cmdb.framework.managers.type_manager import TypeManager
+
 from cmdb.user_management import UserModel
-from cmdb.security.acl.errors import AccessDeniedError
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel
+
+from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -89,5 +90,6 @@ def verify_import_access(user: UserModel, _type: TypeModel, _manager: TypeManage
         }]
     }, {'public_id': _type.public_id}]}
     types_ = _manager.iterate(filter=query, limit=1, skip=0, sort='public_id', order=1)
+
     if len([TypeModel.to_json(_) for _ in types_.results]) == 0:
         raise AccessDeniedError(f'The objects of the type `{_type.name}` are protected by ACL permission!')

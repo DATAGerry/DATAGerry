@@ -14,50 +14,52 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Contains DocAPI Error Classes
+Contains Importer Error Classes
 """
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
-    """Base DocAPI Error"""
+class ImporterError(CMDBError):
+    """
+    Base Importer Error
+    """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------------- DOCAPI ERRORS -------------------------------------------------- #
+# --------------------------------------------------- RENDER ERRORS -------------------------------------------------- #
 
-class DocapiGetError(DocapiError):
+class ImportRuntimeError(ImporterError):
     """
-    Error raised when a GET-operation fails
+    Raised when an errors occurs during import
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f"An error occured during import. Error: {err}"
         super().__init__(self.message)
 
 
-class DocapiInsertError(DocapiError):
+class ParserRuntimeError(ImporterError):
     """
-    Error raised when an INSERT-operation fails
+    Raised when an errors occures during parsing files
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+        self.message = f"Error while parsing. Error: {err}"
         super().__init__(self.message)
 
 
-class DocapiUpdateError(DocapiError):
+class ImporterLoadError(ImporterError):
     """
-    Error raised when an UPDATE-operation fails
+    Raised when an error occurs loading the importer
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+        self.message = f"Could not load importer. Error: {err}"
         super().__init__(self.message)
 
 
-class DocapiDeleteError(DocapiError):
+class ParserLoadError(ImporterError):
     """
-    Error raised when a DELETE-operation fails
+    Raised when an error occurs loading the parser
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+        self.message = f"Could not load parser. Error: {err}"
         super().__init__(self.message)

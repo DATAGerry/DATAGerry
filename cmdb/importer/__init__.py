@@ -14,10 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.importer.importer_errors import ImporterLoadError, ParserLoadError
 from cmdb.importer.parser_object import CsvObjectParser, JsonObjectParser
-from cmdb.importer.importer_object import JsonObjectImporter, CsvObjectImporter, JsonObjectImporterConfig, \
-    CsvObjectImporterConfig
+from cmdb.importer.importer_object import JsonObjectImporter,\
+                                          CsvObjectImporter,\
+                                          JsonObjectImporterConfig, \
+                                          CsvObjectImporterConfig
+
+from cmdb.errors.importer import ImporterLoadError, ParserLoadError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __OBJECT_IMPORTER__ = {
@@ -46,9 +49,11 @@ def load_importer_class(importer_type: str, importer_name: str):
     try:
         importer_class = __importer.get(importer_type).get(importer_name)
     except (IndexError, KeyError, ValueError, TypeError) as err:
-        raise ImporterLoadError(importer_type, importer_name) from err
+        raise ImporterLoadError(f"[{importer_type} - {importer_name}]: {str(err)}") from err
+
     if not importer_class:
-        raise ImporterLoadError(importer_type, importer_name)
+        raise ImporterLoadError(f"[{importer_type} - {importer_name}]: No importer_class!")
+
     return importer_class
 
 
@@ -62,9 +67,9 @@ def load_importer_config_class(importer_type: str, importer_name: str):
     try:
         importer_config_class = __importer_config.get(importer_type).get(importer_name)
     except (IndexError, KeyError, ValueError, TypeError) as err:
-        raise ImporterLoadError(importer_type, importer_name) from err
+        raise ImporterLoadError(f"[{importer_type} - {importer_name}]: {str(err)}") from err
     if not importer_config_class:
-        raise ImporterLoadError(importer_type, importer_name)
+        raise ImporterLoadError(f"[{importer_type} - {importer_name}]: No importer_config_class!")
     return importer_config_class
 
 
@@ -78,7 +83,9 @@ def load_parser_class(parser_type: str, parser_name: str):
     try:
         parser_class = __parser.get(parser_type).get(parser_name)
     except (IndexError, KeyError, ValueError, TypeError) as err:
-        raise ParserLoadError(parser_type, parser_name) from err
+        raise ParserLoadError(f"[{parser_type} - {parser_name}]: {str(err)}") from err
+
     if not parser_class:
-        raise ParserLoadError(parser_type, parser_name)
+        raise ParserLoadError(f"[{parser_type} - {parser_name}]: No parser_class!")
+
     return parser_class

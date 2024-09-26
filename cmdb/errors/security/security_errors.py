@@ -14,19 +14,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all errors for Docapi
+Contains Security Error Classes
 """
-from .docapi_errors import DocapiError,\
-                           DocapiGetError,\
-                           DocapiUpdateError,\
-                           DocapiInsertError,\
-                           DocapiDeleteError
+from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'DocapiError',
-    'DocapiGetError',
-    'DocapiUpdateError',
-    'DocapiInsertError',
-    'DocapiDeleteError'
-]
+class SecurityError(CMDBError):
+    """
+    Base Security Error
+    """
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
+
+# -------------------------------------------------- SECURITY ERRORS ------------------------------------------------- #
+
+class TokenValidationError(SecurityError):
+    """
+    Raised when a jwt token could not be decoded
+    """
+    def __init__(self, err: str):
+        self.message = f'Error while decode the token operation - Error: {err}'
+        super().__init__(self.message)
+
+
+class AccessDeniedError(SecurityError):
+    """
+    Raised when access was denied
+    """
+    def __init__(self, err: str):
+        self.message = f"Access was denied. Error: {err}"
+        super().__init__(self.message)

@@ -26,7 +26,6 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
@@ -38,15 +37,16 @@ from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_fil
     get_element_from_data_request, generate_parsed_output, verify_import_access
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-
-from cmdb.importer.importer_errors import ImportRuntimeError, ParserRuntimeError
-from cmdb.security.acl.errors import AccessDeniedError
+from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
-    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class, ParserLoadError, ImporterLoadError
-from cmdb.framework.cmdb_render import CmdbRender, RenderError
+    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
+
 
 from cmdb.errors.manager import ManagerInsertError
+from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
+from cmdb.errors.render import InstanceRenderError
+from cmdb.errors.importer import ImportRuntimeError, ParserRuntimeError, ImporterLoadError, ParserLoadError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -120,8 +120,9 @@ def parse_objects():
 
     try:
         parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
-    except ParserRuntimeError as pre:
-        return abort(500, pre.message)
+    except ParserRuntimeError :
+        #TODO: ERROR-FIX
+        return abort(500)
 
     return make_response(parsed_output)
 
@@ -176,36 +177,43 @@ def import_objects(request_user: UserModel):
     # Load parser
     try:
         parser_class = load_parser_class('object', file_format)
-    except ParserLoadError as ple:
-        return abort(406, ple.message)
-    parser = parser_class(parser_config)
+    except ParserLoadError as err:
+        #TODO:ERROR-FIX
+        LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
+        return abort(406)
 
-    LOGGER.info('Parser %s was loaded', parser_class)
+    parser = parser_class(parser_config)
 
     # Load importer config
     try:
         importer_config_class = load_importer_config_class('object', file_format)
-    except ImporterLoadError as ile:
-        return abort(406, ile.message)
+    except ImporterLoadError as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
+        return abort(406)
     importer_config = importer_config_class(**importer_config_request)
     LOGGER.debug(importer_config_request)
 
     # Load importer
     try:
         importer_class = load_importer_class('object', file_format)
-    except ImporterLoadError as ile:
-        return abort(406, ile.message)
+    except ImporterLoadError as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
+        return abort(406)
     importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
 
     LOGGER.info('Importer %s was loaded', importer_class)
 
     try:
         import_response: ImporterObjectResponse = importer.start_import()
-    except ImportRuntimeError as ire:
-        LOGGER.error('Error while importing objects: %s', ire.message)
-        return abort(500, ire.message)
+    except ImportRuntimeError as err:
+        #TODO: ERROR-FIX
+        LOGGER.error("Error while importing objects: %s", err.message)
+        return abort(500)
     except AccessDeniedError as err:
-        return abort(403, err.message)
+        #TODO: ERROR-FIX
+        return abort(403)
 
     # close request file
     request_file.close()
@@ -237,8 +245,9 @@ def import_objects(request_user: UserModel):
         except ObjectManagerGetError as err:
             LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
             return abort(404)
-        except RenderError as err:
-            LOGGER.error(err)
+        except InstanceRenderError as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug("[import_objects] InstanceRenderError: %s", err.message)
             return abort(500)
         except ManagerInsertError as err:
             #TODO: ERROR-FIX

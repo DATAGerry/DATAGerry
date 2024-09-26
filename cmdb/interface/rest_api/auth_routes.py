@@ -17,31 +17,31 @@
 import json
 import logging
 from datetime import datetime, timezone
-
 from flask import request, current_app, abort
+
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.interface.route_utils import make_response, insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
-from cmdb.security.auth import AuthModule, AuthSettingsDAO
-from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, \
-                                           AuthenticationProviderNotActivated
-from cmdb.security.auth.response import LoginResponse
 from cmdb.security.security import SecurityManager
-from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management import UserModel, RightManager
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
+
+from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.blueprint import APIBlueprint
+from cmdb.security.auth import AuthModule, AuthSettingsDAO
+from cmdb.security.auth.response import LoginResponse
+from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.rights import __all__ as rights
-
 from cmdb.search import Query
 from cmdb.user_management import __FIXED_GROUPS__
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -195,10 +195,12 @@ def post_login():
 
         try:
             user_instance = auth_module.login(request_user_name, request_password)
-        except (AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated) as err:
-            return abort(503, err.message)
-        except Exception as err:
-            return abort(401, err)
+        except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
+            #TODO: ERROR-FIX
+            return abort(503)
+        except Exception:
+            #TODO: ERROR-FIX
+            return abort(401)
         finally:
             # If login success generate user instance with token
             if user_instance:
@@ -214,7 +216,7 @@ def post_login():
                 return login_response.make_response()
 
             # Login not success
-            return abort(401, 'Could not login')
+            return abort(401, 'Could not login!')
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -14,19 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all errors for Docapi
+This module provides all errors for Rendering
 """
-from .docapi_errors import DocapiError,\
-                           DocapiGetError,\
-                           DocapiUpdateError,\
-                           DocapiInsertError,\
-                           DocapiDeleteError
+from .render_errors import ObjectInstanceError,\
+                           TypeInstanceError,\
+                           InstanceRenderError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
-    'DocapiError',
-    'DocapiGetError',
-    'DocapiUpdateError',
-    'DocapiInsertError',
-    'DocapiDeleteError'
+    'ObjectInstanceError',
+    'TypeInstanceError',
+    'InstanceRenderError',
 ]

@@ -38,7 +38,6 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
 from cmdb.utils.error import CMDBError
-from cmdb.security.acl.errors import AccessDeniedError
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
                                                ObjectManagerInsertError,\
@@ -47,6 +46,7 @@ from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
 from cmdb.errors.database import PublicIDAlreadyExists
 from cmdb.errors.type import FieldNotFoundError, FieldInitError
+from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -68,6 +68,7 @@ def verify_access(model: TypeModel, user: UserModel = None, permission: AccessCo
 
     verify = has_access_control(model, user, permission)
     if not verify:
+        #TODO: ERROR-FIX
         raise AccessDeniedError('Protected by ACL permission!')
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -293,6 +294,7 @@ class CmdbObjectManager(CmdbManagerBase):
 
         type_ = self._type_manager.get(new_object.type_id)
         if not type_.active:
+            #TODO: ERROR-FIX
             raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
 
         verify_access(type_, user, permission)
@@ -367,6 +369,7 @@ class CmdbObjectManager(CmdbManagerBase):
         type_id = self.get_object(public_id=public_id).type_id
         type_ = self._type_manager.get(type_id)
         if not type_.active:
+            #TODO: ERROR-FIX
             raise AccessDeniedError(f'Objects cannot be removed because type `{type_.name}` is deactivated.')
         verify_access(type_, user, permission)
         try:
