@@ -28,9 +28,10 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
 from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.auth.auth_errors import AuthenticationProviderNotExistsError, AuthenticationProviderNotActivated, \
-    AuthenticationError
 
+from cmdb.errors.provider import AuthenticationProviderNotActivated,\
+                                 AuthenticationProviderNotFoundError,\
+                                 AuthenticationError
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -60,6 +61,7 @@ class AuthModule:
             } for provider in __installed_providers
         ]
     }
+
 
     def __init__(self, settings: dict,
                  user_manager: UserManager = None,
@@ -204,7 +206,7 @@ class AuthModule:
             provider_class_name = user.authenticator
 
             if not self.provider_exists(provider_class_name):
-                raise AuthenticationProviderNotExistsError(provider_class_name)
+                raise AuthenticationProviderNotFoundError(f"Provider with name {provider_class_name} does not exist!")
 
             provider: Type[AuthenticationProvider] = self.get_provider_class(provider_class_name)
             provider_config_class: Type[str] = provider.PROVIDER_CONFIG_CLASS
@@ -250,4 +252,5 @@ class AuthModule:
                     LOGGER.debug("User found by provider but could not be inserted or found %s",error.message)
                     continue
 
+            #TODO: ERROR-FIX
             raise AuthenticationError('Unknown user could not login.') from err

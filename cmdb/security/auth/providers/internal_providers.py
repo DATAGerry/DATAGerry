@@ -26,9 +26,8 @@ from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.user_management import UserModel
 
-from cmdb.security.auth.auth_errors import AuthenticationError
-
 from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.provider import AuthenticationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -63,12 +62,13 @@ class LocalAuthenticationProvider(AuthenticationProvider):
             else:
                 user: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
         except ManagerGetError as err:
-            raise AuthenticationError(LocalAuthenticationProvider.get_name(), err) from err
+            raise AuthenticationError(str(err)) from err
         login_pass = self.security_manager.generate_hmac(password)
 
         if login_pass == user.password:
             return user
-        raise AuthenticationError(LocalAuthenticationProvider.get_name(), 'Password did not matched with hmac!')
+
+        raise AuthenticationError(f"{LocalAuthenticationProvider.get_name()}: Password did not matched with hmac!")
 
 
     def is_active(self) -> bool:

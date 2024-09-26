@@ -33,8 +33,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.security.acl.errors import AccessDeniedError
-
+from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -86,6 +85,7 @@ def create_object_link(request_user: UserModel):
         LOGGER.debug("[create_object_link] ManagerGetError: %s", err.message)
         return ErrorMessage(400, "Could not retrieve the created ObjectLink!").response()
     except AccessDeniedError as err:
+        #TODO:ERROR-FIX
         return ErrorMessage(403, "No permission to create an ObjectLink!").response()
 
     api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
@@ -165,6 +165,7 @@ def delete_link(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_link] ManagerDeleteError: %s", err.message)
         return ErrorMessage(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
     except AccessDeniedError as err:
+        #TODO: ERROR-FIX
         return ErrorMessage(403, "No permission to delete an ObjectLink!").response()
 
     return api_response.make_response()

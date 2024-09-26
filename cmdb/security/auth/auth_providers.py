@@ -16,16 +16,19 @@
 """TODO: document"""
 import logging
 
-from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.security.security import SecurityManager
-from cmdb.user_management import UserModel
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.security.security import SecurityManager
+
+from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.user_management import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            AuthenticationProvider - CLASS                                            #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AuthenticationProvider:
     """Provider super class"""
     PASSWORD_ABLE: bool = True
@@ -67,17 +70,3 @@ class AuthenticationProvider:
     def get_name(cls):
         """TODO: document"""
         return cls.__qualname__
-
-
-class NoValidAuthenticationProviderError(Exception):
-    """Exception if auth provider do not exist"""
-
-    def __init__(self, authenticator):
-        self.message = f"The Provider {authenticator} is not a valid authentication-provider"
-
-
-class NotPasswordAbleError(Exception):
-    """Exception if application tries to generate a password for an not password_able class"""
-
-    def __init__(self, provider):
-        self.message = f"The AuthenticationProvider {provider} is not password able"

@@ -16,24 +16,25 @@
 """TODO: document"""
 import logging
 from typing import Union
-
 from authlib.jose import jwt, JsonWebToken
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
 from cmdb.security.key.holder import KeyHolder
 
-from cmdb.utils.error import CMDBError
+from cmdb.errors.security import TokenValidationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                TokenValidator - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class TokenValidator:
     """
     Decodes and validates tokens
     """
-
     def __init__(self, database_manager: DatabaseManagerMongo):
         self.key_holder = KeyHolder(database_manager)
 
@@ -50,7 +51,8 @@ class TokenValidator:
         try:
             decoded_token = jwt.decode(s=token, key=self.key_holder.get_public_key())
         except (BadSignatureError, Exception) as err:
-            raise ValidationError(err) from err
+            raise TokenValidationError(str(err)) from err
+
         return decoded_token
 
 
@@ -67,11 +69,4 @@ class TokenValidator:
             import time
             token.validate(time.time())
         except InvalidClaimError as err:
-            raise ValidationError(err) from err
-
-
-class ValidationError(CMDBError):
-    """TODO: document"""
-
-    def __init__(self, message):
-        self.message = f'Error while decode the token operation - E: ${message}'
+            raise TokenValidationError(str(err)) from err

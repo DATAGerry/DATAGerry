@@ -38,8 +38,7 @@ from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
-from cmdb.security.acl.errors import AccessDeniedError
-
+from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerUpdateError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -249,6 +248,7 @@ class ObjectManager(ManagerBase):
         type_ = self.type_manager.get(instance.get('type_id'))
 
         if not type_.active:
+            #TODO: ERROR-FIX
             raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
         verify_access(type_, user, permission)
 
@@ -278,6 +278,7 @@ class ObjectManager(ManagerBase):
         try:
             update_result = self._update_many(self.collection, query=query, update=update, add_to_set=add_to_set)
         except (ManagerUpdateError, AccessDeniedError) as err:
+            #TODO: ERROR-FIX
             raise err
 
         return update_result

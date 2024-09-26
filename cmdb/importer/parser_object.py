@@ -17,19 +17,21 @@
 import csv
 import json
 import logging
-
 from openpyxl.worksheet.worksheet import Worksheet
 
-from cmdb.importer.importer_errors import ParserRuntimeError
 from cmdb.utils.cast import auto_cast
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
+
+from cmdb.errors.importer import ParserRuntimeError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                           JsonObjectParserResponse - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
 class JsonObjectParserResponse(ObjectParserResponse):
     """TODO: document"""
 
@@ -132,10 +134,10 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
                 if len(parsed.get('entries')) > 0:
                     parsed['entry_length'] = len(parsed.get('entries')[0])
                 else:
-                    raise ParserRuntimeError(self.__class__.__name__, 'No content data!')
+                    raise ParserRuntimeError(f"[{self.__class__.__name__}]: No content data!")
         except Exception as err:
-            LOGGER.error(err)
-            raise ParserRuntimeError(self.__class__.__name__, err) from err
+            LOGGER.error(str(err))
+            raise ParserRuntimeError(f"[{self.__class__.__name__}]: An error occured: {str(err)}") from err
         return CsvObjectParserResponse(**parsed)
 
 
@@ -194,12 +196,12 @@ class ExcelObjectParser(BaseObjectParser, XLSXContent):
         try:
             working_sheet = run_config['sheet_name']
         except (IndexError, ValueError, KeyError) as err:
-            raise ParserRuntimeError(ExcelObjectParser, err) from err
+            raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
 
         wb = load_workbook(file)
         try:
             sheet: Worksheet = wb[working_sheet]
         except KeyError as err:
-            raise ParserRuntimeError(ExcelObjectParser, err) from err
+            raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
 
         return ExcelObjectParserResponse(0, [], 0)

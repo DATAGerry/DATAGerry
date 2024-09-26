@@ -37,7 +37,8 @@ from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDele
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
+#                                              ObjectLinksManager - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ObjectLinksManager(BaseManager):
     """
     The ObjectLinksManager handles the interaction between the ObjectLinks-API and the Database
