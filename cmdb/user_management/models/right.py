@@ -16,7 +16,7 @@
 """TODO: document"""
 from enum import IntEnum
 
-from cmdb.utils.error import CMDBError
+from cmdb.errors.security import InvalidLevelRightError, MinLevelRightError, MaxLevelRightError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 GLOBAL_RIGHT_IDENTIFIER = '*'
@@ -100,10 +100,13 @@ class BaseRight:
     def level(self, level):
         if level not in Levels:
             raise InvalidLevelRightError(level)
+
         if level.value < self.MIN_LEVEL.value:
-            raise PoorlyLevelRightError(level, self.MIN_LEVEL)
+            raise MinLevelRightError(f"Level was {level}, expected at least {self.MIN_LEVEL}")
+
         if level.value > self.MAX_LEVEL.value:
-            raise MaxLevelRightError(level, self.MAX_LEVEL)
+            raise MaxLevelRightError(f"Level was {level}, expected at most {self.MAX_LEVEL}")
+
         self._level = level
 
 
@@ -117,32 +120,3 @@ class BaseRight:
             'description': instance.description,
             'is_master': instance.is_master
         }
-
-# --------------------------------------------------- ERROR CLASSES -------------------------------------------------- #
-
-class InvalidLevelRightError(CMDBError):
-    """TODO: document"""
-    def __init__(self, level):
-        self.message = f'Invalid right level - Level {level} does not exist.'
-        super().__init__()
-
-
-class PoorlyLevelRightError(CMDBError):
-    """TODO: document"""
-    def __init__(self, level, min_level):
-        self.message = f'Min level for the right has been violated. Level was {level}, expected at least {min_level}'
-        super().__init__()
-
-
-class MaxLevelRightError(CMDBError):
-    """TODO: document"""
-    def __init__(self, level, max_level):
-        self.message = f'Max level for the right has been violated. Level was {level}, expected at most {max_level}'
-        super().__init__()
-
-
-class NoParentPrefixError(CMDBError):
-    """TODO: document"""
-    def __init__(self):
-        self.message = 'Right dont has a parent prefix.'
-        super().__init__()

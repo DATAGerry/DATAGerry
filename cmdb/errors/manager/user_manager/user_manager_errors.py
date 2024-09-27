@@ -34,7 +34,7 @@ class UserManagerGetError(UserManagerError):
     Raised when UserManager could not retrieve an user
     """
     def __init__(self, err: str):
-        self.message = f'User could not be retrieved. Error: {err}'
+        self.message = f"User could not be retrieved. Error: {err}"
         super().__init__(self.message)
 
 
@@ -43,8 +43,8 @@ class UserManagerInsertError(UserManagerError):
     """
     Raised when UserManager could not create an user
     """
-    def __init__(self, err):
-        self.message = f'User could not be created. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"User could not be created. Error: {err}"
         super().__init__(self.message)
 
 
@@ -53,8 +53,8 @@ class UserManagerUpdateError(UserManagerError):
     """
     Raised when UserManager could not update an user
     """
-    def __init__(self, err):
-        self.message = f'User could not be updated. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"User could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
@@ -62,6 +62,6 @@ class UserManagerDeleteError(UserManagerError):
     """
     Raised when UserManager could not delete an user
     """
-    def __init__(self, err):
-        self.message = f'User could not be deleted. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"User could not be deleted. Error: {err}"
         super().__init__(self.message)

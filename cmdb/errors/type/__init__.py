@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module provides all cmdb type errors"""
+"""
+This module provides all cmdb type errors
+"""
 from .type_errors import TypeNotFoundError,\
                          ExternalFillError,\
                          TypeReferenceLineFillError,\

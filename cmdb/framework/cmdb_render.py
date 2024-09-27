@@ -31,8 +31,6 @@ from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, Ty
 from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 from cmdb.user_management.user_manager import UserModel
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
@@ -186,13 +184,15 @@ class CmdbRender:
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.user_manager.get(self.object_instance.author_id).get_display_name()
-        except CMDBError:
+        except Exception:
+            #TODO: ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
                 editor_name = self.user_manager.get(self.object_instance.editor_id).get_display_name()
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 editor_name = None
         else:
             editor_name = None
@@ -214,12 +214,15 @@ class CmdbRender:
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.user_manager.get(self.type_instance.author_id).get_display_name()
-        except CMDBError:
+        except Exception:
+            #TODO: ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
+
         try:
             self.type_instance.render_meta.icon
         except KeyError:
             self.type_instance.render_meta.icon = ''
+
         render_result.type_information = {
             'type_id': self.type_instance.public_id,
             'type_name': self.type_instance.name,
@@ -330,7 +333,8 @@ class CmdbRender:
                     ref_field_name: str = f'{section.name}-field'
                     ref_field = self.type_instance.get_field(ref_field_name)
                 except (FieldInitError, FieldNotFoundError) as err:
-                    LOGGER.debug("%s",err)
+                    #TODO: ERROR-FIX
+                    LOGGER.debug("%s",err.message)
                     continue
 
                 try:
@@ -432,7 +436,8 @@ class CmdbRender:
                 try:
                     _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 except (FieldInitError, FieldNotFoundError) as error:
-                    LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error)
+                    #TODO: ERROR-FIX
+                    LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error.message)
 
                 reference.type_id = ref_type.get_public_id()
                 reference.object_id = int(current_field['value'])
@@ -532,7 +537,8 @@ class CmdbRender:
                                 # if value is empty or does not exists
                                 raise ValueError(ext_link_field)
                             field_list.append(field_value)
-                        except CMDBError:
+                        except Exception:
+                            #TODO: ERROR-FIX
                             # if error append missing data
                             missing_list.append(ext_link_instance)
                 if len(missing_list) > 0:
@@ -543,6 +549,7 @@ class CmdbRender:
                 except ValueError:
                     continue
             except Exception:
+                #TODO: ERROR-FIX
                 continue
             external_list.append(TypeExternalLink.to_json(ext_link_instance))
             render_result.externals = external_list

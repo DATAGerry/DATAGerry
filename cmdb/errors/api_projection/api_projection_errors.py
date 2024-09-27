@@ -14,21 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all errors for Security
+Contains API Projection Error Classes
 """
-from .security_errors import TokenValidationError,\
-                             AccessDeniedError,\
-                             RightNotFoundError,\
-                             InvalidLevelRightError,\
-                             MinLevelRightError,\
-                             MaxLevelRightError
+from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'TokenValidationError',
-    'AccessDeniedError',
-    'RightNotFoundError',
-    'InvalidLevelRightError',
-    'MinLevelRightError',
-    'MaxLevelRightError',
-]
+class ApiProjectionError(CMDBError):
+    """
+    Base API Projection Error
+    """
+    def __init__(self, message: str):
+        self.message = message
+        super().__init__(message)
+
+# ----------------------------------------------- API PROJECTION ERRORS ---------------------------------------------- #
+
+class APIProjectionInclusionError(ApiProjectionError):
+    """
+    Raised when an errors occured during inclusion projection
+    """
+    def __init__(self, err: str):
+        self.message = f"Error while inclusion projection. Error: {err}"
+        super().__init__(self.message)

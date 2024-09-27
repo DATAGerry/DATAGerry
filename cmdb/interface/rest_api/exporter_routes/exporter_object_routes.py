@@ -15,10 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import abort, jsonify, current_app
 
-from cmdb.errors.type import TypeNotFoundError
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user
@@ -27,7 +25,8 @@ from cmdb.user_management import UserModel
 from cmdb.utils.helpers import load_class
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.utils.error import CMDBError
+
+from cmdb.errors.type import TypeNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -63,11 +62,13 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
         exporter.from_database(database_manager=current_app.database_manager,
                                user=request_user,
                                permission=AccessControlPermission.READ)
-    except TypeNotFoundError as error:
-        return abort(400, error)
-    except ModuleNotFoundError as error:
-        return abort(400, error)
-    except CMDBError as error:
-        return abort(404, jsonify(message='Not Found', error='Export objects CMDBError'))
+    except TypeNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except ModuleNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except Exception:
+        return abort(404, jsonify(message='Not Found', error='Export objects Exception'))
 
     return exporter.export()

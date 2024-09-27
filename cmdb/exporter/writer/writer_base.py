@@ -28,7 +28,6 @@ from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.managers.object_manager import ObjectManager
-from cmdb.utils.error import CMDBError
 
 from cmdb.utils.helpers import load_class
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -102,8 +101,9 @@ class  BaseExportWriter:
                                    database_manager=database_manager,
                                    object_manager=dep_object_manager,
                                    ref_render=True).render_result_list(raw=False)
-        except CMDBError as err:
-            return abort(400, err)
+        except Exception:
+            #TODO: ERROR-FIX
+            return abort(400)
 
 
     def export(self):

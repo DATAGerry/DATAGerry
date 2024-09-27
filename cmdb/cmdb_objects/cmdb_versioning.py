@@ -60,21 +60,24 @@ class Versioning:
     @major.setter
     def major(self, value):
         if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
+            raise VersionTypeError(f"The version type 'major' update for {str(value)} is wrong!")
+
         self._major = value
 
 
     @minor.setter
     def minor(self, value):
         if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
+            raise VersionTypeError(f"The version type 'minor' update for {str(value)} is wrong!")
+
         self._minor = value
 
 
     @patch.setter
     def patch(self, value):
         if not isinstance(value, int):
-            raise VersionTypeError('major', str(value))
+            raise VersionTypeError(f"The version type 'patch' update for {str(value)} is wrong!")
+
         self._patch = value
 
 

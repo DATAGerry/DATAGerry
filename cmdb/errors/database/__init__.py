@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This package provides all errors for the database of DATAGERRY
+This package provides all errors for the database
 """
 from .database_errors import DataBaseError, \
                              DatabaseConnectionError, \
@@ -22,7 +22,6 @@ from .database_errors import DataBaseError, \
                              DatabaseAlreadyExists, \
                              DatabaseNotExists, \
                              CollectionAlreadyExists, \
-                             PublicIDAlreadyExists, \
                              NoDocumentFound, \
                              DocumentCouldNotBeDeleted
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -34,7 +33,6 @@ __all__ = [
     'DatabaseAlreadyExists',
     'DatabaseNotExists',
     'CollectionAlreadyExists',
-    'PublicIDAlreadyExists',
     'NoDocumentFound',
     'DocumentCouldNotBeDeleted',
 ]

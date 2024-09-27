@@ -30,9 +30,8 @@ from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
 from cmdb.framework.cmdb_render import RenderResult
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
+from cmdb.errors.manager.exportd_job_manager import ExportJobConfigError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -265,17 +264,11 @@ class ExternalSystem:
         """TODO: document"""
 
 
-    def error(self, msg):
+    def error(self, err: str):
         """TODO: document"""
-        raise ExportJobConfigException(msg)
+        raise ExportJobConfigError(err)
 
 
     def set_msg(self, msg):
         """TODO: document"""
         self.msg_string = msg
-
-
-class ExportJobConfigException(CMDBError):
-    """TODO: document"""
-    def __init__(self, *args, **kwargs):
-        Exception.__init__(self, *args, **kwargs)

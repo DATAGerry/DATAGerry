@@ -21,7 +21,7 @@ from ..cmdb_error import CMDBError
 
 class RenderError(CMDBError):
     """
-    Base Provider Error
+    Base Render Error
     """
     def __init__(self, message: str):
         self.message = message

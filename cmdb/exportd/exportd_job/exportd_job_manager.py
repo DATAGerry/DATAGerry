@@ -25,8 +25,6 @@ from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.user_management import UserModel
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.manager.exportd_job_manager import ExportdJobManagerDeleteError,\
                                                     ExportdJobManagerUpdateError,\
@@ -74,7 +72,8 @@ class ExportdJobManager(CmdbManagerBase):
         for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION):
             try:
                 job_list.append(ExportdJob(**founded_job))
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 continue
 
         return job_list
@@ -88,8 +87,8 @@ class ExportdJobManager(CmdbManagerBase):
                 return ExportdJob(**found_type_list[0])
 
             raise ObjectManagerGetError(err='More than 1 type matches this requirement')
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err) from err
+        except Exception as err:
+            raise ObjectManagerGetError(str(err)) from err
 
 
     def get_job_by_args(self, **requirements) -> ExportdJob:
@@ -100,8 +99,8 @@ class ExportdJobManager(CmdbManagerBase):
                 return ExportdJob(**found_type_list[0])
 
             raise ObjectManagerGetError(err='More than 1 type matches this requirement')
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerGetError(err) from err
+        except Exception as err:
+            raise ObjectManagerGetError(str(err)) from err
 
 
     def get_job_by_event_based(self, state):
@@ -112,7 +111,8 @@ class ExportdJobManager(CmdbManagerBase):
         for founded_job in self.dbm.find_all(collection=ExportdJob.COLLECTION, filter=formatted_filter):
             try:
                 job_list.append(ExportdJob(**founded_job))
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 continue
 
         return job_list
@@ -129,7 +129,7 @@ class ExportdJobManager(CmdbManagerBase):
         if isinstance(data, dict):
             try:
                 new_object = ExportdJob(**data)
-            except CMDBError as err:
+            except Exception as err:
                 #TODO: ERROR-FIX
                 raise ExportdJobManagerInsertError(str(err)) from err
         elif isinstance(data, ExportdJob):
@@ -148,7 +148,7 @@ class ExportdJobManager(CmdbManagerBase):
                                                      "user_id": new_object.get_author_id(),
                                                      "event": 'automatic'})
                 self._event_queue.put(event)
-        except CMDBError as err:
+        except Exception as err:
             #TODO: ERROR-FIX
             raise ExportdJobManagerInsertError(str(err)) from err
 

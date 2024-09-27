@@ -33,8 +33,8 @@ class ObjectManagerInsertError(ObjectManagerError):
     """
     Raised when ObjectManager could not insert an object
     """
-    def __init__(self, err):
-        self.message = f'Object could not be inserted. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"Object could not be inserted. Error: {err}"
         super().__init__(self.message)
 
 
@@ -42,8 +42,8 @@ class ObjectManagerDeleteError(ObjectManagerError):
     """
     Raised when ObjectManager could not delete an object
     """
-    def __init__(self, public_id: int = None, err = None):
-        self.message = f'Object with public_id: {public_id} could not be deleted. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"Object could not be deleted. Error: {err}"
         super().__init__(self.message)
 
 
@@ -51,8 +51,8 @@ class ObjectManagerUpdateError(ObjectManagerError):
     """
     Raised when ObjectManager could not update an object
     """
-    def __init__(self, err):
-        self.message = f'Object could not be updated. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"Object could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
@@ -60,8 +60,8 @@ class ObjectManagerGetError(ObjectManagerError):
     """
     Raised when ObjectManager could not retrieve an object
     """
-    def __init__(self, err):
-        self.message = f'Object could not be retrieved. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"Object could not be retrieved. Error: {err}"
         super().__init__(self.message)
 
 
@@ -69,6 +69,15 @@ class ObjectManagerInitError(ObjectManagerError):
     """
     Raised when ObjectManager could not initialise an object
     """
-    def __init__(self, err):
-        self.message = f'Object could not be initialised. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"Object could not be initialised. Error: {err}"
+        super().__init__(self.message)
+
+
+class TypeNotSetError(ObjectManagerError):
+    """
+    Raised when the type_id was not set for an object
+    """
+    def __init__(self):
+        self.message = "The object has no type_id!"
         super().__init__(self.message)

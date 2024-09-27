@@ -26,8 +26,6 @@ from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.media_library.media_file import MediaFile
 from cmdb.media_library.media_file import FileMetadata
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
                                                    MediaFileManagerInsertError,\
                                                    MediaFileManagerUpdateError,\
@@ -78,7 +76,7 @@ class MediaFileManager(CmdbManagerBase):
             iterator: GridOutCursor = self.fs.find(filter=metadata, **params)
             for grid in iterator:
                 results.append(MediaFile.to_json(MediaFile(**grid._file)))
-        except (CMDBError, MediaFileManagerGetError) as err:
+        except (Exception, MediaFileManagerGetError) as err:
             #TODO: ERROR-FIX
             raise MediaFileManagerGetError(str(err)) from err
 

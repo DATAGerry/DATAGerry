@@ -163,7 +163,7 @@ class MongoDatabaseManager(DatabaseManager):
         result = self.get_collection(collection).update_many(criteria, formatted_data)
 
         if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection, None)
+            raise DocumentCouldNotBeDeleted(collection)
 
         return result
 
@@ -340,7 +340,7 @@ class MongoDatabaseManager(DatabaseManager):
         result = self.get_collection(collection).delete_one(criteria)
 
         if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection, criteria)
+            raise DocumentCouldNotBeDeleted(collection)
 
         return result
 
@@ -363,7 +363,7 @@ class MongoDatabaseManager(DatabaseManager):
         result = self.get_collection(collection).delete_many(requirements_filter)
 
         if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection, None)
+            raise DocumentCouldNotBeDeleted(collection)
 
         return result
 

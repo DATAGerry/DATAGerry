@@ -52,7 +52,7 @@ class AuthenticationProviderNotFoundError(ProviderError):
     Raised if auth provider does not exist
     """
     def __init__(self, err: str):
-        self.message = f'Provider does not exist or is not installed. Error: {err}'
+        self.message = f"Provider does not exist or is not installed. Error: {err}"
         super().__init__(self.message)
 
 
@@ -61,5 +61,5 @@ class AuthenticationError(ProviderError):
     Raised when user could not be authenticated via provider
     """
     def __init__(self, err: str):
-        self.message = f'Could not authenticate via provider. Error: {err}'
+        self.message = f"Could not authenticate via provider. Error: {err}"
         super().__init__(self.message)

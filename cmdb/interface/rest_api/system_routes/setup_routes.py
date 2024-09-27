@@ -20,7 +20,6 @@ from datetime import datetime, timezone
 
 from flask import request, current_app
 
-
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.user_management.managers.group_manager import GroupManager
 from cmdb.user_management.managers.user_manager import UserManager
@@ -73,8 +72,8 @@ def setup_datagerry():
         password = setup_data['password']
         email = setup_data['email']
         database = setup_data['database']
-    except KeyError as err:
-        return ErrorMessage(400, f"The data is incomplete. Error: {err}").response()
+    except KeyError:
+        return ErrorMessage(400, "A required field in data is missing!").response()
 
     ### Early out if databse already exists
     if check_db_exists(database):

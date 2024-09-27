@@ -178,7 +178,7 @@ class CmdbDAO:
             TypeError: if version is not a float
         """
         if not hasattr(self, 'version') or self.version is None:
-            raise NoVersionError(self.get_public_id())
+            raise NoVersionError(f"The object (ID: {self.get_public_id()}) has no version property")
 
         updater_version = Versioning(*map(int, self.version.split('.')))
 
@@ -207,7 +207,7 @@ class CmdbDAO:
         if self.version:
             return self.version
 
-        raise NoVersionError(self.get_public_id())
+        raise NoVersionError(f"The object (ID: {self.get_public_id()}) has no version property")
 
 
     def to_database(self) -> dict:

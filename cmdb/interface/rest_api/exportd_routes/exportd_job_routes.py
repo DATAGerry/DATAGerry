@@ -32,9 +32,7 @@ from cmdb.interface.route_utils import make_response, login_required, insert_req
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-
 from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
-from cmdb.utils.error import CMDBError
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
@@ -93,9 +91,9 @@ def get_exportd_job_list(request_user: UserModel):
     except ModuleNotFoundError as e:
         #TODO: ERROR-FIX
         return abort(400, e)
-    except CMDBError as err:
+    except Exception as err:
         #TODO: ERROR-FIX
-        LOGGER.info("Error occured in get_exportd_job_list(): %s", err)
+        LOGGER.info("Error occured in get_exportd_job_list(): %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 
     return make_response(job_list)
@@ -159,14 +157,16 @@ def add_job(request_user: UserModel):
         new_job_data['author_id'] = request_user.get_public_id()
         new_job_data['author_name'] = request_user.get_display_name()
         new_job_data['state'] = ExecuteState.SUCCESSFUL.name
-    except TypeError as e:
-        LOGGER.warning(e)
+    except TypeError as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug(str(err))
         abort(400)
 
     try:
         job_instance = ExportdJob(**new_job_data)
-    except CMDBError as e:
-        LOGGER.debug(e)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug(str(err))
         return abort(400)
 
     try:
@@ -214,7 +214,8 @@ def update_job(request_user: UserModel):
     try:
         state = new_job_data["state"]
         update_job_instance = ExportdJob(**new_job_data)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(400)
 
     try:
@@ -271,7 +272,8 @@ def delete_job(public_id: int, request_user: UserModel):
         ack = exportd_manager.delete_job(public_id=public_id, request_user=request_user)
     except ExportdJobManagerDeleteError:
         return abort(400)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(500)
 
     return make_response(ack)

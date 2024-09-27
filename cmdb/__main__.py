@@ -36,7 +36,6 @@ from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.system_config import SystemConfigReader
 import cmdb.process_management.process_manager
 
-from cmdb.errors.cmdb_error import CMDBError
 from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -85,7 +84,7 @@ def main(args: Namespace):
             _start_app()
             LOGGER.info("DATAGERRY successfully started")
     except Exception as error:
-        raise CMDBError(error) from error
+        raise Exception(error) from error
 
 # ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
 
@@ -320,7 +319,7 @@ if __name__ == "__main__":
         print(WELCOME_STRING.format(options.__dict__))
         print(LICENSE_STRING)
         main(options)
-    except CMDBError as err:
+    except Exception as err:
         if cmdb.__MODE__ == 'DEBUG':
             traceback.print_exc()
 

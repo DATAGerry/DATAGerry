@@ -120,4 +120,4 @@ class TypeExternalLink:
         try:
             self.href = self.href.format(*inputs)
         except Exception as err:
-            raise ExternalFillError(inputs) from err
+            raise ExternalFillError(self.href) from err

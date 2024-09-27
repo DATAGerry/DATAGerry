@@ -20,7 +20,8 @@ from .object_manager_errors import ObjectManagerInsertError,\
                                    ObjectManagerDeleteError,\
                                    ObjectManagerUpdateError,\
                                    ObjectManagerGetError,\
-                                   ObjectManagerInitError
+                                   ObjectManagerInitError,\
+                                   TypeNotSetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -29,4 +30,5 @@ __all__ = [
     'ObjectManagerUpdateError',
     'ObjectManagerGetError',
     'ObjectManagerInitError',
+    'TypeNotSetError',
 ]

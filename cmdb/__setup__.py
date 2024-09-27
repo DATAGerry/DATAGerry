@@ -33,7 +33,6 @@ from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
-from cmdb.errors.cmdb_error import CMDBError
 from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -159,7 +158,7 @@ class SetupRoutine:
             LOGGER.info('KEY ROUTINE: Password was updated for user: %s', admin_user.user_name)
         except Exception as err:
             LOGGER.info('KEY ROUTINE: Password update for user failed: %s', err)
-            raise CMDBError(err) from err
+            raise Exception(err) from err
 
 
         LOGGER.info('KEY ROUTINE: FINISHED')

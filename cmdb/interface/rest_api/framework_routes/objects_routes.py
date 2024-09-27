@@ -46,8 +46,6 @@ from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 from cmdb.framework.cmdb_render import CmdbRender, RenderList
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
@@ -297,9 +295,10 @@ def group_objects_by_type_id(value, request_user: UserModel):
             max_length += 1
             if max_length == 5:
                 break
-
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(400)
+
     return make_response(result)
 
 
@@ -836,8 +835,10 @@ def delete_object(public_id: int, request_user: UserModel):
     except AccessDeniedError as err:
         return abort(403, f"Access denied for object with public_id: {public_id}")
     except ObjectManagerDeleteError:
+        #TODO: ERROR-FIX
         return abort(400)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(500)
 
     try:
@@ -1064,8 +1065,10 @@ def delete_many_objects(public_ids, request_user: UserModel):
         return make_response({'successfully': ack})
 
     except ObjectManagerDeleteError as err:
+        #TODO: ERROR-FIX
         return jsonify(message='Delete Error', error=err.message)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(500)
 
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -34,7 +34,7 @@ class TokenValidationError(SecurityError):
     Raised when a jwt token could not be decoded
     """
     def __init__(self, err: str):
-        self.message = f'Error while decode the token operation - Error: {err}'
+        self.message = f"Error while decode the token operation - Error: {err}"
         super().__init__(self.message)
 
 
@@ -44,4 +44,40 @@ class AccessDeniedError(SecurityError):
     """
     def __init__(self, err: str):
         self.message = f"Access was denied. Error: {err}"
+        super().__init__(self.message)
+
+
+class RightNotFoundError(SecurityError):
+    """
+    Raised when a right was not found
+    """
+    def __init__(self, err: str):
+        self.message = f"Right was not found inside the group. {err}"
+        super().__init__(self.message)
+
+
+class InvalidLevelRightError(SecurityError):
+    """
+    Raised when a right level is not valid
+    """
+    def __init__(self, err: str):
+        self.message = f"Invalid right level. Level does not exist: {err}"
+        super().__init__(self.message)
+
+
+class MinLevelRightError(SecurityError):
+    """
+    Raised when min level for a right was violated
+    """
+    def __init__(self, err: str):
+        self.message = f"Min level for the right has been violated. Error: {err}"
+        super().__init__(self.message)
+
+
+class MaxLevelRightError(SecurityError):
+    """
+    Raised when max level for a right was violated
+    """
+    def __init__(self, err: str):
+        self.message = f"Max level for the right has been violated. Error: {err}"
         super().__init__(self.message)

@@ -34,7 +34,7 @@ class ExportdLogManagerDeleteError(ExportdLogManagerError):
     Raised when ExportdLogManager could not delete a ExportdLog
     """
     def __init__(self, err: str):
-        self.message = f'ExportdLog could not be deleted. Error: {err}'
+        self.message = f"ExportdLog could not be deleted. Error: {err}"
         super().__init__(self.message)
 
 
@@ -43,7 +43,7 @@ class ExportdLogManagerInsertError(ExportdLogManagerError):
     Raised when ExportdLogManager could not create a ExportdLog
     """
     def __init__(self, err: str):
-        self.message = f'ExportdLog could not be created. Error: {err}'
+        self.message = f"ExportdLog could not be created. Error: {err}"
         super().__init__(self.message)
 
 #TODO: ERROR-FIX (never used)
@@ -51,6 +51,6 @@ class ExportdLogManagerGetError(ExportdLogManagerError):
     """
     Raised when ExportdLogManager could not retrieve a ExportdLog
     """
-    def __init__(self, err):
-        self.message = f'ExportdLog could not be retrieved. Error: {err}'
+    def __init__(self, err: str):
+        self.message = f"ExportdLog could not be retrieved. Error: {err}"
         super().__init__(self.message)

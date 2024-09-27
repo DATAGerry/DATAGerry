@@ -19,12 +19,13 @@ Configuration module for settings in file format and in the database
 import logging
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 SystemWriter - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SystemWriter:
     """
     Superclass for general write permissions
@@ -100,19 +101,10 @@ class SystemSettingsWriter(SystemWriter):
         """
         try:
             verify_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
-        except (NoEntryFoundError, CMDBError):
+        except Exception:
             return False
 
         if verify_document != data and data is not None:
             return False
 
         return True
-
-
-class NoEntryFoundError(CMDBError):
-    """
-    Error if no entry exists
-    """
-    def __init__(self, _id):
-        super().__init__()
-        self.message = f"Entry with the id {_id} was not found"

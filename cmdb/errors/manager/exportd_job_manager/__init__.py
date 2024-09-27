@@ -19,7 +19,8 @@ This module provides all errors for the ExportdJobManager
 from .exportd_job_manager_errors import ExportdJobManagerDeleteError,\
                                         ExportdJobManagerUpdateError,\
                                         ExportdJobManagerInsertError,\
-                                        ExportdJobManagerGetError
+                                        ExportdJobManagerGetError,\
+                                        ExportJobConfigError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -27,4 +28,5 @@ __all__ = [
     'ExportdJobManagerUpdateError',
     'ExportdJobManagerInsertError',
     'ExportdJobManagerGetError',
+    'ExportJobConfigError',
 ]

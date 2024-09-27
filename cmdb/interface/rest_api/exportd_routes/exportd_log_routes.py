@@ -27,8 +27,6 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerDeleteError
@@ -86,11 +84,14 @@ def get_log_list(request_user: UserModel):
     try:
         log_list = log_manager.get_all_logs()
     except ObjectManagerGetError as err:
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_log_list] ObjectManagerGetError: %s", err.message)
         return abort(400, "Could not retrieve the log list!")
-    except ModuleNotFoundError as err:
-        return abort(400, err)
-    except CMDBError as err:
+    except ModuleNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except Exception as err:
+        #TODO: ERROR-FIX
         LOGGER.info("Error occured in get_log_list(): %s", err)
         return abort(404, jsonify(message='Not Found'))
 

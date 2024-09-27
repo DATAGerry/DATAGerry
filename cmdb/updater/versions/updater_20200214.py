@@ -23,7 +23,6 @@ from cmdb.framework.managers.object_manager import ObjectManager
 
 from cmdb.updater.updater import Updater
 
-from cmdb.errors.cmdb_error import CMDBError
 from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -75,13 +74,16 @@ class Update20200214(Updater):
                 for field in obj.fields:
                     if [x for x in matches if x['name'] == field['name']]:
                         value = field['value']
+
                         if value:
                             if isinstance(value, datetime):
                                 field['value'] = value
                             else:
                                 field['value'] = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
+
                 manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
-        except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
+        except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
+            #TODO: ERROR-FIX
             LOGGER.error("[worker] Error in worker: %s", err.message)
 
 

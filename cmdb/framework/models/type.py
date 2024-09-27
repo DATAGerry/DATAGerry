@@ -26,8 +26,6 @@ from cmdb.security.acl.control import AccessControlList
 from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
 from cmdb.errors.type import FieldNotFoundError, FieldInitError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -538,11 +536,12 @@ class TypeModel(CmdbDAO):
         if fields:
             try:
                 return fields
-            except (RequiredInitKeyNotFoundError, CMDBError) as err:
+            except (RequiredInitKeyNotFoundError, Exception) as err:
                 #TODO: ERROR-FIX
-                raise FieldInitError(value) from err
+                raise FieldInitError(str(value)) from err
         else:
-            raise FieldNotFoundError(value, self.name)
+            #TODO: ERROR-FIX
+            raise FieldNotFoundError(value)
 
 
     def get_field(self, name) -> dict:
@@ -551,9 +550,8 @@ class TypeModel(CmdbDAO):
         if field:
             try:
                 return field[0]
-            except (RequiredInitKeyNotFoundError, CMDBError) as err:
+            except (RequiredInitKeyNotFoundError, Exception) as err:
                 #TODO: ERROR-FIX
-                LOGGER.debug("[get_field] error: %s, type: %s", err, type(err))
                 raise FieldInitError(name) from err
 
-        raise FieldNotFoundError(name, self.name)
+        raise FieldNotFoundError(name)

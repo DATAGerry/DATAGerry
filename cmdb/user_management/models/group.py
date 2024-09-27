@@ -19,7 +19,8 @@ import logging
 from cmdb.framework import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
-from cmdb.utils.error import CMDBError
+
+from cmdb.errors.security import RightNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -112,8 +113,9 @@ class UserGroupModel(CmdbDAO):
         """TODO: document"""
         try:
             return next(right for right in self.rights if right.name == name)
-        except Exception as exc:
-            raise RightNotFoundError(self.name, name) from exc
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise RightNotFoundError(f"Groupname: {self.name} | Rightname: {name}", ) from err
 
 
     def has_right(self, right_name) -> bool:
@@ -121,6 +123,7 @@ class UserGroupModel(CmdbDAO):
         try:
             self.get_right(right_name)
         except RightNotFoundError:
+            #TODO: ERROR-FIX
             return False
         return True
 
@@ -134,11 +137,3 @@ class UserGroupModel(CmdbDAO):
             return self.has_right(f'{parent_right_name}.{GLOBAL_RIGHT_IDENTIFIER}')
 
         return self.has_extended_right(right_name=parent_right_name)
-
-
-class RightNotFoundError(CMDBError):
-    """TODO: document"""
-
-    def __init__(self, group, right):
-        self.message = f"Right was not found inside this group Groupname: {group} | Rightname: {right}"
-        super().__init__()
