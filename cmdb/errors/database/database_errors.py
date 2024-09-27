@@ -16,8 +16,6 @@
 """
 Contains Database Error Classes
 """
-from pymongo.errors import DuplicateKeyError
-
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -29,14 +27,14 @@ class DataBaseError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ------------------------------------------------- DATABASE - ERRORS ------------------------------------------------ #
 
 class DatabaseConnectionError(DataBaseError):
     """
     Error if connection to database broke up or unable to connect
     """
     def __init__(self, db_name: str):
-        self.message = f'Could not connect to database {db_name}'
+        self.message = f"Could not connect to database {db_name}"
         super().__init__(self.message)
 
 
@@ -45,7 +43,7 @@ class ServerTimeoutError(DataBaseError):
     Server timeout error if connection is lost
     """
     def __init__(self, host:str):
-        self.message = f'Server Timeout - No connection to database at {host}'
+        self.message = f"Server Timeout - No connection to database at {host}"
         super().__init__(self.message)
 
 
@@ -55,7 +53,7 @@ class DatabaseAlreadyExists(DataBaseError):
     Error when database already exists
     """
     def __init__(self, db_name: str):
-        self.message = f'Database with the name {db_name} already exists'
+        self.message = f"Database with the name {db_name} already exists"
         super().__init__(self.message)
 
 
@@ -64,7 +62,7 @@ class DatabaseNotExists(DataBaseError):
     Error when database does not exist
     """
     def __init__(self, db_name: str):
-        self.message = f'Database with the name {db_name} doesn`t exists'
+        self.message = f"Database with the name {db_name} doesn`t exists"
         super().__init__(self.message)
 
 
@@ -75,15 +73,6 @@ class CollectionAlreadyExists(DataBaseError):
     """
     def __init__(self, collection_name: str):
         self.message = f"Collection {collection_name} already exists"
-        super().__init__(self.message)
-
-#TODO: Use the PyMongo error
-class PublicIDAlreadyExists(DuplicateKeyError):
-    """
-    Error if public_id inside database already exists
-    """
-    def __init__(self, public_id: int):
-        self.message = f"Object with this public id already exists: {public_id}"
         super().__init__(self.message)
 
 
@@ -101,6 +90,6 @@ class DocumentCouldNotBeDeleted(DataBaseError):
     """
     Error if document could not be deleted from database
     """
-    def __init__(self, collection: str, public_id: int):
-        self.message = f"The document with the id {public_id} could not be deleted inside {collection}"
+    def __init__(self, collection: str):
+        self.message = f"A document could not be deleted from Collection: {collection}"
         super().__init__(self.message)

@@ -32,7 +32,7 @@ class DocapiGetError(DocapiError):
     Error raised when a GET-operation fails
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while GET: {err}'
+        self.message = f"DocAPI-Error while GET: {err}"
         super().__init__(self.message)
 
 
@@ -41,7 +41,7 @@ class DocapiInsertError(DocapiError):
     Error raised when an INSERT-operation fails
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while INSERT: {err}'
+        self.message = f"DocAPI-Error while INSERT: {err}"
         super().__init__(self.message)
 
 
@@ -50,7 +50,7 @@ class DocapiUpdateError(DocapiError):
     Error raised when an UPDATE-operation fails
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while UPDATE: {err}'
+        self.message = f"DocAPI-Error while UPDATE: {err}"
         super().__init__(self.message)
 
 
@@ -59,5 +59,5 @@ class DocapiDeleteError(DocapiError):
     Error raised when a DELETE-operation fails
     """
     def __init__(self, err: str):
-        self.message = f'DocAPI-Error while DELETE: {err}'
+        self.message = f"DocAPI-Error while DELETE: {err}"
         super().__init__(self.message)

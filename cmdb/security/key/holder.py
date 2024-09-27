@@ -18,7 +18,7 @@ import logging
 from flask import current_app
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.utils.error import CMDBError
+
 from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -54,10 +54,3 @@ class KeyHolder:
             return current_app.asymmetric_key['private']
 
         return self.ssr.get_value('asymmetric_key', 'security')['private']
-
-
-class RSAKeyNotExists(CMDBError):
-    """TODO: document"""
-    def __init__(self):
-        self.message = 'RSA key-pair not exists'
-        super().__init__()

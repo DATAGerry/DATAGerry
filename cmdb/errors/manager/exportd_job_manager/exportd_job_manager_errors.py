@@ -34,7 +34,7 @@ class ExportdJobManagerDeleteError(ExportdJobManagerError):
     Raised when ExportdJobManager could not delete a job
     """
     def __init__(self, err: str):
-        self.message = f'Job could not be deleted. Error: {err}'
+        self.message = f"Job could not be deleted. Error: {err}"
         super().__init__(self.message)
 
 
@@ -43,7 +43,7 @@ class ExportdJobManagerUpdateError(ExportdJobManagerError):
     Raised when ExportdJobManager could not update a job
     """
     def __init__(self, err):
-        self.message = f'Job could not be updated. Error: {err}'
+        self.message = f"Job could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
@@ -52,7 +52,7 @@ class ExportdJobManagerInsertError(ExportdJobManagerError):
     Raised when ExportdJobManager could not create a job
     """
     def __init__(self, err: str):
-        self.message = f'Job could not be updated. Error: {err}'
+        self.message = f"Job could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
@@ -61,5 +61,15 @@ class ExportdJobManagerGetError(ExportdJobManagerError):
     Raised when ExportdJobManager could not retrieve a job
     """
     def __init__(self, err):
-        self.message = f'Job could not be retrieved. Error: {err}'
+        self.message = f"Job could not be retrieved. Error: {err}"
+        super().__init__(self.message)
+
+
+#TODO: ERROR-FIX (not used)
+class ExportJobConfigError(ExportdJobManagerError):
+    """
+    Raised when an error occurs in the exporter base
+    """
+    def __init__(self, err: str):
+        self.message = f"An error occured in exporter base. Error: {err}"
         super().__init__(self.message)

@@ -13,42 +13,63 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Contains Config File Error Classes"""
+"""
+Contains Config File Error Classes
+"""
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ConfigFileError(CMDBError):
-    """Base ConfigFile Error"""
+    """
+    Base ConfigFile Error
+    """
     def __init__(self, message: str):
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# ------------------------------------------------ CONFIG FILE ERRORS ------------------------------------------------ #
 
+#TODO: ERROR-FIX (not used)
 class ConfigFileSetError(ConfigFileError):
-    """Error if code tries to set values or sections while a config file is loaded"""
+    """
+    Error if code tries to set values or sections while a config file is loaded
+    """
     def __init__(self, filename: str):
-        super().__init__(f'Config file: {filename} was loaded. No manual editing of values are allowed!')
+        self.message = f"Config file: {filename} was loaded. No manual editing of values are allowed!"
+        super().__init__(self.message)
 
 
 class ConfigFileNotFound(ConfigFileError):
-    """Error if local file could not be loaded"""
+    """
+    Error if local file could not be loaded
+    """
     def __init__(self, filename: str):
-        super().__init__(f'Config file: {filename} was not found!')
+        self.message = f"Config file: {filename} was not found!"
+        super().__init__(self.message)
 
 
 class ConfigNotLoaded(ConfigFileError):
-    """Error if reader is not loaded"""
+    """
+    Error if reader is not loaded
+    """
     def __init__(self, filename: str):
-        super().__init__(f'Config file: {filename} was not loaded correctly!')
+        self.message = f"Config file: {filename} was not loaded correctly!"
+        super().__init__(self.message)
 
 
 class SectionError(ConfigFileError):
-    """Error if section does not exist"""
+    """
+    Error if section does not exist
+    """
     def __init__(self, name: str):
-        super().__init__(f'The section {name} does not exist!')
+        self.message = f"The section '{name}' does not exist!"
+        super().__init__(self.message)
 
 
+#TODO: ERROR-FIX (not used)
 class KeySectionError(ConfigFileError):
-    """Error if key does not exist in section"""
+    """
+    Error if key does not exist in section
+    """
     def __init__(self, name: str):
-        super().__init__(f'The key {name} was not found!')
+        self.message = f"The key '{name}' was not found!"
+        super().__init__(self.message)

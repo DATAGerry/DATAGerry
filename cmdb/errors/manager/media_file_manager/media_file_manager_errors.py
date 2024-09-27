@@ -34,7 +34,7 @@ class MediaFileManagerGetError(MediaFileManagerError):
     Raised when MediaFileManager could not retrieve a file
     """
     def __init__(self, err: str):
-        self.message = f'File could not be retrieved. Error: {err}'
+        self.message = f"File could not be retrieved. Error: {err}"
         super().__init__(self.message)
 
 
@@ -43,7 +43,7 @@ class MediaFileManagerInsertError(MediaFileManagerError):
     Raised when MediaFileManager could not create a file
     """
     def __init__(self, err: str):
-        self.message = f'File could not be created. Error: {err}'
+        self.message = f"File could not be created. Error: {err}"
         super().__init__(self.message)
 
 
@@ -52,7 +52,7 @@ class MediaFileManagerUpdateError(MediaFileManagerError):
     Raised when MediaFileManager could not update a file
     """
     def __init__(self, err: str):
-        self.message = f'File could not be updated. Error: {err}'
+        self.message = f"File could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
@@ -61,6 +61,5 @@ class MediaFileManagerDeleteError(MediaFileManagerError):
     Raised when MediaFileManager could not delete a file
     """
     def __init__(self, err: str):
-        self.message = f'File could not be deleted. Error: {err}'
+        self.message = f"File could not be deleted. Error: {err}"
         super().__init__(self.message)
-        

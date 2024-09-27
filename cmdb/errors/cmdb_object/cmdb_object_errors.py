@@ -27,24 +27,24 @@ class CmdbDAOError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
+# -------------------------------------------------- CmdbDAO ERRORS -------------------------------------------------- #
 
 class NoPublicIDError(CmdbDAOError):
     """
     Error if object has no public_id
     """
     def __init__(self):
-        self.message = 'The object has no public_id!'
+        self.message = "The object has no public_id!"
         super().__init__(self.message)
 
 
 #TODO: ERROR-FIX (not used)
 class VersionTypeError(CmdbDAOError):
     """
-    Error if update step input was wrong
+    Error if update step of object version was wrong
     """
-    def __init__(self, level: str, update_input: str):
-        self.message = f'The version type {update_input} update for {level} is wrong'
+    def __init__(self, err: str):
+        self.message = f"Error: {err}"
         super().__init__(self.message)
 
 
@@ -53,8 +53,8 @@ class NoVersionError(CmdbDAOError):
     """
     Error if object from models child class has no version number
     """
-    def __init__(self, public_id: int):
-        self.message = f'The object (ID: {public_id}) has no version control'
+    def __init__(self, err: str):
+        self.message = f"No version control. Error: {err}"
         super().__init__(self.message)
 
 
@@ -62,6 +62,6 @@ class RequiredInitKeyNotFoundError(CmdbDAOError):
     """
     Error if on of the given parameters is missing inside required init keys
     """
-    def __init__(self, key_name: str):
-        self.message = f'Following initialization key was not found inside the document: {key_name}'
+    def __init__(self, err: str):
+        self.message = f"Initialization key was not found: {err}"
         super().__init__(self.message)

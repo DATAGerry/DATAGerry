@@ -25,7 +25,7 @@ from cmdb.framework.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 
 from cmdb.errors.type import FieldNotFoundError
-from cmdb.utils.error import CMDBError
+from cmdb.errors.manager.object_manager import TypeNotSetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -195,7 +195,7 @@ class CmdbObject(CmdbDAO):
             int: public id of input_type
         """
         if self.type_id == 0 or self.type_id is None:
-            raise TypeNotSetError(self.get_public_id())
+            raise TypeNotSetError()
 
         return int(self.type_id)
 
@@ -228,7 +228,11 @@ class CmdbObject(CmdbDAO):
 
     def set_value(self, field, value) -> str:
         """TODO: document"""
+        current_field = None
+
         for f in self.fields:
+            current_field = f
+
             if f['name'] == field:
                 if value.isdigit():
                     value = int(value)
@@ -236,7 +240,8 @@ class CmdbObject(CmdbDAO):
                 return f['name']
             continue
 
-        raise FieldNotFoundError
+        if current_field:
+            raise FieldNotFoundError(current_field['name'])
 
 
     def get_value(self, field) -> Union[str, None]:
@@ -272,15 +277,6 @@ class CmdbObject(CmdbDAO):
                 field_value = self.get_value(field_name)
                 value_string += str(field_value)
                 value_string += str(' ')
-            except CMDBError:
+            except Exception:
                 continue
         return value_string.strip()
-
-
-class TypeNotSetError(CMDBError):
-    """
-    @deprecated
-    """
-    def __init__(self, public_id):
-        self.message = f'The object (ID: {public_id}) is not connected with a input_type'
-        super(CMDBError, self).__init__(self.message)

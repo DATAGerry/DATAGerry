@@ -15,14 +15,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import abort, jsonify, current_app
 
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
+
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.utils.error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 with current_app.app_context():
@@ -47,11 +46,10 @@ def get_external_system_params(class_external_system):
     try:
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.parameters
-    except CMDBError as error:
-        LOGGER.info(str(error))
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug(str(err))
         return abort(404, jsonify(message='Not Found', error='external system params'))
-    except Exception as error:
-        return abort(400, error)
 
     return make_response(list_of_parameters)
 
@@ -63,10 +61,9 @@ def get_external_system_variables(class_external_system):
     try:
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.variables
-    except CMDBError as error:
-        LOGGER.info(str(error))
-        return abort(404, jsonify(message='Not Found', error='external system variables'))
     except Exception as error:
-        return abort(400, error)
+        #TODO: ERROR-FIX
+        LOGGER.debug(str(error))
+        return abort(404, jsonify(message='Not Found', error='external system variables'))
 
     return make_response(list_of_parameters)

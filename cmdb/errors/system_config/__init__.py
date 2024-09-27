@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This package contains all errors for the system config of DATAGERRY"""
+"""
+This package contains all errors of the system config
+"""
 from .system_config_errors import ConfigFileError,\
                                   ConfigFileSetError,\
                                   ConfigFileNotFound,\

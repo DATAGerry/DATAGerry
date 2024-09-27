@@ -18,17 +18,16 @@ import json
 import datetime
 import time
 import logging
-
 from flask import abort, jsonify, Response
 
 from cmdb.framework import TypeModel
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.errors.type import TypeNotFoundError
 from cmdb.utils import json_encoding
-from cmdb.utils.error import CMDBError
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+
+from cmdb.errors.type import TypeNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -47,12 +46,15 @@ def export_type(request_user: UserModel):
     try:
         type_list = [TypeModel.to_json(type) for type in object_manager.get_all_types()]
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
-    except TypeNotFoundError as e:
-        return abort(400, e)
-    except ModuleNotFoundError as e:
-        return abort(400, e)
-    except CMDBError as err:
-        LOGGER.info("Error occured in export_type(): %s", err)
+    except TypeNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except ModuleNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.info("Error occured in export_type(): %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')
@@ -85,12 +87,15 @@ def export_type_by_ids(public_ids, request_user: UserModel):
         type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
                                      object_manager.get_types_by(sort="public_id", **{'$or': query_list})],
                                     default=json_encoding.default, indent=2)
-    except TypeNotFoundError as e:
-        return abort(400, e)
-    except ModuleNotFoundError as e:
-        return abort(400, e)
-    except CMDBError as err:
-        LOGGER.info("Error occured in export_type_by_ids(): %s", err)
+    except TypeNotFoundError:
+        #TODO: ERROR-FIX
+        return abort(400)
+    except ModuleNotFoundError:
+        #TODO:ERROR-FIX
+        return abort(400)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.info("[export_type_by_ids] Exception: %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 
     timestamp = datetime.datetime.fromtimestamp(time.time()).strftime('%Y_%m_%d-%H_%M_%S')

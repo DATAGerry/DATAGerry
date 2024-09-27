@@ -345,7 +345,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         result = locations_manager.update({'object_id': object_id}, location_update_params)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
-        return ErrorMessage(400, f"Could not update the location (E: {err})!").response()
+        return ErrorMessage(400, f"Could not update the location!").response()
 
     api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
 

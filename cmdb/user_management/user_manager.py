@@ -24,7 +24,6 @@ from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.right import BaseRight
 import cmdb.user_management.rights as all_rights
-from cmdb.utils.error import CMDBError
 
 from cmdb.errors.database import NoDocumentFound
 from cmdb.errors.manager.user_manager import UserManagerGetError,\
@@ -59,7 +58,8 @@ class UserManager(CmdbManagerBase):
         for founded_user in self._get_many(collection=UserModel.COLLECTION):
             try:
                 user_list.append(UserModel.from_data(founded_user))
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 continue
         return user_list
 
@@ -71,10 +71,13 @@ class UserManager(CmdbManagerBase):
         for user in users_in_database:
             try:
                 user_ = UserModel.from_data(user)
-            except CMDBError as err:
+            except Exception as err:
+                #TODO: ERROR-FIX
                 LOGGER.error('[UserManager] Error while inserting database user into return list: %s',err)
                 continue
+
             user_list.append(user_)
+
         return user_list
 
 
@@ -133,9 +136,11 @@ class UserManager(CmdbManagerBase):
         for found_group in self._get_many(collection=UserGroupModel.COLLECTION):
             try:
                 group_list.append(UserGroupModel(**found_group))
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 LOGGER.debug("Error while group parser: %s",found_group)
                 continue
+
         return group_list
 
 

@@ -19,8 +19,6 @@ import logging
 from cmdb.updater.updater import Updater
 from cmdb.framework.cmdb_object import CmdbObject
 
-from cmdb.errors.cmdb_error import CMDBError
-
 from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -44,7 +42,8 @@ class Update20200408(Updater):
             highest_id = self.database_manager.get_highest_id(collection)
             self.database_manager.update_public_id_counter(collection, highest_id)
 
-        except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
-            raise CMDBError(err) from err
+        except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
+            #TODO: ERROR-FIX
+            raise Exception(err) from err
 
         self.increase_updater_version(20200408)

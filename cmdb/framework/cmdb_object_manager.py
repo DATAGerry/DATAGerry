@@ -23,6 +23,7 @@ import json
 from typing import Union
 from queue import Queue
 from bson import json_util
+from pymongo.errors import DuplicateKeyError
 
 from cmdb.framework.managers.type_manager import TypeManager
 from cmdb.framework.cmdb_base import CmdbManagerBase
@@ -37,14 +38,11 @@ from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management import UserModel
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
                                                ObjectManagerInsertError,\
                                                ObjectManagerInitError,\
                                                ObjectManagerDeleteError
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
-from cmdb.errors.database import PublicIDAlreadyExists
 from cmdb.errors.type import FieldNotFoundError, FieldInitError
 from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -56,8 +54,10 @@ LOGGER = logging.getLogger(__name__)
 def has_access_control(model: TypeModel, user: UserModel, permission: AccessControlPermission) -> bool:
     """Check if a user has access to object/objects for a given permission"""
     acl: AccessControlList = model.acl
+
     if acl and acl.activated:
         return acl.verify_access(user.group_id, permission)
+
     return True
 
 
@@ -137,7 +137,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 type_ = self._type_manager.get(object_.type_id)
                 verify_access(type_, user, permission)
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 continue
             ack.append(CmdbObject(**obj))
         return ack
@@ -210,7 +211,8 @@ class CmdbObjectManager(CmdbManagerBase):
             try:
                 type_ = self._type_manager.get(object_.type_id)
                 verify_access(type_, user, permission)
-            except CMDBError:
+            except Exception:
+                #TODO: ERROR-FIX
                 continue
             ack.append(obj)
 
@@ -286,9 +288,10 @@ class CmdbObjectManager(CmdbManagerBase):
         if isinstance(data, dict):
             try:
                 new_object = CmdbObject(**data)
-            except CMDBError as error:
-                LOGGER.debug('[insert_object] Error while inserting object - error: %s', error)
-                raise ObjectManagerInsertError(error) from error
+            except Exception as err:
+                #TODO: ERROR-FIX
+                LOGGER.debug('[insert_object] Error while inserting object - error: %s', str(err))
+                raise ObjectManagerInsertError(str(err)) from err
         elif isinstance(data, CmdbObject):
             new_object = data
 
@@ -310,7 +313,7 @@ class CmdbObjectManager(CmdbManagerBase):
                                                          "user_id": new_object.author_id,
                                                          "event": 'insert'})
                 self._event_queue.put(event)
-        except (CMDBError, PublicIDAlreadyExists) as error:
+        except (Exception, DuplicateKeyError) as error:
             #TODO: ERROR-FIX
             raise ObjectManagerInsertError(error) from error
 
@@ -347,7 +350,8 @@ class CmdbObjectManager(CmdbManagerBase):
                 for ref_field in ref_fields:
                     type_init_list.append(
                         {"type_id": current_loop_type.get_public_id(), "field_name": ref_field['name']})
-            except (CMDBError, FieldNotFoundError, FieldInitError):
+            except (Exception, FieldNotFoundError, FieldInitError):
+                #TODO: ERROR-FIX
                 continue
 
         referenced_by_objects = []
@@ -382,8 +386,9 @@ class CmdbObjectManager(CmdbManagerBase):
                 self._event_queue.put(event)
             ack = self._delete(CmdbObject.COLLECTION, public_id)
             return ack
-        except (CMDBError, Exception) as err:
-            raise ObjectManagerDeleteError(public_id, err) from err
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ObjectManagerDeleteError(str(err)) from err
 
 
     def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
@@ -419,10 +424,10 @@ class CmdbObjectManager(CmdbManagerBase):
                 collection=TypeModel.COLLECTION,
                 public_id=public_id)
             )
-        except RequiredInitKeyNotFoundError as error:
-            raise ObjectManagerInitError(err=error)  from error
-        except Exception as error:
-            raise ObjectManagerGetError(err=error) from error
+        except RequiredInitKeyNotFoundError as err:
+            raise ObjectManagerInitError(err)  from err
+        except Exception as err:
+            raise ObjectManagerGetError(err=err) from err
 
 
     #@deprecated

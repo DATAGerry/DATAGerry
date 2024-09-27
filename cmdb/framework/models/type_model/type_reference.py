@@ -137,4 +137,4 @@ class TypeReference:
         try:
             self.line = self.line.format(*inputs)
         except Exception as err:
-            raise TypeReferenceLineFillError(inputs) from err
+            raise TypeReferenceLineFillError(self.line) from err

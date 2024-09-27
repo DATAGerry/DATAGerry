@@ -30,8 +30,6 @@ from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
 from cmdb.errors.manager import ManagerIterationError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -62,8 +60,9 @@ def add_template(request_user: UserModel):
 
     try:
         template_instance = DocapiTemplate(**new_tpl_data)
-    except CMDBError as err:
-        LOGGER.debug(err)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug(str(err))
         return abort(400)
 
     try:
@@ -181,7 +180,8 @@ def update_template(request_user: UserModel):
 
     try:
         update_tpl_instance = DocapiTemplate(**new_tpl_data)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(400)
 
     try:

@@ -16,7 +16,7 @@
 """TODO: document"""
 from typing import Union
 
-from cmdb.utils.error import CMDBError
+from cmdb.errors.api_projection import APIProjectionInclusionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class APIProjection:
@@ -130,7 +130,8 @@ class APIProjector:
                 return {include_key: element[include_key]}
             except (KeyError, ValueError, TypeError) as err:
                 raise APIProjectionInclusionError(
-                    f'Projected element does not include the key: {include_key} | Error: {err}') from err
+                    f'Projected element does not include the key: {include_key} | Error: {err}'
+                ) from err
 
         key, rest = include_key.split('.', 1)
         if isinstance(element[key], list):
@@ -160,17 +161,3 @@ class APIProjector:
                     del element[key]  # TODO: Implement nested (dot .) parameter for exclusion.
 
         return element
-
-
-class APIProjectionError(CMDBError):
-    """TODO: document"""
-    def __init__(self, message: str = None):
-        self.message = message
-        super().__init__()
-
-
-class APIProjectionInclusionError(APIProjectionError):
-    """TODO: document"""
-    def __init__(self, message: str):
-        message = f'Error while inclusion projection: err {message}'
-        super().__init__(message)

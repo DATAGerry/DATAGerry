@@ -30,8 +30,6 @@ from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -61,7 +59,8 @@ def add_type(request_user: UserModel):
         try:
             type_instance = TypeModel.from_data(new_type_data)
             type_manager.insert(type_instance)
-        except (ManagerInsertError, CMDBError) as err:
+        except (ManagerInsertError, Exception) as err:
+            #TODO: ERROR-FIX
             error_collection.update({"public_id": new_type_data['public_id'], "message": err})
 
     return make_response(error_collection)
@@ -81,7 +80,8 @@ def update_type(request_user: UserModel):
     for add_data_dump in data_dump:
         try:
             update_type_instance = TypeModel.from_data(add_data_dump)
-        except CMDBError:
+        except Exception:
+            #TODO: ERROR-FIX
             return abort(400)
         try:
             type_manager.get(update_type_instance.public_id)

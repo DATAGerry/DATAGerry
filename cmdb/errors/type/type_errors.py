@@ -13,42 +13,63 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module contains all error classes for Types"""
+"""
+This module contains all error classes for CmdbTypes
+"""
 from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class CmdbTypeError(CMDBError):
-    """Base ConfigFile Error"""
+    """
+    Base CmdbType Error
+    """
     def __init__(self, message: str):
+        self.message = message
         super().__init__(message)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# -------------------------------------------------- CmdbType ERRORS ------------------------------------------------- #
 
 class TypeNotFoundError(CmdbTypeError):
-    """TODO: document"""
+    """
+    Raised when a type was not found
+    """
     def __init__(self, type_id: int):
-        super().__init__(f"Type with ID: {type_id} not found!")
+        self.message = f"Type with ID: {type_id} not found!"
+        super().__init__(self.message)
 
 
+#TODO: ERROR-FIX (never used)
 class ExternalFillError(CmdbTypeError):
-    """Error if href of TypeExternalLink could not filled with input data"""
-    def __init__(self, inputs):
-        super().__init__(f'Href link do not fit with inputs: {inputs}!')
+    """
+    Raised if href of TypeExternalLink could not filled with input data
+    """
+    def __init__(self, href: str):
+        self.message = f"Href link do not fit with inputs: {href}!"
+        super().__init__(self.message)
 
 
 class TypeReferenceLineFillError(CmdbTypeError):
-    """Error if summary line of TypeReferences could not filled with input data"""
-    def __init__(self, inputs):
-        super().__init__(f'Type reference summary line do not fit with inputs: {inputs}!')
+    """
+    Raised if summary line of TypeReferences could not filled with input data
+    """
+    def __init__(self, line: str):
+        self.message = f"Type reference summary line do not fit with inputs: {line}!"
+        super().__init__(self.message)
 
 
 class FieldNotFoundError(CmdbTypeError):
-    """Error if field do not exists"""
-    def __init__(self, field_name: str = None, type_name: str = None):
-        super().__init__(f"Field '{field_name}' was not found inside input_type: '{type_name}'!")
+    """
+    Raised if field do not exists
+    """
+    def __init__(self, field_name: str = None):
+        self.message = f"Field '{field_name}' was not found!"
+        super().__init__(self.message)
 
 
 class FieldInitError(CmdbTypeError):
-    """Error if field could not be initialized"""
-    def __init__(self, field_name:str = None):
-        super().__init__(f"Field '{field_name}' could not be initialized")
+    """
+    Error if field could not be initialized
+    """
+    def __init__(self, field_name:str):
+        self.message = f"Field '{field_name}' could not be initialized"
+        super().__init__(self.message)

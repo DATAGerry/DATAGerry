@@ -21,7 +21,6 @@ from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.type import TypeModel
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
-from cmdb.errors.cmdb_error import CMDBError
 from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -53,7 +52,8 @@ class Update20200226(Updater):
 
             # Remove the property root from category collection
             self.database_manager.unset_update_many(CategoryModel.COLLECTION, {}, 'root')
-        except (ObjectManagerGetError, ObjectManagerUpdateError, CMDBError) as err:
-            raise CMDBError(err) from err
+        except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
+            #TODO: ERROR-FIX
+            raise Exception(err) from err
 
         self.increase_updater_version(20200226)

@@ -24,8 +24,6 @@ from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.utils.error import CMDBError
-
 from cmdb.errors.manager import ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -76,7 +74,8 @@ def get_intro_starter(request_user: UserModel):
             'execute': (types_total > 0 or categories_total > 0 or objects_total > 0)}
 
         resp = make_response(intro_instance)
-    except CMDBError:
+    except Exception:
+        #TODO: ERROR-FIX
         return abort(400)
 
     return resp
