@@ -583,6 +583,20 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Determines if a section should be highlighted.
+     * Highlights the section if its name is empty or if it is duplicated.
+     * @param section - The section to check for highlighting.
+     * @returns true if the section should be highlighted, false otherwise.
+     */
+    public isHighlighted(section: any): boolean {
+        if (!section.name || this.sections.filter(s => s.name === section.name).length > 1) {
+            return true;
+        }
+        return false;
+    }
+
+
     /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any) {
