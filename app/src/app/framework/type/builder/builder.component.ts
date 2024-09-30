@@ -590,7 +590,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @returns true if the section should be highlighted, false otherwise.
      */
     public isHighlighted(section: any): boolean {
-        section.fields.map((field) => console.log('fieldsss', field))
         if (!section.name || this.sections.filter(s => s.name === section.name).length > 1) {
             return true;
         }
