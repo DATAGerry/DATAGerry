@@ -21,8 +21,8 @@ Except for the managers, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 

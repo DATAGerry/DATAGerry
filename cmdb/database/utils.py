@@ -39,12 +39,14 @@ from bson.timestamp import Timestamp
 from bson.tz_util import utc
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
 _RE_TYPE = type(re.compile("foo"))
 
 ASCENDING = 1
 DESCENDING = -1
 
-LOGGER = logging.getLogger(__name__)
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def object_hook(dct: dict):
     """Helper function for converting json to mongo bson
@@ -96,7 +98,7 @@ def default(obj):
     """
     from cmdb.framework.cmdb_render import RenderResult
 
-    from cmdb.framework.cmdb_dao import CmdbDAO
+    from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
     if isinstance(obj, CmdbDAO):
         return obj.__dict__
 

@@ -17,7 +17,7 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog

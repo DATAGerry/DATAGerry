@@ -19,7 +19,7 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Generic, TypeVar
 
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 from cmdb.search.query import Query, Pipeline
 # -------------------------------------------------------------------------------------------------------------------- #
 

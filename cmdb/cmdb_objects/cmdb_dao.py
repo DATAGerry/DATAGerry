@@ -146,7 +146,7 @@ class CmdbDAO:
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbDAO":
+    def from_data(cls, data: dict) -> "CmdbDAO":
         """TODO: document"""
         raise NotImplementedError()
 
@@ -208,16 +208,6 @@ class CmdbDAO:
             return self.version
 
         raise NoVersionError(f"The object (ID: {self.get_public_id()}) has no version property")
-
-
-    def to_database(self) -> dict:
-        """
-        quick and dirty database converter
-        at the moment it only returns the dict, but anyway should be used.
-        Returns:
-            dict: attribute dict of object
-        """
-        return self.__dict__
 
 
     def __repr__(self):

@@ -18,7 +18,7 @@ import logging
 
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob

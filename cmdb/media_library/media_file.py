@@ -19,7 +19,7 @@ from datetime import date
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 
 from cmdb.media_library.media_file_metadata import FileMetadata
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -31,7 +31,11 @@ class MediaFile(MediaFileManagementBase):
     REQUIRED_INIT_KEYS = ['name']
 
     INDEX_KEYS = [
-        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
+        {
+            'keys': [('name', CmdbDAO.DAO_ASCENDING)],
+            'name': 'name',
+            'unique': True
+        }
     ]
 
     def __init__(self, filename, chunkSize, uploadDate, metadata, length, **kwargs):
@@ -67,10 +71,10 @@ class MediaFile(MediaFileManagementBase):
 
         Raises:
             NoPublicIDError: if `public_id` is zero or not set
-
         """
         if self.public_id == 0 or self.public_id is None:
             raise NoPublicIDError()
+
         return self.public_id
 
 
@@ -82,8 +86,8 @@ class MediaFile(MediaFileManagementBase):
         """
         if self.filename is None:
             return ""
-        else:
-            return self.filename
+
+        return self.filename
 
 
     def get_chunk_size(self) -> bytes:

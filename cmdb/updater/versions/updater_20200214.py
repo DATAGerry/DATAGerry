@@ -19,7 +19,7 @@ import time
 import logging
 from datetime import datetime
 
-from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.manager.object_manager import ObjectManager
 
 from cmdb.updater.updater import Updater
 

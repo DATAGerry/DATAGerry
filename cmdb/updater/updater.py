@@ -17,12 +17,12 @@
 import logging
 
 from abc import abstractmethod
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.updater.updater_settings import UpdateSettings

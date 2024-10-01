@@ -25,15 +25,17 @@ import xml.etree.ElementTree as ET
 import zipfile
 import openpyxl
 
+from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.exporter.exporter_utils import ExperterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.exporter.config.config_type import ExporterConfigType
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.framework.cmdb_render import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
 

@@ -19,7 +19,7 @@ from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.event_management.event import Event
 from cmdb.manager.managers import ManagerQueryBuilder
@@ -34,7 +34,9 @@ from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateEr
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             DocapiTemplateManager - CLASS                                            #
+# -------------------------------------------------------------------------------------------------------------------- #
 class DocapiTemplateManager(CmdbManagerBase):
     """TODO: document"""
     def __init__(self, database_manager: DatabaseManagerMongo, event_queue=None, database: str = None):

@@ -23,7 +23,7 @@ from dateutil.parser import parse
 
 from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
 
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
@@ -74,8 +74,8 @@ class TypeModel(CmdbDAO):
             'required': False
         },
         'selectable_as_parent': {
-                'type': 'boolean',
-                'default': True
+            'type': 'boolean',
+            'default': True
         },
         'global_template_ids':{
             'type': 'list',
@@ -325,9 +325,11 @@ class TypeModel(CmdbDAO):
         }
     }
 
-    INDEX_KEYS = [
-        {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
-    ]
+    INDEX_KEYS = [{
+        'keys': [('name', CmdbDAO.DAO_ASCENDING)],
+        'name': 'name',
+        'unique': True
+    }]
 
 
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
@@ -423,6 +425,7 @@ class TypeModel(CmdbDAO):
         """Get the display name"""
         if not self.label:
             self.label = self.name.title()
+
         return self.label
 
 

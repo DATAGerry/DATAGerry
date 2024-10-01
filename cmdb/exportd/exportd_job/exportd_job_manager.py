@@ -19,7 +19,7 @@ from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob

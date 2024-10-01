@@ -21,7 +21,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request
 
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.type_manager import TypeManager
 
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission

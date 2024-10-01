@@ -25,13 +25,13 @@ from queue import Queue
 from bson import json_util
 from pymongo.errors import DuplicateKeyError
 
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.manager.type_manager import TypeManager
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
 from cmdb.framework.models.category import CategoryModel
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Pipeline
 from cmdb.security.acl.control import AccessControlList

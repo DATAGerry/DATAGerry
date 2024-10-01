@@ -17,22 +17,25 @@
 import logging
 import datetime
 import time
-
 from flask import Response, abort
 
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.object_manager import ObjectManager
+
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_render import RenderList, RenderResult
 from cmdb.user_management import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.object_manager import ObjectManager
-
 from cmdb.utils.helpers import load_class
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                          SupportedExporterExtension - CLASS                                          #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SupportedExporterExtension:
     """Supported export extensions for exporting (csv, json, xlsx, xml)"""
 
@@ -67,7 +70,7 @@ class SupportedExporterExtension:
             })
         return _list
 
-
+#TODO: CLASS-FIX
 class  BaseExportWriter:
     """TODO: document"""
 

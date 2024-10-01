@@ -22,7 +22,7 @@ from typing import Union
 from bson import json_util
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-import cmdb.framework.cmdb_object_manager as com
+import cmdb.manager.cmdb_object_manager as com
 from cmdb.manager.managers import ManagerBase
 
 from cmdb.database.utils import object_hook
@@ -32,7 +32,7 @@ from cmdb.framework.results.iteration import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 
 from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #

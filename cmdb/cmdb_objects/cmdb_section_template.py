@@ -19,7 +19,7 @@ a section template in Datagarry.
 """
 import logging
 
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 

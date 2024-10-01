@@ -19,7 +19,7 @@ a location in Datagarry
 """
 import logging
 
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -28,7 +28,6 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 CmdbLocation - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class CmdbLocation(CmdbDAO):
     """
     The CMDB location is the basic data wrapper for storing and

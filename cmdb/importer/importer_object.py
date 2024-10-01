@@ -17,7 +17,7 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework import CmdbObject
 from cmdb.importer import JsonObjectParser

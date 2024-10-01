@@ -114,8 +114,7 @@ class UserGroupModel(CmdbDAO):
         try:
             return next(right for right in self.rights if right.name == name)
         except Exception as err:
-            #TODO: ERROR-FIX
-            raise RightNotFoundError(f"Groupname: {self.name} | Rightname: {name}", ) from err
+            raise RightNotFoundError(f"Groupname: {self.name} | Rightname: {name}. Error: {err}") from err
 
 
     def has_right(self, right_name) -> bool:
@@ -123,8 +122,8 @@ class UserGroupModel(CmdbDAO):
         try:
             self.get_right(right_name)
         except RightNotFoundError:
-            #TODO: ERROR-FIX
             return False
+
         return True
 
 

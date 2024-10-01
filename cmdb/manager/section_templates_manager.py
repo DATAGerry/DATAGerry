@@ -20,16 +20,16 @@ from typing import Union
 from deepdiff import DeepDiff
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework import TypeModel
 from cmdb.framework.models.type_model import TypeFieldSection
 from cmdb.framework import CmdbSectionTemplate
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission

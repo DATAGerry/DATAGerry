@@ -18,10 +18,10 @@ import logging
 from datetime import datetime, timezone
 from flask import abort, request
 
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.locations_manager import LocationsManager
-from cmdb.framework.managers.object_manager import ObjectManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.object_manager import ObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
@@ -31,7 +31,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse, make_api_response
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider

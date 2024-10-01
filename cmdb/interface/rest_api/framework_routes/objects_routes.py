@@ -21,9 +21,9 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
-from cmdb.framework.managers.object_manager import ObjectManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.object_manager import ObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager

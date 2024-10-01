@@ -17,23 +17,24 @@
 This module is the base class for the profiles of DATAGERRY assistant
 """
 import logging
-
 from flask import current_app
+
+from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+
 from cmdb.framework import TypeModel
-
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-
 from .profile_type_constructor import ProfileTypeConstructor
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  ProfileBase - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ProfileBase:
     """
     This class cointains all functions required by the different profiles
     """
-
     def __init__(self, created_type_ids: dict):
         self.type_dict: dict = {}
         self.created_type_ids: dict = created_type_ids
@@ -45,10 +46,8 @@ class ProfileBase:
             self.object_manager = CmdbObjectManager(current_app.database_manager)
             self.type_constructor = ProfileTypeConstructor(current_app.database_manager)
 
+# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                   HELPER FUNCTIONS                                                   #
-# -------------------------------------------------------------------------------------------------------------------- #
     def get_created_id(self, identifier: str) -> int:
         """
         Retrieves the public_id of a type from the 'created_type_ids'-dict

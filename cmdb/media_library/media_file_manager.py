@@ -20,7 +20,7 @@ from gridfs.grid_file import GridOutCursor, GridOut
 from gridfs.errors import NoFile
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.media_library.media_file import MediaFile
