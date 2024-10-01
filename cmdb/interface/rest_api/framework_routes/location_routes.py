@@ -18,8 +18,8 @@ import logging
 from flask import request, current_app
 
 from cmdb.manager.locations_manager import LocationsManager
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_render import RenderList

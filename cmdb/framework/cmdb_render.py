@@ -21,11 +21,11 @@ from dateutil.parser import parse
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.user_management.managers.user_manager import UserManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
 
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
 from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
@@ -40,7 +40,9 @@ from cmdb.errors.render import ObjectInstanceError, TypeInstanceError, InstanceR
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              RenderVisualization - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
 class RenderVisualization:
     """TODO: document"""
 
@@ -72,7 +74,7 @@ class RenderResult(RenderVisualization):
         self.externals: list = []
         self.multi_data_sections: list = []
 
-
+#TODO: CLASS-FIX
 class CmdbRender:
     """TODO: document"""
 
@@ -555,7 +557,7 @@ class CmdbRender:
             render_result.externals = external_list
         return render_result
 
-
+#TODO: CLASS-FIX
 class RenderList:
     """TODO: document"""
     def __init__(self, object_list: list[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,

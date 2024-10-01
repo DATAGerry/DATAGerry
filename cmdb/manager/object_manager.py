@@ -24,12 +24,12 @@ from bson import Regex, json_util
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.type_manager import TypeManager
 
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
 from cmdb.framework import CmdbObject
-from cmdb.framework.cmdb_object_manager import verify_access
+from cmdb.manager.cmdb_object_manager import verify_access
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.search import Query, Pipeline

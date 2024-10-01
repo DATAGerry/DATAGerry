@@ -18,17 +18,19 @@ from enum import Enum
 
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Model
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
+#TODO: CLASS-FIX
 class DocapiTemplateType(Enum):
     """TODO: document"""
     OBJECT = 0
 
 
+#TODO: CLASS-FIX
 class DocapiTemplate(TemplateManagementBase):
     """
     Docapi Template
@@ -115,6 +117,7 @@ class DocapiTemplate(TemplateManagementBase):
         """
         if self.public_id == 0 or self.public_id is None:
             raise NoPublicIDError()
+
         return self.public_id
 
 
@@ -126,8 +129,8 @@ class DocapiTemplate(TemplateManagementBase):
         """
         if self.name is None:
             return ""
-        else:
-            return self.name
+
+        return self.name
 
 
     def get_label(self) -> str:
@@ -187,21 +190,3 @@ class DocapiTemplate(TemplateManagementBase):
             str:
         """
         return self.template_style
-
-
-    def get_template_type(self):
-        """
-        Get type of this template
-        Returns:
-            str:
-        """
-        return self.template_type
-
-
-    def get_template_parameters(self):
-        """
-        Get parameters of this template
-        Returns:
-            str:
-        """
-        return self.template_parameters

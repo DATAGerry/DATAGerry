@@ -18,7 +18,7 @@ import logging
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.security import SecurityManager
-from cmdb.framework.cmdb_base import CmdbManagerBase
+from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel

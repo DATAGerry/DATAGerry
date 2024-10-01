@@ -19,7 +19,7 @@ from queue import Queue
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event

@@ -42,17 +42,6 @@ class CmdbManagerBase:
         self.dbm: DatabaseManagerMongo = database_manager
 
 
-    def _count(self, collection: str) -> int:
-        """Get the number of objects in given collection
-
-        Args:
-            collection: Collection name
-        Returns:
-            (int): number of found objects
-        """
-        return self.dbm.count(collection=collection)
-
-
     def _aggregate(self, collection: str, pipeline, **kwargs):
         """search after query requirements
 
@@ -79,35 +68,6 @@ class CmdbManagerBase:
             str: founded document in json format
         """
         return self.dbm.find_one(collection=collection, public_id=public_id)
-
-
-    def _get_location(self, collection: str, object_id: int) -> dict:
-        """get location document from the database by their object id
-
-        Args:
-            collection (str): name of the database collection
-            object_id (int): object id of the location document
-
-        Returns:
-            str: location document in json format
-        """
-        return self.dbm.find_one(collection=collection, object_id=object_id)
-
-
-    def get_location_by_object(self, collection: str, object_id: int) -> dict:
-        """get location document from the database by their object id
-
-        Args:
-            collection (str): name of the database collection
-            object_id (int): object id of the location document
-
-        Returns:
-            str: location document in json format
-        """
-        return self.dbm.find_one_by_object(
-            collection=collection,
-            object_id=object_id
-        )
 
 
     def _get_by(self, collection: str, **requirements: dict) -> dict:
@@ -178,42 +138,6 @@ class CmdbManagerBase:
             acknowledgment of database
         """
         return self.dbm.update(collection=collection, filter={'public_id': public_id}, data=data)
-
-
-    def _update_for_object(self, collection: str, object_id: int, data: dict) -> object:
-        """
-        update document/object in database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-            data: changed data/object
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.update(
-            collection=collection,
-            filter={'object_id': object_id},
-            data=data
-        )
-
-
-    def _unset_update_many(self, collection: str, data: str) -> object:
-        """
-        update document/object in database
-        Args:
-            collection (str): name of the database collection
-            public_id (int): public id of object
-            data: field to be deleted
-
-        Returns:
-            acknowledgment of database
-        """
-        return self.dbm.unset_update_many(
-            collection=collection,
-            filter={},
-            data=data
-        )
 
 
     def _update_many(self, collection: str, query: dict, update: dict):

@@ -21,7 +21,7 @@ from threading import Thread
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
 from cmdb.user_management.managers.user_manager import UserManager
 from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager

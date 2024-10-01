@@ -18,14 +18,14 @@ import logging
 from typing import Union
 
 from cmdb.framework.models import TypeModel
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.utils import Model, Collection
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 
 class CategoryModel(CmdbDAO):
-    """Category"""
+    """TODO: document"""
 
     COLLECTION: Collection = 'framework.categories'
     MODEL: Model = 'Category'
@@ -76,6 +76,7 @@ class CategoryModel(CmdbDAO):
         {'keys': [('types', CmdbDAO.DAO_ASCENDING)], 'name': 'types', 'unique': False}
     ]
 
+    #TODO CLASS-FIX
     class __CategoryMeta:
         """TODO: document"""
         def __init__(self, icon: str = '', order: int = None):
@@ -197,6 +198,7 @@ class CategoryModel(CmdbDAO):
         return len(self.get_types())
 
 
+#TODO CLASS-FIX
 class CategoryTree:
     """Base tree holder"""
     MODEL: Model = 'CategoryTree'

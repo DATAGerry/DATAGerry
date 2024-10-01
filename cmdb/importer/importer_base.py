@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 import logging
 from typing import Optional
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework import CmdbObject
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig

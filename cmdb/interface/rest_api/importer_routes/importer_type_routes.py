@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import request, abort
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
 
 from cmdb.framework import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint

@@ -16,9 +16,10 @@
 """TODO: document"""
 import logging
 
-from cmdb.framework.cmdb_object import CmdbObject
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
 from cmdb.framework.cmdb_render import RenderResult, RenderList
 from cmdb.search import Search
 from cmdb.search.params import SearchParam

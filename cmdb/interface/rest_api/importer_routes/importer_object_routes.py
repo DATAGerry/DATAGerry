@@ -20,8 +20,8 @@ from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default

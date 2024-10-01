@@ -16,13 +16,14 @@
 """TODO: document"""
 from enum import Enum
 
-from cmdb.framework.cmdb_dao import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from cmdb.framework.utils import Collection, Model
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
+#TODO: CLASS-FIX
 class ExecuteState(Enum):
     """TODO: document"""
     SUCCESSFUL = 0
@@ -32,12 +33,14 @@ class ExecuteState(Enum):
     RUNNING = 4
 
 
+#TODO: CLASS-FIX
 class ExportdJobType(Enum):
     """TODO: document"""
     PUSH = 0
     PULL = 1
 
 
+#TODO: CLASS-FIX
 class ExportdJob(JobManagementBase):
     """
     Exportd Job
@@ -133,6 +136,7 @@ class ExportdJob(JobManagementBase):
         """
         if self.public_id == 0 or self.public_id is None:
             raise NoPublicIDError()
+
         return self.public_id
 
 
@@ -144,8 +148,8 @@ class ExportdJob(JobManagementBase):
         """
         if self.name is None:
             return ""
-        else:
-            return self.name
+
+        return self.name
 
 
     def get_label(self) -> str:
@@ -156,8 +160,8 @@ class ExportdJob(JobManagementBase):
         """
         if self.label is None:
             return ""
-        else:
-            return self.label
+
+        return self.label
 
 
     def get_active(self) -> bool:
@@ -168,8 +172,8 @@ class ExportdJob(JobManagementBase):
         """
         if self.active is None:
             return ""
-        else:
-            return self.active
+
+        return self.active
 
 
     def get_sources(self):
@@ -197,33 +201,6 @@ class ExportdJob(JobManagementBase):
             list: all variables
         """
         return self.variables
-
-
-    def get_scheduling(self) -> dict:
-        """
-        Get scheduling of the job
-        Returns:
-            dict: Execution settings
-        """
-        return self.scheduling
-
-
-    def get_state(self):
-        """
-        Get state of executation of the job
-        Returns:
-            str:
-        """
-        return self.state
-
-
-    def get_exportd_typ(self):
-        """
-        Get type of executation of the job
-        Returns:
-            str:
-        """
-        return self.exportd_type
 
 
     def get_author_id(self):
