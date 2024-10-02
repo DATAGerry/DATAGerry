@@ -179,7 +179,8 @@
                             <!-- <button class="btn btn-link mr-1" type="button">
                                 <fa-icon [icon]="['fas', 'paint-brush']"></fa-icon>
                             </button> -->
-                            <button class="btn btn-link mr-1" type="button" dndHandle>
+                            <button class="btn btn-link mr-1" type="button" dndHandle 
+                            (dragstart)="preventDragForAllSections($event)">
                                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                             </button>
                             <button class="btn btn-link" type="button" (click)="removeSection(section, x)">

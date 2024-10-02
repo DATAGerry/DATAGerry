@@ -597,6 +597,22 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Prevents drag events when any section is highlighted.
+     * If a section is highlighted, this function stops the drag event while allowing other button interactions.
+     * @param event - The drag event to be checked and possibly prevented.
+     */
+    public preventDragForAllSections(event: DragEvent): void {
+        const isAnyHighlighted = this.sections.some(section => this.isHighlighted(section));
+
+        // If any section is highlighted, disable drag, but let other buttons work
+        if (isAnyHighlighted) {
+            event.stopPropagation(); // Stops event from affecting other elements
+            event.preventDefault();  // Prevent dragging behavior
+        }
+    }
+
+
     /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any) {
