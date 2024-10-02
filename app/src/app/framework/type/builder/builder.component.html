@@ -164,7 +164,7 @@
                 (dndMoved)="onSectionDragged(section, sections, 'move', x)">
                 <div class="card">
                     <div class="card-header" [ngClass]="{'global-section-item': isGlobalSection(section)}"
-                    [ngClass]="{'highlight-section-header': isHighlighted(section)}">
+                    [ngClass]="{'highlight-section-header': isSectionHighlighted(section)}">
                         <fa-icon [icon]="['far', 'object-group']"></fa-icon>
                             {{section.label}}
                         <span class="float-right">

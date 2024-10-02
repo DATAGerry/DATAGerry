@@ -584,13 +584,23 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
-     * Determines if a section should be highlighted.
-     * Highlights the section if its name is empty or if it is duplicated.
-     * @param section - The section to check for highlighting.
-     * @returns true if the section should be highlighted, false otherwise.
+     * Determines if a section should be highlighted based on various conditions.
+     * A section is highlighted if it has a duplicate name, missing name or label,
+     * or if it's a reference section with invalid reference data.
+     * @param section - The section to be checked.
+     * @returns boolean - Returns true if the section is highlighted, false otherwise.
      */
-    public isHighlighted(section: any): boolean {
-        if (!section.name || this.sections.filter(s => s.name === section.name).length > 1) {
+    public isSectionHighlighted(section: any): boolean {
+        const isDuplicateIdentifier = this.sections.filter(s => s.name === section.name).length > 1;
+        const isRefSection = section.type === "ref-section";
+
+        if (!section.name || isDuplicateIdentifier || !section.label || isRefSection) {
+
+            if (isRefSection) {
+                const isInvalidReference = !section.reference.type_id || !section.reference.section_name;
+                return isInvalidReference || !section.name || isDuplicateIdentifier || !section.label;
+            }
+
             return true;
         }
         return false;
