@@ -24,7 +24,7 @@ from werkzeug.wrappers import Request
 
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.media_library.media_file_manager import MediaFileManager
+from cmdb.manager.media_file_manager import MediaFileManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

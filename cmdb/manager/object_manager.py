@@ -36,7 +36,7 @@ from cmdb.search import Query, Pipeline
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerUpdateError, ManagerGetError, ManagerIterationError

@@ -24,7 +24,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 

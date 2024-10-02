@@ -36,7 +36,7 @@ from cmdb.framework.models.type import TypeModel
 from cmdb.search.query import Pipeline
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
                                                ObjectManagerInsertError,\

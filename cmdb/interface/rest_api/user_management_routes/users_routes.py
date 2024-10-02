@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from flask import abort, request, current_app
 
 from cmdb.security.security import SecurityManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.user_manager import UserManager
 
 from cmdb.search import Query
 from cmdb.interface.route_utils import insert_request_user
@@ -34,7 +34,7 @@ from cmdb.interface.response import GetMultiResponse, \
                                     ErrorMessage
 from cmdb.framework.utils import PublicID
 from cmdb.framework.results import IterationResult
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerGetError, \

@@ -23,14 +23,14 @@ from datetime import datetime
 from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
 
-from cmdb.user_management.managers.user_manager import UserManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.manager.user_manager import UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.right_manager import RightManager
 from cmdb.security.security import SecurityManager
 from cmdb.security.auth import AuthModule
 
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.user_management import UserGroupModel
+from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_reader import SystemSettingsReader

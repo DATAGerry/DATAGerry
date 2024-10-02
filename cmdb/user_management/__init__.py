@@ -17,13 +17,12 @@
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
 """
+from cmdb.manager.right_manager import RightManager
+
 from cmdb.user_management.models.settings import UserSettingModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.right import BaseRight
-
 from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.user_manager import UserManager
-from cmdb.user_management.managers.right_manager import RightManager
 from cmdb.user_management.rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
 

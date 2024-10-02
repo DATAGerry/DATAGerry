@@ -26,7 +26,7 @@ from cmdb.importer.importer_response import BaseImporterResponse, ImporterObject
     ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
                                                ObjectManagerInsertError,\

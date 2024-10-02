@@ -22,16 +22,16 @@ from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
-from cmdb.user_management.managers.user_manager import UserManager
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.manager.exportd_job_manager import ExportdJobManager
+from cmdb.manager.user_manager import UserManager
+from cmdb.manager.exportd_log_manager import ExportdLogManager
 
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
+from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
 
 
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError

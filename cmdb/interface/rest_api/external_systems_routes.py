@@ -17,7 +17,7 @@
 import logging
 from flask import abort, jsonify, current_app
 
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
+from cmdb.manager.exportd_job_manager import ExportdJobManager
 
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required

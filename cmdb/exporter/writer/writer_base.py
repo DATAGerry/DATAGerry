@@ -24,7 +24,7 @@ from cmdb.manager.object_manager import ObjectManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_render import RenderList, RenderResult
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat

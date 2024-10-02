@@ -17,10 +17,10 @@
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.user_management.managers.right_manager import RightManager
+from cmdb.manager.right_manager import RightManager
 from cmdb.manager.managers import ManagerBase
 
-from cmdb.user_management import UserGroupModel
+from cmdb.user_management.models.group import UserGroupModel
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline

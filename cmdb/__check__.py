@@ -31,8 +31,9 @@ from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 
 from cmdb.user_management import __FIXED_GROUPS__
-from cmdb.user_management.managers.user_manager import UserManager, UserModel
-from cmdb.user_management.managers.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
+from cmdb.user_management.models.user import UserModel
+from cmdb.manager.group_manager import GroupManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES

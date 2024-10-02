@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.user_manager import UserManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.type_manager import TypeManager
 
@@ -29,7 +29,7 @@ from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model import TypeReference, TypeExternalLink, TypeFieldSection, TypeReferenceSection
 from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
-from cmdb.user_management.user_manager import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError

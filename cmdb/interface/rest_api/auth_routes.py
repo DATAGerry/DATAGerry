@@ -21,10 +21,11 @@ from flask import request, current_app, abort
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.security import SecurityManager
-from cmdb.user_management import UserModel, RightManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.right_manager import RightManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
 
+from cmdb.user_management.models.user import UserModel
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.auth import AuthModule, AuthSettingsDAO

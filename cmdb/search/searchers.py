@@ -26,7 +26,7 @@ from cmdb.search.params import SearchParam
 from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.framework.utils import PublicID

@@ -17,9 +17,9 @@
 import logging
 from flask import request
 
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.right_manager import RightManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.right_manager import RightManager
+from cmdb.manager.user_manager import UserManager
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
 from cmdb.interface.route_utils import insert_request_user
@@ -31,7 +31,7 @@ from cmdb.framework.utils import PublicID
 from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.search import Query
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider

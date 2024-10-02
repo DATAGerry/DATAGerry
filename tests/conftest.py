@@ -20,12 +20,12 @@ from datetime import datetime
 import pytest
 
 from cmdb.security.security import SecurityManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
 
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.user_management import __FIXED_GROUPS__
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.database import DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #

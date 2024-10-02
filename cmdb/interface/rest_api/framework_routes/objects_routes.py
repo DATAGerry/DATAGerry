@@ -42,7 +42,7 @@ from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 from cmdb.framework.cmdb_render import CmdbRender, RenderList
 

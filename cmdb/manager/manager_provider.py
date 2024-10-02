@@ -18,25 +18,25 @@ import logging
 from enum import Enum
 from flask import current_app
 
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.rights import __all__ as rights
-from cmdb.user_management.managers.right_manager import RightManager
 
+from cmdb.manager.right_manager import RightManager
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.logs_manager import LogsManager
-from cmdb.docapi.docapi_template.docapi_template_manager import DocapiTemplateManager
-from cmdb.user_management.managers.user_manager import UserManager
-from cmdb.user_management.managers.setting_manager import UserSettingsManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.media_library.media_file_manager import MediaFileManager
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.manager.docapi_template_manager import DocapiTemplateManager
+from cmdb.manager.user_manager import UserManager
+from cmdb.manager.setting_manager import UserSettingsManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.media_file_manager import MediaFileManager
+from cmdb.manager.exportd_log_manager import ExportdLogManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
+from cmdb.manager.exportd_job_manager import ExportdJobManager
 from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
 from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
 

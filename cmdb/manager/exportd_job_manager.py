@@ -23,7 +23,7 @@ from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.manager.exportd_job_manager import ExportdJobManagerDeleteError,\

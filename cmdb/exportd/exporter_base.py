@@ -16,15 +16,15 @@
 """TODO: document"""
 import logging
 
-from cmdb.exportd.exportd_job.exportd_job_manager import ExportdJobManager
-from cmdb.exportd.exportd_logs.exportd_log_manager import ExportdLogManager
+from cmdb.manager.exportd_job_manager import ExportdJobManager
+from cmdb.manager.exportd_log_manager import ExportdLogManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.helpers import load_class
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
+from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
