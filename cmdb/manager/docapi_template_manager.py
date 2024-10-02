@@ -25,7 +25,7 @@ from cmdb.event_management.event import Event
 from cmdb.manager.managers import ManagerQueryBuilder
 from cmdb.framework.results import IterationResult
 from cmdb.search import Pipeline
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 
 from cmdb.errors.manager import ManagerIterationError

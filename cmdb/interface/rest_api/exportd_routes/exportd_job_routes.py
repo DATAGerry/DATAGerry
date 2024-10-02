@@ -30,9 +30,9 @@ from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-from cmdb.exportd.exportd_logs.exportd_log_manager import LogAction, ExportdJobLog
+from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError

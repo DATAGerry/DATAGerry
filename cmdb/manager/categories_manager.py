@@ -27,7 +27,7 @@ from cmdb.framework import CategoryModel
 from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters

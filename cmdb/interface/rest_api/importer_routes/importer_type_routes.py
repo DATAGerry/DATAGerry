@@ -27,7 +27,7 @@ from cmdb.framework import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, make_response, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError

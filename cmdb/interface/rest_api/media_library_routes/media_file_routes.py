@@ -19,10 +19,10 @@ import logging
 from bson import json_util
 from flask import abort, request, Response
 
-from cmdb.media_library.media_file_manager import MediaFileManager
+from cmdb.manager.media_file_manager import MediaFileManager
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import get_element_from_data_request, \
     get_file_in_request, generate_metadata_filter, recursive_delete_filter, generate_collection_parameters, \
     create_attachment_name

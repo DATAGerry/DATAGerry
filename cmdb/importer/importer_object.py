@@ -28,7 +28,7 @@ from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.importer import ImportRuntimeError, ParserRuntimeError

@@ -23,7 +23,7 @@ from werkzeug.wrappers import Request
 
 from cmdb.manager.type_manager import TypeManager
 
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel
 

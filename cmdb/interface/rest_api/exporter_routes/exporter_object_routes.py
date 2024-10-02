@@ -21,7 +21,7 @@ from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.utils.helpers import load_class
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission

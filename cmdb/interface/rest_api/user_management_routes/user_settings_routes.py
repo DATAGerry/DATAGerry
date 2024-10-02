@@ -17,14 +17,14 @@
 import logging
 from flask import abort, request
 
-from cmdb.user_management.managers.setting_manager import UserSettingsManager
+from cmdb.manager.setting_manager import UserSettingsManager
 
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetListResponse, GetSingleResponse, InsertSingleResponse, DeleteSingleResponse, \
     UpdateSingleResponse
-from cmdb.user_management import UserSettingModel
+from cmdb.user_management.models.settings import UserSettingModel
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerInsertError, ManagerGetError

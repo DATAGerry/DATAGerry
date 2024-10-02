@@ -19,7 +19,7 @@ from typing import Union
 
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.framework.models.log import CmdbObjectLog, LogAction
 

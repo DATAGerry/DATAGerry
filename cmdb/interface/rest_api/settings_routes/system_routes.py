@@ -23,7 +23,7 @@ from cmdb.interface.rest_api.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import make_response, login_required, right_required, \
     insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider

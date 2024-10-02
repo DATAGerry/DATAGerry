@@ -33,7 +33,7 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerGetError,\

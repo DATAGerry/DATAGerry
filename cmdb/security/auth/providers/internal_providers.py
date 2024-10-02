@@ -17,14 +17,14 @@
 import logging
 from flask import current_app
 
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.provider import AuthenticationError

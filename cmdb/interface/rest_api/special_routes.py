@@ -21,7 +21,7 @@ from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError

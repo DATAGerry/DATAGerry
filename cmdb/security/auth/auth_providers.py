@@ -16,12 +16,12 @@
 """TODO: document"""
 import logging
 
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

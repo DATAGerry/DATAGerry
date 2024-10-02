@@ -19,9 +19,10 @@ from typing import Type
 from flask import current_app
 
 from cmdb.security.security import SecurityManager
-from cmdb.user_management.managers.group_manager import GroupManager
-from cmdb.user_management.managers.user_manager import UserModel, UserManager
+from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.user_manager import UserManager
 
+from cmdb.user_management.models.user import UserModel
 from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_settings import AuthSettingsDAO

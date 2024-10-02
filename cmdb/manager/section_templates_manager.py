@@ -33,7 +33,7 @@ from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 

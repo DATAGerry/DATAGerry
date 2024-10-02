@@ -16,12 +16,13 @@
 """TODO: document"""
 import logging
 from datetime import datetime
-
 import pytest
 
-from cmdb.user_management import UserGroupModel, RightManager, UserModel
+from cmdb.manager.right_manager import RightManager
 
-from cmdb.user_management import rights
+from cmdb.user_management.models.group import UserGroupModel
+from cmdb.user_management.models.user import UserModel
+from cmdb.user_management.rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 

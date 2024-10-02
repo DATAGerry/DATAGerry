@@ -29,7 +29,7 @@ from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError,\

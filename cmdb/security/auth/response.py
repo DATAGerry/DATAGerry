@@ -17,7 +17,7 @@
 from werkzeug.wrappers import Response
 
 from cmdb.interface.response import make_api_response
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class LoginResponse:

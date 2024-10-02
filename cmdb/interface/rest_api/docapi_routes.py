@@ -27,7 +27,7 @@ from cmdb.interface.response import GetMultiResponse, ErrorMessage
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
-from cmdb.user_management import UserModel
+from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
