@@ -607,6 +607,22 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Determines if a field should be highlighted based on its name, label, or if its name is duplicated.
+     * @param field - The field to be checked for highlighting.
+     * @param sectionfields - The list of section fields to check for duplicates.
+     * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
+     */
+    public isFieldHighlighted(field: any, sectionfields: any): boolean {
+        console.log('fielddd', sectionfields)
+
+        if (!field.name || !field.label || sectionfields.filter(s => s.name === field.name).length > 1) {
+            return true
+        }
+
+        return false
+    }
+
     /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
     public getDnDEffectAllowedForField(field: any) {
