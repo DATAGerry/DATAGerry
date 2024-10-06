@@ -613,13 +613,27 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param event - The drag event to be checked and possibly prevented.
      */
     public preventDragForAllSections(event: DragEvent): void {
-        const isAnyHighlighted = this.sections.some(section => this.isHighlighted(section));
+        const isAnyHighlighted = this.sections.some(section => this.isSectionHighlighted(section));
 
         // If any section is highlighted, disable drag, but let other buttons work
         if (isAnyHighlighted) {
             event.stopPropagation(); // Stops event from affecting other elements
             event.preventDefault();  // Prevent dragging behavior
         }
+    }
+
+    /**
+ * Determines if a field should be highlighted based on its name, label, or if its name is duplicated.
+ * @param field - The field to be checked for highlighting.
+ * @param sectionfields - The list of section fields to check for duplicates.
+ * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
+ */
+    public isFieldHighlighted(field: any, sectionfields: any): boolean {
+        if (!field.name || !field.label || sectionfields.filter(s => s.name === field.name).length > 1) {
+            return true
+        }
+
+        return false
     }
 
 
