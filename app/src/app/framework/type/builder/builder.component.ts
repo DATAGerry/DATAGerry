@@ -615,10 +615,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      */
     public isFieldHighlighted(field: any, sectionfields: any): boolean {
         console.log('fielddd', sectionfields)
-
         if (!field.name || !field.label || sectionfields.filter(s => s.name === field.name).length > 1) {
             return true
         }
+
 
         return false
     }
