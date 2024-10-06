@@ -614,11 +614,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
      */
     public isFieldHighlighted(field: any, sectionfields: any): boolean {
-        console.log('fielddd', sectionfields)
         if (!field.name || !field.label || sectionfields.filter(s => s.name === field.name).length > 1) {
             return true
         }
-
 
         return false
     }
