@@ -238,7 +238,8 @@
                                                         >
                                                             <fa-icon [icon]="['far', 'edit']"></fa-icon>
                                                         </button>
-                                                        <button class="btn btn-link mr-1" type="button" dndHandle>
+                                                        <button class="btn btn-link mr-1" type="button" dndHandle
+                                                        (dragstart)="preventDragForAllFields($event, section)">
                                                             <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                                                         </button>
                                                         <button 
