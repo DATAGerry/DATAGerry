@@ -586,24 +586,25 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     /**
      * Determines if a section should be highlighted based on various conditions.
      * A section is highlighted if it has a duplicate name, missing name or label,
-     * or if it's a reference section with invalid reference data.
+     * or if any of its fields are highlighted (missing name, label, or are duplicates).
      * @param section - The section to be checked.
-     * @returns boolean - Returns true if the section is highlighted, false otherwise.
+     * @returns boolean - Returns true if the section or any of its fields are highlighted, false otherwise.
      */
     public isSectionHighlighted(section: any): boolean {
         const isDuplicateIdentifier = this.sections.filter(s => s.name === section.name).length > 1;
         const isRefSection = section.type === "ref-section";
+        const hasInvalidFields = section.fields?.some(field => this.isFieldHighlighted(field, section.fields));
 
-        if (!section.name || isDuplicateIdentifier || !section.label || isRefSection) {
+        // Check for section-level issues (name, label, duplicates)
+        const hasSectionIssues = !section.name || isDuplicateIdentifier || !section.label;
 
-            if (isRefSection) {
-                const isInvalidReference = !section.reference.type_id || !section.reference.section_name;
-                return isInvalidReference || !section.name || isDuplicateIdentifier || !section.label;
-            }
-
-            return true;
+        if (isRefSection) {
+            const isInvalidReference = !section.reference.type_id || !section.reference.section_name;
+            return isInvalidReference || hasSectionIssues;
         }
-        return false;
+
+        // If the section has issues or any of its fields are invalid, highlight the section
+        return hasSectionIssues || hasInvalidFields;
     }
 
 
