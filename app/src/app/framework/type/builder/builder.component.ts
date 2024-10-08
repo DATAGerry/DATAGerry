@@ -642,32 +642,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
- * Determines if a field should be highlighted based on its name, label, or if its name is duplicated.
- * @param field - The field to be checked for highlighting.
- * @param sectionfields - The list of section fields to check for duplicates.
- * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
- */
-    // public isFieldHighlighted(field: any, sectionfields: any): boolean {
-    //     console.log('section.fields', field)
-
-    //     const isRefField = field.type === "ref";
-
-    //     if (!field.name || !field.label || sectionfields.filter(s => s.name === field.name).length > 1 || isRefField) {
-
-    //         const isIdentifierValid = !field.name || sectionfields.filter(s => s.name === field.name).length > 1
-    //         const isRefTypesValid = 'ref_types' in field && field.ref_types.length > 0
-
-    //         if (isRefField) {
-    //             if ('ref_types' in field && field.ref_types.length > 0) {
-    //                 return !isRefTypesValid || isIdentifierValid || !field.label
-    //             }
-    //         }
-    //         return true
-    //     }
-
-    //     return false
-    // }
-
+     * Determines if a field should be highlighted based on its name, label, or if its name is duplicated.
+     * @param field - The field to be checked for highlighting.
+     * @param sectionfields - The list of section fields to check for duplicates.
+     * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
+     */
     public isFieldHighlighted(field: any, sectionfields: any): boolean {
 
         const isRefField = field.type === "ref";
