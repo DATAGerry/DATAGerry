@@ -53,7 +53,7 @@ class Update20200512(Updater):
 
         for category in new_categories:
             try:
-                self.object_manager.insert_category(category)
+                self.categories_manager.insert_category(category.to_json())
             except ObjectManagerInsertError:
                 continue
         self.__clear_up_types()

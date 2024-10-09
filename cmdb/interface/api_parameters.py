@@ -86,7 +86,9 @@ class CollectionParameters(APIParameters):
             self.skip = 0
         else:
             self.skip: int = (self.page - 1) * self.limit
+
         self.filter: Union[list[dict], dict] = filter or {}
+
         super().__init__(query_string=query_string, **kwargs)
 
 

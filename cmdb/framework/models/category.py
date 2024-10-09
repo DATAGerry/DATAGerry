@@ -119,6 +119,7 @@ class CategoryModel(CmdbDAO):
         self.types: Union[list[int], list[TypeModel]] = types or []
         super(CategoryModel, self).__init__(public_id=public_id)
 
+
     @classmethod
     def from_data(cls, data: dict) -> "CategoryModel":
         """Create a instance of a category from database"""

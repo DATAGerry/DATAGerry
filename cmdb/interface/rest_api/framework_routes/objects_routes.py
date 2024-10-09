@@ -23,6 +23,7 @@ from flask import abort, jsonify, request, current_app
 
 from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
@@ -69,16 +70,17 @@ def insert_object(request_user: UserModel):
     add_data_dump = json.dumps(request.json)
 
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
 
         if 'public_id' not in new_object_data:
-            new_object_data['public_id'] = object_manager.get_new_id(CmdbObject.COLLECTION)
+            new_object_data['public_id'] = objects_manager.get_new_object_public_id()
         else:
             try:
-                object_manager.get_object(public_id=new_object_data['public_id'])
+                objects_manager.get_object(public_id=new_object_data['public_id'])
             except ObjectManagerGetError:
                 pass
             else:
@@ -91,17 +93,40 @@ def insert_object(request_user: UserModel):
         new_object_data['views'] = 0
         new_object_data['version'] = '1.0.0'  # default init version
 
-        new_object_id = object_manager.insert_object(new_object_data,
-                                                     user=request_user,
-                                                     permission=AccessControlPermission.CREATE)
-        # get current object state
-        current_type_instance = object_manager.get_type(new_object_data['type_id'])
-        current_object = object_manager.get_object(new_object_id)
+        try:
+            new_object_id = objects_manager.insert_object(new_object_data, request_user, AccessControlPermission.CREATE)
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            return abort(500)
 
-        current_object_render_result = CmdbRender(object_instance=current_object,
-                                                  object_manager=object_manager,
-                                                  type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+        try:
+            current_type_instance = objects_manager.get_object_type(new_object_data['type_id'])
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            return abort(500)
+
+        try:
+            current_object = objects_manager.get_object(new_object_id)
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            return abort(500)
+
+        try:
+            current_object_render_result = CmdbRender(
+                                                object_instance=current_object,
+                                                type_instance=current_type_instance,
+                                                render_user=request_user,
+                                                object_manager=object_manager,
+                                                ref_render=False,
+                                                objects_manager=objects_manager
+                                            ).result()
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            return abort(500)
 
         # Generate new insert log
         try:
@@ -120,7 +145,7 @@ def insert_object(request_user: UserModel):
 
     except (TypeError, ObjectManagerInsertError) as err:
         #TODO: ERROR-FIX
-        LOGGER.error("[insert_object] TypeError, ObjectManagerInsertError: %s", err.message)
+        LOGGER.debug("[insert_object] TypeError, ObjectManagerInsertError: %s", err.message)
         return abort(400, str(err))
     except (ManagerGetError, ObjectManagerGetError) as err:
         #TODO: ERROR-FIX
@@ -130,7 +155,7 @@ def insert_object(request_user: UserModel):
         return abort(403, "No permission to insert the object !")
     except InstanceRenderError as err:
         #TODO: ERROR-FIX
-        LOGGER.error("[insert_object] InstanceRenderError: %s", err.message)
+        LOGGER.debug("[insert_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
     return make_response(new_object_id)
@@ -143,20 +168,18 @@ def insert_object(request_user: UserModel):
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        object_instance = object_manager.get_object(public_id,
-                                                    user=request_user,
-                                                    permission=AccessControlPermission.READ)
-    except (ObjectManagerGetError, ManagerGetError) as err:
+        object_instance = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
+    except ObjectManagerGetError as err:
         LOGGER.debug("[get_object] ObjectManagerGetError: %s", err.message)
         return abort(404, f"Could not retrieve object with public_id: {public_id} !")
     except AccessDeniedError:
         return abort(403, f"Access denied for object with public_id: {public_id} !")
 
     try:
-        type_instance = type_manager.get(object_instance.get_type_id())
+        type_instance = objects_manager.get_object_type(object_instance.get_type_id())
     except ObjectManagerGetError as err:
         #TODO: ERROR-FIX
         LOGGER.debug("[get_object] ObjectManagerGetError: %s", err.message)
@@ -167,7 +190,8 @@ def get_object(public_id, request_user: UserModel):
                             type_instance=type_instance,
                             render_user=request_user,
                             object_manager=object_manager,
-                            ref_render=True)
+                            ref_render=True,
+                            objects_manager=objects_manager)
 
         render_result = render.result()
     except InstanceRenderError as err:
@@ -195,6 +219,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     """
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     view = params.optional.get('view', 'native')
 
@@ -230,9 +255,9 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
-                                       database_manager=current_app.database_manager,
                                        object_manager=object_manager,
-                                       ref_render=True).render_result_list(raw=True)
+                                       ref_render=True,
+                                       objects_manager=objects_manager).render_result_list(raw=True)
 
             api_response = GetMultiResponse(rendered_list,
                                             total=iteration_result.total,
@@ -257,15 +282,13 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_native_object(public_id: int, request_user: UserModel):
     """TODO: document"""
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        object_instance = object_manager.get_object(public_id,
-                                                    user=request_user,
-                                                    permission=AccessControlPermission.READ)
+        object_instance = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
     except ObjectManagerGetError:
         return abort(404)
-    except AccessDeniedError as err:
+    except AccessDeniedError:
         #TODO: ERROR-FIX
         return abort(403)
 
@@ -310,6 +333,7 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         referenced_object: CmdbObject = manager.get(public_id,
@@ -327,7 +351,8 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
                                    type_instance=referenced_type,
                                    render_user=request_user,
                                    object_manager=object_manager,
-                                   ref_render=True).get_mds_reference(public_id)
+                                   ref_render=True,
+                                   objects_manager=objects_manager).get_mds_reference(public_id)
 
     except InstanceRenderError as err:
         #TODO: ERROR-FIX
@@ -345,6 +370,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     summary_lines = {}
 
@@ -371,7 +397,8 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
                         type_instance=referenced_type,
                         render_user=request_user,
                         object_manager=object_manager,
-                        ref_render=True).get_mds_reference(object_id)
+                        ref_render=True,
+                        objects_manager=objects_manager).get_mds_reference(object_id)
 
             summary_lines[object_id] = mds_reference
 
@@ -391,6 +418,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
     """TODO: document"""
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     view = params.optional.get('view', 'native')
 
@@ -433,9 +461,11 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             if current_app.cloud_mode:
                 current_app.database_manager.connector.set_database(request_user.database)
 
-            rendered_list = RenderList(object_list=iteration_result.results, request_user=request_user,
-                                       database_manager=current_app.database_manager,
-                                       object_manager=object_manager, ref_render=True).render_result_list(
+            rendered_list = RenderList(object_list=iteration_result.results,
+                                       request_user=request_user,
+                                       ref_render=True,
+                                       object_manager=object_manager,
+                                       objects_manager=objects_manager).render_result_list(
                 raw=True)
 
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
@@ -454,12 +484,10 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 def get_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        found_object = object_manager.get_object(public_id=public_id,
-                                                 user=request_user,
-                                                 permission=AccessControlPermission.READ)
+        found_object = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -524,6 +552,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     results: list[dict] = []
     failed = []
@@ -535,10 +564,14 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         try:
             current_object_instance = manager.get(obj_id, user=request_user, permission=AccessControlPermission.READ)
             current_type_instance = type_manager.get(current_object_instance.get_type_id())
+
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                      object_manager=object_manager,
                                                       type_instance=current_type_instance,
-                                                      render_user=request_user).result()
+                                                      render_user=request_user,
+                                                      object_manager=object_manager,
+                                                      ref_render=False,
+                                                      objects_manager=objects_manager
+                                                      ).result()
             update_comment = ''
 
             try:
@@ -640,6 +673,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     if isinstance(request.json, bool):
         state = request.json
@@ -667,10 +701,14 @@ def update_object_state(public_id: int, request_user: UserModel):
         # get current object state
     try:
         current_type_instance = type_manager.get(found_object.get_type_id())
+
         current_object_render_result = CmdbRender(object_instance=found_object,
-                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  object_manager=object_manager,
+                                                  ref_render=False,
+                                                  objects_manager=objects_manager
+                                                  ).result()
     except ObjectManagerGetError as err:
         LOGGER.debug("[update_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -789,22 +827,27 @@ def delete_object(public_id: int, request_user: UserModel):
 
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
 
     try:
-        current_object_instance = object_manager.get_object(public_id)
+        current_object_instance = objects_manager.get_object(public_id)
 
         # Remove object links and references
         if current_object_instance:
             delete_object_links(public_id, request_user)
             manager.delete_all_object_references(public_id)
 
-        current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+        current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
+
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                  object_manager=object_manager,
                                                   type_instance=current_type_instance,
-                                                  render_user=request_user).result()
+                                                  render_user=request_user,
+                                                  object_manager=object_manager,
+                                                  ref_render=False,
+                                                  objects_manager=objects_manager
+                                                  ).result()
 
         #an object can not be deleted if it has a location AND the location is a parent for other locations
         try:
@@ -866,10 +909,11 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         # check if object exists
-        current_object_instance = object_manager.get_object(public_id)
+        current_object_instance = objects_manager.get_object(public_id)
 
         # Remove object links and references
         if current_object_instance:
@@ -930,10 +974,11 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         # check if object exists
-        current_object_instance = object_manager.get_object(public_id)
+        current_object_instance = objects_manager.get_object(public_id)
 
         # Remove object links and references
         if current_object_instance:
@@ -990,6 +1035,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         ids = []
@@ -1026,9 +1072,12 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
                 current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                          object_manager=object_manager,
                                                           type_instance=current_type_instance,
-                                                          render_user=request_user).result()
+                                                          render_user=request_user,
+                                                          object_manager=object_manager,
+                                                          ref_render=False,
+                                                          objects_manager=objects_manager
+                                                          ).result()
             except ObjectManagerGetError as err:
                 LOGGER.debug("[delete_many_objects] ObjectManagerGetError: %s", err.message)
                 return abort(404)

@@ -18,6 +18,7 @@ import logging
 from datetime import datetime, timezone
 
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework import CmdbObject
 from cmdb.importer import JsonObjectParser
@@ -81,12 +82,15 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                  config: JsonObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
                  object_manager: CmdbObjectManager = None,
+                 objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         super().__init__(
             file=file,
             file_type=self.FILE_TYPE,
-            config=config, parser=parser,
+            config=config,
+            parser=parser,
             object_manager=object_manager,
+            objects_manager=objects_manager,
             request_user=request_user
         )
 
@@ -167,9 +171,17 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                  config: CsvObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
                  object_manager: CmdbObjectManager = None,
+                 objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
-        super().__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
-                                                object_manager=object_manager, request_user=request_user)
+        super().__init__(
+                    file=file,
+                    file_type=self.FILE_TYPE,
+                    config=config,
+                    parser=parser,
+                    object_manager=object_manager,
+                    objects_manager=objects_manager,
+                    request_user=request_user
+                )
 
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:
@@ -279,9 +291,17 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
                  config: ExcelObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
                  object_manager: CmdbObjectManager = None,
+                 objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
-        super().__init__(file=file, file_type=self.FILE_TYPE, config=config, parser=parser,
-                                                  object_manager=object_manager, request_user=request_user)
+        super().__init__(
+                    file=file,
+                    file_type=self.FILE_TYPE,
+                    config=config,
+                    parser=parser,
+                    object_manager=object_manager,
+                    objects_manager=objects_manager,
+                    request_user=request_user
+                )
 
 
     def generate_object(self, entry: dict, *args, **kwargs) -> dict:

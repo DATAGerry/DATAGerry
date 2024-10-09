@@ -17,6 +17,7 @@
 import logging
 
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
@@ -248,8 +249,9 @@ class SearchPipelineBuilder(PipelineBuilder):
 class SearcherFramework(Search[CmdbObjectManager]):
     """Framework searcher implementation for object search"""
 
-    def __init__(self, manager: CmdbObjectManager):
+    def __init__(self, manager: CmdbObjectManager, objects_manager: ObjectsManager):
         """Normally uses a instance of CmdbObjectManager as managers"""
+        self.objects_manager = objects_manager
         super().__init__(manager=manager)
 
 
@@ -313,8 +315,12 @@ class SearcherFramework(Search[CmdbObjectManager]):
             raw_search_result_list_entry = raw_search_result_list[0]
             # parse result list
             pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
-            rendered_result_list = RenderList(pre_rendered_result_list, request_user, database_manager=self.manager.dbm,
-                                              object_manager=self.manager).render_result_list()
+
+            rendered_result_list = RenderList(pre_rendered_result_list,
+                                              request_user,
+                                              ref_render=False,
+                                              object_manager=self.manager,
+                                              objects_manager=self.objects_manager).render_result_list()
 
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)
             group_result_list = raw_search_result_list[0]['group']

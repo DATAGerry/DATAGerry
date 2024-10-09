@@ -68,6 +68,7 @@ def quick_search_result_counter(request_user: UserModel):
 def search_framework(request_user: UserModel):
     """TODO: document"""
     object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
@@ -91,7 +92,7 @@ def search_framework(request_user: UserModel):
         return abort(400, err)
 
     try:
-        searcher = SearcherFramework(manager=object_manager)
+        searcher = SearcherFramework(object_manager, objects_manager)
         builder = SearchPipelineBuilder()
 
         query: Pipeline = builder.build(search_parameters, object_manager,

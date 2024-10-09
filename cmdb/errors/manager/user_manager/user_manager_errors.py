@@ -27,7 +27,7 @@ class UserManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
+# ------------------------------------------------ UserManager Errors ------------------------------------------------ #
 
 class UserManagerGetError(UserManagerError):
     """

@@ -67,7 +67,7 @@ class ProfileBase:
             type_name_id (str): Key which should be used for the id of this type, like 'user_type_id'
             type_dict (dict): all the required data to create the type except the public_id
         """
-        type_dict['public_id'] = self.object_manager.get_new_id(self.type_collection)
+        type_dict['public_id'] = self.type_manager.get_new_id()
         new_type_id: int = self.type_manager.insert(type_dict)
 
         self.created_type_ids[type_name_key] = new_type_id

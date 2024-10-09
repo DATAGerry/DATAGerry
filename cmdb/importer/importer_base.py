@@ -19,6 +19,7 @@ import logging
 from typing import Optional
 
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework import CmdbObject
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
@@ -86,6 +87,7 @@ class ObjectImporter(BaseImporter):
                  config: ObjectImporterConfig = None,
                  parser: BaseObjectParser = None,
                  object_manager: CmdbObjectManager = None,
+                 objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         """
         Basic importer super class for object imports
@@ -99,27 +101,21 @@ class ObjectImporter(BaseImporter):
             request_user: the instance of the started user
         """
         self.parser = parser
-        if object_manager:
-            self.object_manager = object_manager
-        else:
-            from cmdb.utils.system_config import SystemConfigReader
-            from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-            object_manager = CmdbObjectManager(database_manager=DatabaseManagerMongo(
-                **SystemConfigReader().get_all_values_from_section('Database')
-            ))
-            self.object_manager = object_manager
+        self.object_manager = object_manager
+        self.objects_manager = objects_manager
         self.request_user = request_user
+
         super().__init__(file=file, file_type=file_type, config=config)
 
 
     def _generate_objects(self, parsed: ObjectParserResponse, *args, **kwargs) -> list:
         """Generate a list of all data from the parser.
         The implementation of the object generation should be written in the sub class"""
-        LOGGER.info("DAT-864 ObjectImporter _generate_objects() called")
         object_instance_list: list[dict] = []
+
         for entry in parsed.entries:
-            # LOGGER.info(f"DAT-864 ObjectImporter entry: {entry}")
             object_instance_list.append(self.generate_object(entry, *args, **kwargs))
+
         return object_instance_list
 
 
@@ -134,7 +130,6 @@ class ObjectImporter(BaseImporter):
         Args:
             import_objects: list of all objects for import - or output of _generate_objects()
         """
-        LOGGER.info("DAT-864 _import() called")
         run_config = self.get_config()
 
         success_imports: list[ImportSuccessMessage] = []
@@ -146,7 +141,7 @@ class ObjectImporter(BaseImporter):
 
         while current_import_index < import_objects_length:
             current_import_object: dict = import_objects[current_import_index]
-            current_public_id: (int, None) = current_import_object.get('public_id')
+            current_public_id: int = current_import_object.get('public_id')
 
             # Object has PublicID and can not overwrite
             if current_public_id is not None and not run_config.overwrite_public:
@@ -158,7 +153,7 @@ class ObjectImporter(BaseImporter):
 
             # Object has no PublicID <- assign new
             if not current_public_id:
-                current_public_id = self.object_manager.get_new_id(CmdbObject.COLLECTION)
+                current_public_id = self.objects_manager.get_new_object_public_id()
                 current_import_object.update({'public_id': current_public_id})
             # else assign given PublicID
             else:
@@ -166,12 +161,12 @@ class ObjectImporter(BaseImporter):
 
             # Insert data
             try:
-                existing = self.object_manager.get_object(current_public_id)
+                existing = self.objects_manager.get_object(current_public_id)
                 current_import_object['creation_time'] = existing.creation_time
                 current_import_object['last_edit_time'] = datetime.now(timezone.utc)
             except ObjectManagerGetError:
                 try:
-                    self.object_manager.insert_object(current_import_object)
+                    self.objects_manager.insert_object(current_import_object)
                 except ObjectManagerInsertError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                     current_import_index += 1
@@ -187,7 +182,7 @@ class ObjectImporter(BaseImporter):
                     continue
                 else:
                     try:
-                        self.object_manager.insert_object(current_import_object)
+                        self.objects_manager.insert_object(current_import_object)
                     except ObjectManagerInsertError as err:
                         failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                         current_import_index += 1

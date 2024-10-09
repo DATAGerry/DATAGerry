@@ -27,7 +27,7 @@ class ExportdLogManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
+# --------------------------------------------- ExportdLogManager Errors --------------------------------------------- #
 
 class ExportdLogManagerDeleteError(ExportdLogManagerError):
     """

@@ -27,7 +27,7 @@ class ExportdJobManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
+# ------------------------------------------- ExportdJobManagerError Errors ------------------------------------------ #
 
 class ExportdJobManagerDeleteError(ExportdJobManagerError):
     """

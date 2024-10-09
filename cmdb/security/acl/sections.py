@@ -66,14 +66,6 @@ class AccessControlListSection(Generic[T]):
         self.includes[key].remove(permission)
 
 
-    def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
-        """TODO: document"""
-        try:
-            return permission.value in self.includes[key]
-        except KeyError:
-            return False
-
-
     @classmethod
     def from_data(cls, data: dict) -> "AccessControlListSection[T]":
         """TODO: document"""

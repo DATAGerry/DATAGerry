@@ -16,6 +16,8 @@
 """TODO: document"""
 import logging
 
+from cmdb.manager.objects_manager import ObjectsManager
+
 from cmdb.framework.cmdb_render import CmdbRender
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
@@ -43,9 +45,10 @@ class AbstractTemplateData:
 class ObjectTemplateData(AbstractTemplateData):
     """TODO: document"""
 
-    def __init__(self, object_manager, cmdb_object):
+    def __init__(self, object_manager, cmdb_object, objects_manager: ObjectsManager):
         super().__init__()
         self.__object_manager = object_manager
+        self.objects_manager = objects_manager
         self._template_data = self.__get_objectdata(cmdb_object, 3)
 
 
@@ -60,13 +63,14 @@ class ObjectTemplateData(AbstractTemplateData):
 
                 if (field["type"] == "ref" or field["type"] == "location") and field["value"] and iteration > 0:
                     # resolve type
-                    current_object = self.__object_manager.get_object(field["value"])
-                    type_instance = self.__object_manager.get_type(current_object.get_type_id())
+                    current_object = self.objects_manager.get_object(field["value"])
+                    type_instance = self.objects_manager.get_object_type(current_object.get_type_id())
 
                     cmdb_render_object = CmdbRender(object_instance=current_object,
                                                     type_instance=type_instance,
                                                     render_user=None,
-                                                    object_manager=self.__object_manager)
+                                                    object_manager=self.__object_manager,
+                                                    objects_manager=self.objects_manager)
 
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 elif field['type'] == 'ref-section-field':

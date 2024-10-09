@@ -19,8 +19,10 @@ import json
 from bson import json_util
 from flask import abort, request, Response
 
-from cmdb.docapi.docapi_base import DocApiManager
+from cmdb.manager.docapi_template_manager import DocapiTemplateManager
+from cmdb.manager.objects_manager import ObjectsManager
 
+from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, ErrorMessage
@@ -219,10 +221,11 @@ def delete_template(public_id: int, request_user: UserModel):
 @right_required('base.framework.object.view')
 def render_object_template(public_id: int, object_id: int, request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_tpl_manager: DocapiTemplateManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
     object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
-    docapi_manager = DocApiManager(docapi_tpl_manager, object_manager)
+    docapi_manager = DocApiRenderer(docapi_tpl_manager, object_manager, objects_manager)
     output = docapi_manager.render_object_template(public_id, object_id)
 
     # return data

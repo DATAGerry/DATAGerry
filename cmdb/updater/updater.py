@@ -37,6 +37,7 @@ class Updater(CmdbManagerBase):
     """TODO: document"""
 
     def __init__(self):
+        #TODO: REFACTOR-FIX (get the correct database)
         scr = SystemConfigReader()
         self.database_manager = DatabaseManagerMongo(**scr.get_all_values_from_section('Database'))
         self.object_manager = CmdbObjectManager(database_manager=self.database_manager)
