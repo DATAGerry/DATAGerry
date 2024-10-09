@@ -146,7 +146,7 @@ class TestFrameworkObjects:
         # forbidden_insert_types_response = rest_api.post(f'{self.ROUTE_URL}/',
         #                                                 json=CmdbObject.to_json(example_object),
         #                                                 user=none_access_user)
-        
+
         # assert forbidden_insert_types_response.status_code == HTTPStatus.FORBIDDEN
 
         validate_response = rest_api.get(f'{self.ROUTE_URL}/{example_object.public_id}')
