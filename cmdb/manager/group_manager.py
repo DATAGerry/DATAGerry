@@ -17,7 +17,7 @@
 from typing import Union
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.right_manager import RightManager
+from cmdb.user_management import RightManager #TODO: CYCLIC-FIX
 from cmdb.manager.managers import ManagerBase
 
 from cmdb.user_management.models.group import UserGroupModel

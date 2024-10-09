@@ -20,16 +20,16 @@ from typing import Union
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.user_management.models.user import UserModel
-
 from cmdb.framework.models.log import CmdbObjectLog, LogAction
-
 from .builder import Builder
 from .builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               BaseQueryBuilder - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class BaseQueryBuilder(Builder):
     """TODO: document"""
     def __init__(self):
@@ -46,7 +46,8 @@ class BaseQueryBuilder(Builder):
     def build(self,
               builder_params: BuilderParameters,
               user: UserModel = None,
-              permission: AccessControlPermission = None) -> list[dict]:
+              permission: AccessControlPermission = None,
+              object_builder_mode: bool = False) -> list[dict]:
         """
         Converts the parameters from the call to a MongoDB aggregation pipeline
         Args:
@@ -58,9 +59,28 @@ class BaseQueryBuilder(Builder):
         Returns:
             Union[dict, list[dict]]: The build query
         """
-        self.query = self.__init_query(builder_params.get_criteria())
+        self.query = self.__init_query(builder_params.get_criteria(), object_builder_mode)
 
-        self.query.append(self.sort_(builder_params.get_sort(), builder_params.get_order()))
+        if object_builder_mode:
+            # TODO: Remove nasty quick hack
+            if builder_params.get_sort().startswith('fields'):
+                sort_value = builder_params.get_sort()[7:]
+
+                self.query.append({
+                    '$addFields': {
+                        'order': {
+                            '$filter': {
+                                'input': '$fields',
+                                'as': 'fields',
+                                'cond': {'$eq': ['$$fields.name', sort_value]}
+                            }
+                        }
+                    }
+                })
+                self.query.append({'$sort': {'order': builder_params.get_order()}})
+        else:
+            self.query.append(self.sort_(builder_params.get_sort(), builder_params.get_order()))
+
         self.query.append(self.skip_(builder_params.get_skip()))
 
         if user and permission:
@@ -100,7 +120,7 @@ class BaseQueryBuilder(Builder):
         self.query = None
 
 
-    def __init_query(self, criteria: Union[dict, list[dict]]) -> list[dict]:
+    def __init_query(self, criteria: Union[dict, list[dict]], object_builder_mode: bool = False) -> list[dict]:
         """
         Initialises the query with valid format
 
@@ -112,6 +132,17 @@ class BaseQueryBuilder(Builder):
         """
         self.clear()
         query: list[dict] = []
+
+        if object_builder_mode:
+            query = [
+                self.lookup_(_from='framework.types', _local='type_id', _foreign='public_id', _as='type'),
+                self.unwind_({'path': '$type'}),
+                self.match_({'type': {'$ne': None}}),
+                self.lookup_(_from='management.users', _local='author_id', _foreign='public_id', _as='author'),
+                self.unwind_({'path': '$author', 'preserveNullAndEmptyArrays': True}),
+                self.lookup_(_from='management.users', _local='editor_id', _foreign='public_id', _as='editor'),
+                self.unwind_({'path': '$editor', 'preserveNullAndEmptyArrays': True}),
+            ]
 
         if isinstance(criteria, dict):
             query.append(self.match_(criteria))
@@ -141,13 +172,6 @@ class BaseQueryBuilder(Builder):
                 '$ne': LogAction.DELETE.value
             }
         }})
-
-        # query.append({"$lookup": {
-        #     "from": "framework.objects",
-        #     "let": {"ref_id": "$object_id"},
-        #     "pipeline": [{'$match': {'$expr': {'$eq': ["$public_id", '$$ref_id']}}}],
-        #     "as": "object"
-        # }})
 
         query.append({
             "$lookup": {

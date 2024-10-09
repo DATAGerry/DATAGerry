@@ -20,7 +20,6 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import request, abort
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.type_manager import TypeManager
 
 from cmdb.framework import TypeModel
@@ -42,7 +41,6 @@ LOGGER = logging.getLogger(__name__)
 @login_required
 def add_type(request_user: UserModel):
     """TODO: document"""
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
 
     error_collection = {}
@@ -51,7 +49,7 @@ def add_type(request_user: UserModel):
 
     for new_type_data in new_type_list:
         try:
-            new_type_data['public_id'] = object_manager.get_new_id(TypeModel.COLLECTION)
+            new_type_data['public_id'] = type_manager.get_new_id()
             new_type_data['creation_time'] = datetime.now(timezone.utc)
         except TypeError as e:
             LOGGER.error(e)

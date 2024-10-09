@@ -17,6 +17,9 @@
 import logging
 from flask import request, abort
 
+from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.categories_manager import CategoriesManager
+
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
@@ -45,12 +48,14 @@ def get_intro_starter(request_user: UserModel):
         _type_: Steps and if there are any objects, types and categories in the database
     """
     object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         steps = []
-        categories_total = len(object_manager.get_categories())
-        types_total = object_manager.count_types()
-        objects_total = object_manager.count_objects()
+        categories_total = categories_manager.count_categories()
+        types_total = objects_manager.count_types()
+        objects_total = objects_manager.count_objects()
 
         if _fetch_only_active_objs():
             result = []
@@ -95,13 +100,15 @@ def create_initial_profiles(data: str, request_user: UserModel):
     Returns:
         _type_: list of created public_ids of types
     """
+    categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
     object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     profiles = data['data'].split('#')
 
-    categories_total = len(object_manager.get_categories())
-    types_total = object_manager.count_types()
-    objects_total = object_manager.count_objects()
+    categories_total = categories_manager.count_categories()
+    types_total = objects_manager.count_types()
+    objects_total = objects_manager.count_objects()
 
     # Only execute if there are no categories, types and objects in the database
     if categories_total > 0 or types_total > 0 or objects_total > 0:

@@ -19,7 +19,7 @@ from typing import Union
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.user_manager import UserManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.type_manager import TypeManager
@@ -83,15 +83,17 @@ class CmdbRender:
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
                  render_user: UserModel,
-                 object_manager: CmdbObjectManager = None, ref_render=False):
+                 object_manager: CmdbObjectManager = None, ref_render=False, objects_manager: ObjectsManager = None):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
         self.render_user: UserModel = render_user
 
         self.object_manager = object_manager
-        if self.object_manager:  # TODO: Refactor to pass database-manager in init
-            self.type_manager = TypeManager(self.object_manager.dbm)
-            self.user_manager = UserManager(self.object_manager.dbm)
+        self.objects_manager = objects_manager
+
+        if self.objects_manager:  # TODO: Refactor to pass database-manager in init
+            self.type_manager = TypeManager(self.objects_manager.dbm)
+            self.user_manager = UserManager(self.objects_manager.dbm)
 
         self.ref_render = ref_render
 
@@ -293,8 +295,10 @@ class CmdbRender:
                             field['value'] = reference_id
 
                             if field['type'] == 'ref':
-                                reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
-                                ref_type: TypeModel = self.type_manager.get(reference_object.get_type_id())
+                                reference_object: CmdbObject = self.objects_manager.get_object(reference_id)
+                                ref_type: TypeModel = self.objects_manager.get_object_type(
+                                                                                reference_object.get_type_id()
+                                                                           )
                                 field['reference'] = {
                                     'type_id': ref_type.public_id,
                                     'type_name': ref_type.name,
@@ -342,7 +346,7 @@ class CmdbRender:
                 try:
                     reference_id: int = self.object_instance.get_value(ref_field_name)
                     ref_field['value'] = reference_id
-                    reference_object: CmdbObject = self.object_manager.get_object(public_id=reference_id)
+                    reference_object: CmdbObject = self.objects_manager.get_object(reference_id)
                 except (ObjectManagerGetError, ValueError, KeyError):
                     reference_object = None
 
@@ -391,11 +395,14 @@ class CmdbRender:
     def __merge_reference_section_fields(self, ref_section_field, ref_type, ref_section_fields, level):
         if ref_section_field and ref_section_field.get('type', '') == 'ref-section-field':
             try:
-                instance = self.object_manager.get_object(ref_section_field.get('value'))
-                reference_type: TypeModel = self.type_manager.get(instance.get_type_id())
-                render = CmdbRender(object_instance=instance, type_instance=ref_type,
+                instance = self.objects_manager.get_object(ref_section_field.get('value'))
+                reference_type: TypeModel = self.objects_manager.get_object_type(instance.get_type_id())
+                render = CmdbRender(object_instance=instance,
+                                    type_instance=ref_type,
                                     render_user=self.render_user,
-                                    object_manager=self.object_manager, ref_render=True)
+                                    object_manager=self.object_manager,
+                                    ref_render=True,
+                                    objects_manager=self.objects_manager)
                 fields = render.result(level).fields
                 res = next((x for x in fields if x['name'] == ref_section_field.get('name', '')), None)
                 if res and ref_section_field.get('type', '') == 'ref-section-field':
@@ -419,8 +426,9 @@ class CmdbRender:
         if current_field['value']:
 
             try:
-                ref_object = self.object_manager.get_object(int(current_field['value']), user=self.render_user,
-                                                            permission=AccessControlPermission.READ)
+                ref_object = self.objects_manager.get_object(int(current_field['value']),
+                                                             self.render_user,
+                                                             AccessControlPermission.READ)
             except AccessDeniedError as err:
                 #TODO: ERROR-FIX
                 return err.message
@@ -428,7 +436,7 @@ class CmdbRender:
                 return TypeReference.to_json(reference)
 
             try:
-                ref_type = self.object_manager.get_type(ref_object.get_type_id())
+                ref_type = self.objects_manager.get_object_type(ref_object.get_type_id())
 
                 _summary_fields = []
                 _nested_summaries = current_field.get('summaries', [])
@@ -557,17 +565,21 @@ class CmdbRender:
             render_result.externals = external_list
         return render_result
 
+
 #TODO: CLASS-FIX
 class RenderList:
     """TODO: document"""
-    def __init__(self, object_list: list[CmdbObject], request_user: UserModel, database_manager: DatabaseManagerMongo,
-                 ref_render=False, object_manager: CmdbObjectManager = None):
+    def __init__(self,
+                 object_list: list[CmdbObject],
+                 request_user: UserModel,
+                 ref_render=False,
+                 object_manager: CmdbObjectManager = None,
+                 objects_manager: ObjectsManager = None):
         self.object_list: list[CmdbObject] = object_list
         self.request_user = request_user
         self.ref_render = ref_render
         self.object_manager = object_manager
-        self.type_manager = TypeManager(database_manager=database_manager)
-        self.user_manager = UserManager(database_manager=database_manager)
+        self.objects_manager = objects_manager
 
 
     def render_result_list(self, raw: bool = False) -> list[Union[RenderResult, dict]]:
@@ -579,7 +591,8 @@ class RenderList:
                 object_instance=passed_object,
                 render_user=self.request_user,
                 object_manager=self.object_manager,
-                ref_render=self.ref_render)
+                ref_render=self.ref_render,
+                objects_manager=self.objects_manager)
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:

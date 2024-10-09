@@ -25,6 +25,7 @@ from cmdb.manager.right_manager import RightManager
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.object_manager import ObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.docapi_template_manager import DocapiTemplateManager
 from cmdb.manager.user_manager import UserManager
@@ -52,6 +53,7 @@ class ManagerType(Enum):
     CATEGORIES_MANAGER = 'CategoriesManager'
     CMDB_OBJECT_MANAGER = 'CmdbObjectManager'
     OBJECT_MANAGER = 'ObjectManager'
+    OBJECTS_MANAGER = 'ObjectsManager'
     LOGS_MANAGER = 'LogsManager'
     DOCAPI_TEMPLATE_MANAGER = 'DocapiTemplateManager'
     USER_MANAGER = 'UserManager'
@@ -89,6 +91,7 @@ class ManagerProvider:
             ManagerType.CATEGORIES_MANAGER: CategoriesManager,
             ManagerType.CMDB_OBJECT_MANAGER: CmdbObjectManager,
             ManagerType.OBJECT_MANAGER: ObjectManager,
+            ManagerType.OBJECTS_MANAGER: ObjectsManager,
             ManagerType.LOGS_MANAGER: LogsManager,
             ManagerType.DOCAPI_TEMPLATE_MANAGER: DocapiTemplateManager,
             ManagerType.USER_MANAGER: UserManager,
@@ -130,6 +133,7 @@ class ManagerProvider:
                 ManagerType.CATEGORIES_MANAGER,
                 ManagerType.CMDB_OBJECT_MANAGER,
                 ManagerType.OBJECT_MANAGER,
+                ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
                 ManagerType.DOCAPI_TEMPLATE_MANAGER,
                 ManagerType.LOCATIONS_MANAGER,
@@ -161,6 +165,7 @@ class ManagerProvider:
                 ManagerType.CATEGORIES_MANAGER,
                 ManagerType.CMDB_OBJECT_MANAGER,
                 ManagerType.OBJECT_MANAGER,
+                ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
                 ManagerType.DOCAPI_TEMPLATE_MANAGER,
                 ManagerType.LOCATIONS_MANAGER,

@@ -21,6 +21,7 @@ from flask import Response, abort
 
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.object_manager import ObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.cmdb_render import RenderList, RenderResult
@@ -90,6 +91,7 @@ class  BaseExportWriter:
         """Get all objects from the collection"""
         manager = ObjectManager(database_manager=database_manager)
         dep_object_manager = CmdbObjectManager(database_manager=database_manager)
+        objects_manager = ObjectsManager(database_manager)
 
         try:
             _params = self.export_config.parameters
@@ -101,9 +103,9 @@ class  BaseExportWriter:
 
             self.data = RenderList(object_list=_result,
                                    request_user=user,
-                                   database_manager=database_manager,
                                    object_manager=dep_object_manager,
-                                   ref_render=True).render_result_list(raw=False)
+                                   ref_render=True,
+                                   objects_manager=objects_manager).render_result_list(raw=False)
         except Exception:
             #TODO: ERROR-FIX
             return abort(400)

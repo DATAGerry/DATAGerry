@@ -22,6 +22,7 @@ from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
@@ -197,10 +198,10 @@ def count_objects(public_id: int, request_user: UserModel):
     Args:
         public_id (int): public_id of the type
     """
-    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        objects_count = object_manager.count_objects(public_id)
+        objects_count = objects_manager.count_objects({'type_id':public_id})
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
@@ -289,12 +290,12 @@ def delete_type(public_id: int, request_user: UserModel):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     deprecated_object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER,
                                                                                request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        objects_count = object_manager.count_objects(public_id)
+        objects_count = objects_manager.count_objects({'type_id':public_id})
 
         if objects_count > 0:
             raise ManagerDeleteError('Delete not possible if objects of this type exist')

@@ -51,7 +51,7 @@ class CategoriesManager(BaseManager):
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance.
+            database_manager (MongoDatabaseManager): Active database managers instance.
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue
@@ -139,6 +139,30 @@ class CategoriesManager(BaseManager):
             raise ManagerIterationError(err) from err
 
         return iteration_result
+
+
+
+    def count_categories(self):
+        """
+        Returns the number of categories
+
+        Args:
+            criteria (dict): Filter for counting documents like {'type_id: 1} 
+
+        Raises:
+            ObjectManagerGetError: When an error occures during counting objects
+
+        Returns:
+            (int): Returns the number of documents with the given criteria
+        """
+        try:
+            categories_count = self.count_documents(self.collection)
+        except ManagerGetError as err:
+            #TODO: ERROR-FIX (CategoriesManagerGetError)
+            raise ManagerGetError(err) from err
+
+        return categories_count
+
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 

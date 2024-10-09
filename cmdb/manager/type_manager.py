@@ -60,6 +60,11 @@ class TypeManager(ManagerBase):
         super().__init__(TypeModel.COLLECTION, database_manager=database_manager)
 
 
+    def get_new_id(self) -> int:
+        """TODO: document"""
+        return self._database_manager.get_next_public_id(TypeModel.COLLECTION)
+
+
     def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) \
             -> IterationResult[TypeModel]:
         """

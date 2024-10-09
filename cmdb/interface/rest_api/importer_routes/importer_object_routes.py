@@ -21,6 +21,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.logs_manager import LogsManager
 
@@ -41,18 +42,18 @@ from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
     __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
 
-
 from cmdb.errors.manager import ManagerInsertError
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.render import InstanceRenderError
 from cmdb.errors.importer import ImportRuntimeError, ParserRuntimeError, ImporterLoadError, ParserLoadError
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
 importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/object')
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 @importer_object_blueprint.route('/importer/', methods=['GET'])
 @importer_object_blueprint.route('/importer', methods=['GET'])
 @login_required
@@ -87,7 +88,6 @@ def get_default_importer_config(importer_type):
 @login_required
 def get_parser():
     """TODO: document"""
-    # parser = [parser for parser in __OBJECT_PARSER__]
     parser = list(__OBJECT_PARSER__)
 
     return make_response(parser)
@@ -102,6 +102,7 @@ def get_default_parser_config(parser_type: str):
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
         return abort(404)
+
     return make_response(parser.DEFAULT_CONFIG)
 
 
@@ -136,6 +137,7 @@ def import_objects(request_user: UserModel):
     # Check if file exists
     if not request.files:
         return abort(400, 'No import file was provided')
+
     request_file: FileStorage = get_file_in_request('file', request.files)
 
     filename = secure_filename(request_file.filename)
@@ -157,6 +159,7 @@ def import_objects(request_user: UserModel):
 
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
     # Check if type exists
@@ -192,7 +195,6 @@ def import_objects(request_user: UserModel):
         LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
         return abort(406)
     importer_config = importer_config_class(**importer_config_request)
-    LOGGER.debug(importer_config_request)
 
     # Load importer
     try:
@@ -201,9 +203,7 @@ def import_objects(request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
         return abort(406)
-    importer = importer_class(working_file, importer_config, parser, object_manager, request_user)
-
-    LOGGER.info('Importer %s was loaded', importer_class)
+    importer = importer_class(working_file, importer_config, parser, object_manager, objects_manager, request_user)
 
     try:
         import_response: ImporterObjectResponse = importer.start_import()
@@ -222,13 +222,14 @@ def import_objects(request_user: UserModel):
     for message in import_response.success_imports:
         try:
             # get object state of every imported object
-            current_type_instance = object_manager.get_type(importer_config_request.get('type_id'))
-            current_object = object_manager.get_object(message.public_id)
+            current_type_instance = objects_manager.get_object_type(importer_config_request.get('type_id'))
+            current_object = objects_manager.get_object(message.public_id)
 
             current_object_render_result = CmdbRender(object_instance=current_object,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      object_manager=object_manager).result()
+                                                      object_manager=object_manager,
+                                                      objects_manager=objects_manager).result()
 
             # insert object create log
             log_params = {

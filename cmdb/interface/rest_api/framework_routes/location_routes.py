@@ -20,6 +20,7 @@ from flask import request, current_app
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_render import RenderList
@@ -64,6 +65,7 @@ def create_location(params: dict, request_user: UserModel):
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     location_creation_params= {}
 
@@ -80,13 +82,16 @@ def create_location(params: dict, request_user: UserModel):
     location_creation_params['public_id'] = locations_manager.get_next_public_id()
 
     if params['name'] == '' or params['name'] is None:
-        current_object = object_manager.get_object(int(params['object_id']))
+        current_object = objects_manager.get_object(int(params['object_id']))
 
         if current_app.cloud_mode:
             current_app.database_manager.connector.set_database(request_user.database)
 
-        rendered_list = RenderList([current_object], request_user, current_app.database_manager, True,
-                                    object_manager ).render_result_list(True)
+        rendered_list = RenderList([current_object],
+                                   request_user,
+                                   True,
+                                   object_manager,
+                                   objects_manager).render_result_list(True)
 
         params['name'] = rendered_list[0]['summary_line']
 
@@ -318,6 +323,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
     """
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     location_update_params = {}
 
@@ -325,16 +331,16 @@ def update_location_for_object(params: dict, request_user: UserModel):
     location_update_params['parent'] = int(params['parent'])
 
     if params['name'] == '' or params['name'] is None:
-        current_object = object_manager.get_object(object_id)
+        current_object = objects_manager.get_object(object_id)
 
         if current_app.cloud_mode:
             current_app.database_manager.connector.set_database(request_user.database)
 
         rendered_list = RenderList([current_object],
                                    request_user,
-                                   current_app.database_manager,
                                    True,
-                                   object_manager).render_result_list(raw=True)
+                                   object_manager,
+                                   objects_manager).render_result_list(raw=True)
 
         params['name'] = rendered_list[0]['summary_line']
 

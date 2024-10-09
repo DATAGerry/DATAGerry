@@ -24,12 +24,12 @@ from bson import Regex, json_util
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.managers import ManagerQueryBuilder, ManagerBase
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.database.utils import object_hook
 from cmdb.event_management.event import Event
 from cmdb.framework import CmdbObject
-from cmdb.manager.cmdb_object_manager import verify_access
+from cmdb.security.acl.helpers import verify_access
 from cmdb.framework.results import IterationResult
 from cmdb.framework.utils import PublicID
 from cmdb.search import Query, Pipeline
@@ -37,6 +37,7 @@ from cmdb.manager.query_builder.builder import Builder
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
+from cmdb.framework import TypeModel
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerUpdateError, ManagerGetError, ManagerIterationError
@@ -52,7 +53,6 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
     """
     Extends: ManagerQueryBuilder
     """
-
     def __init__(self):
         super().__init__()
 
@@ -153,7 +153,6 @@ class ObjectQueryBuilder(ManagerQueryBuilder):
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                     ObjectManager                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class ObjectManager(ManagerBase):
     """
     Extends: ManagerBase
@@ -162,22 +161,18 @@ class ObjectManager(ManagerBase):
     def __init__(self, database_manager: DatabaseManagerMongo,
                  event_queue: Union[Queue, Event] = None,
                  database: str = None):
-        """
-        Set the database connection and the queue for sending events.
-
-        Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
-        """
         self.event_queue = event_queue
         self.object_builder = ObjectQueryBuilder()
 
         if database:
             database_manager.connector.set_database(database)
 
-        self.type_manager = TypeManager(database_manager)
+        self.objects_manager = ObjectsManager(database_manager)
         super().__init__(CmdbObject.COLLECTION, database_manager=database_manager)
 
+
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
     def get(self, public_id: Union[PublicID, int], user: UserModel = None,
             permission: AccessControlPermission = None) -> CmdbObject:
@@ -196,7 +191,7 @@ class ObjectManager(ManagerBase):
 
         for resource_result in cursor_result.limit(-1):
             resource = CmdbObject.from_data(resource_result)
-            type_ = TypeManager(database_manager=self._database_manager).get(resource.type_id)
+            type_ = self.objects_manager.get_object_type(resource.type_id)
             verify_access(type_, user, permission)
             return resource
 
@@ -223,65 +218,6 @@ class ObjectManager(ManagerBase):
         iteration_result.convert_to(CmdbObject)
 
         return iteration_result
-
-
-    def update(self, public_id: Union[PublicID, int], data: Union[CmdbObject, dict], user: UserModel = None,
-               permission: AccessControlPermission = None):
-        """
-        Update a existing type in the system.
-        Args:
-            public_id (int): PublicID of the type in the system.
-            data: New object data
-            user: Request user
-            permission: ACL permission
-
-        Notes:
-            If a CmdbObject instance was passed as data argument, \
-            it will be auto converted via the model `to_json` method.
-        """
-
-        if isinstance(data, CmdbObject):
-            instance = CmdbObject.to_json(data)
-        else:
-            instance = json.loads(json.dumps(data, default=json_util.default), object_hook=object_hook)
-
-        type_ = self.type_manager.get(instance.get('type_id'))
-
-        if not type_.active:
-            #TODO: ERROR-FIX
-            raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
-        verify_access(type_, user, permission)
-
-        update_result = self._update(self.collection, filter={'public_id': public_id}, resource=instance)
-
-        if update_result.matched_count != 1:
-            raise ManagerUpdateError('Something happened during the update!')
-
-        if self.event_queue and user:
-            event = Event("cmdb.core.object.updated", {"id": public_id, "type_id": instance.get('type_id'),
-                                                       "user_id": user.get_public_id(), 'event': 'update'})
-            self.event_queue.put(event)
-
-        return update_result
-
-
-    def update_many(self, query: dict, update: dict, add_to_set: bool = False):
-        """
-        update all documents that match the filter from a collection.
-        Args:
-            query (dict): A query that matches the documents to update.
-            update (dict): The modifications to apply.
-
-        Returns:
-            acknowledgment of database
-        """
-        try:
-            update_result = self._update_many(self.collection, query=query, update=update, add_to_set=add_to_set)
-        except (ManagerUpdateError, AccessDeniedError) as err:
-            #TODO: ERROR-FIX
-            raise err
-
-        return update_result
 
 
     def references(self, object_: CmdbObject, filter: dict, limit: int, skip: int, sort: str, order: int,
@@ -328,58 +264,6 @@ class ObjectManager(ManagerBase):
         merge_result = self.__merge_mds_references(mds_result, result, limit, skip, sort, order)
 
         return merge_result
-
-
-    def __merge_mds_references(self,
-                             mds_result: list,
-                             obj_result: IterationResult,
-                             limit: int,
-                             skip: int,
-                             sort: str,
-                             order: int):
-        """TODO: document"""
-        try:
-            referenced_ids = []
-
-            # get public_id's of all currently referenced objects
-            for obj in obj_result.results:
-                referenced_ids.append(obj.public_id)
-
-
-            # add mds objects to normal references if they are not already inside
-            for ref_object in mds_result:
-                tmp_object = CmdbObject.from_data(ref_object)
-
-                if tmp_object.public_id not in referenced_ids:
-                    obj_result.results.append(tmp_object)
-
-            obj_result.total = len(obj_result.results)
-
-            # sort all findings according to sort and order
-            descending_order = order == -1
-            try:
-                obj_result.results.sort(key=lambda x: getattr(x, sort), reverse=descending_order)
-            except Exception as err:
-                LOGGER.debug("References sorting error: %s", err)
-
-            # just keep the given limit of objects if limit > 0
-            if limit > 0:
-                list_length = limit + skip
-
-                # if the list_length is longer than the object_list then just set it to len(object_list)
-                if list_length > len(obj_result.results):
-                    list_length = len(obj_result.results)
-
-                try:
-                    obj_result.results = obj_result.results[skip:list_length]
-                except Exception as err:
-                    LOGGER.debug("References list slice error: %s", err)
-
-            # obj_result.total = len(obj_result.results)
-        except Exception as err:
-            LOGGER.info("[__merge_mds_references] Errorr: %s", err)
-
-        return obj_result
 
 
     def get_mds_references_for_object(self, referenced_object: CmdbObject, query_filter: Union[dict, list]):
@@ -436,7 +320,7 @@ class ObjectManager(ManagerBase):
         # query.append({'$sort': {sort: order}})
 
         try:
-            results = list(self._aggregate(self.type_manager.collection, query))
+            results = list(self._aggregate(TypeModel.COLLECTION, query))
         except ManagerIterationError as err:
             #TODO: ERROR-FIX
             LOGGER.debug("[get_mds_references_for_object] aggregation error: %s", err.message)
@@ -461,35 +345,67 @@ class ObjectManager(ManagerBase):
 
         return matching_results
 
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def __is_ref_field(self, field_name: str, ref_object: dict) -> bool:
-        """TODO: document"""
-        ref_type = self.type_manager.get(ref_object["type_id"])
-        for field in ref_type.fields:
-            if field["name"] == field_name and field["type"] == "ref":
-                return True
-
-        return False
-
-
-    def count_objects(self, type_id: int):
+    def update(self, public_id: Union[PublicID, int], data: Union[CmdbObject, dict], user: UserModel = None,
+               permission: AccessControlPermission = None):
         """
-        Returns the number of documents with the given type_id
-
+        Update a existing type in the system.
         Args:
-            type_id (int): public_id of type 
+            public_id (int): PublicID of the type in the system.
+            data: New object data
+            user: Request user
+            permission: ACL permission
+
+        Notes:
+            If a CmdbObject instance was passed as data argument, \
+            it will be auto converted via the model `to_json` method.
+        """
+
+        if isinstance(data, CmdbObject):
+            instance = CmdbObject.to_json(data)
+        else:
+            instance = json.loads(json.dumps(data, default=json_util.default), object_hook=object_hook)
+
+        type_ = self.objects_manager.get_object_type(instance.get('type_id'))
+
+        if not type_.active:
+            #TODO: ERROR-FIX
+            raise AccessDeniedError(f'Objects cannot be updated because type `{type_.name}` is deactivated.')
+        verify_access(type_, user, permission)
+
+        update_result = self._update(self.collection, filter={'public_id': public_id}, resource=instance)
+
+        if update_result.matched_count != 1:
+            raise ManagerUpdateError('Something happened during the update!')
+
+        if self.event_queue and user:
+            event = Event("cmdb.core.object.updated", {"id": public_id, "type_id": instance.get('type_id'),
+                                                       "user_id": user.get_public_id(), 'event': 'update'})
+            self.event_queue.put(event)
+
+        return update_result
+
+
+    def update_many(self, query: dict, update: dict, add_to_set: bool = False):
+        """
+        update all documents that match the filter from a collection.
+        Args:
+            query (dict): A query that matches the documents to update.
+            update (dict): The modifications to apply.
 
         Returns:
-            (int): Returns the number of documents with the given type_id
+            acknowledgment of database
         """
         try:
-            object_count = self._count_documents(self.collection, filter={'type_id': type_id})
+            update_result = self._update_many(self.collection, query=query, update=update, add_to_set=add_to_set)
+        except (ManagerUpdateError, AccessDeniedError) as err:
+            #TODO: ERROR-FIX
+            raise err
 
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
+        return update_result
 
-        return object_count
-
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
     def delete_all_object_references(self, public_id: int):
         """
@@ -522,3 +438,66 @@ class ObjectManager(ManagerBase):
 
             refed_object_id = refed_object['public_id']
             self.update(refed_object_id, refed_object)
+
+# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
+
+    def __merge_mds_references(self,
+                             mds_result: list,
+                             obj_result: IterationResult,
+                             limit: int,
+                             skip: int,
+                             sort: str,
+                             order: int):
+        """TODO: document"""
+        try:
+            referenced_ids = []
+
+            # get public_id's of all currently referenced objects
+            for obj in obj_result.results:
+                referenced_ids.append(obj.public_id)
+
+
+            # add mds objects to normal references if they are not already inside
+            for ref_object in mds_result:
+                tmp_object = CmdbObject.from_data(ref_object)
+
+                if tmp_object.public_id not in referenced_ids:
+                    obj_result.results.append(tmp_object)
+
+            obj_result.total = len(obj_result.results)
+
+            # sort all findings according to sort and order
+            descending_order = order == -1
+            try:
+                obj_result.results.sort(key=lambda x: getattr(x, sort), reverse=descending_order)
+            except Exception as err:
+                LOGGER.debug("References sorting error: %s", err)
+
+            # just keep the given limit of objects if limit > 0
+            if limit > 0:
+                list_length = limit + skip
+
+                # if the list_length is longer than the object_list then just set it to len(object_list)
+                if list_length > len(obj_result.results):
+                    list_length = len(obj_result.results)
+
+                try:
+                    obj_result.results = obj_result.results[skip:list_length]
+                except Exception as err:
+                    LOGGER.debug("References list slice error: %s", err)
+
+            # obj_result.total = len(obj_result.results)
+        except Exception as err:
+            LOGGER.info("[__merge_mds_references] Errorr: %s", err)
+
+        return obj_result
+
+
+    def __is_ref_field(self, field_name: str, ref_object: dict) -> bool:
+        """TODO: document"""
+        ref_type = self.objects_manager.get_object_type(ref_object["type_id"])
+        for field in ref_type.fields:
+            if field["name"] == field_name and field["type"] == "ref":
+                return True
+
+        return False

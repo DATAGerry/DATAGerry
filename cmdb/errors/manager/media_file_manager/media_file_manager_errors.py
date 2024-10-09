@@ -27,7 +27,7 @@ class MediaFileManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
+# ---------------------------------------------- MediaFileManager Errors --------------------------------------------- #
 
 class MediaFileManagerGetError(MediaFileManagerError):
     """

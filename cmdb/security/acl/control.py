@@ -60,8 +60,3 @@ class AccessControlList:
             self.groups.grant_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
-
-
-    def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
-        """TODO: document"""
-        return self.groups.verify_access(key, permission)

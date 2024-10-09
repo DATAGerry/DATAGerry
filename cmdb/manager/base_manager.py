@@ -29,8 +29,11 @@ from cmdb.errors.manager import ManagerInsertError,\
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  BaseManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class BaseManager:
-    """This is the base for every FrameworkManager"""
+    """This is the base class for every FrameworkManager"""
 
     def __init__(self, collection: Collection, dbm: MongoDatabaseManager):
         self.collection: Collection = collection
@@ -63,13 +66,26 @@ class BaseManager:
 
     def get_one(self, *args, **kwargs):
         """
-        Calls MongoDB find operation with *args for a single document
+        Calls MongoDB find operation for a single document
 
         Returns:
             Cursor over the result set
         """
         try:
             return self.dbm.find_one(self.collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
+
+    def get_one_from_other_collection(self, collection: str, public_id: int):
+        """
+        Calls MongoDB find operation for a single document from another collection
+
+        Returns:
+            Cursor over the result set
+        """
+        try:
+            return self.dbm.find_one(collection, public_id)
         except Exception as err:
             raise ManagerGetError(err) from err
 
@@ -87,6 +103,7 @@ class BaseManager:
         try:
             return self.dbm.find(self.collection, *args, **kwargs)
         except Exception as err:
+            LOGGER.debug(f"[get] Error: {err} , Type: {type(err)}")
             raise ManagerGetError(err) from err
 
 
@@ -150,6 +167,25 @@ class BaseManager:
             int: New highest public_id of the collection
         """
         return self.dbm.get_next_public_id(self.collection)
+
+
+    def count_documents(self, collection: str, *args, **kwargs):
+        """
+        Calls mongodb count operation
+        Args:
+            collection: Name of the collection
+
+        Raises:
+            ManagerGetError: If an error occures during the 'count' operation
+
+        Returns:
+            int: Number of found documents with given filter 
+        """
+        try:
+            return self.dbm.count(collection, *args, **kwargs)
+        except Exception as err:
+            LOGGER.debug("[count_documents] Error: %s , Type: %s", err, type(err))
+            raise ManagerGetError(err) from err
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 

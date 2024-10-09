@@ -20,7 +20,7 @@ from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
@@ -59,7 +59,7 @@ class ObjectLinksManager(BaseManager):
             dbm.connector.set_database(database)
 
         self.query_builder = BaseQueryBuilder()
-        self.object_manager = CmdbObjectManager(dbm)  # TODO: Replace when object api is updated
+        self.objects_manager = ObjectsManager(dbm)
         super().__init__(ObjectLinkModel.COLLECTION, dbm)
 
 
@@ -87,8 +87,8 @@ class ObjectLinksManager(BaseManager):
                 link['creation_time'] = datetime.now(timezone.utc)
 
             if user and permission:
-                self.object_manager.get_object(public_id=link['primary'], user=user, permission=permission)
-                self.object_manager.get_object(public_id=link['secondary'], user=user, permission=permission)
+                self.objects_manager.get_object(link['primary'], user, permission)
+                self.objects_manager.get_object(link['secondary'], user, permission)
 
             new_public_id = self.insert(link)
         except ManagerGetError as err:
@@ -152,8 +152,8 @@ class ObjectLinksManager(BaseManager):
             link = ObjectLinkModel.from_data(link_instance)
 
             if user and permission:
-                self.object_manager.get_object(link.primary, user, permission)
-                self.object_manager.get_object(link.secondary, user, permission)
+                self.objects_manager.get_object(link.primary, user, permission)
+                self.objects_manager.get_object(link.secondary, user, permission)
 
             return link
         except ManagerGetError as err:
@@ -197,8 +197,8 @@ class ObjectLinksManager(BaseManager):
             link: dict = self.get_one(public_id)
 
             if user and permission:
-                self.object_manager.get_object(link['primary'], user, permission)
-                self.object_manager.get_object(link['secondary'], user, permission)
+                self.objects_manager.get_object(link['primary'], user, permission)
+                self.objects_manager.get_object(link['secondary'], user, permission)
 
             self.delete({'public_id':public_id})
 

@@ -21,6 +21,7 @@ from bson import json_util
 from flask import abort, request, jsonify
 
 from cmdb.exportd.exporter_base import ExportdManagerBase
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob, ExecuteState
@@ -344,15 +345,20 @@ def worker(job: ExportdJob, request_user: UserModel):
 
     log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
     object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         event = Event("cmdb.exportd.run_manual", {"id": job.get_public_id(),
                                                   "user_id": request_user.get_public_id(),
                                                   "event": 'manuel'})
 
-        content = ExportdManagerBase(job, object_manager, log_manager, event).execute(request_user.public_id,
-                                                                                      request_user.get_display_name(),
-                                                                                      False)
+        content = ExportdManagerBase(job,
+                                     object_manager,
+                                     log_manager,
+                                     event,
+                                     objects_manager).execute(request_user.public_id,
+                                                              request_user.get_display_name(),
+                                                              False)
         response = make_response(content.data, content.status)
         response.headers['Content-Type'] = f'{content.mimetype}; charset={content.charset}'
 
