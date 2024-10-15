@@ -19,12 +19,13 @@ import json
 from bson import json_util
 from flask import abort, request, Response
 
-from cmdb.manager.docapi_template_manager import DocapiTemplateManager
+from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.interface.response import GetMultiResponse, ErrorMessage
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
@@ -48,13 +49,14 @@ docs_blueprint = APIBlueprint('docs', __name__)
 @right_required('base.docapi.template.add')
 def add_template(request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                     request_user)
 
     add_data_dump = json.dumps(request.json)
 
     try:
         new_tpl_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
-        new_tpl_data['public_id'] = docapi_tpl_manager.get_new_id()
+        new_tpl_data['public_id'] = docapi_manager.get_new_docapi_public_id()
         new_tpl_data['author_id'] = request_user.get_public_id()
     except TypeError as err:
         LOGGER.warning(err)
@@ -68,7 +70,7 @@ def add_template(request_user: UserModel):
         return abort(400)
 
     try:
-        ack = docapi_tpl_manager.insert_template(template_instance)
+        ack = docapi_manager.insert_template(template_instance)
     except DocapiInsertError as err:
         LOGGER.debug("[add_template] DocapiInsertError: %s", err.message)
         return ErrorMessage(500, "An error occured when trying to insert the template!").response()
@@ -83,11 +85,13 @@ def add_template(request_user: UserModel):
 @docs_blueprint.parse_collection_parameters()
 def get_template_list(params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
-    template_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                    request_user)
 
     try:
-        iteration_result: IterationResult[DocapiTemplate] = template_manager.get_templates(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
+        iteration_result: IterationResult[DocapiTemplate] = docapi_manager.get_templates(builder_params)
 
         types = [DocapiTemplate.to_json(type) for type in iteration_result.results]
 
@@ -109,11 +113,12 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
 @right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER,
+                                                                         request_user)
 
     try:
         filterdict = json.loads(searchfilter)
-        tpl = docapi_tpl_manager.get_templates_by(**filterdict)
+        tpl = docapi_manager.get_templates_by(**filterdict)
     except DocapiGetError:
         return ErrorMessage(404, f"Could not retrieve template list for filter: {searchfilter}").response()
 
@@ -127,15 +132,13 @@ def get_template_list_filtered(searchfilter: str, request_user: UserModel):
 @right_required('base.docapi.template.view')
 def get_template(public_id, request_user: UserModel):
     """
-        get template in database
-        Returns:
-            docapi template
-        """
-    #TODO: ANNOTATION-FIX
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    TODO: document
+    """
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                                         request_user)
 
     try:
-        tpl = docapi_tpl_manager.get_template(public_id)
+        tpl = docapi_manager.get_template(public_id)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err.message)
         return ErrorMessage(404, f"Could not retrieve template with ID: {public_id}!").response()
@@ -150,10 +153,11 @@ def get_template(public_id, request_user: UserModel):
 @right_required('base.docapi.template.view')
 def get_template_by_name(name: str, request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                                            request_user)
 
     try:
-        tpl = docapi_tpl_manager.get_template_by_name(name=name)
+        tpl = docapi_manager.get_template_by_name(name=name)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err.message)
         return ErrorMessage(404, f"Could not retrieve template with name: {name}!").response()
@@ -169,7 +173,8 @@ def get_template_by_name(name: str, request_user: UserModel):
 @right_required('base.docapi.template.edit')
 def update_template(request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                                            request_user)
 
     add_data_dump = json.dumps(request.json)
     new_tpl_data = None
@@ -187,7 +192,7 @@ def update_template(request_user: UserModel):
         return abort(400)
 
     try:
-        docapi_tpl_manager.update_template(update_tpl_instance, request_user)
+        docapi_manager.update_template(update_tpl_instance, request_user)
     except DocapiUpdateError as err:
         LOGGER.debug("[update_template] DocapiUpdateError: %s", err.message)
         return ErrorMessage(500, "Could not update the template!").response()
@@ -203,10 +208,11 @@ def update_template(request_user: UserModel):
 @right_required('base.docapi.template.delete')
 def delete_template(public_id: int, request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                                            request_user)
 
     try:
-        ack = docapi_tpl_manager.delete_template(public_id=public_id, request_user=request_user)
+        ack = docapi_manager.delete_template(public_id, request_user)
     except DocapiDeleteError as err:
         LOGGER.debug("[delete_template] DocapiDeleteError: %s", err.message)
         return ErrorMessage(400, f"Could not delete the template with ID:{public_id}!").response()
@@ -221,12 +227,12 @@ def delete_template(public_id: int, request_user: UserModel):
 @right_required('base.framework.object.view')
 def render_object_template(public_id: int, object_id: int, request_user: UserModel):
     """TODO: document"""
-    docapi_tpl_manager: DocapiTemplateManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER, request_user)
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
+                                                                            request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
-    docapi_manager = DocApiRenderer(docapi_tpl_manager, object_manager, objects_manager)
-    output = docapi_manager.render_object_template(public_id, object_id)
+    docapi_renderer = DocApiRenderer(objects_manager, docapi_manager)
+    output = docapi_renderer.render_object_template(public_id, object_id)
 
     # return data
     return Response(

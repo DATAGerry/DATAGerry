@@ -40,9 +40,8 @@ class ObjectDocumentGenerator:
         }
     """
 
-    def __init__(self, template, object_manager, cmdb_object, doctype, objects_manager: ObjectsManager):
+    def __init__(self, template, cmdb_object, doctype, objects_manager: ObjectsManager):
         self.__template = template
-        self.__object_manager = object_manager
         self.__cmdb_object = cmdb_object
         self.__doctype = doctype
         self.objects_manager = objects_manager
@@ -51,8 +50,7 @@ class ObjectDocumentGenerator:
     def generate_doc(self):
         """TODO: document"""
         # render template data
-        template_data = ObjectTemplateData(self.__object_manager,
-                                           self.__cmdb_object,
+        template_data = ObjectTemplateData(self.__cmdb_object,
                                            self.objects_manager).get_template_data()
         template_engine = TemplateEngine()
         rendered_template = template_engine.render_template_string(self.__template.get_template_data(), template_data)

@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from cmdb.manager.objects_manager import ObjectsManager
-from cmdb.manager.docapi_template_manager import DocapiTemplateManager
+from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 
 from cmdb.framework.cmdb_render import CmdbRender
 from cmdb.docapi.document_generator import ObjectDocumentGenerator
@@ -24,26 +24,25 @@ from cmdb.docapi.doctypes import PdfDocumentType
 
 class DocApiRenderer:
     """TODO: document"""
-    def __init__(self, template_manager: DocapiTemplateManager, object_manager, objects_manager: ObjectsManager):
-        self.template_manager = template_manager
-        self.object_manager = object_manager
+    def __init__(self,
+                 objects_manager: ObjectsManager,
+                 docapi_manager: DocapiTemplatesManager):
+        self.docapi_manager = docapi_manager
         self.objects_manager = objects_manager
 
 
     def render_object_template(self, doctpl_id: int, object_id: int):
         """TODO: document"""
-        template = self.template_manager.get_template(doctpl_id)
+        template = self.docapi_manager.get_template(doctpl_id)
         cmdb_object = self.objects_manager.get_object(object_id)
         type_instance = self.objects_manager.get_object_type(cmdb_object.get_type_id())
         cmdb_render_object = CmdbRender(cmdb_object,
                                         type_instance,
                                         None,
-                                        self.object_manager,
                                         False,
                                         self.objects_manager)
 
         generator = ObjectDocumentGenerator(template,
-                                            self.object_manager,
                                             cmdb_render_object.result(),
                                             PdfDocumentType(),
                                             self.objects_manager)

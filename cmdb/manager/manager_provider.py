@@ -25,7 +25,7 @@ from cmdb.manager.right_manager import RightManager
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
-from cmdb.manager.docapi_template_manager import DocapiTemplateManager
+from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.user_manager import UserManager
 from cmdb.manager.setting_manager import UserSettingsManager
 from cmdb.manager.group_manager import GroupManager
@@ -51,7 +51,7 @@ class ManagerType(Enum):
     CATEGORIES_MANAGER = 'CategoriesManager'
     OBJECTS_MANAGER = 'ObjectsManager'
     LOGS_MANAGER = 'LogsManager'
-    DOCAPI_TEMPLATE_MANAGER = 'DocapiTemplateManager'
+    DOCAPI_TEMPLATES_MANAGER = 'DocapiTemplatesManager'
     USER_MANAGER = 'UserManager'
     USER_SETTINGS_MANAGER = 'UserSettingsManager'
     GROUP_MANAGER = 'GroupManager'
@@ -87,7 +87,7 @@ class ManagerProvider:
             ManagerType.CATEGORIES_MANAGER: CategoriesManager,
             ManagerType.OBJECTS_MANAGER: ObjectsManager,
             ManagerType.LOGS_MANAGER: LogsManager,
-            ManagerType.DOCAPI_TEMPLATE_MANAGER: DocapiTemplateManager,
+            ManagerType.DOCAPI_TEMPLATES_MANAGER: DocapiTemplatesManager,
             ManagerType.USER_MANAGER: UserManager,
             ManagerType.USER_SETTINGS_MANAGER: UserSettingsManager,
             ManagerType.GROUP_MANAGER: GroupManager,
@@ -127,7 +127,7 @@ class ManagerProvider:
                 ManagerType.CATEGORIES_MANAGER,
                 ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
-                ManagerType.DOCAPI_TEMPLATE_MANAGER,
+                ManagerType.DOCAPI_TEMPLATES_MANAGER,
                 ManagerType.LOCATIONS_MANAGER,
                 ManagerType.SECTION_TEMPLATES_MANAGER,
                 ManagerType.OBJECT_LINKS_MANAGER,
@@ -157,7 +157,7 @@ class ManagerProvider:
                 ManagerType.CATEGORIES_MANAGER,
                 ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
-                ManagerType.DOCAPI_TEMPLATE_MANAGER,
+                ManagerType.DOCAPI_TEMPLATES_MANAGER,
                 ManagerType.LOCATIONS_MANAGER,
                 ManagerType.SECTION_TEMPLATES_MANAGER,
                 ManagerType.OBJECT_LINKS_MANAGER,
