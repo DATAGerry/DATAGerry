@@ -16,7 +16,6 @@
 """TODO: document"""
 import logging
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
@@ -192,7 +191,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
 
     def build(self, params: list[SearchParam],
-              obj_manager: CmdbObjectManager = None,
+              objects_manager: ObjectsManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
               active_flag: bool = False, *args, **kwargs) -> Pipeline:
         """Build a pipeline query out of frontend params"""
@@ -227,9 +226,10 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         # category builds
         category_params = [_ for _ in params if _.search_form == 'category']
+
         for param in category_params:
             if param.settings and len(param.settings.get('categories', [])) > 0:
-                categories = obj_manager.get_categories_by(**self.regex_('label', param.search_text))
+                categories = objects_manager.get_categories_by(**self.regex_('label', param.search_text))
                 for curr_category in categories:
                     type_id_in = self.in_('type_id', curr_category.types)
                     self.add_pipe(self.match_(type_id_in))
@@ -246,13 +246,12 @@ class SearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
-class SearcherFramework(Search[CmdbObjectManager]):
+class SearcherFramework(Search[ObjectsManager]):
     """Framework searcher implementation for object search"""
 
-    def __init__(self, manager: CmdbObjectManager, objects_manager: ObjectsManager):
-        """Normally uses a instance of CmdbObjectManager as managers"""
+    def __init__(self, objects_manager: ObjectsManager):
         self.objects_manager = objects_manager
-        super().__init__(manager=manager)
+        super().__init__(objects_manager)
 
 
     def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, permission: AccessControlPermission = None,
@@ -302,7 +301,7 @@ class SearcherFramework(Search[CmdbObjectManager]):
         }
         stages.update(group_stage)
         plb.add_pipe(SearchPipelineBuilder.facet_(stages))
-        raw_search_result = self.manager.aggregate(collection=CmdbObject.COLLECTION, pipeline=plb.pipeline)
+        raw_search_result = self.objects_manager.aggregate_objects(pipeline=plb.pipeline)
         raw_search_result_list = list(raw_search_result)
 
         try:
@@ -318,8 +317,6 @@ class SearcherFramework(Search[CmdbObjectManager]):
 
             rendered_result_list = RenderList(pre_rendered_result_list,
                                               request_user,
-                                              ref_render=False,
-                                              object_manager=self.manager,
                                               objects_manager=self.objects_manager).render_result_list()
 
             total_results = raw_search_result_list_entry['metadata'][0].get('total', 0)

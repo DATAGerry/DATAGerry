@@ -21,7 +21,6 @@ from dateutil.parser import parse
 
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.user_manager import UserManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.type_manager import TypeManager
 
 from cmdb.security.acl.permission import AccessControlPermission
@@ -83,12 +82,11 @@ class CmdbRender:
     def __init__(self, object_instance: CmdbObject,
                  type_instance: TypeModel,
                  render_user: UserModel,
-                 object_manager: CmdbObjectManager = None, ref_render=False, objects_manager: ObjectsManager = None):
+                 ref_render=False,
+                 objects_manager: ObjectsManager = None):
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
         self.render_user: UserModel = render_user
-
-        self.object_manager = object_manager
         self.objects_manager = objects_manager
 
         if self.objects_manager:  # TODO: Refactor to pass database-manager in init
@@ -400,7 +398,6 @@ class CmdbRender:
                 render = CmdbRender(object_instance=instance,
                                     type_instance=ref_type,
                                     render_user=self.render_user,
-                                    object_manager=self.object_manager,
                                     ref_render=True,
                                     objects_manager=self.objects_manager)
                 fields = render.result(level).fields
@@ -573,12 +570,10 @@ class RenderList:
                  object_list: list[CmdbObject],
                  request_user: UserModel,
                  ref_render=False,
-                 object_manager: CmdbObjectManager = None,
                  objects_manager: ObjectsManager = None):
         self.object_list: list[CmdbObject] = object_list
         self.request_user = request_user
         self.ref_render = ref_render
-        self.object_manager = object_manager
         self.objects_manager = objects_manager
 
 
@@ -587,12 +582,12 @@ class RenderList:
         preparation_objects: list[RenderResult] = []
         for passed_object in self.object_list:
             tmp_render = CmdbRender(
-                type_instance=self.object_manager.get_type(passed_object.type_id),
+                type_instance=self.objects_manager.get_object_type(passed_object.type_id),
                 object_instance=passed_object,
                 render_user=self.request_user,
-                object_manager=self.object_manager,
                 ref_render=self.ref_render,
                 objects_manager=self.objects_manager)
+
             if raw:
                 current_render_result = tmp_render.result().__dict__
             else:

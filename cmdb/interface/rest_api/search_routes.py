@@ -16,8 +16,9 @@
 """TODO: document"""
 import json
 import logging
-
 from flask import request, abort
+
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
 from cmdb.search import Search
@@ -42,16 +43,18 @@ search_blueprint = APIBlueprint('search_rest', __name__, url_prefix='/search')
 @insert_request_user
 def quick_search_result_counter(request_user: UserModel):
     """TODO: document"""
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+
     search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
     builder = QuickSearchPipelineBuilder()
     only_active = _fetch_only_active_objs()
-    pipeline: Pipeline = builder.build(search_term=search_term, user=request_user,
+    pipeline: Pipeline = builder.build(search_term=search_term,
+                                       user=request_user,
                                        permission=AccessControlPermission.READ,
                                        active_flag=only_active)
 
     try:
-        result = list(object_manager.aggregate(collection='framework.objects', pipeline=pipeline))
+        result = list(objects_manager.aggregate_objects(pipeline=pipeline))
     except Exception as err:
         LOGGER.error('[Search count]: %s',err)
         return abort(400)
@@ -67,7 +70,6 @@ def quick_search_result_counter(request_user: UserModel):
 @insert_request_user
 def search_framework(request_user: UserModel):
     """TODO: document"""
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -92,12 +94,14 @@ def search_framework(request_user: UserModel):
         return abort(400, err)
 
     try:
-        searcher = SearcherFramework(object_manager, objects_manager)
+        searcher = SearcherFramework(objects_manager)
         builder = SearchPipelineBuilder()
 
-        query: Pipeline = builder.build(search_parameters, object_manager,
+        query: Pipeline = builder.build(search_parameters,
+                                        objects_manager,
                                         user=request_user,
-                                        permission=AccessControlPermission.READ, active_flag=only_active)
+                                        permission=AccessControlPermission.READ,
+                                        active_flag=only_active)
 
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
                                     resolve=resolve_object_references, permission=AccessControlPermission.READ,

@@ -21,8 +21,7 @@ from deepdiff import DeepDiff
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.type_manager import TypeManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
-from cmdb.manager.object_manager import ObjectManager
+from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
@@ -66,8 +65,7 @@ class SectionTemplatesManager(BaseManager):
 
         self.query_builder = BaseQueryBuilder()
         self.type_manager = TypeManager(dbm)
-        self.cmdb_object_manager = CmdbObjectManager(dbm)
-        self.object_manager = ObjectManager(dbm, event_queue)
+        self.objects_manager = ObjectsManager(dbm)
 
         super().__init__(CmdbSectionTemplate.COLLECTION, dbm)
 
@@ -196,7 +194,7 @@ class SectionTemplatesManager(BaseManager):
 
         a_type: TypeModel
         for a_type in found_types.results:
-            objects: list = self.cmdb_object_manager.get_objects_by_type(a_type.public_id)
+            objects: list = self.objects_manager.get_objects_by(type_id=a_type.public_id)
             objects_count += len(objects)
 
         counts['objects'] = objects_count
@@ -383,14 +381,14 @@ class SectionTemplatesManager(BaseManager):
             type_id (int): ID of the type for which the objects should be cleaned
             section_field_names (list[str]): list of all fields which should be deleted 
         """
-        section_objects: list = self.cmdb_object_manager.get_objects_by_type(type_id)
+        section_objects: list = self.objects_manager.get_objects_by(type_id=type_id)
 
         # remove section fields and update the objects
         an_object: CmdbObject
         for an_object in section_objects:
             an_object.fields = [field for field in an_object.fields if field['name'] not in section_field_names]
 
-            self.object_manager.update(an_object.public_id, an_object)
+            self.objects_manager.update_object(an_object.public_id, an_object)
 
 
     def set_new_global_template_fields(self, type_id: int, new_field_names: list[str]) -> None:
@@ -401,7 +399,7 @@ class SectionTemplatesManager(BaseManager):
             type_id (int): ID of the TypeModel
             new_field_names (list[str]): List of names of new fields
         """
-        section_objects: list = self.cmdb_object_manager.get_objects_by_type(type_id)
+        section_objects: list = self.objects_manager.get_objects_by(type_id=type_id)
 
         an_object: CmdbObject
         for an_object in section_objects:
@@ -412,7 +410,7 @@ class SectionTemplatesManager(BaseManager):
                     'value': None
                 })
 
-            self.object_manager.update(an_object.public_id, an_object)
+            self.objects_manager.update_object(an_object.public_id, an_object)
 
 
     def cleanup_global_section_templates(self, template_name: str) -> None:

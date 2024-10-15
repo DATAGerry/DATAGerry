@@ -18,7 +18,6 @@ import logging
 
 from cmdb.manager.exportd_job_manager import ExportdJobManager
 from cmdb.manager.exportd_log_manager import ExportdLogManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.event_management.event import Event
@@ -44,7 +43,6 @@ class ExportdManagerBase(ExportdJobManager):
     """TODO: document"""
 
     def __init__(self, job: ExportdJob,
-                 object_manager: CmdbObjectManager,
                  log_manager: ExportdLogManager,
                  event: Event,
                  objects_manager: ObjectsManager):
@@ -52,12 +50,11 @@ class ExportdManagerBase(ExportdJobManager):
         self.event = event
         self.variables = self.__get_exportvars()
         self.destinations = self.__get__destinations()
-        self.object_manager = object_manager
         self.log_manager = log_manager
         self.sources = self.__get_sources()
         self.objects_manager = objects_manager
 
-        super().__init__(object_manager.dbm)
+        super().__init__(objects_manager.dbm)
 
 
     def __get_exportvars(self):
@@ -72,10 +69,7 @@ class ExportdManagerBase(ExportdJobManager):
 
     def __get_sources(self):
         sources = []
-        sources.append(ExportSource(self.job,
-                                    object_manager=self.object_manager,
-                                    event=self.event,
-                                    objects_manager=self.objects_manager))
+        sources.append(ExportSource(self.job, self.event, self.objects_manager))
 
         return sources
 
@@ -115,9 +109,7 @@ class ExportdManagerBase(ExportdJobManager):
 
             for cmdb_object in cmdb_objects:
                 # setup objectdata for use in ExportVariable templates
-                template_data = ObjectTemplateData(self.object_manager,
-                                                   cmdb_object,
-                                                   self.objects_manager).get_template_data()
+                template_data = ObjectTemplateData(cmdb_object, self.objects_manager).get_template_data()
                 external_system.add_object(cmdb_object, template_data)
             exportd_header = external_system.finish_export()
 
@@ -174,12 +166,10 @@ class ExportSource:
     """TODO: document"""
     def __init__(self,
                  job: ExportdJob,
-                 object_manager: CmdbObjectManager,
                  event: Event,
                  objects_manager: ObjectsManager):
         self.__job = job
         self.event = event
-        self.__obm = object_manager
         self.__objects = self.__fetch_objects()
         self.objects_manager = objects_manager
 
@@ -223,11 +213,12 @@ class ExportSource:
                 if not source["condition"]:
                     query.append({'type_id': source["type_id"], 'active': {'$eq': True}})
 
-            current_objects = self.__obm.get_objects_by(sort="public_id", **{'$or': query})
-            result = (RenderList(current_objects,
-                                 None,
-                                 object_manager=self.__obm,
-                                 objects_manager=self.objects_manager).render_result_list()
+            current_objects = self.objects_manager.get_objects_by(sort="public_id", **{'$or': query})
+
+            result = (
+                        RenderList(current_objects,
+                                   None,
+                                   objects_manager=self.objects_manager).render_result_list()
                      )
 
         return result

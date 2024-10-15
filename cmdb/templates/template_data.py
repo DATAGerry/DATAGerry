@@ -45,9 +45,8 @@ class AbstractTemplateData:
 class ObjectTemplateData(AbstractTemplateData):
     """TODO: document"""
 
-    def __init__(self, object_manager, cmdb_object, objects_manager: ObjectsManager):
+    def __init__(self, cmdb_object, objects_manager: ObjectsManager):
         super().__init__()
-        self.__object_manager = object_manager
         self.objects_manager = objects_manager
         self._template_data = self.__get_objectdata(cmdb_object, 3)
 
@@ -69,7 +68,6 @@ class ObjectTemplateData(AbstractTemplateData):
                     cmdb_render_object = CmdbRender(object_instance=current_object,
                                                     type_instance=type_instance,
                                                     render_user=None,
-                                                    object_manager=self.__object_manager,
                                                     objects_manager=self.objects_manager)
 
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)

@@ -18,13 +18,13 @@ from datetime import datetime, timezone
 import logging
 from typing import Optional
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.framework import CmdbObject
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
-from cmdb.importer.importer_response import BaseImporterResponse, ImporterObjectResponse, ImportFailedMessage,\
-    ImportSuccessMessage
+from cmdb.importer.importer_response import BaseImporterResponse,\
+                                            ImporterObjectResponse,\
+                                            ImportFailedMessage,\
+                                            ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management.models.user import UserModel
@@ -86,7 +86,6 @@ class ObjectImporter(BaseImporter):
                  file_type,
                  config: ObjectImporterConfig = None,
                  parser: BaseObjectParser = None,
-                 object_manager: CmdbObjectManager = None,
                  objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         """
@@ -97,11 +96,9 @@ class ObjectImporter(BaseImporter):
             file_type: file type - used with content-type
             config: importer configuration
             parser: the parser instance based on content-type
-            object_manager: a instance of the object managers
             request_user: the instance of the started user
         """
         self.parser = parser
-        self.object_manager = object_manager
         self.objects_manager = objects_manager
         self.request_user = request_user
 
@@ -175,7 +172,7 @@ class ObjectImporter(BaseImporter):
                     success_imports.append(ImportSuccessMessage(public_id=current_public_id, obj=current_import_object))
             else:
                 try:
-                    self.object_manager.delete_object(current_public_id, self.request_user)
+                    self.objects_manager.delete_object(current_public_id, self.request_user)
                 except ObjectManagerDeleteError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
                     current_import_index += 1

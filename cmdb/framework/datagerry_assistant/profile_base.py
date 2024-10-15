@@ -20,7 +20,6 @@ import logging
 from flask import current_app
 
 from cmdb.manager.type_manager import TypeManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.framework import TypeModel
 from .profile_type_constructor import ProfileTypeConstructor
@@ -43,7 +42,6 @@ class ProfileBase:
 
         with current_app.app_context():
             self.type_manager = TypeManager(current_app.database_manager)
-            self.object_manager = CmdbObjectManager(current_app.database_manager)
             self.type_constructor = ProfileTypeConstructor(current_app.database_manager)
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #

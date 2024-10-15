@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Contains implementation of BaseManager"""
 import logging
+from pymongo.results import DeleteResult
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
@@ -90,6 +91,33 @@ class BaseManager:
             raise ManagerGetError(err) from err
 
 
+    def get_many_from_other_collection(self,
+                                       collection: str,
+                                       sort: str = 'public_id',
+                                       direction: int = -1,
+                                       limit=0,
+                                       **requirements: dict) -> list[dict]:
+        """Get all documents from the database which have the passing requirements
+
+        Args:
+            sort (str): sort by given key - default public_id
+            **requirements (dict): dictionary of key value pairs
+
+        Returns:
+            list: list of all documents
+        """
+        requirements_filter = {}
+        formatted_sort = [(sort, direction)]
+
+        for k, req in requirements.items():
+            requirements_filter.update({k: req})
+
+        return self.dbm.find_all(collection=collection,
+                                 limit=limit,
+                                 filter=requirements_filter,
+                                 sort=formatted_sort)
+
+
     def get(self, *args, **kwargs):
         """
         General find function
@@ -103,7 +131,7 @@ class BaseManager:
         try:
             return self.dbm.find(self.collection, *args, **kwargs)
         except Exception as err:
-            LOGGER.debug(f"[get] Error: {err} , Type: {type(err)}")
+            LOGGER.debug("[get] Error: %s , Type: %s", err, type(err))
             raise ManagerGetError(err) from err
 
 
@@ -155,6 +183,19 @@ class BaseManager:
         """
         try:
             return self.dbm.aggregate(self.collection, *args, **kwargs)
+        except Exception as err:
+            raise ManagerIterationError(err) from err
+
+
+    def aggregate_from_other_collection(self, collection: str, *args, **kwargs):
+        """
+        Calls MongoDB aggregation with *args
+        Args:
+        Returns:
+            - A :class:`~pymongo.command_cursor.CommandCursor` over the result set
+        """
+        try:
+            return self.dbm.aggregate(collection, *args, **kwargs)
         except Exception as err:
             raise ManagerIterationError(err) from err
 
@@ -238,3 +279,24 @@ class BaseManager:
             return self.dbm.delete(self.collection, criteria).acknowledged
         except Exception as err:
             raise ManagerDeleteError(err) from err
+
+
+    def delete_many(self, filter_query: dict) -> DeleteResult:
+        """
+        Removes all documents that match the filter from a collection
+
+        Args:
+            filter (dict): Specifies deletion criteria using query operators
+
+        Raises:
+            ManagerDeleteError: If something goes wrong
+
+        Returns:
+            Acknowledgment of database
+        """
+        try:
+            delete_result = self.dbm.delete_many(collection=self.collection, **filter_query)
+        except Exception as err:
+            raise ManagerDeleteError(str(err)) from err
+
+        return delete_result

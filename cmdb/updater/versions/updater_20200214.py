@@ -19,8 +19,6 @@ import time
 import logging
 from datetime import datetime
 
-from cmdb.manager.object_manager import ObjectManager
-
 from cmdb.updater.updater import Updater
 
 from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
@@ -66,8 +64,7 @@ class Update20200214(Updater):
     def worker(self, type_):
         """TODO: document"""
         try:
-            manager = ObjectManager(database_manager=self.database_manager)  # TODO: Replace when object api is updated
-            object_list = self.object_manager.get_objects_by_type(type_.public_id)
+            object_list = self.objects_manager.get_objects_by(type_id=type_.public_id)
             matches = type_.matches
 
             for obj in object_list:
@@ -81,7 +78,7 @@ class Update20200214(Updater):
                             else:
                                 field['value'] = datetime.strptime(value, '%Y-%m-%dT%H:%M:%S.%fZ')
 
-                manager.update(public_id=obj.public_id, data=obj, user=None, permission=None)
+                self.objects_manager.update_object(obj.public_id, obj)
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
             #TODO: ERROR-FIX
             LOGGER.error("[worker] Error in worker: %s", err.message)
@@ -102,7 +99,7 @@ class Update20200214(Updater):
         }})
 
         try:
-            return self.object_manager.get_type_aggregate(argument)
+            return self.objects_manager.get_type_aggregate(argument)
         except ObjectManagerGetError as err:
             LOGGER.error(err.message)
             return []
