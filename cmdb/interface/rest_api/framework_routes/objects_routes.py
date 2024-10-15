@@ -21,8 +21,6 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
-from cmdb.manager.object_manager import ObjectManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
@@ -69,7 +67,6 @@ def insert_object(request_user: UserModel):
     """TODO: document"""
     add_data_dump = json.dumps(request.json)
 
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
@@ -119,7 +116,6 @@ def insert_object(request_user: UserModel):
                                                 object_instance=current_object,
                                                 type_instance=current_type_instance,
                                                 render_user=request_user,
-                                                object_manager=object_manager,
                                                 ref_render=False,
                                                 objects_manager=objects_manager
                                             ).result()
@@ -167,7 +163,6 @@ def insert_object(request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -189,7 +184,6 @@ def get_object(public_id, request_user: UserModel):
         render = CmdbRender(object_instance=object_instance,
                             type_instance=type_instance,
                             render_user=request_user,
-                            object_manager=object_manager,
                             ref_render=True,
                             objects_manager=objects_manager)
 
@@ -217,9 +211,7 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     Returns:
         (Response): The objects from db fitting the params
     """
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     view = params.optional.get('view', 'native')
 
@@ -230,15 +222,12 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': {"$eq": True}}})
 
+    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
     try:
-        iteration_result: IterationResult[CmdbObject] = manager.iterate(
-                                                        filter=params.filter,
-                                                        limit=params.limit,
-                                                        skip=params.skip,
-                                                        sort=params.sort,
-                                                        order=params.order,
-                                                        user=request_user,
-                                                        permission=AccessControlPermission.READ)
+        iteration_result: IterationResult[CmdbObject] = objects_manager.iterate(builder_params,
+                                                                                request_user,
+                                                                                AccessControlPermission.READ)
 
         if view == 'native':
             object_list: list[dict] = [object_.__dict__ for object_ in iteration_result.results]
@@ -255,7 +244,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
 
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
-                                       object_manager=object_manager,
                                        ref_render=True,
                                        objects_manager=objects_manager).render_result_list(raw=True)
 
@@ -300,22 +288,24 @@ def get_native_object(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def group_objects_by_type_id(value, request_user: UserModel):
     """TODO: document"""
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         filter_state = None
         if _fetch_only_active_objs():
             filter_state = {'active': {"$eq": True}}
         result = []
-        cursor = object_manager.group_objects_by_value(value,
-                                                       filter_state,
-                                                       user=request_user,
-                                                       permission=AccessControlPermission.READ)
+        cursor = objects_manager.group_objects_by_value(value,
+                                                        filter_state,
+                                                        request_user,
+                                                        AccessControlPermission.READ)
         max_length = 0
+
         for document in cursor:
-            document['label'] = object_manager.get_type(document['_id']).label
+            document['label'] = objects_manager.get_object_type(document['_id']).label
             result.append(document)
             max_length += 1
+
             if max_length == 5:
                 break
     except Exception:
@@ -330,15 +320,13 @@ def group_objects_by_type_id(value, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_reference(public_id: int, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        referenced_object: CmdbObject = manager.get(public_id,
-                                                    user=request_user,
-                                                    permission=AccessControlPermission.READ)
+        referenced_object: CmdbObject = objects_manager.get_object(public_id,
+                                                                   request_user,
+                                                                   AccessControlPermission.READ)
 
         referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
 
@@ -350,7 +338,6 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
         mds_reference = CmdbRender(object_instance=referenced_object,
                                    type_instance=referenced_type,
                                    render_user=request_user,
-                                   object_manager=object_manager,
                                    ref_render=True,
                                    objects_manager=objects_manager).get_mds_reference(public_id)
 
@@ -367,10 +354,8 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_references(public_id: int, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     summary_lines = {}
 
@@ -382,9 +367,9 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
 
     for object_id in object_ids:
         try:
-            referenced_object: CmdbObject = manager.get(object_id,
-                                                        user=request_user,
-                                                        permission=AccessControlPermission.READ)
+            referenced_object: CmdbObject = objects_manager.get_object(object_id,
+                                                                       request_user,
+                                                                       AccessControlPermission.READ)
 
             referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
 
@@ -396,7 +381,6 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
             mds_reference = CmdbRender(object_instance=referenced_object,
                         type_instance=referenced_type,
                         render_user=request_user,
-                        object_manager=object_manager,
                         ref_render=True,
                         objects_manager=objects_manager).get_mds_reference(object_id)
 
@@ -416,9 +400,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
 @objects_blueprint.parse_collection_parameters(view='native')
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     view = params.optional.get('view', 'native')
 
@@ -434,18 +416,18 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             params.filter.append({'$match': {}})
 
     try:
-        referenced_object: CmdbObject = manager.get(public_id,
-                                                    user=request_user,
-                                                    permission=AccessControlPermission.READ)
+        referenced_object: CmdbObject = objects_manager.get_object(public_id,
+                                                                   request_user,
+                                                                   AccessControlPermission.READ)
     except ManagerGetError:
         return abort(404)
     except AccessDeniedError:
         return abort(403, "No permission to view object references!")
 
     try:
-        iteration_result: IterationResult[CmdbObject] = manager.references(
+        iteration_result: IterationResult[CmdbObject] = objects_manager.references(
                                                                     object_=referenced_object,
-                                                                    filter=params.filter,
+                                                                    criteria=params.filter,
                                                                     limit=params.limit,
                                                                     skip=params.skip,
                                                                     sort=params.sort,
@@ -464,9 +446,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
                                        ref_render=True,
-                                       object_manager=object_manager,
-                                       objects_manager=objects_manager).render_result_list(
-                raw=True)
+                                       objects_manager=objects_manager).render_result_list(raw=True)
 
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
                                             url=request.url, model=Model('RenderResult'), body=request.method == 'HEAD')
@@ -507,17 +487,19 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         GetListResponse: Which includes the json data of multiple objects.
     """
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         type_instance: TypeModel = type_manager.get(public_id=public_id)
-        objects: list[CmdbObject] = manager.iterate({'type_id': public_id},
-                                                    limit=0,
-                                                    skip=0,
-                                                    sort='public_id',
-                                                    order=1,
-                                                    user=request_user).results
+
+        builder_params = BuilderParameters({'type_id': public_id},
+                                           limit=0,
+                                           skip=0,
+                                           sort='public_id',
+                                           order=1)
+
+        objects: list[CmdbObject] = objects_manager.iterate(builder_params, request_user).results
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(400)
@@ -541,18 +523,16 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 @objects_blueprint.validate(CmdbObject.SCHEMA)
 def update_object(public_id: int, data: dict, request_user: UserModel):
     """TODO: document"""
+    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+
     object_ids = request.args.getlist('objectIDs')
 
     if len(object_ids) > 0:
         object_ids = list(map(int, object_ids))
     else:
         object_ids = [public_id]
-
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     results: list[dict] = []
     failed = []
@@ -562,13 +542,12 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         active_state = request.get_json().get('active', None)
         new_data = copy.deepcopy(data)
         try:
-            current_object_instance = manager.get(obj_id, user=request_user, permission=AccessControlPermission.READ)
+            current_object_instance = objects_manager.get_object(obj_id, request_user, AccessControlPermission.READ)
             current_type_instance = type_manager.get(current_object_instance.get_type_id())
 
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      object_manager=object_manager,
                                                       ref_render=False,
                                                       objects_manager=objects_manager
                                                       ).result()
@@ -623,7 +602,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             else:
                 new_data['version'] = update_object_instance.update_version(update_object_instance.VERSIONING_PATCH)
 
-            manager.update(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
+            objects_manager.update_object(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
             results.append(new_data)
 
             # Generate log entry
@@ -669,18 +648,16 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 def update_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     if isinstance(request.json, bool):
         state = request.json
     else:
         return abort(400)
     try:
-        found_object = manager.get(public_id=public_id, user=request_user, permission=AccessControlPermission.READ)
+        found_object = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
     except ObjectManagerGetError as err:
         LOGGER.debug("[update_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404, f"Could not update object state for public_id: {public_id} !")
@@ -689,7 +666,10 @@ def update_object_state(public_id: int, request_user: UserModel):
         return make_response(False, 204)
     try:
         found_object.active = state
-        manager.update(public_id, found_object, user=request_user, permission=AccessControlPermission.UPDATE)
+        objects_manager.update_object(public_id,
+                                      found_object,
+                                      request_user,
+                                      AccessControlPermission.UPDATE)
     except AccessDeniedError as err:
         #TODO: ERROR-FIX
         LOGGER.error("AccessDeniedError: %s", err)
@@ -705,7 +685,6 @@ def update_object_state(public_id: int, request_user: UserModel):
         current_object_render_result = CmdbRender(object_instance=found_object,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  object_manager=object_manager,
                                                   ref_render=False,
                                                   objects_manager=objects_manager
                                                   ).result()
@@ -755,19 +734,20 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         update_type_instance = type_manager.get(public_id)
         type_fields = update_type_instance.fields
 
-        objects_by_type = manager.iterate({'type_id': public_id},
-                                          limit=0,
-                                          skip=0,
-                                          sort='public_id',
-                                          order=1,
-                                          user=request_user).results
+        builder_params = BuilderParameters({'type_id': public_id},
+                                           limit=0,
+                                           skip=0,
+                                           sort='public_id',
+                                           order=1)
+
+        objects_by_type = objects_manager.iterate(builder_params, request_user).results
 
         for obj in objects_by_type:
             incorrect = []
@@ -782,11 +762,10 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                         incorrect.append(field["name"])
             removed_type_fields = [item for item in incorrect if not item in correct]
             for field in removed_type_fields:
-                manager.update_many(query={'public_id': obj.public_id},
-                                    update={'$pull': {'fields': {"name": field}}})
+                objects_manager.update_many_objects(query={'public_id': obj.public_id},
+                                                    update={'$pull': {'fields': {"name": field}}})
 
-        objects_by_type = manager.iterate({'type_id': public_id}, limit=0, skip=0,
-                                          sort='public_id', order=1, user=request_user).results
+        objects_by_type = objects_manager.iterate(builder_params, request_user).results
 
         for obj in objects_by_type:
             for t_field in type_fields:
@@ -797,9 +776,9 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                 if "value" in t_field:
                     value = t_field["value"]
 
-                manager.update_many(query={'public_id': obj.public_id},
-                                    update={'fields': {"name": name, "value": value}},
-                                    add_to_set=True)
+                objects_manager.update_many_objects(query={'public_id': obj.public_id},
+                                                    update={'fields': {"name": name, "value": value}},
+                                                    add_to_set=True)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_unstructured_objects] ManagerUpdateError: %s", err.message)
         return abort(400, err.message)
@@ -823,13 +802,11 @@ def delete_object(public_id: int, request_user: UserModel):
     Returns:
         Response: Acknowledgment of database 
     """
-    current_location = None
-
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
+    current_location = None
 
     try:
         current_object_instance = objects_manager.get_object(public_id)
@@ -837,14 +814,13 @@ def delete_object(public_id: int, request_user: UserModel):
         # Remove object links and references
         if current_object_instance:
             delete_object_links(public_id, request_user)
-            manager.delete_all_object_references(public_id)
+            objects_manager.delete_all_object_references(public_id)
 
         current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
 
         current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                   type_instance=current_type_instance,
                                                   render_user=request_user,
-                                                  object_manager=object_manager,
                                                   ref_render=False,
                                                   objects_manager=objects_manager
                                                   ).result()
@@ -871,7 +847,7 @@ def delete_object(public_id: int, request_user: UserModel):
         if current_location:
             locations_manager.delete({'public_id':current_location.public_id})
 
-        ack = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
+        ack = objects_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
     except ObjectManagerGetError as err:
         LOGGER.debug("[delete_object] ObjectManagerGetError: %s", err.message)
         return abort(400, f"Could not delete object with public_id: {public_id}!")
@@ -894,6 +870,7 @@ def delete_object(public_id: int, request_user: UserModel):
             'comment': 'Object was deleted',
             'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8')
         }
+
         logs_manager.insert_log(action=LogAction.DELETE, log_type=CmdbObjectLog.__name__, **log_data)
     except ManagerInsertError as err:
         LOGGER.debug("[delete_object] ManagerInsertError: %s", err.message)
@@ -906,8 +883,6 @@ def delete_object(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_object_with_child_locations(public_id: int, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -918,7 +893,7 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
         # Remove object links and references
         if current_object_instance:
             delete_object_links(public_id, request_user)
-            manager.delete_all_object_references(public_id)
+            objects_manager.delete_all_object_references(public_id)
 
         # check if location for this object exists
         current_location = locations_manager.get_location_for_object(public_id)
@@ -939,7 +914,7 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
             # delete the current object and its location
             locations_manager.delete({'public_id':current_location.public_id})
 
-            deleted = object_manager.delete_object(public_id, request_user, permission=AccessControlPermission.DELETE)
+            deleted = objects_manager.delete_object(public_id, request_user, permission=AccessControlPermission.DELETE)
 
         else:
             # something went wrong, either object or location don't exist
@@ -971,8 +946,6 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     Returns:
         (int): Success of this operation
     """
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -983,7 +956,7 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
         # Remove object links and references
         if current_object_instance:
             delete_object_links(public_id, request_user)
-            manager.delete_all_object_references(public_id)
+            objects_manager.delete_all_object_references(public_id)
 
         # check if location for this object exists
         current_location = locations_manager.get_location_for_object(public_id)
@@ -1006,11 +979,11 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
 
             # # delete the objects of child locations
             for child_object_id in children_object_ids:
-                object_manager.delete_object(child_object_id, request_user, AccessControlPermission.DELETE)
+                objects_manager.delete_object(child_object_id, request_user, AccessControlPermission.DELETE)
 
             # # delete the current object and its location
             locations_manager.delete({'public_id':current_location.public_id})
-            deleted = object_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
+            deleted = objects_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
         else:
             # something went wrong, either object or location don't exist
             return abort(404)
@@ -1031,26 +1004,26 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_many_objects(public_ids, request_user: UserModel):
     """TODO: document"""
-    manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
-    objects_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         ids = []
         operator_in = {'$in': []}
         filter_public_ids = {'public_id': {}}
+
         for v in public_ids.split(","):
             try:
                 ids.append(int(v))
             except (ValueError, TypeError):
                 return abort(400)
+
         operator_in.update({'$in': ids})
         filter_public_ids.update({'public_id': operator_in})
 
         ack = []
-        objects = object_manager.get_objects_by(**filter_public_ids)
+        objects = objects_manager.get_objects_by(**filter_public_ids)
 
         # At the current state it is not possible to bulk delete objects with locations
         # check if any object has a location
@@ -1068,13 +1041,12 @@ def delete_many_objects(public_ids, request_user: UserModel):
             try:
                 # Remove object links and references
                 delete_object_links(current_object_instance.public_id, request_user)
-                manager.delete_all_object_references(current_object_instance.public_id)
+                objects_manager.delete_all_object_references(current_object_instance.public_id)
 
-                current_type_instance = object_manager.get_type(current_object_instance.get_type_id())
+                current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
                 current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                           type_instance=current_type_instance,
                                                           render_user=request_user,
-                                                          object_manager=object_manager,
                                                           ref_render=False,
                                                           objects_manager=objects_manager
                                                           ).result()
@@ -1087,9 +1059,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
                 return abort(500)
 
             try:
-                ack.append(object_manager.delete_object(public_id=current_object_instance.get_public_id(),
-                                                        user=request_user,
-                                                        permission=AccessControlPermission.DELETE))
+                ack.append(objects_manager.delete_object(current_object_instance.get_public_id(),
+                                                         request_user,
+                                                         AccessControlPermission.DELETE))
             except ObjectManagerDeleteError:
                 #TODO:ERROR-FIX
                 return abort(400)
@@ -1144,10 +1116,10 @@ def delete_object_links(public_id: int, request_user: UserModel) -> None:
     Args:
         public_id (int): public_id of the object which is deleted
     """
-    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER, request_user)
+    object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
+                                                                           request_user)
 
     object_link_filter: dict = {'$or': [{'primary': public_id}, {'secondary': public_id}]}
-
     builder_params = BuilderParameters(object_link_filter)
 
     links: list[ObjectLinkModel] = object_links_manager.iterate(builder_params).results

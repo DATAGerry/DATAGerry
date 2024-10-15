@@ -47,7 +47,6 @@ def get_intro_starter(request_user: UserModel):
     Returns:
         _type_: Steps and if there are any objects, types and categories in the database
     """
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -60,7 +59,7 @@ def get_intro_starter(request_user: UserModel):
         if _fetch_only_active_objs():
             result = []
 
-            cursor = object_manager.group_objects_by_value('active', {'active': {"$eq": True}})
+            cursor = objects_manager.group_objects_by_value('active', {'active': {"$eq": True}})
             for document in cursor:
                 result.append(document)
             objects_total = result[0]['count'] if result else 0
@@ -101,7 +100,6 @@ def create_initial_profiles(data: str, request_user: UserModel):
         _type_: list of created public_ids of types
     """
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     profiles = data['data'].split('#')

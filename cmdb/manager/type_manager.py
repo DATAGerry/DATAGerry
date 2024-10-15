@@ -22,8 +22,8 @@ from typing import Union
 from bson import json_util
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-import cmdb.manager.cmdb_object_manager as com
 from cmdb.manager.managers import ManagerBase
+from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.database.utils import object_hook
 from cmdb.framework import TypeModel
@@ -56,6 +56,8 @@ class TypeManager(ManagerBase):
         """
         if database:
             database_manager.connector.set_database(database)
+
+        self.objects_manager = ObjectsManager(database_manager)
 
         super().__init__(TypeModel.COLLECTION, database_manager=database_manager)
 
@@ -220,8 +222,7 @@ class TypeManager(ManagerBase):
     def update_multi_data_fields(self, target_type: TypeModel, added_fields: dict, deleted_fields: dict):
         """TODO: document"""
         # get all objects of this type
-        cmdb_object_manager = com.CmdbObjectManager(self._database_manager)
-        all_type_objects = cmdb_object_manager.get_objects_by_type(target_type.public_id)
+        all_type_objects = self.objects_manager.get_objects_by(type_id=target_type.public_id)
 
         # update the multi-data-sections
         an_object: CmdbObject

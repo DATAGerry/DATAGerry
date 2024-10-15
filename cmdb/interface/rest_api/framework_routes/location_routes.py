@@ -19,7 +19,6 @@ from flask import request, current_app
 
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.type_manager import TypeManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
@@ -64,7 +63,6 @@ def create_location(params: dict, request_user: UserModel):
     """
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     location_creation_params= {}
@@ -90,7 +88,6 @@ def create_location(params: dict, request_user: UserModel):
         rendered_list = RenderList([current_object],
                                    request_user,
                                    True,
-                                   object_manager,
                                    objects_manager).render_result_list(True)
 
         params['name'] = rendered_list[0]['summary_line']
@@ -322,7 +319,6 @@ def update_location_for_object(params: dict, request_user: UserModel):
         UpdateSingleResponse: with acknowledged from database
     """
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     location_update_params = {}
@@ -339,7 +335,6 @@ def update_location_for_object(params: dict, request_user: UserModel):
         rendered_list = RenderList([current_object],
                                    request_user,
                                    True,
-                                   object_manager,
                                    objects_manager).render_result_list(raw=True)
 
         params['name'] = rendered_list[0]['summary_line']
@@ -351,7 +346,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         result = locations_manager.update({'object_id': object_id}, location_update_params)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
-        return ErrorMessage(400, f"Could not update the location!").response()
+        return ErrorMessage(400, "Could not update the location!").response()
 
     api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
 

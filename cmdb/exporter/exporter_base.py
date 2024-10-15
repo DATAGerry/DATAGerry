@@ -27,7 +27,6 @@ import openpyxl
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.type_manager import TypeManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
@@ -42,7 +41,6 @@ from cmdb.framework.cmdb_render import RenderResult
 LOGGER = logging.getLogger(__name__)
 
 database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
-object_manager = CmdbObjectManager(database_manager=database_manager)
 type_manager = TypeManager(database_manager=database_manager)
 
 # -------------------------------------------------------------------------------------------------------------------- #

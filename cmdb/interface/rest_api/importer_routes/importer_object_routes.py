@@ -20,7 +20,6 @@ from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.logs_manager import LogsManager
@@ -158,7 +157,6 @@ def import_objects(request_user: UserModel):
         return abort(400, 'No import config was provided')
 
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
@@ -203,7 +201,7 @@ def import_objects(request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
         return abort(406)
-    importer = importer_class(working_file, importer_config, parser, object_manager, objects_manager, request_user)
+    importer = importer_class(working_file, importer_config, parser, objects_manager, request_user)
 
     try:
         import_response: ImporterObjectResponse = importer.start_import()
@@ -228,7 +226,6 @@ def import_objects(request_user: UserModel):
             current_object_render_result = CmdbRender(object_instance=current_object,
                                                       type_instance=current_type_instance,
                                                       render_user=request_user,
-                                                      object_manager=object_manager,
                                                       objects_manager=objects_manager).result()
 
             # insert object create log

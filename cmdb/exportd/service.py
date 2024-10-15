@@ -21,7 +21,6 @@ from threading import Thread
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.exportd_job_manager import ExportdJobManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.user_manager import UserManager
@@ -143,10 +142,9 @@ class ExportdThread(Thread):
         self.is_active = state
         self.exception_handling = None
 
-        self.object_manager = CmdbObjectManager(database_manager=database)
-        self.log_manager = ExportdLogManager(database_manager=database)
-        self.exportd_job_manager = ExportdJobManager(database_manager=database)
-        self.user_manager = UserManager(database_manager=database)
+        self.log_manager = ExportdLogManager(database)
+        self.exportd_job_manager = ExportdJobManager(database)
+        self.user_manager = UserManager(database)
         self.objects_manager = ObjectsManager(database)
 
 
@@ -181,7 +179,6 @@ class ExportdThread(Thread):
             self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportdManagerBase(job=self.job, event=self.event,
-                                                                object_manager=self.object_manager,
                                                                 log_manager=self.log_manager,
                                                                 objects_manager=self.objects_manager)
             job.execute(cur_user.get_public_id(), cur_user.get_display_name())

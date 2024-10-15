@@ -19,8 +19,6 @@ import datetime
 import time
 from flask import Response, abort
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
-from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
@@ -30,6 +28,7 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.utils.helpers import load_class
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -89,23 +88,20 @@ class  BaseExportWriter:
 
     def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
         """Get all objects from the collection"""
-        manager = ObjectManager(database_manager=database_manager)
-        dep_object_manager = CmdbObjectManager(database_manager=database_manager)
         objects_manager = ObjectsManager(database_manager)
 
-        try:
-            _params = self.export_config.parameters
-            _result: list[CmdbObject] = manager.iterate(filter=_params.filter,
-                                                        sort=_params.sort,
-                                                        order=_params.order,
-                                                        limit=0, skip=0,
-                                                        user=user, permission=permission).results
+        export_params = self.export_config.parameters
+        builder_params = BuilderParameters(criteria=export_params.filter,
+                                           sort=export_params.sort,
+                                           order=export_params.order)
 
-            self.data = RenderList(object_list=_result,
-                                   request_user=user,
-                                   object_manager=dep_object_manager,
-                                   ref_render=True,
-                                   objects_manager=objects_manager).render_result_list(raw=False)
+        try:
+            tmp_result: list[CmdbObject] = objects_manager.iterate(builder_params, user, permission).results
+
+            self.data = RenderList(tmp_result,
+                                   user,
+                                   True,
+                                   objects_manager).render_result_list(raw=False)
         except Exception:
             #TODO: ERROR-FIX
             return abort(400)

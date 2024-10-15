@@ -23,8 +23,6 @@ from cmdb.user_management.rights import __all__ as rights
 
 from cmdb.manager.right_manager import RightManager
 from cmdb.manager.categories_manager import CategoriesManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
-from cmdb.manager.object_manager import ObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.docapi_template_manager import DocapiTemplateManager
@@ -51,8 +49,6 @@ LOGGER = logging.getLogger(__name__)
 class ManagerType(Enum):
     """Enum of the different Managers which are used by the API routes"""
     CATEGORIES_MANAGER = 'CategoriesManager'
-    CMDB_OBJECT_MANAGER = 'CmdbObjectManager'
-    OBJECT_MANAGER = 'ObjectManager'
     OBJECTS_MANAGER = 'ObjectsManager'
     LOGS_MANAGER = 'LogsManager'
     DOCAPI_TEMPLATE_MANAGER = 'DocapiTemplateManager'
@@ -89,8 +85,6 @@ class ManagerProvider:
         """
         manager_classes = {
             ManagerType.CATEGORIES_MANAGER: CategoriesManager,
-            ManagerType.CMDB_OBJECT_MANAGER: CmdbObjectManager,
-            ManagerType.OBJECT_MANAGER: ObjectManager,
             ManagerType.OBJECTS_MANAGER: ObjectsManager,
             ManagerType.LOGS_MANAGER: LogsManager,
             ManagerType.DOCAPI_TEMPLATE_MANAGER: DocapiTemplateManager,
@@ -131,8 +125,6 @@ class ManagerProvider:
         if current_app.cloud_mode:
             if manager_type in [
                 ManagerType.CATEGORIES_MANAGER,
-                ManagerType.CMDB_OBJECT_MANAGER,
-                ManagerType.OBJECT_MANAGER,
                 ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
                 ManagerType.DOCAPI_TEMPLATE_MANAGER,
@@ -163,8 +155,6 @@ class ManagerProvider:
         else:
             if manager_type in [
                 ManagerType.CATEGORIES_MANAGER,
-                ManagerType.CMDB_OBJECT_MANAGER,
-                ManagerType.OBJECT_MANAGER,
                 ManagerType.OBJECTS_MANAGER,
                 ManagerType.LOGS_MANAGER,
                 ManagerType.DOCAPI_TEMPLATE_MANAGER,

@@ -14,24 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all ObjectManager errors
+This module contains the classes of all ObjectssManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectManagerError(CMDBError):
     """
-    Base ObjectManager error
+    Base ObjectsManager error
     """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- ObjectManager Errors ----------------------------------------------- #
+# ---------------------------------------------- ObjectsManager Errors ----------------------------------------------- #
 
 class ObjectManagerInsertError(ObjectManagerError):
     """
-    Raised when ObjectManager could not insert an object
+    Raised when ObjectsManager could not insert an object
     """
     def __init__(self, err: str):
         self.message = f"Object could not be inserted. Error: {err}"
@@ -40,7 +40,7 @@ class ObjectManagerInsertError(ObjectManagerError):
 
 class ObjectManagerDeleteError(ObjectManagerError):
     """
-    Raised when ObjectManager could not delete an object
+    Raised when ObjectsManager could not delete an object
     """
     def __init__(self, err: str):
         self.message = f"Object could not be deleted. Error: {err}"
@@ -49,7 +49,7 @@ class ObjectManagerDeleteError(ObjectManagerError):
 
 class ObjectManagerUpdateError(ObjectManagerError):
     """
-    Raised when ObjectManager could not update an object
+    Raised when ObjectsManager could not update an object
     """
     def __init__(self, err: str):
         self.message = f"Object could not be updated. Error: {err}"
@@ -58,7 +58,7 @@ class ObjectManagerUpdateError(ObjectManagerError):
 
 class ObjectManagerGetError(ObjectManagerError):
     """
-    Raised when ObjectManager could not retrieve an object
+    Raised when ObjectsManager could not retrieve an object
     """
     def __init__(self, err: str):
         self.message = f"Object could not be retrieved. Error: {err}"
@@ -67,7 +67,7 @@ class ObjectManagerGetError(ObjectManagerError):
 
 class ObjectManagerInitError(ObjectManagerError):
     """
-    Raised when ObjectManager could not initialise an object
+    Raised when ObjectsManager could not initialise an object
     """
     def __init__(self, err: str):
         self.message = f"Object could not be initialised. Error: {err}"

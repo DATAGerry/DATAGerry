@@ -17,7 +17,6 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework import CmdbObject
@@ -81,7 +80,6 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
                  file=None,
                  config: JsonObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
-                 object_manager: CmdbObjectManager = None,
                  objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         super().__init__(
@@ -89,7 +87,6 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
             file_type=self.FILE_TYPE,
             config=config,
             parser=parser,
-            object_manager=object_manager,
             objects_manager=objects_manager,
             request_user=request_user
         )
@@ -144,7 +141,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
     def start_import(self) -> ImporterObjectResponse:
         """TODO: document"""
         parsed_response: JsonObjectParserResponse = self.parser.parse(self.file)
-        type_instance_fields: list = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        type_instance_fields: list = self.objects_manager.get_object_type(self.config.get_type_id()).get_fields()
 
         import_objects: list[dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
@@ -170,7 +167,6 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                  file=None,
                  config: CsvObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
-                 object_manager: CmdbObjectManager = None,
                  objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         super().__init__(
@@ -178,7 +174,6 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                     file_type=self.FILE_TYPE,
                     config=config,
                     parser=parser,
-                    object_manager=object_manager,
                     objects_manager=objects_manager,
                     request_user=request_user
                 )
@@ -241,7 +236,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
                     }
                 }
                 LOGGER.debug('[CSV] Ref query: %s', query)
-                founded_objects: list[CmdbObject] = self.object_manager.get_objects_by(**query)
+                founded_objects: list[CmdbObject] = self.objects_manager.get_objects_by(**query)
                 LOGGER.debug(founded_objects)
 
                 if len(founded_objects) != 1:
@@ -265,7 +260,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
         except ParserRuntimeError as err:
             raise ImportRuntimeError(f"{err.message}") from err
 
-        type_instance_fields: list[dict] = self.object_manager.get_type(self.config.get_type_id()).get_fields()
+        type_instance_fields: list[dict] = self.objects_manager.get_object_type(self.config.get_type_id()).get_fields()
 
         import_objects: list[dict] = self._generate_objects(parsed_response, fields=type_instance_fields)
         import_result: ImporterObjectResponse = self._import(import_objects)
@@ -290,7 +285,6 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
                  file=None,
                  config: ExcelObjectImporterConfig = None,
                  parser: JsonObjectParser = None,
-                 object_manager: CmdbObjectManager = None,
                  objects_manager: ObjectsManager = None,
                  request_user: UserModel = None):
         super().__init__(
@@ -298,7 +292,6 @@ class ExcelObjectImporter(ObjectImporter, XLSXContent):
                     file_type=self.FILE_TYPE,
                     config=config,
                     parser=parser,
-                    object_manager=object_manager,
                     objects_manager=objects_manager,
                     request_user=request_user
                 )

@@ -20,8 +20,6 @@ from flask import abort, request
 
 from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.locations_manager import LocationsManager
-from cmdb.manager.object_manager import ObjectManager
-from cmdb.manager.cmdb_object_manager import CmdbObjectManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework.models.type import TypeModel
@@ -231,7 +229,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
     """
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
-    object_manager: ObjectManager = ManagerProvider.get_manager(ManagerType.OBJECT_MANAGER, request_user)
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
         unchanged_type = type_manager.get(public_id)
@@ -266,7 +264,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
 
     an_object: CmdbObject
     for an_object in updated_objects:
-        object_manager._update(object_manager.collection, {'public_id': an_object.public_id}, CmdbObject.to_json(an_object))
+        objects_manager.update_object(an_object.public_id, CmdbObject.to_json(an_object))
 
     return api_response.make_response()
 
@@ -290,8 +288,6 @@ def delete_type(public_id: int, request_user: UserModel):
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
     type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
-    deprecated_object_manager: CmdbObjectManager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER,
-                                                                               request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -300,8 +296,8 @@ def delete_type(public_id: int, request_user: UserModel):
         if objects_count > 0:
             raise ManagerDeleteError('Delete not possible if objects of this type exist')
 
-        objects_ids = [object_.get_public_id() for object_ in deprecated_object_manager.get_objects_by_type(public_id)]
-        deprecated_object_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
+        objects_ids = [object_.get_public_id() for object_ in objects_manager.get_objects_by(type_id=public_id)]
+        objects_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = type_manager.delete(public_id=PublicID(public_id))
 
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
