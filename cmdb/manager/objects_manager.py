@@ -190,7 +190,7 @@ class ObjectsManager(BaseManager):
             IterationResult[CmdbObject]: Result which matches the Builderparameters
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
+            query: list[dict] = self.query_builder.build(builder_params, user, permission)
             count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
 
             aggregation_result = list(self.aggregate(query))
@@ -640,6 +640,7 @@ class ObjectsManager(BaseManager):
 
         verify_access(object_type, user, permission)
 
+        #TODO: ERROR-FIX (SWAP WITH DELETEION IN WORKFLOW)
         try:
             if self.event_queue:
                 event = Event("cmdb.core.object.deleted",
