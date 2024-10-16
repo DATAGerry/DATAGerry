@@ -45,6 +45,8 @@ import { SectionIdentifierService } from '../services/SectionIdentifierService.s
 export class TypeBuilderComponent implements OnInit, OnDestroy {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriptions = new Subscription();
+    isHighlighted: boolean = false;
 
     @Input() public typeInstance: CmdbType;
 
@@ -81,6 +83,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     public isIdentifierValid: boolean;
     private subscription: Subscription;
 
+    isSectionHighlighted: boolean = false;
+    isFieldHighlighted: boolean = false;
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -101,6 +105,20 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
 
 
     public ngOnInit(): void {
+
+
+        const sectionHighlightSubscription = this.validationService.isSectionHighlighted$.subscribe((highlighted) => {
+            this.isSectionHighlighted = highlighted;
+        });
+
+        // Subscribe to the field highlight state
+        const fieldHighlightSubscription = this.validationService.isFieldHighlighted$.subscribe((highlighted) => {
+            this.isFieldHighlighted = highlighted;
+        });
+
+        this.subscriptions.add(sectionHighlightSubscription);
+        this.subscriptions.add(fieldHighlightSubscription);
+
         this.isValid$ = this.validationService.getIsValid();
         this.isSectionValid$ = this.validationService.overallSectionValidity();
 
