@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.manager.objects_manager import ObjectsManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.type_manager import TypeManager
 
 from cmdb.security.acl.permission import AccessControlPermission
@@ -91,7 +91,7 @@ class CmdbRender:
 
         if self.objects_manager:  # TODO: Refactor to pass database-manager in init
             self.type_manager = TypeManager(self.objects_manager.dbm)
-            self.user_manager = UserManager(self.objects_manager.dbm)
+            self.users_manager = UsersManager(self.objects_manager.dbm)
 
         self.ref_render = ref_render
 
@@ -185,14 +185,14 @@ class CmdbRender:
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self.user_manager.get(self.object_instance.author_id).get_display_name()
+            author_name = self.users_manager.get_user(self.object_instance.author_id).get_display_name()
         except Exception:
             #TODO: ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
-                editor_name = self.user_manager.get(self.object_instance.editor_id).get_display_name()
+                editor_name = self.users_manager.get_user(self.object_instance.editor_id).get_display_name()
             except Exception:
                 #TODO: ERROR-FIX
                 editor_name = None
@@ -215,7 +215,7 @@ class CmdbRender:
 
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
-            author_name = self.user_manager.get(self.type_instance.author_id).get_display_name()
+            author_name = self.users_manager.get_user(self.type_instance.author_id).get_display_name()
         except Exception:
             #TODO: ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME

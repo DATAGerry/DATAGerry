@@ -21,7 +21,7 @@ from enum import Enum
 from cmdb.manager.group_manager import GroupManager
 from cmdb.security.security import SecurityManager
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
@@ -144,20 +144,21 @@ class SetupRoutine:
 
         self.__check_database()
         scm = SecurityManager(self.setup_database_manager)
-        usm = UserManager(self.setup_database_manager)
+        users_manager = UsersManager(self.setup_database_manager)
 
         try:
-            admin_user: UserModel = usm.get(1)
+            admin_user: UserModel = users_manager.get_user(1)
             LOGGER.warning('KEY ROUTINE: Admin user detected')
             LOGGER.info('KEY ROUTINE: Enter new password for user: %s', admin_user.user_name)
 
             admin_pass = str(input('New admin password: '))
             new_password = scm.generate_hmac(admin_pass)
             admin_user.password = new_password
-            usm.update(admin_user.get_public_id(), admin_user)
+            users_manager.update_user(admin_user.get_public_id(), admin_user)
 
             LOGGER.info('KEY ROUTINE: Password was updated for user: %s', admin_user.user_name)
         except Exception as err:
+            #TODO: ERROR-FIX
             LOGGER.info('KEY ROUTINE: Password update for user failed: %s', err)
             raise Exception(err) from err
 
@@ -170,7 +171,7 @@ class SetupRoutine:
         LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
         scm = SecurityManager(self.setup_database_manager)
         group_manager = GroupManager(self.setup_database_manager)
-        user_manager = UserManager(self.setup_database_manager)
+        users_manager = UsersManager(self.setup_database_manager)
 
         for group in __FIXED_GROUPS__:
             group_manager.insert(group)
@@ -178,6 +179,7 @@ class SetupRoutine:
         # setting the initial user to admin/admin as default
         admin_name = 'admin'
         admin_pass = 'admin'
+
         admin_user = UserModel(
             public_id=1,
             user_name=admin_name,
@@ -186,7 +188,8 @@ class SetupRoutine:
             registration_time=datetime.now(timezone.utc),
             password=scm.generate_hmac(admin_pass),
         )
-        user_manager.insert(admin_user)
+
+        users_manager.insert_user(admin_user)
 
         return True
 

@@ -19,26 +19,24 @@ This module contains logics for database validation and setup
 import logging
 from enum import Enum
 from datetime import datetime, timezone
-
 from pymongo.errors import OperationFailure
 
-
-from cmdb.updater import UpdaterModule
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.errors.system_config import SectionError
-from cmdb.cmdb_objects.cmdb_location import CmdbLocation
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-
-from cmdb.user_management import __FIXED_GROUPS__
-from cmdb.manager.user_manager import UserManager
-from cmdb.user_management.models.user import UserModel
+from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.group_manager import GroupManager
 from cmdb.security.security import SecurityManager
 
+from cmdb.updater import UpdaterModule
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.cmdb_objects.cmdb_location import CmdbLocation
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
+from cmdb.user_management import __FIXED_GROUPS__
+from cmdb.user_management.models.user import UserModel
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+
+from cmdb.errors.system_config import SectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -166,7 +164,7 @@ class CheckRoutine:
         """Creates intital groups and admin user"""
         scm = SecurityManager(self.setup_database_manager)
         group_manager = GroupManager(self.setup_database_manager)
-        user_manager = UserManager(self.setup_database_manager)
+        users_manager = UsersManager(self.setup_database_manager)
 
         for group in __FIXED_GROUPS__:
             group_manager.insert(group)
@@ -182,7 +180,8 @@ class CheckRoutine:
             registration_time=datetime.now(timezone.utc),
             password=scm.generate_hmac(admin_pass),
         )
-        user_manager.insert(admin_user)
+
+        users_manager.insert_user(admin_user)
 
 
     def has_updates(self) -> bool:

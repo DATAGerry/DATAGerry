@@ -23,7 +23,7 @@ from datetime import datetime, timezone
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.exportd_job_manager import ExportdJobManager
 from cmdb.manager.objects_manager import ObjectsManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.exportd_log_manager import ExportdLogManager
 
 import cmdb.process_management.service
@@ -32,7 +32,6 @@ from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
-
 
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -144,7 +143,7 @@ class ExportdThread(Thread):
 
         self.log_manager = ExportdLogManager(database)
         self.exportd_job_manager = ExportdJobManager(database)
-        self.user_manager = UserManager(database)
+        self.users_manager = UsersManager(database)
         self.objects_manager = ObjectsManager(database)
 
 
@@ -174,9 +173,9 @@ class ExportdThread(Thread):
             self.job.last_execute_date = datetime.now(timezone.utc)
 
             # get current user
-            cur_user = self.user_manager.get(self.user_id)
+            cur_user = self.users_manager.get_user(self.user_id)
 
-            self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job, self.users_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
             job = cmdb.exportd.exporter_base.ExportdManagerBase(job=self.job, event=self.event,
                                                                 log_manager=self.log_manager,
@@ -203,4 +202,6 @@ class ExportdThread(Thread):
         finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
-            self.exportd_job_manager.update_job(self.job, self.user_manager.get(self.user_id), event_start=False)
+            self.exportd_job_manager.update_job(self.job,
+                                                self.users_manager.get_user(self.user_id),
+                                                event_start=False)

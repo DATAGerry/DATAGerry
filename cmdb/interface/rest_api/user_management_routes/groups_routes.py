@@ -19,7 +19,7 @@ from flask import request
 
 from cmdb.manager.group_manager import GroupManager
 from cmdb.manager.right_manager import RightManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
 from cmdb.interface.route_utils import insert_request_user
@@ -216,11 +216,11 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
         DeleteSingleResponse: Delete result with the deleted group as data
     """
     group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     # Check of action is set
     if params.action:
-        users_in_group: list[UserModel] = user_manager.get_many(Query({'group_id': public_id}))
+        users_in_group: list[UserModel] = users_manager.get_many_users(Query({'group_id': public_id}))
 
         if len(users_in_group) > 0:
             if params.action == GroupDeleteMode.MOVE.value:
@@ -229,7 +229,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
                         user.group_id = int(params.group_id)
 
                         try:
-                            user_manager.update(user.public_id, user)
+                            users_manager.update_user(user.public_id, user)
                         except ManagerUpdateError as err:
                             return abort(400,
                                          f'Could not move user: {user.public_id} to group: {params.group_id} | '
@@ -238,7 +238,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
             if params.action == GroupDeleteMode.DELETE.value:
                 for user in users_in_group:
                     try:
-                        user_manager.delete(user.public_id)
+                        users_manager.delete_user(user.public_id)
                     except ManagerDeleteError as err:
                         LOGGER.debug("[delete_group] ManagerDeleteError_ %s", err.message)
                         return abort(400, f'Could not delete user with ID: {user.public_id} !')

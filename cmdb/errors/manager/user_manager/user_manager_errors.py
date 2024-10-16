@@ -14,24 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all UserManager errors
+This module contains the classes of all UsersManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserManagerError(CMDBError):
     """
-    Base UserManager error
+    Base UsersManager error
     """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# ------------------------------------------------ UserManager Errors ------------------------------------------------ #
+# ----------------------------------------------- UsersManager Errors ------------------------------------------------ #
 
 class UserManagerGetError(UserManagerError):
     """
-    Raised when UserManager could not retrieve an user
+    Raised when UsersManager could not retrieve an user
     """
     def __init__(self, err: str):
         self.message = f"User could not be retrieved. Error: {err}"
@@ -41,7 +41,7 @@ class UserManagerGetError(UserManagerError):
 #TODO: ERROR-FIX (not used)
 class UserManagerInsertError(UserManagerError):
     """
-    Raised when UserManager could not create an user
+    Raised when UsersManager could not create an user
     """
     def __init__(self, err: str):
         self.message = f"User could not be created. Error: {err}"
@@ -51,7 +51,7 @@ class UserManagerInsertError(UserManagerError):
 #TODO: ERROR-FIX (not used)
 class UserManagerUpdateError(UserManagerError):
     """
-    Raised when UserManager could not update an user
+    Raised when UsersManager could not update an user
     """
     def __init__(self, err: str):
         self.message = f"User could not be updated. Error: {err}"
@@ -60,7 +60,7 @@ class UserManagerUpdateError(UserManagerError):
 
 class UserManagerDeleteError(UserManagerError):
     """
-    Raised when UserManager could not delete an user
+    Raised when UsersManager could not delete an user
     """
     def __init__(self, err: str):
         self.message = f"User could not be deleted. Error: {err}"

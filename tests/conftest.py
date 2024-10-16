@@ -21,7 +21,7 @@ import pytest
 
 from cmdb.security.security import SecurityManager
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.user_management import __FIXED_GROUPS__
@@ -73,7 +73,7 @@ def preset_database(database_manager, database_name):
     kg.generate_symmetric_aes_key()
 
     group_manager = GroupManager(database_manager=database_manager)
-    user_manager = UserManager(database_manager=database_manager)
+    users_manager = UsersManager(database_manager)
     security_manager = SecurityManager(database_manager=database_manager)
 
     for group in __FIXED_GROUPS__:
@@ -91,4 +91,4 @@ def preset_database(database_manager, database_name):
         password=security_manager.generate_hmac(admin_pass),
     )
 
-    user_manager.insert(admin_user)
+    users_manager.insert_user(admin_user)

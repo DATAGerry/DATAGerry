@@ -19,7 +19,7 @@ import logging
 from cerberus import Validator
 from flask import Blueprint, abort, request, current_app
 
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
@@ -54,7 +54,7 @@ class APIBlueprint(Blueprint):
                     if not user_has_right(right):
                         if excepted:
                             with current_app.app_context():
-                                user_manager = UserManager(current_app.database_manager)
+                                users_manager = UsersManager(current_app.database_manager)
 
                             token = parse_authorization_header(request.headers['Authorization'])
                             try:
@@ -67,9 +67,9 @@ class APIBlueprint(Blueprint):
 
                                 if current_app.cloud_mode:
                                     database = decrypted_token['DATAGERRY']['value']['user']['database']
-                                    user_manager = UserManager(current_app.database_manager, database)
+                                    users_manager = UsersManager(current_app.database_manager, database)
 
-                                user_dict: dict = UserModel.to_dict(user_manager.get(user_id))
+                                user_dict: dict = UserModel.to_dict(users_manager.get_user(user_id))
 
                                 if excepted:
                                     for exe_key, exe_value in excepted.items():

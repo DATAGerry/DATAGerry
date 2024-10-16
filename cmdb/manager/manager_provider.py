@@ -26,7 +26,7 @@ from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.setting_manager import UserSettingsManager
 from cmdb.manager.group_manager import GroupManager
 from cmdb.manager.media_file_manager import MediaFileManager
@@ -43,16 +43,17 @@ from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.security.security import SecurityManager
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 class ManagerType(Enum):
     """Enum of the different Managers which are used by the API routes"""
     CATEGORIES_MANAGER = 'CategoriesManager'
     OBJECTS_MANAGER = 'ObjectsManager'
     LOGS_MANAGER = 'LogsManager'
     DOCAPI_TEMPLATES_MANAGER = 'DocapiTemplatesManager'
-    USER_MANAGER = 'UserManager'
+    USERS_MANAGER = 'UsersManager'
     USER_SETTINGS_MANAGER = 'UserSettingsManager'
     GROUP_MANAGER = 'GroupManager'
     MEDIA_FILE_MANAGER = 'MediaFileManager'
@@ -88,7 +89,7 @@ class ManagerProvider:
             ManagerType.OBJECTS_MANAGER: ObjectsManager,
             ManagerType.LOGS_MANAGER: LogsManager,
             ManagerType.DOCAPI_TEMPLATES_MANAGER: DocapiTemplatesManager,
-            ManagerType.USER_MANAGER: UserManager,
+            ManagerType.USERS_MANAGER: UsersManager,
             ManagerType.USER_SETTINGS_MANAGER: UserSettingsManager,
             ManagerType.GROUP_MANAGER: GroupManager,
             ManagerType.MEDIA_FILE_MANAGER: MediaFileManager,
@@ -140,7 +141,7 @@ class ManagerProvider:
                 return common_args + (right_manager, request_user.database)
 
             if manager_type in [
-                ManagerType.USER_MANAGER,
+                ManagerType.USERS_MANAGER,
                 ManagerType.USER_SETTINGS_MANAGER,
                 ManagerType.MEDIA_FILE_MANAGER,
                 ManagerType.EXPORTD_LOG_MANAGER,
