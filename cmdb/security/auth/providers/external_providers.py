@@ -20,8 +20,8 @@ from datetime import datetime, timezone
 from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
+from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
-from cmdb.manager.user_manager import UserManager
 from cmdb.manager.group_manager import GroupManager
 
 from cmdb.user_management.models.user import UserModel
@@ -96,14 +96,18 @@ class LdapAuthenticationProvider(AuthenticationProvider):
     EXTERNAL_PROVIDER: bool = True
     PROVIDER_CONFIG_CLASS = LdapAuthenticationProviderConfig
 
-    def __init__(self, config: LdapAuthenticationProviderConfig = None, user_manager: UserManager = None,
-                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
+    def __init__(self,
+                 config: LdapAuthenticationProviderConfig = None,
+                 group_manager: GroupManager = None,
+                 security_manager: SecurityManager = None,
+                 users_manager: UsersManager = None):
 
         self.__ldap_server = Server(**config.server_config)
         self.__ldap_connection = Connection(self.__ldap_server, **config.connection_config)
-        super().__init__(config, user_manager=user_manager,
-                                                         group_manager=group_manager,
-                                                         security_manager=security_manager)
+        super().__init__(config,
+                         group_manager=group_manager,
+                         security_manager=security_manager,
+                         users_manager=users_manager)
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
@@ -174,13 +178,13 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 raise AuthenticationError(str(err)) from err
 
         try:
-            user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+            user_instance: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
             if (user_instance.group_id != user_group_id) and group_mapping_active:
                 user_instance.group_id = user_group_id
 
                 try:
-                    self.user_manager.update(user_instance.public_id, user_instance)
-                    user_instance: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+                    self.users_manager.update_user(user_instance.public_id, user_instance)
+                    user_instance: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
                 except ManagerUpdateError as err:
                     raise AuthenticationError(str(err)) from err
         except ManagerGetError as err:
@@ -202,14 +206,14 @@ class LdapAuthenticationProvider(AuthenticationProvider):
             LOGGER.debug('[LdapAuthenticationProvider] New user was init')
 
             try:
-                user_id = self.user_manager.insert(new_user_data)
+                user_id = self.users_manager.insert_user(new_user_data)
             except ManagerInsertError as error:
                 #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerInsertError: %s', error.message)
                 raise AuthenticationError(str(error)) from error
 
             try:
-                user_instance: UserModel = self.user_manager.get(public_id=user_id)
+                user_instance: UserModel = self.users_manager.get_user(user_id)
             except ManagerGetError as error:
                 #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerGetError: %s', error.message)

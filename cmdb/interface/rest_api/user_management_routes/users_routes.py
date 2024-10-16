@@ -20,11 +20,12 @@ from datetime import datetime, timezone
 from flask import abort, request, current_app
 
 from cmdb.security.security import SecurityManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.search import Query
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, \
                                     GetSingleResponse, \
@@ -66,7 +67,7 @@ def insert_user(data: dict, request_user: UserModel):
     Returns:
         InsertSingleResponse: Insert response with the new user and the corresponding public_id
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
     try:
@@ -95,7 +96,7 @@ def insert_user(data: dict, request_user: UserModel):
         # Check if email is already exists
         try:
             if current_app.cloud_mode:
-                user_with_given_email = user_manager.get_by(Query({'email': user_email}))
+                user_with_given_email = users_manager.get_user_by(Query({'email': user_email}))
 
                 if user_with_given_email:
                     return ErrorMessage(400, "The email is already in use!").response()
@@ -121,10 +122,10 @@ def insert_user(data: dict, request_user: UserModel):
             with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
                 json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
 
-        result_id: PublicID = user_manager.insert(data)
+        result_id: PublicID = users_manager.insert_user(data)
 
         #Confirm that user is created
-        user = user_manager.get(public_id=result_id)
+        user = users_manager.get_user(result_id)
     except ManagerGetError as err:
         #TODO: ERROR-FIX
         LOGGER.debug("[insert_user] ManagerGetError: %s", err.message)
@@ -132,6 +133,7 @@ def insert_user(data: dict, request_user: UserModel):
     except ManagerInsertError as err:
         LOGGER.debug("[insert_user] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create the user in database!")
+
     api_response = InsertSingleResponse(UserModel.to_dict(user), result_id, request.url, UserModel.MODEL)
 
     return api_response.make_response(prefix='users')
@@ -156,14 +158,12 @@ def get_users(params: CollectionParameters, request_user: UserModel):
         ManagerIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection/resources could not be found.
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
+
+    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
     try:
-        iteration_result: IterationResult[UserModel] = user_manager.iterate(filter=params.filter,
-                                                                            limit=params.limit,
-                                                                            skip=params.skip,
-                                                                            sort=params.sort,
-                                                                            order=params.order)
+        iteration_result: IterationResult[UserModel] = users_manager.iterate(builder_params)
         users = [UserModel.to_dict(user) for user in iteration_result.results]
 
         api_response = GetMultiResponse(users,
@@ -201,10 +201,10 @@ def get_user(public_id: int, request_user: UserModel):
     Returns:
         GetSingleResponse: Which includes the json data of a UserModel.
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:
-        user: UserModel = user_manager.get(public_id)
+        user: UserModel = users_manager.get_user(public_id)
     except ManagerGetError:
         return abort(404)
 
@@ -234,11 +234,11 @@ def update_user(public_id: int, data: dict, request_user: UserModel):
     Returns:
         UpdateSingleResponse: With update result of the new updated user.
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:
         user = UserModel.from_data(data=data)
-        user_manager.update(public_id=PublicID(public_id), user=user)
+        users_manager.update_user(public_id, user)
 
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError:
@@ -266,14 +266,14 @@ def change_user_password(public_id: int, request_user: UserModel):
     Returns:
         UpdateSingleResponse: User with new password
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
     try:
-        user = user_manager.get(public_id=public_id)
+        user = users_manager.get_user(public_id)
         password = security_manager.generate_hmac(request.json.get('password'))
         user.password = password
-        user_manager.update(PublicID(public_id), user)
+        users_manager.update_user(public_id, user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError:
         #TODO: ERROR-FIX
@@ -301,10 +301,10 @@ def delete_user(public_id: int, request_user: UserModel):
     Returns:
         DeleteSingleResponse: Delete result with the deleted user as data.
     """
-    user_manager: UserManager = ManagerProvider.get_manager(ManagerType.USER_MANAGER, request_user)
+    users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:
-        deleted_group = user_manager.delete(public_id=PublicID(public_id))
+        deleted_group = users_manager.delete_user(public_id)
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
     except ManagerGetError as err:
         #TODO: ERROR-FIX

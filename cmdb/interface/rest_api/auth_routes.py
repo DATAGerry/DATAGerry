@@ -23,7 +23,7 @@ from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.security import SecurityManager
 from cmdb.manager.right_manager import RightManager
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.route_utils import make_response, insert_request_user
@@ -136,7 +136,7 @@ def get_provider_config(provider_class: str, request_user: UserModel):
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
     """TODO: document"""
-    user_manager: UserManager = UserManager(current_app.database_manager)
+    users_manager: UsersManager = UsersManager(current_app.database_manager)
     group_manager: GroupManager = GroupManager(current_app.database_manager, right_manager=RightManager(rights))
     security_manager: SecurityManager = SecurityManager(current_app.database_manager)
     login_data = request.json
@@ -188,9 +188,9 @@ def post_login():
 
         auth_module = AuthModule(
             system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-            user_manager=user_manager,
             group_manager=group_manager,
-            security_manager=security_manager)
+            security_manager=security_manager,
+            users_manager=users_manager)
 
         user_instance = None
 
@@ -202,6 +202,7 @@ def post_login():
         except Exception:
             #TODO: ERROR-FIX
             return abort(401)
+        #TODO: ERROR-FIX (Remove the finally)
         finally:
             # If login success generate user instance with token
             if user_instance:
@@ -289,11 +290,11 @@ def create_new_admin_user(user_data: dict):
     """Creates a new admin user"""
     dbm.connector.set_database(user_data['database'])
 
-    loc_user_manager: UserManager = UserManager(dbm)
+    users_manager: UsersManager = UsersManager(dbm)
     scm = SecurityManager(dbm)
 
     try:
-        loc_user_manager.get_by(Query({'email': user_data['email']}))
+        users_manager.get_user_by(Query({'email': user_data['email']}))
     except Exception: # Admin user was not found in the database, create a new one
         admin_user = UserModel(
             public_id=1,
@@ -307,7 +308,7 @@ def create_new_admin_user(user_data: dict):
         )
 
         try:
-            loc_user_manager.insert(admin_user)
+            users_manager.insert_user(admin_user)
         except Exception as error:
             LOGGER.error("Could not create admin user: %s", error)
 
@@ -315,9 +316,9 @@ def create_new_admin_user(user_data: dict):
 def retrive_user(user_data: dict):
     """Get user from db"""
     dbm.connector.set_database(user_data['database'])
-    loc_user_manager: UserManager = UserManager(dbm)
+    users_manager: UsersManager = UsersManager(dbm)
 
     try:
-        return loc_user_manager.get_by(Query({'email': user_data['email']}))
+        return users_manager.get_user_by(Query({'email': user_data['email']}))
     except Exception:
         return None

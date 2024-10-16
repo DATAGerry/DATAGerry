@@ -18,7 +18,7 @@ import logging
 from flask import current_app
 
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.search import Query
@@ -45,22 +45,22 @@ class LocalAuthenticationProvider(AuthenticationProvider):
 
     def __init__(self,
                  config: LocalAuthenticationProviderConfig = None,
-                 user_manager: UserManager = None,
                  group_manager: GroupManager = None,
-                 security_manager: SecurityManager = None):
+                 security_manager: SecurityManager = None,
+                 users_manager: UsersManager = None):
         super().__init__(config=config,
-                         user_manager=user_manager,
                          group_manager=group_manager,
-                         security_manager=security_manager)
+                         security_manager=security_manager,
+                         users_manager=users_manager)
 
 
     def authenticate(self, user_name: str, password: str, *args, **kwargs) -> UserModel:
         """TODO: document"""
         try:
             if current_app.cloud_mode:
-                user: UserModel = self.user_manager.get_by(Query({'email': user_name}))
+                user: UserModel = self.users_manager.get_user_by(Query({'email': user_name}))
             else:
-                user: UserModel = self.user_manager.get_by(Query({'user_name': user_name}))
+                user: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
         except ManagerGetError as err:
             raise AuthenticationError(str(err)) from err
         login_pass = self.security_manager.generate_hmac(password)

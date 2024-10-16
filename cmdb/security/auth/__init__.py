@@ -18,9 +18,9 @@ import logging
 from typing import Type
 from flask import current_app
 
+from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.search import Query
@@ -65,11 +65,11 @@ class AuthModule:
 
 
     def __init__(self, settings: dict,
-                 user_manager: UserManager = None,
                  group_manager: GroupManager = None,
-                 security_manager: SecurityManager = None):
+                 security_manager: SecurityManager = None,
+                 users_manager: UsersManager = None):
         self.__settings: AuthSettingsDAO = self.__init_settings(settings)
-        self.__user_manager = user_manager
+        self.users_manager = users_manager
         self.__group_manager = group_manager
         self.__security_manager = security_manager
 
@@ -176,9 +176,10 @@ class AuthModule:
             _provider_config_values: dict = self.settings.get_provider_settings(_provider_class_name) \
                 .get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
             _provider_config_instance = _provider_config_class(**_provider_config_values)
-            _provider_instance = _provider_class(config=_provider_config_instance, user_manager=self.__user_manager,
+            _provider_instance = _provider_class(config=_provider_config_instance,
                                                  group_manager=self.__group_manager,
-                                                 security_manager=self.__security_manager)
+                                                 security_manager=self.__security_manager,
+                                                 users_manager=self.users_manager)
 
             return _provider_instance
         except Exception as err:
@@ -199,10 +200,10 @@ class AuthModule:
         """
         try:
             if current_app.cloud_mode:
-                user = self.__user_manager.get_by(Query({'email': user_name}))
+                user = self.users_manager.get_user_by(Query({'email': user_name}))
             else:
                 user_name = user_name.lower()
-                user = self.__user_manager.get_by(Query({'user_name': user_name}))
+                user = self.users_manager.get_user_by(Query({'user_name': user_name}))
 
             provider_class_name = user.authenticator
 
@@ -216,9 +217,9 @@ class AuthModule:
             provider_config_instance = provider_config_class(**provider_config_settings)
 
             provider_instance = provider(config=provider_config_instance,
-                                         user_manager=self.__user_manager,
                                          group_manager=self.__group_manager,
-                                         security_manager=self.__security_manager)
+                                         security_manager=self.__security_manager,
+                                         users_manager=self.users_manager)
 
             if not provider_instance.is_active():
                 raise AuthenticationProviderNotActivated(f'Provider {provider_class_name} is deactivated')
@@ -242,9 +243,10 @@ class AuthModule:
                     continue
                 if provider.EXTERNAL_PROVIDER and not self.settings.enable_external:
                     continue
-                provider_instance = provider(config=provider_config_instance, user_manager=self.__user_manager,
+                provider_instance = provider(config=provider_config_instance,
                                              group_manager=self.__group_manager,
-                                             security_manager=self.__security_manager)
+                                             security_manager=self.__security_manager,
+                                             users_manager=self.users_manager)
                 try:
                     return provider_instance.authenticate(user_name, password)
                 except AuthenticationError:

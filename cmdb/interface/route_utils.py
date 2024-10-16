@@ -23,7 +23,7 @@ from datetime import datetime
 from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
 
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.group_manager import GroupManager
 from cmdb.manager.right_manager import RightManager
 from cmdb.security.security import SecurityManager
@@ -105,7 +105,7 @@ def auth_is_valid() -> bool:
 def user_has_right(required_right: str) -> bool:
     """Check if a user has a specific right"""
     with current_app.app_context():
-        user_manager = UserManager(current_app.database_manager)
+        users_manager = UsersManager(current_app.database_manager)
         group_manager = GroupManager(current_app.database_manager, RightManager(rights))
 
     token = parse_authorization_header(request.headers['Authorization'])
@@ -122,10 +122,10 @@ def user_has_right(required_right: str) -> bool:
 
         if current_app.cloud_mode:
             database = decrypted_token['DATAGERRY']['value']['user']['database']
-            user_manager = UserManager(current_app.database_manager, database)
+            users_manager = UsersManager(current_app.database_manager, database)
             group_manager = GroupManager(current_app.database_manager, RightManager(rights), database)
 
-        user = user_manager.get(user_id)
+        user = users_manager.get_user(user_id)
         group = group_manager.get(user.group_id)
         right_status = group.has_right(required_right)
 
@@ -147,7 +147,7 @@ def insert_request_user(func):
     @functools.wraps(func)
     def get_request_user(*args, **kwargs):
         with current_app.app_context():
-            user_manager = UserManager(current_app.database_manager)
+            users_manager = UsersManager(current_app.database_manager)
 
         token = parse_authorization_header(request.headers['Authorization'])
         try:
@@ -162,14 +162,14 @@ def insert_request_user(func):
 
             if current_app.cloud_mode:
                 database = decrypted_token['DATAGERRY']['value']['user']['database']
-                user_manager = UserManager(current_app.database_manager, database)
+                users_manager = UsersManager(current_app.database_manager, database)
         except ValueError:
             return abort(401)
         except Exception as err:
             LOGGER.debug("[insert_request_user] Uncatched error type: %s", type(err))
             return abort(401)
 
-        user = user_manager.get(user_id)
+        user = users_manager.get_user(user_id)
         kwargs.update({'request_user': user})
 
         return func(*args, **kwargs)
@@ -251,7 +251,7 @@ def parse_authorization_header(header):
 
                     current_app.database_manager.connector.set_database(user_data['database'])
 
-                user_manager: UserManager = UserManager(current_app.database_manager)
+                users_manager = UsersManager(current_app.database_manager)
                 group_manager: GroupManager = GroupManager(current_app.database_manager, RightManager(rights))
                 security_manager: SecurityManager = SecurityManager(current_app.database_manager)
 
@@ -259,9 +259,9 @@ def parse_authorization_header(header):
                                                                                    'auth',
                                                                                    AuthModule.__DEFAULT_SETTINGS__)
                 auth_module = AuthModule(auth_settings,
-                                         user_manager=user_manager,
                                          group_manager=group_manager,
-                                         security_manager=security_manager)
+                                         security_manager=security_manager,
+                                         users_manager=users_manager)
 
                 try:
                     user_instance = auth_module.login(username, password)

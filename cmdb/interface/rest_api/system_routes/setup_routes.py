@@ -22,7 +22,7 @@ from flask import request, current_app
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.search import Query
@@ -154,11 +154,11 @@ def create_new_admin_user(user_data: dict):
     """Creates a new admin user"""
     dbm.connector.set_database(user_data['database'])
 
-    loc_user_manager: UserManager = UserManager(dbm)
+    users_manager: UsersManager = UsersManager(dbm)
     scm = SecurityManager(dbm)
 
     try:
-        loc_user_manager.get_by(Query({'email': user_data['email']}))
+        users_manager.get_user_by(Query({'email': user_data['email']}))
     except Exception: # Admin user was not found in the database, create a new one
         admin_user = UserModel(
             public_id=1,
@@ -172,6 +172,6 @@ def create_new_admin_user(user_data: dict):
         )
 
         try:
-            loc_user_manager.insert(admin_user)
+            users_manager.insert_user(admin_user)
         except Exception as err:
             LOGGER.error("Could not create admin user: %s", err)

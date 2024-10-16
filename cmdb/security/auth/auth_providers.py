@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.user_manager import UserManager
+from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
@@ -35,16 +35,18 @@ class AuthenticationProvider:
     EXTERNAL_PROVIDER: bool = False
     PROVIDER_CONFIG_CLASS: 'AuthProviderConfig' = AuthProviderConfig
 
-    def __init__(self, config: AuthProviderConfig = None, user_manager: UserManager = None,
-                 group_manager: GroupManager = None, security_manager: SecurityManager = None):
+    def __init__(self,
+                 config: AuthProviderConfig = None,
+                 group_manager: GroupManager = None,
+                 security_manager: SecurityManager = None,
+                 users_manager: UsersManager = None):
         """
         Init constructor for provider classes
         Args:
             config: Configuration object
-            user_manager: Instance of UserManager
             group_manager: Instance of GroupManager
         """
-        self.user_manager = user_manager
+        self.users_manager = users_manager
         self.group_manager = group_manager
         self.security_manager = security_manager
         self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
