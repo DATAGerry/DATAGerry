@@ -64,6 +64,8 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
+                                    [class.disabled]="isAnySectionHighlighted()"
+                                    [dndDisableIf]="isAnySectionHighlighted()"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
@@ -88,6 +90,8 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
+                                    [class.disabled]="isAnySectionHighlighted()"
+                                    [dndDisableIf]="isAnySectionHighlighted()"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
@@ -112,6 +116,8 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
+                                    [class.disabled]="isAnySectionHighlighted()"
+                                    [dndDisableIf]="isAnySectionHighlighted()"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
@@ -189,7 +195,9 @@
                         </span>
                     </div>
                     <div class="collapse show" id="section-{{x}}{{section.name}}">
-                        <div class="card-body"  (click)="setActiveIndex(x)"  >
+                        <div class="card-body"  
+                        (focusin)="setActiveIndex(x)" 
+                        tabindex="0" >
                             <cmdb-config-edit 
                                 [types]="types"
                                 [mode]="getSectionMode(section, mode)"
@@ -235,11 +243,13 @@
                                                             type="button"
                                                             data-toggle="collapse"
                                                             [attr.data-target]="'#field-'+ x + y + field.name"
-                                                        >
+                                                            [class.disabled]="isLocked()"
+                                                            >
                                                             <fa-icon [icon]="['far', 'edit']"></fa-icon>
                                                         </button>
                                                         <button class="btn btn-link mr-1" type="button" dndHandle
-                                                        (dragstart)="preventDragForAllFields($event, section)">
+                                                        (dragstart)="preventDragForAllFields($event, section)"
+                                                        [class.disabled]="isLocked()" >
                                                             <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                                                         </button>
                                                         <button 
@@ -283,6 +293,7 @@
                                                         [fieldSectionType]="section.type"
                                                         [hiddenStatus]="getFieldHiddenState(section, field)"
                                                         (valuesChanged)="onFieldChange($event)"
+                                                        [isDisabled]="isEmptyFielsExist(x, y)"
                                                     />
                                                 </div>
                                             </div>

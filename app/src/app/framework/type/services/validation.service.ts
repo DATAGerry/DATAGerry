@@ -21,6 +21,13 @@ export class ValidationService {
     public sectionValidity = new Map<string, boolean>();
     private sectionValidity$ = new BehaviorSubject<boolean>(true);
 
+
+    private isSectionHighlightedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isSectionHighlighted$: Observable<boolean> = this.isSectionHighlightedSubject.asObservable();
+
+    private isFieldHighlightedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isFieldHighlighted$: Observable<boolean> = this.isFieldHighlightedSubject.asObservable();
+
     /**
      * Sets the validity of a specific field.
      * Updates the overall form validity based on the validity of all fields.
@@ -111,6 +118,39 @@ export class ValidationService {
 
         this.sectionValidity.clear();
         this.sectionValidity$?.next(true);
+    }
+
+
+    /**
+     * Sets the highlight state for the section and updates the subject.
+     * @param isHighlighted - The highlight state to set for the section.
+     */
+    setSectionHighlightState(isHighlighted: boolean): void {
+        this.isSectionHighlightedSubject.next(isHighlighted);
+    }
+
+    /**
+     * Sets the highlight state for the field and updates the subject.
+     * @param isHighlighted - The highlight state to set for the field.
+     */
+    setFieldHighlightState(isHighlighted: boolean): void {
+        this.isFieldHighlightedSubject.next(isHighlighted);
+    }
+
+    /**
+     * Retrieves the current highlight state of the section.
+     * @returns The current highlight state of the section.
+     */
+    getSectionHighlightState(): boolean {
+        return this.isSectionHighlightedSubject.getValue();
+    }
+
+    /**
+     * Retrieves the current highlight state of the field.
+     * @returns The current highlight state of the field.
+     */
+    getFieldHighlightState(): boolean {
+        return this.isFieldHighlightedSubject.getValue();
     }
 
 }

@@ -57,6 +57,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
     @Input() public types: Array<CmdbType> = [];
     @Input() public fieldSectionType: string;
     @Input() public hiddenStatus: boolean;
+    @Input() public isDisabled: boolean = false;
 
     @ViewChild('configContainer', { read: ViewContainerRef, static: true }) container;
 
@@ -68,7 +69,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
     // Changed values emitter of components created
     @Output() valuesChanged: EventEmitter<any> = new EventEmitter();
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
     constructor(private resolver: ComponentFactoryResolver) {
         this.form = new UntypedFormGroup({});
     }
@@ -89,7 +90,7 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
         this.componentRef.instance.hiddenStatus = this.hiddenStatus;
 
         this.fieldChangesSubscription = this.componentRef.instance.fieldChanges$.subscribe(
-            (data : any) => this.fieldValueChanged(data)
+            (data: any) => this.fieldValueChanged(data)
         );
     }
 
@@ -100,13 +101,13 @@ export class ConfigEditComponent implements OnInit, OnDestroy {
         this.fieldChangesSubscription.unsubscribe();
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     /**
      * Emits changes of values
      * @param data new values
      */
-    public fieldValueChanged(data: any){
+    public fieldValueChanged(data: any) {
         this.valuesChanged.emit(data);
     }
 }

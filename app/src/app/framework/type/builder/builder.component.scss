@@ -109,3 +109,8 @@
 
 .highlight-section-header, .highlight-field-header {
   background-color: #f8d7da;}
+
+  .disabled {
+    pointer-events: none;
+    opacity: 0.6;
+}

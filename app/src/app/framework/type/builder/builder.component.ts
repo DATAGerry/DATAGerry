@@ -26,7 +26,7 @@ import {
     SimpleChanges
 } from '@angular/core';
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 
 import { v4 as uuidv4 } from 'uuid';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
@@ -147,6 +147,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public constructor(private modalService: NgbModal, private validationService: ValidationService,
         public sectionIdentifierService: SectionIdentifierService) {
         this.typeInstance = new CmdbType();
+    }
+
+
+    ngOnInit(): void {
+        this.updateHighlightState();
     }
 
 
@@ -413,6 +418,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 this.typeInstance.fields[index][inputName] = newValue;
             }
         }
+
+        this.updateHighlightState();
     }
 
 
@@ -615,8 +622,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      */
     public preventDragForAllSections(event: DragEvent): void {
         const isAnyHighlighted = this.sections.some(section => this.isSectionHighlighted(section));
-
-        // If any section is highlighted, disable drag, but let other buttons work
         if (isAnyHighlighted) {
             event.stopPropagation(); // Stops event from affecting other elements
             event.preventDefault();  // Prevent dragging behavior
@@ -632,9 +637,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public preventDragForAllFields(event: DragEvent, section: any): void {
         // Check if any field in the section is highlighted (has an error)
         const isAnyFieldHighlighted = section.fields.some(field => this.isFieldHighlighted(field, section.fields));
+        const isAnyFieldEmpty = this.checkEmptyFields().length > 0;
 
-        // If any field is highlighted, prevent the drag for all fields in the section
-        if (isAnyFieldHighlighted) {
+        if (isAnyFieldHighlighted || isAnyFieldEmpty) {
             event.stopPropagation();  // Stops event from affecting other elements
             event.preventDefault();   // Prevent dragging behavior
         }
@@ -642,16 +647,20 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
-     * Determines if a field should be highlighted based on its name, label, or if its name is duplicated.
-     * @param field - The field to be checked for highlighting.
-     * @param sectionfields - The list of section fields to check for duplicates.
-     * @returns boolean - Returns true if the field is missing a name, label, or if the name is duplicated; otherwise false.
+     * Determines if a field should be highlighted based on its properties.
+     * Checks for invalid identifiers, missing labels, and reference fields with invalid reference types.
+     * @param field - The field to check for highlighting.
+     * @param sectionfields - The list of all section fields for checking duplicate names.
+     * @returns boolean - Returns true if the field should be highlighted, false otherwise.
      */
     public isFieldHighlighted(field: any, sectionfields: any): boolean {
-
+        // Ensure field is a valid object (not null, undefined, or a primitive)
+        if (!field || typeof field !== 'object') {
+            return false;
+        }
         const isRefField = field.type === "ref";
         const hasInvalidIdentifier = !field.name || sectionfields.filter(s => s.name === field.name).length > 1;
-        const hasValidRefTypes = 'ref_types' in field && Array.isArray(field.ref_types) && field.ref_types.length > 0;
+        const hasValidRefTypes = field && 'ref_types' in field && Array.isArray(field.ref_types) && field.ref_types.length > 0;
 
         if (hasInvalidIdentifier || isRefField || !field.label) {
             if (isRefField) {
@@ -664,6 +673,90 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+
+    /**
+     * Updates the highlight state of sections and fields based on their current highlight status.
+     * Checks if any section or field is highlighted and sets their respective states
+     * in the validation service.
+     */
+    updateHighlightState(): void {
+        const isSectionHighlighted = this.isAnySectionHighlighted();
+        const isFieldHighlighted = this.isAnyFieldHighlighted();
+
+        this.validationService.setSectionHighlightState(isSectionHighlighted);
+        this.validationService.setFieldHighlightState(isFieldHighlighted);
+    }
+
+
+    /**
+     * Checks if any section is highlighted by evaluating the sections array.
+     * @returns A boolean indicating if any section is currently highlighted.
+     */
+    isAnySectionHighlighted(): boolean {
+        return this.sections.some(section =>
+            this.isSectionHighlighted(section)
+        );
+    }
+
+
+    /**
+     * Checks if any field within the sections is highlighted.
+     * Iterates through all sections and their fields to determine if a field is highlighted.
+     * @returns true if any field is highlighted, false otherwise.
+     */
+    isAnyFieldHighlighted(): boolean {
+        return this.sections.some(section =>
+            section.fields.some(field => this.isFieldHighlighted(field, section.fields))
+        );
+    }
+
+
+    /**
+     * Checks for empty field names in each section and returns an array of objects 
+     * containing the indices of sections and fields with empty or missing names.
+     * @returns An array of objects with `sectionIndex` and `fieldIndex` for each field with an empty name.
+     */
+    checkEmptyFields(): Array<{ sectionIndex: number, fieldIndex: number }> {
+        return this.sections.flatMap((section, sectionIndex) =>
+            section.fields
+                .map((field, fieldIndex) => {
+                    if (!field.name || field.name.trim() === '') {
+                        if (field.hasOwnProperty('name')) {
+                            return { sectionIndex, fieldIndex };
+                        }
+                    }
+                    return null;
+                })
+                .filter((result) => result !== null)
+        );
+    }
+
+
+    /**
+     * Checks if any empty fields exist for a specific section and field index.
+     * @param sectionIndex - The index of the section to check.
+     * @param fieldIndex - The index of the field within the section to check.
+     * @returns A boolean indicating whether empty fields exist at the given section and field index.
+     */
+
+    isEmptyFielsExist(sectionIndex: number, fieldIndex: number): boolean {
+        const emptyFields = this.checkEmptyFields();
+        if (emptyFields.length === 0) {
+            return false;
+        }
+        return !emptyFields.some(emptyField => emptyField.sectionIndex === sectionIndex && emptyField.fieldIndex === fieldIndex);
+    }
+
+
+    /**
+     * Checks if the current section is locked based on empty fields.
+     * If there are any empty fields, interactions are locked.
+     * @returns {boolean} - Returns true if any fields are empty, otherwise false.
+     */
+    isLocked(): boolean {
+        // Lock all interactions if there are any empty fields
+        return this.checkEmptyFields().length > 0;
+    }
 
     /* -------------------------------------------- SECTION TEMPLATE HANDLING ------------------------------------------- */
 
