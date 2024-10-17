@@ -199,7 +199,6 @@ class ObjectsManager(BaseManager):
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-
         #TODO: ERROR-FIX
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err

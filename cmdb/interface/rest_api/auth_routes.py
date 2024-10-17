@@ -21,8 +21,7 @@ from flask import request, current_app, abort
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.security.security import SecurityManager
-from cmdb.manager.right_manager import RightManager
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
@@ -34,7 +33,6 @@ from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.user_management.rights import __all__ as rights
 from cmdb.search import Query
 from cmdb.user_management import __FIXED_GROUPS__
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
@@ -137,7 +135,6 @@ def get_provider_config(provider_class: str, request_user: UserModel):
 def post_login():
     """TODO: document"""
     users_manager: UsersManager = UsersManager(current_app.database_manager)
-    group_manager: GroupManager = GroupManager(current_app.database_manager, right_manager=RightManager(rights))
     security_manager: SecurityManager = SecurityManager(current_app.database_manager)
     login_data = request.json
 
@@ -149,6 +146,7 @@ def post_login():
 
     if current_app.cloud_mode:
         user_data = check_user_in_mysql_db(request_user_name, request_password)
+
         ### login data is invalid
         if not user_data:
             return abort(401, 'Could not login')
@@ -188,7 +186,6 @@ def post_login():
 
         auth_module = AuthModule(
             system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-            group_manager=group_manager,
             security_manager=security_manager,
             users_manager=users_manager)
 
@@ -258,7 +255,7 @@ def init_db_routine(db_name: str):
     """
     new_db = dbm.create_database(db_name)
     dbm.connector.set_database(new_db.name)
-    group_manager = GroupManager(dbm)
+    groups_manager = GroupsManager(dbm)
 
     # Generate framework collections
     for collection in FRAMEWORK_CLASSES:
@@ -280,7 +277,7 @@ def init_db_routine(db_name: str):
 
     # Generate groups
     for group in __FIXED_GROUPS__:
-        group_manager.insert(group)
+        groups_manager.insert_group(group)
 
     # Generate predefined section templates
     dbm.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
@@ -319,6 +316,6 @@ def retrive_user(user_data: dict):
     users_manager: UsersManager = UsersManager(dbm)
 
     try:
-        return users_manager.get_user_by(Query({'email': user_data['email']}))
+        return users_manager.get_user_by({'email': user_data['email']})
     except Exception:
         return None

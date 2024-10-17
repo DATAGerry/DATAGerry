@@ -17,8 +17,7 @@
 import logging
 from flask import request
 
-from cmdb.manager.group_manager import GroupManager
-from cmdb.manager.right_manager import RightManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.interface.rest_api.user_management_routes.group_parameters import GroupDeletionParameters, GroupDeleteMode
@@ -27,14 +26,14 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
 from cmdb.framework.results import IterationResult
-from cmdb.framework.utils import PublicID
 from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.search import Query
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.rights import __all__ as rights
+from cmdb.user_management.rights import flat_rights_tree, __all__ as rights
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -65,11 +64,12 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
     Raises:
         ManagerGetError: If the collection/resources could not be found.
     """
-    group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
+
+    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
     try:
-        iteration_result: IterationResult[UserGroupModel] = group_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        iteration_result: IterationResult[UserGroupModel] = groups_manager.iterate(builder_params)
         groups = [UserGroupModel.to_dict(group) for group in iteration_result.results]
 
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
@@ -104,10 +104,10 @@ def get_group(public_id: int, request_user: UserModel):
     Returns:
         GetSingleResponse: Which includes the json data of a UserGroupModel.
     """
-    group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
 
     try:
-        group = group_manager.get(public_id)
+        group = groups_manager.get_group(public_id)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
@@ -136,11 +136,11 @@ def insert_group(data: dict, request_user: UserModel):
     Returns:
         InsertSingleResponse: Insert response with the new group and its public_id.
     """
-    group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
 
     try:
-        result_id: PublicID = group_manager.insert(data)
-        group = group_manager.get(public_id=result_id)
+        result_id = groups_manager.insert_group(data)
+        group = groups_manager.get_group(result_id)
     except ManagerInsertError as err:
         LOGGER.debug("[insert_group] ManagerInsertError: %s", err.message)
         return abort(400, "The group could not be created !")
@@ -173,13 +173,16 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
     Returns:
         UpdateSingleResponse: With update result of the new updated group
     """
-    group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
 
     try:
-        group = UserGroupModel.from_data(data=data, rights=RightManager(rights).rights)
+        group = UserGroupModel.from_data(data=data, rights=flat_rights_tree(rights))
         group_dict = UserGroupModel.to_dict(group)
         group_dict['rights'] = [right.get('name') for right in group_dict.get('rights', [])]
-        group_manager.update(public_id=PublicID(public_id), group=group_dict)
+
+        #TODO: ERROR-FIX (Add try/except block)
+        groups_manager.update_group(public_id, group_dict)
+
         api_response = UpdateSingleResponse(result=group_dict, url=request.url,
                                             model=UserGroupModel.MODEL)
     except ManagerGetError:
@@ -215,7 +218,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
     Returns:
         DeleteSingleResponse: Delete result with the deleted group as data
     """
-    group_manager: GroupManager = ManagerProvider.get_manager(ManagerType.GROUP_MANAGER, request_user)
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     # Check of action is set
@@ -244,7 +247,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
                         return abort(400, f'Could not delete user with ID: {user.public_id} !')
 
     try:
-        deleted_group = group_manager.delete(public_id=PublicID(public_id))
+        deleted_group = groups_manager.delete_group(public_id)
         api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
     except ManagerGetError as err:
         #TODO: ERROR-FIX

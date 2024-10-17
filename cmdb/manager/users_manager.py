@@ -98,7 +98,7 @@ class UsersManager(BaseManager):
         Returns:
             UserModel: Instance of UserModel with matching data.
         """
-        result = self.get(self.collection, filter=query, limit=1)
+        result = self.get(filter=query, limit=1)
 
         for resource_result in result.limit(-1):
             return UserModel.from_data(resource_result)

@@ -20,7 +20,6 @@ from flask import current_app
 
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
-from cmdb.manager.group_manager import GroupManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.search import Query
@@ -65,12 +64,10 @@ class AuthModule:
 
 
     def __init__(self, settings: dict,
-                 group_manager: GroupManager = None,
                  security_manager: SecurityManager = None,
                  users_manager: UsersManager = None):
         self.__settings: AuthSettingsDAO = self.__init_settings(settings)
         self.users_manager = users_manager
-        self.__group_manager = group_manager
         self.__security_manager = security_manager
 
 
@@ -177,7 +174,6 @@ class AuthModule:
                 .get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
             _provider_config_instance = _provider_config_class(**_provider_config_values)
             _provider_instance = _provider_class(config=_provider_config_instance,
-                                                 group_manager=self.__group_manager,
                                                  security_manager=self.__security_manager,
                                                  users_manager=self.users_manager)
 
@@ -217,7 +213,6 @@ class AuthModule:
             provider_config_instance = provider_config_class(**provider_config_settings)
 
             provider_instance = provider(config=provider_config_instance,
-                                         group_manager=self.__group_manager,
                                          security_manager=self.__security_manager,
                                          users_manager=self.users_manager)
 
@@ -244,7 +239,6 @@ class AuthModule:
                 if provider.EXTERNAL_PROVIDER and not self.settings.enable_external:
                     continue
                 provider_instance = provider(config=provider_config_instance,
-                                             group_manager=self.__group_manager,
                                              security_manager=self.__security_manager,
                                              users_manager=self.users_manager)
                 try:

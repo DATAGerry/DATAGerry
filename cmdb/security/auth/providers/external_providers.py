@@ -22,7 +22,6 @@ from ldap3.core.exceptions import LDAPExceptionError
 
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
-from cmdb.manager.group_manager import GroupManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.search import Query
@@ -98,14 +97,12 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
     def __init__(self,
                  config: LdapAuthenticationProviderConfig = None,
-                 group_manager: GroupManager = None,
                  security_manager: SecurityManager = None,
                  users_manager: UsersManager = None):
 
         self.__ldap_server = Server(**config.server_config)
         self.__ldap_connection = Connection(self.__ldap_server, **config.connection_config)
         super().__init__(config,
-                         group_manager=group_manager,
                          security_manager=security_manager,
                          users_manager=users_manager)
 

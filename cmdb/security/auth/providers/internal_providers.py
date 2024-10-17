@@ -17,7 +17,6 @@
 import logging
 from flask import current_app
 
-from cmdb.manager.group_manager import GroupManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
@@ -45,11 +44,9 @@ class LocalAuthenticationProvider(AuthenticationProvider):
 
     def __init__(self,
                  config: LocalAuthenticationProviderConfig = None,
-                 group_manager: GroupManager = None,
                  security_manager: SecurityManager = None,
                  users_manager: UsersManager = None):
         super().__init__(config=config,
-                         group_manager=group_manager,
                          security_manager=security_manager,
                          users_manager=users_manager)
 

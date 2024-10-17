@@ -20,7 +20,7 @@ from datetime import datetime
 import pytest
 
 from cmdb.security.security import SecurityManager
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.security.key.generator import KeyGenerator
@@ -72,12 +72,12 @@ def preset_database(database_manager, database_name):
     kg.generate_rsa_keypair()
     kg.generate_symmetric_aes_key()
 
-    group_manager = GroupManager(database_manager=database_manager)
+    groups_manager = GroupsManager(database_manager)
     users_manager = UsersManager(database_manager)
     security_manager = SecurityManager(database_manager=database_manager)
 
     for group in __FIXED_GROUPS__:
-        group_manager.insert(group)
+        groups_manager.insert_group(group)
 
     admin_name = 'admin'
     admin_pass = 'admin'
