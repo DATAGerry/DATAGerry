@@ -21,7 +21,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
 from cmdb.manager.objects_manager import ObjectsManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
@@ -156,18 +156,16 @@ def import_objects(request_user: UserModel):
     if not importer_config_request:
         return abort(400, 'No import config was provided')
 
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
     # Check if type exists
     try:
-        type_ = type_manager.get(importer_config_request.get('type_id'))
+        type_ = types_manager.get_type(importer_config_request.get('type_id'))
         if not type_.active:
             raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
-        verify_import_access(user=request_user,
-                             _type=type_,
-                             _manager=type_manager)
+        verify_import_access(request_user, type_, types_manager)
     except ObjectManagerGetError as err:
         #TODO:ERROR-FIX
         LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)

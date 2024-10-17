@@ -99,7 +99,8 @@ class Update20200214(Updater):
         }})
 
         try:
-            return self.objects_manager.get_type_aggregate(argument)
-        except ObjectManagerGetError as err:
-            LOGGER.error(err.message)
+            return self.types_manager.get_type_aggregate(argument)
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug(err)
             return []

@@ -21,11 +21,12 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request
 
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -66,7 +67,7 @@ def generate_parsed_output(request_file, file_format, parser_config):
     return output
 
 
-def verify_import_access(user: UserModel, _type: TypeModel, _manager: TypeManager):
+def verify_import_access(user: UserModel, _type: TypeModel, types_manager: TypesManager):
     """Validate if a user has access to objects of this type."""
 
     location = 'acl.groups.includes.' + str(user.group_id)
@@ -89,7 +90,10 @@ def verify_import_access(user: UserModel, _type: TypeModel, _manager: TypeManage
         ]
         }]
     }, {'public_id': _type.public_id}]}
-    types_ = _manager.iterate(filter=query, limit=1, skip=0, sort='public_id', order=1)
+
+    builder_params = BuilderParameters(criteria=query, limit=1)
+
+    types_ = types_manager.iterate(builder_params)
 
     if len([TypeModel.to_json(_) for _ in types_.results]) == 0:
         raise AccessDeniedError(f'The objects of the type `{_type.name}` are protected by ACL permission!')

@@ -22,7 +22,6 @@ from bson import json_util
 from flask import abort, jsonify, request, current_app
 
 from cmdb.manager.objects_manager import ObjectsManager
-from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager
@@ -320,7 +319,6 @@ def group_objects_by_type_id(value, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_reference(public_id: int, request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -328,7 +326,7 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
                                                                    request_user,
                                                                    AccessControlPermission.READ)
 
-        referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
+        referenced_type: TypeModel = objects_manager.get_object_type(referenced_object.get_type_id())
 
     except ManagerGetError:
         #TODO: ERROR-FIX
@@ -354,7 +352,6 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_references(public_id: int, request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     summary_lines = {}
@@ -371,7 +368,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
                                                                        request_user,
                                                                        AccessControlPermission.READ)
 
-            referenced_type: TypeModel = type_manager.get(referenced_object.get_type_id())
+            referenced_type: TypeModel = objects_manager.get_object_type(referenced_object.get_type_id())
 
         except ManagerGetError:
             #TODO: ERROR-FIX
@@ -487,11 +484,10 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         GetListResponse: Which includes the json data of multiple objects.
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        type_instance: TypeModel = type_manager.get(public_id=public_id)
+        type_instance: TypeModel = objects_manager.get_object_type(public_id)
 
         builder_params = BuilderParameters({'type_id': public_id},
                                            limit=0,
@@ -523,7 +519,6 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 @objects_blueprint.validate(CmdbObject.SCHEMA)
 def update_object(public_id: int, data: dict, request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -543,7 +538,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         new_data = copy.deepcopy(data)
         try:
             current_object_instance = objects_manager.get_object(obj_id, request_user, AccessControlPermission.READ)
-            current_type_instance = type_manager.get(current_object_instance.get_type_id())
+            current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
 
             current_object_render_result = CmdbRender(object_instance=current_object_instance,
                                                       type_instance=current_type_instance,
@@ -648,7 +643,6 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 def update_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -680,7 +674,7 @@ def update_object_state(public_id: int, request_user: UserModel):
 
         # get current object state
     try:
-        current_type_instance = type_manager.get(found_object.get_type_id())
+        current_type_instance = objects_manager.get_object_type(found_object.get_type_id())
 
         current_object_render_result = CmdbRender(object_instance=found_object,
                                                   type_instance=current_type_instance,
@@ -734,11 +728,10 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
     Returns:
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        update_type_instance = type_manager.get(public_id)
+        update_type_instance = objects_manager.get_object_type(public_id)
         type_fields = update_type_instance.fields
 
         builder_params = BuilderParameters({'type_id': public_id},

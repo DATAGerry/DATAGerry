@@ -20,7 +20,7 @@ import time
 import logging
 from flask import abort, jsonify, Response
 
-from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.types_manager import TypesManager
 
 from cmdb.framework import TypeModel
 from cmdb.interface.route_utils import login_required, insert_request_user
@@ -43,10 +43,10 @@ type_export_blueprint = RootBlueprint('type_export_rest', __name__, url_prefix='
 @login_required
 def export_type(request_user: UserModel):
     """TODO: document"""
-    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     try:
-        type_list = [TypeModel.to_json(type) for type in objects_manager.get_all_types()]
+        type_list = [TypeModel.to_json(type) for type in types_manager.get_all_types()]
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
     except TypeNotFoundError:
         #TODO: ERROR-FIX
@@ -76,7 +76,7 @@ def export_type(request_user: UserModel):
 @login_required
 def export_type_by_ids(public_ids, request_user: UserModel):
     """TODO: document"""
-    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     try:
         query_list = []
@@ -87,7 +87,7 @@ def export_type_by_ids(public_ids, request_user: UserModel):
                 except (ValueError, TypeError):
                     return abort(400)
         type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
-                                     objects_manager.get_types_by(sort="public_id", **{'$or': query_list})],
+                                    types_manager.get_types_by(sort="public_id", **{'$or': query_list})],
                                     default=json_encoding.default, indent=2)
     except TypeNotFoundError:
         #TODO: ERROR-FIX

@@ -485,55 +485,6 @@ class ObjectsManager(BaseManager):
         return merge_result
 
 
-    # TODO: REFACTOR-FIX (Move to TypeManager once refactored)
-    def count_types(self):
-        """TODO: document"""
-        return self.count_documents(collection=TypeModel.COLLECTION)
-
-
-    # TODO: REFACTOR-FIX (Move to TypeManager once refactored)
-    def get_all_types(self) -> list[TypeModel]:
-        """TODO: document"""
-        try:
-            raw_types: list[dict] = self.get_many_from_other_collection(collection=TypeModel.COLLECTION)
-        except Exception as err:
-            raise ObjectManagerGetError(err) from err
-        try:
-            return [TypeModel.from_data(type) for type in raw_types]
-        except Exception as err:
-            raise ObjectManagerInitError(err) from err
-
-
-    # TODO: REFACTOR-FIX (Move to TypeManager once refactored)
-    def get_types_by(self, sort='public_id', **requirements):
-        """TODO: document"""
-        try:
-            return [TypeModel.from_data(data) for data in
-                    self.get_many_from_other_collection(collection=TypeModel.COLLECTION, sort=sort, **requirements)]
-        except Exception as error:
-            raise ObjectManagerGetError(error) from error
-
-
-    # TODO: REFACTOR-FIX (Move to TypeManager once refactored)
-    def get_type_aggregate(self, arguments):
-        """This method does not actually
-           performs the find() operation
-           but instead returns
-           a objects sorted by value of the documents that meet the selection criteria.
-
-           Args:
-               arguments: query search for
-           Returns:
-               returns the list of CMDB Types sorted by value of the documents
-           """
-        type_list = []
-        cursor = self.dbm.aggregate(TypeModel.COLLECTION, arguments)
-        for document in cursor:
-            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
-            type_list.append(TypeModel.from_data(put_data))
-        return type_list
-
-
     # TODO: REFACTOR-FIX (Move to CategoriesManager once refactored)
     def get_categories_by(self, sort='public_id', **requirements: dict) -> list[CategoryModel]:
         """Get a list of categories by special requirements"""

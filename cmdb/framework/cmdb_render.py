@@ -21,7 +21,7 @@ from dateutil.parser import parse
 
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.users_manager import UsersManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
@@ -90,7 +90,7 @@ class CmdbRender:
         self.objects_manager = objects_manager
 
         if self.objects_manager:  # TODO: Refactor to pass database-manager in init
-            self.type_manager = TypeManager(self.objects_manager.dbm)
+            self.types_manager = TypesManager(self.objects_manager.dbm)
             self.users_manager = UsersManager(self.objects_manager.dbm)
 
         self.ref_render = ref_render
@@ -349,7 +349,7 @@ class CmdbRender:
                     reference_object = None
 
                 try:
-                    ref_type: TypeModel = self.type_manager.get(section.reference.type_id)
+                    ref_type = self.types_manager.get_type(section.reference.type_id)
                     ref_section = ref_type.get_section(section.reference.section_name)
                     ref_field['references'] = {
                         'type_id': ref_type.public_id,

@@ -31,7 +31,7 @@ from cmdb.manager.setting_manager import UserSettingsManager
 from cmdb.manager.group_manager import GroupManager
 from cmdb.manager.media_file_manager import MediaFileManager
 from cmdb.manager.exportd_log_manager import ExportdLogManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
@@ -58,7 +58,7 @@ class ManagerType(Enum):
     GROUP_MANAGER = 'GroupManager'
     MEDIA_FILE_MANAGER = 'MediaFileManager'
     EXPORTD_LOG_MANAGER = 'ExportdLogManager'
-    TYPE_MANAGER = 'TypeManager'
+    TYPES_MANAGER = 'TypesManager'
     LOCATIONS_MANAGER = 'LocationsManager'
     SECTION_TEMPLATES_MANAGER = 'SectionTemplatesManager'
     OBJECT_LINKS_MANAGER = 'ObjectLinksManager'
@@ -94,7 +94,7 @@ class ManagerProvider:
             ManagerType.GROUP_MANAGER: GroupManager,
             ManagerType.MEDIA_FILE_MANAGER: MediaFileManager,
             ManagerType.EXPORTD_LOG_MANAGER: ExportdLogManager,
-            ManagerType.TYPE_MANAGER: TypeManager,
+            ManagerType.TYPES_MANAGER: TypesManager,
             ManagerType.LOCATIONS_MANAGER: LocationsManager,
             ManagerType.SECTION_TEMPLATES_MANAGER: SectionTemplatesManager,
             ManagerType.OBJECT_LINKS_MANAGER: ObjectLinksManager,
@@ -145,7 +145,7 @@ class ManagerProvider:
                 ManagerType.USER_SETTINGS_MANAGER,
                 ManagerType.MEDIA_FILE_MANAGER,
                 ManagerType.EXPORTD_LOG_MANAGER,
-                ManagerType.TYPE_MANAGER,
+                ManagerType.TYPES_MANAGER,
                 ManagerType.EXPORT_D_LOG_MANAGER,
                 ManagerType.EXPORT_D_JOB_MANAGER,
                 ManagerType.SYSTEM_SETTINGS_READER,

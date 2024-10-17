@@ -20,7 +20,7 @@ from typing import Union
 from deepdiff import DeepDiff
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
@@ -64,7 +64,7 @@ class SectionTemplatesManager(BaseManager):
             dbm.connector.set_database(database)
 
         self.query_builder = BaseQueryBuilder()
-        self.type_manager = TypeManager(dbm)
+        self.types_manager = TypesManager(dbm)
         self.objects_manager = ObjectsManager(dbm)
 
         super().__init__(CmdbSectionTemplate.COLLECTION, dbm)
@@ -184,7 +184,7 @@ class SectionTemplatesManager(BaseManager):
             "global_template_ids":template_name
         }
 
-        found_types: ListResult = self.type_manager.find(type_filter)
+        found_types: ListResult = self.types_manager.find_types(type_filter)
 
         if len(found_types.results) == 0:
             return counts
@@ -269,7 +269,7 @@ class SectionTemplatesManager(BaseManager):
             self.set_new_global_template_fields(a_type.public_id, new_field_names)
 
             #Update the type changes for the type
-            self.type_manager.update(a_type.public_id, a_type)
+            self.types_manager.update_type(a_type.public_id, a_type)
 
 
     def get_section_label_diff(self, new_params: dict, current_params: dict) -> str:
@@ -368,7 +368,7 @@ class SectionTemplatesManager(BaseManager):
             "global_template_ids":template_name
         }
 
-        found_types: ListResult = self.type_manager.find(type_filter)
+        found_types: ListResult = self.types_manager.find_types(type_filter)
 
         return found_types.results
 
@@ -446,4 +446,4 @@ class SectionTemplatesManager(BaseManager):
             self.cleanup_global_section_objects(a_type.public_id, template_section_field_names)
 
             #Update the type changes for the type
-            self.type_manager.update(a_type.public_id, a_type)
+            self.types_manager.update_type(a_type.public_id, a_type)

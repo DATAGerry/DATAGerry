@@ -18,14 +18,13 @@ import logging
 from datetime import datetime, timezone
 from flask import abort, request
 
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.framework.utils import PublicID
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse, make_api_response
@@ -34,6 +33,8 @@ from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError,\
                                 ManagerInsertError,\
@@ -66,22 +67,22 @@ def insert_type(data: dict, request_user: UserModel):
     Returns:
         InsertSingleResponse: Insert response with the new type and its public_id
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     data.setdefault('creation_time', datetime.now(timezone.utc))
     possible_id = data.get('public_id', None)
 
     if possible_id:
         try:
-            type_manager.get(public_id=possible_id)
+            types_manager.get_type(possible_id)
         except ManagerGetError:
             pass
         else:
             return abort(400, f'Type with PublicID {possible_id} already exists.')
 
     try:
-        result_id: PublicID = type_manager.insert(data)
-        raw_doc = type_manager.get(public_id=result_id)
+        result_id = types_manager.insert_type(data)
+        raw_doc = types_manager.get_type(result_id)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
@@ -118,9 +119,8 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
 
     Raises:
         ManagerGetError: If the collection could not be found.
-
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     view = params.active
 
@@ -133,13 +133,10 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
         elif isinstance(params.filter, list):
             params.filter.append({'$match': {'active': view}})
 
+    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
     try:
-        iteration_result: IterationResult[TypeModel] = type_manager.iterate(
-                                                                        filter=params.filter,
-                                                                        limit=params.limit,
-                                                                        skip=params.skip,
-                                                                        sort=params.sort,
-                                                                        order=params.order)
+        iteration_result: IterationResult[TypeModel] = types_manager.iterate(builder_params)
 
         types = [TypeModel.to_json(type) for type in iteration_result.results]
 
@@ -175,10 +172,10 @@ def get_type(public_id: int, request_user: UserModel):
     Returns:
         GetSingleResponse: Which includes the json data of a TypeModel.
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     try:
-        type_ = type_manager.get(public_id)
+        type_ = types_manager.get_type(public_id)
     except ManagerGetError:
         return abort(404)
     api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
@@ -227,16 +224,16 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
     Returns:
         UpdateSingleResponse: With update result of the new updated type.
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        unchanged_type = type_manager.get(public_id)
+        unchanged_type = types_manager.get_type(public_id)
 
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
-        type_manager.update(public_id=PublicID(public_id), type=TypeModel.to_json(type_))
+        types_manager.update_type(public_id, TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError:
         #TODO: ERROR-FIX
@@ -246,7 +243,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
         return abort(400, f"Type with public_id: {public_id} could not be updated!")
 
     # when types are updated, update all locations with relevant data from this type
-    updated_type = type_manager.get(public_id)
+    updated_type = types_manager.get_type(public_id)
     locations_with_type = locations_manager.get_locations_by(type_id=public_id)
 
     loc_data = {
@@ -260,7 +257,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
         locations_manager.update({'public_id':location.public_id}, loc_data)
 
     # check and update all multi data sections for the type if required
-    updated_objects = type_manager.handle_mutli_data_sections(unchanged_type, data)
+    updated_objects = types_manager.handle_mutli_data_sections(unchanged_type, data)
 
     an_object: CmdbObject
     for an_object in updated_objects:
@@ -287,7 +284,7 @@ def delete_type(public_id: int, request_user: UserModel):
     Returns:
         DeleteSingleResponse: Delete result with the deleted type as data.
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -298,7 +295,7 @@ def delete_type(public_id: int, request_user: UserModel):
 
         objects_ids = [object_.get_public_id() for object_ in objects_manager.get_objects_by(type_id=public_id)]
         objects_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
-        deleted_type = type_manager.delete(public_id=PublicID(public_id))
+        deleted_type = types_manager.delete_type(public_id)
 
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:

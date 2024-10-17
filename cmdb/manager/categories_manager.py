@@ -19,7 +19,7 @@ from queue import Queue
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
@@ -44,6 +44,7 @@ class CategoriesManager(BaseManager):
     """
     The CategoriesManager handles the interaction between the Categories-API and the Database
     Extends: BaseManager
+    Depends: TypesManager
     """
 
     def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
@@ -60,7 +61,7 @@ class CategoriesManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
-        self.type_manager = TypeManager(dbm)
+        self.types_manager = TypesManager(dbm)
         super().__init__(CategoryModel.COLLECTION, dbm)
 
 
@@ -73,7 +74,7 @@ class CategoriesManager(BaseManager):
             CategoryTree: Categories as tree structure.
         """
         # Find all types
-        types = self.type_manager.find({}).results
+        types = self.types_manager.find_types({}).results
         build_params = BuilderParameters({})
         categories = self.iterate(build_params).results
 

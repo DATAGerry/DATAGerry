@@ -19,7 +19,6 @@ from queue import Queue
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.type_manager import TypeManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
@@ -57,7 +56,7 @@ class LocationsManager(BaseManager):
             dbm.connector.set_database(database)
 
         self.query_builder = BaseQueryBuilder()
-        self.type_manager = TypeManager(dbm)
+
         super().__init__(CmdbLocation.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #

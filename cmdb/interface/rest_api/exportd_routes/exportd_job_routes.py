@@ -344,7 +344,6 @@ def worker(job: ExportdJob, request_user: UserModel):
     """TODO: document"""
 
     log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
-    object_manager = ManagerProvider.get_manager(ManagerType.CMDB_OBJECT_MANAGER, request_user)
     objects_manager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -353,7 +352,6 @@ def worker(job: ExportdJob, request_user: UserModel):
                                                   "event": 'manuel'})
 
         content = ExportdManagerBase(job,
-                                     object_manager,
                                      log_manager,
                                      event,
                                      objects_manager).execute(request_user.public_id,

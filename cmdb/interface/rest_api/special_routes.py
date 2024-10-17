@@ -18,6 +18,7 @@ import logging
 from flask import request, abort
 
 from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.interface.route_utils import make_response, login_required
@@ -49,11 +50,12 @@ def get_intro_starter(request_user: UserModel):
     """
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     try:
         steps = []
         categories_total = categories_manager.count_categories()
-        types_total = objects_manager.count_types()
+        types_total = types_manager.count_types()
         objects_total = objects_manager.count_objects()
 
         if _fetch_only_active_objs():
@@ -101,11 +103,12 @@ def create_initial_profiles(data: str, request_user: UserModel):
     """
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     profiles = data['data'].split('#')
 
     categories_total = categories_manager.count_categories()
-    types_total = objects_manager.count_types()
+    types_total = types_manager.count_types()
     objects_total = objects_manager.count_objects()
 
     # Only execute if there are no categories, types and objects in the database
