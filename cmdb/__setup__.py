@@ -18,7 +18,7 @@ import logging
 from datetime import datetime, timezone
 from enum import Enum
 
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.security.security import SecurityManager
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.users_manager import UsersManager
@@ -170,11 +170,11 @@ class SetupRoutine:
         """TODO: document"""
         LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
         scm = SecurityManager(self.setup_database_manager)
-        group_manager = GroupManager(self.setup_database_manager)
+        groups_manager = GroupsManager(self.setup_database_manager)
         users_manager = UsersManager(self.setup_database_manager)
 
         for group in __FIXED_GROUPS__:
-            group_manager.insert(group)
+            groups_manager.insert_group(group)
 
         # setting the initial user to admin/admin as default
         admin_name = 'admin'

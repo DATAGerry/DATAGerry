@@ -55,6 +55,7 @@ class RightManager(ManagerBase):
                 rights = rights + RightManager.flat_tree(right)
             else:
                 rights.append(right)
+
         return rights
 
 

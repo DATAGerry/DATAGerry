@@ -24,7 +24,7 @@ from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
 
 from cmdb.manager.users_manager import UsersManager
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.right_manager import RightManager
 from cmdb.security.security import SecurityManager
 from cmdb.security.auth import AuthModule
@@ -106,7 +106,7 @@ def user_has_right(required_right: str) -> bool:
     """Check if a user has a specific right"""
     with current_app.app_context():
         users_manager = UsersManager(current_app.database_manager)
-        group_manager = GroupManager(current_app.database_manager, RightManager(rights))
+        groups_manager = GroupsManager(current_app.database_manager)
 
     token = parse_authorization_header(request.headers['Authorization'])
 
@@ -123,10 +123,10 @@ def user_has_right(required_right: str) -> bool:
         if current_app.cloud_mode:
             database = decrypted_token['DATAGERRY']['value']['user']['database']
             users_manager = UsersManager(current_app.database_manager, database)
-            group_manager = GroupManager(current_app.database_manager, RightManager(rights), database)
+            groups_manager = GroupsManager(current_app.database_manager)
 
         user = users_manager.get_user(user_id)
-        group = group_manager.get(user.group_id)
+        group = groups_manager.get_group(user.group_id)
         right_status = group.has_right(required_right)
 
         if not right_status:
@@ -185,7 +185,7 @@ def right_required(required_right: str, excepted: dict = None):
     def _page_right(func):
         @functools.wraps(func)
         def _decorate(*args, **kwargs):
-            group_manager = GroupManager(current_app.database_manager, RightManager(rights))
+            groups_manager = GroupsManager(current_app.database_manager)
 
             try:
                 current_user: UserModel = kwargs['request_user']
@@ -193,11 +193,9 @@ def right_required(required_right: str, excepted: dict = None):
                 return abort(400, 'No request user was provided')
             try:
                 if current_app.cloud_mode:
-                    group_manager = GroupManager(current_app.database_manager,
-                                                 RightManager(rights),
-                                                 current_user.database)
+                    groups_manager = GroupsManager(current_app.database_manager, current_user.database)
 
-                group: UserGroupModel = group_manager.get(current_user.group_id)
+                group: UserGroupModel = groups_manager.get_group(current_user.group_id)
                 has_right = group.has_right(required_right)
             except ManagerGetError:
                 return abort(404, 'Group or right does not exist!')
@@ -252,14 +250,12 @@ def parse_authorization_header(header):
                     current_app.database_manager.connector.set_database(user_data['database'])
 
                 users_manager = UsersManager(current_app.database_manager)
-                group_manager: GroupManager = GroupManager(current_app.database_manager, RightManager(rights))
                 security_manager: SecurityManager = SecurityManager(current_app.database_manager)
 
                 auth_settings = SystemSettingsReader(current_app.database_manager).get_all_values_from_section(
                                                                                    'auth',
                                                                                    AuthModule.__DEFAULT_SETTINGS__)
                 auth_module = AuthModule(auth_settings,
-                                         group_manager=group_manager,
                                          security_manager=security_manager,
                                          users_manager=users_manager)
 

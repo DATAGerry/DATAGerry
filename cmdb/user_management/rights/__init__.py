@@ -180,3 +180,24 @@ __all__ = (
     EXPORTD_RIGHTS,
     DOCAPI_RIGHTS
 )
+
+
+def flat_rights_tree(right_tree) -> list[BaseRight]:
+    """
+    Flat the right tree to list
+
+    Args:
+        right_tree: Tuple tree of rights
+
+    Returns:
+        list[BaseRight]: Flatted right tree
+    """
+    rights: list[BaseRight] = []
+
+    for right in right_tree:
+        if isinstance(right, (tuple, list)):
+            rights = rights + flat_rights_tree(right)
+        else:
+            rights.append(right)
+
+    return rights

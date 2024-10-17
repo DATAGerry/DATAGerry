@@ -19,16 +19,14 @@ from enum import Enum
 from flask import current_app
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.user_management.rights import __all__ as rights
 
-from cmdb.manager.right_manager import RightManager
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.setting_manager import UserSettingsManager
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.media_file_manager import MediaFileManager
 from cmdb.manager.exportd_log_manager import ExportdLogManager
 from cmdb.manager.types_manager import TypesManager
@@ -55,7 +53,7 @@ class ManagerType(Enum):
     DOCAPI_TEMPLATES_MANAGER = 'DocapiTemplatesManager'
     USERS_MANAGER = 'UsersManager'
     USER_SETTINGS_MANAGER = 'UserSettingsManager'
-    GROUP_MANAGER = 'GroupManager'
+    GROUPS_MANAGER = 'GroupsManager'
     MEDIA_FILE_MANAGER = 'MediaFileManager'
     EXPORTD_LOG_MANAGER = 'ExportdLogManager'
     TYPES_MANAGER = 'TypesManager'
@@ -91,7 +89,7 @@ class ManagerProvider:
             ManagerType.DOCAPI_TEMPLATES_MANAGER: DocapiTemplatesManager,
             ManagerType.USERS_MANAGER: UsersManager,
             ManagerType.USER_SETTINGS_MANAGER: UserSettingsManager,
-            ManagerType.GROUP_MANAGER: GroupManager,
+            ManagerType.GROUPS_MANAGER: GroupsManager,
             ManagerType.MEDIA_FILE_MANAGER: MediaFileManager,
             ManagerType.EXPORTD_LOG_MANAGER: ExportdLogManager,
             ManagerType.TYPES_MANAGER: TypesManager,
@@ -136,11 +134,9 @@ class ManagerProvider:
             ]:
                 return common_args + (current_app.event_queue, request_user.database)
 
-            if manager_type == ManagerType.GROUP_MANAGER:
-                right_manager = RightManager(rights)
-                return common_args + (right_manager, request_user.database)
 
             if manager_type in [
+                ManagerType.GROUPS_MANAGER,
                 ManagerType.USERS_MANAGER,
                 ManagerType.USER_SETTINGS_MANAGER,
                 ManagerType.MEDIA_FILE_MANAGER,
@@ -165,11 +161,6 @@ class ManagerProvider:
                 ManagerType.EXPORTD_JOB_MANAGER,
             ]:
                 return common_args + (current_app.event_queue,)
-
-            if manager_type == ManagerType.GROUP_MANAGER:
-                right_manager = RightManager(rights)
-
-                return common_args + (right_manager,)
 
         # Default route where just the dbm is returned
         return common_args

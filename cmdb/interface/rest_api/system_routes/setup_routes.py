@@ -21,7 +21,7 @@ from datetime import datetime, timezone
 from flask import request, current_app
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.group_manager import GroupManager
+from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
@@ -122,7 +122,7 @@ def init_db_routine(db_name: str):
     """
     new_db = dbm.create_database(db_name)
     dbm.connector.set_database(new_db.name)
-    group_manager = GroupManager(dbm)
+    groups_manager = GroupsManager(dbm)
 
     # Generate framework collections
     for collection in FRAMEWORK_CLASSES:
@@ -144,7 +144,7 @@ def init_db_routine(db_name: str):
 
     # Generate groups
     for group in __FIXED_GROUPS__:
-        group_manager.insert(group)
+        groups_manager.insert_group(group)
 
     # Generate predefined section templates
     dbm.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
