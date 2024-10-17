@@ -18,7 +18,7 @@ import logging
 from flask import request, current_app
 
 from cmdb.manager.locations_manager import LocationsManager
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
@@ -61,7 +61,7 @@ def create_location(params: dict, request_user: UserModel):
     Returns:
         int: public_id of the created location
     """
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -71,7 +71,7 @@ def create_location(params: dict, request_user: UserModel):
     location_creation_params['parent'] = int(params['parent'])
     location_creation_params['type_id'] = int(params['type_id'])
 
-    object_type = type_manager.get(location_creation_params['type_id'])
+    object_type = types_manager.get_type(location_creation_params['type_id'])
 
     location_creation_params['type_label'] = object_type.label
     location_creation_params['type_icon'] = object_type.get_icon()

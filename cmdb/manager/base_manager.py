@@ -135,6 +135,13 @@ class BaseManager:
             raise ManagerGetError(err) from err
 
 
+    def find(self, *args, criteria=None, **kwargs):
+        """TODO: document"""
+        try:
+            return self.dbm.find(self.collection, filter=criteria, *args, **kwargs)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
     def get_one_by(self, criteria: dict):
         """
         Retrieves a single document defined by a filter

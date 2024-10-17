@@ -132,7 +132,7 @@ class ExportdJobManager(CmdbManagerBase):
             except Exception as err:
                 #TODO: ERROR-FIX
                 raise ExportdJobManagerInsertError(str(err)) from err
-        elif isinstance(data, ExportdJob):
+        else:
             new_object = data
 
         try:

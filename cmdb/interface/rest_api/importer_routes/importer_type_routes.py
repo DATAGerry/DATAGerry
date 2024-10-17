@@ -20,7 +20,7 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import request, abort
 
-from cmdb.manager.type_manager import TypeManager
+from cmdb.manager.types_manager import TypesManager
 
 from cmdb.framework import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint
@@ -41,7 +41,7 @@ LOGGER = logging.getLogger(__name__)
 @login_required
 def add_type(request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     error_collection = {}
     upload = request.form.get('uploadFile')
@@ -49,14 +49,14 @@ def add_type(request_user: UserModel):
 
     for new_type_data in new_type_list:
         try:
-            new_type_data['public_id'] = type_manager.get_new_id()
+            new_type_data['public_id'] = types_manager.get_new_type_public_id()
             new_type_data['creation_time'] = datetime.now(timezone.utc)
         except TypeError as e:
             LOGGER.error(e)
             return abort(400)
         try:
             type_instance = TypeModel.from_data(new_type_data)
-            type_manager.insert(type_instance)
+            types_manager.insert_type(type_instance)
         except (ManagerInsertError, Exception) as err:
             #TODO: ERROR-FIX
             error_collection.update({"public_id": new_type_data['public_id'], "message": err})
@@ -69,7 +69,7 @@ def add_type(request_user: UserModel):
 @login_required
 def update_type(request_user: UserModel):
     """TODO: document"""
-    type_manager: TypeManager = ManagerProvider.get_manager(ManagerType.TYPE_MANAGER, request_user)
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     error_collection = {}
     upload = request.form.get('uploadFile')
@@ -82,8 +82,8 @@ def update_type(request_user: UserModel):
             #TODO: ERROR-FIX
             return abort(400)
         try:
-            type_manager.get(update_type_instance.public_id)
-            type_manager.update(update_type_instance.public_id, update_type_instance)
+            types_manager.get_type(update_type_instance.public_id)
+            types_manager.update_type(update_type_instance.public_id, update_type_instance)
         except (ManagerGetError, Exception) as err:
             #TODO: ERROR-FIX
             error_collection.update({"public_id": add_data_dump['public_id'], "message": err})
