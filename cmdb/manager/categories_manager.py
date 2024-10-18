@@ -28,8 +28,6 @@ from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
-
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerInsertError,\
@@ -39,7 +37,9 @@ from cmdb.errors.manager import ManagerInsertError,\
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               CategoriesManager - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CategoriesManager(BaseManager):
     """
     The CategoriesManager handles the interaction between the Categories-API and the Database
@@ -56,7 +56,6 @@ class CategoriesManager(BaseManager):
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
 
         if database:
             dbm.connector.set_database(database)
@@ -108,32 +107,11 @@ class CategoriesManager(BaseManager):
                 user: UserModel = None,
                 permission: AccessControlPermission = None) -> IterationResult[CategoryModel]:
         """
-        Performs an aggregation on the database
-        Args:
-            builder_params (BuilderParameters): Contains input to identify the target of action
-            user (UserModel, optional): User requesting this action
-            permission (AccessControlPermission, optional): Permission which should be checked for the user
-        Raises:
-            ManagerIterationError: Raised when something goes wrong during the aggregate part
-            ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
-        Returns:
-            IterationResult[CategoryModel]: Result which matches the Builderparameters
+        TODO: document
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
 
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
-
-        try:
             iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CategoryModel)
         except Exception as err:
@@ -141,6 +119,22 @@ class CategoriesManager(BaseManager):
 
         return iteration_result
 
+
+    # TODO: REFACTOR-FIX (Move to CategoriesManager once refactored)
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> list[CategoryModel]:
+        """Get a list of categories by special requirements"""
+        try:
+            raw_categories = self.get_many_from_other_collection(collection=CategoryModel.COLLECTION,
+                                                                 sort=sort,
+                                                                 **requirements)
+        except Exception as error:
+            #TODO: ERROR-FIX (need category get error)
+            raise ManagerGetError(error) from error
+        try:
+            return [CategoryModel.from_data(category) for category in raw_categories]
+        except Exception as error:
+            #TODO: ERROR-FIX (need category init error)
+            raise ManagerGetError(error) from error
 
 
     def count_categories(self):

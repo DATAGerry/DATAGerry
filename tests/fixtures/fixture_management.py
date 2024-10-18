@@ -18,7 +18,7 @@ import logging
 from datetime import datetime
 import pytest
 
-from cmdb.manager.right_manager import RightManager
+from cmdb.manager.rights_manager import RightsManager
 
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.user import UserModel
@@ -26,16 +26,16 @@ from cmdb.user_management.rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
-@pytest.fixture(scope="session", name="right_manager")
-def fixture_right_manager():
+@pytest.fixture(scope="session", name="rights_manager")
+def fixture_rights_manager():
     """TODO: document"""
-    return RightManager(rights)
+    return RightsManager(rights)
 
 
 @pytest.fixture(scope="session", name="full_access_group")
-def fixture_full_access_group(right_manager: RightManager):
+def fixture_full_access_group(rights_manager: RightsManager):
     "TODO: document"
-    return UserGroupModel(public_id=1, name='full', label='Full', rights=[right_manager.get('base.*')])
+    return UserGroupModel(public_id=1, name='full', label='Full', rights=[rights_manager.get_right('base.*')])
 
 
 @pytest.fixture(scope="session", name="none_access_group")

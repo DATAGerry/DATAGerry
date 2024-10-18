@@ -16,7 +16,7 @@
 """TODO: document"""
 from flask import request, abort
 
-from cmdb.manager.right_manager import RightManager
+from cmdb.manager.rights_manager import RightsManager
 
 from cmdb.framework.utils import Model
 
@@ -55,20 +55,34 @@ def get_rights(params: CollectionParameters):
         ManagerIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection/resources could not be found.
     """
-    right_manager = RightManager(right_tree)
+    rights_manager = RightsManager(right_tree)
     body = request.method == 'HEAD'
 
     try:
         if params.optional['view'] == 'tree':
-            api_response = GetMultiResponse(right_manager.tree_to_json(right_tree), total=len(right_tree),
-                                            params=params, url=request.url, model='Right-Tree', body=body)
+            api_response = GetMultiResponse(rights_manager.tree_to_json(right_tree),
+                                            total=len(right_tree),
+                                            params=params,
+                                            url=request.url,
+                                            model='Right-Tree',
+                                            body=body)
+
             return api_response.make_response(pagination=False)
 
-        iteration_result: IterationResult[BaseRight] = right_manager.iterate(
-            filter=params.filter, limit=params.limit, skip=params.skip, sort=params.sort, order=params.order)
+        iteration_result: IterationResult[BaseRight] = rights_manager.iterate_rights(
+                                                                            limit=params.limit,
+                                                                            skip=params.skip,
+                                                                            sort=params.sort,
+                                                                            order=params.order)
+
         rights = [BaseRight.to_dict(type) for type in iteration_result.results]
-        api_response = GetMultiResponse(rights, total=iteration_result.total, params=params,
-                                        url=request.url, model=Model('Right'), body=request.method == 'HEAD')
+
+        api_response = GetMultiResponse(rights,
+                                        total=iteration_result.total,
+                                        params=params,
+                                        url=request.url,
+                                        model=Model('Right'),
+                                        body=request.method == 'HEAD')
 
         return api_response.make_response()
     except ManagerIterationError:
@@ -97,15 +111,17 @@ def get_right(name: str):
     Returns:
         GetSingleResponse: Which includes the json data of a BaseRight.
     """
-    right_manager: RightManager = RightManager(right_tree)
+    rights_manager: RightsManager = RightsManager(right_tree)
 
     try:
-        right = right_manager.get(name)
+        right = rights_manager.get_right(name)
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
 
-    api_response = GetSingleResponse(BaseRight.to_dict(right), url=request.url, model=Model('Right'),
+    api_response = GetSingleResponse(BaseRight.to_dict(right),
+                                     url=request.url,
+                                     model=Model('Right'),
                                      body=request.method == 'HEAD')
 
     return api_response.make_response()
@@ -124,7 +140,9 @@ def get_levels():
         Calling the route over HTTP HEAD method will result in an empty body.
     """
 
-    api_response = GetSingleResponse(_nameToLevel, url=request.url, model=Model('Security-Level'),
+    api_response = GetSingleResponse(_nameToLevel,
+                                     url=request.url,
+                                     model=Model('Security-Level'),
                                      body=request.method == 'HEAD')
 
     return api_response.make_response()

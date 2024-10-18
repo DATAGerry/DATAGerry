@@ -22,7 +22,6 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.user_management.rights import flat_rights_tree, __all__ as rights
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.framework.results import IterationResult
 
@@ -41,8 +40,6 @@ class GroupsManager(BaseManager):
 
         if database:
             dbm.connector.set_database(database)
-
-        self.query_builder = BaseQueryBuilder()
 
         super().__init__(UserGroupModel.COLLECTION, dbm)
 
@@ -89,30 +86,9 @@ class GroupsManager(BaseManager):
 
     def iterate(self, builder_params: BuilderParameters) -> IterationResult[UserGroupModel]:
         """
-        Iterate over a collection of group resources.
-
-        Args:
-             filter: match requirements of field values
-            limit: max number of elements to return
-            skip: number of elements to skip first
-            sort: sort field
-            order: sort order
-
-        Returns:
-            IterationResult: Instance of IterationResult with generic CategoryModel.
+        TODO: document
         """
-        try:
-            query: list[dict] = self.query_builder.build(builder_params)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
+        aggregation_result, total = self.iterate_query(builder_params)
 
         iteration_result: IterationResult[UserGroupModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(UserGroupModel)

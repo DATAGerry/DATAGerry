@@ -25,7 +25,6 @@ from werkzeug._internal import _wsgi_decoding_dance
 
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
-from cmdb.manager.right_manager import RightManager
 from cmdb.security.security import SecurityManager
 from cmdb.security.auth import AuthModule
 
