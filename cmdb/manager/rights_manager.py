@@ -15,12 +15,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
-from cmdb.manager.managers import ManagerBase
+from multiprocessing.managers import BaseManager
 
 from cmdb.user_management.models.right import BaseRight
 from cmdb.framework.results import IterationResult
-from cmdb.framework.utils import PublicID
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -28,15 +26,51 @@ from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 RightManager - CLASS                                                 #
+#                                                 RightsManager - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-class RightManager(ManagerBase):
+class RightsManager(BaseManager):
     """TODO: document"""
-
     def __init__(self, right_tree):
-        self.rights = RightManager.flat_tree(right_tree)
-        super().__init__(None, None)
+        self.rights = RightsManager.flat_tree(right_tree)
 
+        super().__init__()
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def iterate_rights(self, limit: int, skip: int, sort: str, order: int) -> IterationResult[BaseRight]:
+        """TODO: document"""
+        try:
+            sorted_rights = sorted(self.rights, key=lambda right: right[sort], reverse=order == -1)
+
+            if limit > 0:
+                spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights),
+                                  limit)][int(skip / limit)]
+            else:
+                spliced_rights = sorted_rights
+        except (AttributeError, ValueError, IndexError) as err:
+            raise ManagerIterationError(err) from err
+
+        result: IterationResult[BaseRight] = IterationResult(spliced_rights, len(self.rights))
+
+        return result
+
+
+    def get_right(self, name: str) -> BaseRight:
+        """
+        Get a right by its name
+
+        Args:
+            name: Name of the right
+
+        Returns:
+            BaseRight: Right instance
+        """
+        try:
+            return next(right for right in self.rights if right.name == name)
+        except Exception as err:
+            raise ManagerGetError(err) from err
+
+# -------------------------------------------------- HELPER METHODS -------------------------------------------------- #
 
     @staticmethod
     def flat_tree(right_tree) -> list[BaseRight]:
@@ -50,9 +84,10 @@ class RightManager(ManagerBase):
             list[BaseRight]: Flatted right tree
         """
         rights: list[BaseRight] = []
+
         for right in right_tree:
             if isinstance(right, (tuple, list)):
-                rights = rights + RightManager.flat_tree(right)
+                rights = rights + RightsManager.flat_tree(right)
             else:
                 rights.append(right)
 
@@ -65,48 +100,11 @@ class RightManager(ManagerBase):
         Converts to right tree to json
         """
         raw_tree = []
+
         for node in right_tree:
             if isinstance(node, tuple) or isinstance(node, list):
-                raw_tree.append(RightManager.tree_to_json(node))
+                raw_tree.append(RightsManager.tree_to_json(node))
             else:
                 raw_tree.append(BaseRight.to_dict(node))
+
         return raw_tree
-
-
-    def iterate(self, filter: dict, limit: int, skip: int, sort: str, order: int, *args, **kwargs) -> IterationResult[
-        BaseRight]:
-        try:
-            sorted_rights = sorted(self.rights, key=lambda right: right[sort], reverse=order == -1)
-            if limit > 0:
-                spliced_rights = [sorted_rights[i:i + limit] for i in range(0, len(sorted_rights), limit)][
-                    int(skip / limit)]
-            else:
-                spliced_rights = sorted_rights
-        except (AttributeError, ValueError, IndexError) as err:
-            raise ManagerIterationError(err) from err
-        result: IterationResult[BaseRight] = IterationResult(spliced_rights, total=len(self.rights))
-        return result
-
-
-    def get(self, name: str) -> BaseRight:
-        """
-        Get a right by its name.
-
-        Args:
-            name: Name of the right.
-
-        Returns:
-            BaseRight: Right instance
-        """
-        try:
-            return next(right for right in self.rights if right.name == name)
-        except Exception as err:
-            raise ManagerGetError(err) from err
-
-
-    def insert(self, resource: dict) -> PublicID:
-        raise NotImplementedError
-
-
-    def update(self, public_id: PublicID, resource: dict):
-        raise NotImplementedError

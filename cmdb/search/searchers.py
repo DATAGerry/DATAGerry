@@ -17,6 +17,7 @@
 import logging
 
 from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
@@ -193,10 +194,11 @@ class SearchPipelineBuilder(PipelineBuilder):
     def build(self, params: list[SearchParam],
               objects_manager: ObjectsManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
-              active_flag: bool = False, *args, **kwargs) -> Pipeline:
+              active_flag: bool = False) -> Pipeline:
         """Build a pipeline query out of frontend params"""
         # clear pipeline
         self.clear()
+        categories_manager = CategoriesManager(objects_manager.dbm)
 
         # load reference fields in runtime.
         self.pipeline = SearchReferencesPipelineBuilder().build()
@@ -229,7 +231,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         for param in category_params:
             if param.settings and len(param.settings.get('categories', [])) > 0:
-                categories = objects_manager.get_categories_by(**self.regex_('label', param.search_text))
+                categories = categories_manager.get_categories_by(**self.regex_('label', param.search_text))
                 for curr_category in categories:
                     type_id_in = self.in_('type_id', curr_category.types)
                     self.add_pipe(self.match_(type_id_in))

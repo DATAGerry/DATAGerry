@@ -28,7 +28,6 @@ from cmdb.framework import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.results import IterationResult
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerDeleteError, ManagerIterationError
@@ -43,6 +42,7 @@ class ObjectLinksManager(BaseManager):
     """
     The ObjectLinksManager handles the interaction between the ObjectLinks-API and the Database
     Extends: BaseManager
+    Depends: ObjectsManager
     """
 
     def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
@@ -58,8 +58,8 @@ class ObjectLinksManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
-        self.query_builder = BaseQueryBuilder()
         self.objects_manager = ObjectsManager(dbm)
+
         super().__init__(ObjectLinkModel.COLLECTION, dbm)
 
 
@@ -109,22 +109,11 @@ class ObjectLinksManager(BaseManager):
                 user: UserModel = None,
                 permission: AccessControlPermission = None) -> IterationResult[ObjectLinkModel]:
         """
-        Iterate over a collection where the public id exists
+        TODO: document
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params, user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
 
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
-
-        try:
             iteration_result: IterationResult[ObjectLinkModel] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(ObjectLinkModel)
         except Exception as err:

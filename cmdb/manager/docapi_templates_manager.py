@@ -25,7 +25,6 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.user_management.models.user import UserModel
@@ -54,7 +53,6 @@ class DocapiTemplatesManager(BaseManager):
             database (str): name of database for cloud mode
         """
         self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
 
         if database:
             dbm.connector.set_database(database)

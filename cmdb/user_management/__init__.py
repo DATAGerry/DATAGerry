@@ -17,7 +17,7 @@
 Basic user functions such as create, change and delete are implemented here.
 In addition, the rights management, group administration and access rights are defined here.
 """
-from cmdb.manager.right_manager import RightManager
+from cmdb.manager.rights_manager import RightsManager
 
 from cmdb.user_management.models.settings import UserSettingModel
 from cmdb.user_management.models.user import UserModel
@@ -28,7 +28,7 @@ from cmdb.user_management.rights import __all__ as rights
 
 # TODO: Refactor to use with dependency injection
 
-right_manager = RightManager(rights)
+rights_manager = RightsManager(rights)
 
 __COLLECTIONS__: list = [
     UserModel,
@@ -37,17 +37,17 @@ __COLLECTIONS__: list = [
 ]
 
 __ADMIN_GROUP_RIGHTS__: list[BaseRight] = [
-    right_manager.get('base.*')
+    rights_manager.get_right('base.*')
 ]
 
 __USER_GROUP_RIGHTS__: list[BaseRight] = [
-    right_manager.get('base.framework.object.*'),
-    right_manager.get('base.framework.type.view'),
-    right_manager.get('base.framework.category.view'),
-    right_manager.get('base.framework.log.view'),
-    right_manager.get('base.user-management.user.view'),
-    right_manager.get('base.user-management.group.view'),
-    right_manager.get('base.docapi.template.view')
+    rights_manager.get_right('base.framework.object.*'),
+    rights_manager.get_right('base.framework.type.view'),
+    rights_manager.get_right('base.framework.category.view'),
+    rights_manager.get_right('base.framework.log.view'),
+    rights_manager.get_right('base.user-management.user.view'),
+    rights_manager.get_right('base.user-management.group.view'),
+    rights_manager.get_right('base.docapi.template.view')
 ]
 
 __FIXED_GROUPS__: list[UserGroupModel] = [

@@ -20,6 +20,10 @@ from pymongo.results import DeleteResult
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.framework.utils import Collection
+from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.user_management.models.user import UserModel
+from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerGetError,\
@@ -38,6 +42,7 @@ class BaseManager:
 
     def __init__(self, collection: Collection, dbm: MongoDatabaseManager):
         self.collection: Collection = collection
+        self.query_builder = BaseQueryBuilder()
         self.dbm: MongoDatabaseManager = dbm
 
 
@@ -64,6 +69,39 @@ class BaseManager:
             raise ManagerInsertError(err) from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def iterate_query(self,
+                      builder_params: BuilderParameters,
+                      user: UserModel = None,
+                      permission: AccessControlPermission = None):
+        """
+        Performs an aggregation on the database
+        Args:
+            builder_params (BuilderParameters): Contains input to identify the target of action
+            user (UserModel, optional): User requesting this action
+            permission (AccessControlPermission, optional): Permission which should be checked for the user
+        Raises:
+            ManagerIterationError: Raised when something goes wrong during the aggregate part
+            ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
+        Returns:
+            IterationResult[CmdbObject]: Result which matches the Builderparameters
+        """
+        try:
+            query: list[dict] = self.query_builder.build(builder_params, user, permission)
+            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+
+            aggregation_result = list(self.aggregate(query))
+            total_cursor = self.aggregate(count_query)
+
+            total = 0
+            while total_cursor.alive:
+                total = next(total_cursor)['total']
+
+            return aggregation_result , total
+        #TODO: ERROR-FIX
+        except ManagerGetError as err:
+            raise ManagerIterationError(err) from err
+
 
     def get_one(self, *args, **kwargs):
         """
