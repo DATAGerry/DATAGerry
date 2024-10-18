@@ -55,6 +55,7 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
 import { CmdbSectionTemplate } from '../../models/cmdb-section-template';
 import { MultiSectionControl } from './controls/multi-section.control';
 import { SectionIdentifierService } from '../services/SectionIdentifierService.service';
+import { FieldIdentifierValidationService } from '../services/field-identifier-validation.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 declare var $: any;
 
@@ -78,6 +79,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public initialIdentifier: string = '';
     public newSections: Array<CmdbTypeSection> = [];
     public newFields: Array<CmdbTypeSection> = [];
+
+    private activeDuplicateField: { sectionIndex: number; fieldIndex: number } | null = null;
+    public disableFields: boolean = false;
 
     @Input() public sectionTemplates: Array<CmdbSectionTemplate> = [];
     @Input() public globalSectionTemplates: Array<CmdbSectionTemplate> = [];
@@ -145,12 +149,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private modalService: NgbModal, private validationService: ValidationService,
-        public sectionIdentifierService: SectionIdentifierService) {
+        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService) {
         this.typeInstance = new CmdbType();
     }
 
 
     ngOnInit(): void {
+        const fieldNames = this.typeInstance.fields.map(field => field.name);
+        this.fieldIdentifierValidation.addFieldNames(fieldNames);
         this.updateHighlightState();
     }
 
@@ -168,6 +174,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.subscriber.complete();
         this.sectionIdentifierService.resetIdentifiers();
         this.validationService.cleanup();
+        this.fieldIdentifierValidation.clearFieldNames();
     }
 
     /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
@@ -299,8 +306,19 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * Redirects changes to field properties
      * @param data new data for field
      */
-    public onFieldChange(data: any) {
-        this.handleFieldChanges(data);
+    public onFieldChange(data: any, sectionIndex: number, fieldIndex: number) {
+        if (data.hasOwnProperty("isDuplicate") && data.isDuplicate) {
+
+            // Set the current field as the active duplicate and set disableFields to true
+            this.activeDuplicateField = { sectionIndex, fieldIndex };
+            this.disableFields = true;
+        } else {
+
+            // Reset the active duplicate field and disableFields flag when no duplication issue exists
+            this.activeDuplicateField = null;
+            this.disableFields = false;
+            this.handleFieldChanges(data);
+        }
     }
 
 
@@ -337,7 +355,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         let sectionIndex: number = this.getSectionOfField(previousName);
         let section: CmdbMultiDataSection = this.typeInstance.render_meta.sections[sectionIndex];
 
-        if (section.hidden_fields?.includes(previousName)) {
+        if (section?.hidden_fields?.includes(previousName)) {
             section.hidden_fields = section.hidden_fields.filter(hiddenField => hiddenField != previousName);
             section.hidden_fields.push(newName);
             this.typeInstance.render_meta.sections[sectionIndex] = section;
@@ -373,6 +391,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         //no section found for field
         return -1;
     }
+
 
     /**
      * Handles changes to field properties and updates them
@@ -418,6 +437,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 this.typeInstance.fields[index][inputName] = newValue;
             }
         }
+
+        this.fieldIdentifierValidation.clearFieldNames();
+        const fieldNames = this.typeInstance.fields.map(field => field.name);
+        this.fieldIdentifierValidation.addFieldNames(fieldNames);
 
         this.updateHighlightState();
     }
@@ -506,6 +529,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.fields.splice(fieldIndex, 1);
         this.typeInstance.fields = [...this.typeInstance.fields];
         this.validationService.setIsValid(updatedDraggedFieldName, true)
+
+        this.fieldIdentifierValidation.clearFieldNames();
+        const fieldNames = this.typeInstance.fields.map(field => field.name);
+        this.fieldIdentifierValidation.addFieldNames(fieldNames);
     }
 
 
@@ -591,6 +618,25 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
+     * Determines if a cmdb-config-edit component should be disabled based on the section and field indices.
+     * @param sectionIndex - The index of the section.
+     * @param fieldIndex - The index of the field within the section.
+     * @returns A boolean indicating whether the component should be disabled.
+     */
+    public isConfigEditDisabled(sectionIndex: number, fieldIndex: number): boolean {
+        // If disableFields is true, disable all fields except the activeDuplicateField
+        if (this.disableFields) {
+            return !(
+                this.activeDuplicateField?.sectionIndex === sectionIndex &&
+                this.activeDuplicateField?.fieldIndex === fieldIndex
+            );
+        }
+        // If no active duplicate, all components are enabled
+        return false;
+    }
+
+
+    /**
      * Determines if a section should be highlighted based on various conditions.
      * A section is highlighted if it has a duplicate name, missing name or label,
      * or if any of its fields are highlighted (missing name, label, or are duplicates).
@@ -622,7 +668,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      */
     public preventDragForAllSections(event: DragEvent): void {
         const isAnyHighlighted = this.sections.some(section => this.isSectionHighlighted(section));
-        if (isAnyHighlighted) {
+        if (isAnyHighlighted || this.disableFields) {
             event.stopPropagation(); // Stops event from affecting other elements
             event.preventDefault();  // Prevent dragging behavior
         }
@@ -639,7 +685,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         const isAnyFieldHighlighted = section.fields.some(field => this.isFieldHighlighted(field, section.fields));
         const isAnyFieldEmpty = this.checkEmptyFields().length > 0;
 
-        if (isAnyFieldHighlighted || isAnyFieldEmpty) {
+        if (isAnyFieldHighlighted || isAnyFieldEmpty || this.disableFields) {
             event.stopPropagation();  // Stops event from affecting other elements
             event.preventDefault();   // Prevent dragging behavior
         }
