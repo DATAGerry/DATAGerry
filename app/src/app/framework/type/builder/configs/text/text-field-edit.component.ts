@@ -25,6 +25,7 @@ import { ValidationService } from '../../../services/validation.service';
 import { ValidRegexValidator } from '../../../../../layout/validators/valid-regex-validator';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { FieldIdentifierValidationService } from '../../../services/field-identifier-validation.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -46,8 +47,11 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     public valueControl: UntypedFormControl = new UntypedFormControl(undefined);
     public helperTextControl: UntypedFormControl = new UntypedFormControl(undefined);
 
-    private initialValue: string;
+    private initialValue: string | boolean;
     isValid$: boolean = false;
+    private previousPreviousValue: string | boolean; // To store the value before the previous change
+
+    isDuplicate$: boolean = false
 
     private identifierInitialValue: string;
 
@@ -55,7 +59,7 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private validationService: ValidationService) {
+    constructor(private validationService: ValidationService, private fieldIdentifierValidation: FieldIdentifierValidationService) {
         super();
     }
 
@@ -115,6 +119,44 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
      * @param type - The type of the input field being changed.
      */
     onInputChange(event: any, type: string) {
+        // Handle boolean event type
+        if (typeof event === 'boolean') {
+            this.handleFieldChange(event, type);
+            return;
+        }
+
+        // Check for duplicates
+        this.isDuplicate$ = this.fieldIdentifierValidation.isDuplicate(event);
+
+        if (!this.isDuplicate$) {
+            this.toggleFormControls(false);
+            this.handleFieldChange(event, type);
+        } else {
+            this.toggleFormControls(true);
+            this.fieldChanges$.next({ "isDuplicate": true });
+        }
+
+        // Perform validation after a slight delay
+        setTimeout(() => {
+            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+            this.isValid$ = true;
+        });
+    }
+
+
+    /**
+     * Handles changes to the form fields and notifies listeners of the change event.
+     * Updates the initial value if the field type is 'name' and triggers field change notifications.
+     * @param event - The new value of the field after change.
+     * @param type - The type of field being changed (e.g., 'name').
+     */
+    private handleFieldChange(event: any, type: string): void {
+        // Update previousPreviousValue before changing the initialValue
+        if (type === 'name' && this.initialValue !== event) {
+            this.previousPreviousValue = this.initialValue;
+        }
+
+        // Notify field changes
         this.fieldChanges$.next({
             "newValue": event,
             "inputName": type,
@@ -123,15 +165,38 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
             "elementType": "text"
         });
 
-        if (type == "name") {
+        // Update the initial value if the type is 'name'
+        if (type === 'name') {
             this.initialValue = this.nameControl.value;
         }
+    }
 
 
-        setTimeout(() => {
-            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
-            this.isValid$ = true;
-        });
-
+    /**
+     * Toggles the enabled or disabled state of the form controls based on the `disable` parameter.
+     * If `disable` is true, the form controls are disabled; otherwise, they are enabled.
+     * @param disable - A boolean value determining whether to disable or enable the form controls.
+     */
+    private toggleFormControls(disable: boolean) {
+        // Disable or enable form controls based on the value of `disable`
+        if (disable) {
+            this.labelControl.disable();
+            this.descriptionControl.disable();
+            this.regexControl.disable();
+            this.placeholderControl.disable();
+            this.valueControl.disable();
+            this.helperTextControl.disable();
+            this.hideFieldControl.disable();
+            this.requiredControl.disable();
+        } else {
+            this.labelControl.enable();
+            this.descriptionControl.enable();
+            this.regexControl.enable();
+            this.placeholderControl.enable();
+            this.valueControl.enable();
+            this.helperTextControl.enable();
+            this.hideFieldControl.enable();
+            this.requiredControl.enable();
+        }
     }
 }
