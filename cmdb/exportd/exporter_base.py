@@ -16,15 +16,15 @@
 """TODO: document"""
 import logging
 
-from cmdb.manager.exportd_job_manager import ExportdJobManager
-from cmdb.manager.exportd_log_manager import ExportdLogManager
+from cmdb.manager.exportd_logs_manager import ExportdLogsManager
+from cmdb.manager.exportd_jobs_manager import ExportdJobsManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.helpers import load_class
-from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
+from cmdb.exportd.exportd_logs.exportd_log import LogAction, ExportdJobLog
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
@@ -39,18 +39,18 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              ExportdManagerBase - CLASS                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
-class ExportdManagerBase(ExportdJobManager):
+class ExportdManagerBase(ExportdJobsManager):
     """TODO: document"""
 
     def __init__(self, job: ExportdJob,
-                 log_manager: ExportdLogManager,
+                 exportd_logs_manager: ExportdLogsManager,
                  event: Event,
                  objects_manager: ObjectsManager):
         self.job = job
         self.event = event
         self.variables = self.__get_exportvars()
         self.destinations = self.__get__destinations()
-        self.log_manager = log_manager
+        self.exportd_logs_manager = exportd_logs_manager
         self.sources = self.__get_sources()
         self.objects_manager = objects_manager
 
@@ -123,7 +123,9 @@ class ExportdManagerBase(ExportdJobManager):
                         'event': self.event.get_type(),
                         'message': external_system.msg_string,
                     }
-                    self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+                    self.exportd_logs_manager.insert_log(action=LogAction.EXECUTE,
+                                                         log_type=ExportdJobLog.__name__,
+                                                         **log_params)
                 except ExportdLogManagerInsertError as err:
                     #TODO: ERROR-FIX
                     LOGGER.error(err)

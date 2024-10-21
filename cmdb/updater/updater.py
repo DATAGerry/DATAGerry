@@ -19,7 +19,6 @@ from abc import abstractmethod
 
 from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.exportd_log_manager import ExportdLogManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.categories_manager import CategoriesManager
@@ -43,9 +42,9 @@ class Updater(CmdbManagerBase):
         scr = SystemConfigReader()
         self.database_manager = DatabaseManagerMongo(**scr.get_all_values_from_section('Database'))
         self.categories_manager = CategoriesManager(self.database_manager)
-        self.log_manager = ExportdLogManager(self.database_manager)
         self.objects_manager = ObjectsManager(self.database_manager)
         self.types_manager = TypesManager(self.database_manager)
+
         super().__init__(self.database_manager)
 
 

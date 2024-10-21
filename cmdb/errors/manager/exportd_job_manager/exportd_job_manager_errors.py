@@ -14,14 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all ExportdJobManager errors
+This module contains the classes of all ExportdJobsManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportdJobManagerError(CMDBError):
     """
-    Base ExportdJobManager error
+    Base ExportdJobsManager error
     """
     def __init__(self, message: str):
         self.message = message
@@ -31,7 +31,7 @@ class ExportdJobManagerError(CMDBError):
 
 class ExportdJobManagerDeleteError(ExportdJobManagerError):
     """
-    Raised when ExportdJobManager could not delete a job
+    Raised when ExportdJobsManager could not delete a job
     """
     def __init__(self, err: str):
         self.message = f"Job could not be deleted. Error: {err}"
@@ -40,7 +40,7 @@ class ExportdJobManagerDeleteError(ExportdJobManagerError):
 
 class ExportdJobManagerUpdateError(ExportdJobManagerError):
     """
-    Raised when ExportdJobManager could not update a job
+    Raised when ExportdJobsManager could not update a job
     """
     def __init__(self, err):
         self.message = f"Job could not be updated. Error: {err}"
@@ -49,7 +49,7 @@ class ExportdJobManagerUpdateError(ExportdJobManagerError):
 
 class ExportdJobManagerInsertError(ExportdJobManagerError):
     """
-    Raised when ExportdJobManager could not create a job
+    Raised when ExportdJobsManager could not create a job
     """
     def __init__(self, err: str):
         self.message = f"Job could not be updated. Error: {err}"
@@ -58,7 +58,7 @@ class ExportdJobManagerInsertError(ExportdJobManagerError):
 
 class ExportdJobManagerGetError(ExportdJobManagerError):
     """
-    Raised when ExportdJobManager could not retrieve a job
+    Raised when ExportdJobsManager could not retrieve a job
     """
     def __init__(self, err):
         self.message = f"Job could not be retrieved. Error: {err}"
