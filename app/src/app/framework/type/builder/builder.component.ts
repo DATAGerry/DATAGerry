@@ -593,9 +593,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
     public removeField(item: any, section: CmdbTypeSection) {
         const indexField: number = this.typeInstance.fields.indexOf(item);
-        let removedFieldName = this.typeInstance.fields[indexField].name;
 
         if (indexField > -1) {
+            let removedFieldName = this.typeInstance.fields[indexField].name;
             this.typeInstance.fields.splice(indexField, 1);
             this.typeInstance.fields = [...this.typeInstance.fields];
             this.validationService.updateFieldValidityOnDeletion(removedFieldName);
