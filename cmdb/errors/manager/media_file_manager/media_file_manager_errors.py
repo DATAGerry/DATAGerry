@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all MediaFileManager errors
+This module contains the classes of all MediaFilesManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -27,11 +27,11 @@ class MediaFileManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ---------------------------------------------- MediaFileManager Errors --------------------------------------------- #
+# --------------------------------------------- MediaFilesManager Errors --------------------------------------------- #
 
 class MediaFileManagerGetError(MediaFileManagerError):
     """
-    Raised when MediaFileManager could not retrieve a file
+    Raised when MediaFilesManager could not retrieve a file
     """
     def __init__(self, err: str):
         self.message = f"File could not be retrieved. Error: {err}"
@@ -40,7 +40,7 @@ class MediaFileManagerGetError(MediaFileManagerError):
 
 class MediaFileManagerInsertError(MediaFileManagerError):
     """
-    Raised when MediaFileManager could not create a file
+    Raised when MediaFilesManager could not create a file
     """
     def __init__(self, err: str):
         self.message = f"File could not be created. Error: {err}"
@@ -49,7 +49,7 @@ class MediaFileManagerInsertError(MediaFileManagerError):
 
 class MediaFileManagerUpdateError(MediaFileManagerError):
     """
-    Raised when MediaFileManager could not update a file
+    Raised when MediaFilesManager could not update a file
     """
     def __init__(self, err: str):
         self.message = f"File could not be updated. Error: {err}"
@@ -58,7 +58,7 @@ class MediaFileManagerUpdateError(MediaFileManagerError):
 
 class MediaFileManagerDeleteError(MediaFileManagerError):
     """
-    Raised when MediaFileManager could not delete a file
+    Raised when MediaFilesManager could not delete a file
     """
     def __init__(self, err: str):
         self.message = f"File could not be deleted. Error: {err}"

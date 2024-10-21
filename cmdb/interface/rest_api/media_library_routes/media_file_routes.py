@@ -19,7 +19,7 @@ import logging
 from bson import json_util
 from flask import abort, request, Response
 
-from cmdb.manager.media_file_manager import MediaFileManager
+from cmdb.manager.media_files_manager import MediaFilesManager
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required, right_required
 from cmdb.user_management.models.user import UserModel
@@ -58,12 +58,13 @@ def get_file_list(params: CollectionParameters, request_user: UserModel):
     Returns:
         list of files
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
         metadata = generate_collection_parameters(params=params)
         response_query = {'limit': params.limit, 'skip': params.skip, 'sort': [(params.sort, params.order)]}
-        output = media_file_manager.get_many(metadata, **response_query)
+        output = media_files_manager.get_many_media_files(metadata, **response_query)
         api_response = GetMultiResponse(output.result, total=output.total, params=params, url=request.url)
     except MediaFileManagerGetError:
         #TODO: ERROR-FIX
@@ -108,7 +109,8 @@ def add_new_file(request_user: UserModel):
     Returns:
         New MediaFile.
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
         file = get_file_in_request('file')
@@ -117,12 +119,12 @@ def add_new_file(request_user: UserModel):
         metadata = get_element_from_data_request('metadata', request)
 
         # Check if file exists
-        is_exist_file = media_file_manager.exist_file(filter_metadata)
+        file_exists = media_files_manager.file_exists(filter_metadata)
         exist = None
 
-        if is_exist_file:
-            exist = media_file_manager.get_file(filter_metadata)
-            media_file_manager.delete_file(exist['public_id'])
+        if file_exists:
+            exist = media_files_manager.get_file(filter_metadata)
+            media_files_manager.delete_file(exist['public_id'])
 
         # If file exist overwrite the references from previous file
         if exist:
@@ -131,7 +133,7 @@ def add_new_file(request_user: UserModel):
         metadata['author_id'] = request_user.public_id
         metadata['mime_type'] = file.mimetype
 
-        result = media_file_manager.insert_file(data=file, metadata=metadata)
+        result = media_files_manager.insert_file(data=file, metadata=metadata)
     except (MediaFileManagerInsertError, MediaFileManagerGetError):
         #TODO: ERROR-FIX
         return abort(500)
@@ -176,14 +178,15 @@ def update_file(request_user: UserModel):
     Returns: MediaFile as JSON
 
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
         add_data_dump = json.dumps(request.json)
         new_file_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
         reference_attachment = json.loads(request.args.get('attachment'))
 
-        data = media_file_manager.get_file(metadata={'public_id': new_file_data['public_id']})
+        data = media_files_manager.get_file(metadata={'public_id': new_file_data['public_id']})
         data['public_id'] = new_file_data['public_id']
         data['filename'] = new_file_data['filename']
         data['metadata'] = new_file_data['metadata']
@@ -192,10 +195,10 @@ def update_file(request_user: UserModel):
         # Check if file / folder exist in folder
         if not reference_attachment['reference']:
             checker = {'filename': new_file_data['filename'], 'metadata.parent': new_file_data['metadata']['parent']}
-            copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_file_manager)
+            copied_name = create_attachment_name(new_file_data['filename'], 0, checker, media_files_manager)
             data['filename'] = copied_name
 
-        media_file_manager.updata_file(data)
+        media_files_manager.update_file(data)
     except MediaFileManagerUpdateError:
         #TODO: ERROR-FIX
         return abort(500)
@@ -220,13 +223,15 @@ def get_file(filename: str, request_user: UserModel):
 
     Returns: MediaFile as JSON
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
-        if media_file_manager.exist_file(filter_metadata):
-            result = media_file_manager.get_file(metadata=filter_metadata)
+
+        if media_files_manager.file_exists(filter_metadata):
+            result = media_files_manager.get_file(metadata=filter_metadata)
         else:
             result = None
     except MediaFileManagerGetError:
@@ -252,12 +257,13 @@ def download_file(filename: str, request_user: UserModel):
 
     Returns: File
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
         filter_metadata = generate_metadata_filter('metadata', request)
         filter_metadata.update({'filename': filename})
-        result = media_file_manager.get_file(metadata=filter_metadata, blob=True)
+        result = media_files_manager.get_file(metadata=filter_metadata, blob=True)
     except MediaFileManagerGetError:
         #TODO: ERROR-FIX
         return abort(500)
@@ -291,14 +297,15 @@ def delete_file(public_id: int, request_user: UserModel):
     Returns:
          Delete result with the deleted File as JSON.
     """
-    media_file_manager: MediaFileManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILE_MANAGER, request_user)
+    media_files_manager: MediaFilesManager = ManagerProvider.get_manager(ManagerType.MEDIA_FILES_MANAGER,
+                                                                         request_user)
 
     try:
-        file_to_delete = media_file_manager.get_file(metadata={'public_id': public_id})
+        file_to_delete = media_files_manager.get_file(metadata={'public_id': public_id})
 
         if file_to_delete:
-            for _id in recursive_delete_filter(public_id, media_file_manager):
-                media_file_manager.delete_file(_id)
+            for _id in recursive_delete_filter(public_id, media_files_manager):
+                media_files_manager.delete_file(_id)
     except MediaFileManagerDeleteError as err:
         #TODO: ERROR-FIX
         LOGGER.debug("[delete_file] MediaFileManagerDeleteError: %s", err)

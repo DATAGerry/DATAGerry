@@ -25,9 +25,9 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.users_manager import UsersManager
-from cmdb.manager.setting_manager import UserSettingsManager
+from cmdb.manager.users_settings_manager import UsersSettingsManager
 from cmdb.manager.groups_manager import GroupsManager
-from cmdb.manager.media_file_manager import MediaFileManager
+from cmdb.manager.media_files_manager import MediaFilesManager
 from cmdb.manager.exportd_log_manager import ExportdLogManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
@@ -52,9 +52,9 @@ class ManagerType(Enum):
     LOGS_MANAGER = 'LogsManager'
     DOCAPI_TEMPLATES_MANAGER = 'DocapiTemplatesManager'
     USERS_MANAGER = 'UsersManager'
-    USER_SETTINGS_MANAGER = 'UserSettingsManager'
+    USERS_SETTINGS_MANAGER = 'UsersSettingsManager'
     GROUPS_MANAGER = 'GroupsManager'
-    MEDIA_FILE_MANAGER = 'MediaFileManager'
+    MEDIA_FILES_MANAGER = 'MediaFilesManager'
     EXPORTD_LOG_MANAGER = 'ExportdLogManager'
     TYPES_MANAGER = 'TypesManager'
     LOCATIONS_MANAGER = 'LocationsManager'
@@ -88,9 +88,9 @@ class ManagerProvider:
             ManagerType.LOGS_MANAGER: LogsManager,
             ManagerType.DOCAPI_TEMPLATES_MANAGER: DocapiTemplatesManager,
             ManagerType.USERS_MANAGER: UsersManager,
-            ManagerType.USER_SETTINGS_MANAGER: UserSettingsManager,
+            ManagerType.USERS_SETTINGS_MANAGER: UsersSettingsManager,
             ManagerType.GROUPS_MANAGER: GroupsManager,
-            ManagerType.MEDIA_FILE_MANAGER: MediaFileManager,
+            ManagerType.MEDIA_FILES_MANAGER: MediaFilesManager,
             ManagerType.EXPORTD_LOG_MANAGER: ExportdLogManager,
             ManagerType.TYPES_MANAGER: TypesManager,
             ManagerType.LOCATIONS_MANAGER: LocationsManager,
@@ -138,8 +138,8 @@ class ManagerProvider:
             if manager_type in [
                 ManagerType.GROUPS_MANAGER,
                 ManagerType.USERS_MANAGER,
-                ManagerType.USER_SETTINGS_MANAGER,
-                ManagerType.MEDIA_FILE_MANAGER,
+                ManagerType.USERS_SETTINGS_MANAGER,
+                ManagerType.MEDIA_FILES_MANAGER,
                 ManagerType.EXPORTD_LOG_MANAGER,
                 ManagerType.TYPES_MANAGER,
                 ManagerType.EXPORT_D_LOG_MANAGER,

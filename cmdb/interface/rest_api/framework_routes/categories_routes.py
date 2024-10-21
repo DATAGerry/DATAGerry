@@ -69,8 +69,9 @@ def insert_category(data: dict, request_user: UserModel):
     data.setdefault('creation_time', datetime.now(timezone.utc))
 
     try:
-        result_id: int = categories_manager.insert(data)
-        new_category = categories_manager.get_one(result_id)
+        result_id: int = categories_manager.insert_category(data)
+        #TODO: MANAGER-FIX (Need function for this)
+        new_category = categories_manager.get_category(result_id)
     except ManagerGetError as err:
         LOGGER.debug("[insert_category] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the created categeory from database!").response()
@@ -158,7 +159,8 @@ def get_category(public_id: int, request_user: UserModel):
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     try:
-        category_instance = categories_manager.get_one(public_id)
+        #TODO: MANAGER-FIX (function required)
+        category_instance = categories_manager.get_category(public_id)
     except ManagerGetError as err:
         LOGGER.debug("[get_category] ManagerGetError: %s", err.message)
         return ErrorMessage(404, "Could not retrieve the requested categeory from database!").response()
@@ -192,7 +194,8 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
 
     try:
         category = CategoryModel.from_data(data)
-        categories_manager.update({'public_id':public_id}, CategoryModel.to_json(category))
+        #TODO: MANAGER-FIX (function required)
+        categories_manager.update_category(public_id, category)
 
         api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
     except ManagerUpdateError as err:
@@ -221,8 +224,8 @@ def delete_category(public_id: int, request_user: UserModel):
     categories_manager: CategoriesManager = ManagerProvider.get_manager(ManagerType.CATEGORIES_MANAGER, request_user)
 
     try:
-        category_instance = categories_manager.get_one(public_id)
-        categories_manager.delete({'public_id':public_id})
+        category_instance = categories_manager.get_category(public_id)
+        categories_manager.delete_category(public_id)
 
         # Update 'parent' attribute on direct children
         categories_manager.reset_children_categories(public_id)

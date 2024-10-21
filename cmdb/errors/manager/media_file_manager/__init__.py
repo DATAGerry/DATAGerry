@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module provides all errors for the MediaFileManager
+This module provides all errors for the MediaFilesManager
 """
 from .media_file_manager_errors import MediaFileManagerGetError,\
                                        MediaFileManagerInsertError,\

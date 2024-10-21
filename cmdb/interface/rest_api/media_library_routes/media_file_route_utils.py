@@ -17,14 +17,14 @@
 import json
 import logging
 from typing import Union
-
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.wrappers import Request
 
+from cmdb.manager.media_files_manager import MediaFilesManager
+
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.manager.media_file_manager import MediaFileManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -100,7 +100,8 @@ def generate_collection_parameters(params: CollectionParameters):
     return generate_metadata_filter('metadata', params=param)
 
 
-def create_attachment_name(name, index, metadata, media_file_manager):
+#TODO: ANNOTATION-FIX
+def create_attachment_name(name, index, metadata, media_files_manager):
     """ This method checks whether the current file name already exists in the directory.
         If this is the case, 'copy_(index)_' is appended as a prefix. method is executed recursively.
 
@@ -108,32 +109,32 @@ def create_attachment_name(name, index, metadata, media_file_manager):
             name (str): filename of the File
             index (int): counter
             metadata (dict): Metadata for filtering Files from Database
-            media_file_manager (MediaFileManager): Manager
+            media_file_manager (MediaFilesManager): Manager
         Returns:
          New Filename with 'copy_(index)_' - prefix.
     """
     try:
-        if media_file_manager.exist_file(metadata):
+        if media_files_manager.file_exists(metadata):
             index += 1  
             name = name.replace(f'copy_({index-1})_', '')
             name = f'copy_({index})_{name}'
             metadata['filename'] = name
 
-            return create_attachment_name(name, index, metadata, media_file_manager)
+            return create_attachment_name(name, index, metadata, media_files_manager)
 
         return name
     except Exception as err:
         raise Exception(err) from err
 
 
-def recursive_delete_filter(public_id: int, media_file_manager: MediaFileManager, _ids=None) -> list:
+def recursive_delete_filter(public_id: int, media_files_manager: MediaFilesManager, _ids=None) -> list:
     """ This method deletes a file in the specified section of the document for storing workflow data.
         Any existing value that matches the file name and metadata is deleted. Before saving a value.
         GridFS document under the specified key is deleted.
 
         Args:
             public_id (int): Public ID of the File
-            media_file_manager (MediaFileManager): Manager
+            media_files_manager (MediaFilesManager): Manager
             _ids (list(int): List of IDs of the Files
         Returns:
          List of deleted public_id.
@@ -141,11 +142,11 @@ def recursive_delete_filter(public_id: int, media_file_manager: MediaFileManager
     if not _ids:
         _ids = []
 
-    root = media_file_manager.get_many(metadata={'public_id': public_id}).result[0]
-    output = media_file_manager.get_many(metadata={'metadata.parent': root['public_id']})
+    root = media_files_manager.get_many_media_files(metadata={'public_id': public_id}).result[0]
+    output = media_files_manager.get_many_media_files(metadata={'metadata.parent': root['public_id']})
     _ids.append(root['public_id'])
 
     for item in output.result:
-        recursive_delete_filter(item['public_id'], media_file_manager, _ids)
+        recursive_delete_filter(item['public_id'], media_files_manager, _ids)
 
     return _ids
