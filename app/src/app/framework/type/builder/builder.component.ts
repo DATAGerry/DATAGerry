@@ -155,8 +155,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     ngOnInit(): void {
-        const fieldNames = this.typeInstance.fields.map(field => field.name);
-        this.fieldIdentifierValidation.addFieldNames(fieldNames);
+        this.refreshFieldIdentifiers();
         this.updateHighlightState();
     }
 
@@ -438,10 +437,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             }
         }
 
-        this.fieldIdentifierValidation.clearFieldNames();
-        const fieldNames = this.typeInstance.fields.map(field => field.name);
-        this.fieldIdentifierValidation.addFieldNames(fieldNames);
-
+        this.refreshFieldIdentifiers();
         this.updateHighlightState();
     }
 
@@ -530,9 +526,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.typeInstance.fields = [...this.typeInstance.fields];
         this.validationService.setIsValid(updatedDraggedFieldName, true)
 
-        this.fieldIdentifierValidation.clearFieldNames();
-        const fieldNames = this.typeInstance.fields.map(field => field.name);
-        this.fieldIdentifierValidation.addFieldNames(fieldNames);
+        this.refreshFieldIdentifiers();
+        this.updateHighlightState();
+
     }
 
 
@@ -545,6 +541,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             this.sections = list;
             this.typeInstance.render_meta.sections = [...this.sections];
             this.sectionIdentifierService.updateSectionIndexes(this.onSectionMoveIndex, this.eventIndex);
+            this.updateHighlightState();
+            this.refreshFieldIdentifiers();
+
         }
     }
 
@@ -586,6 +585,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             this.typeInstance.render_meta.sections.splice(index, 1);
             this.typeInstance.render_meta.sections = [...this.typeInstance.render_meta.sections];
 
+            this.updateHighlightState()
+            this.refreshFieldIdentifiers()
+
             this.validationService.setSectionValid(item.name, true);
         }
     }
@@ -594,7 +596,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public removeField(item: any, section: CmdbTypeSection) {
         const indexField: number = this.typeInstance.fields.indexOf(item);
         let removedFieldName = this.typeInstance.fields[indexField].name;
-
         if (indexField > -1) {
             this.typeInstance.fields.splice(indexField, 1);
             this.typeInstance.fields = [...this.typeInstance.fields];
@@ -614,6 +615,9 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         if (!numberOfFields) {
             this.validationService.setSectionValid(section.name, false);
         }
+
+        this.updateHighlightState()
+        this.refreshFieldIdentifiers()
     }
 
 
@@ -626,11 +630,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     public isConfigEditDisabled(sectionIndex: number, fieldIndex: number): boolean {
         // If disableFields is true, disable all fields except the activeDuplicateField
         if (this.disableFields) {
+            this.validationService.setDisableFields(true)
             return !(
                 this.activeDuplicateField?.sectionIndex === sectionIndex &&
                 this.activeDuplicateField?.fieldIndex === fieldIndex
             );
         }
+        this.validationService.setDisableFields(false)
+
         // If no active duplicate, all components are enabled
         return false;
     }
@@ -658,6 +665,32 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
         // If the section has issues or any of its fields are invalid, highlight the section
         return hasSectionIssues || hasInvalidFields;
+    }
+
+    /**
+     * Determines if a field should be highlighted based on its properties.
+     * Checks for invalid identifiers, missing labels, and reference fields with invalid reference types.
+     * @param field - The field to check for highlighting.
+     * @param sectionfields - The list of all section fields for checking duplicate names.
+     * @returns boolean - Returns true if the field should be highlighted, false otherwise.
+     */
+    public isFieldHighlighted(field: any, sectionfields: any): boolean {
+        // Ensure field is a valid object (not null, undefined, or a primitive)
+        if (!field || typeof field !== 'object') {
+            return false;
+        }
+        const isRefField = field.type === "ref";
+        const hasInvalidIdentifier = !field.name || sectionfields.filter(s => s.name === field.name).length > 1;
+        const hasValidRefTypes = field && 'ref_types' in field && Array.isArray(field.ref_types) && field.ref_types.length > 0;
+
+        if (hasInvalidIdentifier || isRefField || !field.label) {
+            if (isRefField) {
+                return !hasValidRefTypes || hasInvalidIdentifier || !field.label;
+            }
+            return true;
+        }
+
+        return false;
     }
 
 
@@ -690,34 +723,6 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             event.preventDefault();   // Prevent dragging behavior
         }
     }
-
-
-    /**
-     * Determines if a field should be highlighted based on its properties.
-     * Checks for invalid identifiers, missing labels, and reference fields with invalid reference types.
-     * @param field - The field to check for highlighting.
-     * @param sectionfields - The list of all section fields for checking duplicate names.
-     * @returns boolean - Returns true if the field should be highlighted, false otherwise.
-     */
-    public isFieldHighlighted(field: any, sectionfields: any): boolean {
-        // Ensure field is a valid object (not null, undefined, or a primitive)
-        if (!field || typeof field !== 'object') {
-            return false;
-        }
-        const isRefField = field.type === "ref";
-        const hasInvalidIdentifier = !field.name || sectionfields.filter(s => s.name === field.name).length > 1;
-        const hasValidRefTypes = field && 'ref_types' in field && Array.isArray(field.ref_types) && field.ref_types.length > 0;
-
-        if (hasInvalidIdentifier || isRefField || !field.label) {
-            if (isRefField) {
-                return !hasValidRefTypes || hasInvalidIdentifier || !field.label;
-            }
-            return true;
-        }
-
-        return false;
-    }
-
 
 
     /**
@@ -791,6 +796,17 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             return false;
         }
         return !emptyFields.some(emptyField => emptyField.sectionIndex === sectionIndex && emptyField.fieldIndex === fieldIndex);
+    }
+
+
+    /**
+     * Refreshes the list of field identifiers by clearing existing field names
+     * and adding the current field names from the type instance.
+     */
+    refreshFieldIdentifiers(): void {
+        this.fieldIdentifierValidation.clearFieldNames();
+        const fieldNames = this.typeInstance.fields.map(field => field.name);
+        this.fieldIdentifierValidation.addFieldNames(fieldNames);
     }
 
 

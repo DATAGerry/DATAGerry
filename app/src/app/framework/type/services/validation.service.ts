@@ -28,6 +28,9 @@ export class ValidationService {
     private isFieldHighlightedSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     isFieldHighlighted$: Observable<boolean> = this.isFieldHighlightedSubject.asObservable();
 
+    private disableFieldsSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    disableFields$: Observable<boolean> = this.disableFieldsSubject.asObservable();
+
     /**
      * Sets the validity of a specific field.
      * Updates the overall form validity based on the validity of all fields.
@@ -151,6 +154,14 @@ export class ValidationService {
      */
     getFieldHighlightState(): boolean {
         return this.isFieldHighlightedSubject.getValue();
+    }
+
+    /**
+     * Sets the value for disabling fields.
+     * @param value - true to disable fields, false to enable.
+     */
+    setDisableFields(value: boolean): void {
+        this.disableFieldsSubject.next(value);
     }
 
 }

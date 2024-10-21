@@ -111,7 +111,7 @@
             type="button"
             class="btn btn-block btn-success mt-2"
             (click)="saveType()"
-            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid || !isLabelValid || !isNameValid || !(isValid$ | async) || !(isSectionValid$ | async) || !isIdentifierValid"
+            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid || !isLabelValid || !isNameValid || isSectionHighlighted || isFieldHighlighted || disableFields"
         >
             Save
         </button>
