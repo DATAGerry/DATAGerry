@@ -33,7 +33,6 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
@@ -63,7 +62,6 @@ class SectionTemplatesManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
-        self.query_builder = BaseQueryBuilder()
         self.types_manager = TypesManager(dbm)
         self.objects_manager = ObjectsManager(dbm)
 

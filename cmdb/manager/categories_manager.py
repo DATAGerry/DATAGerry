@@ -33,8 +33,10 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerGetError,\
                                 ManagerIterationError,\
-                                ManagerUpdateError
+                                ManagerUpdateError,\
+                                ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -102,6 +104,15 @@ class CategoriesManager(BaseManager):
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
+    def get_category(self, public_id: int):
+        """TODO: document"""
+        try:
+            return self.get_one(public_id)
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerGetError(str(err)) from err
+
+
     def iterate(self,
                 builder_params: BuilderParameters,
                 user: UserModel = None,
@@ -152,12 +163,31 @@ class CategoriesManager(BaseManager):
         """
         try:
             categories_count = self.count_documents(self.collection)
-        except ManagerGetError as err:
+        except Exception as err:
             #TODO: ERROR-FIX (CategoriesManagerGetError)
             raise ManagerGetError(err) from err
 
         return categories_count
 
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
+
+    def update_category(self, public_id:int, data: dict):
+        """TODO: document"""
+        try:
+            self.update({'public_id':public_id}, CategoryModel.to_json(data))
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerUpdateError(str(err)) from err
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
+
+    def delete_category(self, public_id: int):
+        """TODO: document"""
+        try:
+            return self.delete({'public_id':public_id})
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerDeleteError(str(err)) from err
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 

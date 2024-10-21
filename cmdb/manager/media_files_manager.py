@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 from gridfs.grid_file import GridOutCursor, GridOut
 from gridfs.errors import NoFile
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.base_manager import BaseManager
 
 from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.media_library.media_file import MediaFile
@@ -35,23 +35,44 @@ from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                               MediaFileManager - CLASS                                               #
+#                                               MediaFilesManager - CLASS                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
-class MediaFileManager(CmdbManagerBase):
+class MediaFilesManager(BaseManager):
     """TODO: document"""
-    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         if database:
-            database_manager.connector.set_database(database)
+            dbm.connector.set_database(database)
 
-        self.dbm = database_manager
-        self.fs = DatabaseGridFS(self.dbm.connector.database, MediaFile.COLLECTION)
+        self.fs = DatabaseGridFS(dbm.connector.database, MediaFile.COLLECTION)
+        super().__init__(MediaFile.COLLECTION, dbm)
 
-        super().__init__(database_manager)
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
+    def insert_file(self, data, metadata):
+        """
+        Insert new MediaFile Object
+        Args:
+            data: init media_file
+            metadata: a set of data that describes and gives information about other data.
+        Returns:
+            New MediaFile in database
+        """
+        try:
+            with self.fs.new_file(filename=data.filename) as media_file:
+                media_file.write(data)
+                media_file.public_id = self.get_new_media_file_id()
+                media_file.metadata = FileMetadata(**metadata).__dict__
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise MediaFileManagerInsertError(str(err)) from err
 
-    def get_new_id(self, collection: str) -> int:
+        return media_file._file
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def get_new_media_file_id(self) -> int:
         """TODO: document"""
-        return self.dbm.get_next_public_id(collection)
+        return self.get_next_public_id()
 
 
     def get_file(self, metadata: dict, blob: bool = False) -> GridOut:
@@ -66,7 +87,7 @@ class MediaFileManager(CmdbManagerBase):
         return result.read() if blob else result._file
 
 
-    def get_many(self, metadata, **params: dict):
+    def get_many_media_files(self, metadata, **params: dict):
         """TODO: document"""
         try:
             results = []
@@ -83,36 +104,29 @@ class MediaFileManager(CmdbManagerBase):
         return GridFsResponse(results, records_total)
 
 
-    def insert_file(self, data, metadata):
+    def file_exists(self, filter_metadata) -> bool:
         """
-        Insert new MediaFile Object
+        Check is MediaFile Object exist
         Args:
-            data: init media_file
-            metadata: a set of data that describes and gives information about other data.
+            filter_metadata: Metadata as filter
         Returns:
-            New MediaFile in database
+            bool: If exist return true else false
         """
-        try:
-            with self.fs.new_file(filename=data.filename) as media_file:
-                media_file.write(data)
-                media_file.public_id = self.get_new_id(MediaFile.COLLECTION)
-                media_file.metadata = FileMetadata(**metadata).__dict__
-        except Exception as err:
-            #TODO: ERROR-FIX
-            raise MediaFileManagerInsertError(str(err)) from err
+        return self.fs.exists(**filter_metadata)
 
-        return media_file._file
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-
-    def updata_file(self, data):
+    def update_file(self, data):
         """TODO: document"""
         try:
             data['uploadDate'] = datetime.now(timezone.utc)
-            self._update(collection='media.libary.files', public_id=data['public_id'], data=data)
+            self.update(criteria={'public_id':data['public_id']}, data=data)
         except Exception as err:
             raise MediaFileManagerUpdateError(f"Could not update file. Error: {err}") from err
+
         return data
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
     def delete_file(self, public_id) -> bool:
         """
@@ -130,17 +144,6 @@ class MediaFileManager(CmdbManagerBase):
             raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from err
 
         return True
-
-
-    def exist_file(self, filter_metadata) -> bool:
-        """
-        Check is MediaFile Object exist
-        Args:
-            filter_metadata: Metadata as filter
-        Returns:
-            bool: If exist return true else false
-        """
-        return self.fs.exists(**filter_metadata)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

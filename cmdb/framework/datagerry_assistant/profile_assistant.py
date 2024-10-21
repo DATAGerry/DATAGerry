@@ -127,10 +127,10 @@ class ProfileAssistant:
             all_type_ids (dict): All created type_ids from the assistant
         """
         all_categories: list[dict] = self.get_all_categories(all_type_ids)
-        category_manager = CategoriesManager(current_app.database_manager)
+        categories_manager = CategoriesManager(current_app.database_manager)
 
         for i, category in enumerate(all_categories):
-            category_manager.insert(category)
+            categories_manager.insert_category(category)
 
 
     def get_all_categories(self, all_type_ids: dict) -> list[dict]:
