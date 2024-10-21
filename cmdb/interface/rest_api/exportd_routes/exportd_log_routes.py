@@ -17,6 +17,9 @@
 import logging
 from flask import abort, jsonify, request
 
+from cmdb.manager.exportd_logs_manager import ExportdLogsManager
+from cmdb.manager.exportd_jobs_manager import ExportdJobsManager
+
 from cmdb.exportd.exportd_logs.exportd_log import ExportdJobLog, LogAction, ExportdMetaLog
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -24,6 +27,7 @@ from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
 from cmdb.interface.route_utils import make_response, login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
@@ -46,15 +50,13 @@ def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
     """Iterate route for exportd logs"""
     body = request.method == 'HEAD'
 
-    logd_manager = ManagerProvider.get_manager(ManagerType.EXPORT_D_LOG_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
+
+    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
     try:
-        iteration_result: IterationResult[ExportdJobLog] = logd_manager.iterate(
-                                                                filter=params.filter,
-                                                                limit=params.limit,
-                                                                skip=params.skip,
-                                                                sort=params.sort,
-                                                                order=params.order)
+        iteration_result: IterationResult[ExportdJobLog] = exportd_logs_manager.iterate(builder_params)
 
         types = [ExportdJobLog.to_json(type) for type in iteration_result.results]
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
@@ -79,10 +81,11 @@ def get_log_list(request_user: UserModel):
     Returns:
         list of exportd logs
     """
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
 
     try:
-        log_list = log_manager.get_all_logs()
+        log_list = exportd_logs_manager.get_all_logs()
     except ObjectManagerGetError as err:
         #TODO: ERROR-FIX
         LOGGER.debug("[get_log_list] ObjectManagerGetError: %s", err.message)
@@ -105,10 +108,11 @@ def get_log_list(request_user: UserModel):
 @right_required('base.exportd.log.delete')
 def delete_log(public_id: int, request_user: UserModel):
     """TODO: document"""
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
 
     try:
-        delete_ack = log_manager.delete_log(public_id=public_id)
+        delete_ack = exportd_logs_manager.delete_log(public_id)
     except ExportdLogManagerDeleteError:
         #TODO: ERROR-FIX
         return abort(500)
@@ -123,10 +127,11 @@ def delete_log(public_id: int, request_user: UserModel):
 @right_required('base.exportd.log.view')
 def get_logs_by_jobs(public_id: int, request_user: UserModel):
     """TODO: document"""
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
 
     try:
-        object_logs = log_manager.get_exportd_job_logs(public_id=public_id)
+        object_logs = exportd_logs_manager.get_exportd_job_logs(public_id=public_id)
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_logs_by_jobs] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -144,8 +149,10 @@ def get_logs_by_jobs(public_id: int, request_user: UserModel):
 @right_required('base.exportd.log.view')
 def get_logs_with_existing_objects(request_user: UserModel):
     """TODO: document"""
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
-    exportd_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOB_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
+    exportd_jobs_manager: ExportdJobsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOBS_MANAGER,
+                                                                            request_user)
 
     existing_list = []
     deleted_list = []
@@ -158,7 +165,7 @@ def get_logs_with_existing_objects(request_user: UserModel):
                 '$ne': LogAction.DELETE.name
             }
         }
-        object_logs = log_manager.get_logs_by(**query)
+        object_logs = exportd_logs_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_logs_with_existing_objects] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -175,7 +182,7 @@ def get_logs_with_existing_objects(request_user: UserModel):
             continue
         else:
             try:
-                exportd_manager.get_job(current_object_id)
+                exportd_jobs_manager.get_job(current_object_id)
                 existing_list.append(current_object_id)
                 passed_objects.append(log)
             except (ObjectManagerGetError, Exception):
@@ -195,8 +202,10 @@ def get_logs_with_existing_objects(request_user: UserModel):
 @right_required('base.exportd.log.view')
 def get_logs_with_deleted_objects(request_user: UserModel):
     """TODO: document"""
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
-    exportd_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOB_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
+    exportd_jobs_manager: ExportdJobsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_JOBS_MANAGER,
+                                                                            request_user)
 
     existing_list = []
     deleted_list = []
@@ -209,7 +218,7 @@ def get_logs_with_deleted_objects(request_user: UserModel):
                 '$ne': LogAction.DELETE.name
             }
         }
-        object_logs = log_manager.get_logs_by(**query)
+        object_logs = exportd_logs_manager.get_logs_by(**query)
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_logs_with_deleted_objects] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -227,7 +236,7 @@ def get_logs_with_deleted_objects(request_user: UserModel):
             continue
         else:
             try:
-                exportd_manager.get_job(current_object_id)
+                exportd_jobs_manager.get_job(current_object_id)
                 existing_list.append(current_object_id)
             except (ObjectManagerGetError, Exception):
                 deleted_list.append(current_object_id)
@@ -247,14 +256,15 @@ def get_logs_with_deleted_objects(request_user: UserModel):
 @right_required('base.exportd.log.view')
 def get_job_delete_logs(request_user: UserModel):
     """TODO: document"""
-    log_manager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOG_MANAGER, request_user)
+    exportd_logs_manager: ExportdLogsManager = ManagerProvider.get_manager(ManagerType.EXPORTD_LOGS_MANAGER,
+                                                                           request_user)
 
     try:
         query = {
             'log_type': ExportdJobLog.__name__,
             'action': LogAction.DELETE.name
         }
-        object_logs = log_manager.get_logs_by(**query)
+        object_logs = exportd_logs_manager.get_logs_by(**query)
     except (ObjectManagerGetError, Exception) as err:
         LOGGER.debug("[get_job_delete_logs] ObjectManagerGetError: %s", err.message)
         return abort(404)

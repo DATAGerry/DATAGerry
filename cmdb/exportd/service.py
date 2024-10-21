@@ -21,17 +21,17 @@ from threading import Thread
 from datetime import datetime, timezone
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.manager.exportd_job_manager import ExportdJobManager
+from cmdb.manager.exportd_jobs_manager import ExportdJobsManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.users_manager import UsersManager
-from cmdb.manager.exportd_log_manager import ExportdLogManager
+from cmdb.manager.exportd_logs_manager import ExportdLogsManager
 
 import cmdb.process_management.service
 import cmdb.exportd.exporter_base
 from cmdb.event_management.event import Event
 from cmdb.exportd.exportd_job.exportd_job import ExecuteState
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.manager.exportd_log_manager import LogAction, ExportdJobLog
+from cmdb.exportd.exportd_logs.exportd_log import LogAction, ExportdJobLog
 
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -141,8 +141,8 @@ class ExportdThread(Thread):
         self.is_active = state
         self.exception_handling = None
 
-        self.log_manager = ExportdLogManager(database)
-        self.exportd_job_manager = ExportdJobManager(database)
+        self.exportd_logs_manager = ExportdLogsManager(database)
+        self.exportd_jobs_manager = ExportdJobsManager(database)
         self.users_manager = UsersManager(database)
         self.objects_manager = ObjectsManager(database)
 
@@ -151,13 +151,13 @@ class ExportdThread(Thread):
         """TODO: document"""
         try:
             if self.type_id:
-                for obj in self.exportd_job_manager.get_job_by_event_based(True):
+                for obj in self.exportd_jobs_manager.get_job_by_event_based(True):
                     if next((item for item in obj.get_sources() if item["type_id"] == self.type_id), None):
                         if obj.get_active() and obj.scheduling["event"]["active"]:
                             self.job = obj
                             self.worker()
             elif self.is_active:
-                self.job = self.exportd_job_manager.get_job(self.job_id)
+                self.job = self.exportd_jobs_manager.get_job(self.job_id)
                 self.worker()
         except Exception as ex:
             LOGGER.error(ex)
@@ -175,10 +175,11 @@ class ExportdThread(Thread):
             # get current user
             cur_user = self.users_manager.get_user(self.user_id)
 
-            self.exportd_job_manager.update_job(self.job, self.users_manager.get_user(self.user_id), event_start=False)
+            self.exportd_jobs_manager.update_job(self.job, self.users_manager.get_user(self.user_id), event_start=False)
             # execute Exportd job
-            job = cmdb.exportd.exporter_base.ExportdManagerBase(job=self.job, event=self.event,
-                                                                log_manager=self.log_manager,
+            job = cmdb.exportd.exporter_base.ExportdManagerBase(job=self.job,
+                                                                event=self.event,
+                                                                exportd_logs_manager=self.exportd_logs_manager,
                                                                 objects_manager=self.objects_manager)
             job.execute(cur_user.get_public_id(), cur_user.get_display_name())
 
@@ -195,13 +196,15 @@ class ExportdThread(Thread):
                     'event': self.event.get_type(),
                     'message': ['Successful'] if not err else err.args,
                 }
-                self.log_manager.insert_log(action=LogAction.EXECUTE, log_type=ExportdJobLog.__name__, **log_params)
+                self.exportd_logs_manager.insert_log(action=LogAction.EXECUTE,
+                                                     log_type=ExportdJobLog.__name__,
+                                                     **log_params)
             except ExportdLogManagerInsertError as error:
                 #TODO: ERROR-FIX
                 LOGGER.error(error)
         finally:
             # update job for UI
             self.job.state = ExecuteState.SUCCESSFUL.name if not self.exception_handling else ExecuteState.FAILED.name
-            self.exportd_job_manager.update_job(self.job,
-                                                self.users_manager.get_user(self.user_id),
-                                                event_start=False)
+            self.exportd_jobs_manager.update_job(self.job,
+                                                 self.users_manager.get_user(self.user_id),
+                                                 event_start=False)

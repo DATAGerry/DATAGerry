@@ -15,22 +15,18 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from flask import abort, jsonify, current_app
-
-from cmdb.manager.exportd_job_manager import ExportdJobManager
+from flask import abort, jsonify
 
 from cmdb.utils.helpers import load_class, get_module_classes
 from cmdb.interface.route_utils import make_response, login_required
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
-with current_app.app_context():
-    exportd_manager = ExportdJobManager(current_app.database_manager)
-
 LOGGER = logging.getLogger(__name__)
+
 external_system = RootBlueprint('external_system', __name__, url_prefix='/externalsystem')
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
 # DEFAULT ROUTES
 @external_system.route('/', methods=['GET'])
 @login_required

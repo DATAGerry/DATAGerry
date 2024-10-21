@@ -173,6 +173,22 @@ class BaseManager:
             raise ManagerGetError(err) from err
 
 
+    def find_all(self, *args, **kwargs):
+        """calls find with all returns
+
+        Args:
+            collection (str): name of database collection
+            *args: arguments for search operation
+            **kwargs: key arguments
+
+        Returns:
+            list: list of found documents
+        """
+        found_documents = self.find(collection=self.collection, *args, **kwargs)
+
+        return list(found_documents)
+
+
     def find(self, *args, criteria=None, **kwargs):
         """TODO: document"""
         try:

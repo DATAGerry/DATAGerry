@@ -28,14 +28,12 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.users_settings_manager import UsersSettingsManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.media_files_manager import MediaFilesManager
-from cmdb.manager.exportd_log_manager import ExportdLogManager
+from cmdb.manager.exportd_logs_manager import ExportdLogsManager
+from cmdb.manager.exportd_jobs_manager import ExportdJobsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
-from cmdb.manager.exportd_job_manager import ExportdJobManager
-from cmdb.exportd.managers.exportd_log_manager import ExportDLogManager
-from cmdb.exportd.managers.exportd_job_manager import ExportDJobManager
 
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
@@ -55,14 +53,12 @@ class ManagerType(Enum):
     USERS_SETTINGS_MANAGER = 'UsersSettingsManager'
     GROUPS_MANAGER = 'GroupsManager'
     MEDIA_FILES_MANAGER = 'MediaFilesManager'
-    EXPORTD_LOG_MANAGER = 'ExportdLogManager'
+    EXPORTD_LOGS_MANAGER = 'ExportdLogsManager'
+    EXPORTD_JOBS_MANAGER = 'ExportdJobsManager'
     TYPES_MANAGER = 'TypesManager'
     LOCATIONS_MANAGER = 'LocationsManager'
     SECTION_TEMPLATES_MANAGER = 'SectionTemplatesManager'
     OBJECT_LINKS_MANAGER = 'ObjectLinksManager'
-    EXPORTD_JOB_MANAGER = 'ExportdJobManager'
-    EXPORT_D_LOG_MANAGER = 'ExportDLogManager'
-    EXPORT_D_JOB_MANAGER = 'ExportDJobManager'
     SYSTEM_SETTINGS_READER = 'SystemSettingsReader'
     SYSTEM_SETTINGS_WRITER = 'SystemSettingsWriter'
     SECURITY_MANAGER = 'SecurityManager'
@@ -91,14 +87,12 @@ class ManagerProvider:
             ManagerType.USERS_SETTINGS_MANAGER: UsersSettingsManager,
             ManagerType.GROUPS_MANAGER: GroupsManager,
             ManagerType.MEDIA_FILES_MANAGER: MediaFilesManager,
-            ManagerType.EXPORTD_LOG_MANAGER: ExportdLogManager,
+            ManagerType.EXPORTD_LOGS_MANAGER: ExportdLogsManager,
             ManagerType.TYPES_MANAGER: TypesManager,
             ManagerType.LOCATIONS_MANAGER: LocationsManager,
             ManagerType.SECTION_TEMPLATES_MANAGER: SectionTemplatesManager,
             ManagerType.OBJECT_LINKS_MANAGER: ObjectLinksManager,
-            ManagerType.EXPORTD_JOB_MANAGER: ExportdJobManager,
-            ManagerType.EXPORT_D_LOG_MANAGER: ExportDLogManager,
-            ManagerType.EXPORT_D_JOB_MANAGER: ExportDJobManager,
+            ManagerType.EXPORTD_JOBS_MANAGER: ExportdJobsManager,
             ManagerType.SYSTEM_SETTINGS_READER: SystemSettingsReader,
             ManagerType.SYSTEM_SETTINGS_WRITER: SystemSettingsWriter,
             ManagerType.SECURITY_MANAGER: SecurityManager
@@ -130,7 +124,7 @@ class ManagerProvider:
                 ManagerType.LOCATIONS_MANAGER,
                 ManagerType.SECTION_TEMPLATES_MANAGER,
                 ManagerType.OBJECT_LINKS_MANAGER,
-                ManagerType.EXPORTD_JOB_MANAGER,
+                ManagerType.EXPORTD_JOBS_MANAGER,
             ]:
                 return common_args + (current_app.event_queue, request_user.database)
 
@@ -140,10 +134,8 @@ class ManagerProvider:
                 ManagerType.USERS_MANAGER,
                 ManagerType.USERS_SETTINGS_MANAGER,
                 ManagerType.MEDIA_FILES_MANAGER,
-                ManagerType.EXPORTD_LOG_MANAGER,
+                ManagerType.EXPORTD_LOGS_MANAGER,
                 ManagerType.TYPES_MANAGER,
-                ManagerType.EXPORT_D_LOG_MANAGER,
-                ManagerType.EXPORT_D_JOB_MANAGER,
                 ManagerType.SYSTEM_SETTINGS_READER,
                 ManagerType.SYSTEM_SETTINGS_WRITER,
                 ManagerType.SECURITY_MANAGER
@@ -158,7 +150,7 @@ class ManagerProvider:
                 ManagerType.LOCATIONS_MANAGER,
                 ManagerType.SECTION_TEMPLATES_MANAGER,
                 ManagerType.OBJECT_LINKS_MANAGER,
-                ManagerType.EXPORTD_JOB_MANAGER,
+                ManagerType.EXPORTD_JOBS_MANAGER,
             ]:
                 return common_args + (current_app.event_queue,)
 

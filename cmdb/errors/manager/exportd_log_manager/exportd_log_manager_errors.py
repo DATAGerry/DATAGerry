@@ -14,24 +14,24 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all ExportdLogManager errors
+This module contains the classes of all ExportdLogsManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ExportdLogManagerError(CMDBError):
     """
-    Base ExportdLogManager error
+    Base ExportdLogsManager error
     """
     def __init__(self, message: str):
         self.message = message
         super().__init__(message)
 
-# --------------------------------------------- ExportdLogManager Errors --------------------------------------------- #
+# -------------------------------------------- ExportdLogsManager Errors --------------------------------------------- #
 
 class ExportdLogManagerDeleteError(ExportdLogManagerError):
     """
-    Raised when ExportdLogManager could not delete a ExportdLog
+    Raised when ExportdLogsManager could not delete a ExportdLog
     """
     def __init__(self, err: str):
         self.message = f"ExportdLog could not be deleted. Error: {err}"
@@ -40,7 +40,7 @@ class ExportdLogManagerDeleteError(ExportdLogManagerError):
 
 class ExportdLogManagerInsertError(ExportdLogManagerError):
     """
-    Raised when ExportdLogManager could not create a ExportdLog
+    Raised when ExportdLogsManager could not create a ExportdLog
     """
     def __init__(self, err: str):
         self.message = f"ExportdLog could not be created. Error: {err}"
@@ -49,7 +49,7 @@ class ExportdLogManagerInsertError(ExportdLogManagerError):
 #TODO: ERROR-FIX (never used)
 class ExportdLogManagerGetError(ExportdLogManagerError):
     """
-    Raised when ExportdLogManager could not retrieve a ExportdLog
+    Raised when ExportdLogsManager could not retrieve a ExportdLog
     """
     def __init__(self, err: str):
         self.message = f"ExportdLog could not be retrieved. Error: {err}"
