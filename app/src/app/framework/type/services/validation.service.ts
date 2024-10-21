@@ -31,6 +31,9 @@ export class ValidationService {
     private disableFieldsSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
     disableFields$: Observable<boolean> = this.disableFieldsSubject.asObservable();
 
+    private isSectionWithoutFieldSubject: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+    isSectionWithoutField$: Observable<boolean> = this.isSectionWithoutFieldSubject.asObservable();
+
     /**
      * Sets the validity of a specific field.
      * Updates the overall form validity based on the validity of all fields.
@@ -140,21 +143,15 @@ export class ValidationService {
         this.isFieldHighlightedSubject.next(isHighlighted);
     }
 
-    /**
-     * Retrieves the current highlight state of the section.
-     * @returns The current highlight state of the section.
-     */
-    getSectionHighlightState(): boolean {
-        return this.isSectionHighlightedSubject.getValue();
-    }
 
     /**
-     * Retrieves the current highlight state of the field.
-     * @returns The current highlight state of the field.
+     * Sets the state indicating whether the section is without a field and updates the corresponding subject.
+     * @param isWithoutField - A boolean value indicating if the section is without a field.
      */
-    getFieldHighlightState(): boolean {
-        return this.isFieldHighlightedSubject.getValue();
+    setSectionWithoutFieldState(isWithoutField: boolean): void {
+        this.isSectionWithoutFieldSubject.next(isWithoutField);
     }
+
 
     /**
      * Sets the value for disabling fields.
