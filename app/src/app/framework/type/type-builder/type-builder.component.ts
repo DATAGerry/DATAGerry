@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { AfterContentChecked, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Observable, ReplaySubject, Subscription, takeUntil } from 'rxjs';
@@ -42,7 +42,7 @@ import { SectionIdentifierService } from '../services/SectionIdentifierService.s
     templateUrl: './type-builder.component.html',
     styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit, OnDestroy {
+export class TypeBuilderComponent implements OnInit, OnDestroy, AfterContentChecked {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
     private subscriptions = new Subscription();
@@ -85,6 +85,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
 
     isSectionHighlighted: boolean = false;
     isFieldHighlighted: boolean = false;
+    disableFields: boolean = false
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -104,8 +105,12 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
 
 
-    public ngOnInit(): void {
+    ngAfterContentChecked() {
+        this.changeDetector.detectChanges();
+    }
 
+
+    public ngOnInit(): void {
 
         const sectionHighlightSubscription = this.validationService.isSectionHighlighted$.subscribe((highlighted) => {
             this.isSectionHighlighted = highlighted;
@@ -116,16 +121,21 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             this.isFieldHighlighted = highlighted;
         });
 
+        const disableFieldsSubscription = this.validationService.disableFields$.subscribe((disableFields) => {
+            this.disableFields = disableFields;
+        });
+
         this.subscriptions.add(sectionHighlightSubscription);
         this.subscriptions.add(fieldHighlightSubscription);
+        this.subscriptions.add(disableFieldsSubscription)
 
         this.isValid$ = this.validationService.getIsValid();
         this.isSectionValid$ = this.validationService.overallSectionValidity();
 
-        this.subscription = this.sectionIdentifierService.getIsIdentifierValid().subscribe(isValid => {
-            this.isIdentifierValid = isValid;
+        // this.subscription = this.sectionIdentifierService.getIsIdentifierValid().subscribe(isValid => {
+        //     this.isIdentifierValid = isValid;
 
-        });
+        // });
 
         if (this.mode === CmdbMode.Create) {
             this.typeInstance = new CmdbType();
