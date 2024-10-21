@@ -602,6 +602,11 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Removes a field from the type instance and section, updates the validation state, and refreshes the UI.
+     * @param item - The field item to be removed.
+     * @param section - The section from which the field will be removed.
+     */
     public removeField(item: any, section: CmdbTypeSection) {
         const indexField: number = this.typeInstance.fields.indexOf(item);
 
