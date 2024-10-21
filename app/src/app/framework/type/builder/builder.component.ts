@@ -210,6 +210,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @param event DropEvent containing the section as data
      */
     public onSectionDrop(event: DndDropEvent): void {
+
         event.event.preventDefault;
         let sectionData = event.data;
 
@@ -274,6 +275,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         }
 
         this.validationService.setSectionValid(sectionData.name, sectionData.fields.length > 0);
+        this.updateSectionFieldStatus()
     }
 
 
@@ -483,8 +485,15 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         return -1;
     }
 
-
+    /**
+     * Handles the event when a field is dropped into a section. 
+     * Updates the section field status, checks if the section is global, and processes the drop event.
+     * Adds the dropped field data into the section and updates the type instance metadata.
+     * @param event - The drop event, containing field data and drop effect.
+     * @param section - The section where the field is dropped.
+     */
     public onFieldDrop(event: DndDropEvent, section: CmdbTypeSection) {
+        this.updateSectionFieldStatus()
         if (this.isGlobalSection(section)) {
             return;
         }
@@ -593,9 +602,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     }
 
 
+    /**
+     * Removes a field from the type instance and section, updates the validation state, and refreshes the UI.
+     * @param item - The field item to be removed.
+     * @param section - The section from which the field will be removed.
+     */
     public removeField(item: any, section: CmdbTypeSection) {
         const indexField: number = this.typeInstance.fields.indexOf(item);
-      
+
         if (indexField > -1) {
             let removedFieldName = this.typeInstance.fields[indexField].name;
             this.typeInstance.fields.splice(indexField, 1);
@@ -645,6 +659,27 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
 
     /**
+     * Checks if a section has fields.
+     * @param section - The section to check.
+     * @returns - True if the section has fields, otherwise false.
+     */
+    isSectionHasField(section: any): boolean {
+        return section.fields.length > 0;
+    }
+
+
+    /**
+     * Checks if any section lacks fields and updates the save button status.
+     */
+    updateSectionFieldStatus(): void {
+        const allSectionsHaveFields = this.sections.every(section => section.fields.length > 0);
+
+        // Set the save button disabled state based on section status
+        this.validationService.setSectionWithoutFieldState(allSectionsHaveFields);
+    }
+
+
+    /**
      * Determines if a section should be highlighted based on various conditions.
      * A section is highlighted if it has a duplicate name, missing name or label,
      * or if any of its fields are highlighted (missing name, label, or are duplicates).
@@ -667,6 +702,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         // If the section has issues or any of its fields are invalid, highlight the section
         return hasSectionIssues || hasInvalidFields;
     }
+
 
     /**
      * Determines if a field should be highlighted based on its properties.
@@ -735,6 +771,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         const isSectionHighlighted = this.isAnySectionHighlighted();
         const isFieldHighlighted = this.isAnyFieldHighlighted();
 
+        this.updateSectionFieldStatus()
         this.validationService.setSectionHighlightState(isSectionHighlighted);
         this.validationService.setFieldHighlightState(isFieldHighlighted);
     }

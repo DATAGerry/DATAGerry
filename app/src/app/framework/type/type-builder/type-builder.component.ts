@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { AfterContentChecked, ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 
 import { Observable, ReplaySubject, Subscription, takeUntil } from 'rxjs';
@@ -42,7 +42,7 @@ import { SectionIdentifierService } from '../services/SectionIdentifierService.s
     templateUrl: './type-builder.component.html',
     styleUrls: ['./type-builder.component.scss']
 })
-export class TypeBuilderComponent implements OnInit, OnDestroy, AfterContentChecked {
+export class TypeBuilderComponent implements OnInit, OnDestroy {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
     private subscriptions = new Subscription();
@@ -86,6 +86,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy, AfterContentChec
     isSectionHighlighted: boolean = false;
     isFieldHighlighted: boolean = false;
     disableFields: boolean = false
+    isSectionWithoutFields: boolean = false
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -105,29 +106,43 @@ export class TypeBuilderComponent implements OnInit, OnDestroy, AfterContentChec
     }
 
 
-    ngAfterContentChecked() {
-        this.changeDetector.detectChanges();
-    }
 
 
     public ngOnInit(): void {
 
         const sectionHighlightSubscription = this.validationService.isSectionHighlighted$.subscribe((highlighted) => {
-            this.isSectionHighlighted = highlighted;
+
+            setTimeout(() => {
+                this.isSectionHighlighted = highlighted;
+            });
         });
 
         // Subscribe to the field highlight state
         const fieldHighlightSubscription = this.validationService.isFieldHighlighted$.subscribe((highlighted) => {
-            this.isFieldHighlighted = highlighted;
+
+            setTimeout(() => {
+                this.isFieldHighlighted = highlighted;
+            });
         });
 
         const disableFieldsSubscription = this.validationService.disableFields$.subscribe((disableFields) => {
-            this.disableFields = disableFields;
+
+            setTimeout(() => {
+                this.disableFields = disableFields;
+            });
+        });
+
+        const sectionWithoutFieldSubscription = this.validationService.isSectionWithoutField$.subscribe((disabledSection) => {
+            console.log('sectionWithoutFieldSubscription', disabledSection)
+            setTimeout(() => {
+                this.isSectionWithoutFields = disabledSection
+            });
         });
 
         this.subscriptions.add(sectionHighlightSubscription);
         this.subscriptions.add(fieldHighlightSubscription);
         this.subscriptions.add(disableFieldsSubscription)
+        this.subscriptions.add(sectionWithoutFieldSubscription)
 
         this.isValid$ = this.validationService.getIsValid();
         this.isSectionValid$ = this.validationService.overallSectionValidity();
