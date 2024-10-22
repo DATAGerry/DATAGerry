@@ -16,6 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import {
+    AfterViewChecked,
     ChangeDetectionStrategy,
     Component,
     EventEmitter,
@@ -65,7 +66,7 @@ declare var $: any;
     styleUrls: ['./builder.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class BuilderComponent implements OnChanges, OnDestroy {
+export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked {
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
     public MODES: typeof CmdbMode = CmdbMode;
 
@@ -82,6 +83,10 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
     private activeDuplicateField: { sectionIndex: number; fieldIndex: number } | null = null;
     public disableFields: boolean = false;
+
+    // Flags to store previous highlight states
+    private prevSectionHighlighted: boolean = false;
+    private prevFieldHighlighted: boolean = false;
 
     @Input() public sectionTemplates: Array<CmdbSectionTemplate> = [];
     @Input() public globalSectionTemplates: Array<CmdbSectionTemplate> = [];
@@ -149,7 +154,8 @@ export class BuilderComponent implements OnChanges, OnDestroy {
     /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private modalService: NgbModal, private validationService: ValidationService,
-        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService) {
+        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService,
+    ) {
         this.typeInstance = new CmdbType();
     }
 
@@ -175,6 +181,12 @@ export class BuilderComponent implements OnChanges, OnDestroy {
         this.validationService.cleanup();
         this.fieldIdentifierValidation.clearFieldNames();
     }
+
+
+    ngAfterViewChecked(): void {
+        this.checkAndUpdateHighlightState()
+    }
+
 
     /* ------------------------------------------------ FIELD ITERACTIONS ----------------------------------------------- */
 
@@ -276,6 +288,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
         this.validationService.setSectionValid(sectionData.name, sectionData.fields.length > 0);
         this.updateSectionFieldStatus()
+        this.updateHighlightState();
     }
 
 
@@ -540,7 +553,14 @@ export class BuilderComponent implements OnChanges, OnDestroy {
 
     }
 
-
+    /**
+     * Handles the drag event of a section and updates the section list based on the drag-and-drop effect.
+     * If the drag effect is 'move', the section is removed from its original position, 
+     * and the section indexes and highlight states are updated accordingly.
+     * @param item - The section being dragged.
+     * @param list - The list of sections.
+     * @param effect - The effect of the drag-and-drop operation (e.g., 'move').
+     */
     public onSectionDragged(item: any, list: any[], effect: DropEffect) {
 
 
@@ -643,6 +663,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @returns A boolean indicating whether the component should be disabled.
      */
     public isConfigEditDisabled(sectionIndex: number, fieldIndex: number): boolean {
+
         // If disableFields is true, disable all fields except the activeDuplicateField
         if (this.disableFields) {
             this.validationService.setDisableFields(true)
@@ -652,6 +673,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
             );
         }
         this.validationService.setDisableFields(false)
+        this.updateHighlightState()
 
         // If no active duplicate, all components are enabled
         return false;
@@ -664,6 +686,7 @@ export class BuilderComponent implements OnChanges, OnDestroy {
      * @returns - True if the section has fields, otherwise false.
      */
     isSectionHasField(section: any): boolean {
+        // this.updateHighlightState()
         return section.fields.length > 0;
     }
 
@@ -818,6 +841,26 @@ export class BuilderComponent implements OnChanges, OnDestroy {
                 })
                 .filter((result) => result !== null)
         );
+    }
+
+
+    /**
+     * Optimized method to check if any section or field is highlighted
+     * and call `updateHighlightState` only when necessary.
+     */
+    checkAndUpdateHighlightState(): void {
+        // Check current highlight states
+        const isSectionHighlighted = this.isAnySectionHighlighted();
+        const isFieldHighlighted = this.isAnyFieldHighlighted();
+
+        // Only update if the highlight state has changed
+        if (isSectionHighlighted !== this.prevSectionHighlighted || isFieldHighlighted !== this.prevFieldHighlighted) {
+            this.updateHighlightState();
+
+            // Store the current states as the new previous states
+            this.prevSectionHighlighted = isSectionHighlighted;
+            this.prevFieldHighlighted = isFieldHighlighted;
+        }
     }
 
 

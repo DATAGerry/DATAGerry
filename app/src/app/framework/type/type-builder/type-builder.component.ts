@@ -133,7 +133,6 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         });
 
         const sectionWithoutFieldSubscription = this.validationService.isSectionWithoutField$.subscribe((disabledSection) => {
-            console.log('sectionWithoutFieldSubscription', disabledSection)
             setTimeout(() => {
                 this.isSectionWithoutFields = disabledSection
             });
