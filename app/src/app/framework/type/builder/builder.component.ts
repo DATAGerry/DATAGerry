@@ -27,7 +27,7 @@ import {
     SimpleChanges
 } from '@angular/core';
 
-import { ReplaySubject, Subscription } from 'rxjs';
+import { ReplaySubject } from 'rxjs';
 
 import { v4 as uuidv4 } from 'uuid';
 import { DndDropEvent, DropEffect } from 'ngx-drag-drop';
@@ -51,12 +51,11 @@ import { CmdbMode } from '../../modes.enum';
 import { DateControl } from './controls/date-time/date.control';
 import { RefSectionControl } from './controls/ref-section.common';
 import { CmdbMultiDataSection, CmdbType, CmdbTypeSection } from '../../models/cmdb-type';
-import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
-import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
 import { CmdbSectionTemplate } from '../../models/cmdb-section-template';
 import { MultiSectionControl } from './controls/multi-section.control';
 import { SectionIdentifierService } from '../services/SectionIdentifierService.service';
 import { FieldIdentifierValidationService } from '../services/field-identifier-validation.service';
+import { BuilderUtils } from './utils/builder-utils';
 /* ------------------------------------------------------------------------------------------------------------------ */
 declare var $: any;
 
@@ -154,7 +153,7 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
     /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private modalService: NgbModal, private validationService: ValidationService,
-        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService,
+        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService
     ) {
         this.typeInstance = new CmdbType();
     }
@@ -464,17 +463,7 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
      * @returns (int): Index of the field. -1 of no field with this name is found
      */
     private getFieldIndexForName(targetName: string): number {
-        let index = 0;
-        for (let field of this.typeInstance.fields) {
-
-            if (field.name == targetName) {
-                return index;
-            } else {
-                index += 1;
-            }
-        }
-
-        return -1;
+        return BuilderUtils.getFieldIndexForName(this.typeInstance, targetName);
     }
 
 
@@ -485,17 +474,7 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
      * @returns (int): Index of the field. -1 of no field with this name is found
      */
     private getSectionIndexForName(targetName: string): number {
-        let index = 0;
-
-        for (let aSection of this.typeInstance.render_meta.sections) {
-            if (aSection.name == targetName) {
-                return index;
-            } else {
-                index += 1;
-            }
-        }
-
-        return -1;
+        return BuilderUtils.getSectionIndexForName(this.typeInstance, targetName);
     }
 
     /**
@@ -562,8 +541,6 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
      * @param effect - The effect of the drag-and-drop operation (e.g., 'move').
      */
     public onSectionDragged(item: any, list: any[], effect: DropEffect) {
-
-
         if (effect === 'move') {
             const index = list.indexOf(item);
             list.splice(index, 1);
@@ -572,7 +549,6 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
             this.sectionIdentifierService.updateSectionIndexes(this.onSectionMoveIndex, this.eventIndex);
             this.updateHighlightState();
             this.refreshFieldIdentifiers();
-
         }
     }
 
@@ -885,9 +861,11 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
      * and adding the current field names from the type instance.
      */
     refreshFieldIdentifiers(): void {
-        this.fieldIdentifierValidation.clearFieldNames();
-        const fieldNames = this.typeInstance.fields.map(field => field.name);
-        this.fieldIdentifierValidation.addFieldNames(fieldNames);
+        // this.fieldIdentifierValidation.clearFieldNames();
+        // const fieldNames = this.typeInstance.fields.map(field => field.name);
+        // this.fieldIdentifierValidation.addFieldNames(fieldNames);
+        BuilderUtils.refreshFieldIdentifiers(this.typeInstance, this.fieldIdentifierValidation);
+
     }
 
 
@@ -1142,48 +1120,93 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
     /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
-    public isNewSection(section: CmdbTypeSection): boolean {
-        return this.newSections.indexOf(section) > -1;
+    // public isNewSection(section: CmdbTypeSection): boolean {
+    //     return this.newSections.indexOf(section) > -1;
+    // }
+
+
+    // public isNewField(field: any): boolean {
+    //     return this.newFields.indexOf(field) > -1;
+    // }
+
+
+    // public openPreview() {
+    //     const previewModal = this.modalService.open(PreviewModalComponent, { scrollable: true });
+    //     previewModal.componentInstance.sections = this.sections;
+    // }
+
+
+    // public openDiagnostic() {
+    //     const diagnosticModal = this.modalService.open(DiagnosticModalComponent, { scrollable: true });
+    //     diagnosticModal.componentInstance.data = this.sections;
+    // }
+
+
+    // public matchedType(value: string) {
+    //     switch (value) {
+    //         case 'textarea':
+    //             return 'align-left';
+    //         case 'password':
+    //             return 'key';
+    //         case 'checkbox':
+    //             return 'check-square';
+    //         case 'radio':
+    //             return 'check-circle';
+    //         case 'select':
+    //             return 'list';
+    //         case 'ref':
+    //             return 'retweet';
+    //         case 'location':
+    //             return 'globe';
+    //         case 'date':
+    //             return 'calendar-alt';
+    //         default:
+    //             return 'font';
+    //     }
+    // }
+
+    /**
+     * Checks if the given section is new by comparing it to the list of new sections.
+     * @param section - The section to check.
+     * @returns `true` if the section is new, otherwise `false`.
+     */
+    isNewSection(section: CmdbTypeSection): boolean {
+        return BuilderUtils.isNewSection(section, this.newSections);
     }
 
 
-    public isNewField(field: any): boolean {
-        return this.newFields.indexOf(field) > -1;
+    /**
+     * Checks if the given field is new by comparing it to the list of new fields.
+     * @param field - The field to check.
+     * @returns `true` if the field is new, otherwise `false`.
+     */
+    isNewField(field: any): boolean {
+        return BuilderUtils.isNewField(field, this.newFields);
     }
 
 
-    public openPreview() {
-        const previewModal = this.modalService.open(PreviewModalComponent, { scrollable: true });
-        previewModal.componentInstance.sections = this.sections;
+    /**
+     * Opens a preview modal for the current sections.
+     */
+    openPreview(): void {
+        BuilderUtils.openPreview(this.modalService, this.sections);
     }
 
 
-    public openDiagnostic() {
-        const diagnosticModal = this.modalService.open(DiagnosticModalComponent, { scrollable: true });
-        diagnosticModal.componentInstance.data = this.sections;
+    /**
+     * Opens a diagnostic modal for the current sections.
+     */
+    openDiagnostic(): void {
+        BuilderUtils.openDiagnostic(this.modalService, this.sections);
     }
 
 
-    public matchedType(value: string) {
-        switch (value) {
-            case 'textarea':
-                return 'align-left';
-            case 'password':
-                return 'key';
-            case 'checkbox':
-                return 'check-square';
-            case 'radio':
-                return 'check-circle';
-            case 'select':
-                return 'list';
-            case 'ref':
-                return 'retweet';
-            case 'location':
-                return 'globe';
-            case 'date':
-                return 'calendar-alt';
-            default:
-                return 'font';
-        }
+    /**
+     * Matches a given value to a corresponding type string.
+     * @param value - The value to match.
+     * @returns The matched type as a string.
+     */
+    matchedType(value: string): string {
+        return BuilderUtils.matchedType(value);
     }
 }
