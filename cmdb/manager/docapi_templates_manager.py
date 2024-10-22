@@ -73,7 +73,7 @@ class DocapiTemplatesManager(BaseManager):
             try:
                 new_object = DocapiTemplate(**data)
             except Exception as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 raise DocapiInsertError(str(err)) from err
         else:
             new_object = data
@@ -81,7 +81,7 @@ class DocapiTemplatesManager(BaseManager):
         try:
             ack = self.insert(new_object.to_database())
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiInsertError(str(err)) from err
         try:
             if self.event_queue:
@@ -90,7 +90,7 @@ class DocapiTemplatesManager(BaseManager):
                                                     "user_id": new_object.get_author_id()})
                 self.event_queue.put(event)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiInsertError(str(err)) from err
 
         return ack
@@ -112,7 +112,7 @@ class DocapiTemplatesManager(BaseManager):
         try:
             result = self.get_one(public_id)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiGetError(str(err)) from err
 
         return DocapiTemplate(**result)
@@ -149,7 +149,7 @@ class DocapiTemplatesManager(BaseManager):
 
             return ack
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiGetError(str(err)) from err
 
 
@@ -164,7 +164,7 @@ class DocapiTemplatesManager(BaseManager):
             if not len(templates) == 0:
                 raise DocapiGetError('More than 1 type matches this requirement')
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiGetError(str(err)) from err
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
@@ -183,7 +183,7 @@ class DocapiTemplatesManager(BaseManager):
         elif isinstance(data, DocapiTemplate):
             update_object = data
         else:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocapiUpdateError(f'Could not update template with ID: {data.get_public_id()}')
 
         update_object.last_execute_date = datetime.now(timezone.utc)

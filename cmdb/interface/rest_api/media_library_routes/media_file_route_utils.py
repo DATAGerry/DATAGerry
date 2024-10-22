@@ -100,7 +100,7 @@ def generate_collection_parameters(params: CollectionParameters):
     return generate_metadata_filter('metadata', params=param)
 
 
-#TODO: ANNOTATION-FIX
+#ANNOTATION-FIX
 def create_attachment_name(name, index, metadata, media_files_manager):
     """ This method checks whether the current file name already exists in the directory.
         If this is the case, 'copy_(index)_' is appended as a prefix. method is executed recursively.

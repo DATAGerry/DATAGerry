@@ -61,7 +61,7 @@ class UsersManager(BaseManager):
         if isinstance(user, UserModel):
             user = UserModel.to_data(user)
 
-        #TODO: ERROR-FIX (add try/except)
+        #ERROR-FIX (add try/except)
         return self.insert(user)
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
@@ -79,7 +79,7 @@ class UsersManager(BaseManager):
         try:
             requested_user = self.get_one(public_id)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(err) from err
 
         if requested_user:

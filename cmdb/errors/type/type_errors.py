@@ -38,7 +38,7 @@ class TypeNotFoundError(CmdbTypeError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (never used)
+#ERROR-FIX (never used)
 class ExternalFillError(CmdbTypeError):
     """
     Raised if href of TypeExternalLink could not filled with input data

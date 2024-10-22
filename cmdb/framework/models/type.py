@@ -21,7 +21,6 @@ import logging
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
-from cmdb.framework.utils import Collection, Model
 from cmdb.security.acl.control import AccessControlList
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
@@ -41,16 +40,16 @@ class TypeModel(CmdbDAO):
     Extends: CmdbDAO
     
     Attributes:
-        COLLECTION (Collection):    Name of the database collection.
+        COLLECTION (str):    Name of the database collection.
         MODEL (Model):              Name of the DAO.
         DEFAULT_VERSION (str):      The default "starting" version number.
         SCHEMA (dict):              The validation schema for this DAO.
         INDEX_KEYS (list):          List of index keys for the database.
     """
 
-    COLLECTION: Collection = "framework.types"
-    MODEL: Model = 'Type'
-    DEFAULT_VERSION: str = '1.0.0'
+    COLLECTION = "framework.types"
+    MODEL = 'Type'
+    DEFAULT_VERSION = '1.0.0'
     SCHEMA: dict = {
         'public_id': {
             'type': 'integer'
@@ -540,10 +539,10 @@ class TypeModel(CmdbDAO):
             try:
                 return fields
             except (RequiredInitKeyNotFoundError, Exception) as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 raise FieldInitError(str(value)) from err
         else:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise FieldNotFoundError(value)
 
 
@@ -554,7 +553,7 @@ class TypeModel(CmdbDAO):
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, Exception) as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 raise FieldInitError(name) from err
 
         raise FieldNotFoundError(name)

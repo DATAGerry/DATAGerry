@@ -60,7 +60,7 @@ class APIBlueprint(Blueprint):
                             try:
                                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
                             except TokenValidationError:
-                                #TODO: ERROR-FIX
+                                #ERROR-FIX
                                 return abort(401)
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']

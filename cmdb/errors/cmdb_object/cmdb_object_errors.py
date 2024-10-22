@@ -38,7 +38,7 @@ class NoPublicIDError(CmdbDAOError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX (not used)
 class VersionTypeError(CmdbDAOError):
     """
     Error if update step of object version was wrong
@@ -48,7 +48,7 @@ class VersionTypeError(CmdbDAOError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX (not used)
 class NoVersionError(CmdbDAOError):
     """
     Error if object from models child class has no version number

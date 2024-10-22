@@ -43,7 +43,7 @@ def get_external_system_params(class_external_system):
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.parameters
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug(str(err))
         return abort(404, jsonify(message='Not Found', error='external system params'))
 
@@ -58,7 +58,7 @@ def get_external_system_variables(class_external_system):
         external_system_class = load_class(f"cmdb.exportd.externals.external_systems.{class_external_system}")
         list_of_parameters = external_system_class.variables
     except Exception as error:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug(str(error))
         return abort(404, jsonify(message='Not Found', error='external system variables'))
 

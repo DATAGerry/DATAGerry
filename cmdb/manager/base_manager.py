@@ -19,7 +19,6 @@ from pymongo.results import DeleteResult
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb.framework.utils import Collection
 from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
@@ -40,8 +39,8 @@ LOGGER = logging.getLogger(__name__)
 class BaseManager:
     """This is the base class for every FrameworkManager"""
 
-    def __init__(self, collection: Collection, dbm: MongoDatabaseManager):
-        self.collection: Collection = collection
+    def __init__(self, collection: str, dbm: MongoDatabaseManager):
+        self.collection = collection
         self.query_builder = BaseQueryBuilder()
         self.dbm: MongoDatabaseManager = dbm
 
@@ -98,7 +97,7 @@ class BaseManager:
                 total = next(total_cursor)['total']
 
             return aggregation_result , total
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

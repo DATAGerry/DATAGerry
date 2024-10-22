@@ -22,7 +22,6 @@ from typing import Union
 from dateutil.parser import parse
 
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 
 from cmdb.errors.type import FieldNotFoundError
 from cmdb.errors.manager.object_manager import TypeNotSetError
@@ -40,16 +39,16 @@ class CmdbObject(CmdbDAO):
     holding the pure objects within the CMDB.
 
     Attributes:
-        COLLECTION (Collection):    Name of the database collection.
+        COLLECTION (str):    Name of the database collection.
         MODEL (Model):              Name of the DAO.
         DEFAULT_VERSION (str):      The default "starting" version number.
         SCHEMA (dict):              The validation schema for this DAO.
         INDEX_KEYS (list):          List of index keys for the database.
     """
 
-    COLLECTION: Collection = 'framework.objects'
-    MODEL: Model = 'Object'
-    DEFAULT_VERSION: str = '1.0.0'
+    COLLECTION = 'framework.objects'
+    MODEL = 'Object'
+    DEFAULT_VERSION = '1.0.0'
     REQUIRED_INIT_KEYS = ['type_id', 'creation_time', 'author_id', 'active', 'fields', 'version']
     SCHEMA: dict = {
         'public_id': {

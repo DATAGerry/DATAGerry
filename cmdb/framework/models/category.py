@@ -19,16 +19,18 @@ from typing import Union
 
 from cmdb.framework.models import TypeModel
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Model, Collection
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 CategoryModel - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CategoryModel(CmdbDAO):
     """TODO: document"""
 
-    COLLECTION: Collection = 'framework.categories'
-    MODEL: Model = 'Category'
+    COLLECTION = 'framework.categories'
+    MODEL = 'Category'
     SCHEMA: dict = {
         'public_id': {
             'type': 'integer'
@@ -76,7 +78,7 @@ class CategoryModel(CmdbDAO):
         {'keys': [('types', CmdbDAO.DAO_ASCENDING)], 'name': 'types', 'unique': False}
     ]
 
-    #TODO CLASS-FIX
+    #CLASS-FIX
     class __CategoryMeta:
         """TODO: document"""
         def __init__(self, icon: str = '', order: int = None):
@@ -199,10 +201,10 @@ class CategoryModel(CmdbDAO):
         return len(self.get_types())
 
 
-#TODO CLASS-FIX
+#CLASS-FIX
 class CategoryTree:
     """Base tree holder"""
-    MODEL: Model = 'CategoryTree'
+    MODEL = 'CategoryTree'
 
     class CategoryNode:
         """Class of a category node inside the category tree"""

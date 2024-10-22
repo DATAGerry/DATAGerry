@@ -17,14 +17,13 @@
 from datetime import datetime, timezone
 
 from cmdb.framework import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectLinkModel(CmdbDAO):
     """TODO: document"""
 
-    COLLECTION: Collection = "framework.links"
-    MODEL: Model = 'ObjectLink'
+    COLLECTION = "framework.links"
+    MODEL = 'ObjectLink'
 
     def __init__(self, public_id: int, primary: int, secondary: int, creation_time: datetime = None):
         if primary == secondary:

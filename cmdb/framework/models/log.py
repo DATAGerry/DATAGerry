@@ -19,12 +19,11 @@ from datetime import datetime
 from enum import Enum
 
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-#TODO CLASS-FIX
+#CLASS-FIX
 class LogAction(Enum):
     """TODO: document"""
     CREATE = 0
@@ -33,11 +32,11 @@ class LogAction(Enum):
     DELETE = 3
 
 
-#TODO CLASS-FIX
+#CLASS-FIX
 class CmdbMetaLog(CmdbDAO):
     """CmdbMetaLog"""
-    COLLECTION: Collection = 'framework.logs'
-    MODEL: Model = 'CmdbLog'
+    COLLECTION = 'framework.logs'
+    MODEL = 'CmdbLog'
 
     def __init__(self, public_id, log_type, log_time: datetime, action: LogAction, action_name: str):
         self.log_type = log_type
@@ -47,7 +46,7 @@ class CmdbMetaLog(CmdbDAO):
         super().__init__(public_id=public_id)
 
 
-#TODO CLASS-FIX
+#CLASS-FIX
 class CmdbObjectLog(CmdbMetaLog):
     """TODO:document"""
 
@@ -156,7 +155,7 @@ class CmdbObjectLog(CmdbMetaLog):
         }
 
 
-#TODO CLASS-FIX
+#CLASS-FIX
 class CmdbLog:
     """TODO: document"""
     REGISTERED_LOG_TYPE = {}

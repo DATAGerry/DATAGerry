@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Definition of all routes for Locations"""
 import logging
-from flask import request, current_app
+from flask import request, current_app, abort
 
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.types_manager import TypesManager
@@ -25,7 +25,7 @@ from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.cmdb_render import RenderList
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.framework.models.location_node import LocationNode
@@ -99,7 +99,7 @@ def create_location(params: dict, request_user: UserModel):
         created_location_id = locations_manager.insert_location(location_creation_params)
     except ManagerInsertError as err:
         LOGGER.debug("[ManagerInsertError] ManagerInsertError: %s", err.message)
-        return ErrorMessage(400, "Could not insert the new location in database)!").response()
+        return abort(400, "Could not insert the new location in database)!")
 
     return make_response(created_location_id)
 
@@ -137,7 +137,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 
     except ManagerIterationError as err:
         LOGGER.debug("[get_all_locations] ManagerIterationError: %s", err.message)
-        return ErrorMessage(400, "Could not retrieve locations from database!").response()
+        return abort(400, "Could not retrieve locations from database!")
 
 
     return api_response.make_response()
@@ -195,7 +195,7 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
 
     except ManagerIterationError as err:
         LOGGER.debug("[get_locations_tree] ManagerIterationError: %s", err.message)
-        return ErrorMessage(400, "Could not retrieve locations from database!").response()
+        return abort(400, "Could not retrieve locations from database!")
 
     return api_response.make_response()
 
@@ -217,7 +217,7 @@ def get_location(public_id: int, request_user: UserModel):
         location_instance = locations_manager.get_location(public_id)
     except ManagerGetError as err:
         LOGGER.debug("[get_location] ManagerGetError: %s", err.message)
-        return ErrorMessage(404, "Could not retrieve the location from database!").response()
+        return abort(404, "Could not retrieve the location from database!")
 
     return make_response(location_instance)
 
@@ -239,7 +239,7 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         location_instance = locations_manager.get_location_for_object(object_id)
     except ManagerGetError as err:
         LOGGER.debug("[get_location_for_object] ManagerGetError: %s", err.message)
-        return ErrorMessage(404, "Could not retrieve the location from database!").response()
+        return abort(404, "Could not retrieve the location from database!")
 
     return make_response(location_instance)
 
@@ -346,7 +346,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         result = locations_manager.update({'object_id': object_id}, location_update_params)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
-        return ErrorMessage(400, "Could not update the location!").response()
+        return abort(400, "Could not update the location!")
 
     api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
 
@@ -375,9 +375,9 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         ack = locations_manager.delete({'public_id':location_public_id})
     except ManagerGetError as err:
         LOGGER.debug("[delete_location_for_object] ManagerGetError: %s", err.message)
-        return ErrorMessage(404, "Could not retrieve the location which should be deleted!").response()
+        return abort(404, "Could not retrieve the location which should be deleted!")
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_location_for_object] ManagerDeleteError: %s", err.message)
-        return ErrorMessage(400, f"Could not delete the location with ID: {object_id} !").response()
+        return abort(400, f"Could not delete the location with ID: {object_id} !")
 
     return make_response(ack)

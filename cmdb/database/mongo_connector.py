@@ -51,7 +51,7 @@ class MongoConnector:
         try:
             self.database = self.client.get_database(db_name)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.error("Can't set connector database with name: %s. Error: %s", db_name, err)
 
 

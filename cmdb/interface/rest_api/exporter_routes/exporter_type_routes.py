@@ -49,13 +49,13 @@ def export_type(request_user: UserModel):
         type_list = [TypeModel.to_json(type) for type in types_manager.get_all_types()]
         resp = json.dumps(type_list, default=json_encoding.default, indent=2)
     except TypeNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ModuleNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.info("Error occured in export_type(): %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 
@@ -90,13 +90,13 @@ def export_type_by_ids(public_ids, request_user: UserModel):
                                     types_manager.get_types_by(sort="public_id", **{'$or': query_list})],
                                     default=json_encoding.default, indent=2)
     except TypeNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ModuleNotFoundError:
-        #TODO:ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.info("[export_type_by_ids] Exception: %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 

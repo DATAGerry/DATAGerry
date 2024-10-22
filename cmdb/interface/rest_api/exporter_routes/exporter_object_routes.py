@@ -63,10 +63,10 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
                                user=request_user,
                                permission=AccessControlPermission.READ)
     except TypeNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ModuleNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except Exception:
         return abort(404, jsonify(message='Not Found', error='Export objects Exception'))

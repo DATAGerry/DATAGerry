@@ -18,12 +18,11 @@ from enum import Enum
 
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
-from cmdb.framework.utils import Collection, Model
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class ExecuteState(Enum):
     """TODO: document"""
     SUCCESSFUL = 0
@@ -33,20 +32,20 @@ class ExecuteState(Enum):
     RUNNING = 4
 
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class ExportdJobType(Enum):
     """TODO: document"""
     PUSH = 0
     PULL = 1
 
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class ExportdJob(JobManagementBase):
     """
     Exportd Job
     """
-    COLLECTION: Collection = 'exportd.jobs'
-    MODEL: Model = 'ExportDJob'
+    COLLECTION = 'exportd.jobs'
+    MODEL = 'ExportDJob'
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}

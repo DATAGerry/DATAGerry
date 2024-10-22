@@ -26,8 +26,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import DeleteSingleResponse,\
                                     InsertSingleResponse,\
-                                    GetMultiResponse,\
-                                    ErrorMessage
+                                    GetMultiResponse
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
@@ -61,7 +60,7 @@ def create_object_link(request_user: UserModel):
         primary_id = object_link_creation_data['primary']
         secondary_id = object_link_creation_data['secondary']
     except KeyError:
-        return ErrorMessage(400, "The 'primary' or 'secondary' key does not exist in the request data!").response()
+        return abort(400, "The 'primary' or 'secondary' key does not exist in the request data!")
 
     object_links_manager: ObjectLinksManager = ManagerProvider.get_manager(ManagerType.OBJECT_LINKS_MANAGER,
                                                                            request_user)
@@ -70,7 +69,7 @@ def create_object_link(request_user: UserModel):
     object_link_exists = object_links_manager.check_link_exists(object_link_creation_data)
 
     if object_link_exists:
-        return ErrorMessage(400, f"The link between {primary_id} and {secondary_id} already exists!").response()
+        return abort(400, f"The link between {primary_id} and {secondary_id} already exists!")
 
     try:
         result_id = object_links_manager.insert_object_link(object_link_creation_data,
@@ -80,13 +79,13 @@ def create_object_link(request_user: UserModel):
         raw_doc = object_links_manager.get_link(result_id, request_user, AccessControlPermission.CREATE)
     except ManagerInsertError as err:
         LOGGER.debug("[create_object_link] ManagerInsertError: %s", err.message)
-        return ErrorMessage(400, "Could not create the ObjectLink!").response()
+        return abort(400, "Could not create the ObjectLink!")
     except ManagerGetError as err:
         LOGGER.debug("[create_object_link] ManagerGetError: %s", err.message)
-        return ErrorMessage(400, "Could not retrieve the created ObjectLink!").response()
+        return abort(400, "Could not retrieve the created ObjectLink!")
     except AccessDeniedError as err:
-        #TODO:ERROR-FIX
-        return ErrorMessage(403, "No permission to create an ObjectLink!").response()
+        #ERROR-FIX
+        return abort(403, "No permission to create an ObjectLink!")
 
     api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
                                         result_id,
@@ -128,7 +127,7 @@ def get_links(params: CollectionParameters, request_user: UserModel):
                                         request.method == 'HEAD')
 
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
         return abort(404, "No object links found!")
@@ -160,12 +159,12 @@ def delete_link(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("[delete_link] ManagerGetError: %s", err.message)
-        return ErrorMessage(404, "Could not retrieve the ObjectLink which should be deleted!").response()
+        return abort(404, "Could not retrieve the ObjectLink which should be deleted!")
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_link] ManagerDeleteError: %s", err.message)
-        return ErrorMessage(400, f"Could not delete the ObjectLink with public_id: {public_id}!").response()
+        return abort(400, f"Could not delete the ObjectLink with public_id: {public_id}!")
     except AccessDeniedError as err:
-        #TODO: ERROR-FIX
-        return ErrorMessage(403, "No permission to delete an ObjectLink!").response()
+        #ERROR-FIX
+        return abort(403, "No permission to delete an ObjectLink!")
 
     return api_response.make_response()

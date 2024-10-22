@@ -15,19 +15,23 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from datetime import datetime, timezone
-
 from dateutil import parser
+
 from cmdb.framework import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserModel(CmdbDAO):
     """TODO: document"""
-    COLLECTION: Collection = 'management.users'
-    MODEL: Model = 'User'
+    COLLECTION = 'management.users'
+    MODEL = 'User'
     INDEX_KEYS = [
-        {'keys': [('user_name', CmdbDAO.DAO_ASCENDING)], 'name': 'user_name', 'unique': True}
+        {
+            'keys': [('user_name', CmdbDAO.DAO_ASCENDING)],
+            'name': 'user_name',
+            'unique': True
+        }
     ]
+
     DEFAULT_AUTHENTICATOR: str = 'LocalAuthenticationProvider'
     DEFAULT_GROUP: int = 2
 

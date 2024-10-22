@@ -194,12 +194,12 @@ def post_login():
         try:
             user_instance = auth_module.login(request_user_name, request_password)
         except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             return abort(503)
         except Exception:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             return abort(401)
-        #TODO: ERROR-FIX (Remove the finally)
+        #ERROR-FIX (Remove the finally)
         finally:
             # If login success generate user instance with token
             if user_instance:

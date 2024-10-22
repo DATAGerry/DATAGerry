@@ -249,5 +249,5 @@ class AuthModule:
                     LOGGER.debug("User found by provider but could not be inserted or found %s",error.message)
                     continue
 
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise AuthenticationError('Unknown user could not login.') from err

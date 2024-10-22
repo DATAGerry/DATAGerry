@@ -80,7 +80,7 @@ class GroupsManager(BaseManager):
         try:
             return UserGroupModel.from_data(requested_group, self.rights)
         except Exception as err:
-            #TODO. ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
 

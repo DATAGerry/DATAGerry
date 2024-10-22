@@ -109,7 +109,7 @@ class CategoriesManager(BaseManager):
         try:
             return self.get_one(public_id)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
 
@@ -131,7 +131,6 @@ class CategoriesManager(BaseManager):
         return iteration_result
 
 
-    # TODO: REFACTOR-FIX (Move to CategoriesManager once refactored)
     def get_categories_by(self, sort='public_id', **requirements: dict) -> list[CategoryModel]:
         """Get a list of categories by special requirements"""
         try:
@@ -139,12 +138,12 @@ class CategoriesManager(BaseManager):
                                                                  sort=sort,
                                                                  **requirements)
         except Exception as error:
-            #TODO: ERROR-FIX (need category get error)
+            #ERROR-FIX (need category get error)
             raise ManagerGetError(error) from error
         try:
             return [CategoryModel.from_data(category) for category in raw_categories]
         except Exception as error:
-            #TODO: ERROR-FIX (need category init error)
+            #ERROR-FIX (need category init error)
             raise ManagerGetError(error) from error
 
 
@@ -164,7 +163,7 @@ class CategoriesManager(BaseManager):
         try:
             categories_count = self.count_documents(self.collection)
         except Exception as err:
-            #TODO: ERROR-FIX (CategoriesManagerGetError)
+            #ERROR-FIX (CategoriesManagerGetError)
             raise ManagerGetError(err) from err
 
         return categories_count
@@ -176,7 +175,7 @@ class CategoriesManager(BaseManager):
         try:
             self.update({'public_id':public_id}, CategoryModel.to_json(data))
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerUpdateError(str(err)) from err
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
@@ -186,7 +185,7 @@ class CategoriesManager(BaseManager):
         try:
             return self.delete({'public_id':public_id})
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerDeleteError(str(err)) from err
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #

@@ -92,11 +92,11 @@ class ObjectLinksManager(BaseManager):
 
             new_public_id = self.insert(link)
         except ManagerGetError as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("[insert_object_link] ManagerGetError: %s", err.message)
             raise ManagerGetError(err) from err
         except ManagerInsertError as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("[insert_object_link] ManagerInsertError: %s", err.message)
             raise ManagerInsertError(err) from err
 

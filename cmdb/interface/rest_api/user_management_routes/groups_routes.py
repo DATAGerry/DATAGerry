@@ -75,10 +75,10 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
                                         url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except Exception:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
 
 
@@ -109,7 +109,7 @@ def get_group(public_id: int, request_user: UserModel):
     try:
         group = groups_manager.get_group(public_id)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
@@ -180,13 +180,13 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
         group_dict = UserGroupModel.to_dict(group)
         group_dict['rights'] = [right.get('name') for right in group_dict.get('rights', [])]
 
-        #TODO: ERROR-FIX (Add try/except block)
+        #ERROR-FIX (Add try/except block)
         groups_manager.update_group(public_id, group_dict)
 
         api_response = UpdateSingleResponse(result=group_dict, url=request.url,
                                             model=UserGroupModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_group] ManagerUpdateError: %s", err.message)
@@ -250,11 +250,11 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
         deleted_group = groups_manager.delete_group(public_id)
         api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
     except ManagerGetError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[delete_group] ManagerGetError: %s", err.message)
         return abort(404)
     except ManagerDeleteError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[delete_group] ManagerDeleteError: %s", err.message)
         return abort(404)
 

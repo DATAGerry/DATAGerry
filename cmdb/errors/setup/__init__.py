@@ -13,3 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+This package contains all errors which occurs when initialising DATAGERRY
+"""
+from .setup_errors import CollectionInitError
+# -------------------------------------------------------------------------------------------------------------------- #
+
+__all__ = [
+    'CollectionInitError',
+]

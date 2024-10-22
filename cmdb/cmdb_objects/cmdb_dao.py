@@ -15,11 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import Union
 from pymongo import IndexModel
 
 from cmdb.cmdb_objects.cmdb_versioning import Versioning
-from cmdb.framework.utils import Model, Collection
 from cmdb.utils.helpers import debug_print
 
 from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
@@ -50,8 +48,8 @@ class CmdbDAO:
 
     DAO_ASCENDING = 1
     DAO_DESCENDING = -1
-    COLLECTION: Union[str, Collection] = 'framework.*'
-    MODEL: Model = ''
+    COLLECTION = 'framework.*'
+    MODEL: str = ''
     SCHEMA: dict = {}
 
     __SUPER_INIT_KEYS = [

@@ -20,7 +20,6 @@ from enum import Enum
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
 from cmdb.framework import CmdbLog
-from cmdb.framework.utils import Model, Collection
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -36,8 +35,8 @@ class LogAction(Enum):
 
 class ExportdMetaLog(JobManagementBase):
     """TODO: document"""
-    COLLECTION: Collection = 'exportd.logs'
-    MODEL: Model = 'ExportdLog'
+    COLLECTION = 'exportd.logs'
+    MODEL = 'ExportdLog'
 
     def __init__(self, public_id, log_type, log_time: datetime, action: LogAction, action_name: str):
         self.log_type = log_type

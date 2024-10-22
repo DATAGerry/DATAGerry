@@ -43,7 +43,7 @@ class Update20200408(Updater):
             self.database_manager.update_public_id_counter(collection, highest_id)
 
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise Exception(err) from err
 
         self.increase_updater_version(20200408)

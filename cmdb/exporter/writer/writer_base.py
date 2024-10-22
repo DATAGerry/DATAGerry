@@ -70,7 +70,7 @@ class SupportedExporterExtension:
             })
         return _list
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class  BaseExportWriter:
     """TODO: document"""
 
@@ -103,7 +103,7 @@ class  BaseExportWriter:
                                    True,
                                    objects_manager).render_result_list(raw=False)
         except Exception:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             return abort(400)
 
 

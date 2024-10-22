@@ -200,7 +200,7 @@ class ExportdThread(Thread):
                                                      log_type=ExportdJobLog.__name__,
                                                      **log_params)
             except ExportdLogManagerInsertError as error:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 LOGGER.error(error)
         finally:
             # update job for UI

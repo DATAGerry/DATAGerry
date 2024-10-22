@@ -20,7 +20,6 @@ from typing import Any
 from pymongo import IndexModel
 
 from cmdb.database.utils import default
-from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserSettingType(Enum):
@@ -100,8 +99,8 @@ class UserSettingModel:
     Every user has exact one model document in the database collection.
     """
 
-    COLLECTION: Collection = 'management.users.settings'
-    MODEL: Model = 'UserSetting'
+    COLLECTION = 'management.users.settings'
+    MODEL = 'UserSetting'
     INDEX_KEYS = [
         {'keys': [('resource', 1), ('user_id', 1)],
          'name': 'resource-user',

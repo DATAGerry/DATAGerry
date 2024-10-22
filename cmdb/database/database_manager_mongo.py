@@ -162,7 +162,7 @@ class DatabaseManagerMongo(DatabaseManager):
         result = self.get_collection(collection).update_many(filter=query, update=formatted_data)
 
         if not result.acknowledged:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocumentCouldNotBeDeleted(collection)
 
         return result
@@ -356,7 +356,7 @@ class DatabaseManagerMongo(DatabaseManager):
         result = self.get_collection(collection).delete_one(filter)
 
         if result.deleted_count != 1:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocumentCouldNotBeDeleted(collection)
 
         return result
@@ -380,7 +380,7 @@ class DatabaseManagerMongo(DatabaseManager):
         result = self.get_collection(collection).delete_many(requirements_filter)
 
         if not result.acknowledged:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise DocumentCouldNotBeDeleted(collection)
 
         return result

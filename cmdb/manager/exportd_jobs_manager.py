@@ -65,7 +65,7 @@ class ExportdJobsManager(BaseManager):
             try:
                 new_object = ExportdJob(**data)
             except Exception as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 raise ExportdJobManagerInsertError(str(err)) from err
         else:
             new_object = data
@@ -73,7 +73,7 @@ class ExportdJobsManager(BaseManager):
         try:
             ack = self.insert(new_object.to_database())
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ExportdJobManagerInsertError(str(err)) from err
 
         try:
@@ -85,7 +85,7 @@ class ExportdJobsManager(BaseManager):
                                                      "event": 'automatic'})
                 self.event_queue.put(event)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("RabbitMQ error: %s", str(err))
 
         return ack
@@ -97,7 +97,7 @@ class ExportdJobsManager(BaseManager):
         try:
             result = self.get_one(public_id)
         except (ExportdJobManagerGetError, Exception) as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.error(err)
             raise err
 
@@ -113,9 +113,9 @@ class ExportdJobsManager(BaseManager):
 
             iteration_result: IterationResult[ExportdJob] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(ExportdJob)
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerIterationError(err) from err
 
         return iteration_result
@@ -129,7 +129,7 @@ class ExportdJobsManager(BaseManager):
             try:
                 job_list.append(ExportdJob(**found_job))
             except Exception:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 continue
 
         return job_list
@@ -142,7 +142,7 @@ class ExportdJobsManager(BaseManager):
             if len(found_type_list) > 0:
                 return ExportdJob(**found_type_list[0])
 
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ObjectManagerGetError(err='More than 1 type matches this requirement')
         except Exception as err:
             raise ObjectManagerGetError(str(err)) from err
@@ -157,7 +157,7 @@ class ExportdJobsManager(BaseManager):
             try:
                 job_list.append(ExportdJob(**founded_job))
             except Exception:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 continue
 
         return job_list
@@ -189,7 +189,7 @@ class ExportdJobsManager(BaseManager):
         elif isinstance(data, ExportdJob):
             update_object = data
         else:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ExportdJobManagerUpdateError(f'Could not update job with ID: {data.get_public_id()}')
 
         update_object.last_execute_date = datetime.now(timezone.utc)
@@ -205,7 +205,7 @@ class ExportdJobsManager(BaseManager):
                                                     "event": 'automatic'})
                 self.event_queue.put(event)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("RabbitMQ error: %s", str(err))
 
         return ack.acknowledged
@@ -226,7 +226,7 @@ class ExportdJobsManager(BaseManager):
                                                        "event": 'automatic'})
                 self.event_queue.put(event)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("RabbitMQ error: %s", str(err))
 
         return ack
@@ -242,7 +242,7 @@ class ExportdJobsManager(BaseManager):
                                                         "event": 'manual'})
                 self.event_queue.put(event)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("RabbitMQ error: %s", str(err))
 
         return True

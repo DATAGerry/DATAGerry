@@ -63,7 +63,7 @@ class ExportdLogsManager(BaseManager):
             new_log = ExportdJobLog.from_data(log_data)
             ack = self.insert(ExportdJobLog.to_json(new_log))
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ExportdLogManagerInsertError(str(err)) from err
 
         return ack
@@ -78,7 +78,7 @@ class ExportdLogsManager(BaseManager):
             try:
                 log_list.append(ExportdLog(**found_log))
             except Exception as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 LOGGER.error(err)
                 raise ExportdLogManagerGetError(str(err)) from err
 
@@ -94,7 +94,7 @@ class ExportdLogsManager(BaseManager):
             for log in logs:
                 ack.append(ExportdJobLog.from_data(log))
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.error(err)
             raise ExportdLogManagerGetError(str(err)) from err
 
@@ -110,9 +110,9 @@ class ExportdLogsManager(BaseManager):
 
             iteration_result: IterationResult[ExportdJobLog] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(ExportdJobLog)
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerIterationError(err) from err
 
         return iteration_result
@@ -158,7 +158,7 @@ class ExportdLogsManager(BaseManager):
         try:
             ack = self.delete({'public_id': public_id})
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ExportdLogManagerDeleteError(str(err)) from err
 
         return ack
