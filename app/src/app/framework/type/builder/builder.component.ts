@@ -553,7 +553,14 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
     }
 
-
+    /**
+     * Handles the drag event of a section and updates the section list based on the drag-and-drop effect.
+     * If the drag effect is 'move', the section is removed from its original position, 
+     * and the section indexes and highlight states are updated accordingly.
+     * @param item - The section being dragged.
+     * @param list - The list of sections.
+     * @param effect - The effect of the drag-and-drop operation (e.g., 'move').
+     */
     public onSectionDragged(item: any, list: any[], effect: DropEffect) {
 
 
