@@ -109,7 +109,7 @@ class LocationsManager(BaseManager):
             if location:
                 resource = CmdbLocation(**location)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return resource
@@ -134,7 +134,7 @@ class LocationsManager(BaseManager):
             if location:
                 location = CmdbLocation(**location)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         if not location:
@@ -157,7 +157,7 @@ class LocationsManager(BaseManager):
             for location in locations:
                 locations_list.append(CmdbLocation(**location))
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return locations_list

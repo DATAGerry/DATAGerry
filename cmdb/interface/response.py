@@ -23,7 +23,6 @@ from typing import Union
 from flask import make_response as flask_response
 from werkzeug.wrappers import Response
 
-from cmdb.framework.utils import PublicID, Model
 from cmdb.interface import DEFAULT_MIME_TYPE, API_VERSION
 from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
@@ -121,7 +120,7 @@ class BaseAPIResponse:
     """Basic `abstract` response class"""
     __slots__ = 'url', 'operation_type', 'time', 'model', 'body'
 
-    def __init__(self, operation_type: OperationType, url: str = None, model: Model = None, body: bool = None):
+    def __init__(self, operation_type: OperationType, url: str = None, model: str = None, body: bool = None):
         """
         Constructor of a basic api response.
 
@@ -136,7 +135,7 @@ class BaseAPIResponse:
 
         self.operation_type: OperationType = operation_type
         self.url = url or ''
-        self.model: Model = model or ''
+        self.model: str = model or ''
         self.body = body or True
         self.time: str = datetime.now(timezone.utc).isoformat()
 
@@ -168,23 +167,12 @@ class BaseAPIResponse:
         }
 
 
-class ErrorMessage:
-    """Used to return errors to frontend"""
-    def __init__(self, status: int, error: str):
-        self.status = status
-        self.error = error
-
-    def response(self) -> None:
-        """Creates a Flask-Response which is returned to the Frontend"""
-        return make_api_response(self.error, self.status)
-
-
 class GetSingleResponse(BaseAPIResponse):
     """
     API Response for get calls with a single resource.
     """
 
-    def __init__(self, result: dict, url: str = None, model: Model = None, body: bool = None, projection: dict = None):
+    def __init__(self, result: dict, url: str = None, model: str = None, body: bool = None, projection: dict = None):
         """
         Constructor of GetSingleResponse.
 
@@ -235,7 +223,7 @@ class GetMultiResponse(BaseAPIResponse):
     __slots__ = 'results', 'count', 'total', 'parameters', 'pager', 'pagination'
 
     def __init__(self, results: list[dict], total: int, params: CollectionParameters, url: str = None,
-                 model: Model = None, body: bool = None):
+                 model: str = None, body: bool = None):
         """
         Constructor of GetMultiResponse.
 
@@ -319,7 +307,7 @@ class InsertSingleResponse(BaseAPIResponse):
     """
     API Response for insert call of a single resource
     """
-    def __init__(self, raw: dict, result_id: Union[PublicID, str, int] = None, url: str = None, model: Model = None):
+    def __init__(self, raw: dict, result_id: Union[str, int] = None, url: str = None, model: str = None):
         """
         Constructor of InsertSingleResponse.
 
@@ -334,7 +322,7 @@ class InsertSingleResponse(BaseAPIResponse):
             self.result_id: int = int(result_id)
             super().__init__(operation_type=OperationType.INSERT, url=url, model=model)
         except Exception as err:
-            LOGGER.info(f"InsertSingleResponse __init__ error: {err}")
+            LOGGER.info("InsertSingleResponse __init__ error: %s", str(err))
 
 
     def make_response(self, prefix: str = '', *args, **kwargs) -> Response:
@@ -370,7 +358,7 @@ class UpdateSingleResponse(BaseAPIResponse):
 
     __slots__ = 'result', 'failed'
 
-    def __init__(self, result: dict, failed: ResponseFailedMessage = None, url: str = None, model: Model = None):
+    def __init__(self, result: dict, failed: ResponseFailedMessage = None, url: str = None, model: str = None):
         """
         Constructor of UpdateSingleResponse.
 
@@ -419,7 +407,7 @@ class UpdateMultiResponse(BaseAPIResponse):
     __slots__ = 'results', 'failed'
 
     def __init__(self, results: list[dict], failed: list[ResponseFailedMessage] = None,
-                 url: str = None, model: Model = None):
+                 url: str = None, model: str = None):
         """
         Constructor of UpdateSingleResponse.
 
@@ -465,7 +453,7 @@ class DeleteSingleResponse(BaseAPIResponse):
     API Response for delete call of a single resource.
     """
 
-    def __init__(self, raw: dict = None, url: str = None, model: Model = None):
+    def __init__(self, raw: dict = None, url: str = None, model: str = None):
         """
         Constructor of DeleteSingleResponse.
 
@@ -508,7 +496,7 @@ class GetListResponse(BaseAPIResponse):
     """
     __slots__ = 'results', 'params'
 
-    def __init__(self, results: list[dict], url: str = None, model: Model = None, body: bool = None,
+    def __init__(self, results: list[dict], url: str = None, model: str = None, body: bool = None,
                  params: APIParameters = None):
 
         self.params = params

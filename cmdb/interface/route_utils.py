@@ -112,7 +112,7 @@ def user_has_right(required_right: str) -> bool:
     try:
         decrypted_token = TokenValidator(database_manager=current_app.database_manager).decode_token(token)
     except TokenValidationError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[user_has_right] Error: %s", str(err))
         return abort(401)
 
@@ -153,7 +153,7 @@ def insert_request_user(func):
             with current_app.app_context():
                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
         except TokenValidationError:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             return abort(401)
 
         try:

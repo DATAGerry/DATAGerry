@@ -18,7 +18,7 @@ Definition of all routes for CmdbSectionTemplates
 """
 import json
 import logging
-from flask import request
+from flask import request, abort
 
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
@@ -27,7 +27,7 @@ from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.framework import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
-from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse, ErrorMessage
+from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
@@ -73,7 +73,7 @@ def create_section_template(params: dict, request_user: UserModel):
         created_section_template_id = template_manager.insert_section_template(params)
     except ManagerInsertError as err:
         LOGGER.debug("[create_section_template] ManagerInsertError: %s", err.message)
-        return ErrorMessage(400, "Could not create the section template!").response()
+        return abort(400, "Could not create the section template!")
 
     return make_response(created_section_template_id)
 
@@ -107,13 +107,12 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         CmdbSectionTemplate.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[get_all_section_templates] ManagerIterationError: %s", err.message)
-        return ErrorMessage(400, "Could not retrieve SectionTemplates!").response()
+        return abort(400, "Could not retrieve SectionTemplates!")
 
     return api_response.make_response()
 
-# -------------------------------------------------------------------------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
@@ -133,14 +132,13 @@ def get_section_template(public_id: int, request_user: UserModel):
         section_template_instance = template_manager.get_section_template(public_id)
     except ManagerGetError as err:
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
 
     if not section_template_instance:
         section_template_instance = []
 
     return make_response(section_template_instance)
 
-# -------------------------------------------------------------------------------------------------------------------- #
 
 @section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
 @insert_request_user
@@ -163,16 +161,16 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
 
     return make_response(counts)
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
+@section_template_blueprint.parse_location_parameters()
 @insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.edit')
-@section_template_blueprint.parse_location_parameters()
 def update_section_template(params: dict, request_user: UserModel):
     """
     Updates a CmdbSectionTemplate
@@ -204,12 +202,12 @@ def update_section_template(params: dict, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with ID: {params['public_id']}!").response()
+        return abort(400, f"Could not retrieve SectionTemplate with ID: {params['public_id']}!")
     except ManagerUpdateError as err:
         LOGGER.debug("[update_section_template] ManagerUpdateError: %s", err.message)
-        return ErrorMessage(400, f"Could not update SectionTemplate with ID: {params['public_id']}!").response()
+        return abort(400, f"Could not update SectionTemplate with ID: {params['public_id']}!")
     except NoDocumentFound as err:
-        return ErrorMessage(404, err.message).response()
+        return abort(404, "Section template not found!")
 
     api_response = UpdateSingleResponse(result, None, request.url, CmdbSectionTemplate.MODEL)
 
@@ -239,11 +237,11 @@ def delete_section_template(public_id: int, request_user: UserModel):
 
     except ManagerGetError as err:
         LOGGER.debug("[delete_section_template] ManagerGetError: %s", err.message)
-        return ErrorMessage(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!").response()
+        return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
     except DisallowedActionError:
-        return ErrorMessage(405, f"Disallowed action for section template with ID: {public_id}").response()
+        return abort(405, f"Disallowed action for section template with ID: {public_id}")
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_section_template] ManagerDeleteError: %s", err)
-        return ErrorMessage(400, f"Could not delete SectionTemplate with public_id: {public_id}!").response()
+        return abort(400, f"Could not delete SectionTemplate with public_id: {public_id}!")
 
     return make_response(ack)

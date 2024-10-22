@@ -158,7 +158,7 @@ class SetupRoutine:
 
             LOGGER.info('KEY ROUTINE: Password was updated for user: %s', admin_user.user_name)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.info('KEY ROUTINE: Password update for user failed: %s', err)
             raise Exception(err) from err
 

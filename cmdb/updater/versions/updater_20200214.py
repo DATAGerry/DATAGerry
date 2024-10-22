@@ -80,7 +80,7 @@ class Update20200214(Updater):
 
                 self.objects_manager.update_object(obj.public_id, obj)
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.error("[worker] Error in worker: %s", err.message)
 
 
@@ -101,6 +101,6 @@ class Update20200214(Updater):
         try:
             return self.types_manager.get_type_aggregate(argument)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug(err)
             return []

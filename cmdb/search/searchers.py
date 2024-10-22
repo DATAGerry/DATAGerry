@@ -30,7 +30,6 @@ from cmdb.search.search_result import SearchResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
-from cmdb.framework.utils import PublicID
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=int(user.group_id),
                                                                                  permission=permission))]
         self.add_pipe(pipe_match)
         self.add_pipe({'$group': {"_id": {'active': '$active'}, 'count': {'$sum': 1}}})
@@ -243,7 +242,7 @@ class SearchPipelineBuilder(PipelineBuilder):
 
         # permission builds
         if user and permission:
-            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=PublicID(user.group_id),
+            self.pipeline = [*self.pipeline, *(AccessControlQueryBuilder().build(group_id=int(user.group_id),
                                                                                  permission=permission))]
         return self.pipeline
 

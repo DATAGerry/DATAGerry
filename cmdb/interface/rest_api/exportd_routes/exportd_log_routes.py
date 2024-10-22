@@ -62,10 +62,10 @@ def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=ExportdMetaLog.MODEL, body=body)
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404, "Could not retrieve exportd logs!")
 
     return api_response.make_response()
@@ -87,14 +87,14 @@ def get_log_list(request_user: UserModel):
     try:
         log_list = exportd_logs_manager.get_all_logs()
     except ObjectManagerGetError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[get_log_list] ObjectManagerGetError: %s", err.message)
         return abort(400, "Could not retrieve the log list!")
     except ModuleNotFoundError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.info("Error occured in get_log_list(): %s", err)
         return abort(404, jsonify(message='Not Found'))
 
@@ -114,7 +114,7 @@ def delete_log(public_id: int, request_user: UserModel):
     try:
         delete_ack = exportd_logs_manager.delete_log(public_id)
     except ExportdLogManagerDeleteError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(500)
 
     return make_response(delete_ack)

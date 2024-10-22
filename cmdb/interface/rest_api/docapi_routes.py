@@ -26,7 +26,7 @@ from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.interface.response import GetMultiResponse, ErrorMessage
+from cmdb.interface.response import GetMultiResponse
 from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
@@ -65,7 +65,7 @@ def add_template(request_user: UserModel):
     try:
         template_instance = DocapiTemplate(**new_tpl_data)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug(str(err))
         return abort(400)
 
@@ -73,7 +73,7 @@ def add_template(request_user: UserModel):
         ack = docapi_manager.insert_template(template_instance)
     except DocapiInsertError as err:
         LOGGER.debug("[add_template] DocapiInsertError: %s", err.message)
-        return ErrorMessage(500, "An error occured when trying to insert the template!").response()
+        return abort(500, "An error occured when trying to insert the template!")
 
     return make_response(ack)
 
@@ -98,7 +98,7 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
                                         url=request.url, model=DocapiTemplate.MODEL, body=request.method == 'HEAD')
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
         return abort(404, "Could not retrieve template list!")
@@ -113,14 +113,14 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
 @right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: UserModel):
     """TODO: document"""
-    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATE_MANAGER,
+    docapi_manager: DocapiTemplatesManager = ManagerProvider.get_manager(ManagerType.DOCAPI_TEMPLATES_MANAGER,
                                                                          request_user)
 
     try:
         filterdict = json.loads(searchfilter)
         tpl = docapi_manager.get_templates_by(**filterdict)
     except DocapiGetError:
-        return ErrorMessage(404, f"Could not retrieve template list for filter: {searchfilter}").response()
+        return abort(404, f"Could not retrieve template list for filter: {searchfilter}")
 
     return make_response(tpl)
 
@@ -141,7 +141,7 @@ def get_template(public_id, request_user: UserModel):
         tpl = docapi_manager.get_template(public_id)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err.message)
-        return ErrorMessage(404, f"Could not retrieve template with ID: {public_id}!").response()
+        return abort(404, f"Could not retrieve template with ID: {public_id}!")
 
     return make_response(tpl)
 
@@ -160,7 +160,7 @@ def get_template_by_name(name: str, request_user: UserModel):
         tpl = docapi_manager.get_template_by_name(name=name)
     except DocapiGetError as err:
         LOGGER.debug("DocapiGetError: %s", err.message)
-        return ErrorMessage(404, f"Could not retrieve template with name: {name}!").response()
+        return abort(404, f"Could not retrieve template with name: {name}!")
 
     return make_response(tpl)
 
@@ -188,14 +188,14 @@ def update_template(request_user: UserModel):
     try:
         update_tpl_instance = DocapiTemplate(**new_tpl_data)
     except Exception:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
 
     try:
         docapi_manager.update_template(update_tpl_instance, request_user)
     except DocapiUpdateError as err:
         LOGGER.debug("[update_template] DocapiUpdateError: %s", err.message)
-        return ErrorMessage(500, "Could not update the template!").response()
+        return abort(500, "Could not update the template!")
 
     return make_response(update_tpl_instance)
 
@@ -215,7 +215,7 @@ def delete_template(public_id: int, request_user: UserModel):
         ack = docapi_manager.delete_template(public_id, request_user)
     except DocapiDeleteError as err:
         LOGGER.debug("[delete_template] DocapiDeleteError: %s", err.message)
-        return ErrorMessage(400, f"Could not delete the template with ID:{public_id}!").response()
+        return abort(400, f"Could not delete the template with ID:{public_id}!")
 
     return make_response(ack)
 

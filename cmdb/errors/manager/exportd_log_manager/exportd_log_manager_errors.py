@@ -46,7 +46,7 @@ class ExportdLogManagerInsertError(ExportdLogManagerError):
         self.message = f"ExportdLog could not be created. Error: {err}"
         super().__init__(self.message)
 
-#TODO: ERROR-FIX (never used)
+#ERROR-FIX (never used)
 class ExportdLogManagerGetError(ExportdLogManagerError):
     """
     Raised when ExportdLogsManager could not retrieve a ExportdLog

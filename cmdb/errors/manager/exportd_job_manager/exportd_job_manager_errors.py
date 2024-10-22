@@ -65,7 +65,7 @@ class ExportdJobManagerGetError(ExportdJobManagerError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX (not used)
 class ExportJobConfigError(ExportdJobManagerError):
     """
     Raised when an error occurs in the exporter base

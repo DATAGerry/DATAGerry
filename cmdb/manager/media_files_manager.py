@@ -63,7 +63,7 @@ class MediaFilesManager(BaseManager):
                 media_file.public_id = self.get_new_media_file_id()
                 media_file.metadata = FileMetadata(**metadata).__dict__
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise MediaFileManagerInsertError(str(err)) from err
 
         return media_file._file
@@ -98,7 +98,7 @@ class MediaFilesManager(BaseManager):
             for grid in iterator:
                 results.append(MediaFile.to_json(MediaFile(**grid._file)))
         except (Exception, MediaFileManagerGetError) as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise MediaFileManagerGetError(str(err)) from err
 
         return GridFsResponse(results, records_total)
@@ -140,7 +140,7 @@ class MediaFilesManager(BaseManager):
             file_id = self.fs.get_last_version(**{'public_id': public_id})._id
             self.fs.delete(file_id)
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from err
 
         return True
@@ -149,7 +149,7 @@ class MediaFilesManager(BaseManager):
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                GridFsResponse - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-#TODO: CLASS-FIX
+#CLASS-FIX
 class GridFsResponse:
     """TODO: document"""
     def __init__(self, result, total: int = None):

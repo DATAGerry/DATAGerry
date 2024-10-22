@@ -16,7 +16,6 @@
 """TODO: document"""
 from enum import Enum
 
-from cmdb.framework.utils import PublicID
 from cmdb.interface.api_parameters import APIParameters, Parameter
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -30,7 +29,7 @@ class GroupDeleteMode(Enum):
 class GroupDeletionParameters(APIParameters):
     """TODO: document"""
 
-    def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: PublicID = None, **kwargs):
+    def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: int = None, **kwargs):
         """
         Constructor of the GroupDeletionParameters.
 

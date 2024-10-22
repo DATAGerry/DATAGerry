@@ -95,13 +95,13 @@ def get_exportd_job_list(request_user: UserModel):
     try:
         job_list = exportd_jobs_manager.get_all_jobs()
     except ExportdJobManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400, "Could not retrieve job list!")
     except ModuleNotFoundError as e:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400, e)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.info("Error occured in get_exportd_job_list(): %s", str(err))
         return abort(404, jsonify(message='Not Found'))
 
@@ -125,7 +125,7 @@ def get_exportd_job(public_id, request_user: UserModel):
     try:
         job = exportd_jobs_manager.get_job(public_id)
     except ExportdJobManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return  make_response(job)
@@ -171,21 +171,21 @@ def add_job(request_user: UserModel):
         new_job_data['author_name'] = request_user.get_display_name()
         new_job_data['state'] = ExecuteState.SUCCESSFUL.name
     except TypeError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug(str(err))
         abort(400)
 
     try:
         job_instance = ExportdJob(**new_job_data)
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug(str(err))
         return abort(400)
 
     try:
         exportd_jobs_manager.insert_job(job_instance)
     except ExportdJobManagerInsertError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(500)
 
     # Generate new insert log
@@ -202,7 +202,7 @@ def add_job(request_user: UserModel):
                                         log_type=ExportdJobLog.__name__,
                                         **log_params)
     except ExportdLogManagerInsertError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.error(err)
 
     return make_response(ExportdJob.to_json(job_instance))
@@ -232,13 +232,13 @@ def update_job(request_user: UserModel):
         state = new_job_data["state"]
         update_job_instance = ExportdJob(**new_job_data)
     except Exception:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
 
     try:
         exportd_jobs_manager.update_job(update_job_instance, request_user, False)
     except ExportdJobManagerUpdateError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(500)
 
     # Generate new insert log
@@ -256,7 +256,7 @@ def update_job(request_user: UserModel):
                                             log_type=ExportdJobLog.__name__,
                                             **log_params)
         except ExportdLogManagerInsertError as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.error(err)
 
     return make_response(update_job_instance)
@@ -290,14 +290,14 @@ def delete_job(public_id: int, request_user: UserModel):
                                             log_type=ExportdJobLog.__name__,
                                             **log_params)
         except (ExportdJobManagerGetError, ExportdLogManagerInsertError):
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             return abort(404)
 
         ack = exportd_jobs_manager.delete_job(public_id, request_user)
     except ExportdJobManagerDeleteError:
         return abort(400)
     except Exception:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(500)
 
     return make_response(ack)

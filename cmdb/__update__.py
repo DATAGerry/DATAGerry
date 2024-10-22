@@ -30,6 +30,8 @@ from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError
+from cmdb.errors.setup import CollectionInitError
+from cmdb.errors.system_config import SectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -102,7 +104,11 @@ class UpdateRoutine:
             )
 
         if not self.__is_database_empty():
-            self.update_database_collection()
+            try:
+                self.update_database_collection()
+            except CollectionInitError as err:
+                LOGGER.debug("[update_database_collection] Error: %s", err)
+
             self.update_db_version()
         else:
             LOGGER.info('UPDATE ROUTINE: The update is faulty because no collection was detected.')
@@ -149,8 +155,9 @@ class UpdateRoutine:
                     self.setup_database_manager.create_indexes(collection.COLLECTION,
                                                                collection.get_index_keys())
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
-        except Exception as ex:
-            LOGGER.info('UPDATE ROUTINE: Database collection validation failed: %s', ex)
+        except Exception as err:
+            LOGGER.info('UPDATE ROUTINE: Database collection validation failed: %s', err)
+            raise CollectionInitError(str(err)) from err
 
 
     def update_db_version(self):
@@ -159,10 +166,11 @@ class UpdateRoutine:
         try:
             updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
             ssr = SystemSettingsReader(self.setup_database_manager)
+
             try:
                 updater_settings_values = ssr.get_all_values_from_section('updater')
                 updater_setting_instance = UpdateSettings(**updater_settings_values)
-            except Exception:
+            except SectionError: #ERROR-FIX (UpdateSettings initialisation is not covered)
                 # create updater section if not exist
                 system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
                 updater_setting_instance = UpdateSettings(**updater_settings_values)

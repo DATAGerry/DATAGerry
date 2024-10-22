@@ -62,7 +62,7 @@ def get_user_settings(user_id: int, request_user: UserModel):
         api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,
                                        body=request.method == 'HEAD')
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return api_response.make_response()
@@ -96,7 +96,7 @@ def get_user_setting(user_id: int, resource: str, request_user: UserModel):
         api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
                                          model=UserSettingModel.MODEL, body=request.method == 'HEAD')
     except ManagerGetError:
-        # TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return api_response.make_response()
@@ -180,7 +180,7 @@ def update_setting(user_id: int, resource: str, data: dict, request_user: UserMo
 
         api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_setting] ManagerUpdateError: %s", err.message)
@@ -213,7 +213,7 @@ def delete_setting(user_id: int, resource: str, request_user: UserModel):
         deleted_setting = users_settings_manager.delete(user_id=user_id, resource=resource)
         api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_setting] ManagerDeleteError: %s", err.message)

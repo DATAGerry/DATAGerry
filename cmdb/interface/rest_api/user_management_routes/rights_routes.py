@@ -18,8 +18,6 @@ from flask import request, abort
 
 from cmdb.manager.rights_manager import RightsManager
 
-from cmdb.framework.utils import Model
-
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
@@ -81,15 +79,15 @@ def get_rights(params: CollectionParameters):
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        model=Model('Right'),
+                                        model='Right',
                                         body=request.method == 'HEAD')
 
         return api_response.make_response()
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
 
@@ -116,12 +114,12 @@ def get_right(name: str):
     try:
         right = rights_manager.get_right(name)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     api_response = GetSingleResponse(BaseRight.to_dict(right),
                                      url=request.url,
-                                     model=Model('Right'),
+                                     model='Right',
                                      body=request.method == 'HEAD')
 
     return api_response.make_response()
@@ -142,7 +140,7 @@ def get_levels():
 
     api_response = GetSingleResponse(_nameToLevel,
                                      url=request.url,
-                                     model=Model('Security-Level'),
+                                     model='Security-Level',
                                      body=request.method == 'HEAD')
 
     return api_response.make_response()

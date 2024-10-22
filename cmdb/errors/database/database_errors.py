@@ -47,7 +47,7 @@ class ServerTimeoutError(DataBaseError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (never used)
+#ERROR-FIX (never used)
 class DatabaseAlreadyExists(DataBaseError):
     """
     Error when database already exists
@@ -66,7 +66,7 @@ class DatabaseNotExists(DataBaseError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX (not used)
 class CollectionAlreadyExists(DataBaseError):
     """
     Error if you try to create a collection that alrady exists
@@ -76,7 +76,7 @@ class CollectionAlreadyExists(DataBaseError):
         super().__init__(self.message)
 
 
-#TODO: Use the Pymongo error
+#ERROR-FIX (Use the Pymongo error)
 class NoDocumentFound(DataBaseError):
     """
     Error if no document was found

@@ -81,7 +81,7 @@ class TypesManager(BaseManager):
         else:
             type_to_add = json.loads(json.dumps(new_type, default=json_util.default), object_hook=object_hook)
 
-        #TODO: ERROR-FIX (Add try/except block)
+        #ERROR-FIX (Add try/except block)
         return self.insert(type_to_add)
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
@@ -111,7 +111,7 @@ class TypesManager(BaseManager):
         try:
             return TypeModel.from_data(requested_type)
         except Exception as err:
-            #TODO: ERROR-FIX (Needs a TypesManagerGetError)
+            #ERROR-FIX (Needs a TypesManagerGetError)
             raise ManagerGetError(str(err)) from err
 
 
@@ -141,7 +141,7 @@ class TypesManager(BaseManager):
             while total_cursor.alive:
                 total = next(total_cursor)['total']
         except ManagerGetError as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerIterationError(err) from err
 
         iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
@@ -170,7 +170,6 @@ class TypesManager(BaseManager):
         return self.count_documents(TypeModel.COLLECTION)
 
 
-        # TODO: REFACTOR-FIX (Move to TypeManager once refactored)
     def get_all_types(self) -> list[TypeModel]:
         """TODO: document"""
         try:
@@ -180,7 +179,7 @@ class TypesManager(BaseManager):
         try:
             return [TypeModel.from_data(type) for type in raw_types]
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(err) from err
 
 
@@ -189,7 +188,7 @@ class TypesManager(BaseManager):
         try:
             return [TypeModel.from_data(data) for data in self.get_many(sort=sort, **requirements)]
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerGetError(err) from err
 
 
@@ -254,7 +253,7 @@ class TypesManager(BaseManager):
         try:
             self.delete({'public_id': public_id})
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise ManagerDeleteError(str(err)) from err
 
         return raw_type
@@ -311,7 +310,7 @@ class TypesManager(BaseManager):
                 del data_set["data"][idx]
 
         except Exception as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             LOGGER.debug("Error in delete_mds_field_entries(): %s", err) 
 
         return data_set
@@ -320,7 +319,7 @@ class TypesManager(BaseManager):
     def update_multi_data_fields(self, target_type: TypeModel, added_fields: dict, deleted_fields: dict):
         """TODO: document"""
         # get all objects of this type
-        #TODO: REFACTOR-FIX (remove dependency on ObjectsManager)
+        #REFACTOR-FIX (remove dependency on ObjectsManager)
         all_type_objects = self.objects_manager.get_objects_by(type_id=target_type.public_id)
 
         # update the multi-data-sections

@@ -15,11 +15,17 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+import json
+from pymongo import IndexModel
+
+from cmdb.database.utils import default
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               JobManagementBase - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class JobManagementBase:
     """TODO: document"""
     ASCENDING = 1
@@ -42,8 +48,7 @@ class JobManagementBase:
     @classmethod
     def get_index_keys(cls):
         """TODO: document"""
-        from pymongo import IndexModel
-        index_list = list()
+        index_list = []
         for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
         return index_list
@@ -55,8 +60,6 @@ class JobManagementBase:
         Returns:
             dict: json dump with database default encoding of the object attributes
         """
-        from cmdb.database.utils import default
-        import json
         return json.dumps(self.__dict__, default=default)
 
 

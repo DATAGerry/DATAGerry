@@ -127,7 +127,7 @@ class ExportdManagerBase(ExportdJobsManager):
                                                          log_type=ExportdJobLog.__name__,
                                                          **log_params)
                 except ExportdLogManagerInsertError as err:
-                    #TODO: ERROR-FIX
+                    #ERROR-FIX
                     LOGGER.error(err)
 
         return exportd_header

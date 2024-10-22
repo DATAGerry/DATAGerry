@@ -73,7 +73,7 @@ class RenderResult(RenderVisualization):
         self.externals: list = []
         self.multi_data_sections: list = []
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class CmdbRender:
     """TODO: document"""
 
@@ -187,14 +187,14 @@ class CmdbRender:
         try:
             author_name = self.users_manager.get_user(self.object_instance.author_id).get_display_name()
         except Exception:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
                 editor_name = self.users_manager.get_user(self.object_instance.editor_id).get_display_name()
             except Exception:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 editor_name = None
         else:
             editor_name = None
@@ -217,7 +217,7 @@ class CmdbRender:
         try:
             author_name = self.users_manager.get_user(self.type_instance.author_id).get_display_name()
         except Exception:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         try:
@@ -337,7 +337,7 @@ class CmdbRender:
                     ref_field_name: str = f'{section.name}-field'
                     ref_field = self.type_instance.get_field(ref_field_name)
                 except (FieldInitError, FieldNotFoundError) as err:
-                    #TODO: ERROR-FIX
+                    #ERROR-FIX
                     LOGGER.debug("%s",err.message)
                     continue
 
@@ -359,7 +359,7 @@ class CmdbRender:
                         'fields': []
                     }
                 except (ManagerGetError, Exception) as err:
-                    #TODO: ERROR-FIX
+                    #ERROR-FIX
                     LOGGER.debug("%s",str(err))
                     continue
 
@@ -427,7 +427,7 @@ class CmdbRender:
                                                              self.render_user,
                                                              AccessControlPermission.READ)
             except AccessDeniedError as err:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 return err.message
             except ObjectManagerGetError:
                 return TypeReference.to_json(reference)
@@ -443,7 +443,7 @@ class CmdbRender:
                 try:
                     _nested_summary_fields = ref_type.get_nested_summary_fields(_nested_summaries)
                 except (FieldInitError, FieldNotFoundError) as error:
-                    #TODO: ERROR-FIX
+                    #ERROR-FIX
                     LOGGER.warning('Summary setting refers to non-existent field(s), Error %s',error.message)
 
                 reference.type_id = ref_type.get_public_id()
@@ -545,7 +545,7 @@ class CmdbRender:
                                 raise ValueError(ext_link_field)
                             field_list.append(field_value)
                         except Exception:
-                            #TODO: ERROR-FIX
+                            #ERROR-FIX
                             # if error append missing data
                             missing_list.append(ext_link_instance)
                 if len(missing_list) > 0:
@@ -556,14 +556,14 @@ class CmdbRender:
                 except ValueError:
                     continue
             except Exception:
-                #TODO: ERROR-FIX
+                #ERROR-FIX
                 continue
             external_list.append(TypeExternalLink.to_json(ext_link_instance))
             render_result.externals = external_list
         return render_result
 
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class RenderList:
     """TODO: document"""
     def __init__(self,

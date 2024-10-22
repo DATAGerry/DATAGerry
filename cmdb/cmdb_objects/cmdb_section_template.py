@@ -20,7 +20,6 @@ a section template in Datagarry.
 import logging
 
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -35,15 +34,15 @@ class CmdbSectionTemplate(CmdbDAO):
     holding locations within the CMDB.
 
     Attributes:
-        COLLECTION (Collection):    Name of the database collection.
+        COLLECTION (str):    Name of the database collection.
         MODEL (Model):              Name of the DAO.
         DEFAULT_VERSION (str):      The default "starting" version number.
         SCHEMA (dict):              The validation schema for this DAO.
         INDEX_KEYS (list):          List of index keys for the database.
     """
-    COLLECTION: Collection = 'framework.sectionTemplates'
-    MODEL: Model = 'Section_Template'
-    DEFAULT_VERSION: str = '1.0.0'
+    COLLECTION = 'framework.sectionTemplates'
+    MODEL = 'Section_Template'
+    DEFAULT_VERSION = '1.0.0'
     REQUIRED_INIT_KEYS = ['name', 'label','type', 'fields']
 
     SCHEMA: dict = {

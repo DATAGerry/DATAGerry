@@ -38,7 +38,7 @@ class UserManagerGetError(UserManagerError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX(not used)
 class UserManagerInsertError(UserManagerError):
     """
     Raised when UsersManager could not create an user
@@ -48,7 +48,7 @@ class UserManagerInsertError(UserManagerError):
         super().__init__(self.message)
 
 
-#TODO: ERROR-FIX (not used)
+#ERROR-FIX (not used)
 class UserManagerUpdateError(UserManagerError):
     """
     Raised when UsersManager could not update an user

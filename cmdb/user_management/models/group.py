@@ -17,7 +17,6 @@
 import logging
 
 from cmdb.framework import CmdbDAO
-from cmdb.framework.utils import Collection, Model
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 
 from cmdb.errors.security import RightNotFoundError
@@ -28,8 +27,8 @@ LOGGER = logging.getLogger(__name__)
 
 class UserGroupModel(CmdbDAO):
     """TODO: document"""
-    COLLECTION: Collection = 'management.groups'
-    MODEL: Model = 'Group'
+    COLLECTION = 'management.groups'
+    MODEL = 'Group'
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]

@@ -53,7 +53,7 @@ class Update20200226(Updater):
             # Remove the property root from category collection
             self.database_manager.unset_update_many(CategoryModel.COLLECTION, {}, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
-            #TODO: ERROR-FIX
+            #ERROR-FIX
             raise Exception(err) from err
 
         self.increase_updater_version(20200226)

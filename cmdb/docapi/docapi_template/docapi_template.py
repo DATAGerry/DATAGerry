@@ -19,24 +19,23 @@ from enum import Enum
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.utils import Model
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class DocapiTemplateType(Enum):
     """TODO: document"""
     OBJECT = 0
 
 
-#TODO: CLASS-FIX
+#CLASS-FIX
 class DocapiTemplate(TemplateManagementBase):
     """
     Docapi Template
     """
     COLLECTION = 'docapi.templates'
-    MODEL: Model = 'DocapiTemplate'
+    MODEL = 'DocapiTemplate'
 
     INDEX_KEYS = [
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}

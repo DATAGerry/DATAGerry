@@ -17,8 +17,7 @@
 import json
 import logging
 from datetime import datetime, timezone
-
-from flask import request, current_app
+from flask import request, current_app, abort
 
 from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.manager.groups_manager import GroupsManager
@@ -27,7 +26,6 @@ from cmdb.security.security import SecurityManager
 
 from cmdb.search import Query
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import ErrorMessage
 from cmdb.interface.route_utils import make_response
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.models.user import UserModel
@@ -62,7 +60,7 @@ def setup_datagerry():
     LOGGER.info("setup_datagerry() called")
 
     if not request.args:
-        return ErrorMessage(400, 'No request arguments provided!').response()
+        return abort(400, 'No request arguments provided!')
 
     setup_data: dict = request.args.to_dict()
 
@@ -73,11 +71,11 @@ def setup_datagerry():
         email = setup_data['email']
         database = setup_data['database']
     except KeyError:
-        return ErrorMessage(400, "A required field in data is missing!").response()
+        return abort(400, "A required field in data is missing!")
 
     ### Early out if databse already exists
     if check_db_exists(database):
-        return ErrorMessage(400, f"The database with the name {database} already exists!").response()
+        return abort(400, f"The database with the name {database} already exists!")
 
     # Create database and a new admin user
     init_db_routine(database)
@@ -89,7 +87,7 @@ def setup_datagerry():
             users_data = json.load(users_file)
 
             if email in users_data:
-                return ErrorMessage(400, "A user with this email already exists!").response()
+                return abort(400, "A user with this email already exists!")
 
         # Create the user in the dict
         users_data[email] = {
@@ -102,8 +100,8 @@ def setup_datagerry():
         with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
             json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
     except Exception as err:
-        LOGGER.debug(f"[setup_datagerry] Error: {err}, Type: {type(err)}")
-        return ErrorMessage(400, "There is an issue with the users json file!").response()
+        LOGGER.debug("[setup_datagerry] Error: %s, Type: %s", err, type(err))
+        return abort(400, "There is an issue with the users json file!")
 
     return make_response(True)
 

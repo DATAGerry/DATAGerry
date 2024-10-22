@@ -31,9 +31,7 @@ from cmdb.interface.response import GetMultiResponse, \
                                     GetSingleResponse, \
                                     InsertSingleResponse, \
                                     UpdateSingleResponse, \
-                                    DeleteSingleResponse, \
-                                    ErrorMessage
-from cmdb.framework.utils import PublicID
+                                    DeleteSingleResponse
 from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
@@ -80,7 +78,7 @@ def insert_user(data: dict, request_user: UserModel):
                 # Confirm database is available from the request
                 data['database'] = request_user.database
         except KeyError:
-            return ErrorMessage(400, "The database could not be retrieved!").response()
+            return abort(400, "The database could not be retrieved!")
 
         try:
             if current_app.cloud_mode:
@@ -91,7 +89,7 @@ def insert_user(data: dict, request_user: UserModel):
                     raise KeyError
         except KeyError:
             LOGGER.debug("[insert_user] No email was provided!")
-            return ErrorMessage(400, "The email is mandatory to create a new user!").response()
+            return abort(400, "The email is mandatory to create a new user!")
 
         # Check if email is already exists
         try:
@@ -99,7 +97,7 @@ def insert_user(data: dict, request_user: UserModel):
                 user_with_given_email = users_manager.get_user_by(Query({'email': user_email}))
 
                 if user_with_given_email:
-                    return ErrorMessage(400, "The email is already in use!").response()
+                    return abort(400, "The email is already in use!")
         except ManagerGetError:
             pass
 
@@ -109,7 +107,7 @@ def insert_user(data: dict, request_user: UserModel):
                 users_data = json.load(users_file)
 
                 if user_email in users_data:
-                    return ErrorMessage(400, "A user with this email already exists!").response()
+                    return abort(400, "A user with this email already exists!")
 
             # Create the user in the dict
             users_data[user_email] = {
@@ -122,12 +120,12 @@ def insert_user(data: dict, request_user: UserModel):
             with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
                 json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
 
-        result_id: PublicID = users_manager.insert_user(data)
+        result_id = users_manager.insert_user(data)
 
         #Confirm that user is created
         user = users_manager.get_user(result_id)
     except ManagerGetError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[insert_user] ManagerGetError: %s", err.message)
         return abort(404, "An error occured when creating the user!")
     except ManagerInsertError as err:
@@ -173,10 +171,10 @@ def get_users(params: CollectionParameters, request_user: UserModel):
                                         model=UserModel.MODEL,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return api_response.make_response()
@@ -242,7 +240,7 @@ def update_user(public_id: int, data: dict, request_user: UserModel):
 
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_user] ManagerUpdateError: %s", err.message)
@@ -276,7 +274,7 @@ def change_user_password(public_id: int, request_user: UserModel):
         users_manager.update_user(public_id, user)
         api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[change_user_password] ManagerUpdateError: %s", err.message)
@@ -307,11 +305,11 @@ def delete_user(public_id: int, request_user: UserModel):
         deleted_group = users_manager.delete_user(public_id)
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
     except ManagerGetError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[delete_user] ManagerGetError: %s", err.message)
         return abort(404, f"Could not delete user with ID: {public_id} !")
     except ManagerDeleteError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[delete_user] ManagerDeleteError: %s", err.message)
         return abort(404, f"Could not delete user with ID: {public_id} !")
 

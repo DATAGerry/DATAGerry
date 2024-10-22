@@ -81,7 +81,7 @@ def get_intro_starter(request_user: UserModel):
 
         resp = make_response(intro_instance)
     except Exception:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
 
     return resp

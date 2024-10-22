@@ -84,7 +84,7 @@ def insert_type(data: dict, request_user: UserModel):
         result_id = types_manager.insert_type(data)
         raw_doc = types_manager.get_type(result_id)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerInsertError as err:
         LOGGER.debug("[insert_type] ManagerInsertError: %s", err.message)
@@ -147,10 +147,10 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
                                         model=TypeModel.MODEL,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return api_response.make_response()
@@ -198,7 +198,7 @@ def count_objects(public_id: int, request_user: UserModel):
     try:
         objects_count = objects_manager.count_objects({'type_id':public_id})
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
 
     return make_api_response(objects_count)
@@ -236,7 +236,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
         types_manager.update_type(public_id, TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
     except ManagerGetError:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_type] ManagerUpdateError: %s", err.message)
@@ -299,14 +299,14 @@ def delete_type(public_id: int, request_user: UserModel):
 
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
     except ManagerGetError as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         LOGGER.debug("[delete_type] ManagerGetError: %s", err.message)
         return abort(404)
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_type] ManagerDeleteError: %s", err.message)
         return abort(400, f"Could not delete the type with ID: {public_id}")
     except Exception as err:
-        #TODO: ERROR-FIX
+        #ERROR-FIX
         return abort(400)
 
     return api_response.make_response()

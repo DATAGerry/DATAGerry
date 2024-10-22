@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.framework.utils import PublicID
 from cmdb.search import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
@@ -27,7 +26,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -64,7 +63,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         return unwind
 
 
-    def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
+    def _match_acl(self, group_id: int, permission: AccessControlPermission) -> dict:
         return self.match_(
             self.or_([
                 self.exists_('type.acl', False),
@@ -84,7 +83,7 @@ class AccessControlQueryBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -121,7 +120,7 @@ class AccessControlQueryBuilder(PipelineBuilder):
         return unwind
 
 
-    def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
+    def _match_acl(self, group_id: int, permission: AccessControlPermission) -> dict:
         return self.match_(
             self.or_([
                 self.exists_('type.acl', False),
