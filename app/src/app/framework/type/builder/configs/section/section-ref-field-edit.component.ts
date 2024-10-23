@@ -144,7 +144,7 @@ export class SectionRefFieldEditComponent extends ConfigEditBaseComponent implem
         this.form.addControl('label', this.labelControl);
         this.form.addControl('reference', this.referenceGroup);
 
-        if (this.mode === CmdbMode.Edit) {
+        if (this.mode === CmdbMode.Edit || this.mode === CmdbMode.Create) {
             if (this.data?.reference?.type_id) {
                 this.loadPresetType(this.data.reference.type_id);
             }
