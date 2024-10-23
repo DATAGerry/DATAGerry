@@ -721,7 +721,12 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
         if (hasInvalidIdentifier || isRefField || !field.label) {
             if (isRefField) {
-                return !hasValidRefTypes || hasInvalidIdentifier || !field.label;
+
+                const hasSummaries = field.summaries?.every(
+                    ({ type_id, line }) => type_id != null && line?.trim() !== "" && line !== null
+                );
+
+                return !hasValidRefTypes || hasInvalidIdentifier || !field.label || !hasSummaries;
             }
             return true;
         }
