@@ -68,13 +68,13 @@ def preset_database(database_manager, database_name):
         pass
 
 
-    kg = KeyGenerator(database_manager=database_manager)
+    kg = KeyGenerator(database_manager)
     kg.generate_rsa_keypair()
     kg.generate_symmetric_aes_key()
 
     groups_manager = GroupsManager(database_manager)
     users_manager = UsersManager(database_manager)
-    security_manager = SecurityManager(database_manager=database_manager)
+    security_manager = SecurityManager(database_manager)
 
     for group in __FIXED_GROUPS__:
         groups_manager.insert_group(group)

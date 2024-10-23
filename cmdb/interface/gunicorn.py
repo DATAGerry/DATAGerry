@@ -18,12 +18,12 @@ Server module for web-based services
 """
 import logging
 import multiprocessing
-
 from gunicorn.app.base import BaseApplication
+
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __MODE__, __CLOUD_MODE__
 import cmdb.process_management.service
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
 from cmdb.interface.rest_api import create_rest_api
@@ -53,7 +53,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
         else:
             event_queue = self._event_manager.get_send_queue()
 
-        database_manager = DatabaseManagerMongo(
+        dbm = MongoDatabaseManager(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
 
@@ -63,7 +63,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
             app=create_app(),
             mounts={
                 '/docs': create_docs_server(),
-                '/rest': create_rest_api(database_manager, event_queue)
+                '/rest': create_rest_api(dbm, event_queue)
             }
         )
 

@@ -21,7 +21,7 @@ from enum import Enum
 from datetime import datetime, timezone
 from pymongo.errors import OperationFailure
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.security.security import SecurityManager
@@ -41,11 +41,9 @@ from cmdb.errors.system_config import SectionError
 
 LOGGER = logging.getLogger(__name__)
 
-
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 CheckRoutine - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class CheckRoutine:
     """
     This class holds checks for the database check routines
@@ -61,9 +59,9 @@ class CheckRoutine:
         FINISHED = 3
 
 
-    def __init__(self, dbm: DatabaseManagerMongo):
+    def __init__(self, dbm: MongoDatabaseManager):
         self.status: int = CheckRoutine.CheckStatus.NOT
-        self.setup_database_manager = dbm
+        self.dbm = dbm
 
 
     def get_check_status(self) -> int:
@@ -104,12 +102,12 @@ class CheckRoutine:
         Returns:
             (bool): Returns bool if there are any collection in the initialised database
         """
-        return not self.setup_database_manager.connector.database.list_collection_names()
+        return not self.dbm.connector.database.list_collection_names()
 
 
     def __check_database_collection_valid(self) -> bool:
         LOGGER.info('CHECK: Checking database collection validation')
-        detected_database = self.setup_database_manager.connector.database
+        detected_database = self.dbm.connector.database
         collection_test = True
 
         all_collections = detected_database.list_collection_names()
@@ -119,37 +117,37 @@ class CheckRoutine:
             for collection in FRAMEWORK_CLASSES:
                 #first check if collection exists, else create it
                 if collection.COLLECTION not in all_collections:
-                    created_collection = self.setup_database_manager.create_collection(collection.COLLECTION)
-                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    created_collection = self.dbm.create_collection(collection.COLLECTION)
+                    self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
                     LOGGER.info("CHECK: Created missing Collection => %s", created_collection)
 
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
 
                 # setup locations if valid test
                 if collection == CmdbLocation and collection_test:
-                    root_location: CmdbLocation = self.setup_database_manager.find_one(collection.COLLECTION, 1)
+                    root_location: CmdbLocation = self.dbm.find_one(collection.COLLECTION, 1)
 
                     if root_location:
-                        if self.setup_database_manager.validate_root_location(CmdbLocation.to_data(root_location)):
+                        if self.dbm.validate_root_location(CmdbLocation.to_data(root_location)):
                             LOGGER.info("CHECK: Root Location valid")
                         else:
                             LOGGER.info("CHECK: Root Location invalalid => Fixing the Issue!")
-                            self.setup_database_manager.set_root_location(collection.COLLECTION, create=False)
+                            self.dbm.set_root_location(collection.COLLECTION, create=False)
                     else:
                         LOGGER.info("CHECK: No Root Location => Creating a new Root Location!")
-                        self.setup_database_manager.set_root_location(collection.COLLECTION, create=True)
+                        self.dbm.set_root_location(collection.COLLECTION, create=True)
 
                 # setup section templates if valid test
                 if collection == CmdbSectionTemplate and collection_test:
                     # Add predefined templates if they don't exist
-                    self.setup_database_manager.init_predefined_templates(collection.COLLECTION)
+                    self.dbm.init_predefined_templates(collection.COLLECTION)
 
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:
                 collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
 
             # if there are no groups create groups and admin user
-            if self.setup_database_manager.count('management.groups') < 2:
+            if self.dbm.count('management.groups') < 2:
                 self.init_user_management()
 
             # exportdJob management collections
@@ -165,9 +163,9 @@ class CheckRoutine:
 
     def init_user_management(self):
         """Creates intital groups and admin user"""
-        scm = SecurityManager(self.setup_database_manager)
-        groups_manager = GroupsManager(self.setup_database_manager)
-        users_manager = UsersManager(self.setup_database_manager)
+        scm = SecurityManager(self.dbm)
+        groups_manager = GroupsManager(self.dbm)
+        users_manager = UsersManager(self.dbm)
 
         for group in __FIXED_GROUPS__:
             groups_manager.insert_group(group)
@@ -195,7 +193,7 @@ class CheckRoutine:
             (bool): True if updates are available else raises an error
         """
         try:
-            ssr = SystemSettingsReader(self.setup_database_manager)
+            ssr = SystemSettingsReader(self.dbm)
             ssr.get_all_values_from_section('updater')
 
             upd_module = UpdaterModule(ssr)

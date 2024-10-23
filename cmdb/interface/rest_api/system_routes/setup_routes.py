@@ -19,7 +19,7 @@ import logging
 from datetime import datetime, timezone
 from flask import request, current_app, abort
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
@@ -38,7 +38,7 @@ LOGGER = logging.getLogger(__name__)
 setup_blueprint = APIBlueprint('setup', __name__)
 
 with current_app.app_context():
-    dbm: DatabaseManagerMongo = current_app.database_manager
+    dbm: MongoDatabaseManager = current_app.database_manager
 
 # -------------------------------------------------------------------------------------------------------------------- #
 

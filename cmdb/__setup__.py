@@ -20,7 +20,7 @@ from enum import Enum
 
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.security.security import SecurityManager
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
@@ -40,10 +40,13 @@ from cmdb.errors.manager.user_manager import UserManagerInsertError
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 SetupRoutine - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SetupRoutine:
     """TODO: document"""
 
+    #CLASS-FIX
     class SetupStatus(Enum):
         """TODO: document"""
         NOT = 0
@@ -52,13 +55,13 @@ class SetupRoutine:
         FINISHED = 3
 
 
-    def __init__(self, dbm: DatabaseManagerMongo):
+    def __init__(self, dbm: MongoDatabaseManager):
         self.status = SetupRoutine.SetupStatus.NOT
         # check if settings are loaded
 
-        self.setup_system_config_reader: SystemConfigReader = SystemConfigReader()
-        self.setup_database_manager: DatabaseManagerMongo = dbm
-        system_config_reader_status: bool = self.setup_system_config_reader.status()
+        self.setup_system_config_reader = SystemConfigReader()
+        self.dbm = dbm
+        system_config_reader_status = self.setup_system_config_reader.status()
 
         if system_config_reader_status is not True:
             self.status = SetupRoutine.SetupStatus.ERROR
@@ -111,7 +114,7 @@ class SetupRoutine:
             # create user management
             LOGGER.info('SETUP ROUTINE: UserModel management')
             try:
-                if self.setup_database_manager.count('management.groups') < 2:
+                if self.dbm.count('management.groups') < 2:
                     self.__create_user_management()
             except Exception as err:
                 self.status = SetupRoutine.SetupStatus.ERROR
@@ -121,7 +124,7 @@ class SetupRoutine:
 
             # create version updater settings
             try:
-                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
+                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.dbm)
                 updater_setting_instance = UpdateSettings(**UpdaterModule.get_last_version())
                 system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
@@ -138,15 +141,15 @@ class SetupRoutine:
 
     def init_keys(self):
         """TODO: document"""
-        kg = KeyGenerator(self.setup_database_manager)
+        kg = KeyGenerator(self.dbm)
         LOGGER.info('KEY ROUTINE: Generate RSA keypair')
         kg.generate_rsa_keypair()
         LOGGER.info('KEY ROUTINE: Generate aes key')
         kg.generate_symmetric_aes_key()
 
         self.__check_database()
-        scm = SecurityManager(self.setup_database_manager)
-        users_manager = UsersManager(self.setup_database_manager)
+        scm = SecurityManager(self.dbm)
+        users_manager = UsersManager(self.dbm)
 
         try:
             admin_user: UserModel = users_manager.get_user(1)
@@ -171,9 +174,9 @@ class SetupRoutine:
     def __create_user_management(self):
         """TODO: document"""
         LOGGER.info("SETUP ROUTINE: CREATE USER MANAGEMENT")
-        scm = SecurityManager(self.setup_database_manager)
-        groups_manager = GroupsManager(self.setup_database_manager)
-        users_manager = UsersManager(self.setup_database_manager)
+        scm = SecurityManager(self.dbm)
+        groups_manager = GroupsManager(self.dbm)
+        users_manager = UsersManager(self.dbm)
 
         for group in __FIXED_GROUPS__:
             groups_manager.insert_group(group)
@@ -201,7 +204,7 @@ class SetupRoutine:
         LOGGER.info('SETUP ROUTINE: Checking database connection')
 
         try:
-            connection_test = self.setup_database_manager.connector.is_connected()
+            connection_test = self.dbm.connector.is_connected()
         except ServerTimeoutError:
             connection_test = False
         LOGGER.info('SETUP ROUTINE: Database connection status %s', connection_test)
@@ -210,7 +213,7 @@ class SetupRoutine:
 
 
     def __is_database_empty(self) -> bool:
-        return not self.setup_database_manager.connector.database.list_collection_names()
+        return not self.dbm.connector.database.list_collection_names()
 
 
     def __init_database(self):
@@ -220,29 +223,29 @@ class SetupRoutine:
 
         # delete database
         try:
-            self.setup_database_manager.drop_database(database_name)
+            self.dbm.drop_database(database_name)
         except DatabaseNotExists as err:
             LOGGER.debug("[__init_database] DatabaseNotExists: %s", err.message)
 
         # create new database
-        self.setup_database_manager.create_database(database_name)
+        self.dbm.create_database(database_name)
 
         #generate framework collections
         for collection in FRAMEWORK_CLASSES:
-            self.setup_database_manager.create_collection(collection.COLLECTION)
+            self.dbm.create_collection(collection.COLLECTION)
             # set unique indexes
-            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+            self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
 
         #generate user management collections
         for collection in USER_MANAGEMENT_COLLECTION:
-            self.setup_database_manager.create_collection(collection.COLLECTION)
+            self.dbm.create_collection(collection.COLLECTION)
             # set unique indexes
-            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+            self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
 
         #generate ExportdJob management collections
         for collection in JOB_MANAGEMENT_COLLECTION:
-            self.setup_database_manager.create_collection(collection.COLLECTION)
+            self.dbm.create_collection(collection.COLLECTION)
             # set unique indexes
-            self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+            self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
 
         LOGGER.info('SETUP ROUTINE: initialize finished')

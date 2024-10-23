@@ -17,10 +17,11 @@
 import logging
 from flask import current_app
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+
 from cmdb import __title__, __version__
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -29,7 +30,7 @@ connection_routes = RootBlueprint('connection_routes', __name__)
 
 
 with current_app.app_context():
-    database_manager: DatabaseManagerMongo = current_app.database_manager
+    dbm: MongoDatabaseManager = current_app.database_manager
 
 
 @connection_routes.route('/')
@@ -43,7 +44,7 @@ def connection_response():
     resp = {
         'title': __title__,
         'version': __version__,
-        'connected': database_manager.status()
+        'connected': dbm.status()
     }
 
     return make_response(resp)

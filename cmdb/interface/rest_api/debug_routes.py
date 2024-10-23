@@ -17,21 +17,24 @@
 from flask import current_app
 from werkzeug.exceptions import abort
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+
 from cmdb.interface.route_utils import make_response
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
+
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')
 
 with current_app.app_context():
-    from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-    database_manager: DatabaseManagerMongo = current_app.database_manager
+    dbm: MongoDatabaseManager = current_app.database_manager
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @debug_blueprint.route('/indexes/<string:collection>/', methods=['GET'])
 @debug_blueprint.route('/indexes/<string:collection>', methods=['GET'])
 def get_index(collection: str):
     """TODO: document"""
-    return make_response(database_manager.get_index_info(collection))
+    return make_response(dbm.get_index_info(collection))
 
 
 @debug_blueprint.route('/error/<int:status_code>/', methods=['GET', 'POST'])

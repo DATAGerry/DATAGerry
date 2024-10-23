@@ -15,19 +15,23 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from Crypto import Random
 from Crypto.PublicKey import RSA
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+
 from cmdb.utils.system_writer import SystemSettingsWriter
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 KeyGenerator - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class KeyGenerator:
     """TODO: document"""
-    def __init__(self, database_manager: DatabaseManagerMongo):
-        self.ssw = SystemSettingsWriter(database_manager)
+    def __init__(self, dbm: MongoDatabaseManager):
+        self.ssw = SystemSettingsWriter(dbm)
 
 
     def generate_rsa_keypair(self):
@@ -41,14 +45,11 @@ class KeyGenerator:
             'public': public_key
         }
 
-        LOGGER.debug("POC => generate asymmetric_key")
-
         self.ssw.write('security', {'asymmetric_key': asymmetric_key})
 
 
     def generate_symmetric_aes_key(self):
         """TODO: document"""
         symmetric_aes_key = Random.get_random_bytes(32)
-        LOGGER.debug("POC => generate symmetric_aes_key")
 
         self.ssw.write('security', {'symmetric_aes_key': symmetric_aes_key})

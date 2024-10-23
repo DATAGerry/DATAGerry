@@ -20,7 +20,7 @@ import sched
 from threading import Thread
 from datetime import datetime, timezone
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.exportd_jobs_manager import ExportdJobsManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.users_manager import UsersManager
@@ -130,7 +130,7 @@ class ExportdThread(Thread):
     def __init__(self, event: Event, state: bool = False):
         scr = SystemConfigReader()
         database_options = scr.get_all_values_from_section('Database')
-        database = DatabaseManagerMongo(**database_options)
+        dbm = MongoDatabaseManager(**database_options)
 
         super().__init__()
         self.job = None
@@ -141,10 +141,10 @@ class ExportdThread(Thread):
         self.is_active = state
         self.exception_handling = None
 
-        self.exportd_logs_manager = ExportdLogsManager(database)
-        self.exportd_jobs_manager = ExportdJobsManager(database)
-        self.users_manager = UsersManager(database)
-        self.objects_manager = ObjectsManager(database)
+        self.exportd_logs_manager = ExportdLogsManager(dbm)
+        self.exportd_jobs_manager = ExportdJobsManager(dbm)
+        self.users_manager = UsersManager(dbm)
+        self.objects_manager = ObjectsManager(dbm)
 
 
     def run(self):
