@@ -17,7 +17,7 @@
 import logging
 from flask import current_app
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -30,12 +30,12 @@ LOGGER = logging.getLogger(__name__)
 class KeyHolder:
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, dbm: MongoDatabaseManager):
         """
         Args:
             key_directory: key based directory
         """
-        self.ssr = SystemSettingsReader(database_manager)
+        self.ssr = SystemSettingsReader(dbm)
         self.rsa_public = self.get_public_key()
         self.rsa_private = self.get_private_key()
 

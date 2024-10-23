@@ -19,7 +19,7 @@ from typing import Union
 from authlib.jose import jwt, JsonWebToken
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.security.key.holder import KeyHolder
 
@@ -35,8 +35,8 @@ class TokenValidator:
     """
     Decodes and validates tokens
     """
-    def __init__(self, database_manager: DatabaseManagerMongo):
-        self.key_holder = KeyHolder(database_manager)
+    def __init__(self, dbm: MongoDatabaseManager):
+        self.key_holder = KeyHolder(dbm)
 
 
     def decode_token(self, token: Union[JsonWebToken, str, dict]):

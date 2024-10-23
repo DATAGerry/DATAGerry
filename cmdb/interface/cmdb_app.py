@@ -20,7 +20,7 @@ from queue import Queue
 from flask import Flask
 
 from cmdb import __CLOUD_MODE__
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -30,9 +30,10 @@ class BaseCmdbApp(Flask):
     """TODO: document"""
 
     def __init__(self, import_name: str,
-                 database_manager: DatabaseManagerMongo = None,
+                 database_manager: MongoDatabaseManager = None,
                  event_queue: Queue = None):
-        self.database_manager: DatabaseManagerMongo = database_manager
+        #REFACTOR-FIX (replace self.database_manager with self.dbm)
+        self.database_manager: MongoDatabaseManager = database_manager
         self.event_queue: Queue = event_queue
         self.temp_folder: str = '/tmp/'
         self.cloud_mode = __CLOUD_MODE__

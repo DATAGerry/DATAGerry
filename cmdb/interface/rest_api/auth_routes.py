@@ -19,7 +19,7 @@ import logging
 from datetime import datetime, timezone
 from flask import request, current_app, abort
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.security.security import SecurityManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
@@ -46,7 +46,7 @@ LOGGER = logging.getLogger(__name__)
 auth_blueprint = APIBlueprint('auth', __name__)
 
 with current_app.app_context():
-    dbm: DatabaseManagerMongo = current_app.database_manager
+    dbm: MongoDatabaseManager = current_app.database_manager
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -133,8 +133,8 @@ def get_provider_config(provider_class: str, request_user: UserModel):
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
     """TODO: document"""
-    users_manager: UsersManager = UsersManager(current_app.database_manager)
-    security_manager: SecurityManager = SecurityManager(current_app.database_manager)
+    users_manager = UsersManager(current_app.database_manager)
+    security_manager = SecurityManager(current_app.database_manager)
     login_data = request.json
 
     if not request.json:
@@ -286,7 +286,7 @@ def create_new_admin_user(user_data: dict):
     """Creates a new admin user"""
     dbm.connector.set_database(user_data['database'])
 
-    users_manager: UsersManager = UsersManager(dbm)
+    users_manager = UsersManager(dbm)
     scm = SecurityManager(dbm)
 
     try:
@@ -312,9 +312,10 @@ def create_new_admin_user(user_data: dict):
 def retrive_user(user_data: dict):
     """Get user from db"""
     dbm.connector.set_database(user_data['database'])
-    users_manager: UsersManager = UsersManager(dbm)
+    users_manager = UsersManager(dbm)
 
     try:
         return users_manager.get_user_by({'email': user_data['email']})
     except Exception:
+        #ERROR-FIX
         return None

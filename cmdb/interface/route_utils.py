@@ -110,7 +110,7 @@ def user_has_right(required_right: str) -> bool:
     token = parse_authorization_header(request.headers['Authorization'])
 
     try:
-        decrypted_token = TokenValidator(database_manager=current_app.database_manager).decode_token(token)
+        decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
     except TokenValidationError as err:
         #ERROR-FIX
         LOGGER.debug("[user_has_right] Error: %s", str(err))
@@ -249,7 +249,7 @@ def parse_authorization_header(header):
                     current_app.database_manager.connector.set_database(user_data['database'])
 
                 users_manager = UsersManager(current_app.database_manager)
-                security_manager: SecurityManager = SecurityManager(current_app.database_manager)
+                security_manager = SecurityManager(current_app.database_manager)
 
                 auth_settings = SystemSettingsReader(current_app.database_manager).get_all_values_from_section(
                                                                                    'auth',

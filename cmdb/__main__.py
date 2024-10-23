@@ -25,7 +25,7 @@ from argparse import ArgumentParser, Namespace
 import os
 import sys
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 import cmdb
 from cmdb import __title__
@@ -62,15 +62,15 @@ def main(args: Namespace):
 
         if args.start and not args.cloud:
             try:
-                dbm: DatabaseManagerMongo = _check_database()
+                dbm: MongoDatabaseManager = _check_database()
 
                 if not dbm:
                     raise DatabaseConnectionError('Could not establish connection to db')
 
                 LOGGER.info("Database connection established.")
 
-            except DatabaseConnectionError as error:
-                LOGGER.critical("%s: %s",type(error).__name__, error)
+            except DatabaseConnectionError as err:
+                LOGGER.critical("%s: %s",type(err), err)
                 sys.exit(1)
 
         # check db-settings and run update if needed
@@ -88,11 +88,11 @@ def main(args: Namespace):
 
 # ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
 
-def _start_key_routine(dbm: DatabaseManagerMongo):
+def _start_key_routine(dbm: MongoDatabaseManager):
     """
     Starts key generation routine
     Args:
-        dbm (DatabaseManagerMongo): Database Connector
+        dbm (MongoDatabaseManager): Database Connector
     """
     setup_routine = SetupRoutine(dbm)
     setup_status = None
@@ -110,11 +110,11 @@ def _start_key_routine(dbm: DatabaseManagerMongo):
         sys.exit(1)
 
 
-def _start_check_routines(dbm: DatabaseManagerMongo):
+def _start_check_routines(dbm: MongoDatabaseManager):
     """
     Starts validation of database structure
     Args:
-        dbm (DatabaseManagerMongo): Database Connector
+        dbm (MongoDatabaseManager): Database Connector
     """
     check_routine = CheckRoutine(dbm)
         # check db-settings
@@ -127,7 +127,7 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
 
     if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
         # run update
-        update_routine = UpdateRoutine()
+        update_routine = UpdateRoutine(dbm)
 
         try:
             update_status = update_routine.start_update()
@@ -166,7 +166,7 @@ def _check_database():
     ssc = SystemConfigReader()
     LOGGER.info('Checking database connection with %s data',ssc.config_name)
     database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(**database_options)
+    dbm = MongoDatabaseManager(**database_options)
 
     try:
         connection_test = dbm.connector.is_connected()

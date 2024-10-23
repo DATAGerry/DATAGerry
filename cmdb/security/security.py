@@ -25,7 +25,7 @@ from bson import json_util
 from bson.json_util import dumps
 from flask import current_app
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
@@ -35,19 +35,21 @@ from cmdb.errors.database import NoDocumentFound
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                SecurityManager - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SecurityManager:
     """TODO: document"""
     DEFAULT_BLOCK_SIZE = 32
     DEFAULT_ALG = 'HS512'
     DEFAULT_EXPIRES = int(10)
 
-    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         if database:
-            database_manager.connector.set_database(database)
+            dbm.connector.set_database(database)
 
-        self.ssr = SystemSettingsReader(database_manager)
-        self.ssw = SystemSettingsWriter(database_manager)
+        self.ssr = SystemSettingsReader(dbm)
+        self.ssw = SystemSettingsWriter(dbm)
         self.salt = "cmdb"
 
 

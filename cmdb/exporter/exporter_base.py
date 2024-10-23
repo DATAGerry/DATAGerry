@@ -25,26 +25,19 @@ import xml.etree.ElementTree as ET
 import zipfile
 import openpyxl
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
-from cmdb.utils.system_config import SystemConfigReader
 from cmdb.exporter.exporter_utils import ExperterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.exporter.config.config_type import ExporterConfigType
-
 from cmdb.framework.cmdb_render import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-database_manager = DatabaseManagerMongo(**SystemConfigReader().get_all_values_from_section('Database'))
-
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                     ZipExportType                                                    #
+#                                                 ZipExportType - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class ZipExportType(BaseExporterFormat):
     """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "zip"
@@ -102,7 +95,7 @@ class ZipExportType(BaseExporterFormat):
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                     CsvExportType                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
-
+#CLASS-FIX
 class CsvExportType(BaseExporterFormat):
     """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "csv"
@@ -179,7 +172,7 @@ class CsvExportType(BaseExporterFormat):
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    JsonExportType                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
-
+#CLASS-FIX
 class JsonExportType(BaseExporterFormat):
     """Extends: BaseExporterFormat"""
     FILE_EXTENSION = "json"
@@ -274,7 +267,7 @@ class JsonExportType(BaseExporterFormat):
 
         return json.dumps(output, default=json_encoding.default, ensure_ascii=False, indent=2)
 
-
+#CLASS-FIX
 class XlsxExportType(BaseExporterFormat):
     """TODO: ducoment"""
     FILE_EXTENSION = "xlsx"
@@ -383,7 +376,7 @@ class XlsxExportType(BaseExporterFormat):
     def __normalize_sheet_title(self, input_data):
         return re.sub('[\\*?:/\[\]]', '_', input_data)
 
-
+#CLASS-FIX
 class XmlExportType(BaseExporterFormat):
     """TODO: ducoment"""
     FILE_EXTENSION = "xml"

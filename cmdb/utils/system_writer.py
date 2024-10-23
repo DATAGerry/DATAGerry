@@ -86,7 +86,7 @@ class SystemSettingsWriter(SystemWriter):
         """
         Write new settings in database
         """
-        return self.dbm.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
+        return self.dbm.update(collection=self.COLLECTION, criteria={'_id': _id}, data=data, upsert=True)
 
 
     def verify(self, _id: str, data: dict = None) -> bool:
@@ -103,6 +103,7 @@ class SystemSettingsWriter(SystemWriter):
         try:
             verify_document = self.dbm.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
         except Exception:
+            #ERROR-FIX
             return False
 
         if verify_document != data and data is not None:

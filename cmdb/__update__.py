@@ -18,7 +18,7 @@ import logging
 from enum import Enum
 from pymongo.errors import CollectionInvalid
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.updater import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
@@ -36,11 +36,13 @@ from cmdb.errors.system_config import SectionError
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 UpdateRoutine - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class UpdateRoutine:
     """TODO: document"""
 
-
+    #CLASS-FIX
     class UpateStatus(Enum):
         """TODO: document"""
         NOT = 0
@@ -49,13 +51,13 @@ class UpdateRoutine:
         FINISHED = 3
 
 
-    def __init__(self):
+    def __init__(self, dbm: MongoDatabaseManager):
         self.status = UpdateRoutine.UpateStatus.NOT
         # check if settings are loaded
 
         self.setup_system_config_reader = SystemConfigReader()
         system_config_reader_status = self.setup_system_config_reader.status()
-        self.setup_database_manager = None
+        self.dbm = dbm
 
         if system_config_reader_status is not True:
             self.status = UpdateRoutine.UpateStatus.ERROR
@@ -72,12 +74,9 @@ class UpdateRoutine:
     def __check_database(self):
         """TODO: document"""
         LOGGER.info('SETUP ROUTINE: Checking database connection')
+        #REFACTOR-FIX
         try:
-            self.setup_database_manager = DatabaseManagerMongo(
-                **self.setup_system_config_reader.get_all_values_from_section('Database')
-            )
-
-            connection_test = self.setup_database_manager.connector.is_connected()
+            connection_test = self.dbm.connector.is_connected()
         except ServerTimeoutError:
             connection_test = False
         LOGGER.info('SETUP ROUTINE: Database connection status %s',connection_test)
@@ -87,7 +86,7 @@ class UpdateRoutine:
 
     def __is_database_empty(self) -> bool:
         """TODO: document"""
-        return not self.setup_database_manager.connector.database.list_collection_names()
+        return not self.dbm.connector.database.list_collection_names()
 
 
     def start_update(self):
@@ -123,16 +122,16 @@ class UpdateRoutine:
     def update_database_collection(self):
         """TODO: document"""
         try:
-            detected_database = self.setup_database_manager.connector.database
+            detected_database = self.dbm.connector.database
 
             # update framework collections
             for collection in FRAMEWORK_CLASSES:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
                 except CollectionInvalid:
-                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    self.dbm.create_collection(collection.COLLECTION)
                     # set unique indexes
-                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
 
             # update user management collections
@@ -140,9 +139,9 @@ class UpdateRoutine:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
                 except CollectionInvalid:
-                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    self.dbm.create_collection(collection.COLLECTION)
                     # set unique indexes
-                    self.setup_database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+                    self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
 
             # update exportdJob management collections
@@ -150,9 +149,9 @@ class UpdateRoutine:
                 try:
                     detected_database.validate_collection(collection.COLLECTION)['valid']
                 except CollectionInvalid:
-                    self.setup_database_manager.create_collection(collection.COLLECTION)
+                    self.dbm.create_collection(collection.COLLECTION)
                     # set unique indexes
-                    self.setup_database_manager.create_indexes(collection.COLLECTION,
+                    self.dbm.create_indexes(collection.COLLECTION,
                                                                collection.get_index_keys())
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
         except Exception as err:
@@ -165,14 +164,14 @@ class UpdateRoutine:
         # update version updater settings
         try:
             updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
-            ssr = SystemSettingsReader(self.setup_database_manager)
+            ssr = SystemSettingsReader(self.dbm)
 
             try:
                 updater_settings_values = ssr.get_all_values_from_section('updater')
                 updater_setting_instance = UpdateSettings(**updater_settings_values)
             except SectionError: #ERROR-FIX (UpdateSettings initialisation is not covered)
                 # create updater section if not exist
-                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.setup_database_manager)
+                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.dbm)
                 updater_setting_instance = UpdateSettings(**updater_settings_values)
                 system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
