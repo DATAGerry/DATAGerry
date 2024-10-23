@@ -125,15 +125,20 @@ export class TextFieldEditComponent extends ConfigEditBaseComponent implements O
             return;
         }
 
-        // Check for duplicates
-        this.isDuplicate$ = this.fieldIdentifierValidation.isDuplicate(event);
+        if (type === 'name') {
+            // Check for duplicates
+            this.isDuplicate$ = this.fieldIdentifierValidation.isDuplicate(event);
 
-        if (!this.isDuplicate$) {
+            if (!this.isDuplicate$) {
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            } else {
+                this.toggleFormControls(true);
+                this.fieldChanges$.next({ "isDuplicate": true });
+            }
+        } else {
             this.toggleFormControls(false);
             this.handleFieldChange(event, type);
-        } else {
-            this.toggleFormControls(true);
-            this.fieldChanges$.next({ "isDuplicate": true });
         }
 
         // Perform validation after a slight delay
