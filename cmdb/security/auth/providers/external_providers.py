@@ -24,7 +24,6 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 
@@ -175,13 +174,13 @@ class LdapAuthenticationProvider(AuthenticationProvider):
                 raise AuthenticationError(str(err)) from err
 
         try:
-            user_instance: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
+            user_instance: UserModel = self.users_manager.get_user_by({'user_name': user_name})
             if (user_instance.group_id != user_group_id) and group_mapping_active:
                 user_instance.group_id = user_group_id
 
                 try:
                     self.users_manager.update_user(user_instance.public_id, user_instance)
-                    user_instance: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
+                    user_instance: UserModel = self.users_manager.get_user_by({'user_name': user_name})
                 except ManagerUpdateError as err:
                     raise AuthenticationError(str(err)) from err
         except ManagerGetError as err:

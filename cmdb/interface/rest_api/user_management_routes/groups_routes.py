@@ -28,7 +28,6 @@ from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertS
 from cmdb.framework.results import IterationResult
 from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.search import Query
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import flat_rights_tree, __all__ as rights
@@ -223,7 +222,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
 
     # Check of action is set
     if params.action:
-        users_in_group: list[UserModel] = users_manager.get_many_users(Query({'group_id': public_id}))
+        users_in_group: list[UserModel] = users_manager.get_many_users({'group_id': public_id})
 
         if len(users_in_group) > 0:
             if params.action == GroupDeleteMode.MOVE.value:

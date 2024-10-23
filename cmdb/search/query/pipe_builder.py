@@ -16,7 +16,6 @@
 """TODO: document"""
 import logging
 
-from cmdb.search.query import Pipeline
 from cmdb.manager.query_builder.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -26,12 +25,12 @@ LOGGER = logging.getLogger(__name__)
 class PipelineBuilder(Builder):
     """Pipeline query builder for database aggregation search"""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         """Init constructor
         Args:
             pipeline: preset a for defined pipeline
         """
-        self._pipeline = pipeline or Pipeline([])
+        self._pipeline = pipeline if pipeline is not None else []
 
 
     def __len__(self) -> int:
@@ -43,18 +42,18 @@ class PipelineBuilder(Builder):
 
     def clear(self):
         """Clear the pipeline"""
-        self.pipeline = Pipeline([])
+        self.pipeline = []
 
 
     @property
-    def pipeline(self) -> Pipeline:
+    def pipeline(self) -> list[dict]:
         """TODO: document"""
         return self._pipeline
 
 
     @pipeline.setter
     def pipeline(self, pipes: list[dict]):
-        self._pipeline = Pipeline(pipes)
+        self._pipeline = pipes
 
 
     def add_pipe(self, pipe: dict):
@@ -67,6 +66,6 @@ class PipelineBuilder(Builder):
         self._pipeline.remove(pipe)
 
 
-    def build(self, *args, **kwargs) -> Pipeline:
+    def build(self, *args, **kwargs) -> list[dict]:
         """TODO: document"""
         raise NotImplementedError

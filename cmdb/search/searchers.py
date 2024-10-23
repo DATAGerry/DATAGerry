@@ -22,9 +22,7 @@ from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.cmdb_render import RenderResult, RenderList
-from cmdb.search import Search
 from cmdb.search.params import SearchParam
-from cmdb.search.query import Query, Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
 from cmdb.user_management.models.user import UserModel
@@ -40,7 +38,7 @@ LOGGER = logging.getLogger(__name__)
 class QuickSearchPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         """Init constructor
 
         Args:
@@ -50,7 +48,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 
 
     def build(self, search_term, user: UserModel = None, permission: AccessControlPermission = None,
-              active_flag: bool = False, *args, **kwargs) -> Pipeline:
+              active_flag: bool = False, *args, **kwargs) -> list[dict]:
         """Build a pipeline query out of search search term"""
 
         regex = self.regex_('fields.value', f'{search_term}', 'ims')
@@ -94,7 +92,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 class SearchReferencesPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         """
         Init constructor load reference fields in runtime.
         The search should interpret reference section like normal field contents.
@@ -105,7 +103,7 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, *args, **kwargs) -> Pipeline:
+    def build(self, *args, **kwargs) -> list[dict]:
         # Load reference fields in runtime
         self.add_pipe(self.lookup_('framework.objects', 'fields.value', 'public_id', 'data'))
         self.add_pipe(
@@ -148,7 +146,7 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
 class SearchPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         """Init constructor
         Args:
             pipeline: preset a for defined pipeline
@@ -193,7 +191,7 @@ class SearchPipelineBuilder(PipelineBuilder):
     def build(self, params: list[SearchParam],
               objects_manager: ObjectsManager = None,
               user: UserModel = None, permission: AccessControlPermission = None,
-              active_flag: bool = False) -> Pipeline:
+              active_flag: bool = False) -> list[dict]:
         """Build a pipeline query out of frontend params"""
         # clear pipeline
         self.clear()
@@ -247,21 +245,25 @@ class SearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
-class SearcherFramework(Search[ObjectsManager]):
+class SearcherFramework:
     """Framework searcher implementation for object search"""
+    DEFAULT_SKIP: int = 0
+    DEFAULT_LIMIT: int = 10
+    DEFAULT_REGEX: str = ''
+
 
     def __init__(self, objects_manager: ObjectsManager):
         self.objects_manager = objects_manager
         super().__init__(objects_manager)
 
 
-    def aggregate(self, pipeline: Pipeline, request_user: UserModel = None, permission: AccessControlPermission = None,
-                  limit: int = Search.DEFAULT_LIMIT,
-                  skip: int = Search.DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
+    def aggregate(self, pipeline: list[dict], request_user: UserModel = None, permission: AccessControlPermission = None,
+                  limit: int = DEFAULT_LIMIT,
+                  skip: int = DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
         """
         Use mongodb aggregation system with pipeline queries
         Args:
-            pipeline (Pipeline): list of requirement pipes
+            pipeline (list[dict]): list of requirement pipes
             request_user (UserModel): user who started this search
             permission (AccessControlPermission) : Permission enum for possible ACL operations..
             limit (int): max number of documents to return
@@ -340,7 +342,7 @@ class SearcherFramework(Search[ObjectsManager]):
         return search_result
 
 
-    def search(self, query: Query, request_user: UserModel = None, limit: int = Search.DEFAULT_LIMIT,
-               skip: int = Search.DEFAULT_SKIP) -> SearchResult[RenderResult]:
+    def search(self, query: dict, request_user: UserModel = None, limit: int = DEFAULT_LIMIT,
+               skip: int = DEFAULT_SKIP) -> SearchResult[RenderResult]:
         """Uses mongodb find query system"""
         raise NotImplementedError()

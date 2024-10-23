@@ -81,17 +81,20 @@ class CheckRoutine:
         LOGGER.info('STARTING Checks...')
         self.status = CheckRoutine.CheckStatus.FINISHED
 
-        # check database
-        if not self.__is_database_empty():
-            if not (self.__check_database_collection_valid() and self.has_updates()):
-                LOGGER.warning("""
-                               The current database collections are not valid!
-                               An update is avaiable which will be installed automatically.
-                               """)
-                self.status = CheckRoutine.CheckStatus.HAS_UPDATES
-        LOGGER.info('FINISHED Checks!')
+        try:
+            # check database
+            if not self.__is_database_empty():
+                if not (self.__check_database_collection_valid() and self.has_updates()):
+                    LOGGER.warning("""
+                                The current database collections are not valid!
+                                An update is avaiable which will be installed automatically.
+                                """)
+                    self.status = CheckRoutine.CheckStatus.HAS_UPDATES
+            LOGGER.info('FINISHED Checks!')
 
-        return self.status
+            return self.status
+        except Exception as err:
+            raise RuntimeError(err) from err
 
 
     def __is_database_empty(self) -> bool:

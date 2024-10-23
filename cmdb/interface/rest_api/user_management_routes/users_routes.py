@@ -22,7 +22,6 @@ from flask import abort, request, current_app
 from cmdb.security.security import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
-from cmdb.search import Query
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
@@ -94,7 +93,7 @@ def insert_user(data: dict, request_user: UserModel):
         # Check if email is already exists
         try:
             if current_app.cloud_mode:
-                user_with_given_email = users_manager.get_user_by(Query({'email': user_email}))
+                user_with_given_email = users_manager.get_user_by({'email': user_email})
 
                 if user_with_given_email:
                     return abort(400, "The email is already in use!")

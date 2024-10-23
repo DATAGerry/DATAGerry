@@ -48,7 +48,7 @@ class DocapiTemplatesManager(BaseManager):
         Set the database connection and the queue for sending events
 
         Args:
-            dbm (DatabaseManagerMongo): Database connection
+            dbm (MongoDatabaseManager): Database connection
             event_queue (Queue, Event): The queue for events in RabbitMQ
             database (str): name of database for cloud mode
         """

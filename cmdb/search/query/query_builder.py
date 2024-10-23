@@ -14,15 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.search.query import Query
 from cmdb.manager.query_builder.builder import Builder
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class QueryBuilder(Builder):
     """Query builder for database find search"""
 
-    def __init__(self, query: Query = None):
-        self._query: Query = query or Query({})
+    def __init__(self, query: dict = None):
+        self._query: dict = query or {}
 
 
     def __len__(self):
@@ -30,20 +29,20 @@ class QueryBuilder(Builder):
 
 
     def clear(self):
-        self.query = Query({})
+        self.query = {}
 
 
     @property
-    def query(self) -> Query:
+    def query(self) -> dict:
         """TODO: document"""
         return self._query
 
 
     @query.setter
     def query(self, value: dict):
-        self._query = Query(value)
+        self._query = value
 
 
-    def build(self, *args, **kwargs) -> Query:
+    def build(self, *args, **kwargs) -> dict:
         """TODO: document"""
         raise NotImplementedError()

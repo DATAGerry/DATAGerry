@@ -93,7 +93,7 @@ class UsersManager(BaseManager):
         Get a single user by a query.
 
         Args:
-            query (Query): Query filter of user parameters.
+            query (dict): Query filter of user parameters.
 
         Returns:
             UserModel: Instance of UserModel with matching data.
@@ -111,7 +111,7 @@ class UsersManager(BaseManager):
         Get a collection of users by a query. Passing no query means all users
 
         Args:
-            query (Query): A database query for filtering
+            query (dict): A database query for filtering
         Returns:
             list[UserModel]: A list of all users which matches the query
         """

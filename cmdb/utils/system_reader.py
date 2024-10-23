@@ -18,7 +18,7 @@ Collection of system readers which loads configuration files and settings
 """
 from typing import Any, Union
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.errors.database import NoDocumentFound
 from cmdb.errors.system_config import SectionError
@@ -29,7 +29,7 @@ class SystemReader:
     Reader super class
     """
 
-    def get_value(self, name: str, section: str, default: Any = None) -> Any:
+    def get_value(self, name: str, section: str) -> Any:
         """
         get specific value from a section
         Args:
@@ -68,16 +68,16 @@ class SystemSettingsReader(SystemReader):
     """
     COLLECTION = 'settings.conf'
 
-    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
         init system settings reader
         Args:
             database_manager: database managers
         """
         if database:
-            database_manager.connector.set_database(database)
+            dbm.connector.set_database(database)
 
-        self.dbm = database_manager
+        self.dbm = dbm
 
         super().__init__()
 

@@ -39,8 +39,8 @@ class Update20200408(Updater):
     def start_update(self):
         try:
             collection = CmdbObject.COLLECTION
-            highest_id = self.database_manager.get_highest_id(collection)
-            self.database_manager.update_public_id_counter(collection, highest_id)
+            highest_id = self.dbm.get_highest_id(collection)
+            self.dbm.update_public_id_counter(collection, highest_id)
 
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
             #ERROR-FIX

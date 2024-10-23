@@ -18,7 +18,7 @@ import logging
 from datetime import datetime, timezone
 
 from cmdb.manager.base_manager import BaseManager
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.exportd.exportd_logs.exportd_log import ExportdLog, ExportdMetaLog, ExportdJobLog
 from cmdb.exportd.exportd_logs.exportd_log import LogAction
@@ -38,7 +38,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 class ExportdLogsManager(BaseManager):
     """TODO: document"""
-    def __init__(self, dbm: DatabaseManagerMongo, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         if database:
             dbm.connector.set_database(database)
 

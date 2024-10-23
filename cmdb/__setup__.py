@@ -35,6 +35,7 @@ from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
+from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -102,6 +103,7 @@ class SetupRoutine:
                 self.init_keys()
             except Exception as err:
                 self.status = SetupRoutine.SetupStatus.ERROR
+
                 raise RuntimeError(
                     f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
                 ) from err
@@ -160,7 +162,7 @@ class SetupRoutine:
         except Exception as err:
             #ERROR-FIX
             LOGGER.info('KEY ROUTINE: Password update for user failed: %s', err)
-            raise Exception(err) from err
+            raise UserManagerInsertError(err) from err
 
 
         LOGGER.info('KEY ROUTINE: FINISHED')

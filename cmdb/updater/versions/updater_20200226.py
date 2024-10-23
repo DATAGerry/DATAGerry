@@ -26,7 +26,9 @@ from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectM
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                Update20200226 - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class Update20200226(Updater):
     """TODO: document"""
 
@@ -47,11 +49,12 @@ class Update20200226(Updater):
             # Update all types where category ID is 0,
             # to root category public ID
             if len(category):
-                self.database_manager.update_many(TypeModel.COLLECTION, query={'category_id': 0},
-                                                  update={'category_id': category.results[0].get_public_id()})
+                self.dbm.update_many(TypeModel.COLLECTION,
+                                     criteria={'category_id': 0},
+                                     update={'category_id': category.results[0].get_public_id()})
 
             # Remove the property root from category collection
-            self.database_manager.unset_update_many(CategoryModel.COLLECTION, {}, 'root')
+            self.dbm.unset_update_many(CategoryModel.COLLECTION, {}, 'root')
         except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
             #ERROR-FIX
             raise Exception(err) from err

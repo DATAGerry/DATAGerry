@@ -21,9 +21,7 @@ from flask import request, abort
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
-from cmdb.search import Search
 from cmdb.search.params import SearchParam
-from cmdb.search.query import Pipeline
 from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
@@ -45,10 +43,10 @@ def quick_search_result_counter(request_user: UserModel):
     """TODO: document"""
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
-    search_term = request.args.get('searchValue', Search.DEFAULT_REGEX, str)
+    search_term = request.args.get('searchValue', SearcherFramework.DEFAULT_REGEX, str)
     builder = QuickSearchPipelineBuilder()
     only_active = _fetch_only_active_objs()
-    pipeline: Pipeline = builder.build(search_term=search_term,
+    pipeline: list[dict] = builder.build(search_term=search_term,
                                        user=request_user,
                                        permission=AccessControlPermission.READ,
                                        active_flag=only_active)
@@ -73,8 +71,8 @@ def search_framework(request_user: UserModel):
     objects_manager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
-        limit = request.args.get('limit', Search.DEFAULT_LIMIT, int)
-        skip = request.args.get('skip', Search.DEFAULT_SKIP, int)
+        limit = request.args.get('limit', SearcherFramework.DEFAULT_LIMIT, int)
+        skip = request.args.get('skip', SearcherFramework.DEFAULT_SKIP, int)
         only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
         resolve_object_references: bool = request.args.get('resolve', False)
@@ -97,7 +95,7 @@ def search_framework(request_user: UserModel):
         searcher = SearcherFramework(objects_manager)
         builder = SearchPipelineBuilder()
 
-        query: Pipeline = builder.build(search_parameters,
+        query: list[dict] = builder.build(search_parameters,
                                         objects_manager,
                                         user=request_user,
                                         permission=AccessControlPermission.READ,

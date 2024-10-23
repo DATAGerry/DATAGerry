@@ -17,8 +17,8 @@
 import logging
 from abc import abstractmethod
 
-from cmdb.cmdb_objects.cmdb_base import CmdbManagerBase
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.manager.base_manager import BaseManager
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.categories_manager import CategoriesManager
@@ -34,18 +34,18 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    Updater - CLASS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-class Updater(CmdbManagerBase):
+class Updater(BaseManager):
     """TODO: document"""
 
     def __init__(self):
-        #REFACTOR-FIX (get the correct database)
         scr = SystemConfigReader()
-        self.database_manager = DatabaseManagerMongo(**scr.get_all_values_from_section('Database'))
-        self.categories_manager = CategoriesManager(self.database_manager)
-        self.objects_manager = ObjectsManager(self.database_manager)
-        self.types_manager = TypesManager(self.database_manager)
+        self.dbm = MongoDatabaseManager(**scr.get_all_values_from_section('Database'))
+        self.categories_manager = CategoriesManager(self.dbm)
+        self.objects_manager = ObjectsManager(self.dbm)
+        self.types_manager = TypesManager(self.dbm)
 
-        super().__init__(self.database_manager)
+        #REFACTOR-FIX (get the correct database)
+        super().__init__(scr.get_value('database_name', 'Database'), self.dbm)
 
 
     @abstractmethod
@@ -74,8 +74,8 @@ class Updater(CmdbManagerBase):
 
     def increase_updater_version(self, value: int):
         """TODO: document"""
-        ssr = SystemSettingsReader(self.database_manager)
-        system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.database_manager)
+        ssr = SystemSettingsReader(self.dbm)
+        system_setting_writer = SystemSettingsWriter(self.dbm)
         updater_settings_values = ssr.get_all_values_from_section('updater')
         updater_setting_instance = UpdateSettings(**updater_settings_values)
         updater_setting_instance.version = value

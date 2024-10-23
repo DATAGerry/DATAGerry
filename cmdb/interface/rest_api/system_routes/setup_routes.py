@@ -24,7 +24,6 @@ from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
-from cmdb.search import Query
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import make_response
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
@@ -156,7 +155,7 @@ def create_new_admin_user(user_data: dict):
     scm = SecurityManager(dbm)
 
     try:
-        users_manager.get_user_by(Query({'email': user_data['email']}))
+        users_manager.get_user_by({'email': user_data['email']})
     except Exception: # Admin user was not found in the database, create a new one
         admin_user = UserModel(
             public_id=1,

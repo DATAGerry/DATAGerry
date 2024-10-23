@@ -74,6 +74,7 @@ class MongoDatabaseManager(DatabaseManager):
                 _gen_default_tables(coll)
             except Exception:
                 return False
+
         return True
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
