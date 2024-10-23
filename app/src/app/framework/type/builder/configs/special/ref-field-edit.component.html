@@ -111,7 +111,7 @@
                             [items]="filteredTypeList"
                             bindLabel="label"
                             bindValue="public_id"
-                            (change)="changeSummaryOption($event)"
+                            (change)="changeSummaryOption($event, summary)"
                             [(ngModel)]="summary.type_id"
                             [ngModelOptions]="{standalone: true}"
                         ></ng-select>

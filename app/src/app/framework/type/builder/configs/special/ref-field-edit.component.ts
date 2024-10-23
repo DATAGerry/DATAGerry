@@ -278,6 +278,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
                 this.summaries.splice(index, 1);
             }
         }
+        this.cd.detectChanges()
     }
 
 
@@ -293,9 +294,12 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
      * Updates the corresponding summary item with the selected type's label and icon.
      * @param type - The selected type object containing the public_id, label, and render_meta.icon.
     */
-    public changeSummaryOption(type: CmdbType) {
-        console.log(type);
+    public changeSummaryOption(type: CmdbType, summary: any) {
+
         if (!type) {
+            summary.label = '';
+            summary.line = '';
+            summary.fields = [];
             return;
         }
         const nestedSummary = this.summaries.find(s => s.type_id === type.public_id);
