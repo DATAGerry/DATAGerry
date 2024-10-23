@@ -33,7 +33,6 @@ from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.search import Query
 from cmdb.user_management import __FIXED_GROUPS__
 from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
@@ -291,7 +290,7 @@ def create_new_admin_user(user_data: dict):
     scm = SecurityManager(dbm)
 
     try:
-        users_manager.get_user_by(Query({'email': user_data['email']}))
+        users_manager.get_user_by({'email': user_data['email']})
     except Exception: # Admin user was not found in the database, create a new one
         admin_user = UserModel(
             public_id=1,

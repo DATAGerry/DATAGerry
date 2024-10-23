@@ -22,7 +22,6 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
@@ -196,10 +195,10 @@ class AuthModule:
         """
         try:
             if current_app.cloud_mode:
-                user = self.users_manager.get_user_by(Query({'email': user_name}))
+                user = self.users_manager.get_user_by({'email': user_name})
             else:
                 user_name = user_name.lower()
-                user = self.users_manager.get_user_by(Query({'user_name': user_name}))
+                user = self.users_manager.get_user_by({'user_name': user_name})
 
             provider_class_name = user.authenticator
 

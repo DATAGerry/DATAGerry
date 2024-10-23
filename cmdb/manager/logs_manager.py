@@ -47,7 +47,7 @@ class LogsManager(BaseManager):
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance
+            database_manager (MongoDatabaseManager): Active database managers instance
             event_queue (Queue, Event): The queue for sending events or the created event to send
         """
         self.event_queue = event_queue

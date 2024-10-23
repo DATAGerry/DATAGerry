@@ -20,7 +20,6 @@ from flask import current_app
 from cmdb.manager.users_manager import UsersManager
 from cmdb.security.security import SecurityManager
 
-from cmdb.search import Query
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.user_management.models.user import UserModel
@@ -55,9 +54,9 @@ class LocalAuthenticationProvider(AuthenticationProvider):
         """TODO: document"""
         try:
             if current_app.cloud_mode:
-                user: UserModel = self.users_manager.get_user_by(Query({'email': user_name}))
+                user: UserModel = self.users_manager.get_user_by({'email': user_name})
             else:
-                user: UserModel = self.users_manager.get_user_by(Query({'user_name': user_name}))
+                user: UserModel = self.users_manager.get_user_by({'user_name': user_name})
         except ManagerGetError as err:
             raise AuthenticationError(str(err)) from err
         login_pass = self.security_manager.generate_hmac(password)

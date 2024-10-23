@@ -22,7 +22,9 @@ from cmdb.utils.system_reader import SystemSettingsReader
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                UpdateSettings - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class UpdateSettings:
     """Update data object"""
 
@@ -45,6 +47,7 @@ class UpdateSettings:
 
     def run_updates(self, version: int, ssr: SystemSettingsReader):
         """TODO: document"""
+        #IMPORT-FIX
         from cmdb.updater import UpdaterModule
         ssr.get_all_values_from_section('updater')
         updater_instance = UpdaterModule(ssr)

@@ -83,8 +83,8 @@ def main(args: Namespace):
         if args.start:
             _start_app()
             LOGGER.info("DATAGERRY successfully started")
-    except Exception as error:
-        raise Exception(error) from error
+    except Exception as err:
+        raise RuntimeError(err) from err
 
 # ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
 
@@ -120,7 +120,7 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
         # check db-settings
     try:
         check_status = check_routine.checker()
-    except Exception as error:
+    except RuntimeError as error:
         LOGGER.debug("[_start_check_routines] Error: %s", error)
         LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
         check_status = check_routine.get_check_status()
@@ -319,7 +319,7 @@ if __name__ == "__main__":
         print(WELCOME_STRING.format(options.__dict__))
         print(LICENSE_STRING)
         main(options)
-    except Exception as err:
+    except RuntimeError as err:
         if cmdb.__MODE__ == 'DEBUG':
             traceback.print_exc()
 

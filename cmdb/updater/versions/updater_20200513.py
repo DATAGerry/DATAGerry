@@ -39,7 +39,7 @@ class Update20200513(Updater):
         collection = TypeModel.COLLECTION
         all_types: list[dict] = []
 
-        all_types = self.database_manager.find_all(collection)
+        all_types = self.dbm.find_all(collection)
 
         for cur_type in all_types:
             #Check if the type already has the 'global_template_ids' property, else create it
@@ -49,16 +49,16 @@ class Update20200513(Updater):
 
             if not global_template_ids in cur_type.keys():
                 cur_type[global_template_ids] = []
-                self.database_manager.update(collection=collection,
-                                             filter={'public_id':cur_public_id},
-                                             data=cur_type)
+                self.dbm.update(collection=collection,
+                                criteria={'public_id':cur_public_id},
+                                data=cur_type)
                 LOGGER.info("Updated 'global_template_ids' for type ID: %s", cur_public_id)
 
             if not selectable_as_parent in cur_type.keys():
                 cur_type[selectable_as_parent] = True
-                self.database_manager.update(collection=collection,
-                                             filter={'public_id':cur_public_id},
-                                             data=cur_type)
+                self.dbm.update(collection=collection,
+                                criteria={'public_id':cur_public_id},
+                                data=cur_type)
                 LOGGER.info("Updated 'selectable_as_parent' for type ID: %s", cur_public_id)
 
         super().increase_updater_version(20200513)

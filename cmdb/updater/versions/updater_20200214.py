@@ -26,7 +26,9 @@ from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectM
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                Update20200214 - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class Update20200214(Updater):
     """TODO: document"""
 

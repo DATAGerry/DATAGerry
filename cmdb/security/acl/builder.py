@@ -14,7 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.search import Pipeline
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -22,11 +21,11 @@ from cmdb.security.acl.permission import AccessControlPermission
 class LookedAccessControlQueryBuilder(PipelineBuilder):
     """Query builder for looked objects in aggregation calls."""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> list[dict]:
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -79,11 +78,11 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
 class AccessControlQueryBuilder(PipelineBuilder):
     """Query builder for restrict objects in aggregation calls."""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> list[dict]:
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())

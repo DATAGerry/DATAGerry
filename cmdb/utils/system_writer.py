@@ -18,7 +18,7 @@ Configuration module for settings in file format and in the database
 """
 import logging
 
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -33,13 +33,13 @@ class SystemWriter:
     """
     COLLECTION = 'settings.*'
 
-    def __init__(self, writer: DatabaseManagerMongo):
+    def __init__(self, dbm: MongoDatabaseManager):
         """
         Default constructor
         Args:
             writer: Database managers instance
         """
-        self.writer = writer
+        self.dbm = dbm
 
 
     def write(self, _id: str, data: dict):
@@ -65,27 +65,28 @@ class SystemWriter:
         raise NotImplementedError
 
 
+#CLASS-FIX
 class SystemSettingsWriter(SystemWriter):
     """TODO: document"""
     COLLECTION = 'settings.conf'
 
-    def __init__(self, database_manager: DatabaseManagerMongo, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
-        Init database writer with DatabaseManagerMongo
+        Init database writer with MongoDatabaseManager
         Args:
             database_manager: Database connection
         """
         if database:
-            database_manager.connector.set_database(database)
+            dbm.connector.set_database(database)
 
-        super().__init__(database_manager)
+        super().__init__(dbm)
 
 
     def write(self, _id: str, data: dict):
         """
         Write new settings in database
         """
-        return self.writer.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
+        return self.dbm.update(collection=self.COLLECTION, filter={'_id': _id}, data=data, upsert=True)
 
 
     def verify(self, _id: str, data: dict = None) -> bool:
@@ -100,7 +101,7 @@ class SystemSettingsWriter(SystemWriter):
         TODO: REFACTOR
         """
         try:
-            verify_document = self.writer.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
+            verify_document = self.dbm.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
         except Exception:
             return False
 

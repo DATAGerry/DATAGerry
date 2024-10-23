@@ -42,14 +42,14 @@ class Update20200512(Updater):
         """TODO: document"""
         collection = CategoryModel.COLLECTION
         new_categories: list[CategoryModel] = []
-        raw_categories_old_structure: list[dict] = self.database_manager.find_all(collection=collection,
+        raw_categories_old_structure: list[dict] = self.dbm.find_all(collection=collection,
                                                                                   filter={})
         for idx, old_raw_category in enumerate(raw_categories_old_structure):
             new_categories.append(self.__convert_category_to_new_structure(old_raw_category, index=idx))
 
-        self.database_manager.delete_collection(collection=CategoryModel.COLLECTION)
-        self.database_manager.create_collection(CategoryModel.COLLECTION)
-        self.database_manager.create_indexes(CategoryModel.COLLECTION, CategoryModel.get_index_keys())
+        self.dbm.delete_collection(collection=CategoryModel.COLLECTION)
+        self.dbm.create_collection(CategoryModel.COLLECTION)
+        self.dbm.create_indexes(CategoryModel.COLLECTION, CategoryModel.get_index_keys())
 
         for category in new_categories:
             try:
@@ -84,10 +84,10 @@ class Update20200512(Updater):
             Do not use type_instance.category_id here - doesnt exists anymore
         """
         return [type.get('public_id') for type in
-                self.database_manager.find_all(collection=TypeModel.COLLECTION,
+                self.dbm.find_all(collection=TypeModel.COLLECTION,
                                                filter={'category_id': category_id})]
 
 
     def __clear_up_types(self):
         """Removes the category_id field from type collection"""
-        self.database_manager.unset_update_many(collection=TypeModel.COLLECTION, filter={}, data='category_id')
+        self.dbm.unset_update_many(collection=TypeModel.COLLECTION, filter={}, data='category_id')
