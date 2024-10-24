@@ -23,6 +23,7 @@ import { ReplaySubject } from 'rxjs';
 import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { FieldIdentifierValidationService } from '../../../services/field-identifier-validation.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
     selector: 'cmdb-textarea-edit',
@@ -48,10 +49,13 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
     isValid$: boolean = false;
 
 
+    private previousPreviousValue: string | boolean; // To store the value before the previous change
+    isDuplicate$: boolean = false
+
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
-    public constructor(private validationService: ValidationService) {
+    public constructor(private validationService: ValidationService, private fieldIdentifierValidation: FieldIdentifierValidationService) {
         super();
     }
 
@@ -103,6 +107,31 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
 
 
 
+    // /**
+    //  * Handles input changes for the field and emits changes through fieldChanges$.
+    //  * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+    //  * @param event - The input event value.
+    //  * @param type - The type of the input field being changed.
+    //  */
+    // onInputChange(event: any, type: string) {
+    //     this.fieldChanges$.next({
+    //         "newValue": event,
+    //         "inputName": type,
+    //         "fieldName": this.nameControl.value,
+    //         "previousName": this.initialValue,
+    //         "elementType": "textarea"
+    //     });
+
+    //     if (type == "name") {
+    //         this.initialValue = this.nameControl.value;
+    //     }
+
+    //     setTimeout(() => {
+    //         this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+    //         this.isValid$ = true;
+    //     });
+    // }
+
     /**
      * Handles input changes for the field and emits changes through fieldChanges$.
      * Updates the initial value if the input type is 'name' and triggers validation after a delay.
@@ -110,6 +139,48 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
      * @param type - The type of the input field being changed.
      */
     onInputChange(event: any, type: string) {
+        // Handle boolean event type
+        if (typeof event === 'boolean') {
+            this.handleFieldChange(event, type);
+            return;
+        }
+
+        if (type === 'name') {
+            // Check for duplicates
+            this.isDuplicate$ = this.fieldIdentifierValidation.isDuplicate(event);
+
+            if (!this.isDuplicate$) {
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            } else {
+                this.toggleFormControls(true);
+                this.fieldChanges$.next({ "isDuplicate": true });
+            }
+        } else {
+            this.toggleFormControls(false);
+            this.handleFieldChange(event, type);
+        }
+
+        // Perform validation after a slight delay
+        setTimeout(() => {
+            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+            this.isValid$ = true;
+        });
+    }
+
+    /**
+     * Handles changes to the form fields and notifies listeners of the change event.
+     * Updates the initial value if the field type is 'name' and triggers field change notifications.
+     * @param event - The new value of the field after change.
+     * @param type - The type of field being changed (e.g., 'name').
+     */
+    private handleFieldChange(event: any, type: string): void {
+        // Update previousPreviousValue before changing the initialValue
+        if (type === 'name' && this.initialValue !== event) {
+            this.previousPreviousValue = this.initialValue;
+        }
+
+        // Notify field changes
         this.fieldChanges$.next({
             "newValue": event,
             "inputName": type,
@@ -118,13 +189,37 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
             "elementType": "textarea"
         });
 
-        if (type == "name") {
+        // Update the initial value if the type is 'name'
+        if (type === 'name') {
             this.initialValue = this.nameControl.value;
         }
+    }
 
-        setTimeout(() => {
-            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
-            this.isValid$ = true;
-        });
+    /**
+     * Toggles the enabled or disabled state of the form controls based on the `disable` parameter.
+     * If `disable` is true, the form controls are disabled; otherwise, they are enabled.
+     * @param disable - A boolean value determining whether to disable or enable the form controls.
+     */
+    private toggleFormControls(disable: boolean) {
+        // Disable or enable form controls based on the value of `disable`
+        if (disable) {
+            this.labelControl.disable();
+            this.descriptionControl.disable();
+            this.placeholderControl.disable();
+            this.valueControl.disable();
+            this.helperTextControl.disable();
+            this.hideFieldControl.disable();
+            this.requiredControl.disable();
+            this.rowsControl.disable()
+        } else {
+            this.labelControl.enable();
+            this.descriptionControl.enable();
+            this.placeholderControl.enable();
+            this.valueControl.enable();
+            this.helperTextControl.enable();
+            this.hideFieldControl.enable();
+            this.requiredControl.enable();
+            this.rowsControl.enable();
+        }
     }
 }
