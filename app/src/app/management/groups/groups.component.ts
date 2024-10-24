@@ -18,16 +18,17 @@
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { GroupService } from '../services/group.service';
-import {BehaviorSubject, ReplaySubject} from 'rxjs';
+import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { Group } from '../models/group';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 import { takeUntil } from 'rxjs/operators';
-import {Column, Sort, SortDirection, TableState, TableStatePayload} from '../../layout/table/table.types';
+import { Column, Sort, SortDirection, TableState, TableStatePayload } from '../../layout/table/table.types';
 import { ActivatedRoute, Data, Router } from '@angular/router';
 import { convertResourceURL, UserSettingsService } from '../user-settings/services/user-settings.service';
 import { UserSetting } from '../user-settings/models/user-setting';
 import { UserSettingsDBService } from '../user-settings/services/user-settings-db.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 
 @Component({
   selector: 'cmdb-groups',
@@ -107,8 +108,9 @@ export class GroupsComponent implements OnInit, OnDestroy {
   }
 
   constructor(private groupService: GroupService, private router: Router, private route: ActivatedRoute,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+    private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>,
+    private toastSerive: ToastService) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads
@@ -196,7 +198,11 @@ export class GroupsComponent implements OnInit, OnDestroy {
       this.totalGroups = response.total;
       this.groupAPIResponse = response;
       this.loading = false;
-    });
+    }
+      ,
+      (error) => {
+        this.toastSerive.error(error?.error?.message);
+      });
   }
 
   /**

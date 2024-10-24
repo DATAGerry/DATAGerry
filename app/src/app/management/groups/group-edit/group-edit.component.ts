@@ -45,9 +45,9 @@ export class GroupEditComponent implements OnInit, OnDestroy {
     public group: Group;
 
     public typeEditRight = this.permissionService.hasRight(this.typeEditRightName) ||
-                            this.permissionService.hasExtendedRight(this.typeEditRightName);
+        this.permissionService.hasExtendedRight(this.typeEditRightName);
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         private route: ActivatedRoute,
@@ -72,18 +72,21 @@ export class GroupEditComponent implements OnInit, OnDestroy {
         this.subscriber.complete();
     }
 
-/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     public edit(group: Group): void {
         const editGroup = Object.assign(this.group, group);
-        
+
         if (this.valid) {
             this.groupService.putGroup(this.group.public_id, editGroup).pipe(takeUntil(this.subscriber))
-            .subscribe((g: Group) => {
-                this.toastService.success(`Group ${ g.label } was updated!`);
-                this.router.navigate(['/', 'management', 'groups']);
-                }
-            );
+                .subscribe((g: Group) => {
+                    this.toastService.success(`Group ${g.label} was updated!`);
+                    this.router.navigate(['/', 'management', 'groups']);
+                },
+                    (error) => {
+                        this.toastService.error(error?.error?.message);
+                    }
+                );
         }
     }
 }

@@ -24,6 +24,7 @@ import { SidebarService } from 'src/app/layout/services/sidebar.service';
 
 import { CmdbType } from 'src/app/framework/models/cmdb-type';
 import { ImporterConfig, ImporterFile, ImportResponse } from '../../../models/import-object.models';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -54,11 +55,11 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
     // Import Response
     public importResponse: ImportResponse = undefined;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private importService: ImportService, public sidebarService: SidebarService) {
+    public constructor(private importService: ImportService, public sidebarService: SidebarService, private toastService: ToastService) {
         this.fileReader = new FileReader();
         this.importerSubscription = new Subscription();
         this.parseDataSubscription = new Subscription();
@@ -90,7 +91,7 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
                 next: (defaultConfig: any) => {
                     this.defaultImporterConfig = defaultConfig;
                 },
-                error: (error) => console.error(error),
+                error: (e) => this.toastService.error(e?.error?.message),
                 complete: () => defaultImporterConfig.unsubscribe()
             })
     }
@@ -139,7 +140,7 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
                     this.parsedData = parsedData;
                     // this.cdr.detectChanges();
                 },
-                error: (error) => console.error(error)
+                error: (e) => this.toastService.error(e?.error?.message),
             });
     }
 
@@ -152,17 +153,17 @@ export class ImportObjectsComponent implements OnInit, OnDestroy {
         }
 
         this.importService.importObjects(this.importerFile.file, this.importerFile.fileFormat,
-                                         this.parserConfig, runtimeConfig)
-        .subscribe({
-            next: (importResponse) => {
-                this.importResponse = importResponse;
-            },
-            error: (error) => {
-                console.error(error);
-            },
-            complete: () => {
-                this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
-            }
-        });
+            this.parserConfig, runtimeConfig)
+            .subscribe({
+                next: (importResponse) => {
+                    this.importResponse = importResponse;
+                },
+                error: (e) => {
+                    this.toastService.error(e?.error?.message)
+                },
+                complete: () => {
+                    this.sidebarService.updateTypeCounter(this.typeInstance.public_id);
+                }
+            });
     }
 }

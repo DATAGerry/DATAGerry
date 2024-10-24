@@ -24,6 +24,7 @@ import { ObjectService } from '../../services/object.service';
 
 import { CmdbMode } from '../../modes.enum';
 import { RenderResult } from '../../models/cmdb-render';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -41,17 +42,26 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
     private objectViewSubject: BehaviorSubject<RenderResult> = new BehaviorSubject<RenderResult>(undefined);
 
     /* --------------------------------------------------- LIFE CYLCE --------------------------------------------------- */
-    constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private changesRef: ChangeDetectorRef) {
+    constructor(public objectService: ObjectService, private activateRoute: ActivatedRoute, private changesRef: ChangeDetectorRef,
+        private toastService: ToastService
+    ) {
         this.activateRoute.data.subscribe((data: Data) => {
             this.objectViewSubject.next(data.object as RenderResult);
-        });
+        },
+            (e) => {
+                this.toastService.error(e?.error?.message);
+            });
     }
 
 
     public ngOnInit(): void {
-        this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe)).subscribe((result) => {
-            this.renderResult = result;
-        });
+        this.objectViewSubject.asObservable().pipe(takeUntil(this.unsubscribe))
+            .subscribe((result) => {
+                this.renderResult = result;
+            },
+                (e) => {
+                    this.toastService.error(e?.error?.message);
+                });
     }
 
     ngAfterViewInit(): void {
