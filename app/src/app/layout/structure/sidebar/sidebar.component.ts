@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
+import { ChangeDetectorRef, Component, ElementRef, OnDestroy, OnInit, Renderer2 } from '@angular/core';
 import { UntypedFormControl } from '@angular/forms';
 
 import { ReplaySubject, Subscription, takeUntil } from 'rxjs';
@@ -66,14 +66,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
     isExpanded: boolean = false
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         private sidebarService: SidebarService,
         private typeService: TypeService,
         private renderer: Renderer2,
         private elementRef: ElementRef,
-        private userService: UserService
+        private userService: UserService,
+        private cdRef: ChangeDetectorRef
     ) {
         this.categoryTreeSubscription = new Subscription();
         this.unCategorizedTypesSubscription = new Subscription();
@@ -85,22 +86,23 @@ export class SidebarComponent implements OnInit, OnDestroy {
     public ngOnInit(): void {
         this.renderer.addClass(document.body, 'sidebar-fixed');
 
-        if(this.user) {
+        if (this.user) {
             this.sidebarService.loadCategoryTree();
             this.categoryTreeSubscription = this.sidebarService.categoryTree.asObservable()
-            .subscribe((categoryTree: CmdbCategoryTree) => {
-                this.categoryTree = categoryTree;
+                .subscribe((categoryTree: CmdbCategoryTree) => {
+                    this.categoryTree = categoryTree;
 
-                this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false)
-                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-                    this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
-                });
+                    this.unCategorizedTypesSubscription = this.typeService.getUncategorizedTypes(AccessControlPermission.READ, false)
+                        .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                            this.unCategorizedTypes = apiResponse.results as Array<CmdbType>;
+                            this.cdRef.detectChanges();
+                        });
 
-                this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
-                .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
-                    this.typeList = apiResponse.results as Array<CmdbType>;
+                    this.typeService.getTypes(this.typesParams).pipe(takeUntil(this.subscriber))
+                        .subscribe((apiResponse: APIGetMultiResponse<CmdbType>) => {
+                            this.typeList = apiResponse.results as Array<CmdbType>;
+                        });
                 });
-            });
         }
 
         this.selectedMenu = this.sidebarService.selectedMenu;
@@ -114,7 +116,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
         this.renderer.removeClass(document.body, 'sidebar-fixed');
     }
 
-/* ------------------------------------------------ SIDEBAR HANDLING ------------------------------------------------ */
+    /* ------------------------------------------------ SIDEBAR HANDLING ------------------------------------------------ */
 
     /**
      * Toggles the activated menu tabs (categories and locations)
