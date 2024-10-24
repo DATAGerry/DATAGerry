@@ -118,8 +118,14 @@ def get_template_list_filtered(searchfilter: str, request_user: UserModel):
 
     try:
         filterdict = json.loads(searchfilter)
+    except Exception as err:
+        LOGGER.debug("[get_template_list_filtered] Error: %s, Type: %s", err, type(err))
+        return abort(404, f"Could not unpack the search filter: {searchfilter}")
+
+    try:
         tpl = docapi_manager.get_templates_by(**filterdict)
-    except DocapiGetError:
+    except DocapiGetError as err:
+        LOGGER.debug("[get_template_list_filtered] Error: %s, Type: %s", err, type(err))
         return abort(404, f"Could not retrieve template list for filter: {searchfilter}")
 
     return make_response(tpl)

@@ -111,11 +111,11 @@ def insert_object(request_user: UserModel):
 
         try:
             current_object_render_result = CmdbRender(
-                                                object_instance=current_object,
-                                                type_instance=current_type_instance,
-                                                render_user=request_user,
-                                                ref_render=False,
-                                                objects_manager=objects_manager
+                                                current_object,
+                                                current_type_instance,
+                                                request_user,
+                                                False,
+                                                objects_manager.dbm
                                             ).result()
         except Exception as err:
             #ERROR-FIX
@@ -179,11 +179,7 @@ def get_object(public_id, request_user: UserModel):
         return abort(404, f"Could not retrieve object with public_id: {public_id} !")
 
     try:
-        render = CmdbRender(object_instance=object_instance,
-                            type_instance=type_instance,
-                            render_user=request_user,
-                            ref_render=True,
-                            objects_manager=objects_manager)
+        render = CmdbRender(object_instance, type_instance, request_user, True, objects_manager.dbm)
 
         render_result = render.result()
     except InstanceRenderError as err:
@@ -332,11 +328,11 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
         return abort(404)
 
     try:
-        mds_reference = CmdbRender(object_instance=referenced_object,
-                                   type_instance=referenced_type,
-                                   render_user=request_user,
-                                   ref_render=True,
-                                   objects_manager=objects_manager).get_mds_reference(public_id)
+        mds_reference = CmdbRender(referenced_object,
+                                   referenced_type,
+                                   request_user,
+                                   True,
+                                   objects_manager.dbm).get_mds_reference(public_id)
 
     except InstanceRenderError as err:
         #ERROR-FIX
@@ -374,11 +370,11 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
             return abort(404)
 
         try:
-            mds_reference = CmdbRender(object_instance=referenced_object,
-                        type_instance=referenced_type,
-                        render_user=request_user,
-                        ref_render=True,
-                        objects_manager=objects_manager).get_mds_reference(object_id)
+            mds_reference = CmdbRender(referenced_object,
+                                       referenced_type,
+                                       request_user,
+                                       True,
+                                       objects_manager.dbm).get_mds_reference(object_id)
 
             summary_lines[object_id] = mds_reference
 
@@ -539,12 +535,12 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             current_object_instance = objects_manager.get_object(obj_id, request_user, AccessControlPermission.READ)
             current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
 
-            current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                      type_instance=current_type_instance,
-                                                      render_user=request_user,
-                                                      ref_render=False,
-                                                      objects_manager=objects_manager
-                                                      ).result()
+            current_object_render_result = CmdbRender(current_object_instance,
+                                                      current_type_instance,
+                                                      request_user,
+                                                      False,
+                                                      objects_manager.dbm).result()
+
             update_comment = ''
 
             try:
@@ -675,12 +671,11 @@ def update_object_state(public_id: int, request_user: UserModel):
     try:
         current_type_instance = objects_manager.get_object_type(found_object.get_type_id())
 
-        current_object_render_result = CmdbRender(object_instance=found_object,
-                                                  type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  ref_render=False,
-                                                  objects_manager=objects_manager
-                                                  ).result()
+        current_object_render_result = CmdbRender(found_object,
+                                                  current_type_instance,
+                                                  request_user,
+                                                  False,
+                                                  objects_manager.dbm).result()
     except ObjectManagerGetError as err:
         LOGGER.debug("[update_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
@@ -810,12 +805,11 @@ def delete_object(public_id: int, request_user: UserModel):
 
         current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
 
-        current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                  type_instance=current_type_instance,
-                                                  render_user=request_user,
-                                                  ref_render=False,
-                                                  objects_manager=objects_manager
-                                                  ).result()
+        current_object_render_result = CmdbRender(current_object_instance,
+                                                  current_type_instance,
+                                                  request_user,
+                                                  False,
+                                                  objects_manager.dbm).result()
 
         #an object can not be deleted if it has a location AND the location is a parent for other locations
         try:
@@ -1035,12 +1029,11 @@ def delete_many_objects(public_ids, request_user: UserModel):
                 objects_manager.delete_all_object_references(current_object_instance.public_id)
 
                 current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
-                current_object_render_result = CmdbRender(object_instance=current_object_instance,
-                                                          type_instance=current_type_instance,
-                                                          render_user=request_user,
-                                                          ref_render=False,
-                                                          objects_manager=objects_manager
-                                                          ).result()
+                current_object_render_result = CmdbRender(current_object_instance,
+                                                          current_type_instance,
+                                                          request_user,
+                                                          False,
+                                                          objects_manager).result()
             except ObjectManagerGetError as err:
                 LOGGER.debug("[delete_many_objects] ObjectManagerGetError: %s", err.message)
                 return abort(404)

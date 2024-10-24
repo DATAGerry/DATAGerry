@@ -40,6 +40,7 @@ from cmdb.errors.manager import ManagerGetError, \
                                 ManagerUpdateError, \
                                 ManagerDeleteError, \
                                 ManagerIterationError
+from cmdb.errors.manager.user_manager import UserManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -67,6 +68,7 @@ def insert_user(data: dict, request_user: UserModel):
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
+    #REFATOR-FIX
     try:
         user_password = data['password']
         data['password'] = security_manager.generate_hmac(data['password'])
@@ -202,7 +204,8 @@ def get_user(public_id: int, request_user: UserModel):
 
     try:
         user: UserModel = users_manager.get_user(public_id)
-    except ManagerGetError:
+    except UserManagerGetError:
+        #MESSAGE-FIX
         return abort(404)
 
     api_response = GetSingleResponse(UserModel.to_dict(user),
@@ -268,6 +271,11 @@ def change_user_password(public_id: int, request_user: UserModel):
 
     try:
         user = users_manager.get_user(public_id)
+    except UserManagerGetError:
+        #MESSAGE-FIX
+        return abort(404)
+
+    try:
         password = security_manager.generate_hmac(request.json.get('password'))
         user.password = password
         users_manager.update_user(public_id, user)

@@ -112,17 +112,31 @@ def parse_objects():
     """TODO: document"""
     # TODO: check if request user has the permission 'base.import.object.*'
     # Check if file exists
-    request_file: FileStorage = get_file_in_request('file', request.files)
+    try:
+        #REFACTOR-FIX (get_file_in_request-function)
+        request_file: FileStorage = get_file_in_request('file', request.files)
+    except Exception as err:
+        LOGGER.debug("[parse_objects] Exception: %s, Type: %s", err, type(err))
+        return abort(500, "No file in request!")
+
     # Load parser config
-    parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+    try:
+        parser_config: dict = get_element_from_data_request('parser_config', request) or {}
+    except Exception as err:
+        LOGGER.debug("[parse_objects] Exception: %s, Type: %s", err, type(err))
+        return abort(500, "No parser config!")
     # Load file format
     file_format = request.form.get('file_format', None)
 
+    if not file_format:
+        return abort(500, "No file format!")
+
     try:
         parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
-    except ParserRuntimeError :
+    except (ParserRuntimeError, Exception) as err:
         #ERROR-FIX
-        return abort(500)
+        LOGGER.debug("[parse_objects] Error: %s, Type: %s", err, type(err))
+        return abort(500, "Could not generate parsed output!")
 
     return make_response(parsed_output)
 
@@ -221,10 +235,11 @@ def import_objects(request_user: UserModel):
             current_type_instance = objects_manager.get_object_type(importer_config_request.get('type_id'))
             current_object = objects_manager.get_object(message.public_id)
 
-            current_object_render_result = CmdbRender(object_instance=current_object,
-                                                      type_instance=current_type_instance,
-                                                      render_user=request_user,
-                                                      objects_manager=objects_manager).result()
+            current_object_render_result = CmdbRender(current_object,
+                                                      current_type_instance,
+                                                      request_user,
+                                                      False,
+                                                      objects_manager.dbm).result()
 
             # insert object create log
             log_params = {

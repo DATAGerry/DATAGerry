@@ -22,10 +22,16 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.results import IterationResult
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError, ManagerIterationError
+from cmdb.errors.manager import ManagerUpdateError,\
+                                ManagerDeleteError,\
+                                ManagerGetError,\
+                                ManagerIterationError,\
+                                ManagerInsertError
+from cmdb.errors.manager.user_manager import UserManagerGetError,\
+                                             UserManagerInsertError,\
+                                             UserManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -40,8 +46,6 @@ class UsersManager(BaseManager):
     def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         if database:
             dbm.connector.set_database(database)
-
-        self.query_builder = BaseQueryBuilder()
 
         super().__init__(UserModel.COLLECTION, dbm)
 
@@ -61,8 +65,10 @@ class UsersManager(BaseManager):
         if isinstance(user, UserModel):
             user = UserModel.to_data(user)
 
-        #ERROR-FIX (add try/except)
-        return self.insert(user)
+        try:
+            return self.insert(user)
+        except ManagerInsertError as err:
+            raise UserManagerInsertError(err) from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -78,14 +84,13 @@ class UsersManager(BaseManager):
         """
         try:
             requested_user = self.get_one(public_id)
-        except Exception as err:
-            #ERROR-FIX
-            raise ManagerGetError(err) from err
+        except ManagerGetError as err:
+            raise UserManagerGetError(err) from err
 
         if requested_user:
             return UserModel.from_data(requested_user)
 
-        raise ManagerGetError("User not found!")
+        raise UserManagerGetError("User not found!")
 
 
     def get_user_by(self, query: dict) -> UserModel:
@@ -98,12 +103,13 @@ class UsersManager(BaseManager):
         Returns:
             UserModel: Instance of UserModel with matching data.
         """
-        result = self.get(filter=query, limit=1)
+        try:
+            result = self.get(filter=query, limit=1)
 
-        for resource_result in result.limit(-1):
-            return UserModel.from_data(resource_result)
-
-        raise ManagerGetError(f'User with the query: {query} not found!')
+            for resource_result in result.limit(-1):
+                return UserModel.from_data(resource_result)
+        except Exception as err:
+            raise UserManagerGetError(err) from err
 
 
     def get_many_users(self, query: list = None) -> list[UserModel]:
@@ -112,13 +118,20 @@ class UsersManager(BaseManager):
 
         Args:
             query (dict): A database query for filtering
+        Raises:
+            UserManagerGetError: Raised when users cant be retrieved or not transformed into UserModel
         Returns:
             list[UserModel]: A list of all users which matches the query
         """
         query = query or {}
-        results = self.get(filter=query)
 
-        return [UserModel.from_data(user) for user in results]
+        try:
+            results = self.get(filter=query)
+
+            return [UserModel.from_data(user) for user in results]
+        except Exception as err:
+            LOGGER.debug("[get_many_users] Error: %s, Type: %s", err, type(err))
+            raise UserManagerGetError(err) from err
 
 
     def iterate(self, builder_params: BuilderParameters) -> IterationResult[UserModel]:
@@ -177,25 +190,35 @@ class UsersManager(BaseManager):
 
     def delete_user(self, public_id: int) -> UserModel:
         """
-        Delete a existing user by its PublicID.
+        Delete an existing user by its PublicID
 
         Args:
-            public_id (int): PublicID of the user in the system.
+            public_id (int): PublicID of the user
 
         Raises:
-            ManagerDeleteError: If you try to delete the admin \
-                                or something happened during the database operation.
+            UserManagerDeleteError:
+                - If you try to delete the admin
+                - If user which should be deleted could not be retrieved
+                - No user matches the public_id
+                - User could not be deleted
 
         Returns:
-            UserModel: The deleted user as its model.
+            UserModel: Model of the deleted user
         """
-        if public_id in [1]:
-            raise ManagerDeleteError('You cant delete the admin user')
+        if public_id == 1:
+            raise UserManagerDeleteError("You can't delete the admin user")
 
-        user: UserModel = self.get_user(public_id)
-        delete_result = self.delete({'public_id': public_id})
+        try:
+            user: UserModel = self.get_user(public_id)
+        except UserManagerGetError as err:
+            raise UserManagerDeleteError(f"Could not retrieve user with ID: {public_id}") from err
 
-        if not delete_result:
-            raise ManagerDeleteError(err='No user matched this public id')
+        try:
+            delete_result = self.delete({'public_id': public_id})
+
+            if not delete_result:
+                raise UserManagerDeleteError('No user matched this public_id')
+        except ManagerDeleteError as err:
+            raise UserManagerDeleteError(f"Could not delete user with ID: {public_id}") from err
 
         return user

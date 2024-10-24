@@ -36,11 +36,12 @@ class DocApiRenderer:
         template = self.docapi_manager.get_template(doctpl_id)
         cmdb_object = self.objects_manager.get_object(object_id)
         type_instance = self.objects_manager.get_object_type(cmdb_object.get_type_id())
+
         cmdb_render_object = CmdbRender(cmdb_object,
                                         type_instance,
                                         None,
                                         False,
-                                        self.objects_manager)
+                                        self.objects_manager.dbm)
 
         generator = ObjectDocumentGenerator(template,
                                             cmdb_render_object.result(),
