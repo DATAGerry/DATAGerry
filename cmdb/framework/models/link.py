@@ -16,7 +16,7 @@
 """TODO: document"""
 from datetime import datetime, timezone
 
-from cmdb.framework import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ObjectLinkModel(CmdbDAO):

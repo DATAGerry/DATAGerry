@@ -17,7 +17,7 @@
 import logging
 from typing import Union
 
-from cmdb.framework.models import TypeModel
+from cmdb.framework.models.type import TypeModel
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 

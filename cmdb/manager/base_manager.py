@@ -329,6 +329,7 @@ class BaseManager:
 
         Args:
             criteria (dict): Filter to match document
+
         Raises:
             ManagerDeleteError: Something went wrong while trying to delete document
 

@@ -26,7 +26,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import CmdbObject
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
@@ -260,6 +260,7 @@ class ObjectsManager(BaseManager):
             except Exception:
                 #ERROR-FIX
                 continue
+
             ack.append(obj)
 
         return ack

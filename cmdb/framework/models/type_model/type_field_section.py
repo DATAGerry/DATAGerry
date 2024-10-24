@@ -20,7 +20,7 @@ Extends: TypeSection
 import logging
 import json
 
-from cmdb.framework.models.type_model import TypeSection
+from cmdb.framework.models.type_model.type_section import TypeSection
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

@@ -86,7 +86,7 @@ class Updater(BaseManager):
         """TODO: document"""
         raise UpdaterException(msg)
 
-
+#TODO: REFACTOR-FIX
 class UpdaterException(Exception):
     """TODO: document"""
     def __init__(self, *args, **kwargs):
