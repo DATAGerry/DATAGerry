@@ -60,9 +60,9 @@ export class ObjectEditComponent implements OnInit {
     // Table columns definition
     columns: Array<Column> = [];
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor(
         private objectService: ObjectService,
@@ -92,14 +92,14 @@ export class ObjectEditComponent implements OnInit {
                 this.renderResult = rr;
                 this.activeState = this.renderResult.object_information.active;
             },
-            error: error => {
-                console.error(error);
+            error: e => {
+                this.toastService.error(e?.error?.message)
             },
             complete: () => {
                 this.objectService.getObject<CmdbObject>(this.objectID, true).subscribe(ob => {
                     this.objectInstance = ob;
                 });
-    
+
                 this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
                     this.typeInstance = value;
                 });
@@ -107,7 +107,7 @@ export class ObjectEditComponent implements OnInit {
         });
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     @HostListener('window:scroll', ['$event'])
     onWindowScroll($event) {
@@ -133,8 +133,8 @@ export class ObjectEditComponent implements OnInit {
      * Adds the MultiDataSectionEntry data to the object instance
      * @param multiDataSection (MultiDataSectionEntry):  the new data of the section 
      */
-    handleMultiDataSection(multiDataSection: MultiDataSectionEntry){
-        for (let aSection of this.objectInstance.multi_data_sections){
+    handleMultiDataSection(multiDataSection: MultiDataSectionEntry) {
+        for (let aSection of this.objectInstance.multi_data_sections) {
             if (aSection.section_id == multiDataSection.section_id) {
                 aSection.highest_id = multiDataSection.highest_id;
                 aSection.values = multiDataSection.values;
@@ -182,9 +182,9 @@ export class ObjectEditComponent implements OnInit {
             });
 
             this.handleLocation(this.objectInstance.public_id,
-                                this.selectedLocation,
-                                this.locationTreeName,
-                                this.objectInstance.type_id);
+                this.selectedLocation,
+                this.locationTreeName,
+                this.objectInstance.type_id);
 
             this.objectInstance.fields = patchValue;
             this.objectInstance.comment = this.commitForm.get('comment').value;
@@ -202,12 +202,12 @@ export class ObjectEditComponent implements OnInit {
                         for (const err of res.failed) {
                             this.toastService.error(err.error_message);
                         }
-    
+
                         this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
                     }
                 },
-                error: error => {
-                    this.toastService.error(error);
+                error: e => {
+                    this.toastService.error(e?.error?.message);
                     this.router.navigate(['/framework/object/type/' + this.objectInstance.type_id]);
                 }
             });

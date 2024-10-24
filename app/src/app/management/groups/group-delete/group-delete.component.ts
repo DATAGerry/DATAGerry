@@ -30,7 +30,7 @@ import { ToastService } from '../../../layout/toast/toast.service';
   templateUrl: './group-delete.component.html',
   styleUrls: ['./group-delete.component.scss']
 })
-export class GroupDeleteComponent implements OnDestroy{
+export class GroupDeleteComponent implements OnDestroy {
 
   public group: Group;
   public groups: Array<Group> = [];
@@ -39,7 +39,7 @@ export class GroupDeleteComponent implements OnDestroy{
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private route: ActivatedRoute, private router: Router, private groupService: GroupService,
-              private toast: ToastService) {
+    private toast: ToastService) {
     this.group = this.route.snapshot.data.group as Group;
     this.groups = this.route.snapshot.data.groups as Array<Group>;
 
@@ -57,9 +57,13 @@ export class GroupDeleteComponent implements OnDestroy{
       const action = this.deleteForm.get('deleteGroupAction').value;
       const groupID = this.deleteForm.get('deleteGroupOption').value;
       this.groupService.deleteGroup(this.group.public_id, action, groupID).pipe(takeUntil(this.subscriber)).subscribe(() => {
-        this.toast.success(`Group ${ this.group.label } was deleted`);
+        this.toast.success(`Group ${this.group.label} was deleted`);
         this.router.navigate(['/', 'management', 'groups']);
-      });
+      },
+        (error) => {
+          this.toast.error(error?.error?.message);
+        }
+      );
     }
   }
 

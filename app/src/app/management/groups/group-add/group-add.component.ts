@@ -37,7 +37,7 @@ export class GroupAddComponent implements OnDestroy {
   private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
 
   constructor(private route: ActivatedRoute, private router: Router, private toastService: ToastService,
-              private groupService: GroupService) {
+    private groupService: GroupService) {
     this.rights = this.route.snapshot.data.rights as Array<Right>;
   }
 
@@ -48,8 +48,11 @@ export class GroupAddComponent implements OnDestroy {
   public save(group: Group) {
     if (this.valid) {
       this.groupService.postGroup(group).pipe(takeUntil(this.subscriber)).subscribe((g: Group) => {
-          this.toastService.success(`Group ${g.label} was added!`);
-          this.router.navigate(['/', 'management', 'groups']);
+        this.toastService.success(`Group ${g.label} was added!`);
+        this.router.navigate(['/', 'management', 'groups']);
+      },
+        (error) => {
+          this.toastService.error(error?.error?.message);
         }
       );
     }

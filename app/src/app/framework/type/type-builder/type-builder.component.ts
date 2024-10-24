@@ -181,8 +181,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                 next: (response: APIGetMultiResponse) => {
                     this.groups = [...response.results as Array<Group>];
                 },
-                error: (error) => {
-                    console.log(error)
+                error: (e) => {
+                    this.toast.error(e?.error?.message)
                 },
                 complete: () => {
                     this.checkAclGroupExist();
@@ -266,8 +266,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                     this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
                     this.toast.success(`Type was successfully created: TypeID: ${newTypeID}`);
                 },
-                error: (error) => {
-                    this.toast.error(`${error}`);
+                error: (e) => {
+                    this.toast.error(e?.error?.message);
                 }
             });
         } else if (this.mode === CmdbMode.Edit) {

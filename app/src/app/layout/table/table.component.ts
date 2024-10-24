@@ -38,6 +38,7 @@ import { TableService } from './table.service';
 
 import { Column, GroupRowsBy, Sort, SortDirection, TableState } from './table.types';
 import { PageLengthEntry } from './components/table-page-size/table-page-size.component';
+import { ToastService } from '../toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -211,11 +212,11 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     DSC: number = SortDirection.DESCENDING;
     routerSubscription: Subscription | undefined;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private tableService: TableService, private router: Router) {
+    public constructor(private tableService: TableService, private router: Router, private toastService: ToastService) {
         this.resetSelectedItems()
     }
 
@@ -234,27 +235,30 @@ export class TableComponent<T> implements OnInit, OnDestroy {
                 this.tableService.setCurrentTableState(this.router.url, this.id, this.tableState);
                 this.stateChange.emit(this.tableState);
             }
-        });
+        },
+            (error) => {
+                this.toastService.error(error?.error?.message);
+            });
 
         if (isDevMode()) {
             this.pageSizeChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((size: number) => {
-                console.log(`[TableEvent] Page size changed to: ${ size }`);
+                console.log(`[TableEvent] Page size changed to: ${size}`);
             });
 
             this.pageChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((page: number) => {
-                console.log(`[TableEvent] Page changed to: ${ page }`);
+                console.log(`[TableEvent] Page changed to: ${page}`);
             });
 
             this.searchChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((search: string) => {
-                console.log(`[TableEvent] Search input changed to: ${ search }`);
+                console.log(`[TableEvent] Search input changed to: ${search}`);
             });
 
             this.selectedChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((selected: Array<T>) => {
-                console.log(`[TableEvent] Selected rows changed to: ${ selected } `);
+                console.log(`[TableEvent] Selected rows changed to: ${selected} `);
             });
 
             this.sortChange.asObservable().pipe(takeUntil(this.subscriber)).subscribe((sort: Sort) => {
-                console.log(`[TableEvent] Sort changed to: ${ sort }`);
+                console.log(`[TableEvent] Sort changed to: ${sort}`);
             });
         }
     }
@@ -266,7 +270,7 @@ export class TableComponent<T> implements OnInit, OnDestroy {
         this.routerSubscription.unsubscribe();
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
      * Reseting the selected Items
