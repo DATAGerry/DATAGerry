@@ -19,6 +19,7 @@ from datetime import datetime
 
 import pytest
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.security.security import SecurityManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
@@ -60,7 +61,7 @@ pytest_plugins = [
 
 
 @pytest.fixture(scope="session", autouse=True)
-def preset_database(database_manager, database_name):
+def preset_database(database_manager: MongoDatabaseManager, database_name):
     """TODO: document"""
     try:
         database_manager.drop_database(database_name)

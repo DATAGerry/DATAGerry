@@ -24,7 +24,7 @@ from bson.min_key import MinKey
 from bson.objectid import ObjectId
 from bson.timestamp import Timestamp
 
-from cmdb.framework.cmdb_render import RenderVisualization
+from cmdb.framework.cmdb_render import RenderResult
 from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 from cmdb.search.search_result import SearchResult, SearchResultMap
 from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
@@ -35,9 +35,9 @@ from cmdb.settings.date.date_settings import DateSettingsDAO
 try:
     import uuid
 
-    _use_uuid = True
+    USE_UUID = True
 except ImportError:
-    _use_uuid = False
+    USE_UUID = False
 # -------------------------------------------------------------------------------------------------------------------- #
 
 _RE_TYPE = type(re.compile("foo"))
@@ -56,7 +56,7 @@ def default(obj):
                         MediaFileManagementBase,
                         TemplateManagementBase,
                         BaseRight,
-                        RenderVisualization,
+                        RenderResult,
                         BaseImporterResponse,
                         ImportMessage,
                         AuthSettingsDAO,
@@ -104,7 +104,7 @@ def default(obj):
     if isinstance(obj, Timestamp):
         return {"t": obj.time, "i": obj.inc}
 
-    if _use_uuid and isinstance(obj, uuid.UUID):
+    if USE_UUID and isinstance(obj, uuid.UUID):
         return {"$uuid": obj.hex}
 
     raise TypeError(f"{obj} is not JSON serializable - type: {type(obj)}")

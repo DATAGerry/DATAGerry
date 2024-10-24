@@ -40,6 +40,7 @@ from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
+from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -202,7 +203,7 @@ def post_login():
         finally:
             # If login success generate user instance with token
             if user_instance:
-                tg = TokenGenerator(database_manager=current_app.database_manager)
+                tg = TokenGenerator(current_app.database_manager)
                 token: bytes = tg.generate_token(payload={'user': {
                     'public_id': user_instance.get_public_id()
                 }})
@@ -305,7 +306,7 @@ def create_new_admin_user(user_data: dict):
 
         try:
             users_manager.insert_user(admin_user)
-        except Exception as error:
+        except UserManagerInsertError as error:
             LOGGER.error("Could not create admin user: %s", error)
 
 

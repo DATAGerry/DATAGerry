@@ -65,10 +65,11 @@ class ObjectTemplateData(AbstractTemplateData):
                     current_object = self.objects_manager.get_object(field["value"])
                     type_instance = self.objects_manager.get_object_type(current_object.get_type_id())
 
-                    cmdb_render_object = CmdbRender(object_instance=current_object,
-                                                    type_instance=type_instance,
-                                                    render_user=None,
-                                                    objects_manager=self.objects_manager)
+                    cmdb_render_object = CmdbRender(current_object,
+                                                    type_instance,
+                                                    None,
+                                                    False,
+                                                    self.objects_manager.dbm)
 
                     data["fields"][field_name] = self.__get_objectdata(cmdb_render_object.result(), iteration - 1)
                 elif field['type'] == 'ref-section-field':
@@ -81,6 +82,7 @@ class ObjectTemplateData(AbstractTemplateData):
             except ObjectManagerGetError:
                 continue
             except Exception as err:
+                #ERROR-FIX
                 LOGGER.error(err)
 
         return data

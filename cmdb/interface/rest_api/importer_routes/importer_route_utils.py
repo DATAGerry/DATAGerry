@@ -39,6 +39,7 @@ def get_file_in_request(file_name: str, request_files) -> FileStorage:
     if file_name not in request_files:
         LOGGER.error('File with name: %s was not provided', file_name)
         return abort(400)
+
     return request.files.get(file_name)
 
 

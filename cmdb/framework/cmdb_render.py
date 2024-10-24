@@ -19,6 +19,7 @@ from typing import Union
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.types_manager import TypesManager
@@ -35,20 +36,28 @@ from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.type import TypeReferenceLineFillError, FieldNotFoundError, FieldInitError
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.render import ObjectInstanceError, TypeInstanceError, InstanceRenderError
+from cmdb.errors.manager.user_manager import UserManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                              RenderVisualization - CLASS                                             #
+#                                                 RenderResult - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-class RenderVisualization:
+#CLASS-FIX
+class RenderResult:
     """TODO: document"""
 
     def __init__(self):
         self.current_render_time = datetime.now(timezone.utc)
         self.object_information: dict = {}
         self.type_information: dict = {}
+        self.fields: list = []
+        self.sections: list = []
+        self.summaries: list = []
+        self.summary_line: str = ''
+        self.externals: list = []
+        self.multi_data_sections: list = []
 
 
     def get_object_information(self, idx):
@@ -61,18 +70,9 @@ class RenderVisualization:
         return self.type_information[idx]
 
 
-class RenderResult(RenderVisualization):
-    """TODO: document"""
-
-    def __init__(self):
-        super().__init__()
-        self.fields: list = []
-        self.sections: list = []
-        self.summaries: list = []
-        self.summary_line: str = ''
-        self.externals: list = []
-        self.multi_data_sections: list = []
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  CmdbRender - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 #CLASS-FIX
 class CmdbRender:
     """TODO: document"""
@@ -83,15 +83,16 @@ class CmdbRender:
                  type_instance: TypeModel,
                  render_user: UserModel,
                  ref_render=False,
-                 objects_manager: ObjectsManager = None):
+                 dbm: MongoDatabaseManager = None):
+        self.dbm = dbm
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
         self.render_user: UserModel = render_user
-        self.objects_manager = objects_manager
 
-        if self.objects_manager:  # TODO: Refactor to pass database-manager in init
-            self.types_manager = TypesManager(self.objects_manager.dbm)
-            self.users_manager = UsersManager(self.objects_manager.dbm)
+        if dbm:
+            self.objects_manager = ObjectsManager(self.dbm)
+            self.types_manager = TypesManager(self.dbm)
+            self.users_manager = UsersManager(self.dbm)
 
         self.ref_render = ref_render
 
@@ -186,15 +187,13 @@ class CmdbRender:
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.users_manager.get_user(self.object_instance.author_id).get_display_name()
-        except Exception:
-            #ERROR-FIX
+        except UserManagerGetError:
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
         if self.object_instance.editor_id:
             try:
                 editor_name = self.users_manager.get_user(self.object_instance.editor_id).get_display_name()
-            except Exception:
-                #ERROR-FIX
+            except UserManagerGetError:
                 editor_name = None
         else:
             editor_name = None
@@ -216,7 +215,7 @@ class CmdbRender:
     def __generate_type_information(self, render_result: RenderResult) -> RenderResult:
         try:
             author_name = self.users_manager.get_user(self.type_instance.author_id).get_display_name()
-        except Exception:
+        except UserManagerGetError:
             #ERROR-FIX
             author_name = CmdbRender.AUTHOR_ANONYMOUS_NAME
 
@@ -395,15 +394,13 @@ class CmdbRender:
             try:
                 instance = self.objects_manager.get_object(ref_section_field.get('value'))
                 reference_type: TypeModel = self.objects_manager.get_object_type(instance.get_type_id())
-                render = CmdbRender(object_instance=instance,
-                                    type_instance=ref_type,
-                                    render_user=self.render_user,
-                                    ref_render=True,
-                                    objects_manager=self.objects_manager)
+                render = CmdbRender(instance, ref_type, self.render_user, True, self.dbm)
                 fields = render.result(level).fields
                 res = next((x for x in fields if x['name'] == ref_section_field.get('name', '')), None)
+
                 if res and ref_section_field.get('type', '') == 'ref-section-field':
                     self.__merge_reference_section_fields(res, reference_type, ref_section_fields, level)
+
                     for field in res['references']['fields']:
                         merged_field_content = self.__merge_field_content_section(field, instance)
                         if merged_field_content and merged_field_content.get('type', '') == 'ref-section-field':
@@ -466,8 +463,10 @@ class CmdbRender:
                 try:
                     # fill the summary line with summaries value data
                     reference.line = _nested_summary_line
+
                     if not reference.line_requires_fields():
                         reference.summaries = []
+
                     if _nested_summary_line:
                         reference.fill_line(summary_values)
                 except (TypeReferenceLineFillError, Exception, FieldNotFoundError, FieldInitError):
@@ -540,6 +539,7 @@ class CmdbRender:
                                 field_value = self.object_instance.public_id
                             else:
                                 field_value = self.object_instance.get_value(ext_link_field)
+
                             if field_value is None or field_value == '':
                                 # if value is empty or does not exists
                                 raise ValueError(ext_link_field)
@@ -560,6 +560,7 @@ class CmdbRender:
                 continue
             external_list.append(TypeExternalLink.to_json(ext_link_instance))
             render_result.externals = external_list
+
         return render_result
 
 
@@ -571,6 +572,7 @@ class RenderList:
                  request_user: UserModel,
                  ref_render=False,
                  objects_manager: ObjectsManager = None):
+        """TODO: document"""
         self.object_list: list[CmdbObject] = object_list
         self.request_user = request_user
         self.ref_render = ref_render
@@ -581,12 +583,11 @@ class RenderList:
         """TODO: document"""
         preparation_objects: list[RenderResult] = []
         for passed_object in self.object_list:
-            tmp_render = CmdbRender(
-                type_instance=self.objects_manager.get_object_type(passed_object.type_id),
-                object_instance=passed_object,
-                render_user=self.request_user,
-                ref_render=self.ref_render,
-                objects_manager=self.objects_manager)
+            tmp_render = CmdbRender(passed_object,
+                                    self.objects_manager.get_object_type(passed_object.type_id),
+                                    self.request_user,
+                                    self.ref_render,
+                                    self.objects_manager.dbm)
 
             if raw:
                 current_render_result = tmp_render.result().__dict__

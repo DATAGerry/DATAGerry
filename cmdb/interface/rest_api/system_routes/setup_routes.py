@@ -31,6 +31,8 @@ from cmdb.user_management.models.user import UserModel
 from cmdb.user_management import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+
+from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -170,5 +172,5 @@ def create_new_admin_user(user_data: dict):
 
         try:
             users_manager.insert_user(admin_user)
-        except Exception as err:
+        except UserManagerInsertError as err:
             LOGGER.error("Could not create admin user: %s", err)

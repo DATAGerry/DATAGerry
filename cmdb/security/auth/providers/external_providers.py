@@ -29,6 +29,7 @@ from cmdb.security.auth.provider_config import AuthProviderConfig
 
 from cmdb.errors.provider import GroupMappingError, AuthenticationError
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
+from cmdb.errors.manager.user_manager import UserManagerGetError, UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -36,6 +37,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                       LdapAuthenticationProviderConfig - CLASS                                       #
 # -------------------------------------------------------------------------------------------------------------------- #
+#CLASS-FIX
 class LdapAuthenticationProviderConfig(AuthProviderConfig):
     """TODO: document"""
 
@@ -137,6 +139,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
     def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
         """TODO: document"""
+        #REFACTOR-FIX
         try:
             ldap_connection_status = self.connect()
             if not ldap_connection_status:
@@ -153,6 +156,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
         user_group_id = self.config.default_group
         group_mapping_active = self.config.groups.get('active', False)
+
         if group_mapping_active:
             group_search_filter = self.config.groups['searchfiltergroup'].replace("%username%", user_name)
             group_search_result = self.__ldap_connection.search(self.config.search['basedn'], group_search_filter)
@@ -203,14 +207,14 @@ class LdapAuthenticationProvider(AuthenticationProvider):
 
             try:
                 user_id = self.users_manager.insert_user(new_user_data)
-            except ManagerInsertError as error:
+            except UserManagerInsertError as error:
                 #ERROR-FIX
-                LOGGER.debug('[authenticate] ManagerInsertError: %s', error.message)
+                LOGGER.debug('[authenticate] UserManagerInsertError: %s', error.message)
                 raise AuthenticationError(str(error)) from error
 
             try:
                 user_instance: UserModel = self.users_manager.get_user(user_id)
-            except ManagerGetError as error:
+            except UserManagerGetError as error:
                 #ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerGetError: %s', error.message)
                 raise AuthenticationError(str(error)) from error
