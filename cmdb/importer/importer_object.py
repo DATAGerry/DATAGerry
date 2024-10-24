@@ -19,8 +19,8 @@ from datetime import datetime, timezone
 
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.framework import CmdbObject
-from cmdb.importer import JsonObjectParser
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.importer.parser_object import JsonObjectParser
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig

@@ -19,7 +19,8 @@ Extends: TypeSection
 """
 import logging
 
-from cmdb.framework.models.type_model import TypeSection, TypeReferenceSectionEntry
+from cmdb.framework.models.type_model.type_section import TypeSection
+from cmdb.framework.models.type_model.type_reference_section_entry import TypeReferenceSectionEntry
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -35,7 +36,7 @@ class TypeReferenceSection(TypeSection):
 
     def __init__(self, type: str, name: str, label: str = None, reference: TypeReferenceSectionEntry = None,
                  fields: list = None):
-        self.reference: reference = reference or {}
+        self.reference = reference or {}
         self.fields = fields or []
         super().__init__(type=type, name=name, label=label)
 

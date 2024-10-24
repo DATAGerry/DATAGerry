@@ -31,6 +31,9 @@ from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             MongoDatabaseManager - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
 class MongoDatabaseManager(DatabaseManager):
     """
     PyMongo (MongoDB) implementation of Database Manager

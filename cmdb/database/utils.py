@@ -16,13 +16,17 @@
 """
 List of useful functions for the database
 """
-import calendar
-import datetime
-
-from datetime import datetime
-
 import re
 import logging
+import calendar
+import datetime
+from datetime import datetime
+from bson.dbref import DBRef
+from bson.max_key import MaxKey
+from bson.min_key import MinKey
+from bson.objectid import ObjectId
+from bson.timestamp import Timestamp
+from bson.tz_util import utc
 
 try:
     import uuid
@@ -30,13 +34,6 @@ try:
     USE_UUID = True
 except ImportError:
     USE_UUID = False
-
-from bson.dbref import DBRef
-from bson.max_key import MaxKey
-from bson.min_key import MinKey
-from bson.objectid import ObjectId
-from bson.timestamp import Timestamp
-from bson.tz_util import utc
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

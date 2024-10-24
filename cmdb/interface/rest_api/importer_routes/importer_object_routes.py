@@ -26,20 +26,29 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
+
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.import_routes import importer_blueprint
-from cmdb.interface.route_utils import make_response, insert_request_user, login_required, \
-    right_required
+from cmdb.interface.route_utils import make_response,\
+                                       insert_request_user,\
+                                       login_required,\
+                                       right_required
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request, \
-    get_element_from_data_request, generate_parsed_output, verify_import_access
+from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_file_in_request,\
+                                                                         get_element_from_data_request,\
+                                                                         generate_parsed_output,\
+                                                                         verify_import_access
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 from cmdb.framework.cmdb_render import CmdbRender
-from cmdb.importer import load_parser_class, load_importer_class, __OBJECT_IMPORTER__, __OBJECT_PARSER__, \
-    __OBJECT_IMPORTER_CONFIG__, load_importer_config_class
+from cmdb.importer import load_parser_class,\
+                          load_importer_class,\
+                          load_importer_config_class,\
+                          __OBJECT_IMPORTER__,\
+                          __OBJECT_PARSER__, \
+                          __OBJECT_IMPORTER_CONFIG__
 
 from cmdb.errors.manager import ManagerInsertError
 from cmdb.errors.security import AccessDeniedError

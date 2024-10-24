@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-TODO: document
+Handles interaction between API and CmdbTypes
 """
 import json
 import logging
@@ -25,19 +25,21 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.framework import TypeModel
+from cmdb.framework.models.type import TypeModel
 from cmdb.database.utils import object_hook
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
-from cmdb.manager.query_builder.base_query_builder import BaseQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 
-from cmdb.errors.manager import ManagerUpdateError,\
-                                ManagerDeleteError,\
-                                ManagerGetError,\
-                                ManagerIterationError
+from cmdb.errors.manager import ManagerGetError,\
+                                ManagerInsertError
+from cmdb.errors.manager.types_manager import TypesManagerGetError,\
+                                              TypesManagerUpdateError,\
+                                              TypesManagerDeleteError,\
+                                              TypesManagerInsertError,\
+                                              TypesManagerInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -55,8 +57,6 @@ class TypesManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
-        self.query_builder = BaseQueryBuilder()
-
         self.objects_manager = ObjectsManager(dbm)
 
         super().__init__(TypeModel.COLLECTION, dbm)
@@ -73,16 +73,27 @@ class TypesManager(BaseManager):
         Notes:
             If no public id was given, the database manager will auto insert the next available ID.
 
+        Raises:
+            TypesManagerInitError:
+                - When the Type could not be initialised from data
+            TypesManagerInsertError:
+                - When Type could not be inserted in database
+
         Returns:
             int: The Public ID of the new inserted type
         """
-        if isinstance(new_type, TypeModel):
-            type_to_add = TypeModel.to_json(new_type)
-        else:
-            type_to_add = json.loads(json.dumps(new_type, default=json_util.default), object_hook=object_hook)
+        try:
+            if isinstance(new_type, TypeModel):
+                type_to_add = TypeModel.to_json(new_type)
+            else:
+                type_to_add = json.loads(json.dumps(new_type, default=json_util.default), object_hook=object_hook)
+        except Exception as err:
+            raise TypesManagerInitError("Could not initialise the type from data!") from err
 
-        #ERROR-FIX (Add try/except block)
-        return self.insert(type_to_add)
+        try:
+            return self.insert(type_to_add)
+        except ManagerInsertError as err:
+            raise TypesManagerInsertError(f"Could not insert the type. Error: {err}") from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -98,14 +109,21 @@ class TypesManager(BaseManager):
 
     def get_type(self, public_id: int) -> TypeModel:
         """
-        Get a single type by its id.
+        Get a single type by its public_id
 
         Args:
-            public_id (int): ID of the type.
+            public_id (int): ID of the type
+
+        Raises:
+            TypesManagerInitError:
+                - When the Type could not be initialised from data
+            TypesManagerGetError:
+                - When Type could not be inserted in database
 
         Returns:
             TypeModel: Instance of TypeModel with data.
         """
+
         requested_type = self.get_one(public_id)
 
         try:
@@ -140,9 +158,8 @@ class TypesManager(BaseManager):
             total = 0
             while total_cursor.alive:
                 total = next(total_cursor)['total']
-        except ManagerGetError as err:
-            #ERROR-FIX
-            raise ManagerIterationError(err) from err
+        except Exception as err:
+            raise TypesManagerGetError(err) from err
 
         iteration_result: IterationResult[TypeModel] = IterationResult(aggregation_result, total)
         iteration_result.convert_to(TypeModel)
@@ -216,24 +233,29 @@ class TypesManager(BaseManager):
 
     def update_type(self, public_id: int, update_type: Union[TypeModel, dict]):
         """
-        Update a existing type in the system.
+        Update an existing type in the system
+
         Args:
-            public_id (int): PublicID of the type in the system.
+            public_id (int): PublicID of the type
             type: New type data
 
         Notes:
-            If a TypeModel instance was passed as type argument, \
+            If a TypeModel instance was passed as type argument,
             it will be auto converted via the model `to_json` method.
         """
+        #REFACTOR-FIX try/except block
         if isinstance(update_type, TypeModel):
             new_version_type = TypeModel.to_json(update_type)
         else:
             new_version_type = json.loads(json.dumps(update_type, default=json_util.default), object_hook=object_hook)
 
-        update_result = self.update(criteria={'public_id': public_id}, data=new_version_type)
+        try:
+            update_result = self.update(criteria={'public_id': public_id}, data=new_version_type)
+        except Exception as err:
+            raise TypesManagerUpdateError(err) from err
 
         if update_result.matched_count != 1:
-            raise ManagerUpdateError('Something happened during the update!')
+            raise TypesManagerUpdateError('More than one type updated')
 
         return update_result
 
@@ -249,12 +271,13 @@ class TypesManager(BaseManager):
         Returns:
             TypeModel: The deleted type as its model.
         """
+        #REFACTOR-FIX try/except block
         raw_type: TypeModel = self.get_type(public_id)
+
         try:
             self.delete({'public_id': public_id})
         except Exception as err:
-            #ERROR-FIX
-            raise ManagerDeleteError(str(err)) from err
+            raise TypesManagerDeleteError(str(err)) from err
 
         return raw_type
 
@@ -311,7 +334,7 @@ class TypesManager(BaseManager):
 
         except Exception as err:
             #ERROR-FIX
-            LOGGER.debug("Error in delete_mds_field_entries(): %s", err) 
+            LOGGER.debug("Error in delete_mds_field_entries(): %s", err)
 
         return data_set
 
@@ -353,11 +376,9 @@ class TypesManager(BaseManager):
 
         a_section: TypeFieldSection
         for a_section in target_type.render_meta.sections:
-            # LOGGER.info(f"a type section: {a_section}")
 
             if a_section.type == "multi-data-section":
                 for updated_section in updated_data["render_meta"]["sections"]:
-                    # LOGGER.info(f"new sections: {updated_section}")
 
                     if a_section.type == updated_section["type"] and a_section.name == updated_section["name"]:
                         # get the field changes for each multi-data-section

@@ -14,12 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the classes of all UsersManager errors
+This module contains the classes of all TypesManager errors
 """
 from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class UserManagerError(CMDBError):
+class TypesManagerError(CMDBError):
     """
     Base UsersManager error
     """
@@ -27,39 +27,50 @@ class UserManagerError(CMDBError):
         self.message = message
         super().__init__(message)
 
-# ----------------------------------------------- UsersManager Errors ------------------------------------------------ #
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               TypesManagerError Errors                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 
-class UserManagerGetError(UserManagerError):
+class TypesManagerGetError(TypesManagerError):
     """
-    Raised when UsersManager could not retrieve an user
+    Raised when TypesManager could not retrieve a type
     """
     def __init__(self, err: str):
-        self.message = f"User could not be retrieved. Error: {err}"
+        self.message = f"Type could not be retrieved. Error: {err}"
         super().__init__(self.message)
 
 
-class UserManagerInsertError(UserManagerError):
+class TypesManagerInsertError(TypesManagerError):
     """
-    Raised when UsersManager could not create an user
+    Raised when TypesManager could not create a type
     """
     def __init__(self, err: str):
-        self.message = f"User could not be created. Error: {err}"
+        self.message = f"Type could not be created. Error: {err}"
         super().__init__(self.message)
 
 
-class UserManagerUpdateError(UserManagerError):
+class TypesManagerUpdateError(TypesManagerError):
     """
-    Raised when UsersManager could not update an user
+    Raised when TypesManager could not update a type
     """
     def __init__(self, err: str):
-        self.message = f"User could not be updated. Error: {err}"
+        self.message = f"Type could not be updated. Error: {err}"
         super().__init__(self.message)
 
 
-class UserManagerDeleteError(UserManagerError):
+class TypesManagerDeleteError(TypesManagerError):
     """
-    Raised when UsersManager could not delete an user
+    Raised when TypesManager could not delete a type
     """
     def __init__(self, err: str):
-        self.message = f"User could not be deleted. Error: {err}"
+        self.message = f"Type could not be deleted. Error: {err}"
+        super().__init__(self.message)
+
+
+class TypesManagerInitError(TypesManagerError):
+    """
+    Raised when TypesManager could not initialise a type
+    """
+    def __init__(self, err: str):
+        self.message = f"Type could not be initialised. Error: {err}"
         super().__init__(self.message)

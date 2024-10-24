@@ -18,11 +18,11 @@ This class represents type render meta
 """
 import logging
 
-from cmdb.framework.models.type_model import TypeSection, \
-                                             TypeExternalLink, \
-                                             TypeSummary, \
-                                             TypeFieldSection, \
-                                             TypeReferenceSection
+from cmdb.framework.models.type_model.type_section import TypeSection
+from cmdb.framework.models.type_model.type_external_link import TypeExternalLink
+from cmdb.framework.models.type_model.type_summary import TypeSummary
+from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
+from cmdb.framework.models.type_model.type_reference_section import TypeReferenceSection
 from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
 # -------------------------------------------------------------------------------------------------------------------- #
 
