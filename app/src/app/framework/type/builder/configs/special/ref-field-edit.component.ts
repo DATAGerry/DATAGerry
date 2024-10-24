@@ -152,25 +152,65 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     }
 
 
+    // public onChange() {
+    //     const { ref_types } = this.data;
+    //     this.data.ref_types = this.form.controls.ref_types.value;
+
+    //     this.onInputChange();
+
+    //     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
+    //         this.objectList = [];
+    //         this.filteredTypeList = [];
+    //         this.data.value = '';
+    //     } else {
+    //         this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+    //             this.objectList = res;
+    //             this.prepareSummaries();
+    //         });
+    //     }
+
+    //     this.filterSummaries();
+    // }
+
+
+    /**
+     * Handles changes to the reference types in the form.
+     * Updates the reference types, fetches objects based on the selected types,
+     * and resets or updates lists accordingly. Preserves the current default value if valid.
+     */
     public onChange() {
-        const { ref_types } = this.data;
-        this.data.ref_types = this.form.controls.ref_types.value;
+        const selectedRefTypes = this.form.controls.ref_types.value;
 
-        this.onInputChange();
+        // Only reset lists if types have changed
+        if (JSON.stringify(this.data.ref_types) !== JSON.stringify(selectedRefTypes)) {
+            const currentDefaultValue = this.data.value;
 
-        if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
-            this.objectList = [];
-            this.filteredTypeList = [];
-            this.data.value = '';
-        } else {
-            this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
-                this.objectList = res;
-                this.prepareSummaries();
-            });
+            // Update the reference types
+            this.data.ref_types = selectedRefTypes;
+
+            if (this.data.ref_types.length > 0) {
+                // Fetch objects and update lists
+                this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+                    this.objectList = res;
+
+                    // Preserve default if valid
+                    this.data.value = this.objectList.some(obj => obj.object_information.object_id === currentDefaultValue)
+                        ? currentDefaultValue
+                        : '';
+
+                    this.prepareSummaries();
+                    this.filterSummaries()
+                    this.cd.detectChanges();
+                });
+            } else {
+                // Clear data if no types selected
+                this.summaries = [];
+                this.data.value = '';
+                this.objectList = [];
+            }
         }
-
-        this.filterSummaries();
     }
+
 
     /**
      * Filters the summaries based on the reference types available in the data.
