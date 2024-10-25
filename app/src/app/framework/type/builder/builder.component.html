@@ -184,9 +184,11 @@
                             >
                                 <fa-icon [icon]="getSectionCollapseIcon(section)"></fa-icon>
                             </button>
-                            <!-- <button class="btn btn-link mr-1" type="button">
+
+                            <button class="btn btn-link mr-1" type="button" (click)="toggleColorPicker(section)">
                                 <fa-icon [icon]="['fas', 'paint-brush']"></fa-icon>
-                            </button> -->
+                            </button>
+                    
                             <button class="btn btn-link mr-1" type="button" dndHandle 
                             (dragstart)="preventDragForAllSections($event)"
                             [class.disabled]="disableFields">

@@ -93,6 +93,8 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
     public selectedGlobalSectionTemplates: Array<CmdbSectionTemplate> = [];
     public globalSectionTemplateFields: Array<string> = [];
 
+    public showColorPickerForSection: string | null = null;  // Keep track of which section's color picker is open
+
     @Input() public mode = CmdbMode.View;
     @Input() public groups: Array<Group> = [];
     @Input() public users: Array<User> = [];
@@ -1122,6 +1124,20 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
         this.activeIndex = index;
         this.sectionIdentifierService.setActiveIndex(index);
     }
+
+
+    /**
+     * Toggles the visibility of the color picker for the specified section.
+     * @param section - The section for which the color picker visibility is toggled.
+     */
+    public toggleColorPicker(section: CmdbTypeSection): void {
+        if (this.showColorPickerForSection === section.name) {
+            this.showColorPickerForSection = null;
+        } else {
+            this.showColorPickerForSection = section.name;
+        }
+    }
+
 
     /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
