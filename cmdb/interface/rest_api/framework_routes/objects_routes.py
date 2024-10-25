@@ -28,9 +28,10 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.utils import object_hook, default
-from cmdb.framework import CmdbObject, TypeModel
+from cmdb.framework.models.type import TypeModel
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-from cmdb.framework import ObjectLinkModel
+from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetListResponse, UpdateMultiResponse, UpdateSingleResponse,\
@@ -41,7 +42,8 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-from cmdb.framework.cmdb_render import CmdbRender, RenderList
+from cmdb.framework.rendering.cmdb_render import CmdbRender
+from cmdb.framework.rendering.render_list import RenderList
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError

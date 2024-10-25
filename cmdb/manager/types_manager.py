@@ -23,7 +23,6 @@ from bson import json_util
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
-from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.database.utils import object_hook
@@ -56,8 +55,6 @@ class TypesManager(BaseManager):
     def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         if database:
             dbm.connector.set_database(database)
-
-        self.objects_manager = ObjectsManager(dbm)
 
         super().__init__(TypeModel.COLLECTION, dbm)
 
@@ -338,12 +335,21 @@ class TypesManager(BaseManager):
 
         return data_set
 
+    def get_objects_for_type(self, target_type_id: int) -> list:
+        """TODO: document"""
+        all_type_objects = self.get_many_from_other_collection(CmdbObject.COLLECTION, type_id=target_type_id)
+
+        found_objects = []
+
+        for obj in all_type_objects:
+            found_objects.append(CmdbObject(**obj))
+
+        return found_objects
+
 
     def update_multi_data_fields(self, target_type: TypeModel, added_fields: dict, deleted_fields: dict):
         """TODO: document"""
-        # get all objects of this type
-        #REFACTOR-FIX (remove dependency on ObjectsManager)
-        all_type_objects = self.objects_manager.get_objects_by(type_id=target_type.public_id)
+        all_type_objects = self.get_objects_for_type(target_type.public_id)
 
         # update the multi-data-sections
         an_object: CmdbObject

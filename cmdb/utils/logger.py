@@ -70,10 +70,10 @@ def get_logging_conf():
     # get current process name
     proc_name = multiprocessing.current_process().name
 
-    logging_conf = dict(
-        version=1,
-        disable_existing_loggers=True,
-        handlers={
+    logging_conf = {
+        'version':1,
+        'disable_existing_loggers':True,
+        'handlers':{
             'console': {
                 'class': 'logging.StreamHandler',
                 'formatter': 'generic'
@@ -100,14 +100,14 @@ def get_logging_conf():
                 'backupCount': 4
             }
         },
-        formatters={
+        'formatters':{
             'generic': {
                 'format': '[%(asctime)s][%(levelname)-8s] --- %(message)s (%(filename)s)',
                 'datefmt': '%Y-%m-%d %H:%M:%S',
                 'class': 'logging.Formatter'
             }
         },
-        loggers={
+        'loggers':{
             "__main__": {
                 'level': str(get_log_level(minlevel="INFO")),
                 'handlers': ['console', 'file_daemon'],
@@ -131,6 +131,6 @@ def get_logging_conf():
                 "qualname": "gunicorn.access"
             }
         }
-    )
+    }
 
     return logging_conf

@@ -16,13 +16,3 @@
 """
 This module contains all models used by DATAGERRY
 """
-from .type import TypeModel
-from .category import CategoryModel
-from .link import ObjectLinkModel
-# -------------------------------------------------------------------------------------------------------------------- #
-
-__all__ = [
-    'CategoryModel',
-    'TypeModel',
-    'ObjectLinkModel'
-]

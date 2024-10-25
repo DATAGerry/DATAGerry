@@ -20,6 +20,7 @@ from os import path
 from flask import send_from_directory
 from flask_cors import CORS
 
+import cmdb
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
 
@@ -30,8 +31,6 @@ def create_app():
     """TODO: document"""
     app = BaseCmdbApp(__name__)
     CORS(app)
-
-    import cmdb
 
     if cmdb.__MODE__ == 'DEBUG':
         config = app_config['development']

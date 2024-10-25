@@ -22,6 +22,8 @@ import os
 import subprocess
 import requests
 import pymysql
+import csv
+from requests.exceptions import HTTPError
 
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
@@ -295,6 +297,7 @@ class ExternalSystemOpenNMS(ExternalSystem):
         if node_location != "default":
             node_xml_attr["location"] = str(node_location)
         node_xml = ET.Element("node", node_xml_attr)
+
         # XML: interface
         for interface in interfaces:
             interface_xml_attr = {}
@@ -304,18 +307,23 @@ class ExternalSystemOpenNMS(ExternalSystem):
                 service_xml_attr = {}
                 service_xml_attr["service-name"] = str(service)
                 ET.SubElement(interface_xml, "monitored-service", service_xml_attr)
+
         # XML: categories
         for category in categories:
             if category:
                 cat_xml_attr = {}
                 cat_xml_attr["name"] = str(category)
                 ET.SubElement(node_xml, "category", cat_xml_attr)
+
         # XML: assets
-        for asset in assets:
-            asset_xml_attr = {}
-            asset_xml_attr["name"] = asset
-            asset_xml_attr["value"] = assets[asset]
+        for name, value in assets.items():
+            asset_xml_attr = {
+                "name": name,
+                "value": value
+            }
+
             ET.SubElement(node_xml, "asset", asset_xml_attr)
+
         # XML: append structure
         self.__xml.append(node_xml)
 
@@ -550,10 +558,10 @@ class ExternalSystemCpanelDns(ExternalSystem):
                            IP and/or hostname is invalid")
 
         # check if a DNS record exist for object
-        if hostname in self.__existing_records.keys():
+        if hostname in self.__existing_records:
             # check if entry has changed
             if self.__existing_records[hostname]["data"] != ip:
-                if hostname not in self.__created_records.keys():
+                if hostname not in self.__created_records:
                     # recreate entry
                     self.delete_a_records(self.__domain_name, hostname)
                     self.add_a_record(self.__domain_name, hostname, ip)
@@ -562,7 +570,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
             del self.__existing_records[hostname]
         else:
             # if not create a new one
-            if hostname not in self.__created_records.keys():
+            if hostname not in self.__created_records:
                 self.add_a_record(self.__domain_name, hostname, ip)
 
         # save to created records
@@ -607,7 +615,7 @@ class ExternalSystemCpanelDns(ExternalSystem):
                 record_line = record['line']
 
             # format hostname
-            matches = re.search(r'(.*?).%s?.' % cur_domain, record_hostname)
+            matches = re.search(rf'(.*?).{cur_domain}?.', record_hostname)
             if matches:
                 record_hostname = matches.group(1)
                 output.update({record_hostname: {"data": record_data, "line": record_line}})
@@ -623,7 +631,6 @@ class ExternalSystemCpanelDns(ExternalSystem):
         Returns:
             JSON data, which are returned from API
         """
-        from requests.exceptions import HTTPError
         json_result = {}
 
         try:
@@ -683,12 +690,14 @@ class ExternalSystemCpanelDns(ExternalSystem):
         """
         # get all A records in zone
         records = self.get_a_records(cur_domain)
-        for r_name in records:
+        for r_name, r_data in records.items():
             # check if record has the correct name
             if r_name == cur_hostname:
                 # delete enty
-                url_parameters = "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=remove_zone_record"
-                url_parameters += "&domain={}&line={}".format(cur_domain, str(records[r_name]['line']))
+                url_parameters = (
+                    "cpanel_jsonapi_module=ZoneEdit&cpanel_jsonapi_func=remove_zone_record"
+                )
+                url_parameters += f"&domain={cur_domain}&line={str(r_data['line'])}"
                 self.get_data(url_parameters)
 
 
@@ -713,7 +722,6 @@ class ExternalSystemCpanelDns(ExternalSystem):
         Returns:
             The correct format. Empty string, if not.
         """
-        import ipaddress
         try:
             if ipaddress.IPv4Address(value) or ipaddress.IPv6Address(value):
                 return value
@@ -776,7 +784,6 @@ class ExternalSystemCsv(ExternalSystem):
 
 
     def finish_export(self):
-        import csv
         with open(self.filename, 'w', encoding='utf-8', newline='') as csv_file:
             writer = csv.DictWriter(csv_file,
                                     fieldnames=self.header,

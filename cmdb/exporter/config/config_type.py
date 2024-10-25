@@ -28,4 +28,4 @@ class ExporterConfig(BaseExporterConfig):
         """
         self.parameters = parameters
         self.options = options or None
-        super().__init__(config_type=ExporterConfigType.native)
+        super().__init__(config_type=ExporterConfigType.NATIVE)

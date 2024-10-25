@@ -24,7 +24,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import ObjectLinkModel
+from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.results import IterationResult

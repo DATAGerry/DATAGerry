@@ -17,7 +17,7 @@
 from cmdb.exporter.config.config_type import ExporterConfigType
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExperterUtils:
+class ExporterUtils:
     """
     The utils module contains classes and funtions of general utility used in multiple places throughout Exporter.
     Some of these are exporter-specific algorithms while others are more python tricks.
@@ -26,11 +26,12 @@ class ExperterUtils:
     def summary_renderer(obj, field, view: str = 'native') -> str:
         """TODO: ducoment"""
         # Export only the shown fields chosen by the user
-        if view == ExporterConfigType.render.name and field.get('type') == 'ref':
+        if view.upper() == ExporterConfigType.RENDER.name and field.get('type') == 'ref':
             summary_line = f'{obj.type_information["type_label"]} #{obj.type_information["type_id"]}  '
             first = True
             reference = field.get('reference')
             summaries = [] if not reference else reference.get('summaries')
+
             for line in summaries:
                 if first:
                     summary_line += f'{line["value"]}'

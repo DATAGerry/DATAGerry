@@ -79,7 +79,7 @@ class EventManagerAmqp(EventManager):
     It starts an EventSender and an EventReceiver thread.
     """
 
-    def __init__(self, flag_shutdown, receiver_callback, process_id=None, event_types=["#"], flag_multiproc=False):
+    def __init__(self, flag_shutdown, receiver_callback, process_id=None, event_types=None, flag_multiproc=False):
         """Creates an instance of EventManagerAmqp
 
         Args:
@@ -91,6 +91,9 @@ class EventManagerAmqp(EventManager):
             flag_multiproc(bool): switch, if EventManager should be used
                 by multiple processes
         """
+        if event_types is None:
+            event_types = ["#"]
+
         super().__init__(receiver_callback)
 
         # store variables
@@ -226,7 +229,7 @@ class EventReceiverAmqp(threading.Thread):
     types were processed (e.g. cmdb.core.objects.added)
     """
 
-    def __init__(self, receiver_callback, flag_shutdown, process_id=None, event_types=["#"]):
+    def __init__(self, receiver_callback, flag_shutdown, process_id=None, event_types=None):
         """Creates an instance of EventReceiverAmqp
 
         Args:
@@ -236,6 +239,9 @@ class EventReceiverAmqp(threading.Thread):
             process_id(str): process identifier (process name)
             event_types(list): list of event types, that will be processed
         """
+        if event_types is None:
+            event_types = ["#"]
+
         super().__init__()
         self.__receiver_callback = receiver_callback
         self.__flag_shutdown = flag_shutdown

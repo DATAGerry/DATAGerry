@@ -23,8 +23,9 @@ from cmdb.database.database_manager import DatabaseManager
 from cmdb.database.mongo_connector import MongoConnector
 
 from cmdb.database.counter import PublicIDCounter
-from cmdb.database.utils import DESCENDING
 from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
+from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
+from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
 
 from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -57,8 +58,6 @@ class MongoDatabaseManager(DatabaseManager):
         Returns:
             acknowledged
         """
-        from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
-        from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
         collection = FRAMEWORK_COLLECTIONS + USER_MANAGEMENT_COLLECTIONS
 
         def _gen_default_tables(collection_class):
@@ -306,7 +305,7 @@ class MongoDatabaseManager(DatabaseManager):
             int: highest public id
         """
         try:
-            formatted_sort = [('public_id', DESCENDING)]
+            formatted_sort = [('public_id', -1)]
 
             highest_id = self.find_one_by(collection=collection, sort=formatted_sort)
 

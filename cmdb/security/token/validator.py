@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+import time
 from typing import Union
 from authlib.jose import jwt, JsonWebToken
 from authlib.jose.errors import BadSignatureError, InvalidClaimError
@@ -66,7 +67,6 @@ class TokenValidator:
             JWTClaims: decoded token
         """
         try:
-            import time
             token.validate(time.time())
         except InvalidClaimError as err:
             raise TokenValidationError(str(err)) from err

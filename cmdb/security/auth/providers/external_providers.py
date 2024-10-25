@@ -28,7 +28,7 @@ from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
 
 from cmdb.errors.provider import GroupMappingError, AuthenticationError
-from cmdb.errors.manager import ManagerGetError, ManagerInsertError, ManagerUpdateError
+from cmdb.errors.manager import ManagerGetError, ManagerUpdateError
 from cmdb.errors.manager.user_manager import UserManagerGetError, UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 

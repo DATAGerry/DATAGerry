@@ -25,7 +25,7 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.framework.results import IterationResult
 
-from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError, ManagerIterationError
+from cmdb.errors.manager import ManagerUpdateError, ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

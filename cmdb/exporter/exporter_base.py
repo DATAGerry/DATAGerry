@@ -27,10 +27,10 @@ import openpyxl
 
 from cmdb.utils import json_encoding
 from cmdb.utils.helpers import load_class
-from cmdb.exporter.exporter_utils import ExperterUtils
+from cmdb.exporter.exporter_utils import ExporterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.exporter.config.config_type import ExporterConfigType
-from cmdb.framework.cmdb_render import RenderResult
+from cmdb.framework.rendering.render_result import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -82,7 +82,7 @@ class ZipExportType(BaseExporterFormat):
                 export = export_type.export(type_list)
 
                 # check if export output is a string, bytes or a file and inserts it into the zip file
-                if isinstance(export, str) or isinstance(export, bytes):
+                if isinstance(export, (str, bytes)):
                     f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i), export)
                 else:
                     f.writestr((type_name + "_ID_" + str(type_id) + "." + export_type.FILE_EXTENSION).format(i),
@@ -122,7 +122,9 @@ class CsvExportType(BaseExporterFormat):
         current_type_id = None
 
         # Export only the shown fields chosen by the user
-        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+        if args and args[0].get("metadata", False) and \
+           args[0].get('view', 'native').upper() == ExporterConfigType.RENDER.name:
+
             _meta = json.loads(args[0].get("metadata", ""))
             view = args[0].get('view', 'native')
             header = _meta['header']
@@ -142,7 +144,7 @@ class CsvExportType(BaseExporterFormat):
 
             for field in obj.fields:
                 obj_field_name = field.get('name')
-                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
+                obj_fields_dict[obj_field_name] = ExporterUtils.summary_renderer(obj, field, view)
 
             # define output row
             row = []
@@ -211,7 +213,7 @@ class JsonExportType(BaseExporterFormat):
                 multi_data_sections = obj.multi_data_sections
 
             # Export only the shown fields chosen by the user
-            if meta and view == ExporterConfigType.render.name:
+            if meta and view.upper() == ExporterConfigType.RENDER.name:
                 _meta = json.loads(meta)
                 header = _meta['header']
                 columns = [x for x in columns if x['name'] in _meta['columns']]
@@ -232,7 +234,7 @@ class JsonExportType(BaseExporterFormat):
             for field in columns:
                 output_element['fields'].append({
                     'name': field.get('name'),
-                    'value': ExperterUtils.summary_renderer(obj, field, view)
+                    'value': ExporterUtils.summary_renderer(obj, field, view)
                 })
 
             if len(multi_data_sections) > 0:
@@ -313,7 +315,9 @@ class XlsxExportType(BaseExporterFormat):
         view = 'native'
 
         # Export only the shown fields chosen by the user
-        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+        if args and args[0].get("metadata", False) and \
+           args[0].get('view', 'native').upper() == ExporterConfigType.RENDER.name:
+
             _meta = json.loads(args[0].get("metadata", ""))
             view = args[0].get('view', 'native')
             header = _meta['header']
@@ -358,7 +362,7 @@ class XlsxExportType(BaseExporterFormat):
             obj_fields_dict = {}
             for field in obj.fields:
                 obj_field_name = field.get('name')
-                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
+                obj_fields_dict[obj_field_name] = ExporterUtils.summary_renderer(obj, field, view)
 
             # insert row values: fields
             c = len(header)+1
@@ -402,7 +406,9 @@ class XmlExportType(BaseExporterFormat):
         view = 'native'
 
         # Export only the shown fields chosen by the user
-        if args and args[0].get("metadata", False) and args[0].get('view', 'native') == ExporterConfigType.render.name:
+        if args and args[0].get("metadata", False) and \
+           args[0].get('view', 'native').upper() == ExporterConfigType.RENDER.name:
+
             _meta = json.loads(args[0].get("metadata", ""))
             view = args[0].get('view', 'native')
             header = _meta['header']
@@ -416,7 +422,7 @@ class XmlExportType(BaseExporterFormat):
             obj_fields_dict = {}
             for field in obj.fields:
                 obj_field_name = field.get('name')
-                obj_fields_dict[obj_field_name] = ExperterUtils.summary_renderer(obj, field, view)
+                obj_fields_dict[obj_field_name] = ExporterUtils.summary_renderer(obj, field, view)
 
             # xml output: object
             cmdb_object = ET.SubElement(cmdb_object_list, 'object')

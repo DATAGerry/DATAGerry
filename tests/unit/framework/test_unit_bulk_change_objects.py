@@ -23,9 +23,11 @@ from pytest import fixture
 from pymongo.mongo_client import MongoClient
 from pymongo.collection import Collection
 
-from cmdb.framework import TypeModel, CmdbObject
-from cmdb.framework.models.type_model import TypeSummary
-from cmdb.framework.models.type_model import TypeFieldSection, TypeRenderMeta
+from cmdb.framework.models.type import TypeModel
+from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.framework.models.type_model.type_summary import TypeSummary
+from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
+from cmdb.framework.models.type_model.type_render_meta import TypeRenderMeta
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.sections import GroupACL
 # -------------------------------------------------------------------------------------------------------------------- #

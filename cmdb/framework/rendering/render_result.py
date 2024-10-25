@@ -15,45 +15,34 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
-from pymongo import IndexModel
+from datetime import datetime, timezone
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                            TemplateManagementBase - CLASS                                            #
+#                                                 RenderResult - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TemplateManagementBase:
+class RenderResult:
     """TODO: document"""
-    ASCENDING = 1
-    DESCENDING = -1
-    COLLECTION = 'docapi.*'
 
-    SUPER_INDEX_KEYS = [
-        {'keys': [('public_id', ASCENDING)], 'name': 'public_id', 'unique': True}
-    ]
-    IGNORED_INIT_KEYS = []
-    REQUIRED_INIT_KEYS = []
-    INDEX_KEYS = []
-
-    def __init__(self, **kwargs):
-        self.public_id = None
-
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+    def __init__(self):
+        self.current_render_time = datetime.now(timezone.utc)
+        self.object_information: dict = {}
+        self.type_information: dict = {}
+        self.fields: list = []
+        self.sections: list = []
+        self.summaries: list = []
+        self.summary_line: str = ''
+        self.externals: list = []
+        self.multi_data_sections: list = []
 
 
-    @classmethod
-    def get_index_keys(cls):
+    def get_object_information(self, idx):
         """TODO: document"""
-        index_list = []
-        for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
-            index_list.append(IndexModel(**index))
-
-        return index_list
+        return self.object_information[idx]
 
 
-    def to_database(self):
+    def get_type_information(self, idx):
         """TODO: document"""
-        return self.__dict__
+        return self.type_information[idx]

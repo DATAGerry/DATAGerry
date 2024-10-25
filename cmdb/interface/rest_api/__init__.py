@@ -18,8 +18,20 @@ Init module for rest routes
 """
 from flask_cors import CORS
 
+import cmdb
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
+from cmdb.interface.custom_converters import RegexConverter
+
+from cmdb.interface.error_handlers import internal_server_error,\
+                                          page_gone,\
+                                          not_acceptable,\
+                                          method_not_allowed,\
+                                          page_not_found,\
+                                          forbidden,\
+                                          unauthorized,\
+                                          bad_request,\
+                                          service_unavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def create_rest_api(database_manager, event_queue):
@@ -30,7 +42,6 @@ def create_rest_api(database_manager, event_queue):
     # Import App Extensions
     CORS(app=app, expose_headers=['X-API-Version', 'X-Total-Count'])
 
-    import cmdb
     if cmdb.__MODE__ == 'DEBUG':
         config = app_config['development']
         app.config.from_object(config)
@@ -51,13 +62,11 @@ def create_rest_api(database_manager, event_queue):
 
 def register_converters(app):
     """TODO: document"""
-    from cmdb.interface.custom_converters import RegexConverter
     app.url_map.converters['regex'] = RegexConverter
 
 
 def register_blueprints(app):
     """TODO: document"""
-    import cmdb
     from cmdb.interface.rest_api.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.system_routes.setup_routes import setup_blueprint
     from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
@@ -127,9 +136,6 @@ def register_error_pages(app):
     Params:
         app (BaseCmdbApp): app where to register the error handlers
     """
-    from cmdb.interface.error_handlers import internal_server_error, page_gone, not_acceptable, \
-                                              method_not_allowed, page_not_found, forbidden, unauthorized, \
-                                              bad_request, service_unavailable
 
     app.register_error_handler(400, bad_request)
     app.register_error_handler(401, unauthorized)

@@ -21,7 +21,8 @@ from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type import TypeModel
-from cmdb.framework.cmdb_render import RenderResult, RenderList
+from cmdb.framework.rendering.render_list import RenderList
+from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.search.params import SearchParam
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
@@ -48,7 +49,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
 
 
     def build(self, search_term, user: UserModel = None, permission: AccessControlPermission = None,
-              active_flag: bool = False, *args, **kwargs) -> list[dict]:
+              active_flag: bool = False) -> list[dict]:
         """Build a pipeline query out of search search term"""
 
         regex = self.regex_('fields.value', f'{search_term}', 'ims')
@@ -158,17 +159,16 @@ class SearchPipelineBuilder(PipelineBuilder):
         """Extract the regex pipes value from the pipeline"""
         regex_pipes: list[str] = []
 
-        def gen_dict_extract(key, var) -> str:
+        def gen_dict_extract(key, var):
             for k, v in var.items():
                 if k == key:
                     yield v
                 if isinstance(v, dict):
-                    for result in gen_dict_extract(key, v):
-                        yield result
+                    yield from gen_dict_extract(key, v)
                 elif isinstance(v, list):
                     for d in v:
-                        for result in gen_dict_extract(key, d):
-                            yield result
+                        if isinstance(d, dict):
+                            yield from gen_dict_extract(key, d)
 
         for pipe in self.pipeline:
             pipe_extract = []
@@ -247,7 +247,6 @@ class SearchPipelineBuilder(PipelineBuilder):
 
 class SearcherFramework:
     """Framework searcher implementation for object search"""
-    DEFAULT_SKIP: int = 0
     DEFAULT_LIMIT: int = 10
     DEFAULT_REGEX: str = ''
 
@@ -257,9 +256,10 @@ class SearcherFramework:
         super().__init__(objects_manager)
 
 
-    def aggregate(self, pipeline: list[dict], request_user: UserModel = None, permission: AccessControlPermission = None,
+    def aggregate(self, pipeline: list[dict],
+                  request_user: UserModel = None,
                   limit: int = DEFAULT_LIMIT,
-                  skip: int = DEFAULT_SKIP, **kwargs) -> SearchResult[RenderResult]:
+                  skip: int = 0, **kwargs) -> SearchResult[RenderResult]:
         """
         Use mongodb aggregation system with pipeline queries
         Args:
@@ -343,6 +343,6 @@ class SearcherFramework:
 
 
     def search(self, query: dict, request_user: UserModel = None, limit: int = DEFAULT_LIMIT,
-               skip: int = DEFAULT_SKIP) -> SearchResult[RenderResult]:
+               skip: int = 0) -> SearchResult[RenderResult]:
         """Uses mongodb find query system"""
         raise NotImplementedError()

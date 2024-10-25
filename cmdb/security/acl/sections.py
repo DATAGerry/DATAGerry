@@ -94,8 +94,9 @@ class GroupACL(AccessControlListSection[int]):
     def includes(self, value: AccessControlSectionDict):
         if not isinstance(value, dict):
             raise TypeError('`AccessControlListSection` only takes dict as include structure')
-        else:
-            value = {int(k): v for k, v in value.items()}
+
+        value = {int(k): v for k, v in value.items()}
+
         self._includes = value
 
 

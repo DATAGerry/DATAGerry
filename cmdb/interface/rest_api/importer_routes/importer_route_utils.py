@@ -16,6 +16,7 @@
 """TODO: document"""
 import json
 import logging
+from typing import Union
 from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
@@ -23,6 +24,7 @@ from werkzeug.wrappers import Request
 
 from cmdb.manager.types_manager import TypesManager
 
+from cmdb.importer import load_parser_class
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel
@@ -43,7 +45,7 @@ def get_file_in_request(file_name: str, request_files) -> FileStorage:
     return request.files.get(file_name)
 
 
-def get_element_from_data_request(element, _request: Request) -> (dict, None):
+def get_element_from_data_request(element, _request: Request) -> Union[dict, None]:
     """TODO: document"""
     try:
         return json.loads(_request.form.to_dict()[element])
@@ -53,7 +55,7 @@ def get_element_from_data_request(element, _request: Request) -> (dict, None):
 
 def generate_parsed_output(request_file, file_format, parser_config):
     """TODO: document"""
-    from cmdb.importer import load_parser_class
+
     # Load parser class
     parser_class = load_parser_class('object', file_format)
 

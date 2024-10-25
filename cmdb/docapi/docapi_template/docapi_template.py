@@ -14,22 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from enum import Enum
-
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
-
+from cmdb.docapi.docapi_template.docapi_template_type import DocapiTemplateType
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-#CLASS-FIX
-class DocapiTemplateType(Enum):
-    """TODO: document"""
-    OBJECT = 0
-
-
-#CLASS-FIX
 class DocapiTemplate(TemplateManagementBase):
     """
     Docapi Template
@@ -41,8 +32,17 @@ class DocapiTemplate(TemplateManagementBase):
         {'keys': [('name', CmdbDAO.DAO_ASCENDING)], 'name': 'name', 'unique': True}
     ]
 
-    def __init__(self, name, label=None, description=None, active=None, author_id=None,
-                 template_data=None, template_style=None, template_type=None, template_parameters=None, **kwargs):
+    def __init__(self,
+                 name,
+                 label=None,
+                 description=None,
+                 active=None,
+                 author_id=None,
+                 template_data=None,
+                 template_style=None,
+                 template_type=None,
+                 template_parameters=None,
+                 **kwargs):
         """
         Args:
             name: name of this template
@@ -85,7 +85,7 @@ class DocapiTemplate(TemplateManagementBase):
 
 
     @classmethod
-    def to_json(cls, instance: "DocapiTemplate", *args, **kwargs) -> dict:
+    def to_json(cls, instance: "DocapiTemplate") -> dict:
         """TODO: document"""
         return {
             'public_id': instance.public_id,

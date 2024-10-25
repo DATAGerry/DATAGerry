@@ -22,7 +22,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
-from cmdb.framework.cmdb_render import RenderList
+from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse

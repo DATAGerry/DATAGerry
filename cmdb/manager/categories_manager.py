@@ -23,7 +23,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import CategoryModel
+from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.category import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission

@@ -23,7 +23,10 @@ from dateutil.parser import parse
 
 from cmdb.security.acl.control import AccessControlList
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.models.type_model import TypeSummary, TypeExternalLink, TypeSection, TypeRenderMeta
+from cmdb.framework.models.type_model.type_summary import TypeSummary
+from cmdb.framework.models.type_model.type_external_link import TypeExternalLink
+from cmdb.framework.models.type_model.type_section import TypeSection
+from cmdb.framework.models.type_model.type_render_meta import TypeRenderMeta
 
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
 from cmdb.errors.type import FieldNotFoundError, FieldInitError
