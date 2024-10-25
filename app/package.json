@@ -46,6 +46,7 @@
     "jquery": "^3.7.1",
     "jszip": "^3.10.1",
     "moment-timezone": "^0.5.45",
+    "ngx-color": "^9.0.0",
     "ngx-drag-drop": "^17.0.0",
     "ngx-filesaver": "^17.0.0",
     "ngx-icon-picker": "^1.11.2",

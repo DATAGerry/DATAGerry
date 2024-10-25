@@ -42,6 +42,7 @@ import { SectionRefFieldEditComponent } from './configs/section/section-ref-fiel
 import { ConfigEditComponent } from './configs/config-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { ColorChromeModule } from 'ngx-color/chrome';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -57,7 +58,8 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
         NgbDatepickerModule,
         CategoryModule,
         NgbTooltipModule,
-        LayoutModule
+        LayoutModule,
+        ColorChromeModule
     ],
     declarations: [
         ConfigEditComponent,
@@ -81,4 +83,4 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
         ConfigEditComponent
     ]
 })
-export class BuilderModule {}
+export class BuilderModule { }
