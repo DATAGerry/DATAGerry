@@ -1036,7 +1036,8 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
             'name': sectionName,
             'label': data.label,
             'type': data.type,
-            'fields': data.fields
+            'fields': data.fields,
+            'bg_color': '#ffffff'
         }
     }
 
@@ -1136,6 +1137,34 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
         } else {
             this.showColorPickerForSection = section.name;
         }
+    }
+
+
+    /**
+     * Updates the background color of a specified section and applies it to the type instance metadata.
+     * @param section - The section whose background color is to be updated.
+     * @param color - The new color to set for the section.
+     */
+    public updateSectionColor(section: CmdbTypeSection, color: string): void {
+        if (this.mode === this.MODES.View) {
+            return;
+        }
+
+        // Validate color input, ensure it's a valid string
+        if (!color || color.trim() === '') {
+            return;
+        }
+
+        section.bg_color = color;
+
+
+        const sectionIndex = this.typeInstance.render_meta.sections.findIndex((s) => s.name === section.name);
+        if (sectionIndex !== -1) {
+            this.typeInstance.render_meta.sections[sectionIndex].bg_color = color;
+        }
+
+        //hide the color picker after selecting a color
+        this.showColorPickerForSection = null;
     }
 
 
