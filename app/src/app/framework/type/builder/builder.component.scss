@@ -114,3 +114,12 @@
     pointer-events: none;
     opacity: 0.6;
 }
+
+.color-picker-wrapper {
+  position: absolute;  /* Position relative to the button that opens it */
+  top: 30px; 
+  right: 0; 
+  z-index: 2000;  /* Ensure it appears above other elements */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);  
+  background: #fff;
+} 
