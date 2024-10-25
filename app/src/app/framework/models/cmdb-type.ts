@@ -39,7 +39,7 @@ export interface CmdbMultiDataSection {
     label: string;
     fields?: Array<any>;
     hidden_fields?: Array<any>;
-    bg_color?: string;  // Add bg_color with optional type
+    bg_color?: string;
     reference?: {
         type_id: number;
         section_name: string;
