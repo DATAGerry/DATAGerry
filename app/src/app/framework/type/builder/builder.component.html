@@ -189,6 +189,13 @@
                                 <fa-icon [icon]="['fas', 'paint-brush']"></fa-icon>
                             </button>
                     
+                            <div class="color-picker-wrapper" *ngIf="showColorPickerForSection === section.name">
+                                <color-chrome
+                                    [color]="section.bg_color || '#ffffff'" 
+                                    (onChangeComplete)="updateSectionColor(section, $event.color.hex)">
+                                </color-chrome>
+                            </div>
+                            
                             <button class="btn btn-link mr-1" type="button" dndHandle 
                             (dragstart)="preventDragForAllSections($event)"
                             [class.disabled]="disableFields">
