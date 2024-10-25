@@ -72,7 +72,7 @@ def search_framework(request_user: UserModel):
 
     try:
         limit = request.args.get('limit', SearcherFramework.DEFAULT_LIMIT, int)
-        skip = request.args.get('skip', SearcherFramework.DEFAULT_SKIP, int)
+        skip = request.args.get('skip', 0, int)
         only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
         resolve_object_references: bool = request.args.get('resolve', False)
@@ -102,8 +102,7 @@ def search_framework(request_user: UserModel):
                                         active_flag=only_active)
 
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
-                                    resolve=resolve_object_references, permission=AccessControlPermission.READ,
-                                    active=only_active)
+                                    resolve=resolve_object_references, active=only_active)
     except Exception as err:
         LOGGER.error('[search_framework]: %s',err)
         return make_response([], 204)

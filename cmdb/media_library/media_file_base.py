@@ -15,6 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+from pymongo import IndexModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -43,8 +44,9 @@ class MediaFileManagementBase:
     @classmethod
     def get_index_keys(cls):
         """TODO: document"""
-        from pymongo import IndexModel
         index_list = []
+
         for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS:
             index_list.append(IndexModel(**index))
+
         return index_list

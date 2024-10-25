@@ -22,7 +22,7 @@ from flask import request, abort
 
 from cmdb.manager.types_manager import TypesManager
 
-from cmdb.framework import TypeModel
+from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, make_response, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint

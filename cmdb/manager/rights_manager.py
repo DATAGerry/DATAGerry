@@ -102,7 +102,7 @@ class RightsManager(BaseManager):
         raw_tree = []
 
         for node in right_tree:
-            if isinstance(node, tuple) or isinstance(node, list):
+            if isinstance(node, (tuple, list)):
                 raw_tree.append(RightsManager.tree_to_json(node))
             else:
                 raw_tree.append(BaseRight.to_dict(node))

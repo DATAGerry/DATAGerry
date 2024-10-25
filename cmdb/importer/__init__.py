@@ -42,10 +42,10 @@ __OBJECT_PARSER__ = {
 def load_importer_class(importer_type: str, importer_name: str):
     """TODO: document"""
 
-    global __OBJECT_IMPORTER__
     __importer = {
         'object': __OBJECT_IMPORTER__
     }
+
     try:
         importer_class = __importer.get(importer_type).get(importer_name)
     except (IndexError, KeyError, ValueError, TypeError) as err:
@@ -60,7 +60,6 @@ def load_importer_class(importer_type: str, importer_name: str):
 def load_importer_config_class(importer_type: str, importer_name: str):
     """TODO: document"""
 
-    global __OBJECT_IMPORTER_CONFIG__
     __importer_config = {
         'object': __OBJECT_IMPORTER_CONFIG__
     }
@@ -76,7 +75,6 @@ def load_importer_config_class(importer_type: str, importer_name: str):
 def load_parser_class(parser_type: str, parser_name: str):
     """TODO: document"""
 
-    global __OBJECT_PARSER__
     __parser = {
             'object': __OBJECT_PARSER__
     }

@@ -19,10 +19,10 @@ from enum import Enum
 
 class ExporterConfigType(Enum):
     """
-    Type of exported data (native = CmdbObject, render = RenderResult)
+    Type of exported data (NATIVE = CmdbObject, RENDER = RenderResult)
     """
-    native = 2
-    render = 3
+    NATIVE = 2
+    RENDER = 3
 
     def __str__(self):
         return self.name
@@ -34,6 +34,6 @@ class BaseExporterConfig:
     def __init__(self, config_type: ExporterConfigType):
         """
         Args:
-            config_type: Type of exported data (CmdbObject = native, RenderResult = render)
+            config_type: Type of exported data (CmdbObject = NATIVE, RenderResult = RENDER)
         """
         self.config_type = config_type

@@ -25,10 +25,10 @@ from cmdb.exportd.exportd_job.exportd_job import ExportdJob
 from cmdb.exportd.exportd_header.exportd_header import ExportdHeader
 from cmdb.utils.helpers import load_class
 from cmdb.exportd.exportd_logs.exportd_log import LogAction, ExportdJobLog
-from cmdb.framework.cmdb_render import RenderList
+from cmdb.framework.rendering.render_list import RenderList
 from cmdb.templates.template_data import ObjectTemplateData
 from cmdb.templates.template_engine import TemplateEngine
-from cmdb.framework.cmdb_render import RenderResult
+from cmdb.framework.rendering.render_result import RenderResult
 
 from cmdb.errors.manager.exportd_log_manager import ExportdLogManagerInsertError
 from cmdb.errors.manager.exportd_job_manager import ExportJobConfigError
@@ -133,6 +133,7 @@ class ExportdManagerBase(ExportdJobsManager):
         return exportd_header
 
 
+#CLASS-FIX
 class ExportVariable:
     """TODO: document"""
     def __init__(self, name, value_tpl_default, value_tpl_types: dict = None):

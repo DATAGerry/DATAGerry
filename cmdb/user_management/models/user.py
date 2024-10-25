@@ -17,7 +17,7 @@
 from datetime import datetime, timezone
 from dateutil import parser
 
-from cmdb.framework import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserModel(CmdbDAO):
@@ -163,8 +163,10 @@ class UserModel(CmdbDAO):
     def from_data(cls, data: dict) -> "UserModel":
         """TODO: document"""
         reg_date = data.get('registration_time', None)
+
         if reg_date and isinstance(reg_date, str):
             reg_date = parser.parse(reg_date)
+
         return cls(
             public_id=data.get('public_id'),
             user_name=data.get('user_name'),

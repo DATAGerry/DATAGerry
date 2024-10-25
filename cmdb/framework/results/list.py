@@ -16,7 +16,7 @@
 """TODO: document"""
 from typing import TypeVar, Generic, Union
 
-from cmdb.framework import CmdbDAO
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 C = TypeVar('C', bound=CmdbDAO)

@@ -26,9 +26,9 @@ from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 
-from cmdb.framework.models import TypeModel
-from cmdb.framework.models import CategoryModel
-from cmdb.framework.models import ObjectLinkModel
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.framework.models.log import CmdbLog, CmdbObjectLog, CmdbMetaLog
 # -------------------------------------------------------------------------------------------------------------------- #
 

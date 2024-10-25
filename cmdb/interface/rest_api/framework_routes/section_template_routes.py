@@ -25,7 +25,7 @@ from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
-from cmdb.framework import CmdbSectionTemplate
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.response import GetMultiResponse, UpdateSingleResponse
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters

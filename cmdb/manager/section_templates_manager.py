@@ -25,9 +25,9 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import TypeModel
-from cmdb.framework.models.type_model import TypeFieldSection
-from cmdb.framework import CmdbSectionTemplate
+from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult

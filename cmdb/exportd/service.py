@@ -75,10 +75,6 @@ class ExportdService(cmdb.process_management.service.AbstractCmdbService):
         self.handler(event)
 
 
-    def __schedule_job(self, event: Event):
-        pass
-
-
     def handler(self, event: Event):
         """TODO: document"""
         # get type of Event

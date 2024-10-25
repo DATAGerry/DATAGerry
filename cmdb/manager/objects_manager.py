@@ -663,8 +663,7 @@ class ObjectsManager(BaseManager):
                 list_length = limit + skip
 
                 # if the list_length is longer than the object_list then just set it to len(object_list)
-                if list_length > len(obj_result.results):
-                    list_length = len(obj_result.results)
+                list_length = min(list_length, len(obj_result.results))
 
                 try:
                     obj_result.results = obj_result.results[skip:list_length]

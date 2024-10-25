@@ -14,24 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-import io
-from xhtml2pdf import pisa
+from enum import Enum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class PdfDocumentType:
+class DocapiTemplateType(Enum):
     """TODO: document"""
-    FILE_EXTENSION = "pdf"
-    ICON = "file-pdf"
-    LABEL = "PDF"
-
-    def __init__(self):
-        pass
-
-    def create_doc(self, input_data):
-        """TODO: document"""
-        output = io.BytesIO()
-        # create PDF
-        pisa.CreatePDF(input_data, dest=output, encoding='utf8')
-        output.seek(0)
-
-        return output
+    OBJECT = 0

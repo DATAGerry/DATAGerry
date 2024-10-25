@@ -23,8 +23,7 @@ from cmdb.manager.base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.event_management.event import Event
-from cmdb.framework import CmdbMetaLog, CmdbLog
-from cmdb.framework.models.log import CmdbObjectLog, LogAction
+from cmdb.framework.models.log import CmdbObjectLog, LogAction, CmdbMetaLog, CmdbLog
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
@@ -33,9 +32,13 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
-LOGGER = logging.getLogger(__name__)
-# -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  LogsManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class LogsManager(BaseManager):
     """
     The LogsManager handles the interaction between the Logs-API and the Database
@@ -60,7 +63,7 @@ class LogsManager(BaseManager):
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-    def insert_log(self, action: LogAction, log_type: str, *args, **kwargs) -> int:
+    def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         """
         Creates a new log in the database
 

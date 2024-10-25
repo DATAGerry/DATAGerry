@@ -16,7 +16,6 @@
 """The module implements the base class for database managers"""
 import logging
 from typing import Union, Any
-
 from pymongo.database import Database
 from pymongo.errors import CollectionInvalid
 from pymongo import IndexModel

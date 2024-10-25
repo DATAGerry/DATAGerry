@@ -19,7 +19,7 @@ from datetime import datetime
 from enum import Enum
 
 from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
-from cmdb.framework import CmdbLog
+from cmdb.framework.models.log import CmdbLog
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -64,7 +64,7 @@ class ExportdJobLog(ExportdMetaLog):
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "ExportdJobLog":
+    def from_data(cls, data: dict) -> "ExportdJobLog":
         """Create a instance of ExportdJobLog from database values"""
         return cls(
             public_id=data.get('public_id'),

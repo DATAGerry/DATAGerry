@@ -34,6 +34,9 @@ try:
     USE_UUID = True
 except ImportError:
     USE_UUID = False
+
+from cmdb.framework.rendering.render_result import RenderResult
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -93,13 +96,7 @@ def default(obj):
     Returns:
         json format
     """
-    from cmdb.framework.cmdb_render import RenderResult
-
-    from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-    if isinstance(obj, CmdbDAO):
-        return obj.__dict__
-
-    if isinstance(obj, RenderResult):
+    if isinstance(obj, (CmdbDAO, RenderResult)):
         return obj.__dict__
 
     if isinstance(obj, ObjectId):
@@ -111,8 +108,7 @@ def default(obj):
     if isinstance(obj, datetime):
         if obj.utcoffset() is not None:
             obj = obj - obj.utcoffset()
-        millis = int(calendar.timegm(obj.timetuple()) * 1000 +
-                     obj.microsecond / 1000)
+        millis = int(calendar.timegm(obj.timetuple()) * 1000 + obj.microsecond / 1000)
         return {"$date": millis}
 
     if isinstance(obj, _RE_TYPE):

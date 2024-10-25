@@ -24,7 +24,7 @@ from bson.min_key import MinKey
 from bson.objectid import ObjectId
 from bson.timestamp import Timestamp
 
-from cmdb.framework.cmdb_render import RenderResult
+from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.importer.importer_response import ImportMessage, BaseImporterResponse
 from cmdb.search.search_result import SearchResult, SearchResultMap
 from cmdb.security.auth import AuthSettingsDAO, AuthenticationProvider
@@ -45,7 +45,7 @@ _RE_TYPE = type(re.compile("foo"))
 
 def default(obj):
     """Helper function for converting cmdb objects to json"""
-    from cmdb.framework import CmdbDAO
+    from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
     from cmdb.user_management.models.right import BaseRight
     from cmdb.exportd.exportd_job.exportd_job_base import JobManagementBase
     from cmdb.media_library.media_file_base import MediaFileManagementBase

@@ -17,12 +17,13 @@
 import logging
 import datetime
 import time
-from flask import Response, abort
+from flask import Response
 
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_render import RenderList, RenderResult
+from cmdb.framework.rendering.render_list import RenderList
+from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
@@ -70,6 +71,7 @@ class SupportedExporterExtension:
             })
         return _list
 
+
 #CLASS-FIX
 class  BaseExportWriter:
     """TODO: document"""
@@ -95,16 +97,13 @@ class  BaseExportWriter:
                                            sort=export_params.sort,
                                            order=export_params.order)
 
-        try:
-            tmp_result: list[CmdbObject] = objects_manager.iterate(builder_params, user, permission).results
 
-            self.data = RenderList(tmp_result,
-                                   user,
-                                   True,
-                                   objects_manager).render_result_list(raw=False)
-        except Exception:
-            #ERROR-FIX
-            return abort(400)
+        tmp_result: list[CmdbObject] = objects_manager.iterate(builder_params, user, permission).results
+
+        self.data = RenderList(tmp_result,
+                                user,
+                                True,
+                                objects_manager).render_result_list(raw=False)
 
 
     def export(self):

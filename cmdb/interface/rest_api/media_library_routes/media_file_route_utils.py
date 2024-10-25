@@ -115,7 +115,7 @@ def create_attachment_name(name, index, metadata, media_files_manager):
     """
     try:
         if media_files_manager.file_exists(metadata):
-            index += 1  
+            index += 1
             name = name.replace(f'copy_({index-1})_', '')
             name = f'copy_({index})_{name}'
             metadata['filename'] = name
@@ -124,6 +124,7 @@ def create_attachment_name(name, index, metadata, media_files_manager):
 
         return name
     except Exception as err:
+        #ERROR-FIX
         raise Exception(err) from err
 
 

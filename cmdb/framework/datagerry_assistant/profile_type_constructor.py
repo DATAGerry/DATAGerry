@@ -17,10 +17,10 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
-from cmdb.framework import CmdbSectionTemplate
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 # -------------------------------------------------------------------------------------------------------------------- #
 

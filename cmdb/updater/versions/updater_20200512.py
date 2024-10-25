@@ -16,7 +16,8 @@
 """TODO: document"""
 import logging
 
-from cmdb.framework import CategoryModel, TypeModel
+from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.type import TypeModel
 from cmdb.updater.updater import Updater
 
 from cmdb.errors.manager.object_manager import ObjectManagerInsertError

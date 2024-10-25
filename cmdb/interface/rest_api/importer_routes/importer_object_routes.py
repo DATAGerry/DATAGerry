@@ -42,7 +42,7 @@ from cmdb.interface.rest_api.importer_routes.importer_route_utils import get_fil
                                                                          verify_import_access
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
-from cmdb.framework.cmdb_render import CmdbRender
+from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.importer import load_parser_class,\
                           load_importer_class,\
                           load_importer_config_class,\

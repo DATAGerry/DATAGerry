@@ -16,7 +16,7 @@
 """TODO: document"""
 
 
-class ExportdHeader(object):
+class ExportdHeader:
     """TODO: document"""
 
     def __init__(self,

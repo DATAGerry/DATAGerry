@@ -59,9 +59,7 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
 
         exporter = BaseExportWriter(exporter_class, _config)
 
-        exporter.from_database(database_manager=current_app.database_manager,
-                               user=request_user,
-                               permission=AccessControlPermission.READ)
+        exporter.from_database(current_app.database_manager, request_user, AccessControlPermission.READ)
     except TypeNotFoundError:
         #ERROR-FIX
         return abort(400)

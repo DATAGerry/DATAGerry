@@ -15,8 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Object/Type render"""
 import logging
-from typing import Union
-from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
@@ -24,8 +22,10 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.types_manager import TypesManager
 
+
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model.type_reference import TypeReference
 from cmdb.framework.models.type_model.type_external_link import TypeExternalLink
@@ -45,38 +45,8 @@ from cmdb.errors.manager.user_manager import UserManagerGetError
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 RenderResult - CLASS                                                 #
-# -------------------------------------------------------------------------------------------------------------------- #
-#CLASS-FIX
-class RenderResult:
-    """TODO: document"""
-
-    def __init__(self):
-        self.current_render_time = datetime.now(timezone.utc)
-        self.object_information: dict = {}
-        self.type_information: dict = {}
-        self.fields: list = []
-        self.sections: list = []
-        self.summaries: list = []
-        self.summary_line: str = ''
-        self.externals: list = []
-        self.multi_data_sections: list = []
-
-
-    def get_object_information(self, idx):
-        """TODO: document"""
-        return self.object_information[idx]
-
-
-    def get_type_information(self, idx):
-        """TODO: document"""
-        return self.type_information[idx]
-
-
-# -------------------------------------------------------------------------------------------------------------------- #
 #                                                  CmdbRender - CLASS                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
-#CLASS-FIX
 class CmdbRender:
     """TODO: document"""
 
@@ -87,6 +57,7 @@ class CmdbRender:
                  render_user: UserModel,
                  ref_render=False,
                  dbm: MongoDatabaseManager = None):
+        """TODO: document"""
         self.dbm = dbm
         self.object_instance: CmdbObject = object_instance
         self.type_instance: TypeModel = type_instance
@@ -186,6 +157,7 @@ class CmdbRender:
         render_result.multi_data_sections = self.object_instance.multi_data_sections
 
         return render_result
+
 
     def __generate_object_information(self, render_result: RenderResult) -> RenderResult:
         try:
@@ -565,37 +537,3 @@ class CmdbRender:
             render_result.externals = external_list
 
         return render_result
-
-
-#CLASS-FIX
-class RenderList:
-    """TODO: document"""
-    def __init__(self,
-                 object_list: list[CmdbObject],
-                 request_user: UserModel,
-                 ref_render=False,
-                 objects_manager: ObjectsManager = None):
-        """TODO: document"""
-        self.object_list: list[CmdbObject] = object_list
-        self.request_user = request_user
-        self.ref_render = ref_render
-        self.objects_manager = objects_manager
-
-
-    def render_result_list(self, raw: bool = False) -> list[Union[RenderResult, dict]]:
-        """TODO: document"""
-        preparation_objects: list[RenderResult] = []
-        for passed_object in self.object_list:
-            tmp_render = CmdbRender(passed_object,
-                                    self.objects_manager.get_object_type(passed_object.type_id),
-                                    self.request_user,
-                                    self.ref_render,
-                                    self.objects_manager.dbm)
-
-            if raw:
-                current_render_result = tmp_render.result().__dict__
-            else:
-                current_render_result = tmp_render.result()
-            preparation_objects.append(current_render_result)
-
-        return preparation_objects
