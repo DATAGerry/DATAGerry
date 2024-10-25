@@ -1164,7 +1164,7 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
         }
 
         //hide the color picker after selecting a color
-        this.showColorPickerForSection = null;
+        // this.showColorPickerForSection = null;
     }
 
 
