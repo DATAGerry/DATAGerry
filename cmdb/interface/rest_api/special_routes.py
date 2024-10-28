@@ -28,7 +28,7 @@ from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
-from cmdb.errors.manager import ManagerInsertError
+from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -118,9 +118,9 @@ def create_initial_profiles(data: str, request_user: UserModel):
     try:
         profile_assistant = ProfileAssistant()
         created_ids = profile_assistant.create_profiles(profiles)
-    except ManagerInsertError as err:
+    except ProfileCreationError as err:
         LOGGER.debug("[create_initial_profiles] ManagerInsertError: %s", err.message)
-        return abort(400, "Could not create initial profiles !")
+        return abort(400, "Could not create initial profiles!")
 
     return make_response(created_ids)
 

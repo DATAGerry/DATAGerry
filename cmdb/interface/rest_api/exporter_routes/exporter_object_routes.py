@@ -43,9 +43,9 @@ def get_export_file_types():
 
 
 @exporter_blueprint.route('/', methods=['GET'])
+@exporter_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @exporter_blueprint.protect(auth=True, right='base.framework.object.view')
-@exporter_blueprint.parse_collection_parameters(view='native')
 def export_objects(params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
     try:
@@ -66,7 +66,8 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
     except ModuleNotFoundError:
         #ERROR-FIX
         return abort(400)
-    except Exception:
+    except Exception as err:
+        LOGGER.debug("[export_objects] Exception: %s, Type: %s", err, type(err))
         return abort(404, jsonify(message='Not Found', error='Export objects Exception'))
 
     return exporter.export()

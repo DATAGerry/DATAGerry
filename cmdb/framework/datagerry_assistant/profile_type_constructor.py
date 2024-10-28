@@ -390,7 +390,6 @@ class ProfileTypeConstructor:
             template_name = template['name']
             formatted_list[template_name] = self.__format_predefined_template_data(template)
 
-        # TODO: Throw error if no predefined templates are avaiable
         return formatted_list
 
 

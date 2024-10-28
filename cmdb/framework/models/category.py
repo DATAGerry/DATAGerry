@@ -119,7 +119,7 @@ class CategoryModel(CmdbDAO):
             raise ValueError(f'Category {name} has his own ID as Parent')
         self.parent: int = parent
         self.types: Union[list[int], list[TypeModel]] = types or []
-        super(CategoryModel, self).__init__(public_id=public_id)
+        super().__init__(public_id=public_id)
 
 
     @classmethod

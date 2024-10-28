@@ -21,8 +21,12 @@ import sys
 import importlib
 import pprint
 import inspect
+import logging
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 def debug_print(self):
     """
     pretty formatting of error/debug output
@@ -41,6 +45,7 @@ def load_class(classname):
     #TODO: check if this regex is correct
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
+    LOGGER.debug(f"[load_class] pattern match: {match}")
 
     if match is None:
         raise Exception(f"Could not load class {classname}")
