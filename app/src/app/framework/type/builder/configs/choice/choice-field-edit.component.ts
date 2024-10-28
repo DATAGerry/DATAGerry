@@ -50,7 +50,7 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     private initialValue: string;
     isValid$: boolean = false;
     private identifierInitialValue: string;
-    private previousPreviousValue: string | boolean; // To store the value before the previous change
+    private priorValue: string | boolean; // To store the value before the previous change
     isDuplicate$: boolean = false
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
@@ -189,7 +189,14 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
             if (!this.isDuplicate$) {
                 this.toggleFormControls(false);
                 this.handleFieldChange(event, type);
-            } else {
+            }
+            else if (event === this.priorValue) {
+                this.isDuplicate$ = false
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            }
+            else {
+                this.priorValue = this.initialValue
                 this.toggleFormControls(true);
                 this.fieldChanges$.next({ "isDuplicate": true });
             }
@@ -215,7 +222,7 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     private handleFieldChange(event: any, type: string): void {
         // Update previousPreviousValue before changing the initialValue
         if (type === 'name' && this.initialValue !== event) {
-            this.previousPreviousValue = this.initialValue;
+            this.priorValue = this.initialValue;
         }
 
         // Notify field changes

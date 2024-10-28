@@ -49,7 +49,7 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
     isValid$: boolean = false;
 
 
-    private previousPreviousValue: string | boolean; // To store the value before the previous change
+    private priorValue: string | boolean;
     isDuplicate$: boolean = false
 
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -152,7 +152,14 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
             if (!this.isDuplicate$) {
                 this.toggleFormControls(false);
                 this.handleFieldChange(event, type);
-            } else {
+            }
+            else if (event === this.priorValue) {
+                this.isDuplicate$ = false
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            }
+            else {
+                this.priorValue = this.initialValue
                 this.toggleFormControls(true);
                 this.fieldChanges$.next({ "isDuplicate": true });
             }
@@ -177,7 +184,7 @@ export class TextareaEditComponent extends ConfigEditBaseComponent implements On
     private handleFieldChange(event: any, type: string): void {
         // Update previousPreviousValue before changing the initialValue
         if (type === 'name' && this.initialValue !== event) {
-            this.previousPreviousValue = this.initialValue;
+            this.priorValue = this.initialValue;
         }
 
         // Notify field changes
