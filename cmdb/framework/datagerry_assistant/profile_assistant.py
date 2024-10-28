@@ -30,6 +30,8 @@ from .profile_ipam import IPAMProfile
 from .profile_client_management import ClientManagementProfile
 from .profile_server_management import ServerManagementProfile
 from .profile_network_infrastructure import NetworkInfrastructureProfile
+
+from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -107,7 +109,8 @@ class ProfileAssistant:
             self.create_all_categories(created_type_ids)
 
         except Exception as err:
-            LOGGER.info("Assitant Error: %s",err)
+            LOGGER.debug("[create_profiles] Error: %s",err)
+            raise ProfileCreationError(str(err)) from err
 
         created_ids = []
 
@@ -129,7 +132,7 @@ class ProfileAssistant:
         all_categories: list[dict] = self.get_all_categories(all_type_ids)
         categories_manager = CategoriesManager(current_app.database_manager)
 
-        for i, category in enumerate(all_categories):
+        for _, category in enumerate(all_categories):
             categories_manager.insert_category(category)
 
 

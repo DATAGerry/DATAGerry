@@ -22,6 +22,7 @@ from pymongo import IndexModel
 from cmdb.database.utils import default
 # -------------------------------------------------------------------------------------------------------------------- #
 
+#CLASS-FIX
 class UserSettingType(Enum):
     """
     Type of user settings. Applied only on user application level.
@@ -32,7 +33,7 @@ class UserSettingType(Enum):
     APPLICATION = 'APPLICATION'
     SERVER = 'SERVER'
 
-
+#CLASS-FIX
 class UserSettingPayload:
     """
     Payload wrapper user settings.
@@ -150,7 +151,7 @@ class UserSettingModel:
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "UserSettingModel":
+    def from_data(cls, data: dict) -> "UserSettingModel":
         """
         Create a `UserSettingsModel` instance from database.
 
