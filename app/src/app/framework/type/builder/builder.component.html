@@ -68,7 +68,8 @@
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
                                     [class.disabled]="isAnySectionHighlighted() || disableFields"
-                                    [dndDisableIf]="isAnySectionHighlighted() || disableFields"                                >
+                                    [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
+                                    >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                                     </span>
@@ -119,7 +120,7 @@
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
                                     [class.disabled]="isAnySectionHighlighted() || disableFields"
-                                    [dndDisableIf]="isAnySectionHighlighted() || disableFields"
+                                    [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
