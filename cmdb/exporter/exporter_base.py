@@ -25,7 +25,7 @@ import xml.etree.ElementTree as ET
 import zipfile
 import openpyxl
 
-from cmdb.utils import json_encoding
+from cmdb.database.utils import default
 from cmdb.utils.helpers import load_class
 from cmdb.exporter.exporter_utils import ExporterUtils
 from cmdb.exporter.format.format_base import BaseExporterFormat
@@ -267,7 +267,7 @@ class JsonExportType(BaseExporterFormat):
 
             output.append(output_element)
 
-        return json.dumps(output, default=json_encoding.default, ensure_ascii=False, indent=2)
+        return json.dumps(output, default=default, ensure_ascii=False, indent=2)
 
 #CLASS-FIX
 class XlsxExportType(BaseExporterFormat):

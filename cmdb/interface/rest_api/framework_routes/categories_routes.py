@@ -20,7 +20,8 @@ from flask import request, abort
 
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.framework.models.category import CategoryModel, CategoryTree
+from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.category_model.category_tree import CategoryTree
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters

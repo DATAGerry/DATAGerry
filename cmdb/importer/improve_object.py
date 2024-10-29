@@ -15,11 +15,14 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+import datetime
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 ImproveObject - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ImproveObject:
     """TODO: document"""
 
@@ -37,7 +40,6 @@ class ImproveObject:
         self.field_entries = field_entries
         self.possible_fields = possible_fields
         self.value = None
-        super()
 
 
     def improve_entry(self) -> dict:
@@ -88,12 +90,10 @@ class ImproveObject:
     def improve_date(value):
         """
         This method converts the date format
+
         Returns:
             datetime parsed from a string
-
         """
-        import datetime
-
         try:
             if isinstance(value, dict) and value.get('$date'):
                 return datetime.datetime.fromtimestamp(value["$date"]/1000)
@@ -107,9 +107,11 @@ class ImproveObject:
                          '%d.%m.%Y %H:%M', '%d.%m.%Y %H:%M:%S', '%Y.%m.%d %H:%M', '%Y.%m.%d %H:%M:%S',
                          '%d-%m-%y %H:%M', '%d-%m-%y %H:%M:%S', '%y-%m-%d %H:%M', '%y-%m-%d %H:%M:%S',
                          '%d-%m-%Y %H:%M', '%d-%m-%Y %H:%M:%S', '%Y-%m-%d %H:%M', '%Y-%m-%d %H:%M:%S')
+
             for fmt in dt_format:
                 try:
                     return datetime.datetime.strptime(str(value), fmt)
                 except ValueError:
                     pass
+
         return value

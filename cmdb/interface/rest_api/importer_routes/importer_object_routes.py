@@ -26,7 +26,6 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
-
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
@@ -256,7 +255,9 @@ def import_objects(request_user: UserModel):
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_display_name(),
                 'comment': 'Object was imported',
-                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+                'render_state': json.dumps(
+                                    current_object_render_result,
+                                    default=default).encode('UTF-8'),
                 'version': current_object.version
             }
 

@@ -143,24 +143,6 @@ class CmdbDAO:
         return index_list
 
 
-    @classmethod
-    def from_data(cls, data: dict) -> "CmdbDAO":
-        """TODO: document"""
-        raise NotImplementedError()
-
-
-    @classmethod
-    def to_data(cls, instance: "CmdbDAO") -> dict:
-        """TODO: document"""
-        raise NotImplementedError()
-
-
-    @classmethod
-    def to_dict(cls, instance: "CmdbDAO") -> dict:
-        """TODO: document"""
-        raise NotImplementedError()
-
-
     def update_version(self, update) -> str:
         """
         Update the version number of the object

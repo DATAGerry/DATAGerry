@@ -108,6 +108,7 @@ class CollectionParameters(APIParameters):
             optional['filter'] = loads(optional['filter'])
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
+
         return cls(Parameter(query_string), **optional)
 
 

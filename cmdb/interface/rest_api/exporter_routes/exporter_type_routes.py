@@ -25,7 +25,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.framework.models.type import TypeModel
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.utils import json_encoding
+from cmdb.database.utils import default
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
@@ -47,7 +47,7 @@ def export_type(request_user: UserModel):
 
     try:
         type_list = [TypeModel.to_json(type) for type in types_manager.get_all_types()]
-        resp = json.dumps(type_list, default=json_encoding.default, indent=2)
+        resp = json.dumps(type_list, default=default, indent=2)
     except TypeNotFoundError:
         #ERROR-FIX
         return abort(400)
@@ -88,7 +88,7 @@ def export_type_by_ids(public_ids, request_user: UserModel):
                     return abort(400)
         type_list_data = json.dumps([TypeModel.to_json(type_) for type_ in
                                     types_manager.get_types_by(sort="public_id", **{'$or': query_list})],
-                                    default=json_encoding.default, indent=2)
+                                    default=default, indent=2)
     except TypeNotFoundError:
         #ERROR-FIX
         return abort(400)

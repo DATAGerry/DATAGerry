@@ -109,7 +109,7 @@ class CmdbLocation(CmdbDAO):
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbLocation":
+    def from_data(cls, data: dict) -> "CmdbLocation":
         """
         Returns an Instance of CmdbLocation
 
@@ -169,11 +169,3 @@ class CmdbLocation(CmdbDAO):
             'type_icon': instance['type_icon'],
             'type_selectable': instance['type_selectable'],
         }
-
-
-    @classmethod
-    def to_dict(cls, instance: "CmdbLocation") -> dict:
-        """
-        Not used
-        """
-        return []

@@ -28,12 +28,18 @@ from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
 
 from cmdb.interface.api_pagination import APIPagination, APIPager
-from cmdb.interface.route_utils import default
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
+
+def default(obj):
+    """Json encoder for database values."""
+    if isinstance(obj, datetime):
+        return obj.isoformat()
+    return str(obj)
+
 
 def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
     """

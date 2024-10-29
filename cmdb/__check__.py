@@ -26,7 +26,7 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.security.security import SecurityManager
 
-from cmdb.updater import UpdaterModule
+from cmdb.updater.updater_module import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate

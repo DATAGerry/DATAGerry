@@ -156,8 +156,8 @@ class APIProjector:
             element = data
 
         if self.__projection.has_excludes():
-            for key, item in element.copy().items():
+            for key, _ in element.copy().items():
                 if key in self.__projection.excludes:
-                    del element[key]  # TODO: Implement nested (dot .) parameter for exclusion.
+                    del element[key]
 
         return element

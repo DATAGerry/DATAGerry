@@ -49,13 +49,13 @@ class ObjectLinkModel(CmdbDAO):
         return self.creation_time
 
 
-    def get_partners(self) -> (int, int):
+    def get_partners(self) -> list[int, int]:
         """TODO: document"""
         return self.get_primary(), self.get_secondary()
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "ObjectLinkModel":
+    def from_data(cls, data: dict) -> "ObjectLinkModel":
         """Convert the database data to a link instance."""
         return cls(
             public_id=data.get('public_id'),

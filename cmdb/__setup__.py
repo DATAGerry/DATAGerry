@@ -26,7 +26,7 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.updater import UpdaterModule
+from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.user_management import __FIXED_GROUPS__
@@ -125,7 +125,7 @@ class SetupRoutine:
             # create version updater settings
             try:
                 system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.dbm)
-                updater_setting_instance = UpdateSettings(**UpdaterModule.get_last_version())
+                updater_setting_instance = UpdateSettings(UpdaterModule.get_last_version()['version'])
                 system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
             except Exception as err:

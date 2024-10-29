@@ -17,7 +17,7 @@
 import csv
 import json
 import logging
-from openpyxl.worksheet.worksheet import Worksheet
+from openpyxl import load_workbook
 
 from cmdb.utils.cast import auto_cast
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
@@ -51,10 +51,12 @@ class JsonObjectParser(BaseObjectParser, JSONContent):
         super().__init__(parser_config)
 
 
-    def parse(self, file) -> (dict, list, JsonObjectParserResponse):
+    def parse(self, file) -> JsonObjectParserResponse:
         run_config = self.get_config()
+
         with open(file, 'r', encoding=run_config.get('encoding')) as json_file:
             parsed = json.load(json_file)
+
         return JsonObjectParserResponse(count=len(parsed), entries=parsed)
 
 
@@ -171,26 +173,7 @@ class ExcelObjectParser(BaseObjectParser, XLSXContent):
         super().__init__(parser_config)
 
 
-    @staticmethod
-    def __generate_index_pair(row: list) -> dict:
-        line: dict = {}
-        idx: int = 0
-        for col in row:
-            line.update({
-                idx: col
-            })
-            idx = idx + 1
-        return line
-
     def parse(self, file) -> ExcelObjectParserResponse:
-        from openpyxl import load_workbook
-
-        parsed = {
-            'count': 0,
-            'header': None,
-            'entries': [],
-            'entry_length': 0
-        }
 
         run_config = self.get_config()
         try:
@@ -199,8 +182,9 @@ class ExcelObjectParser(BaseObjectParser, XLSXContent):
             raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
 
         wb = load_workbook(file)
+
         try:
-            sheet: Worksheet = wb[working_sheet]
+            wb[working_sheet]
         except KeyError as err:
             raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
 

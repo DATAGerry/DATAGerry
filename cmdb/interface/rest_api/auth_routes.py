@@ -181,42 +181,41 @@ def post_login():
         login_response = LoginResponse(user, token, token_issued_at, token_expire)
 
         return login_response.make_response()
-    else:
-        system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
 
-        auth_module = AuthModule(
-            system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-            security_manager=security_manager,
-            users_manager=users_manager)
+    #PATH when its not cloud mode
+    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
 
-        user_instance = None
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+        security_manager=security_manager,
+        users_manager=users_manager)
 
-        try:
-            user_instance = auth_module.login(request_user_name, request_password)
-        except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
-            #ERROR-FIX
-            return abort(503)
-        except Exception:
-            #ERROR-FIX
-            return abort(401)
-        #ERROR-FIX (Remove the finally)
-        finally:
-            # If login success generate user instance with token
-            if user_instance:
-                tg = TokenGenerator(current_app.database_manager)
-                token: bytes = tg.generate_token(payload={'user': {
-                    'public_id': user_instance.get_public_id()
-                }})
-                token_issued_at = int(datetime.now(timezone.utc).timestamp())
-                token_expire = int(tg.get_expire_time().timestamp())
+    user_instance = None
 
-                login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+    try:
+        user_instance = auth_module.login(request_user_name, request_password)
 
-                return login_response.make_response()
+        if user_instance:
+            tg = TokenGenerator(current_app.database_manager)
 
-            # Login not success
-            return abort(401, 'Could not login!')
+            token: bytes = tg.generate_token(payload={'user': {
+                'public_id': user_instance.get_public_id()
+            }})
 
+            token_issued_at = int(datetime.now(timezone.utc).timestamp())
+            token_expire = int(tg.get_expire_time().timestamp())
+
+            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+
+            return login_response.make_response()
+
+        return abort(401, 'Could not login!')
+    except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
+        #ERROR-FIX
+        return abort(503)
+    except Exception:
+        #ERROR-FIX
+        return abort(401)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                        HELPER                                                        #

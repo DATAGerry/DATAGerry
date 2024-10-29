@@ -18,10 +18,11 @@ This module contains the "ProfileAssistant" class
 """
 import logging
 from datetime import datetime, timezone
-
 from flask import current_app
 
 from cmdb.manager.categories_manager import CategoriesManager
+
+from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 
 from .profile_name import ProfileName
 from .profile_user_management import UserManagementProfile
@@ -30,8 +31,6 @@ from .profile_ipam import IPAMProfile
 from .profile_client_management import ClientManagementProfile
 from .profile_server_management import ServerManagementProfile
 from .profile_network_infrastructure import NetworkInfrastructureProfile
-
-from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

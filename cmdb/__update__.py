@@ -20,7 +20,7 @@ from pymongo.errors import CollectionInvalid
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb.updater import UpdaterModule
+from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
@@ -172,7 +172,7 @@ class UpdateRoutine:
             except SectionError: #ERROR-FIX (UpdateSettings initialisation is not covered)
                 # create updater section if not exist
                 system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.dbm)
-                updater_setting_instance = UpdateSettings(**updater_settings_values)
+                updater_setting_instance = UpdateSettings(updater_settings_values['version'])
                 system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
             # start running update files

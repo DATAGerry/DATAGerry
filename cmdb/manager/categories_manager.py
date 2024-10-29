@@ -24,7 +24,7 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.event_management.event import Event
 from cmdb.framework.models.category import CategoryModel
-from cmdb.framework.models.category import CategoryTree
+from cmdb.framework.models.category_model.category_tree import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel

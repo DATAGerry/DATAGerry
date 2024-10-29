@@ -30,11 +30,9 @@ from cmdb.security.auth import AuthModule
 
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.rights import __all__ as rights
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils import json_encoding
-
+from cmdb.database.utils import default
 from cmdb.security.token.validator import TokenValidator
 
 from cmdb.errors.manager import ManagerGetError
@@ -46,13 +44,6 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_MIME_TYPE = 'application/json'
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
-def default(obj):
-    """Json encoder for database values."""
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    return str(obj)
-
 
 #@deprecated
 def make_response(instance, status_code=200, indent=2):
@@ -66,7 +57,7 @@ def make_response(instance, status_code=200, indent=2):
         http valid response
     """
     # encode the dict data from the object to json data
-    resp = flask_response(json.dumps(instance, default=json_encoding.default, indent=indent), status_code)
+    resp = flask_response(json.dumps(instance, default=default, indent=indent), status_code)
     resp.mimetype = DEFAULT_MIME_TYPE
 
     return resp
@@ -175,9 +166,8 @@ def insert_request_user(func):
 
     return get_request_user
 
-
 #@deprecated
-def right_required(required_right: str, excepted: dict = None):
+def right_required(required_right: str):
     """wraps function for routes which requires a special user right
     requires: insert_request_user
     """
@@ -273,12 +263,12 @@ def parse_authorization_header(header):
                                                         'database': user_instance.database
                                                     }
                                                 })
-                    else:
-                        return tg.generate_token(payload={
-                                                    'user': {
-                                                        'public_id': user_instance.get_public_id()
-                                                    }
-                                                })
+
+                    return tg.generate_token(payload={
+                                                'user': {
+                                                    'public_id': user_instance.get_public_id()
+                                                }
+                                            })
 
                 return None
         except Exception:
@@ -314,7 +304,7 @@ def check_user_in_mysql_db(mail: str, password: str):
             else:
                 return None
 
-
+        return None
     except Exception as err:
-        LOGGER.debug(f"[get users from file] error: {err} , error type: {type(err)}")
+        LOGGER.debug("[get users from file] Exception: %s, Type: %s", err, type(err))
         return None
