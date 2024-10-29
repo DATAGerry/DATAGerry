@@ -19,6 +19,7 @@ from typing import Union
 
 from cmdb.framework.models.type import TypeModel
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.framework.models.category_model.category_meta import CategoryMeta
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -78,45 +79,22 @@ class CategoryModel(CmdbDAO):
         {'keys': [('types', CmdbDAO.DAO_ASCENDING)], 'name': 'types', 'unique': False}
     ]
 
-    #CLASS-FIX
-    class __CategoryMeta:
+
+    def __init__(self,
+                 public_id: int,
+                 name: str,
+                 label: str = None,
+                 meta: CategoryMeta = None,
+                 parent: int = None,
+                 types: Union[list[int], list[TypeModel]] = None):
         """TODO: document"""
-        def __init__(self, icon: str = '', order: int = None):
-            self.icon = icon
-            self.order = order
-
-
-        def get_icon(self) -> str:
-            """Get a icon, string or unicode symbol"""
-            return self.icon
-
-
-        def has_icon(self) -> bool:
-            """Check if icon is set"""
-            if self.icon:
-                return True
-            return False
-
-
-        def get_order(self) -> int:
-            """Get the order"""
-            return self.order
-
-
-        def has_order(self) -> bool:
-            """Check if order is set"""
-            if self.order:
-                return True
-            return False
-
-
-    def __init__(self, public_id: int, name: str, label: str = None, meta: __CategoryMeta = None,
-                 parent: int = None, types: Union[list[int], list[TypeModel]] = None):
         self.name: str = name
         self.label: str = label
-        self.meta: CategoryModel.__CategoryMeta = meta
+        self.meta: CategoryMeta = meta
+
         if parent == public_id and (parent is not None):
             raise ValueError(f'Category {name} has his own ID as Parent')
+
         self.parent: int = parent
         self.types: Union[list[int], list[TypeModel]] = types or []
         super().__init__(public_id=public_id)
@@ -125,10 +103,10 @@ class CategoryModel(CmdbDAO):
     @classmethod
     def from_data(cls, data: dict) -> "CategoryModel":
         """Create a instance of a category from database"""
-
         raw_meta: dict = data.get('meta', None)
+
         if raw_meta:
-            meta = cls.__CategoryMeta(icon=raw_meta.get('icon', ''), order=raw_meta.get('order', None))
+            meta = CategoryMeta(raw_meta.get('icon', ''), raw_meta.get('order', None))
         else:
             meta = raw_meta
 
@@ -167,10 +145,10 @@ class CategoryModel(CmdbDAO):
         return self.label
 
 
-    def get_meta(self) -> __CategoryMeta:
+    def get_meta(self) -> CategoryMeta:
         """Get meta data"""
         if not self.meta:
-            self.meta = CategoryModel.__CategoryMeta()
+            self.meta = CategoryMeta()
         return self.meta
 
 
@@ -186,7 +164,7 @@ class CategoryModel(CmdbDAO):
 
     def has_types(self) -> bool:
         """Check if this category has types"""
-        return True if self.get_number_of_types() > 0 else False
+        return self.get_number_of_types() > 0
 
 
     def get_types(self) -> Union[list[int], list[TypeModel]]:
@@ -199,109 +177,3 @@ class CategoryModel(CmdbDAO):
     def get_number_of_types(self) -> int:
         """Get number of types in this category"""
         return len(self.get_types())
-
-
-#CLASS-FIX
-class CategoryTree:
-    """Base tree holder"""
-    MODEL = 'CategoryTree'
-
-    class CategoryNode:
-        """Class of a category node inside the category tree"""
-
-        def __init__(self, category: CategoryModel, children: list["CategoryTree.CategoryNode"] = None,
-                     types: list[TypeModel] = None):
-            self.category: CategoryModel = category
-            self.node_order: int = self.category.get_meta().get_order()
-            self.children: list["CategoryTree.CategoryNode"] = sorted(children or [], key=lambda node: (
-                                                             node.get_order() is None, node.get_order()))
-            # prevent wrong type order
-            self.types: list[TypeModel] = [type_ for id_ in self.category.types for type_ in types if
-                                           id_ == type_.public_id]
-
-
-        @classmethod
-        def to_json(cls, instance: "CategoryTree.CategoryNode"):
-            """Get the node as json"""
-            return {
-                'category': CategoryModel.to_json(instance.category),
-                'node_order': instance.node_order,
-                'children': [CategoryTree.CategoryNode.to_json(child_node) for child_node in instance.children],
-                'types': [TypeModel.to_json(type) for type in instance.types]
-            }
-
-
-        def get_order(self) -> int:
-            """Get the order value from the main category inside this node.
-            Should be equal to __CategoryMeta -> order
-            """
-            return self.node_order
-
-
-        def flatten(self) -> list[CategoryModel]:
-            """Flats a category node and its children"""
-            return [self.category] + sum(
-                (c.flatten() for c in self.children),
-                [],
-            )
-
-
-        def __repr__(self):
-            """String representation of the category node"""
-            return f'CategoryNode(CategoryID={self.category.public_id})'
-
-
-    def __init__(self, categories: list[CategoryModel], types: list[TypeModel] = None):
-        self._categories = categories
-        self._types = types
-        self._tree: list[CategoryTree.CategoryNode] = sorted(self.__create_tree(self._categories, types=self._types),
-                                                             key=lambda node: (
-                                                             node.get_order() is None, node.get_order()))
-
-
-    def __len__(self) -> int:
-        """Get length of tree - this means the number of root categories"""
-        return len(self._tree)
-
-
-    def flat(self) -> list[CategoryModel]:
-        """Returns a flatted tree with tree like category order"""
-        flatted = []
-        for node in self.tree:
-            flatted += node.flatten()
-        return flatted
-
-
-    @property
-    def tree(self) -> list[CategoryNode]:
-        """Get the tree"""
-        if not self._tree:
-            self._tree = CategoryTree.__create_tree(self._categories, types=self._types)
-        return self._tree
-
-
-    @classmethod
-    def __create_tree(cls, categories, parent: int = None, types: list[TypeModel] = None) -> list[CategoryNode]:
-        """
-        Generate the category tree from list structure
-        Args:
-            categories: list of root/child categories
-            parent: the parent id of the current subset, None if root list
-            types: list of all possible types
-        """
-        return [category for category in [CategoryTree.CategoryNode(category, CategoryTree.__create_tree(
-            categories, category.get_public_id(), types), types) for category in categories if
-                                          category.get_parent() == parent]]
-
-
-    @classmethod
-    def from_data(cls, raw_categories: list[dict]) -> "CategoryTree":
-        """Create the category list from raw data"""
-        categories: list[CategoryModel] = [CategoryModel.from_data(category) for category in raw_categories]
-        return cls(categories=categories)
-
-
-    @classmethod
-    def to_json(cls, instance: "CategoryTree"):
-        """Get the complete category tree as json"""
-        return [CategoryTree.CategoryNode.to_json(node) for node in instance.tree]

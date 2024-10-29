@@ -17,6 +17,8 @@
 import logging
 from flask import request, abort
 
+from cmdb.manager.logs_manager import LogsManager
+
 from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
@@ -47,7 +49,7 @@ def get_log(public_id: int, request_user: UserModel):
     Returns:
         CmdbObjectLog: The log with the given public_id
     """
-    logs_manager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
     try:
         requested_log: CmdbObjectLog = logs_manager.get_one(public_id)
@@ -217,7 +219,7 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
     Returns:
         dict: object log
     """
-    logs_manager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
 
     try:
         selected_log: CmdbObjectLog = logs_manager.get_one(public_id)

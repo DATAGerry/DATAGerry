@@ -27,7 +27,7 @@ from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.database.utils import object_hook, default
+from cmdb.database.utils import default, object_hook
 from cmdb.framework.models.type import TypeModel
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.log import LogAction, CmdbObjectLog
@@ -131,7 +131,8 @@ def insert_object(request_user: UserModel):
                 'user_id': request_user.get_public_id(),
                 'user_name': request_user.get_display_name(),
                 'comment': 'Object was created',
-                'render_state': json.dumps(current_object_render_result, default=default).encode('UTF-8'),
+                'render_state': json.dumps(current_object_render_result,
+                                           default=default).encode('UTF-8'),
                 'version': current_object.version
             }
 
@@ -579,7 +580,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             new_data['last_edit_time'] = datetime.now(timezone.utc)
             new_data['editor_id'] = request_user.public_id
 
-            update_object_instance = CmdbObject(**json.loads(json.dumps(new_data, default=json_util.default),
+            update_object_instance = CmdbObject(**json.loads(json.dumps(new_data, default=default),
                                                              object_hook=object_hook))
 
             # calc version

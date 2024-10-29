@@ -17,8 +17,8 @@
 """TODO: document"""
 from cmdb import __title__
 from cmdb.interface.cmdb_app import BaseCmdbApp
-from cmdb.interface.rest_api import create_rest_api
-
+from cmdb.interface.rest_api.init_rest_api import create_rest_api
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def test_start_routine():
     """TODO: document"""

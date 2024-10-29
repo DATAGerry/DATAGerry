@@ -175,19 +175,21 @@ def get_logs_with_existing_objects(request_user: UserModel):
 
     for log in object_logs:
         current_object_id: int = log.job_id
+
         if current_object_id in existing_list:
             passed_objects.append(log)
             continue
-        elif current_object_id in deleted_list:
+
+        if current_object_id in deleted_list:
             continue
-        else:
-            try:
-                exportd_jobs_manager.get_job(current_object_id)
-                existing_list.append(current_object_id)
-                passed_objects.append(log)
-            except (ObjectManagerGetError, Exception):
-                deleted_list.append(current_object_id)
-                continue
+
+        try:
+            exportd_jobs_manager.get_job(current_object_id)
+            existing_list.append(current_object_id)
+            passed_objects.append(log)
+        except (ObjectManagerGetError, Exception):
+            deleted_list.append(current_object_id)
+            continue
 
     if len(passed_objects) < 1:
         return make_response(passed_objects, 204)

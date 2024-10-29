@@ -24,12 +24,12 @@ class AuthSettingsDAO:
     __DEFAULT_EXTERNAL_ENABLED = False
 
     def __init__(self,
+                 _id : str = None,
                  providers: list[dict] = None,
                  enable_external: bool = None,
-                 token_lifetime: int = None,
-                 *args,
-                 **kwargs):
-        self._id: str = AuthSettingsDAO.__DOCUMENT_IDENTIFIER
+                 token_lifetime: int = None):
+        """TODO: document"""
+        self._id: str = _id or AuthSettingsDAO.__DOCUMENT_IDENTIFIER
         self.providers: list[dict] = providers or []
         self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
         self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
@@ -54,4 +54,4 @@ class AuthSettingsDAO:
 
     def get_provider_settings(self, class_name: str) -> dict:
         """Get a specific provider list element by name"""
-        return next(_ for _ in self.get_provider_list() if _['class_name'] == class_name)['config']
+        return next(config for config in self.get_provider_list() if config['class_name'] == class_name)['config']

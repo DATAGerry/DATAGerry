@@ -15,16 +15,41 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from werkzeug.routing import BaseConverter
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                RegexConverter - CLASS                                                #
+#                                                 CategoryMeta - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-class RegexConverter(BaseConverter):
+class CategoryMeta:
     """TODO: document"""
+    def __init__(self, icon: str = '', order: int = None):
+        self.icon = icon
+        self.order = order
 
-    def __init__(self, url_map):
-        super().__init__(url_map)
+
+    def get_icon(self) -> str:
+        """Get a icon, string or unicode symbol"""
+        return self.icon
+
+
+    def has_icon(self) -> bool:
+        """Check if icon is set"""
+        if self.icon:
+            return True
+
+        return False
+
+
+    def get_order(self) -> int:
+        """Get the order"""
+        return self.order
+
+
+    def has_order(self) -> bool:
+        """Check if order is set"""
+        if self.order:
+            return True
+
+        return False

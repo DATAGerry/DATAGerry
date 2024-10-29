@@ -22,7 +22,7 @@ class BaseImporterResponse:
     def __init__(self, message: str):
         self.message: str = message
 
-
+#CLASS-FIX
 class ImporterObjectResponse(BaseImporterResponse):
     """Response of an bulk object import"""
 
@@ -31,7 +31,7 @@ class ImporterObjectResponse(BaseImporterResponse):
         self.failed_imports: list[ImportFailedMessage] = failed_imports or []
         super().__init__(message=message)
 
-
+#CLASS-FIX
 class ImportMessage:
     """Simple class wrapper for json encoding"""
 

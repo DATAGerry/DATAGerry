@@ -32,6 +32,9 @@ from cmdb.errors.security import TokenValidationError
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 APIBlueprint - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class APIBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
 
@@ -193,6 +196,7 @@ class APIBlueprint(Blueprint):
         return _parse
 
 
+#CLASS-FIX
 class RootBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
     def __init__(self, *args, **kwargs):
@@ -225,6 +229,7 @@ class RootBlueprint(Blueprint):
         return _parse
 
 
+#CLASS-FIX
 class NestedBlueprint:
     """Default Blueprint class but with parent prefix route
     """

@@ -103,9 +103,19 @@ class CmdbObjectLog(CmdbMetaLog):
     UNKNOWN_USER_STRING = 'Unknown'
 
 
-    def __init__(self, public_id: int, log_type, log_time: datetime, action: LogAction, action_name: str,
-                 object_id: int, version, user_id: int, user_name: str = None, changes: list = None,
-                 comment: str = None, render_state=None):
+    def __init__(self,
+                 public_id: int,
+                 log_type, log_time: datetime,
+                 action: LogAction,
+                 action_name: str,
+                 object_id: int,
+                 version,
+                 user_id: int,
+                 user_name: str = None,
+                 changes: list = None,
+                 comment: str = None,
+                 render_state=None):
+        """TODO: document"""
         self.object_id = object_id
         self.version = version
         self.user_id = user_id
@@ -118,7 +128,7 @@ class CmdbObjectLog(CmdbMetaLog):
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObjectLog":
+    def from_data(cls, data: dict) -> "CmdbObjectLog":
         """Create a instance of TypeModel from database values"""
         return cls(
             public_id=data.get('public_id'),
@@ -166,7 +176,7 @@ class CmdbLog:
 
 
     @classmethod
-    def __get_log_class(cls, *args, **kwargs):
+    def __get_log_class(cls, **kwargs):
         try:
             log_class = cls.REGISTERED_LOG_TYPE[kwargs['log_type']]
         except (KeyError, ValueError):

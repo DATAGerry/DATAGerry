@@ -75,6 +75,7 @@ class AuthModule:
         """Merge default values with database entries"""
         provider_config_list: list[dict] = auth_settings_values.get('providers')
         installed_providers = AuthModule.get_installed_providers()
+
         for provider in installed_providers:
             if not any(p['class_name'] == provider.get_name() for p in provider_config_list):
                 auth_settings_values['providers'].append(provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
@@ -86,8 +87,11 @@ class AuthModule:
                         **auth_settings_values['providers'][provider_index]['config']).__dict__
                 except Exception as err:
                     LOGGER.error(
-                        'Error while parsing auth provider settings for: %s: %s\n Fallback to default values!',provider.get_name(),err)
-                    auth_settings_values['providers'][provider_index]['config'] = provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
+                        'Error while parsing auth provider settings for: %s: %s\n Fallback to default values!',
+                        provider.get_name(),err)
+
+                    default_config_values = provider.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES
+                    auth_settings_values['providers'][provider_index]['config'] = default_config_values
 
         return AuthSettingsDAO(**auth_settings_values)
 
@@ -248,5 +252,4 @@ class AuthModule:
                     LOGGER.debug("User found by provider but could not be inserted or found %s",error.message)
                     continue
 
-            #ERROR-FIX
             raise AuthenticationError('Unknown user could not login.') from err

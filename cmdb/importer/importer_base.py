@@ -36,7 +36,9 @@ from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 BaseImporter - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class BaseImporter:
     """Superclass for all importer"""
 
@@ -70,7 +72,7 @@ class BaseImporter:
 
     def has_config(self) -> bool:
         """Check if importer has a config"""
-        return True if self.config else False
+        return bool(self.config)
 
 
     def start_import(self) -> BaseImporterResponse:

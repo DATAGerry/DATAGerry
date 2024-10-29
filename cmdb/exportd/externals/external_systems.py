@@ -20,9 +20,9 @@ import json
 import re
 import os
 import subprocess
+import csv
 import requests
 import pymysql
-import csv
 from requests.exceptions import HTTPError
 
 from cmdb.exportd.exporter_base import ExternalSystem, ExportVariable

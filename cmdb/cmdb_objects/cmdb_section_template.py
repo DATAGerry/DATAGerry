@@ -107,7 +107,7 @@ class CmdbSectionTemplate(CmdbDAO):
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbSectionTemplate":
+    def from_data(cls, data: dict) -> "CmdbSectionTemplate":
         """
         Returns an Instance of CmdbSectionTemplate
 
@@ -165,11 +165,3 @@ class CmdbSectionTemplate(CmdbDAO):
             'predefined': instance['predefined'],
             'type': instance['type'],
         }
-
-
-    @classmethod
-    def to_dict(cls, instance: "CmdbSectionTemplate") -> dict:
-        """
-        Not used
-        """
-        return []

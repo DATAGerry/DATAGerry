@@ -30,7 +30,7 @@ class UpdateSettings:
 
     __DOCUMENT_IDENTIFIER = 'updater'
 
-    def __init__(self, version: int, *args, **kwargs):
+    def __init__(self, version: int):
         self._id: str = UpdateSettings.__DOCUMENT_IDENTIFIER
         self.version = version
 
@@ -48,7 +48,7 @@ class UpdateSettings:
     def run_updates(self, version: int, ssr: SystemSettingsReader):
         """TODO: document"""
         #IMPORT-FIX
-        from cmdb.updater import UpdaterModule
+        from cmdb.updater.updater_module import UpdaterModule
         ssr.get_all_values_from_section('updater')
         updater_instance = UpdaterModule(ssr)
         versions = updater_instance.__UPDATER_VERSIONS_POOL__
