@@ -59,8 +59,7 @@ def get_user_settings(user_id: int, request_user: UserModel):
 
         raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
 
-        api_response = GetListResponse(results=raw_settings, url=request.url, model=UserSettingModel.MODEL,
-                                       body=request.method == 'HEAD')
+        api_response = GetListResponse(results=raw_settings, body=request.method == 'HEAD')
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -93,8 +92,7 @@ def get_user_setting(user_id: int, resource: str, request_user: UserModel):
     try:
         setting: UserSettingModel = users_settings_manager.get_user_setting(user_id, resource)
 
-        api_response = GetSingleResponse(UserSettingModel.to_dict(setting), url=request.url,
-                                         model=UserSettingModel.MODEL, body=request.method == 'HEAD')
+        api_response = GetSingleResponse(UserSettingModel.to_dict(setting), body=request.method == 'HEAD')
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -134,12 +132,9 @@ def insert_setting(user_id: int, data: dict, request_user: UserModel):
         LOGGER.debug("[insert_setting] ManagerInsertError: %s", err.message)
         return abort(400, "Could not insert the setting!")
 
-    api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting),
-                                        result_id=setting.resource,
-                                        url=request.url,
-                                        model=UserSettingModel.MODEL)
+    api_response = InsertSingleResponse(raw=UserSettingModel.to_dict(setting), result_id=setting.resource)
 
-    return api_response.make_response(prefix=f'users/{user_id}/settings/{setting.resource}')
+    return api_response.make_response()
 
 
 @user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
@@ -178,7 +173,7 @@ def update_setting(user_id: int, resource: str, data: dict, request_user: UserMo
         else:
             users_settings_manager.insert_setting(data)
 
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=UserSettingModel.MODEL)
+        api_response = UpdateSingleResponse(data)
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -211,7 +206,7 @@ def delete_setting(user_id: int, resource: str, request_user: UserModel):
 
     try:
         deleted_setting = users_settings_manager.delete(user_id=user_id, resource=resource)
-        api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting), model=UserSettingModel.MODEL)
+        api_response = DeleteSingleResponse(raw=UserSettingModel.to_dict(deleted_setting))
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)

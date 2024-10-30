@@ -72,7 +72,7 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
         groups = [UserGroupModel.to_dict(group) for group in iteration_result.results]
 
         api_response = GetMultiResponse(groups, total=iteration_result.total, params=params,
-                                        url=request.url, model=UserGroupModel.MODEL, body=request.method == 'HEAD')
+                                        url=request.url, body=request.method == 'HEAD')
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -111,8 +111,7 @@ def get_group(public_id: int, request_user: UserModel):
         #ERROR-FIX
         return abort(404)
 
-    api_response = GetSingleResponse(UserGroupModel.to_dict(group), url=request.url,
-                                     model=UserGroupModel.MODEL, body=request.method == 'HEAD')
+    api_response = GetSingleResponse(UserGroupModel.to_dict(group), body=request.method == 'HEAD')
 
     return api_response.make_response()
 
@@ -147,10 +146,9 @@ def insert_group(data: dict, request_user: UserModel):
         LOGGER.debug("[insert_group] ManagerGetError: %s", err.message)
         return abort(404, "The created group could not be retrieved from database!")
 
-    api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group), url=request.url,
-                                        model=UserGroupModel.MODEL)
+    api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group))
 
-    return api_response.make_response(prefix='groups')
+    return api_response.make_response()
 
 
 @groups_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
@@ -182,8 +180,7 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
         #ERROR-FIX (Add try/except block)
         groups_manager.update_group(public_id, group_dict)
 
-        api_response = UpdateSingleResponse(result=group_dict, url=request.url,
-                                            model=UserGroupModel.MODEL)
+        api_response = UpdateSingleResponse(group_dict)
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -247,7 +244,7 @@ def delete_group(public_id: int, params: GroupDeletionParameters, request_user: 
 
     try:
         deleted_group = groups_manager.delete_group(public_id)
-        api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group), model=UserGroupModel.MODEL)
+        api_response = DeleteSingleResponse(raw=UserGroupModel.to_dict(deleted_group))
     except ManagerGetError as err:
         #ERROR-FIX
         LOGGER.debug("[delete_group] ManagerGetError: %s", err.message)

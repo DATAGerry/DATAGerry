@@ -95,8 +95,11 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
 
         types = [DocapiTemplate.to_json(type) for type in iteration_result.results]
 
-        api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=DocapiTemplate.MODEL, body=request.method == 'HEAD')
+        api_response = GetMultiResponse(types,
+                                        total=iteration_result.total,
+                                        params=params,
+                                        url=request.url,
+                                        body=request.method == 'HEAD')
     except ManagerIterationError:
         #ERROR-FIX
         return abort(400)
@@ -108,8 +111,8 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
 
 @docapi_blueprint.route('/template/by/<string:searchfilter>/', methods=['GET'])
 @docapi_blueprint.route('/template/by/<string:searchfilter>', methods=['GET'])
-@login_required
 @insert_request_user
+@login_required
 @right_required('base.docapi.template.view')
 def get_template_list_filtered(searchfilter: str, request_user: UserModel):
     """TODO: document"""

@@ -70,7 +70,7 @@ def get_exportd_jobs(params: CollectionParameters, request_user: UserModel):
         types = [ExportdJob.to_json(type) for type in iteration_result.results]
 
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=ExportdJob.MODEL, body=request.method == 'HEAD')
+                                        url=request.url, body=request.method == 'HEAD')
     except ManagerIterationError:
         return abort(400)
     except ManagerGetError:

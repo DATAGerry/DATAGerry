@@ -138,9 +138,9 @@ def add_new_file(request_user: UserModel):
         #ERROR-FIX
         return abort(500)
 
-    api_response = InsertSingleResponse(raw=result, result_id=result['public_id'], url=request.url)
+    api_response = InsertSingleResponse(raw=result, result_id=result['public_id'])
 
-    return api_response.make_response(prefix='library')
+    return api_response.make_response()
 
 
 @media_file_blueprint.route('/', methods=['PUT'])

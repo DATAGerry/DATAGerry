@@ -69,9 +69,14 @@ class CategoryTree:
             parent: the parent id of the current subset, None if root list
             types: list of all possible types
         """
-        return list([CategoryNode(category,
-                                  CategoryTree.__create_tree(categories, category.get_public_id(), types),
-                                  types) for category in categories if category.get_parent() == parent])
+        return list(
+            CategoryNode(
+                category,
+                cls.__create_tree(categories, category.get_public_id(), types),
+                types
+            )
+            for category in categories if category.get_parent() == parent
+        )
 
 
     @classmethod

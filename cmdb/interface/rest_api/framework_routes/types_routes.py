@@ -90,12 +90,9 @@ def insert_type(data: dict, request_user: UserModel):
         LOGGER.debug("[insert_type] ManagerInsertError: %s", err.message)
         return abort(400, "The Type could not be inserted !")
 
-    api_response = InsertSingleResponse(result_id=result_id,
-                                        raw=TypeModel.to_json(raw_doc),
-                                        url=request.url,
-                                        model=TypeModel.MODEL)
+    api_response = InsertSingleResponse(result_id=result_id, raw=TypeModel.to_json(raw_doc))
 
-    return api_response.make_response(prefix='types')
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -144,7 +141,6 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        model=TypeModel.MODEL,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
         #ERROR-FIX
@@ -178,8 +174,7 @@ def get_type(public_id: int, request_user: UserModel):
         type_ = types_manager.get_type(public_id)
     except ManagerGetError:
         return abort(404)
-    api_response = GetSingleResponse(TypeModel.to_json(type_), url=request.url,
-                                     model=TypeModel.MODEL, body=request.method == 'HEAD')
+    api_response = GetSingleResponse(TypeModel.to_json(type_), body=request.method == 'HEAD')
 
     return api_response.make_response()
 
@@ -234,7 +229,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
         types_manager.update_type(public_id, TypeModel.to_json(type_))
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=TypeModel.MODEL)
+        api_response = UpdateSingleResponse(result=data)
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -297,7 +292,7 @@ def delete_type(public_id: int, request_user: UserModel):
         objects_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = types_manager.delete_type(public_id)
 
-        api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type), model=TypeModel.MODEL)
+        api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type))
     except ManagerGetError as err:
         #ERROR-FIX
         LOGGER.debug("[delete_type] ManagerGetError: %s", err.message)

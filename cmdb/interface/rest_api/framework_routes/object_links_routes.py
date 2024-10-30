@@ -87,12 +87,9 @@ def create_object_link(request_user: UserModel):
         #ERROR-FIX
         return abort(403, "No permission to create an ObjectLink!")
 
-    api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc),
-                                        result_id,
-                                        request.url,
-                                        ObjectLinkModel.MODEL)
+    api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc), result_id)
 
-    return api_response.make_response(prefix='objects/links')
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -123,7 +120,6 @@ def get_links(params: CollectionParameters, request_user: UserModel):
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        ObjectLinkModel.MODEL,
                                         request.method == 'HEAD')
 
     except ManagerIterationError:
@@ -155,7 +151,7 @@ def delete_link(public_id: int, request_user: UserModel):
     try:
         deleted_link = object_links_manager.delete_object_link(public_id, request_user, AccessControlPermission.DELETE)
 
-        api_response = DeleteSingleResponse(raw=deleted_link, model=ObjectLinkModel.MODEL)
+        api_response = DeleteSingleResponse(raw=deleted_link)
 
     except ManagerGetError as err:
         LOGGER.debug("[delete_link] ManagerGetError: %s", err.message)

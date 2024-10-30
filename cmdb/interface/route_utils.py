@@ -19,7 +19,6 @@ import functools
 import json
 import logging
 from functools import wraps
-from datetime import datetime
 from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
 
@@ -57,8 +56,12 @@ def make_response(instance, status_code=200, indent=2):
         http valid response
     """
     # encode the dict data from the object to json data
-    resp = flask_response(json.dumps(instance, default=default, indent=indent), status_code)
-    resp.mimetype = DEFAULT_MIME_TYPE
+    try:
+        resp = flask_response(json.dumps(instance, default=default, indent=indent), status_code)
+        resp.mimetype = DEFAULT_MIME_TYPE
+    except Exception as err:
+        LOGGER.debug("[make_response] Exception: %s, Type: %s", err, type(err))
+        abort(500, "Could not create response from data!")
 
     return resp
 
@@ -72,8 +75,7 @@ def login_required(f):
     def decorated(*args, **kwargs):
         """checks if user is logged in and valid
         """
-        valid = auth_is_valid()
-        if valid:
+        if auth_is_valid():
             return f(*args, **kwargs)
 
         return abort(401)

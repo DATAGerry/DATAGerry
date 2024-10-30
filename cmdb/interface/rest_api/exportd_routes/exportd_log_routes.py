@@ -60,7 +60,7 @@ def get_exportd_logs(params: CollectionParameters, request_user: UserModel):
 
         types = [ExportdJobLog.to_json(type) for type in iteration_result.results]
         api_response = GetMultiResponse(types, total=iteration_result.total, params=params,
-                                        url=request.url, model=ExportdMetaLog.MODEL, body=body)
+                                        url=request.url, body=body)
     except ManagerIterationError:
         #ERROR-FIX
         return abort(400)

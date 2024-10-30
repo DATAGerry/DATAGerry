@@ -62,7 +62,6 @@ def get_rights(params: CollectionParameters):
                                             total=len(right_tree),
                                             params=params,
                                             url=request.url,
-                                            model='Right-Tree',
                                             body=body)
 
             return api_response.make_response(pagination=False)
@@ -79,7 +78,6 @@ def get_rights(params: CollectionParameters):
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        model='Right',
                                         body=request.method == 'HEAD')
 
         return api_response.make_response()
@@ -117,10 +115,7 @@ def get_right(name: str):
         #ERROR-FIX
         return abort(404)
 
-    api_response = GetSingleResponse(BaseRight.to_dict(right),
-                                     url=request.url,
-                                     model='Right',
-                                     body=request.method == 'HEAD')
+    api_response = GetSingleResponse(BaseRight.to_dict(right), body=request.method == 'HEAD')
 
     return api_response.make_response()
 
@@ -138,9 +133,6 @@ def get_levels():
         Calling the route over HTTP HEAD method will result in an empty body.
     """
 
-    api_response = GetSingleResponse(_nameToLevel,
-                                     url=request.url,
-                                     model='Security-Level',
-                                     body=request.method == 'HEAD')
+    api_response = GetSingleResponse(_nameToLevel, body=request.method == 'HEAD')
 
     return api_response.make_response()
