@@ -21,7 +21,6 @@ import { CmdbType } from '../../models/cmdb-type';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbMode } from '../../modes.enum';
 import { TypeService } from '../../services/type.service';
-import { Right } from '../../../management/models/right';
 
 @Component({
   selector: 'cmdb-type-edit',
