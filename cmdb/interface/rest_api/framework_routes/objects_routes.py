@@ -233,7 +233,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             total=iteration_result.total,
                                             params=params,
                                             url=request.url,
-                                            model=CmdbObject.MODEL,
                                             body=request.method == 'HEAD')
         elif view == 'render':
             if current_app.cloud_mode:
@@ -248,7 +247,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             total=iteration_result.total,
                                             params=params,
                                             url=request.url,
-                                            model='RenderResult',
                                             body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
@@ -433,7 +431,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
         if view == 'native':
             object_list: list[dict] = [object_.__dict__ for object_ in iteration_result.results]
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
-                                            url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+                                            url=request.url, body=request.method == 'HEAD')
         elif view == 'render':
             if current_app.cloud_mode:
                 current_app.database_manager.connector.set_database(request_user.database)
@@ -444,7 +442,7 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
                                        objects_manager=objects_manager).render_result_list(raw=True)
 
             api_response = GetMultiResponse(rendered_list, total=iteration_result.total, params=params,
-                                            url=request.url, model='RenderResult', body=request.method == 'HEAD')
+                                            url=request.url, body=request.method == 'HEAD')
         else:
             return abort(401, 'No possible view parameter')
     except ManagerIterationError:
@@ -506,7 +504,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
         if sorted(object_fields) != type_fields:
             unstructured.append(object_.__dict__)
 
-    api_response = GetListResponse(unstructured, url=request.url, model=CmdbObject.MODEL, body=request.method == 'HEAD')
+    api_response = GetListResponse(unstructured, body=request.method == 'HEAD')
     return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
@@ -632,7 +630,8 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
                                                 public_id=obj_id, obj=new_data).to_dict())
             continue
 
-    api_response = UpdateMultiResponse(results=results, failed=failed, url=request.url, model=CmdbObject.MODEL)
+    api_response = UpdateMultiResponse(results=results, failed=failed)
+
     return api_response.make_response()
 
 
@@ -707,7 +706,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     except ManagerInsertError as err:
         LOGGER.debug("[update_object_state] ManagerInsertError: %s", err.message)
 
-    api_response = UpdateSingleResponse(result=found_object.__dict__, url=request.url, model=CmdbObject.MODEL)
+    api_response = UpdateSingleResponse(result=found_object.__dict__)
     return api_response.make_response()
 
 
@@ -773,7 +772,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
         LOGGER.debug("[update_unstructured_objects] ManagerUpdateError: %s", err.message)
         return abort(400, err.message)
 
-    api_response = UpdateMultiResponse([], url=request.url, model=CmdbObject.MODEL)
+    api_response = UpdateMultiResponse([])
 
     return api_response.make_response()
 

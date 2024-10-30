@@ -79,12 +79,9 @@ def insert_category(data: dict, request_user: UserModel):
         LOGGER.debug("[insert_category] ManagerInsertError: %s", err.message)
         return abort(400, "Could not insert the new categeory in database)!")
 
-    api_response = InsertSingleResponse(result_id=result_id,
-                                    raw=new_category,
-                                    url=request.url,
-                                    model=CategoryModel.MODEL)
+    api_response = InsertSingleResponse(result_id=result_id, raw=new_category)
 
-    return api_response.make_response(prefix='categories')
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -117,7 +114,6 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
                                             len(tree),
                                             params,
                                             request.url,
-                                            CategoryTree.MODEL,
                                             body)
 
             return api_response.make_response(pagination=False)
@@ -133,7 +129,6 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        CategoryModel.MODEL,
                                         body)
     except ManagerIterationError as err:
         LOGGER.debug("[get_categories] ManagerIterationError: %s", err.message)
@@ -164,10 +159,7 @@ def get_category(public_id: int, request_user: UserModel):
         LOGGER.debug("[get_category] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the requested categeory from database!")
 
-    api_response = GetSingleResponse(category_instance,
-                                     url = request.url,
-                                     model = CategoryModel.MODEL,
-                                     body = request.method == 'HEAD')
+    api_response = GetSingleResponse(category_instance, body = request.method == 'HEAD')
 
     return api_response.make_response()
 
@@ -196,7 +188,7 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
 
         categories_manager.update_category(public_id, category)
 
-        api_response = UpdateSingleResponse(result=data, url=request.url, model=CategoryModel.MODEL)
+        api_response = UpdateSingleResponse(result=data)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_category] ManagerUpdateError: %s", err.message)
         return abort(400, f"Could not update the categeory with public_id: {public_id}!")
@@ -229,7 +221,7 @@ def delete_category(public_id: int, request_user: UserModel):
         # Update 'parent' attribute on direct children
         categories_manager.reset_children_categories(public_id)
 
-        api_response = DeleteSingleResponse(raw=category_instance, model=CategoryModel.MODEL)
+        api_response = DeleteSingleResponse(raw=category_instance)
     except ManagerGetError as err:
         LOGGER.debug("[delete_category] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the child categeories from the database!")

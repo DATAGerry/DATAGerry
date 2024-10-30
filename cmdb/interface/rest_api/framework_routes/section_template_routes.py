@@ -104,7 +104,6 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        CmdbSectionTemplate.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         #ERROR-FIX
@@ -209,7 +208,7 @@ def update_section_template(params: dict, request_user: UserModel):
     except NoDocumentFound as err:
         return abort(404, "Section template not found!")
 
-    api_response = UpdateSingleResponse(result, None, request.url, CmdbSectionTemplate.MODEL)
+    api_response = UpdateSingleResponse(result)
 
     return api_response.make_response()
 

@@ -21,7 +21,6 @@ import uuid
 import logging
 import calendar
 import datetime
-from datetime import datetime
 from bson.dbref import DBRef
 from bson.max_key import MaxKey
 from bson.min_key import MinKey
@@ -31,7 +30,9 @@ from bson.tz_util import utc
 
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.search.search_result import SearchResult, SearchResultMap
+from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -60,9 +61,9 @@ def object_hook(dct: dict):
     if "$date" in dct:
         try:
             # if timestamp
-            return datetime.fromtimestamp(float(dct["$date"]) / 1000.0, utc)
+            return datetime.datetime.fromtimestamp(float(dct["$date"]) / 1000.0, utc)
         except ValueError:
-            return datetime.fromisoformat(dct['$date'][:-1]).astimezone(utc)
+            return datetime.datetime.fromisoformat(dct['$date'][:-1]).astimezone(utc)
 
     if "$regex" in dct:
         flags = 0
@@ -92,7 +93,10 @@ def default(obj):
     Returns:
         json format
     """
-    if isinstance(obj, (CmdbDAO, RenderResult)):
+    if isinstance(obj, (CmdbDAO,
+                        RenderResult,
+                        TemplateManagementBase,
+                        DateSettingsDAO)):
         return obj.__dict__
 
     if isinstance(obj, (SearchResult,SearchResultMap)):
@@ -107,7 +111,7 @@ def default(obj):
     if isinstance(obj, DBRef):
         return obj.as_doc()
 
-    if isinstance(obj, datetime):
+    if isinstance(obj, datetime.datetime):
         if obj.utcoffset() is not None:
             obj = obj - obj.utcoffset()
 

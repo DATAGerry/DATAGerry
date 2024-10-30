@@ -85,7 +85,6 @@ def get_logs_with_existing_objects(params: CollectionParameters, request_user: U
                                         object_logs.total,
                                         params,
                                         request.url,
-                                        CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("[get_logs_with_existing_objects] ManagerIterationError: %s", err.message)
@@ -120,7 +119,6 @@ def get_logs_with_deleted_objects(params: CollectionParameters, request_user: Us
                                         object_logs.total,
                                         params,
                                         request.url,
-                                        CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("[get_logs_with_deleted_objects] ManagerIterationError: %s", err.message)
@@ -158,7 +156,6 @@ def get_object_delete_logs(params: CollectionParameters, request_user: UserModel
                                         object_logs.total,
                                         params,
                                         request.url,
-                                        CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("[get_object_delete_logs] ManagerIterationError: %s", err.message)
@@ -198,7 +195,6 @@ def get_logs_by_object(object_id: int, params: CollectionParameters, request_use
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        CmdbMetaLog.MODEL,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
         LOGGER.debug("[get_logs_by_object] ManagerIterationError: %s", err.message)

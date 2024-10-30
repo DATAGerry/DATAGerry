@@ -132,7 +132,6 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        CmdbLocation.MODEL,
                                         request.method == 'HEAD')
 
     except ManagerIterationError as err:
@@ -190,7 +189,6 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        CmdbLocation.MODEL,
                                         request.method == 'HEAD')
 
     except ManagerIterationError as err:
@@ -348,7 +346,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
         return abort(400, "Could not update the location!")
 
-    api_response = UpdateSingleResponse(result=result, url=request.url, model=CmdbLocation.MODEL)
+    api_response = UpdateSingleResponse(result=result)
 
     return api_response.make_response()
 

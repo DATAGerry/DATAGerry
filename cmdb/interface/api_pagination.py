@@ -49,6 +49,7 @@ class APIPager:
         }
 
 
+#CLASS-FIX
 class APIPagination:
     """
     Pagination data for rest api calls.

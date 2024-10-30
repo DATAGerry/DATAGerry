@@ -133,9 +133,9 @@ def insert_user(data: dict, request_user: UserModel):
         LOGGER.debug("[insert_user] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create the user in database!")
 
-    api_response = InsertSingleResponse(UserModel.to_dict(user), result_id, request.url, UserModel.MODEL)
+    api_response = InsertSingleResponse(UserModel.to_dict(user), result_id)
 
-    return api_response.make_response(prefix='users')
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -169,7 +169,6 @@ def get_users(params: CollectionParameters, request_user: UserModel):
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        model=UserModel.MODEL,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
         #ERROR-FIX
@@ -208,10 +207,7 @@ def get_user(public_id: int, request_user: UserModel):
         #MESSAGE-FIX
         return abort(404)
 
-    api_response = GetSingleResponse(UserModel.to_dict(user),
-                                     url=request.url,
-                                     model=UserModel.MODEL,
-                                     body=request.method == 'HEAD')
+    api_response = GetSingleResponse(UserModel.to_dict(user), body=request.method == 'HEAD')
 
     return api_response.make_response()
 
@@ -240,7 +236,7 @@ def update_user(public_id: int, data: dict, request_user: UserModel):
         user = UserModel.from_data(data=data)
         users_manager.update_user(public_id, user)
 
-        api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
+        api_response = UpdateSingleResponse(UserModel.to_dict(user))
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -279,7 +275,7 @@ def change_user_password(public_id: int, request_user: UserModel):
         password = security_manager.generate_hmac(request.json.get('password'))
         user.password = password
         users_manager.update_user(public_id, user)
-        api_response = UpdateSingleResponse(result=UserModel.to_dict(user), url=request.url, model=UserModel.MODEL)
+        api_response = UpdateSingleResponse(UserModel.to_dict(user))
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
@@ -310,7 +306,7 @@ def delete_user(public_id: int, request_user: UserModel):
 
     try:
         deleted_group = users_manager.delete_user(public_id)
-        api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group), model=UserModel.MODEL)
+        api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group))
     except ManagerGetError as err:
         #ERROR-FIX
         LOGGER.debug("[delete_user] ManagerGetError: %s", err.message)

@@ -17,6 +17,7 @@
 Registering import routes for objects and types
 """
 from flask import current_app
+
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')

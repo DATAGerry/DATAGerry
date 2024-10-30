@@ -38,14 +38,20 @@ LOGGER = logging.getLogger(__name__)
 @insert_request_user
 def get_date_settings(request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
-                                                                               request_user)
+    try:
+        system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                                request_user)
 
-    date_settings = system_settings_reader.get_all_values_from_section('date',
-                                                                       default=DateSettingsDAO.__DEFAULT_SETTINGS__)
-    date_settings = DateSettingsDAO(**date_settings)
+        date_settings = system_settings_reader.get_all_values_from_section('date',
+                                                                        default=DateSettingsDAO.__DEFAULT_SETTINGS__)
 
-    return make_response(date_settings)
+        date_settings = DateSettingsDAO(**date_settings)
+
+        return make_response(date_settings)
+    except Exception as err:
+        #ERROR-FIX
+        LOGGER.debug(f"[get_date_settings] Exception: %s, Type: %s", err, type(err))
+        return abort(500)
 
 
 @date_blueprint.route('/', methods=['POST', 'PUT'])

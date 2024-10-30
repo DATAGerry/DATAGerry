@@ -45,7 +45,6 @@ def load_class(classname):
     #TODO: check if this regex is correct
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
-    LOGGER.debug("[load_class] pattern match: %s", str(match))
 
     if match is None:
         raise Exception(f"Could not load class {classname}")
