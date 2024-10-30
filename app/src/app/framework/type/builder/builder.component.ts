@@ -19,11 +19,13 @@ import {
     AfterViewChecked,
     ChangeDetectionStrategy,
     Component,
+    ElementRef,
     EventEmitter,
     Input,
     OnChanges,
     OnDestroy,
     Output,
+    Renderer2,
     SimpleChanges
 } from '@angular/core';
 
@@ -155,7 +157,9 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
     /* ------------------------------------------------------------------------------------------------------------------ */
 
     public constructor(private modalService: NgbModal, private validationService: ValidationService,
-        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService
+        public sectionIdentifierService: SectionIdentifierService, private fieldIdentifierValidation: FieldIdentifierValidationService,
+        private renderer: Renderer2,
+        private el: ElementRef,
     ) {
         this.typeInstance = new CmdbType();
     }
@@ -259,8 +263,10 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
             for (const el of this.sections) {
                 if (el.name && el.name.trim()) {
-                    const collapseCard = $('#' + el.name);
-                    collapseCard.collapse('hide');
+                    const collapseCard = this.el.nativeElement.querySelector(`#${el.name}`);
+                    if (collapseCard) {
+                        this.renderer.setStyle(collapseCard, 'display', 'none');
+                    }
                 }
             }
 
@@ -1165,6 +1171,31 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
         //hide the color picker after selecting a color
         // this.showColorPickerForSection = null;
+    }
+
+    /* ----------------------------------------------- CSS CLASS HANDLERS ------------------------------------------------ */
+
+
+    /**
+     * Returns the CSS classes for a section header based on its state.
+     * Applies styles for global sections and highlighted headers.
+     * @param section - The section to evaluate.
+     */
+    getSectionHeaderClass(section: any): any {
+        return {
+            'global-section-item': this.isGlobalSection(section),
+            'highlight-section-header': this.isSectionHighlighted(section) || !this.isSectionHasField(section)
+        };
+    }
+
+    /**
+     * Returns the CSS classes for a draggable item based on section state.
+     * Applies 'disabled' class if any section is highlighted or fields are disabled.
+     */
+    getDraggableItemClass(): any {
+        return {
+            'disabled': this.isAnySectionHighlighted() || this.disableFields
+        };
     }
 
 

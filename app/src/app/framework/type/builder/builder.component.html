@@ -16,7 +16,7 @@
                                     [dndType]="'sections'"
                                     [dndDraggable]="globalSectionTemplate"
                                     class="list-group-item list-group-item-action"
-                                    [class.disabled]="isAnySectionHighlighted() || disableFields"
+                                    [ngClass]="getDraggableItemClass()"
                                     [dndDisableIf]="isAnySectionHighlighted() || disableFields"
                                 >
                                     <span>
@@ -42,7 +42,7 @@
                                     [dndType]="'sections'"
                                     [dndDraggable]="sectionTemplate"
                                     class="list-group-item list-group-item-action"
-                                    [class.disabled]="isAnySectionHighlighted() || disableFields"
+                                    [ngClass]="getDraggableItemClass()"
                                     [dndDisableIf]="isAnySectionHighlighted() || disableFields"                             >
                                     <span>
                                         #{{ sectionTemplate.public_id }} - <b>{{ sectionTemplate.label }}</b>
@@ -67,7 +67,7 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
-                                    [class.disabled]="isAnySectionHighlighted() || disableFields"
+                                    [ngClass]="getDraggableItemClass()"
                                     [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
                                     >
                                     <span>
@@ -93,7 +93,7 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
-                                    [class.disabled]="isAnySectionHighlighted() || disableFields"
+                                    [ngClass]="getDraggableItemClass()"
                                     [dndDisableIf]="isAnySectionHighlighted() || disableFields"
                                 >
                                     <span>
@@ -119,7 +119,7 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
-                                    [class.disabled]="isAnySectionHighlighted() || disableFields"
+                                    [ngClass]="getDraggableItemClass()"
                                     [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
                                 >
                                     <span>
@@ -172,8 +172,7 @@
                 (dndStart)="onDragStart(x)"
                 (dndMoved)="onSectionDragged(section, sections, 'move', x)">
                 <div class="card" [ngStyle]="{'background-color': section.bg_color || '#ffffff'}">
-                    <div class="card-header" [ngClass]="{'global-section-item': isGlobalSection(section)}"
-                    [ngClass]="{'highlight-section-header': isSectionHighlighted(section) || !isSectionHasField(section)}">
+                    <div class="card-header" [ngClass]="getSectionHeaderClass(section)">
                         <fa-icon [icon]="['far', 'object-group']"></fa-icon>
                             {{section.label}}
                         <span class="float-right">
