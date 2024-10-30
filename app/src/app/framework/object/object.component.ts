@@ -17,14 +17,14 @@
 */
 
 import { Component, OnDestroy, OnInit, TemplateRef, ViewChild } from '@angular/core';
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subject } from 'rxjs';
 import { ObjectService } from '../services/object.service';
 import { CmdbObject } from '../models/cmdb-object';
 import { RenderResult } from '../models/cmdb-render';
 import { APIGetMultiResponse } from '../../services/models/api-response';
 import { Column, Sort, SortDirection } from '../../layout/table/table.types';
 import { CollectionParameters } from '../../services/models/api-parameter';
-import { takeUntil } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, takeUntil, tap } from 'rxjs/operators';
 import { ToastService } from '../../layout/toast/toast.service';
 
 @Component({
@@ -138,6 +138,9 @@ export class ObjectComponent implements OnInit, OnDestroy {
    */
   @ViewChild('actionTemplate', { static: true }) actionTemplate: TemplateRef<any>;
 
+  searchTerms$ = new Subject<string>();
+
+
   constructor(private objectService: ObjectService<RenderResult>, private toastService: ToastService) {
     this.subscriber = new ReplaySubject<void>();
   }
@@ -218,8 +221,20 @@ export class ObjectComponent implements OnInit, OnDestroy {
       }
     ] as Array<Column>;
     this.initialVisibleColumns = columns.filter(c => !c.hidden).map(c => c.name);
-    this.columns = [... columns];
+    this.columns = [...columns];
     this.loadObjectsFromAPI();
+
+    this.searchTerms$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        tap(term => {
+          this.filter = term ? term : undefined;
+          this.loadObjectsFromAPI();
+        })
+      )
+      .subscribe();
+
   }
 
   private setLoadingState(isLoading: boolean) {
@@ -271,7 +286,8 @@ export class ObjectComponent implements OnInit, OnDestroy {
           }
         });
 
-      query.push({ $project: {
+      query.push({
+        $project: {
           _id: 1,
           public_id: 1,
           type_id: 1,
@@ -287,51 +303,58 @@ export class ObjectComponent implements OnInit, OnDestroy {
               in: { $setUnion: ['$$value', '$$this'] }
             }
           }
-        } });
+        }
+      });
 
       query.push({
         $group: {
           _id: '$_id',
-          public_id : { $first: '$public_id' },
+          public_id: { $first: '$public_id' },
           type_id: { $first: '$type_id' },
           active: { $first: '$active' },
           author_id: { $first: '$author_id' },
           creation_time: { $first: '$creation_time' },
           last_edit_time: { $first: '$last_edit_time' },
-          fields : { $first: '$fields' },
+          fields: { $first: '$fields' },
           simple: { $first: '$simple' },
         }
       });
 
-      query.push({ $project:
-            {
-              _id: '$_id',
-              public_id: 1,
-              type_id: 1,
-              active: 1,
-              author_id: 1,
-              creation_time: 1,
-              last_edit_time: 1,
-              fields: 1,
-              references : { $setUnion: ['$fields', '$simple'] },
-            }
+      query.push({
+        $project:
+        {
+          _id: '$_id',
+          public_id: 1,
+          type_id: 1,
+          active: 1,
+          author_id: 1,
+          creation_time: 1,
+          last_edit_time: 1,
+          fields: 1,
+          references: { $setUnion: ['$fields', '$simple'] },
         }
+      }
       );
       // Search for creation_time
       query.push(
-        { $addFields: {
+        {
+          $addFields: {
             creationString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$creation_time' } }
-          }},
+          }
+        },
       );
       // Search for last_edit_time
       query.push(
-        { $addFields: {
+        {
+          $addFields: {
             editString: { $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$last_edit_time' } }
-          }},
+          }
+        },
       );
       // Search date in field values
       query.push(
-        { $addFields: {
+        {
+          $addFields: {
             references: {
               $map: {
                 input: '$references',
@@ -339,10 +362,12 @@ export class ObjectComponent implements OnInit, OnDestroy {
                 in: {
                   $cond: [
                     { $eq: [{ $type: '$$new_fields.value' }, 'date'] },
-                    { name: '$$new_fields.name', value: {
-                        $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' } }
+                    {
+                      name: '$$new_fields.name', value: {
+                        $dateToString: { format: '%Y-%m-%dT%H:%M:%S.%LZ', date: '$$new_fields.value' }
+                      }
                     },
-                    { name: '$$new_fields.name', value: '$$new_fields.value'}
+                    { name: '$$new_fields.name', value: '$$new_fields.value' }
                   ]
                 }
               }
@@ -367,8 +392,8 @@ export class ObjectComponent implements OnInit, OnDestroy {
         }
       });
       // Date string search
-      or.push( { creationString: { $regex: String(this.filter), $options: 'ims' } } );
-      or.push( { editString: { $regex: String(this.filter), $options: 'ims' } } );
+      or.push({ creationString: { $regex: String(this.filter), $options: 'ims' } });
+      or.push({ editString: { $regex: String(this.filter), $options: 'ims' } });
       // Search Fields
       or.push({
         references: {
@@ -427,12 +452,7 @@ export class ObjectComponent implements OnInit, OnDestroy {
    * @param search
    */
   public onSearchChange(search: any): void {
-    if (search) {
-      this.filter = search;
-    } else {
-      this.filter = undefined;
-    }
-    this.loadObjectsFromAPI();
+    this.searchTerms$.next(search);
   }
 
   /**
@@ -442,34 +462,34 @@ export class ObjectComponent implements OnInit, OnDestroy {
   public onObjectDelete(objectID: number) {
     this.objectService.deleteObject(objectID).pipe(takeUntil(this.subscriber))
       .subscribe(() => {
-          this.toastService.success(`Object ${ objectID } was deleted successfully`);
-          this.loadObjectsFromAPI();
-        },
+        this.toastService.success(`Object ${objectID} was deleted successfully`);
+        this.loadObjectsFromAPI();
+      },
         (error) => {
-          this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
+          this.toastService.error(`Error while deleting object ${objectID} | Error: ${error}`);
         });
   }
 
-  public onObjectDeleteWithLocations(objectID: number){
+  public onObjectDeleteWithLocations(objectID: number) {
     this.objectService.deleteObjectWithLocations(objectID).pipe(takeUntil(this.subscriber))
-    .subscribe(() => {
-        this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
+      .subscribe(() => {
+        this.toastService.success(`Object ${objectID} and child locations were deleted successfully`);
         this.loadObjectsFromAPI();
       },
-      (error) => {
-        this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
-      });
+        (error) => {
+          this.toastService.error(`Error while deleting object ${objectID} | Error: ${error}`);
+        });
   }
 
-  public onObjectDeleteWithObjects(objectID: number){
+  public onObjectDeleteWithObjects(objectID: number) {
     this.objectService.deleteObjectWithChildren(objectID).pipe(takeUntil(this.subscriber))
-    .subscribe(() => {
-        this.toastService.success(`Object ${ objectID } and child locations were deleted successfully`);
+      .subscribe(() => {
+        this.toastService.success(`Object ${objectID} and child locations were deleted successfully`);
         this.loadObjectsFromAPI();
       },
-      (error) => {
-        this.toastService.error(`Error while deleting object ${ objectID } | Error: ${ error }`);
-      });
+        (error) => {
+          this.toastService.error(`Error while deleting object ${objectID} | Error: ${error}`);
+        });
   }
 
   /**
