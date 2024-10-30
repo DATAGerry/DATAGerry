@@ -215,6 +215,14 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         }
     }
 
+    /* ----------------------------------------------- CSS CLASS HANDLERS ------------------------------------------------ */
+
+
+    get isSaveButtonDisabled(): boolean {
+        return !this.basicValid || !this.contentValid || !this.metaValid || !this.accessValid || !this.isLabelValid || !this.isNameValid || this.isSectionHighlighted || this.isFieldHighlighted || this.disableFields || !this.isSectionWithoutFields;
+    }
+
+
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
