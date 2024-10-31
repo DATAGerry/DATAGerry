@@ -87,10 +87,6 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.logs_routes import logs_blueprint
     from cmdb.interface.rest_api.setting_routes import settings_blueprint
     from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.exportd_routes import exportd_blueprint
-    from cmdb.interface.rest_api.exportd_routes.exportd_job_routes import exportd_job_blueprint
-    from cmdb.interface.rest_api.exportd_routes.exportd_log_routes import exportd_log_blueprint
-    from cmdb.interface.rest_api.external_systems_routes import external_system
     from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
     from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.special_routes import special_blueprint
@@ -115,10 +111,6 @@ def register_blueprints(app):
     app.register_blueprint(logs_blueprint, url_prefix='/logs')
     app.register_blueprint(settings_blueprint)
     app.register_blueprint(importer_blueprint)
-    app.register_blueprint(exportd_blueprint, url_prefix='/exportd')
-    app.register_blueprint(exportd_job_blueprint)
-    app.register_blueprint(exportd_log_blueprint)
-    app.register_blueprint(external_system)
     app.register_blueprint(docapi_blueprint)
     app.register_blueprint(docs_blueprint, url_prefix='/docs')
     app.register_blueprint(media_file_blueprint)
@@ -136,7 +128,6 @@ def register_error_pages(app):
     Params:
         app (BaseCmdbApp): app where to register the error handlers
     """
-
     app.register_error_handler(400, bad_request)
     app.register_error_handler(401, unauthorized)
     app.register_error_handler(403, forbidden)

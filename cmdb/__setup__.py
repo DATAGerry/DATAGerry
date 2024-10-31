@@ -31,7 +31,6 @@ from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 from cmdb.errors.manager.user_manager import UserManagerInsertError
@@ -237,12 +236,6 @@ class SetupRoutine:
 
         #generate user management collections
         for collection in USER_MANAGEMENT_COLLECTION:
-            self.dbm.create_collection(collection.COLLECTION)
-            # set unique indexes
-            self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-        #generate ExportdJob management collections
-        for collection in JOB_MANAGEMENT_COLLECTION:
             self.dbm.create_collection(collection.COLLECTION)
             # set unique indexes
             self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())

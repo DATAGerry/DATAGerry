@@ -27,7 +27,6 @@ from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management.constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError
 from cmdb.errors.setup import CollectionInitError
@@ -142,17 +141,6 @@ class UpdateRoutine:
                     self.dbm.create_collection(collection.COLLECTION)
                     # set unique indexes
                     self.dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-                    LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
-
-            # update exportdJob management collections
-            for collection in JOB_MANAGEMENT_COLLECTION:
-                try:
-                    detected_database.validate_collection(collection.COLLECTION)['valid']
-                except CollectionInvalid:
-                    self.dbm.create_collection(collection.COLLECTION)
-                    # set unique indexes
-                    self.dbm.create_indexes(collection.COLLECTION,
-                                                               collection.get_index_keys())
                     LOGGER.info('UPDATE ROUTINE: Database collection %s was created.', collection.COLLECTION)
         except Exception as err:
             LOGGER.info('UPDATE ROUTINE: Database collection validation failed: %s', err)
