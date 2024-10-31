@@ -24,7 +24,7 @@ from werkzeug.wrappers import Request
 
 from cmdb.manager.types_manager import TypesManager
 
-from cmdb.importer import load_parser_class
+from cmdb.importer.importer_helper import load_parser_class
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.models.type import TypeModel

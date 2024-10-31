@@ -19,10 +19,11 @@ from json import dumps
 from datetime import datetime, timezone
 from enum import Enum
 from math import ceil
-from typing import Union
-from flask import make_response as flask_response
+from typing import Union, Any
+from flask import abort, make_response as flask_response
 from werkzeug.wrappers import Response
 
+from cmdb.database.utils import default
 from cmdb.interface.api_parameters import CollectionParameters, APIParameters
 from cmdb.interface.api_project import APIProjection, APIProjector
 from cmdb.interface.api_pagination import APIPagination, APIPager
@@ -34,35 +35,8 @@ DEFAULT_MIME_TYPE = 'application/json'
 API_VERSION = '1.0'
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
-def default(obj):
-    """Json encoder for database values."""
-    if isinstance(obj, datetime):
-        return obj.isoformat()
-    return str(obj)
-
-
-def make_api_response(body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
-    """
-    Make a valid http response.
-
-    Args:
-        body: http body content
-        status: http status code
-        mime: mime type
-        indent: display indent
-
-    Returns:
-        Response
-    """
-    response = flask_response(dumps(body, default=default, indent=indent), status)
-    response.mimetype = mime or DEFAULT_MIME_TYPE
-    response.headers['X-API-Version'] = API_VERSION
-
-    return response
-
-
-#CLASS-FIX
+#                                                 OperationType - ENUM                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class OperationType(Enum):
     """
     Enum for different response operations.
@@ -148,6 +122,55 @@ class BaseAPIResponse:
         }
 
 
+    # def default(self, obj):
+    #     """Json encoder for database values"""
+    #     if isinstance(obj, datetime):
+    #         return obj.isoformat()
+
+    #     return str(obj)
+
+
+    def make_api_response(self, body, status: int = 200, mime: str = None, indent: int = 2) -> Response:
+        """
+        Make a valid http response.
+
+        Args:
+            body: http body content
+            status: http status code
+            mime: mime type
+            indent: display indent
+
+        Returns:
+            Response
+        """
+        try:
+            response = flask_response(dumps(body, default=default, indent=indent), status)
+            response.mimetype = mime or DEFAULT_MIME_TYPE
+            response.headers['X-API-Version'] = API_VERSION
+        except Exception as err:
+            LOGGER.debug("[make_response] Exception: %s, Type: %s", err, type(err))
+            return abort(500, "Could not create response from data!")
+
+        return response
+
+
+class GetSingleValueResponse(BaseAPIResponse):
+    """TODO: document"""
+    def __init__(self, value: Any):
+        """TODO: document"""
+        self.value = value
+        super().__init__(OperationType.GET)
+
+
+    def make_response(self, *args, **kwargs) -> Response:
+        """
+        Make a valid http response
+
+        Returns:
+            Instance of Response with a HTTP 200 status code
+        """
+        return self.make_api_response(self.value)
+
 #CLASS-FIX
 class GetSingleResponse(BaseAPIResponse):
     """
@@ -178,9 +201,9 @@ class GetSingleResponse(BaseAPIResponse):
             Instance of Response with a HTTP 200 status code
         """
         if self.body:
-            response = make_api_response(self.export(*args, **kwargs))
+            response = self.make_api_response(self.export(*args, **kwargs))
         else:
-            response = make_api_response(None)
+            response = self.make_api_response(None)
 
         return response
 
@@ -247,9 +270,9 @@ class GetMultiResponse(BaseAPIResponse):
             Instance of Response
         """
         if self.body:
-            response = make_api_response(self.export(*args, **kwargs))
+            response = self.make_api_response(self.export(*args, **kwargs))
         else:
-            response = make_api_response(None)
+            response = self.make_api_response(None)
 
         response.headers['X-Total-Count'] = self.total
 
@@ -311,7 +334,7 @@ class InsertSingleResponse(BaseAPIResponse):
         Returns:
             Instance of Response with http status code 201.
         """
-        response = make_api_response(self.export(), 201)
+        response = self.make_api_response(self.export(), 201)
 
         return response
 
@@ -351,7 +374,7 @@ class UpdateSingleResponse(BaseAPIResponse):
         Returns:
             Instance of Response with http status code 202
         """
-        response = make_api_response(self.export(), 202)
+        response = self.make_api_response(self.export(), 202)
 
         return response
 
@@ -393,7 +416,7 @@ class UpdateMultiResponse(BaseAPIResponse):
         Returns:
             Instance of Response with http status code 202
         """
-        response = make_api_response(self.export(), 202)
+        response = self.make_api_response(self.export(), 202)
 
         return response
 
@@ -436,7 +459,7 @@ class DeleteSingleResponse(BaseAPIResponse):
         """
         status_code = 204 if not self.raw else 202
 
-        return make_api_response(self.export(*args, **kwargs), status_code)
+        return self.make_api_response(self.export(*args, **kwargs), status_code)
 
 
     def export(self) -> dict:
@@ -476,9 +499,9 @@ class GetListResponse(BaseAPIResponse):
             Instance of Response with a HTTP 200 status code.
         """
         if self.body:
-            response = make_api_response(self.export(*args, **kwargs))
+            response = self.make_api_response(self.export(*args, **kwargs))
         else:
-            response = make_api_response(None)
+            response = self.make_api_response(None)
 
         response.headers['X-Total-Count'] = len(self.results)
 

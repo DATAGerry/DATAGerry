@@ -26,17 +26,18 @@ from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.response import GetSingleValueResponse
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.security.auth import AuthModule, AuthSettingsDAO
+from cmdb.security.auth.auth_settings import AuthSettingsDAO
+from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.auth.response import LoginResponse
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.user_management import __FIXED_GROUPS__
-from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
@@ -61,8 +62,9 @@ def get_auth_settings(request_user: UserModel):
 
     auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
+    api_response = GetSingleValueResponse(auth_module.settings)
 
-    return make_response(auth_module.settings)
+    return api_response.make_response()
 
 
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
@@ -88,7 +90,8 @@ def update_auth_settings(request_user: UserModel):
     update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        return make_response(system_settings_reader.get_section('auth'))
+        api_response = GetSingleValueResponse(system_settings_reader.get_section('auth'))
+        return api_response.make_response()
 
     return abort(400, 'Could not update auth settings')
 
@@ -237,7 +240,7 @@ def check_user_in_mysql_db(mail: str, password: str):
 
 
     except Exception as err:
-        LOGGER.debug(f"[get users from file] error: {err} , error type: {type(err)}")
+        LOGGER.debug("[get users from file] Exception: %s , Type: %s", err, type(err))
         return None
 
 

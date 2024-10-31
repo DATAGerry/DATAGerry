@@ -21,7 +21,7 @@ from authlib.jose import jwt
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __title__
-from cmdb.security.auth import AuthModule
+from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
 from cmdb.utils.system_reader import SystemSettingsReader

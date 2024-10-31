@@ -29,10 +29,9 @@ from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.security.key.generator import KeyGenerator
-from cmdb.user_management import __FIXED_GROUPS__
-from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError, DatabaseNotExists
 from cmdb.errors.manager.user_manager import UserManagerInsertError
