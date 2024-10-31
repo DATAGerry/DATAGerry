@@ -111,15 +111,6 @@
                                             <div class="col">
                                                 <a
                                                     class="dropdown-icon-item"
-                                                    *permissionLink="['base.exportd.job.view']"
-                                                    [routerLink]="['/exportd']"
-                                                >
-                                                    <i class="fas fa-tachometer-alt"></i> <span>Exportd</span>
-                                                </a>
-                                            </div>
-                                            <div class="col">
-                                                <a
-                                                    class="dropdown-icon-item"
                                                     *permissionLink="['base.docapi.template.view']"
                                                     [routerLink]="['/docapi']"
                                                 >
@@ -268,13 +259,6 @@
                                         [routerLink]="['/settings/logs/objects']"
                                     >
                                         <fa-icon icon="clipboard-list"></fa-icon>Object Logs
-                                    </a>
-                                    <a
-                                        class="dropdown-item"
-                                        *permissionLink="['base.exportd.log.view']"
-                                        [routerLink]="['/settings/logs/exportdjobs']"
-                                    >
-                                        <fa-icon icon="clipboard-list"></fa-icon>Exportd Logs
                                     </a>
                                 </div>
                             </li>

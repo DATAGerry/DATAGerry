@@ -33,15 +33,8 @@ import { DeleteModalComponent, LogObjectSettingsComponent } from './log-object-s
 import { ActivateTabComponent } from './log-object-settings/activate-tab/activate-tab.component';
 import { DeactivateTabComponent } from './log-object-settings/deactivate-tab/deactivate-tab.component';
 import { DeleteTabComponent } from './log-object-settings/delete-tab/delete-tab.component';
-import { LogExportdSettingsComponent } from './log-exportd-settings/log-exportd-settings.component';
 import { LogSettingsComponent } from './log-settings.component';
-import { ActivateExportdTabComponent } from './log-exportd-settings/activate-exportd-tab/activate-exportd-tab.component';
-import { DeletedExportdTabComponent } from './log-exportd-settings/deactivate-exportd-tab/deleted-exportd-tab.component';
 import { LogObjectTableActionsComponent } from './log-object-settings/log-object-table-actions/log-object-table-actions.component';
-import {
-    DeleteLogJobModalComponent,
-    LogExportdTableComponent
-} from './log-exportd-settings/components/log-exportd-table/log-exportd-table.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -51,16 +44,8 @@ import {
         DeactivateTabComponent,
         DeleteTabComponent,
         LogSettingsComponent,
-        LogExportdSettingsComponent,
-        ActivateExportdTabComponent,
-        DeletedExportdTabComponent,
         LogObjectTableActionsComponent,
-        LogExportdTableComponent,
-        DeleteLogJobModalComponent,
         DeleteModalComponent
-    ],
-    exports: [
-        LogExportdTableComponent
     ],
     imports: [
         CommonModule,
@@ -76,4 +61,4 @@ import {
         RenderModule
     ]
 })
-export class LogSettingsModule {}
+export class LogSettingsModule { }

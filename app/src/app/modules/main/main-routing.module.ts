@@ -122,15 +122,6 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         loadChildren: () => import('../../filemanager/filemanager.module').then(m => m.FilemanagerModule)
-    },
-    {
-        path: 'exportd',
-        data: {
-            breadcrumb: 'Exportd'
-        },
-        canActivate: [AuthGuard],
-        canActivateChild: [AuthGuard],
-        loadChildren: () => import('../../exportd/exportd.module').then(m => m.ExportdModule)
     }
 ];
 
@@ -138,4 +129,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class MainRoutingModule {}
+export class MainRoutingModule { }
