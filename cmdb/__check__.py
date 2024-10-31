@@ -30,11 +30,10 @@ from cmdb.updater.updater_module import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.user_management import __FIXED_GROUPS__
+from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.user_management.models.user import UserModel
-from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.system_config import SectionError
 # -------------------------------------------------------------------------------------------------------------------- #

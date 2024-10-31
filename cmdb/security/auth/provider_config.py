@@ -14,7 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+# -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              AuthProviderConfig - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AuthProviderConfig:
     """Base provider config"""
 

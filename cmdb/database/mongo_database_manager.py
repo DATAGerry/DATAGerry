@@ -24,8 +24,8 @@ from cmdb.database.mongo_connector import MongoConnector
 
 from cmdb.database.counter import PublicIDCounter
 from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
-from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
-from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
+from cmdb.user_management.constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
 
 from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 # -------------------------------------------------------------------------------------------------------------------- #

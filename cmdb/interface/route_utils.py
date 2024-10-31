@@ -25,7 +25,7 @@ from werkzeug._internal import _wsgi_decoding_dance
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.security.security import SecurityManager
-from cmdb.security.auth import AuthModule
+from cmdb.security.auth.auth_module import AuthModule
 
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.models.group import UserGroupModel
@@ -61,7 +61,7 @@ def make_response(instance, status_code=200, indent=2):
         resp.mimetype = DEFAULT_MIME_TYPE
     except Exception as err:
         LOGGER.debug("[make_response] Exception: %s, Type: %s", err, type(err))
-        abort(500, "Could not create response from data!")
+        return abort(500, "Could not create response from data!")
 
     return resp
 

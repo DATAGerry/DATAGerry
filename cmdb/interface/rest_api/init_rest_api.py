@@ -23,15 +23,15 @@ from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
 from cmdb.interface.custom_converters import RegexConverter
 
-from cmdb.interface.error_handlers import internal_server_error,\
-                                          page_gone,\
-                                          not_acceptable,\
-                                          method_not_allowed,\
-                                          page_not_found,\
-                                          forbidden,\
-                                          unauthorized,\
-                                          bad_request,\
-                                          service_unavailable
+from cmdb.interface.rest_api.responses.error_handlers import internal_server_error,\
+                                                              page_gone,\
+                                                              not_acceptable,\
+                                                              method_not_allowed,\
+                                                              page_not_found,\
+                                                              forbidden,\
+                                                              unauthorized,\
+                                                              bad_request,\
+                                                              service_unavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def create_rest_api(database_manager, event_queue):

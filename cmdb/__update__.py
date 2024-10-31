@@ -25,9 +25,9 @@ from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.framework import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.user_management import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.exportd import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.user_management.constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError
 from cmdb.errors.setup import CollectionInitError

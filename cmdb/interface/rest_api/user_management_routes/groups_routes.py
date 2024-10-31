@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from flask import request
+from flask import request, abort
 
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
@@ -26,7 +26,6 @@ from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
     DeleteSingleResponse
 from cmdb.framework.results import IterationResult
-from cmdb.interface.route_utils import abort
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel

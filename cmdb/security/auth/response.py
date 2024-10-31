@@ -14,12 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from werkzeug.wrappers import Response
 
-from cmdb.interface.response import make_api_response
+from cmdb.interface.response import GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 LoginResponse - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class LoginResponse:
     """Basic login instance for returning a login data"""
 
@@ -48,7 +54,7 @@ class LoginResponse:
         Returns:
             Instance of Response
         """
-        return make_api_response(LoginResponse.to_dict(self))
+        return GetSingleValueResponse(LoginResponse.to_dict(self)).make_response()
 
 
     @classmethod

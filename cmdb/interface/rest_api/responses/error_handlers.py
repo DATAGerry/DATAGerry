@@ -25,15 +25,24 @@ Notes:
 """
 import logging
 from typing import Optional
-
 from flask import request, jsonify
-from werkzeug.exceptions import HTTPException, NotFound, BadRequest, Unauthorized, Forbidden, MethodNotAllowed, \
-    NotAcceptable, Gone, InternalServerError, ServiceUnavailable
+from werkzeug.exceptions import HTTPException,\
+                                NotFound,\
+                                BadRequest,\
+                                Unauthorized,\
+                                Forbidden,\
+                                MethodNotAllowed,\
+                                NotAcceptable,\
+                                Gone,\
+                                InternalServerError,\
+                                ServiceUnavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 ErrorResponse - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ErrorResponse:
     """TODO: documentation"""
     def __init__(self, status: int, prefix: str, description: str, message: str, joke: str = None):

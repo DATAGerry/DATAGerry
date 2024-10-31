@@ -26,8 +26,12 @@ from cmdb.framework.models.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.response import GetMultiResponse, GetSingleResponse, InsertSingleResponse, UpdateSingleResponse, \
-    DeleteSingleResponse, make_api_response
+from cmdb.interface.response import GetMultiResponse,\
+                                    GetSingleResponse,\
+                                    InsertSingleResponse,\
+                                    UpdateSingleResponse,\
+                                    DeleteSingleResponse,\
+                                    GetSingleValueResponse
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
@@ -192,11 +196,15 @@ def count_objects(public_id: int, request_user: UserModel):
 
     try:
         objects_count = objects_manager.count_objects({'type_id':public_id})
+        api_response = GetSingleValueResponse(objects_count)
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)
+    except Exception:
+        #ERROR-FIX
+        return abort(500)
 
-    return make_api_response(objects_count)
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
