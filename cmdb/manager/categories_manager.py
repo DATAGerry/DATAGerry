@@ -22,7 +22,6 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.framework.models.category import CategoryModel
 from cmdb.framework.models.category_model.category_tree import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
@@ -49,16 +48,13 @@ class CategoriesManager(BaseManager):
     Depends: TypesManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             database_manager (MongoDatabaseManager): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 

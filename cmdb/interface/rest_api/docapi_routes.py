@@ -201,7 +201,7 @@ def update_template(request_user: UserModel):
         return abort(400)
 
     try:
-        docapi_manager.update_template(update_tpl_instance, request_user)
+        docapi_manager.update_template(update_tpl_instance)
     except DocapiUpdateError as err:
         LOGGER.debug("[update_template] DocapiUpdateError: %s", err.message)
         return abort(500, "Could not update the template!")

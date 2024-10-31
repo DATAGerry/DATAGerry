@@ -15,8 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This module contains the implementation of the SectionTemplatesManager"""
 import logging
-from queue import Queue
-from typing import Union
 from deepdiff import DeepDiff
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
@@ -24,7 +22,6 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.framework.models.type import TypeModel
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
@@ -49,16 +46,13 @@ class SectionTemplatesManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             database_manager (MongoDatabaseManager): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 

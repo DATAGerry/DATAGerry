@@ -17,14 +17,12 @@
 This DocapiTemplatesManager handles the DocAPI interface to the database
 """
 import logging
-from queue import Queue
 from typing import Union
 from datetime import datetime, timezone
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.user_management.models.user import UserModel
@@ -43,17 +41,14 @@ class DocapiTemplatesManager(BaseManager):
     """
     This DocapiTemplatesManager handles the DocAPI interface to the database
     """
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             dbm (MongoDatabaseManager): Database connection
-            event_queue (Queue, Event): The queue for events in RabbitMQ
             database (str): name of database for cloud mode
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 
@@ -80,15 +75,6 @@ class DocapiTemplatesManager(BaseManager):
 
         try:
             ack = self.insert(new_object.to_database())
-        except Exception as err:
-            #ERROR-FIX
-            raise DocapiInsertError(str(err)) from err
-        try:
-            if self.event_queue:
-                event = Event("cmdb.docapi.added", {"id": new_object.get_public_id(),
-                                                    "active": new_object.get_active(),
-                                                    "user_id": new_object.get_author_id()})
-                self.event_queue.put(event)
         except Exception as err:
             #ERROR-FIX
             raise DocapiInsertError(str(err)) from err
@@ -169,7 +155,7 @@ class DocapiTemplatesManager(BaseManager):
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def update_template(self, data: Union[DocapiTemplate, dict], request_user: UserModel) -> str:
+    def update_template(self, data: Union[DocapiTemplate, dict]) -> str:
         """
         Update new DocapiTemplat Object
         Args:
@@ -193,15 +179,6 @@ class DocapiTemplatesManager(BaseManager):
                 data=update_object.to_database()
               )
 
-        try:
-            if self.event_queue:
-                event = Event("cmdb.docapi.updated", {"id": update_object.get_public_id(),
-                                                    "active": update_object.get_active(),
-                                                    "user_id": request_user.get_public_id()})
-                self.event_queue.put(event)
-        except Exception as err:
-            LOGGER.debug("Event Error: %s, Type: %s", err, type(err))
-
         return ack.acknowledged
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
@@ -212,13 +189,5 @@ class DocapiTemplatesManager(BaseManager):
             ack = self.delete({'public_id': public_id})
         except Exception as err:
             raise DocapiDeleteError(f'Could not delete template with ID: {public_id}') from err
-
-        try:
-            if self.event_queue:
-                event = Event("cmdb.docapi.deleted", {"id": public_id, "active": False,
-                                                    "user_id": request_user.get_public_id()})
-                self.event_queue.put(event)
-        except Exception:
-            LOGGER.debug("Event Error: %s, Type: %s", err, type(err))
 
         return ack

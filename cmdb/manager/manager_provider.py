@@ -96,7 +96,7 @@ class ManagerProvider:
 
 
     @staticmethod
-    def __get_manager_args(manager_type: ManagerType, request_user: UserModel):
+    def __get_manager_args(request_user: UserModel):
         """
         Returns the appropriate arguments for the manager class based on the provided
         ManagerType and 'cloud_mode' flag.
@@ -110,42 +110,8 @@ class ManagerProvider:
         common_args = (current_app.database_manager,)
 
         if current_app.cloud_mode:
-            if manager_type in [
-                ManagerType.CATEGORIES_MANAGER,
-                ManagerType.OBJECTS_MANAGER,
-                ManagerType.LOGS_MANAGER,
-                ManagerType.DOCAPI_TEMPLATES_MANAGER,
-                ManagerType.LOCATIONS_MANAGER,
-                ManagerType.SECTION_TEMPLATES_MANAGER,
-                ManagerType.OBJECT_LINKS_MANAGER,
-            ]:
-                return common_args + (current_app.event_queue, request_user.database)
+            return common_args + (request_user.database,)
 
-
-            if manager_type in [
-                ManagerType.GROUPS_MANAGER,
-                ManagerType.USERS_MANAGER,
-                ManagerType.USERS_SETTINGS_MANAGER,
-                ManagerType.MEDIA_FILES_MANAGER,
-                ManagerType.TYPES_MANAGER,
-                ManagerType.SYSTEM_SETTINGS_READER,
-                ManagerType.SYSTEM_SETTINGS_WRITER,
-                ManagerType.SECURITY_MANAGER
-            ]:
-                return common_args + (request_user.database,)
-        else:
-            if manager_type in [
-                ManagerType.CATEGORIES_MANAGER,
-                ManagerType.OBJECTS_MANAGER,
-                ManagerType.LOGS_MANAGER,
-                ManagerType.DOCAPI_TEMPLATES_MANAGER,
-                ManagerType.LOCATIONS_MANAGER,
-                ManagerType.SECTION_TEMPLATES_MANAGER,
-                ManagerType.OBJECT_LINKS_MANAGER,
-            ]:
-                return common_args + (current_app.event_queue,)
-
-        # Default route where just the dbm is returned
         return common_args
 
 
@@ -166,6 +132,6 @@ class ManagerProvider:
             LOGGER.error("No manager found for type: %s", manager_type)
             return None
 
-        manager_args = cls.__get_manager_args(manager_type, request_user)
+        manager_args = cls.__get_manager_args(request_user)
 
         return manager_class(*manager_args)

@@ -21,14 +21,14 @@ import signal
 import sys
 import threading
 
-from cmdb import __CLOUD_MODE__
-import cmdb.event_management.event_manager
 from cmdb.utils.logger import get_logging_conf
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              AbstractCmdbService - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #s
 class AbstractCmdbService:
     """Abstract definition of a CMDB service
 
@@ -40,8 +40,6 @@ class AbstractCmdbService:
         """Create a new instance"""
         # service name
         self._name = "abstract-service"
-        # define event types for subscription
-        self._eventtypes = ["cmdb.#"]
         # boolean: execute _run() method as own thread
         self._threaded_service = True
         # boolean: multiprocessing service
@@ -64,17 +62,6 @@ class AbstractCmdbService:
         # init shutdown handling
         self._event_shutdown = threading.Event()
         signal.signal(signal.SIGTERM, self._shutdown)
-
-
-        # start event managers
-        if __CLOUD_MODE__:
-            self._event_manager = None
-        else:
-            self._event_manager = cmdb.event_management.event_manager.EventManagerAmqp(self._event_shutdown,
-                                                                                    self._handle_event,
-                                                                                    self._name,
-                                                                                    self._eventtypes,
-                                                                                    self._multiprocessing)
 
         if self._threaded_service:
             # start daemon logic in own thread
@@ -106,8 +93,6 @@ class AbstractCmdbService:
         LOGGER.info("shutdown %s ...", self._name)
         # set shutdown event
         self._event_shutdown.set()
-        # shutdown EventManager
-        self._event_manager.shutdown()
         # wait for termination of service thread (max 5sec)
         if self._threaded_service and self._thread_service:
             LOGGER.debug("wait for termination of service thread")

@@ -22,7 +22,7 @@ from gunicorn.app.base import BaseApplication
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb import __MODE__, __CLOUD_MODE__
+from cmdb import __MODE__
 from cmdb.process_management.service import AbstractCmdbService
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
@@ -42,7 +42,6 @@ class WebCmdbService(AbstractCmdbService):
     def __init__(self):
         super().__init__()
         self._name = "webapp"
-        self._eventtypes = ["cmdb.webapp.#"]
         self._threaded_service = False
         self._multiprocessing = True
         self.__webserver_proc = None
@@ -50,11 +49,6 @@ class WebCmdbService(AbstractCmdbService):
 
     def _run(self):
         # get queue for sending events
-        if __CLOUD_MODE__:
-            event_queue = None
-        else:
-            event_queue = self._event_manager.get_send_queue()
-
         dbm = MongoDatabaseManager(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
@@ -65,7 +59,7 @@ class WebCmdbService(AbstractCmdbService):
             app=create_app(),
             mounts={
                 '/docs': create_docs_server(),
-                '/rest': create_rest_api(dbm, event_queue)
+                '/rest': create_rest_api(dbm)
             }
         )
 

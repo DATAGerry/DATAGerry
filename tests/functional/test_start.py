@@ -30,6 +30,6 @@ class TestRestAPI:
 
     def test_rest_api_start(self, database_manager, rest_api):
         """TODO: document"""
-        api = create_rest_api(database_manager, None)
+        api = create_rest_api(database_manager)
         assert isinstance(api, BaseCmdbApp)
         assert rest_api.get('/').get_json()['title'] == __title__

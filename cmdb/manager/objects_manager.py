@@ -18,14 +18,12 @@ Manages Objects in the backend
 """
 import logging
 import json
-from queue import Queue
 from typing import Union
 from bson import Regex, json_util
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
@@ -54,17 +52,14 @@ class ObjectsManager(BaseManager):
     Interface for objects between backend and database
     Extends: BaseMaanger
     """
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database:str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             dbm (MongoDatabaseManager): Database connection
-            event_queue (Queue, Event): The queue for events in RabbitMQ
             database (str): name of database for cloud mode
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 
@@ -116,22 +111,6 @@ class ObjectsManager(BaseManager):
             #ERROR-FIX
             LOGGER.debug("[insert_object] Error while inserting object. Exception: %s", str(err))
             raise ObjectManagerInsertError(err) from err
-
-        try:
-            if self.event_queue:
-                event = Event("cmdb.core.object.added",
-                                {
-                                    "id": new_object.get_public_id(),
-                                    "type_id": new_object.get_type_id(),
-                                    "user_id": new_object.author_id,
-                                    "event": 'insert'
-                                }
-                             )
-
-                self.event_queue.put(event)
-        except Exception:
-            #ERROR-FIX
-            LOGGER.debug("[insert_object] Error while creating object event. Error: %s", str(err))
 
         return ack
 
@@ -498,19 +477,6 @@ class ObjectsManager(BaseManager):
         if update_result.matched_count != 1:
             raise ManagerUpdateError('Something happened during the update!')
 
-        if self.event_queue and user:
-            try:
-                event = Event("cmdb.core.object.updated",
-                            {
-                                "id": public_id,
-                                "type_id": instance.get('type_id'),
-                                "user_id": user.get_public_id(),
-                                'event': 'update'
-                                })
-                self.event_queue.put(event)
-            except Exception as err:
-                LOGGER.debug("[update_object] Event error: %s, Type: %s", err, type(err))
-
         return update_result
 
 
@@ -552,19 +518,6 @@ class ObjectsManager(BaseManager):
 
         verify_access(object_type, user, permission)
 
-        #ERROR-FIX (SWAP WITH DELETEION IN WORKFLOW)
-        try:
-            if self.event_queue:
-                event = Event("cmdb.core.object.deleted",
-                              {"id": public_id,
-                               "type_id": type_id,
-                               "user_id": user.get_public_id(),
-                               "event": 'delete'})
-                self.event_queue.put(event)
-        except Exception as err:
-            #ERROR-FIX
-            raise ObjectManagerDeleteError(str(err)) from err
-
         try:
             ack = self.delete({'public_id': public_id})
             return ack
@@ -578,15 +531,6 @@ class ObjectsManager(BaseManager):
             ack = self.delete_many(filter_query)
         except Exception as err:
             raise ObjectManagerDeleteError(str(err)) from err
-
-        try:
-            if self.event_queue:
-                event = Event("cmdb.core.objects.deleted", {"ids": public_ids,
-                                                            "user_id": user.get_public_id(),
-                                                            "event": 'delete'})
-                self.event_queue.put(event)
-        except Exception as err:
-            LOGGER.debug("[delete_many_objects] event_queue Error: %s , Type: %s", err , type(err))
 
         return ack
 
