@@ -33,7 +33,6 @@ from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.system_config import SectionError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -148,10 +147,6 @@ class CheckRoutine:
             # if there are no groups create groups and admin user
             if self.dbm.count('management.groups') < 2:
                 self.init_user_management()
-
-            # exportdJob management collections
-            for collection in JOB_MANAGEMENT_COLLECTION:
-                collection_test = detected_database.validate_collection(collection.COLLECTION, scandata=True)['valid']
         except OperationFailure as err:
             LOGGER.info('CHECK: Database collection validation for "%s" failed, error: %s', collection.COLLECTION, err)
             collection_test = False

@@ -21,7 +21,6 @@ from cmdb.user_management.rights.user_management_rights import UserManagementRig
 from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
     LogRight, SectionTemplateRight
 from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
-from cmdb.user_management.rights.exportd_rights import ExportdRight, ExportdJobRight, ExportdLogRight
 from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -131,29 +130,6 @@ USER_MANAGEMENT_RIGHTS = (
 )
 
 
-EXPORTD_RIGHTS = (
-    ExportdRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd'),
-    (
-        ExportdJobRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage jobs'),
-        (
-            ExportdJobRight('view', description='View job'),
-            ExportdJobRight('add', description='Add job'),
-            ExportdJobRight('edit', Levels.SECURE, description='Edit job'),
-            ExportdJobRight('delete', Levels.SECURE, description='Delete job'),
-            ExportdJobRight('run', Levels.SECURE, description='Run job manual')
-        ),
-    ),
-    (
-        ExportdLogRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage exportd logs'),
-        (
-            ExportdLogRight('view', description='View exportd logs'),
-            ExportdLogRight('reload', Levels.SECURE, description='Reload exportd logs'),
-            ExportdLogRight('delete', Levels.DANGER, description='Delete exportd logs')
-        )
-    )
-)
-
-
 DOCAPI_RIGHTS = (
     DocapiRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage DocAPI'),
     (
@@ -177,7 +153,6 @@ __all__ = (
     EXPORT_RIGHTS,
     IMPORT_RIGHTS,
     USER_MANAGEMENT_RIGHTS,
-    EXPORTD_RIGHTS,
     DOCAPI_RIGHTS
 )
 

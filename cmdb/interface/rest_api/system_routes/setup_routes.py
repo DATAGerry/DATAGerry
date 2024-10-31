@@ -30,7 +30,6 @@ from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.exportd.constants import __COLLECTIONS__ as JOB_MANAGEMENT_COLLECTION
 
 from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -131,12 +130,6 @@ def init_db_routine(db_name: str):
 
     # Generate user management collections
     for collection in USER_MANAGEMENT_COLLECTION:
-        dbm.create_collection(collection.COLLECTION)
-        # set unique indexes
-        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-    # Generate ExportdJob management collections
-    for collection in JOB_MANAGEMENT_COLLECTION:
         dbm.create_collection(collection.COLLECTION)
         # set unique indexes
         dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
