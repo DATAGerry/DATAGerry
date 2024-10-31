@@ -15,13 +15,10 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This module contains the implementation of the LocationsManager"""
 import logging
-from queue import Queue
-from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
@@ -41,16 +38,13 @@ class LocationsManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             database_manager (MongoDatabaseManager): Active database managers instance
-            event_queue (Queue, Event): The queue for sending events or the created event to send
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 

@@ -34,9 +34,9 @@ from cmdb.interface.rest_api.responses.error_handlers import internal_server_err
                                                               service_unavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
-def create_rest_api(database_manager, event_queue):
+def create_rest_api(database_manager):
     """TODO: document"""
-    app = BaseCmdbApp(__name__, database_manager=database_manager, event_queue=event_queue)
+    app = BaseCmdbApp(__name__, database_manager=database_manager)
     app.url_map.strict_slashes = True
 
     # Import App Extensions

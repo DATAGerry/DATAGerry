@@ -29,12 +29,9 @@ LOGGER = logging.getLogger(__name__)
 class BaseCmdbApp(Flask):
     """TODO: document"""
 
-    def __init__(self, import_name: str,
-                 database_manager: MongoDatabaseManager = None,
-                 event_queue: Queue = None):
+    def __init__(self, import_name: str, database_manager: MongoDatabaseManager = None):
         #REFACTOR-FIX (replace self.database_manager with self.dbm)
         self.database_manager: MongoDatabaseManager = database_manager
-        self.event_queue: Queue = event_queue
         self.temp_folder: str = '/tmp/'
         self.cloud_mode = __CLOUD_MODE__
 

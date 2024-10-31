@@ -140,7 +140,7 @@ def post_login():
     security_manager = SecurityManager(current_app.database_manager)
     login_data = request.json
 
-    if not request.json:
+    if not login_data:
         return abort(400, 'No valid JSON data was provided')
 
     request_user_name = login_data['user_name']
@@ -183,6 +183,7 @@ def post_login():
         login_response = LoginResponse(user, token, token_issued_at, token_expire)
 
         return login_response.make_response()
+
 
     #PATH when its not cloud mode
     system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)

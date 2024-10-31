@@ -15,7 +15,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This module contains the implementation of the ObjectLinksManager"""
 import logging
-from queue import Queue
 from typing import Union
 from datetime import datetime, timezone
 
@@ -23,7 +22,6 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
 from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
@@ -45,16 +43,13 @@ class ObjectLinksManager(BaseManager):
     Depends: ObjectsManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None, database: str = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
             database_manager (MongoDatabaseManager): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
         """
-        self.event_queue = event_queue
-
         if database:
             dbm.connector.set_database(database)
 
