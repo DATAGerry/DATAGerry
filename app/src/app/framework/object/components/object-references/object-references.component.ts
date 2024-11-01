@@ -15,7 +15,8 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import {Component, Input, OnChanges, SimpleChanges} from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Location } from '@angular/common';
 
 import { Subject, Subscription } from 'rxjs';
 
@@ -55,10 +56,10 @@ export class ObjectReferencesComponent implements OnChanges {
     referencedTypes: Array<TypeRef> = [];
     referenceSubscription: Subscription;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
-    constructor(public objectService: ObjectService) {
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    constructor(public objectService: ObjectService, private location: Location) {
 
     }
 
@@ -83,7 +84,7 @@ export class ObjectReferencesComponent implements OnChanges {
 
             this.referenceSubscription = this.objectService.getObjectReferences(this.publicID, params).subscribe(
                 (apiResponse: APIGetMultiResponse<RenderResult>) => {
-                this.sortReferencesByType(apiResponse.results as Array<RenderResult>);
+                    this.sortReferencesByType(apiResponse.results as Array<RenderResult>);
                 }
             );
         }
@@ -92,11 +93,11 @@ export class ObjectReferencesComponent implements OnChanges {
 
     ngOnDestroy() {
         if (this.referenceSubscription) {
-        this.referenceSubscription.unsubscribe();
+            this.referenceSubscription.unsubscribe();
         }
     }
 
-/* -------------------------------------------------- EVENT HANDLER ------------------------------------------------- */
+    /* -------------------------------------------------- EVENT HANDLER ------------------------------------------------- */
 
     /**
      * Hides the selected type from the tab list
@@ -124,7 +125,14 @@ export class ObjectReferencesComponent implements OnChanges {
         this.clickSubject.next(event);
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /**
+     * Navigates back to the previous page in the browser's history.
+     */
+    goBack(): void {
+        this.location.back();
+    }
+
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
      * Sorts References by Type
@@ -132,7 +140,7 @@ export class ObjectReferencesComponent implements OnChanges {
      */
     sortReferencesByType(event: Array<RenderResult>) {
         this.referencedTypes = [];
-        let objectList: Array < RenderResult > = Array.from(event);
+        let objectList: Array<RenderResult> = Array.from(event);
         this.totalReferences = objectList.length;
 
         while (objectList.length > 0) {
@@ -140,7 +148,7 @@ export class ObjectReferencesComponent implements OnChanges {
             const typeLabel = objectList[0].type_information.type_label;
             const typeName = objectList[0].type_information.type_name;
             const occurences = objectList.filter(object => object.type_information.type_id === typeID).length;
-            this.referencedTypes.push({typeID, typeLabel, typeName, occurences, hidden: false});
+            this.referencedTypes.push({ typeID, typeLabel, typeName, occurences, hidden: false });
             objectList = objectList.filter(object => object.type_information.type_id !== typeID);
             this.sortRefTabs();
         }
