@@ -41,7 +41,6 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
   public form: UntypedFormGroup;
 
 
-
   @Input('typeInstance')
   public set TypeInstance(instance: CmdbType) {
     if (instance) {
@@ -70,6 +69,7 @@ export class TypeBasicStepComponent extends TypeBuilderStepComponent implements 
   public ngOnInit(): void {
     if (this.mode === CmdbMode.Create) {
       this.form.get('name').setAsyncValidators(checkTypeExistsValidator(this.typeService));
+      this.form.markAllAsTouched();
     } else if (this.mode === CmdbMode.Edit) {
       this.form.markAllAsTouched();
     }
