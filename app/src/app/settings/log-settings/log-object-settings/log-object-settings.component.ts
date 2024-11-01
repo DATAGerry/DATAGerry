@@ -115,13 +115,16 @@ export class LogObjectSettingsComponent {
                 () => {
                     switch (reloadList) {
                         case 'active':
-                            this.reloadActiveLogs = true;
+                            this.reloadActiveLogs = false;
+                            setTimeout(() => this.reloadActiveLogs = true, 0);
                             break;
                         case 'deactive':
-                            this.reloadDeActiveLogs = true;
+                            this.reloadDeActiveLogs = false;
+                            setTimeout(() => this.reloadDeActiveLogs = true, 0);
                             break;
                         case 'delete':
-                            this.reloadDeleteLogs = true;
+                            this.reloadDeleteLogs = false;
+                            setTimeout(() => this.reloadDeleteLogs = true, 0);
                             break;
                     }
                 }
