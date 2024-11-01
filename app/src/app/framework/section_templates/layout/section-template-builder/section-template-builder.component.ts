@@ -138,6 +138,8 @@ export class SectionTemplateBuilderComponent implements OnInit {
      */
     public handleSectionTemplate() {
 
+        this.initialSection.label = this.sectionComponent.form.controls['label'].value;
+
         if (this.sectionTemplateID > 0) {
             this.updateSectionTemplate();
         } else {
