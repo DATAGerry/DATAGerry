@@ -28,7 +28,7 @@ LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              AbstractCmdbService - CLASS                                             #
-# -------------------------------------------------------------------------------------------------------------------- #s
+# -------------------------------------------------------------------------------------------------------------------- #
 class AbstractCmdbService:
     """Abstract definition of a CMDB service
 
@@ -83,6 +83,7 @@ class AbstractCmdbService:
         """
 
 
+    #pylint: disable=unused-argument
     def _shutdown(self, signam, frame):
         """shutdown handler"""
         self.stop()

@@ -185,11 +185,13 @@ class UserModel(CmdbDAO):
 
     @classmethod
     def to_data(cls, instance: "UserModel") -> dict:
+        """TODO: document"""
         return cls.to_dict(instance)
 
 
     @classmethod
     def to_dict(cls, instance: "UserModel") -> dict:
+        """TODO: document"""
         return {
             'public_id': instance.public_id,
             'user_name': instance.user_name,

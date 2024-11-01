@@ -21,6 +21,8 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import abort, jsonify, request, current_app
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
@@ -28,9 +30,10 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.utils import default, object_hook
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
-from cmdb.framework.models.log import LogAction, CmdbObjectLog
+from cmdb.framework.models.log_model.log_action_enum import LogAction
+from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.framework.models.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.interface.api_parameters import CollectionParameters
@@ -41,7 +44,6 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
 

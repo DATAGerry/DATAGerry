@@ -17,6 +17,8 @@
 import logging
 from flask import request, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.categories_manager import CategoriesManager
@@ -26,7 +28,6 @@ from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #

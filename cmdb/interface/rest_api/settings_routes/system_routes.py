@@ -26,7 +26,8 @@ from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

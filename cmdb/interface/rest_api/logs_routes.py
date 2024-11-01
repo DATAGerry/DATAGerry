@@ -17,16 +17,18 @@
 import logging
 from flask import request, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.logs_manager import LogsManager
 
-from cmdb.framework.models.log import CmdbObjectLog, CmdbMetaLog, LogAction
+from cmdb.framework.models.log_model.log_action_enum import  LogAction
+from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.interface.route_utils import make_response, insert_request_user
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.response import GetMultiResponse
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerIterationError, ManagerGetError, ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #

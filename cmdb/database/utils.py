@@ -89,7 +89,7 @@ def object_hook(dct: dict):
 
     return dct
 
-
+#pylint: disable=too-many-return-statements
 def default(obj):
     """Helper function for converting bson to json
     Args:

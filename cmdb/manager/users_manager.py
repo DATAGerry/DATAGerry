@@ -145,15 +145,7 @@ class UsersManager(BaseManager):
             IterationResult: Instance of IterationResult with generic UserModel.
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
+            aggregation_result, total = self.iterate_query(builder_params)
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

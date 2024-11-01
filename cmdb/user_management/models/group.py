@@ -80,6 +80,7 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def to_dict(cls, instance: "UserGroupModel") -> dict:
+        """TODO: document"""
         return {
             'public_id': instance.public_id,
             'name': instance.name,
@@ -90,6 +91,7 @@ class UserGroupModel(CmdbDAO):
 
     @classmethod
     def to_data(cls, instance: "UserGroupModel") -> dict:
+        """TODO: document"""
         return {
             'public_id': instance.public_id,
             'name': instance.name,

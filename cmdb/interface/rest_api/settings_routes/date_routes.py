@@ -25,7 +25,8 @@ from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 date_blueprint = APIBlueprint('date', __name__)
@@ -50,7 +51,7 @@ def get_date_settings(request_user: UserModel):
         return make_response(date_settings)
     except Exception as err:
         #ERROR-FIX
-        LOGGER.debug(f"[get_date_settings] Exception: %s, Type: %s", err, type(err))
+        LOGGER.debug("[get_date_settings] Exception: %s, Type: %s", err, type(err))
         return abort(500)
 
 

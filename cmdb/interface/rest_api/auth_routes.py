@@ -14,33 +14,34 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-import json
 import logging
 from datetime import datetime, timezone
 from flask import request, current_app, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.security.security import SecurityManager
-from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import make_response,\
+                                       insert_request_user,\
+                                       check_db_exists,\
+                                       init_db_routine,\
+                                       create_new_admin_user,\
+                                       retrive_user
 from cmdb.interface.response import GetSingleValueResponse
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.route_utils import check_user_in_mysql_db
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.auth.response import LoginResponse
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
-from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -49,7 +50,99 @@ auth_blueprint = APIBlueprint('auth', __name__)
 with current_app.app_context():
     dbm: MongoDatabaseManager = current_app.database_manager
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
+@auth_blueprint.route('/login', methods=['POST'])
+def post_login():
+    """TODO: document"""
+    users_manager = UsersManager(current_app.database_manager)
+    security_manager = SecurityManager(current_app.database_manager)
+    login_data = request.json
+
+    if not login_data:
+        return abort(400, 'No valid JSON data was provided')
+
+    request_user_name = login_data['user_name']
+    request_password = login_data['password']
+
+    try:
+        if current_app.cloud_mode:
+            user_data = check_user_in_mysql_db(request_user_name, request_password)
+
+            ### login data is invalid
+            if not user_data:
+                return abort(401, 'Could not login')
+
+            ### no db with this name, create it
+            if not check_db_exists(user_data['database']):
+                init_db_routine(user_data['database'])
+                create_new_admin_user(user_data)
+
+            ### Get the user
+            user = retrive_user(user_data)
+
+            # User does not exist
+            if not user:
+                return abort(401, 'Could not login')
+
+            dbm.connector.set_database(user_data['database'])
+
+            tg = TokenGenerator(dbm)
+
+            token: bytes = tg.generate_token(
+                payload={
+                    'user': {
+                        'public_id': user.get_public_id(),
+                        'database': user.get_database()
+                    }
+                }
+            )
+
+            token_issued_at = int(datetime.now(timezone.utc).timestamp())
+            token_expire = int(tg.get_expire_time().timestamp())
+            login_response = LoginResponse(user, token, token_issued_at, token_expire)
+
+            return login_response.make_response()
+    except Exception as err:
+        LOGGER.debug("[post_login] Exception: %s, Type: %s", err, type(err))
+        return abort(500, "Could not login")
+
+    #PATH when its not cloud mode
+    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
+
+    auth_module = AuthModule(
+        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+        security_manager=security_manager,
+        users_manager=users_manager)
+
+    user_instance = None
+
+    try:
+        user_instance = auth_module.login(request_user_name, request_password)
+
+        if user_instance:
+            tg = TokenGenerator(current_app.database_manager)
+
+            token: bytes = tg.generate_token(payload={'user': {
+                'public_id': user_instance.get_public_id()
+            }})
+
+            token_issued_at = int(datetime.now(timezone.utc).timestamp())
+            token_expire = int(tg.get_expire_time().timestamp())
+
+            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
+
+            return login_response.make_response()
+
+        return abort(401, 'Could not login!')
+    except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
+        #ERROR-FIX
+        return abort(503)
+    except Exception:
+        #ERROR-FIX
+        return abort(401)
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @auth_blueprint.route('/settings', methods=['GET'])
 @insert_request_user
@@ -64,35 +157,6 @@ def get_auth_settings(request_user: UserModel):
     api_response = GetSingleValueResponse(auth_module.settings)
 
     return api_response.make_response()
-
-
-@auth_blueprint.route('/settings', methods=['POST', 'PUT'])
-@insert_request_user
-@auth_blueprint.protect(auth=True, right='base.system.edit')
-def update_auth_settings(request_user: UserModel):
-    """TODO: document"""
-    new_auth_settings_values = request.get_json()
-
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
-                                                                               request_user)
-    system_setting_writer: SystemSettingsWriter = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_WRITER,
-                                                                               request_user)
-
-    if not new_auth_settings_values:
-        return abort(400, 'No new data was provided')
-
-    try:
-        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values)
-    except Exception as err:
-        return abort(400, err)
-
-    update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
-
-    if update_result.acknowledged:
-        api_response = GetSingleValueResponse(system_settings_reader.get_section('auth'))
-        return api_response.make_response()
-
-    return abort(400, 'Could not update auth settings')
 
 
 @auth_blueprint.route('/providers', methods=['GET'])
@@ -132,187 +196,32 @@ def get_provider_config(provider_class: str, request_user: UserModel):
 
     return make_response(provider_class_config)
 
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-@auth_blueprint.route('/login', methods=['POST'])
-def post_login():
+@auth_blueprint.route('/settings', methods=['POST', 'PUT'])
+@insert_request_user
+@auth_blueprint.protect(auth=True, right='base.system.edit')
+def update_auth_settings(request_user: UserModel):
     """TODO: document"""
-    users_manager = UsersManager(current_app.database_manager)
-    security_manager = SecurityManager(current_app.database_manager)
-    login_data = request.json
+    new_auth_settings_values = request.get_json()
 
-    if not login_data:
-        return abort(400, 'No valid JSON data was provided')
+    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+                                                                               request_user)
+    system_setting_writer: SystemSettingsWriter = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_WRITER,
+                                                                               request_user)
 
-    request_user_name = login_data['user_name']
-    request_password = login_data['password']
-
-    if current_app.cloud_mode:
-        user_data = check_user_in_mysql_db(request_user_name, request_password)
-
-        ### login data is invalid
-        if not user_data:
-            return abort(401, 'Could not login')
-
-        ### no db with this name, create it
-        if not check_db_exists(user_data['database']):
-            init_db_routine(user_data['database'])
-            create_new_admin_user(user_data)
-
-        ### Get the user
-        user = retrive_user(user_data)
-
-        # User does not exist
-        if not user:
-            return abort(401, 'Could not login')
-
-        dbm.connector.set_database(user_data['database'])
-
-        tg = TokenGenerator(dbm)
-
-        token: bytes = tg.generate_token(
-            payload={
-                'user': {
-                    'public_id': user.get_public_id(),
-                    'database': user.get_database()
-                }
-            }
-        )
-
-        token_issued_at = int(datetime.now(timezone.utc).timestamp())
-        token_expire = int(tg.get_expire_time().timestamp())
-        login_response = LoginResponse(user, token, token_issued_at, token_expire)
-
-        return login_response.make_response()
-
-
-    #PATH when its not cloud mode
-    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
-
-    auth_module = AuthModule(
-        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
-        security_manager=security_manager,
-        users_manager=users_manager)
-
-    user_instance = None
+    if not new_auth_settings_values:
+        return abort(400, 'No new data was provided')
 
     try:
-        user_instance = auth_module.login(request_user_name, request_password)
-
-        if user_instance:
-            tg = TokenGenerator(current_app.database_manager)
-
-            token: bytes = tg.generate_token(payload={'user': {
-                'public_id': user_instance.get_public_id()
-            }})
-
-            token_issued_at = int(datetime.now(timezone.utc).timestamp())
-            token_expire = int(tg.get_expire_time().timestamp())
-
-            login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
-
-            return login_response.make_response()
-
-        return abort(401, 'Could not login!')
-    except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
-        #ERROR-FIX
-        return abort(503)
-    except Exception:
-        #ERROR-FIX
-        return abort(401)
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                        HELPER                                                        #
-# -------------------------------------------------------------------------------------------------------------------- #
-def check_user_in_mysql_db(mail: str, password: str):
-    """Simulates Users in MySQL DB"""
-
-    try:
-        with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
-            users_data = json.load(users_file)
-
-            if mail in users_data:
-                user = users_data[mail]
-
-                if user["password"] == password:
-                    return user
-            else:
-                return None
-
-
+        new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values)
     except Exception as err:
-        LOGGER.debug("[get users from file] Exception: %s , Type: %s", err, type(err))
-        return None
+        return abort(400, err)
 
+    update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
 
-def check_db_exists(db_name: dict):
-    """Checks if the database exists"""
-    return dbm.check_database_exists(db_name)
+    if update_result.acknowledged:
+        api_response = GetSingleValueResponse(system_settings_reader.get_section('auth'))
+        return api_response.make_response()
 
-
-def init_db_routine(db_name: str):
-    """Creates a database with the given name and all corresponding collections
-
-    Args:
-        db_name (str): Name of the database
-    """
-    new_db = dbm.create_database(db_name)
-    dbm.connector.set_database(new_db.name)
-    groups_manager = GroupsManager(dbm)
-
-    # Generate framework collections
-    for collection in FRAMEWORK_CLASSES:
-        dbm.create_collection(collection.COLLECTION)
-        # set unique indexes
-        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-    # Generate user management collections
-    for collection in USER_MANAGEMENT_COLLECTION:
-        dbm.create_collection(collection.COLLECTION)
-        # set unique indexes
-        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-    # Generate groups
-    for group in __FIXED_GROUPS__:
-        groups_manager.insert_group(group)
-
-    # Generate predefined section templates
-    dbm.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
-
-
-def create_new_admin_user(user_data: dict):
-    """Creates a new admin user"""
-    dbm.connector.set_database(user_data['database'])
-
-    users_manager = UsersManager(dbm)
-    scm = SecurityManager(dbm)
-
-    try:
-        users_manager.get_user_by({'email': user_data['email']})
-    except Exception: # Admin user was not found in the database, create a new one
-        admin_user = UserModel(
-            public_id=1,
-            user_name=user_data['user_name'],
-            email=user_data['email'],
-            database=user_data['database'],
-            active=True,
-            group_id=1,
-            registration_time=datetime.now(timezone.utc),
-            password=scm.generate_hmac(user_data['password']),
-        )
-
-        try:
-            users_manager.insert_user(admin_user)
-        except UserManagerInsertError as error:
-            LOGGER.error("Could not create admin user: %s", error)
-
-
-def retrive_user(user_data: dict):
-    """Get user from db"""
-    dbm.connector.set_database(user_data['database'])
-    users_manager = UsersManager(dbm)
-
-    try:
-        return users_manager.get_user_by({'email': user_data['email']})
-    except Exception:
-        #ERROR-FIX
-        return None
+    return abort(400, 'Could not update auth settings')

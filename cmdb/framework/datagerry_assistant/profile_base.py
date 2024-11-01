@@ -21,7 +21,7 @@ from flask import current_app
 
 from cmdb.manager.types_manager import TypesManager
 
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from .profile_type_constructor import ProfileTypeConstructor
 # -------------------------------------------------------------------------------------------------------------------- #
 

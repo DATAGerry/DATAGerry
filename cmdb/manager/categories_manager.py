@@ -15,14 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This module contains the implementation of the SectionTemplatesManager"""
 import logging
-from queue import Queue
-from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.category_model.category import CategoryModel
 from cmdb.framework.models.category_model.category_tree import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission

@@ -16,7 +16,6 @@
 """TODO: document"""
 import logging
 
-from queue import Queue
 from flask import Flask
 
 from cmdb import __CLOUD_MODE__

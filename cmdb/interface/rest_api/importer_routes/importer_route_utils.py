@@ -27,7 +27,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.importer.importer_helper import load_parser_class
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.security import AccessDeniedError

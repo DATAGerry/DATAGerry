@@ -37,6 +37,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   TypeModel - CLASS                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
+#pylint: disable=too-many-instance-attributes
 class TypeModel(CmdbDAO):
     """
     Model class of the framework type
@@ -334,6 +335,8 @@ class TypeModel(CmdbDAO):
     }]
 
 
+    #pylint: disable=too-many-arguments
+    #pylint: disable=too-many-locals
     def __init__(self, public_id: int, name: str, author_id: int, render_meta: TypeRenderMeta,
                  creation_time: datetime = None, last_edit_time: datetime = None, editor_id: int = None,
                  active: bool = True,  selectable_as_parent: bool = True,

@@ -18,6 +18,8 @@ Init module for rest routes
 """
 from flask_cors import CORS
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+
 import cmdb
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.config import app_config
@@ -34,7 +36,7 @@ from cmdb.interface.rest_api.responses.error_handlers import internal_server_err
                                                               service_unavailable
 # -------------------------------------------------------------------------------------------------------------------- #
 
-def create_rest_api(database_manager):
+def create_rest_api(database_manager: MongoDatabaseManager):
     """TODO: document"""
     app = BaseCmdbApp(__name__, database_manager=database_manager)
     app.url_map.strict_slashes = True
