@@ -17,6 +17,7 @@
 */
 
 import { Component, OnInit, Renderer2, ChangeDetectorRef } from '@angular/core';
+import { Location } from '@angular/common';
 import { LogService } from '../../services/log.service';
 import { ActivatedRoute } from '@angular/router';
 import { CmdbLog } from '../../models/cmdb-log';
@@ -41,7 +42,7 @@ export class ObjectLogComponent implements OnInit {
     public compareResult: RenderResult;
 
     constructor(private logService: LogService, private activateRoute: ActivatedRoute, private render: Renderer2,
-        private readonly changeDetectorRef: ChangeDetectorRef) {
+        private readonly changeDetectorRef: ChangeDetectorRef, private location: Location) {
         this.renderForm = new UntypedFormGroup({});
         this.compareForm = new UntypedFormGroup({});
         this.activateRoute.params.subscribe((params) => {
@@ -102,6 +103,13 @@ export class ObjectLogComponent implements OnInit {
                 return other.value === current.value && other.name === current.name;
             }).length === 0;
         };
+    }
+
+    /**
+     * Navigates back to the previous page in the browser's history.
+     */
+    goBack(): void {
+        this.location.back();
     }
 
 }
