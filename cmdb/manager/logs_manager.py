@@ -20,7 +20,10 @@ from datetime import datetime, timezone
 from cmdb.manager.base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb.framework.models.log import CmdbObjectLog, LogAction, CmdbMetaLog, CmdbLog
+from cmdb.framework.models.log_model.cmdb_meta_log import CmdbMetaLog
+from cmdb.framework.models.log_model.log_action_enum import LogAction
+from cmdb.framework.models.log_model.cmdb_log import CmdbLog
+from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
@@ -103,15 +106,7 @@ class LogsManager(BaseManager):
             IterationResult[CmdbMetaLog]: Result which matches the Builderparameters
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

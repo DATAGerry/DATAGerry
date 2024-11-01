@@ -144,7 +144,8 @@ class CmdbObject(CmdbDAO):
 
 
     @classmethod
-    def from_data(cls, data: dict, *args, **kwargs) -> "CmdbObject":
+    def from_data(cls, data: dict) -> "CmdbObject":
+        """TODO: document"""
         creation_time = data.get('creation_time', None)
         last_edit_time = data.get('last_edit_time', None)
 
@@ -217,32 +218,6 @@ class CmdbObject(CmdbDAO):
         return True
 
 
-    def set_new_value(self, field, value):
-        """TODO: document"""
-        self.fields.append({
-            'name': field,
-            'value': value
-        })
-
-
-    def set_value(self, field, value) -> str:
-        """TODO: document"""
-        current_field = None
-
-        for f in self.fields:
-            current_field = f
-
-            if f['name'] == field:
-                if value.isdigit():
-                    value = int(value)
-                f['value'] = value
-                return f['name']
-            continue
-
-        if current_field:
-            raise FieldNotFoundError(current_field['name'])
-
-
     def get_value(self, field) -> Union[str, None]:
         """Get value of a field
 
@@ -257,25 +232,3 @@ class CmdbObject(CmdbDAO):
                 return f['value']
             continue
         raise ValueError(field)
-
-
-    def get_values(self, fields: list) -> list:
-        """TODO: document"""
-        list_of_values = []
-        for field in self.fields:
-            if field['name'] in fields:
-                list_of_values.append(field['value'])
-        return list_of_values
-
-
-    def to_value_strings(self, field_names: list) -> str:
-        """TODO: document"""
-        value_string = ''
-        for field_name in field_names:
-            try:
-                field_value = self.get_value(field_name)
-                value_string += str(field_value)
-                value_string += str(' ')
-            except Exception:
-                continue
-        return value_string.strip()

@@ -16,30 +16,18 @@
 """These routes are used to setup databases and the correspondig user in DATAGerry"""
 import json
 import logging
-from datetime import datetime, timezone
-from flask import request, current_app, abort
-
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.groups_manager import GroupsManager
-from cmdb.manager.users_manager import UsersManager
-from cmdb.security.security import SecurityManager
+from flask import request, abort
 
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.user_management.models.user import UserModel
-from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-
-from cmdb.errors.manager.user_manager import UserManagerInsertError
+from cmdb.interface.route_utils import make_response,\
+                                       check_db_exists,\
+                                       init_db_routine,\
+                                       create_new_admin_user
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 setup_blueprint = APIBlueprint('setup', __name__)
-
-with current_app.app_context():
-    dbm: MongoDatabaseManager = current_app.database_manager
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -104,66 +92,3 @@ def setup_datagerry():
         return abort(400, "There is an issue with the users json file!")
 
     return make_response(True)
-
-# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
-
-def check_db_exists(db_name: dict):
-    """Checks if the database exists"""
-    return dbm.check_database_exists(db_name)
-
-
-def init_db_routine(db_name: str):
-    """Creates a database with the given name and all corresponding collections
-
-    Args:
-        db_name (str): Name of the database
-    """
-    new_db = dbm.create_database(db_name)
-    dbm.connector.set_database(new_db.name)
-    groups_manager = GroupsManager(dbm)
-
-    # Generate framework collections
-    for collection in FRAMEWORK_CLASSES:
-        dbm.create_collection(collection.COLLECTION)
-        # set unique indexes
-        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-    # Generate user management collections
-    for collection in USER_MANAGEMENT_COLLECTION:
-        dbm.create_collection(collection.COLLECTION)
-        # set unique indexes
-        dbm.create_indexes(collection.COLLECTION, collection.get_index_keys())
-
-    # Generate groups
-    for group in __FIXED_GROUPS__:
-        groups_manager.insert_group(group)
-
-    # Generate predefined section templates
-    dbm.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
-
-
-def create_new_admin_user(user_data: dict):
-    """Creates a new admin user"""
-    dbm.connector.set_database(user_data['database'])
-
-    users_manager: UsersManager = UsersManager(dbm)
-    scm = SecurityManager(dbm)
-
-    try:
-        users_manager.get_user_by({'email': user_data['email']})
-    except Exception: # Admin user was not found in the database, create a new one
-        admin_user = UserModel(
-            public_id=1,
-            user_name=user_data['user_name'],
-            email=user_data['email'],
-            database=user_data['database'],
-            active=True,
-            group_id=1,
-            registration_time=datetime.now(timezone.utc),
-            password=scm.generate_hmac(user_data['password']),
-        )
-
-        try:
-            users_manager.insert_user(admin_user)
-        except UserManagerInsertError as err:
-            LOGGER.error("Could not create admin user: %s", err)

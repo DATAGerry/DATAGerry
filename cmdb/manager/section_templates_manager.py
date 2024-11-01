@@ -22,7 +22,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
@@ -110,15 +110,7 @@ class SectionTemplatesManager(BaseManager):
             IterationResult[CmdbSectionTemplate]: Result which matches the Builderparameters
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

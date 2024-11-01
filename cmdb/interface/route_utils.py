@@ -18,6 +18,7 @@ import base64
 import functools
 import json
 import logging
+from datetime import datetime, timezone
 from functools import wraps
 from flask import request, abort, current_app, make_response as flask_response
 from werkzeug._internal import _wsgi_decoding_dance
@@ -33,9 +34,13 @@ from cmdb.user_management.models.user import UserModel
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.database.utils import default
 from cmdb.security.token.validator import TokenValidator
+from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
+from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
+from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.security import TokenValidationError
+from cmdb.errors.manager.user_manager import UserManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -309,4 +314,81 @@ def check_user_in_mysql_db(mail: str, password: str):
         return None
     except Exception as err:
         LOGGER.debug("[get users from file] Exception: %s, Type: %s", err, type(err))
+        return None
+
+
+def check_db_exists(db_name: dict):
+    """Checks if the database exists"""
+    return current_app.database_manager.check_database_exists(db_name)
+
+
+def init_db_routine(db_name: str):
+    """Creates a database with the given name and all corresponding collections
+
+    Args:
+        db_name (str): Name of the database
+    """
+    new_db = current_app.database_manager.create_database(db_name)
+    current_app.database_manager.connector.set_database(new_db.name)
+
+    with current_app.app_context():
+        groups_manager = GroupsManager(current_app.database_manager)
+
+    # Generate framework collections
+    for collection in FRAMEWORK_CLASSES:
+        current_app.database_manager.create_collection(collection.COLLECTION)
+        # set unique indexes
+        current_app.database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+    # Generate user management collections
+    for collection in USER_MANAGEMENT_COLLECTION:
+        current_app.database_manager.create_collection(collection.COLLECTION)
+        # set unique indexes
+        current_app.database_manager.create_indexes(collection.COLLECTION, collection.get_index_keys())
+
+    # Generate groups
+    for group in __FIXED_GROUPS__:
+        groups_manager.insert_group(group)
+
+    # Generate predefined section templates
+    current_app.database_manager.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
+
+
+def create_new_admin_user(user_data: dict):
+    """Creates a new admin user"""
+    with current_app.app_context():
+        current_app.database_manager.connector.set_database(user_data['database'])
+        users_manager = UsersManager(current_app.database_manager)
+        scm = SecurityManager(current_app.database_manager)
+
+    try:
+        users_manager.get_user_by({'email': user_data['email']})
+    except Exception: # Admin user was not found in the database, create a new one
+        admin_user = UserModel(
+            public_id=1,
+            user_name=user_data['user_name'],
+            email=user_data['email'],
+            database=user_data['database'],
+            active=True,
+            group_id=1,
+            registration_time=datetime.now(timezone.utc),
+            password=scm.generate_hmac(user_data['password']),
+        )
+
+        try:
+            users_manager.insert_user(admin_user)
+        except UserManagerInsertError as error:
+            LOGGER.error("Could not create admin user: %s", error)
+
+
+def retrive_user(user_data: dict):
+    """Get user from db"""
+    with current_app.app_context():
+        current_app.database_manager.connector.set_database(user_data['database'])
+        users_manager = UsersManager(current_app.database_manager)
+
+    try:
+        return users_manager.get_user_by({'email': user_data['email']})
+    except Exception:
+        #ERROR-FIX
         return None

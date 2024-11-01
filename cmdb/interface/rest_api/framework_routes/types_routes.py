@@ -22,7 +22,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.interface.rest_api.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.interface.blueprint import APIBlueprint
@@ -36,7 +36,8 @@ from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 

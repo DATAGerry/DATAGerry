@@ -15,11 +15,9 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """This class provides the different managers for the API routes"""
 import logging
-from enum import Enum
 from flask import current_app
 
-from cmdb.user_management.models.user import UserModel
-
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.logs_manager import LogsManager
@@ -32,34 +30,18 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
-
+from cmdb.security.security import SecurityManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.security.security import SecurityManager
+
+from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class ManagerType(Enum):
-    """Enum of the different Managers which are used by the API routes"""
-    CATEGORIES_MANAGER = 'CategoriesManager'
-    OBJECTS_MANAGER = 'ObjectsManager'
-    LOGS_MANAGER = 'LogsManager'
-    DOCAPI_TEMPLATES_MANAGER = 'DocapiTemplatesManager'
-    USERS_MANAGER = 'UsersManager'
-    USERS_SETTINGS_MANAGER = 'UsersSettingsManager'
-    GROUPS_MANAGER = 'GroupsManager'
-    MEDIA_FILES_MANAGER = 'MediaFilesManager'
-    TYPES_MANAGER = 'TypesManager'
-    LOCATIONS_MANAGER = 'LocationsManager'
-    SECTION_TEMPLATES_MANAGER = 'SectionTemplatesManager'
-    OBJECT_LINKS_MANAGER = 'ObjectLinksManager'
-    SYSTEM_SETTINGS_READER = 'SystemSettingsReader'
-    SYSTEM_SETTINGS_WRITER = 'SystemSettingsWriter'
-    SECURITY_MANAGER = 'SecurityManager'
-
-
+#                                                ManagerProvider - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ManagerProvider:
     """Provides Managers for stateless API route requests"""
 

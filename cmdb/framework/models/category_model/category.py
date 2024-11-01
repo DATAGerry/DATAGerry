@@ -17,7 +17,7 @@
 import logging
 from typing import Union
 
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
 from cmdb.framework.models.category_model.category_meta import CategoryMeta
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -80,6 +80,7 @@ class CategoryModel(CmdbDAO):
     ]
 
 
+    #pylint: disable=too-many-arguments
     def __init__(self,
                  public_id: int,
                  name: str,

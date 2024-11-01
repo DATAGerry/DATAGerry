@@ -18,9 +18,11 @@ import logging
 from datetime import datetime, timezone
 from flask import request, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.framework.models.category import CategoryModel
+from cmdb.framework.models.category_model.category import CategoryModel
 from cmdb.framework.models.category_model.category_tree import CategoryTree
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.framework.results.iteration import IterationResult
@@ -33,7 +35,6 @@ from cmdb.interface.response import GetSingleResponse, \
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerGetError, \
                                 ManagerInsertError, \

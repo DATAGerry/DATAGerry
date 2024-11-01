@@ -15,35 +15,25 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+from datetime import datetime
 
-from cmdb.updater.updater import Updater
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
-
-from cmdb.errors.manager.object_manager import ObjectManagerUpdateError, ObjectManagerGetError
+from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.framework.models.log_model.log_action_enum import LogAction
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class Update20200408(Updater):
-    """TODO: document"""
+#                                                  CmdbMetaLog - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
+class CmdbMetaLog(CmdbDAO):
+    """CmdbMetaLog"""
+    COLLECTION = 'framework.logs'
+    MODEL = 'CmdbLog'
 
-    def creation_date(self):
-        return '20200408'
-
-
-    def description(self):
-        return 'Fix possible wrong object counter'
-
-
-    def start_update(self):
-        try:
-            collection = CmdbObject.COLLECTION
-            highest_id = self.dbm.get_highest_id(collection)
-            self.dbm.update_public_id_counter(collection, highest_id)
-
-        except (ObjectManagerGetError, ObjectManagerUpdateError, Exception) as err:
-            #ERROR-FIX
-            raise Exception(err) from err
-
-        self.increase_updater_version(20200408)
+    def __init__(self, public_id, log_type, log_time: datetime, action: LogAction, action_name: str):
+        self.log_type = log_type
+        self.log_time: datetime = log_time
+        self.action: LogAction = action
+        self.action_name = action_name
+        super().__init__(public_id=public_id)

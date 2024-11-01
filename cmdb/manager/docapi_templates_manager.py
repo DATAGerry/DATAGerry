@@ -25,7 +25,6 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
-from cmdb.user_management.models.user import UserModel
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerIterationError
@@ -107,14 +106,7 @@ class DocapiTemplatesManager(BaseManager):
     def get_templates(self, builder_params: BuilderParameters) -> IterationResult[DocapiTemplate]:
         """TODO: document"""
         try:
-            query: list[dict] = self.query_builder.build(builder_params)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
+            aggregation_result, total = self.iterate_query(builder_params)
         except Exception as err:
             raise ManagerIterationError(err) from err
 
@@ -183,7 +175,7 @@ class DocapiTemplatesManager(BaseManager):
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
-    def delete_template(self, public_id: int, request_user: UserModel) -> bool:
+    def delete_template(self, public_id: int) -> bool:
         """TODO: document"""
         try:
             ack = self.delete({'public_id': public_id})

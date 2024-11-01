@@ -33,7 +33,8 @@ from cmdb.interface.response import GetMultiResponse, \
                                     DeleteSingleResponse
 from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 
 from cmdb.errors.manager import ManagerGetError, \
                                 ManagerInsertError, \

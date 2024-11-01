@@ -26,8 +26,6 @@ from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
 
-# TODO: Refactor to use with dependency injection
-
 rights_manager = RightsManager(rights)
 
 __COLLECTIONS__: list = [

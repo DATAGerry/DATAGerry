@@ -17,6 +17,8 @@
 import logging
 from flask import request, current_app, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
@@ -31,7 +33,6 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.framework.models.location_node import LocationNode
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\

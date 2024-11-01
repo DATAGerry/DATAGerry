@@ -13,3 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""TODO: document"""
+from enum import Enum
+# -------------------------------------------------------------------------------------------------------------------- #
+
+class LogAction(Enum):
+    """TODO: document"""
+    CREATE = 0
+    EDIT = 1
+    ACTIVE_CHANGE = 2
+    DELETE = 3

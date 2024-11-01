@@ -24,7 +24,7 @@ from bson import json_util
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.database.utils import object_hook
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
@@ -146,15 +146,7 @@ class TypesManager(BaseManager):
         """
 
         try:
-            query: list[dict] = self.query_builder.build(builder_params)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
+            aggregation_result, total = self.iterate_query(builder_params)
         except Exception as err:
             raise TypesManagerGetError(err) from err
 
@@ -204,27 +196,6 @@ class TypesManager(BaseManager):
         except Exception as err:
             #ERROR-FIX
             raise ManagerGetError(err) from err
-
-
-    def get_type_aggregate(self, arguments):
-        """This method does not actually
-           performs the find() operation
-           but instead returns
-           a objects sorted by value of the documents that meet the selection criteria.
-
-           Args:
-               arguments: query search for
-           Returns:
-               returns the list of CMDB Types sorted by value of the documents
-           """
-        type_list = []
-        cursor = self.dbm.aggregate(TypeModel.COLLECTION, arguments)
-
-        for document in cursor:
-            put_data = json.loads(json_util.dumps(document), object_hook=object_hook)
-            type_list.append(TypeModel.from_data(put_data))
-
-        return type_list
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 

@@ -30,7 +30,7 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.helpers import verify_access
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.framework.models.type import TypeModel
+from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.database.utils import object_hook
 from cmdb.framework.results import IterationResult
 

@@ -19,6 +19,8 @@ import json
 from bson import json_util
 from flask import abort, request, Response
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
@@ -31,7 +33,6 @@ from cmdb.interface.route_utils import make_response, login_required, insert_req
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError
 from cmdb.errors.manager import ManagerIterationError, ManagerGetError
@@ -221,7 +222,7 @@ def delete_template(public_id: int, request_user: UserModel):
                                                                             request_user)
 
     try:
-        ack = docapi_manager.delete_template(public_id, request_user)
+        ack = docapi_manager.delete_template(public_id)
     except DocapiDeleteError as err:
         LOGGER.debug("[delete_template] DocapiDeleteError: %s", err.message)
         return abort(400, f"Could not delete the template with ID:{public_id}!")

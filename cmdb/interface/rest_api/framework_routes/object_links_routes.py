@@ -17,6 +17,8 @@
 import logging
 from flask import abort, request
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.object_links_manager import ObjectLinksManager
 
 from cmdb.interface.route_utils import insert_request_user
@@ -30,7 +32,6 @@ from cmdb.interface.response import DeleteSingleResponse,\
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError

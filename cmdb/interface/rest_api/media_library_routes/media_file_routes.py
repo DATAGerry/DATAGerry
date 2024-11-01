@@ -29,7 +29,8 @@ from cmdb.interface.rest_api.media_library_routes.media_file_route_utils import 
 from cmdb.interface.response import GetMultiResponse, InsertSingleResponse
 from cmdb.interface.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 
 from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
                                                    MediaFileManagerInsertError,\

@@ -16,37 +16,16 @@
 """TODO: document"""
 import logging
 from datetime import datetime
-from enum import Enum
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.framework.models.log_model.log_action_enum import LogAction
+from cmdb.framework.models.log_model.cmdb_meta_log import CmdbMetaLog
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-#CLASS-FIX
-class LogAction(Enum):
-    """TODO: document"""
-    CREATE = 0
-    EDIT = 1
-    ACTIVE_CHANGE = 2
-    DELETE = 3
-
-
-#CLASS-FIX
-class CmdbMetaLog(CmdbDAO):
-    """CmdbMetaLog"""
-    COLLECTION = 'framework.logs'
-    MODEL = 'CmdbLog'
-
-    def __init__(self, public_id, log_type, log_time: datetime, action: LogAction, action_name: str):
-        self.log_type = log_type
-        self.log_time: datetime = log_time
-        self.action: LogAction = action
-        self.action_name = action_name
-        super().__init__(public_id=public_id)
-
-
-#CLASS-FIX
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 CmdbObjectLog - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CmdbObjectLog(CmdbMetaLog):
     """TODO:document"""
 
@@ -102,7 +81,7 @@ class CmdbObjectLog(CmdbMetaLog):
 
     UNKNOWN_USER_STRING = 'Unknown'
 
-
+    #pylint: disable=too-many-arguments
     def __init__(self,
                  public_id: int,
                  log_type, log_time: datetime,
@@ -148,56 +127,6 @@ class CmdbObjectLog(CmdbMetaLog):
 
     @classmethod
     def to_json(cls, instance: "CmdbObjectLog") -> dict:
-        """Convert a type instance to json conform data"""
-        return {
-            'public_id': instance.public_id,
-            'log_time': instance.log_time,
-            'log_type': instance.log_type,
-            'action': instance.action,
-            'object_id': instance.object_id,
-            'version': instance.version,
-            'user_name': instance.user_name,
-            'user_id': instance.user_id,
-            'render_state': instance.render_state,
-            'changes': instance.changes,
-            'comment': instance.comment,
-            'action_name': instance.action_name
-        }
-
-
-#CLASS-FIX
-class CmdbLog:
-    """TODO: document"""
-    REGISTERED_LOG_TYPE = {}
-    DEFAULT_LOG_TYPE = CmdbObjectLog
-
-    def __new__(cls, *args, **kwargs):
-        return cls.__get_log_class(*args, **kwargs)(*args, **kwargs)
-
-
-    @classmethod
-    def __get_log_class(cls, **kwargs):
-        try:
-            log_class = cls.REGISTERED_LOG_TYPE[kwargs['log_type']]
-        except (KeyError, ValueError):
-            log_class = cls.DEFAULT_LOG_TYPE
-        return log_class
-
-
-    @classmethod
-    def register_log_type(cls, log_name, log_class):
-        """TODO: document"""
-        cls.REGISTERED_LOG_TYPE[log_name] = log_class
-
-
-    @classmethod
-    def from_data(cls, data: dict, *args, **kwargs):
-        """TODO: document"""
-        return cls.__get_log_class(**data).from_data(data, *args, **kwargs)
-
-
-    @classmethod
-    def to_json(cls, instance: "CmdbLog") -> dict:
         """Convert a type instance to json conform data"""
         return {
             'public_id': instance.public_id,

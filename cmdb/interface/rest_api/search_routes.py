@@ -18,6 +18,8 @@ import json
 import logging
 from flask import request, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.interface.route_utils import make_response, insert_request_user, login_required
@@ -26,7 +28,6 @@ from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, Quic
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.manager.manager_provider import ManagerType, ManagerProvider
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
