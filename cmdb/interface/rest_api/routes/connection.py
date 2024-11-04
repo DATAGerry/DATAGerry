@@ -33,7 +33,7 @@ with current_app.app_context():
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
-@connection_routes.route('/')
+@connection_routes.route('/', methods=['GET', 'HEAD'])
 def connection_response():
     """
     This route is called when {{url}}/rest/ is called
