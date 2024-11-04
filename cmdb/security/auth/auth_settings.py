@@ -15,6 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
+
+from cmdb.errors.security.security_errors import AuthSettingsInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class AuthSettingsDAO:
@@ -29,10 +31,13 @@ class AuthSettingsDAO:
                  enable_external: bool = None,
                  token_lifetime: int = None):
         """TODO: document"""
-        self._id: str = _id or AuthSettingsDAO.__DOCUMENT_IDENTIFIER
-        self.providers: list[dict] = providers or []
-        self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
-        self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
+        try:
+            self._id: str = _id or AuthSettingsDAO.__DOCUMENT_IDENTIFIER
+            self.providers: list[dict] = providers or []
+            self.token_lifetime: int = token_lifetime or DEFAULT_TOKEN_LIFETIME
+            self.enable_external: bool = enable_external or AuthSettingsDAO.__DEFAULT_EXTERNAL_ENABLED
+        except Exception as err:
+            raise AuthSettingsInitError(str(err)) from err
 
 
     def get_id(self) -> str:

@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from flask import current_app
+from flask import current_app, abort
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
@@ -28,10 +28,10 @@ LOGGER = logging.getLogger(__name__)
 
 connection_routes = RootBlueprint('connection_routes', __name__)
 
-
 with current_app.app_context():
     dbm: MongoDatabaseManager = current_app.database_manager
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @connection_routes.route('/')
 def connection_response():
@@ -41,10 +41,14 @@ def connection_response():
     Returns:
         Response: Dict with infos about Datagerry(title, version and connection status of db)
     """
-    resp = {
-        'title': __title__,
-        'version': __version__,
-        'connected': dbm.status()
-    }
+    try:
+        resp = {
+            'title': __title__,
+            'version': __version__,
+            'connected': dbm.status()
+        }
 
-    return make_response(resp)
+        return make_response(resp)
+    except Exception as err:
+        LOGGER.debug("[connection_response] Exception: %s", str(err))
+        abort(500, "Could not connect to REST API!")
