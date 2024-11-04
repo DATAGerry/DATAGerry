@@ -15,12 +15,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
+from typing import Tuple
 from datetime import datetime, timezone
 from flask import request, current_app, abort
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.security.security import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
@@ -41,20 +42,19 @@ from cmdb.interface.route_utils import make_response,\
                                        retrive_user
 from cmdb.interface.rest_api.responses import GetSingleValueResponse
 
+from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
 auth_blueprint = APIBlueprint('auth', __name__)
 
-with current_app.app_context():
-    dbm: MongoDatabaseManager = current_app.database_manager
-
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
     """TODO: document"""
+    LOGGER.debug("[post_login] called")
     users_manager = UsersManager(current_app.database_manager)
     security_manager = SecurityManager(current_app.database_manager)
     login_data = request.json
@@ -69,41 +69,36 @@ def post_login():
         if current_app.cloud_mode:
             user_data = check_user_in_mysql_db(request_user_name, request_password)
 
-            ### login data is invalid
             if not user_data:
                 return abort(401, 'Could not login')
 
             ### no db with this name, create it
             if not check_db_exists(user_data['database']):
+                LOGGER.debug("[post_login] start init routine")
                 init_db_routine(user_data['database'])
                 create_new_admin_user(user_data)
 
             ### Get the user
             user = retrive_user(user_data)
-
             # User does not exist
             if not user:
                 return abort(401, 'Could not login')
 
-            dbm.connector.set_database(user_data['database'])
+            current_app.database_manager.connector.set_database(user_data['database'])
+            token, token_issued_at, token_expire = generate_token_with_params(user,
+                                                                              current_app.database_manager,
+                                                                              True)
 
-            tg = TokenGenerator(dbm)
-
-            token: bytes = tg.generate_token(
-                payload={
-                    'user': {
-                        'public_id': user.get_public_id(),
-                        'database': user.get_database()
-                    }
-                }
-            )
-
-            token_issued_at = int(datetime.now(timezone.utc).timestamp())
-            token_expire = int(tg.get_expire_time().timestamp())
             login_response = LoginResponse(user, token, token_issued_at, token_expire)
 
             return login_response.make_response()
-    except Exception as err:
+    except UserManagerGetError as err:
+        LOGGER.debug("[post_login] UserManagerGetError: %s", err)
+        return abort(500, "Could not login because user can't be retrieved from database!")
+    except UserManagerInsertError as err:
+        LOGGER.debug("[post_login] UserManagerInsertError: %s", err)
+        return abort(500, "Could not login because user can't be inserted in database!")
+    except Exception as err: #pylint: disable=broad-exception-caught
         LOGGER.debug("[post_login] Exception: %s, Type: %s", err, type(err))
         return abort(500, "Could not login")
 
@@ -121,14 +116,8 @@ def post_login():
         user_instance = auth_module.login(request_user_name, request_password)
 
         if user_instance:
-            tg = TokenGenerator(current_app.database_manager)
-
-            token: bytes = tg.generate_token(payload={'user': {
-                'public_id': user_instance.get_public_id()
-            }})
-
-            token_issued_at = int(datetime.now(timezone.utc).timestamp())
-            token_expire = int(tg.get_expire_time().timestamp())
+            token, token_issued_at, token_expire = generate_token_with_params(user_instance,
+                                                                              current_app.database_manager)
 
             login_response = LoginResponse(user_instance, token, token_issued_at, token_expire)
 
@@ -138,9 +127,9 @@ def post_login():
     except (AuthenticationProviderNotFoundError, AuthenticationProviderNotActivated):
         #ERROR-FIX
         return abort(503)
-    except Exception:
-        #ERROR-FIX
-        return abort(401)
+    except Exception as err: #pylint: disable=broad-exception-caught
+        LOGGER.debug("[post_login] Exception: %s, Type: %s", err, type(err))
+        return abort(500, "Could not login")
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -225,3 +214,25 @@ def update_auth_settings(request_user: UserModel):
         return api_response.make_response()
 
     return abort(400, 'Could not update auth settings')
+
+# ------------------------------------------------------ HELPERS ----------------------------------------------------- #
+
+def generate_token_with_params(
+        login_user: UserModel,
+        database_manager: MongoDatabaseManager,
+        cloud_mode: bool = False
+    ) -> Tuple[bytes, int, int]:
+    """TODO: document"""
+    tg = TokenGenerator(database_manager)
+
+    user_data = {'public_id': login_user.get_public_id()}
+
+    if cloud_mode:
+        user_data['database'] = login_user.get_database()
+
+    token: bytes = tg.generate_token(payload={'user': user_data})
+
+    token_issued_at = int(datetime.now(timezone.utc).timestamp())
+    token_expire = int(tg.get_expire_time().timestamp())
+
+    return token, token_issued_at, token_expire
