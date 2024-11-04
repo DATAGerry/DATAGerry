@@ -14,23 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from .delete_single_response import DeleteSingleResponse
-from .get_list_response import GetListResponse
-from .get_multi_response import GetMultiResponse
-from .get_single_response import GetSingleResponse
-from .get_single_value_response import GetSingleValueResponse
-from .insert_single_response import InsertSingleResponse
-from .update_single_response import UpdateSingleResponse
-from .update_multi_response import UpdateMultiResponse
+from enum import Enum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'DeleteSingleResponse',
-    'GetListResponse',
-    'GetMultiResponse',
-    'GetSingleResponse',
-    'GetSingleValueResponse',
-    'InsertSingleResponse',
-    'UpdateSingleResponse',
-    'UpdateMultiResponse',
-]
+class OperationType(Enum):
+    """
+    Enum for different response operations.
+    Works as identifier beside the class instance.
+    """
+    GET = 'GET'
+    UPDATE = 'UPDATE'
+    PATCH = 'PATCH'
+    INSERT = 'INSERT'
+    DELETE = 'DELETE'

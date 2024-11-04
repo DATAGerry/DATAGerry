@@ -69,29 +69,29 @@ def register_converters(app):
 
 def register_blueprints(app):
     """TODO: document"""
-    from cmdb.interface.rest_api.auth_routes import auth_blueprint
-    from cmdb.interface.rest_api.system_routes.setup_routes import setup_blueprint
-    from cmdb.interface.rest_api.settings_routes.date_routes import date_blueprint
-    from cmdb.interface.rest_api.framework_routes.objects_routes import objects_blueprint
-    from cmdb.interface.rest_api.framework_routes.object_links_routes import links_blueprint
-    from cmdb.interface.rest_api.framework_routes.types_routes import types_blueprint
-    from cmdb.interface.rest_api.connection import connection_routes
-    from cmdb.interface.rest_api.framework_routes.categories_routes import categories_blueprint
-    from cmdb.interface.rest_api.framework_routes.location_routes import location_blueprint
-    from cmdb.interface.rest_api.framework_routes.section_template_routes import section_template_blueprint
-    from cmdb.interface.rest_api.user_management_routes.users_routes import users_blueprint
-    from cmdb.interface.rest_api.user_management_routes.user_settings_routes import user_settings_blueprint
-    from cmdb.interface.rest_api.user_management_routes.groups_routes import groups_blueprint
-    from cmdb.interface.rest_api.user_management_routes.rights_routes import rights_blueprint
-    from cmdb.interface.rest_api.search_routes import search_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_object_routes import exporter_blueprint
-    from cmdb.interface.rest_api.exporter_routes.exporter_type_routes import type_export_blueprint
-    from cmdb.interface.rest_api.logs_routes import logs_blueprint
-    from cmdb.interface.rest_api.setting_routes import settings_blueprint
-    from cmdb.interface.rest_api.import_routes import importer_blueprint
-    from cmdb.interface.rest_api.docapi_routes import docapi_blueprint, docs_blueprint
-    from cmdb.interface.rest_api.media_library_routes.media_file_routes import media_file_blueprint
-    from cmdb.interface.rest_api.special_routes import special_blueprint
+    from cmdb.interface.rest_api.routes.auth_routes import auth_blueprint
+    from cmdb.interface.rest_api.routes.system_routes.setup_routes import setup_blueprint
+    from cmdb.interface.rest_api.routes.settings_routes.date_routes import date_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.objects_routes import objects_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.object_links_routes import links_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.types_routes import types_blueprint
+    from cmdb.interface.rest_api.routes.connection import connection_routes
+    from cmdb.interface.rest_api.routes.framework_routes.categories_routes import categories_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.location_routes import location_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.section_template_routes import section_template_blueprint
+    from cmdb.interface.rest_api.routes.user_management_routes.users_routes import users_blueprint
+    from cmdb.interface.rest_api.routes.user_management_routes.user_settings_routes import user_settings_blueprint
+    from cmdb.interface.rest_api.routes.user_management_routes.groups_routes import groups_blueprint
+    from cmdb.interface.rest_api.routes.user_management_routes.rights_routes import rights_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.search_routes import search_blueprint
+    from cmdb.interface.rest_api.routes.exporter_routes.exporter_object_routes import exporter_blueprint
+    from cmdb.interface.rest_api.routes.exporter_routes.exporter_type_routes import type_export_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.logs_routes import logs_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
+    from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.docapi_routes import docapi_blueprint, docs_blueprint
+    from cmdb.interface.rest_api.routes.media_library_routes.media_file_routes import media_file_blueprint
+    from cmdb.interface.rest_api.routes.framework_routes.special_routes import special_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(setup_blueprint, url_prefix='/setup')
@@ -119,7 +119,7 @@ def register_blueprints(app):
     app.register_blueprint(special_blueprint)
 
     if cmdb.__MODE__ == 'DEBUG':
-        from cmdb.interface.rest_api.debug_routes import debug_blueprint
+        from cmdb.interface.rest_api.routes.debug_routes import debug_blueprint
         app.register_blueprint(debug_blueprint)
 
 

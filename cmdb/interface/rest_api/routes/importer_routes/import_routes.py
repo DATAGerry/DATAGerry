@@ -13,24 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from .delete_single_response import DeleteSingleResponse
-from .get_list_response import GetListResponse
-from .get_multi_response import GetMultiResponse
-from .get_single_response import GetSingleResponse
-from .get_single_value_response import GetSingleValueResponse
-from .insert_single_response import InsertSingleResponse
-from .update_single_response import UpdateSingleResponse
-from .update_multi_response import UpdateMultiResponse
-# -------------------------------------------------------------------------------------------------------------------- #
+"""
+Registering import routes for objects and types
+"""
+from flask import current_app
 
-__all__ = [
-    'DeleteSingleResponse',
-    'GetListResponse',
-    'GetMultiResponse',
-    'GetSingleResponse',
-    'GetSingleValueResponse',
-    'InsertSingleResponse',
-    'UpdateSingleResponse',
-    'UpdateMultiResponse',
-]
+from cmdb.interface.blueprint import RootBlueprint
+# -------------------------------------------------------------------------------------------------------------------- #
+importer_blueprint = RootBlueprint('import_rest', __name__, url_prefix='/import')
+
+with current_app.app_context():
+    from cmdb.interface.rest_api.routes.importer_routes.importer_object_routes import importer_object_blueprint
+    importer_blueprint.register_nested_blueprint(importer_object_blueprint)
+    from cmdb.interface.rest_api.routes.importer_routes.importer_type_routes import importer_type_blueprint
+    importer_blueprint.register_nested_blueprint(importer_type_blueprint)

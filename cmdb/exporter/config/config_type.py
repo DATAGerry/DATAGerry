@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.interface.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
 from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
 # -------------------------------------------------------------------------------------------------------------------- #
 

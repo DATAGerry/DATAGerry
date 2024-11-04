@@ -17,8 +17,8 @@
 import logging
 from werkzeug.wrappers import Response
 
-from cmdb.interface.response import GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
+from cmdb.interface.rest_api.responses.get_single_value_response import GetSingleValueResponse
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
