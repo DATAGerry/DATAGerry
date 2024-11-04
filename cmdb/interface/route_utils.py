@@ -40,7 +40,7 @@ from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as 
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.security import TokenValidationError
-from cmdb.errors.manager.user_manager import UserManagerInsertError
+from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -356,29 +356,35 @@ def init_db_routine(db_name: str):
 
 def create_new_admin_user(user_data: dict):
     """Creates a new admin user"""
+    LOGGER.debug("[create_new_admin_user] called")
     with current_app.app_context():
         current_app.database_manager.connector.set_database(user_data['database'])
         users_manager = UsersManager(current_app.database_manager)
         scm = SecurityManager(current_app.database_manager)
 
     try:
-        users_manager.get_user_by({'email': user_data['email']})
-    except Exception: # Admin user was not found in the database, create a new one
-        admin_user = UserModel(
-            public_id=1,
-            user_name=user_data['user_name'],
-            email=user_data['email'],
-            database=user_data['database'],
-            active=True,
-            group_id=1,
-            registration_time=datetime.now(timezone.utc),
-            password=scm.generate_hmac(user_data['password']),
-        )
+        admin_user_from_db = users_manager.get_user_by({'email': user_data['email']})
 
-        try:
+        if not admin_user_from_db:
+            admin_user = UserModel(
+                public_id=1,
+                user_name=user_data['user_name'],
+                email=user_data['email'],
+                database=user_data['database'],
+                active=True,
+                group_id=1,
+                registration_time=datetime.now(timezone.utc),
+                password=scm.generate_hmac(user_data['password']),
+            )
+
             users_manager.insert_user(admin_user)
-        except UserManagerInsertError as error:
-            LOGGER.error("Could not create admin user: %s", error)
+    except UserManagerGetError as err:
+        raise UserManagerGetError(str(err)) from err
+    except UserManagerInsertError as err:
+        raise UserManagerInsertError(str(err)) from err
+    except Exception as err:
+        LOGGER.debug("[create_new_admin_user] Exception: %s, Type: %s", err, type(err))
+        raise UserManagerInsertError(str(err)) from err
 
 
 def retrive_user(user_data: dict):
