@@ -75,7 +75,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.routes.framework_routes.objects_routes import objects_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.object_links_routes import links_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.types_routes import types_blueprint
-    from cmdb.interface.rest_api.routes.connection import connection_routes
+    from cmdb.interface.rest_api.connection import connection_routes
     from cmdb.interface.rest_api.routes.framework_routes.categories_routes import categories_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.location_routes import location_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.section_template_routes import section_template_blueprint
