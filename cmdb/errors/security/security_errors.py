@@ -81,3 +81,12 @@ class MaxLevelRightError(SecurityError):
     def __init__(self, err: str):
         self.message = f"Max level for the right has been violated. Error: {err}"
         super().__init__(self.message)
+
+
+class AuthSettingsInitError(SecurityError):
+    """
+    Raised when AuthSettingsDAO could not be initialised
+    """
+    def __init__(self, err: str):
+        self.message = f"Could not initialise AuthSettingsDAO. Error: {err}"
+        super().__init__(self.message)
