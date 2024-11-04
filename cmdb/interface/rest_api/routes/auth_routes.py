@@ -44,6 +44,7 @@ from cmdb.interface.rest_api.responses import GetSingleValueResponse
 
 from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
+from cmdb.errors.security.security_errors import AuthSettingsInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -204,8 +205,9 @@ def update_auth_settings(request_user: UserModel):
 
     try:
         new_auth_setting_instance = AuthSettingsDAO(**new_auth_settings_values)
-    except Exception as err:
-        return abort(400, err)
+    except AuthSettingsInitError as err:
+        LOGGER.debug("[update_auth_settings] Error: %s", str(err))
+        return abort(500, "Could not initialise auth settings!")
 
     update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
 

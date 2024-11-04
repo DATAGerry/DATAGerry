@@ -21,7 +21,8 @@ from .security_errors import TokenValidationError,\
                              RightNotFoundError,\
                              InvalidLevelRightError,\
                              MinLevelRightError,\
-                             MaxLevelRightError
+                             MaxLevelRightError,\
+                             AuthSettingsInitError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     'InvalidLevelRightError',
     'MinLevelRightError',
     'MaxLevelRightError',
+    'AuthSettingsInitError',
 ]
