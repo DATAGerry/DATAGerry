@@ -16,10 +16,9 @@
 """
 Contains Database Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DataBaseError(CMDBError):
+class DataBaseError(Exception):
     """
     Base Database Error
     """

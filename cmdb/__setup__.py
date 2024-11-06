@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 from enum import Enum
 
 from cmdb.manager.groups_manager import GroupsManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 

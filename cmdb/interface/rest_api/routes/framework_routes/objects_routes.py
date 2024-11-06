@@ -42,13 +42,16 @@ from cmdb.framework.rendering.render_list import RenderList
 from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.interface.rest_api.responses.response_failed_message import ResponseFailedMessage
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import GetListResponse,\
-                                              UpdateMultiResponse,\
-                                              UpdateSingleResponse,\
-                                              GetMultiResponse
+from cmdb.interface.rest_api.responses import (
+    GetListResponse,
+    UpdateMultiResponse,
+    UpdateSingleResponse,
+    GetMultiResponse,
+    GetSingleValueResponse,
+)
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError
@@ -160,7 +163,9 @@ def insert_object(request_user: UserModel):
         LOGGER.debug("[insert_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
-    return make_response(new_object_id)
+    api_response = GetSingleValueResponse(new_object_id)
+
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -195,7 +200,9 @@ def get_object(public_id, request_user: UserModel):
         LOGGER.error("[get_object] InstanceRenderError: %s", err.message)
         return abort(500)
 
-    return make_response(render_result)
+    api_response = GetSingleValueResponse(render_result)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
@@ -280,7 +287,9 @@ def get_native_object(public_id: int, request_user: UserModel):
         #ERROR-FIX
         return abort(403)
 
-    return make_response(object_instance)
+    api_response = GetSingleValueResponse(object_instance)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/group/<string:value>', methods=['GET'])
@@ -312,7 +321,9 @@ def group_objects_by_type_id(value, request_user: UserModel):
         #ERROR-FIX
         return abort(400)
 
-    return make_response(result)
+    api_response = GetSingleValueResponse(result)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/mds_reference', methods=['GET'])
@@ -345,7 +356,9 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
         LOGGER.error("[get_object_mds_reference] InstanceRenderError: %s", err.message)
         return abort(500)
 
-    return make_response(mds_reference)
+    api_response = GetSingleValueResponse(mds_reference)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/mds_references', methods=['GET'])
@@ -389,7 +402,9 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
             LOGGER.error("[get_object_mds_references] InstanceRenderError: %s", err.message)
             return abort(500)
 
-    return make_response(summary_lines)
+    api_response = GetSingleValueResponse(summary_lines)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
@@ -469,7 +484,10 @@ def get_object_state(public_id: int, request_user: UserModel):
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
-    return make_response(found_object.active)
+
+    api_response = GetSingleValueResponse(found_object.active)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
@@ -510,6 +528,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
             unstructured.append(object_.__dict__)
 
     api_response = GetListResponse(unstructured, body=request.method == 'HEAD')
+
     return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
@@ -659,7 +678,7 @@ def update_object_state(public_id: int, request_user: UserModel):
         return abort(404, f"Could not update object state for public_id: {public_id} !")
 
     if found_object.active == state:
-        return make_response(False, 204)
+        return GetSingleValueResponse(False).make_response(204)
     try:
         found_object.active = state
         objects_manager.update_object(public_id,
@@ -868,7 +887,9 @@ def delete_object(public_id: int, request_user: UserModel):
     except ManagerInsertError as err:
         LOGGER.debug("[delete_object] ManagerInsertError: %s", err.message)
 
-    return make_response(ack)
+    api_response = GetSingleValueResponse(ack)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/locations', methods=['DELETE'])
@@ -921,7 +942,9 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
         LOGGER.error("[delete_object_with_child_locations] InstanceRenderError: %s", err.message)
         return abort(500)
 
-    return make_response(deleted)
+    api_response = GetSingleValueResponse(deleted)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/children', methods=['DELETE'])
@@ -989,7 +1012,9 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
         LOGGER.error("[delete_object_with_child_objects] InstanceRenderError: %s", err.message)
         return abort(500)
 
-    return make_response(deleted)
+    api_response = GetSingleValueResponse(deleted)
+
+    return api_response.make_response()
 
 
 @objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
@@ -1074,7 +1099,9 @@ def delete_many_objects(public_ids, request_user: UserModel):
             except ManagerInsertError as err:
                 LOGGER.debug("[delete_many_objects] ManagerInsertError: %s", err.message)
 
-        return make_response({'successfully': ack})
+        api_response = GetSingleValueResponse({'successfully': ack})
+
+        return api_response.make_response()
 
     except ObjectManagerDeleteError as err:
         #ERROR-FIX

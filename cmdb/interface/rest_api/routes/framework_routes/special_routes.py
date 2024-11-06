@@ -23,11 +23,11 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.interface.route_utils import make_response, login_required
+from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
-from cmdb.interface.route_utils import insert_request_user
 from cmdb.user_management.models.user import UserModel
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 
 from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -80,7 +80,9 @@ def get_intro_starter(request_user: UserModel):
             'steps': steps,
             'execute': (types_total > 0 or categories_total > 0 or objects_total > 0)}
 
-        resp = make_response(intro_instance)
+        api_response = GetSingleValueResponse(intro_instance)
+
+        resp = api_response.make_response()
     except Exception:
         #ERROR-FIX
         return abort(400)
@@ -123,7 +125,9 @@ def create_initial_profiles(data: str, request_user: UserModel):
         LOGGER.debug("[create_initial_profiles] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create initial profiles!")
 
-    return make_response(created_ids)
+    api_response = GetSingleValueResponse(created_ids)
+
+    return api_response.make_response()
 
 
 def _fetch_only_active_objs():

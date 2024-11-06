@@ -14,10 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Contains Manager Error Classes"""
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ManagerError(CMDBError):
+class ManagerError(Exception):
     """Base Manager Error"""
     def __init__(self, message: str):
         self.message = message

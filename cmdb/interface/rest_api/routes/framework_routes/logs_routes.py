@@ -23,10 +23,10 @@ from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.framework.models.log_model.log_action_enum import  LogAction
 from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.rest_api.responses import GetMultiResponse
+from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
@@ -58,7 +58,9 @@ def get_log(public_id: int, request_user: UserModel):
     except ManagerGetError:
         return abort(404, "Could not retrieve the requested log from database!")
 
-    return make_response(requested_log)
+    api_response = GetSingleValueResponse(requested_log)
+
+    return api_response.make_response()
 
 
 @logs_blueprint.route('/object/exists', methods=['GET', 'HEAD'])
@@ -238,7 +240,9 @@ def get_corresponding_object_logs(public_id: int, request_user: UserModel):
         LOGGER.debug("[get_corresponding_object_logs] ManagerIterationError: %s", err.message)
         return abort(400, f"Could not retrieve corresponding logs for ID:{public_id}!")
 
-    return make_response(corresponding_logs)
+    api_response = GetSingleValueResponse(corresponding_logs)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
@@ -262,4 +266,6 @@ def delete_log(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_log] ManagerDeleteError: %s", err.message)
         return abort(400, f"Could not delete the log with the ID:{public_id}!")
 
-    return make_response(deleted)
+    api_response = GetSingleValueResponse(deleted)
+
+    return api_response.make_response(deleted)

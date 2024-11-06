@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.manager.users_manager import UsersManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.user_management.models.user import UserModel

@@ -20,7 +20,7 @@ from datetime import datetime
 import pytest
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 

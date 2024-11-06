@@ -22,25 +22,25 @@ from flask import request, current_app, abort
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
-from cmdb.security.auth.response import LoginResponse
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import check_user_in_mysql_db
-from cmdb.interface.route_utils import make_response,\
-                                       insert_request_user,\
-                                       check_db_exists,\
-                                       init_db_routine,\
-                                       create_new_admin_user,\
-                                       retrive_user
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.route_utils import (
+    insert_request_user,
+    check_db_exists,
+    init_db_routine,
+    create_new_admin_user,
+    retrive_user,
+)
+from cmdb.interface.rest_api.responses import GetSingleValueResponse, LoginResponse
 
 from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
@@ -55,7 +55,6 @@ auth_blueprint = APIBlueprint('auth', __name__)
 @auth_blueprint.route('/login', methods=['POST'])
 def post_login():
     """TODO: document"""
-    LOGGER.debug("[post_login] called")
     users_manager = UsersManager(current_app.database_manager)
     security_manager = SecurityManager(current_app.database_manager)
     login_data = request.json
@@ -165,7 +164,9 @@ def get_installed_providers(request_user: UserModel):
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
 
-    return make_response(provider_names)
+    api_response = GetSingleValueResponse(provider_names)
+
+    return api_response.make_response()
 
 
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
@@ -184,7 +185,9 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     except StopIteration:
         return abort(404, 'Provider not found')
 
-    return make_response(provider_class_config)
+    api_response = GetSingleValueResponse(provider_class_config)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 

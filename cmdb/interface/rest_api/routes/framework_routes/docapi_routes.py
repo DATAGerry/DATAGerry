@@ -29,8 +29,8 @@ from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import GetMultiResponse
-from cmdb.interface.route_utils import make_response, login_required, insert_request_user, right_required
+from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleValueResponse
+from cmdb.interface.route_utils import login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.user_management.models.user import UserModel
 
@@ -76,7 +76,9 @@ def add_template(request_user: UserModel):
         LOGGER.debug("[add_template] DocapiInsertError: %s", err.message)
         return abort(500, "An error occured when trying to insert the template!")
 
-    return make_response(ack)
+    api_response = GetSingleValueResponse(ack)
+
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -132,7 +134,9 @@ def get_template_list_filtered(searchfilter: str, request_user: UserModel):
         LOGGER.debug("[get_template_list_filtered] Error: %s, Type: %s", err, type(err))
         return abort(404, f"Could not retrieve template list for filter: {searchfilter}")
 
-    return make_response(tpl)
+    api_response = GetSingleValueResponse(tpl)
+
+    return api_response.make_response()
 
 
 @docapi_blueprint.route('/template/<int:public_id>/', methods=['GET'])
@@ -153,7 +157,9 @@ def get_template(public_id, request_user: UserModel):
         LOGGER.debug("DocapiGetError: %s", err.message)
         return abort(404, f"Could not retrieve template with ID: {public_id}!")
 
-    return make_response(tpl)
+    api_response = GetSingleValueResponse(tpl)
+
+    return api_response.make_response()
 
 
 @docapi_blueprint.route('/template/name/<string:name>/', methods=['GET'])
@@ -172,7 +178,9 @@ def get_template_by_name(name: str, request_user: UserModel):
         LOGGER.debug("DocapiGetError: %s", err.message)
         return abort(404, f"Could not retrieve template with name: {name}!")
 
-    return make_response(tpl)
+    api_response = GetSingleValueResponse(tpl)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -207,7 +215,9 @@ def update_template(request_user: UserModel):
         LOGGER.debug("[update_template] DocapiUpdateError: %s", err.message)
         return abort(500, "Could not update the template!")
 
-    return make_response(update_tpl_instance)
+    api_response = GetSingleValueResponse(update_tpl_instance)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
@@ -227,7 +237,9 @@ def delete_template(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_template] DocapiDeleteError: %s", err.message)
         return abort(400, f"Could not delete the template with ID:{public_id}!")
 
-    return make_response(ack)
+    api_response = GetSingleValueResponse(ack)
+
+    return api_response.make_response()
 
 
 @docapi_blueprint.route('/template/<int:public_id>/render/<int:object_id>/', methods=['GET'])

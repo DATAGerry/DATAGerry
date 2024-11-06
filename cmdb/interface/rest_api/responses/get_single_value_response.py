@@ -35,11 +35,11 @@ class GetSingleValueResponse(BaseAPIResponse):
         super().__init__(OperationType.GET)
 
 
-    def make_response(self, *args, **kwargs) -> Response:
+    def make_response(self, status: int = 200) -> Response:
         """
         Make a valid http response
 
         Returns:
             Instance of Response with a HTTP 200 status code
         """
-        return self.make_api_response(self.value)
+        return self.make_api_response(self.value, status)

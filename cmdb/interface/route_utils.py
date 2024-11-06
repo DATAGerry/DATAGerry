@@ -20,23 +20,22 @@ import json
 import logging
 from datetime import datetime, timezone
 from functools import wraps
-from flask import request, abort, current_app, make_response as flask_response
+from flask import request, abort, current_app
 from werkzeug._internal import _wsgi_decoding_dance
 
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.security.auth.auth_module import AuthModule
 
+from cmdb.security.token.validator import TokenValidator
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.user import UserModel
+from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.database.utils import default
-from cmdb.security.token.validator import TokenValidator
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.security import TokenValidationError
@@ -48,28 +47,6 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_MIME_TYPE = 'application/json'
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
-#@deprecated
-def make_response(instance, status_code=200, indent=2):
-    """
-    make json http response with indent settings and auto encoding
-    Args:
-        instance: instance of a cmdbDao instance or instance of the subclass
-        status_code: optional status code
-        indent: indent of json response
-    Returns:
-        http valid response
-    """
-    # encode the dict data from the object to json data
-    try:
-        resp = flask_response(json.dumps(instance, default=default, indent=indent), status_code)
-        resp.mimetype = DEFAULT_MIME_TYPE
-    except Exception as err:
-        LOGGER.debug("[make_response] Exception: %s, Type: %s", err, type(err))
-        return abort(500, "Could not create response from data!")
-
-    return resp
-
 
 #@deprecated
 def login_required(f):

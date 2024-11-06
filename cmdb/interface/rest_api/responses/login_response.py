@@ -18,7 +18,8 @@ import logging
 from werkzeug.wrappers import Response
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.interface.rest_api.responses.get_single_value_response import GetSingleValueResponse
+from cmdb.interface.rest_api.responses.base_api_response import BaseAPIResponse
+from cmdb.interface.rest_api.responses.helpers.operation_type_enum import OperationType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -26,11 +27,10 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 LoginResponse - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-class LoginResponse:
-    """Basic login instance for returning a login data"""
-
-    __slots__ = 'user', 'token', 'token_issued_at', 'token_expire'
-
+class LoginResponse(BaseAPIResponse):
+    """
+    Basic login instance for returning a login data
+    """
     def __init__(self, user: UserModel, token: bytes, token_issued_at: int, token_expire: int):
         """
         Constructor of `LoginResponse`
@@ -38,31 +38,34 @@ class LoginResponse:
         Args:
             user (UserModel): Instance of the selected user
             token (bytes): A valid JW Token
-            token_issued_at: The timestamp when the token was issued.
-            token_expire: The timestamp when the token expires.
+            token_issued_at: The timestamp when the token was issued
+            token_expire: The timestamp when the token expires
         """
         self.user = user
         self.token = token
         self.token_issued_at = token_issued_at
         self.token_expire = token_expire
 
+        super().__init__(OperationType.GET)
 
-    def make_response(self) -> Response:
+
+    def make_response(self, status: int = 200) -> Response:
         """
         Make a valid http response.
 
         Returns:
             Instance of Response
         """
-        return GetSingleValueResponse(LoginResponse.to_dict(self)).make_response()
+        response = self.make_api_response(self.export(), status)
+
+        return response
 
 
-    @classmethod
-    def to_dict(cls, instance: 'LoginResponse') -> dict:
+    def export(self) -> dict:
         """TODO: document"""
         return {
-            'user': UserModel.to_dict(instance.user),
-            'token': instance.token.decode('UTF-8'),
-            'token_issued_at': instance.token_issued_at,
-            'token_expire': instance.token_expire
+            'user': UserModel.to_dict(self.user),
+            'token': self.token.decode('UTF-8'),
+            'token_issued_at': self.token_issued_at,
+            'token_expire': self.token_expire
         }

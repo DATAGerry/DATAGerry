@@ -15,18 +15,19 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-
 from flask import request, abort
 
-from cmdb.interface.route_utils import make_response, insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
-
-from cmdb.settings.date.date_settings import DateSettingsDAO
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
-from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
+from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.utils.system_writer import SystemSettingsWriter
+
+from cmdb.settings.date.date_settings import DateSettingsDAO
+from cmdb.user_management.models.user import UserModel
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.blueprint import APIBlueprint
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 date_blueprint = APIBlueprint('date', __name__)
@@ -48,7 +49,9 @@ def get_date_settings(request_user: UserModel):
 
         date_settings = DateSettingsDAO(**date_settings)
 
-        return make_response(date_settings)
+        api_response = GetSingleValueResponse(date_settings)
+
+        return api_response.make_response()
     except Exception as err:
         #ERROR-FIX
         LOGGER.debug("[get_date_settings] Exception: %s, Type: %s", err, type(err))
@@ -77,6 +80,8 @@ def update_date_settings(request_user: UserModel):
     update_result = system_setting_writer.write(_id='date', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        return make_response(system_settings_reader.get_section('date'))
+        api_response = GetSingleValueResponse(system_settings_reader.get_section('date'))
+
+        return api_response.make_response()
 
     return abort(400, 'Could not update date settings')

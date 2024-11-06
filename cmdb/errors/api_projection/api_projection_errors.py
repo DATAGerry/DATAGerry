@@ -16,10 +16,9 @@
 """
 Contains API Projection Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ApiProjectionError(CMDBError):
+class ApiProjectionError(Exception):
     """
     Base API Projection Error
     """

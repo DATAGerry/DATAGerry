@@ -18,9 +18,9 @@ import json
 import logging
 from flask import request, abort
 
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response,\
-                                       check_db_exists,\
+from cmdb.interface.route_utils import check_db_exists,\
                                        init_db_routine,\
                                        create_new_admin_user
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -45,8 +45,6 @@ def setup_datagerry():
         "database": Name of database
     }
     """
-    LOGGER.info("setup_datagerry() called")
-
     if not request.args:
         return abort(400, 'No request arguments provided!')
 
@@ -91,4 +89,6 @@ def setup_datagerry():
         LOGGER.debug("[setup_datagerry] Error: %s, Type: %s", err, type(err))
         return abort(400, "There is an issue with the users json file!")
 
-    return make_response(True)
+    api_response = GetSingleValueResponse(True)
+
+    return api_response.make_response()

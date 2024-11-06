@@ -16,10 +16,9 @@
 """
 Contains Security Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class SecurityError(CMDBError):
+class SecurityError(Exception):
     """
     Base Security Error
     """

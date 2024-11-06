@@ -16,10 +16,9 @@
 """
 Contains CmdbDAO object error classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class CmdbDAOError(CMDBError):
+class CmdbDAOError(Exception):
     """
     Base CmdbDAO Error
     """

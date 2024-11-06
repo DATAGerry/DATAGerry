@@ -19,7 +19,7 @@ from werkzeug.exceptions import abort
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb.interface.route_utils import make_response
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -34,7 +34,7 @@ with current_app.app_context():
 @debug_blueprint.route('/indexes/<string:collection>', methods=['GET'])
 def get_index(collection: str):
     """TODO: document"""
-    return make_response(dbm.get_index_info(collection))
+    return GetSingleValueResponse(dbm.get_index_info(collection)).make_response()
 
 
 @debug_blueprint.route('/error/<int:status_code>/', methods=['GET', 'POST'])

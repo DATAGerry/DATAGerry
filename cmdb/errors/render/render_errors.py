@@ -16,10 +16,9 @@
 """
 Contains Render Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class RenderError(CMDBError):
+class RenderError(Exception):
     """
     Base Render Error
     """

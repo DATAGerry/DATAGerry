@@ -16,10 +16,9 @@
 """
 This module contains the classes of all ObjectssManager errors
 """
-from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ObjectManagerError(CMDBError):
+class ObjectManagerError(Exception):
     """
     Base ObjectsManager error
     """

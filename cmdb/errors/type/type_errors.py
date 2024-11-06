@@ -16,10 +16,9 @@
 """
 This module contains all error classes for CmdbTypes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class CmdbTypeError(CMDBError):
+class CmdbTypeError(Exception):
     """
     Base CmdbType Error
     """

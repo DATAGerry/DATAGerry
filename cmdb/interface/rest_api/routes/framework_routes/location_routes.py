@@ -29,11 +29,14 @@ from cmdb.user_management.models.user import UserModel
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.models.location_node import LocationNode
 from cmdb.framework.results import IterationResult
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import UpdateSingleResponse,\
-                                              GetMultiResponse
+from cmdb.interface.rest_api.responses import (
+    UpdateSingleResponse,
+    GetMultiResponse,
+    GetSingleValueResponse,
+)
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -103,7 +106,9 @@ def create_location(params: dict, request_user: UserModel):
         LOGGER.debug("[ManagerInsertError] ManagerInsertError: %s", err.message)
         return abort(400, "Could not insert the new location in database)!")
 
-    return make_response(created_location_id)
+    api_response = GetSingleValueResponse(created_location_id)
+
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -139,7 +144,6 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
     except ManagerIterationError as err:
         LOGGER.debug("[get_all_locations] ManagerIterationError: %s", err.message)
         return abort(400, "Could not retrieve locations from database!")
-
 
     return api_response.make_response()
 
@@ -219,7 +223,9 @@ def get_location(public_id: int, request_user: UserModel):
         LOGGER.debug("[get_location] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the location from database!")
 
-    return make_response(location_instance)
+    api_response = GetSingleValueResponse(location_instance)
+
+    return api_response.make_response()
 
 
 @location_blueprint.route('/<int:object_id>/object', methods=['GET'])
@@ -241,7 +247,9 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         LOGGER.debug("[get_location_for_object] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the location from database!")
 
-    return make_response(location_instance)
+    api_response = GetSingleValueResponse(location_instance)
+
+    return api_response.make_response()
 
 
 @location_blueprint.route('/<int:object_id>/parent', methods=['GET'])
@@ -255,9 +263,9 @@ def get_parent(object_id: int, request_user: UserModel):
         object_id (int): object_id of object 
         request_user (UserModel): User which is requesting the data
     """
-    parent = None
-
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+
+    parent = None
 
     try:
         current_location = locations_manager.get_location_for_object(object_id)
@@ -265,11 +273,13 @@ def get_parent(object_id: int, request_user: UserModel):
         if current_location:
             parent_id = current_location.parent
             parent = locations_manager.get_location(parent_id)
+    except Exception as err:
+        #ERROR-FIX
+        LOGGER.debug("[get_parent] Exception: %s, Type: %s", err, type(err))
 
-    except ManagerGetError:
-        return make_response(parent)
+    api_response = GetSingleValueResponse(parent)
 
-    return make_response(parent)
+    return api_response.make_response()
 
 
 @location_blueprint.route('/<int:object_id>/children', methods=['GET'])
@@ -297,10 +307,13 @@ def get_children(object_id: int, request_user: UserModel):
             location_public_id = current_location.public_id
             children = locations_manager.get_locations_by(parent=location_public_id)
 
-    except ManagerGetError:
-        return make_response(children)
+    except Exception as err:
+        #ERROR-FIX
+        LOGGER.debug("[get_children] Exception: %s, Type: %s", err, type(err))
 
-    return make_response(children)
+    api_response = GetSingleValueResponse(children)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -348,7 +361,7 @@ def update_location_for_object(params: dict, request_user: UserModel):
         LOGGER.debug("[update_location_for_object] ManagerUpdateError: %s", err.message)
         return abort(400, "Could not update the location!")
 
-    api_response = UpdateSingleResponse(result=result)
+    api_response = UpdateSingleResponse(result)
 
     return api_response.make_response()
 
@@ -380,4 +393,6 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         LOGGER.debug("[delete_location_for_object] ManagerDeleteError: %s", err.message)
         return abort(400, f"Could not delete the location with ID: {object_id} !")
 
-    return make_response(ack)
+    api_response = GetSingleValueResponse(ack)
+
+    return api_response.make_response()

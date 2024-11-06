@@ -54,7 +54,7 @@ class BaseAPIResponse:
         self.time: str = datetime.now(timezone.utc).isoformat()
 
 
-    def make_response(self, *args, **kwargs) -> Response:
+    def make_response(self, status: int = 200) -> Response:
         """
         Abstract method for http response
 

@@ -29,11 +29,11 @@ from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import make_response, insert_request_user
+from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import UpdateSingleResponse,\
-                                              GetMultiResponse
-
+                                              GetMultiResponse,\
+                                              GetSingleValueResponse
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -78,7 +78,9 @@ def create_section_template(params: dict, request_user: UserModel):
         LOGGER.debug("[create_section_template] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create the section template!")
 
-    return make_response(created_section_template_id)
+    api_response = GetSingleValueResponse(created_section_template_id)
+
+    return api_response.make_response()
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -139,7 +141,9 @@ def get_section_template(public_id: int, request_user: UserModel):
     if not section_template_instance:
         section_template_instance = []
 
-    return make_response(section_template_instance)
+    api_response = GetSingleValueResponse(section_template_instance)
+
+    return api_response.make_response()
 
 
 @section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
@@ -165,7 +169,9 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
 
-    return make_response(counts)
+    api_response = GetSingleValueResponse(counts)
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -246,4 +252,6 @@ def delete_section_template(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_section_template] ManagerDeleteError: %s", err)
         return abort(400, f"Could not delete SectionTemplate with public_id: {public_id}!")
 
-    return make_response(ack)
+    api_response = GetSingleValueResponse(ack)
+
+    return api_response.make_response()
