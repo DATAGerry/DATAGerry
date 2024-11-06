@@ -208,6 +208,9 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     @Output() public stateDelete: EventEmitter<TableState> = new EventEmitter<TableState>();
     @Output() public stateReset: EventEmitter<void> = new EventEmitter<void>();
 
+    @Input() enableObjectReferenceLinks: boolean = false; // To enable hover pointer and routing
+    @Input() referenceViewPath: string[] = []; // Base route for navigation
+
     ASC: number = SortDirection.ASCENDING;
     DSC: number = SortDirection.DESCENDING;
     routerSubscription: Subscription | undefined;
@@ -476,5 +479,16 @@ export class TableComponent<T> implements OnInit, OnDestroy {
     public onStateReset(): void {
         this.tableService.setCurrentTableState(this.router.url, this.id, undefined);
         this.stateReset.emit();
+    }
+
+
+    /**
+     * Navigates to the specified item if object reference links are enabled and an object ID is present.
+     * @param item - The item to navigate to.
+     */
+    navigateToItem(item: any): void {
+        if (this.enableObjectReferenceLinks && item?.object_information.object_id) {
+            this.router.navigate([...this.referenceViewPath, item?.object_information.object_id]);
+        }
     }
 }

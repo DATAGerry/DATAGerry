@@ -4,7 +4,10 @@
             [customButtons]="[exportButtonTemplate]" [tableState]="tableState"
             (pageChange)="onPageChange($event)" (pageSizeChange)="onPageSizeChange($event)"
             (sortChange)="onSortChange($event)" (selectedChange)="onSelectedChange($event)"
-            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()" (searchChange)="onSearchChange($event)">
+            (stateSelect)="onStateSelect($event)" (stateReset)="onStateReset()" (searchChange)="onSearchChange($event)"
+            [enableObjectReferenceLinks]="true"
+            [referenceViewPath]="['/', 'framework', 'object', 'view']"
+            >
 </cmdb-table>
 
 <!-- Table templates -->

@@ -6,3 +6,8 @@
   pointer-events: none;
   opacity: 0.4;
 }
+
+/* CSS to make the cursor a hand pointer on row hover */
+.row-hover-pointer:hover {
+  cursor: pointer;
+}
