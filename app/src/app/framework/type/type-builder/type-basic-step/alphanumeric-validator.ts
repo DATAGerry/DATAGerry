@@ -7,7 +7,8 @@ import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
  */
 export function alphanumericValidator(): ValidatorFn {
     return (control: AbstractControl): ValidationErrors | null => {
-        const valid = /^[a-zA-Z0-9]*$/.test(control.value);
+        // This regex allows only numbers, alphabets (including German), and hyphen.
+        const valid = /^[\p{L}\p{N}-]*$/u.test(control.value);
         return valid ? null : { invalidCharacters: true };
     };
 }
