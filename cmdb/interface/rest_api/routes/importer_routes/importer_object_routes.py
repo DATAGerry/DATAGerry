@@ -31,15 +31,17 @@ from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.importer.importer_response import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
-from cmdb.interface.route_utils import make_response,\
-                                       insert_request_user,\
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.route_utils import insert_request_user,\
                                        login_required,\
                                        right_required
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.interface.rest_api.routes.importer_routes.importer_route_utils import get_file_in_request,\
-                                                                                get_element_from_data_request,\
-                                                                                generate_parsed_output,\
-                                                                                verify_import_access
+from cmdb.interface.rest_api.routes.importer_routes.importer_route_utils import (
+    get_file_in_request,
+    get_element_from_data_request,
+    generate_parsed_output,
+    verify_import_access,
+)
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
@@ -76,7 +78,9 @@ def get_importer():
             'icon': __OBJECT_IMPORTER__.get(importer).ICON
         })
 
-    return make_response(importer_response)
+    api_response = GetSingleValueResponse(importer_response)
+
+    return api_response.make_response()
 
 
 @importer_object_blueprint.route('/importer/config/<string:importer_type>/', methods=['GET'])
@@ -89,7 +93,9 @@ def get_default_importer_config(importer_type):
     except IndexError:
         return abort(404)
 
-    return make_response({'manually_mapping': importer.MANUALLY_MAPPING})
+    api_response = GetSingleValueResponse({'manually_mapping': importer.MANUALLY_MAPPING})
+
+    return api_response.make_response()
 
 
 @importer_object_blueprint.route('/parser/', methods=['GET'])
@@ -99,7 +105,9 @@ def get_parser():
     """TODO: document"""
     parser = list(__OBJECT_PARSER__)
 
-    return make_response(parser)
+    api_response = GetSingleValueResponse(parser)
+
+    return api_response.make_response()
 
 
 @importer_object_blueprint.route('/parser/default/<string:parser_type>', methods=['GET'])
@@ -111,8 +119,10 @@ def get_default_parser_config(parser_type: str):
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
         return abort(404)
+    
+    api_response = GetSingleValueResponse(parser.DEFAULT_CONFIG)
 
-    return make_response(parser.DEFAULT_CONFIG)
+    return api_response.make_response()
 
 
 @importer_object_blueprint.route('/parse/', methods=['POST'])
@@ -148,7 +158,9 @@ def parse_objects():
         LOGGER.debug("[parse_objects] Error: %s, Type: %s", err, type(err))
         return abort(500, "Could not generate parsed output!")
 
-    return make_response(parsed_output)
+    api_response = GetSingleValueResponse(parsed_output)
+
+    return api_response.make_response()
 
 
 @importer_object_blueprint.route('/', methods=['POST'])
@@ -276,4 +288,6 @@ def import_objects(request_user: UserModel):
             #ERROR-FIX
             LOGGER.debug("[import_objects] ManagerInsertError: %s", err.message)
 
-    return make_response(import_response)
+    api_response = GetSingleValueResponse(import_response)
+
+    return api_response.make_response()

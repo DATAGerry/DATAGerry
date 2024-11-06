@@ -16,10 +16,9 @@
 """
 Contains Provider Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ProviderError(CMDBError):
+class ProviderError(Exception):
     """
     Base Provider Error
     """

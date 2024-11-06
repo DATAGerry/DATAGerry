@@ -20,7 +20,7 @@ from flask import current_app, abort
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __title__, __version__
-from cmdb.interface.route_utils import make_response
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -42,13 +42,15 @@ def connection_response():
         Response: Dict with infos about Datagerry(title, version and connection status of db)
     """
     try:
-        resp = {
+        infos = {
             'title': __title__,
             'version': __version__,
             'connected': dbm.status()
         }
 
-        return make_response(resp)
+        api_response = GetSingleValueResponse(infos)
+
+        return api_response.make_response()
     except Exception as err:
         LOGGER.debug("[connection_response] Exception: %s", str(err))
         abort(500, "Could not connect to REST API!")

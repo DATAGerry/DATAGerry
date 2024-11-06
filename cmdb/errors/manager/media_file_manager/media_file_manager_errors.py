@@ -16,10 +16,9 @@
 """
 This module contains the classes of all MediaFilesManager errors
 """
-from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class MediaFileManagerError(CMDBError):
+class MediaFileManagerError(Exception):
     """
     Base MediaFileManagerError error
     """

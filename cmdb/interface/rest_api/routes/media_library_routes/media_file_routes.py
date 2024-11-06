@@ -24,20 +24,26 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.media_files_manager import MediaFilesManager
 
 from cmdb.user_management.models.user import UserModel
-from cmdb.interface.route_utils import make_response,\
-                                       insert_request_user,\
-                                       login_required,\
-                                       right_required
-from cmdb.interface.rest_api.routes.media_library_routes.media_file_route_utils import get_element_from_data_request,\
-                                                                                       get_file_in_request,\
-                                                                                       generate_metadata_filter,\
-                                                                                       recursive_delete_filter,\
-                                                                                       generate_collection_parameters,\
-                                                                                       create_attachment_name
+from cmdb.interface.route_utils import (
+    insert_request_user,
+    login_required,
+    right_required,
+)
+from cmdb.interface.rest_api.routes.media_library_routes.media_file_route_utils import (
+    get_element_from_data_request,
+    get_file_in_request,
+    generate_metadata_filter,
+    recursive_delete_filter,
+    generate_collection_parameters,
+    create_attachment_name,
+)
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.rest_api.responses import InsertSingleResponse,\
-                                              GetMultiResponse
+from cmdb.interface.rest_api.responses import (
+    InsertSingleResponse,
+    GetMultiResponse,
+    GetSingleValueResponse,
+)
 
 from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
                                                    MediaFileManagerInsertError,\
@@ -211,7 +217,9 @@ def update_file(request_user: UserModel):
         #ERROR-FIX
         return abort(500)
 
-    return make_response(data)
+    api_response = GetSingleValueResponse(data)
+
+    return api_response.make_response()
 
 
 @media_file_blueprint.route('/<string:filename>/', methods=['GET'])
@@ -246,7 +254,9 @@ def get_file(filename: str, request_user: UserModel):
         #ERROR-FIX
         return abort(404, f"Could not retrieve file with filename: {filename}")
 
-    return make_response(result)
+    api_response = GetSingleValueResponse(result)
+
+    return api_response.make_response()
 
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
@@ -319,4 +329,6 @@ def delete_file(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_file] MediaFileManagerDeleteError: %s", err)
         return abort(404)
 
-    return make_response(file_to_delete)
+    api_response = GetSingleValueResponse(file_to_delete)
+
+    return api_response.make_response()

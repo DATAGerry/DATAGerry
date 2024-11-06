@@ -30,7 +30,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.utils.system_writer import SystemSettingsWriter
 

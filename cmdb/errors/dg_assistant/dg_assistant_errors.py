@@ -16,10 +16,9 @@
 """
 Contains DATAerry Assistant Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class AssistantError(CMDBError):
+class AssistantError(Exception):
     """Base DocAPI Error"""
     def __init__(self, message: str):
         self.message = message

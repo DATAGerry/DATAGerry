@@ -18,16 +18,17 @@ import sys
 import time
 import logging
 
-from cmdb import __title__, __version__, __runtime__
-from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
-from cmdb.interface.route_utils import make_response, login_required, right_required, \
-    insert_request_user
-from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.user_management.models.user import UserModel
-from cmdb.utils.system_config import SystemConfigReader
-from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
+from cmdb.utils.system_config import SystemConfigReader
+from cmdb.utils.system_reader import SystemSettingsReader
+
+from cmdb import __title__, __version__, __runtime__
+from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
+from cmdb.interface.route_utils import login_required, right_required, insert_request_user
+from cmdb.interface.blueprint import NestedBlueprint
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -58,14 +59,16 @@ def get_datagerry_information(request_user: UserModel):
         'starting_parameters': sys.argv
     }
 
-    return make_response(datagerry_infos)
+    api_response = GetSingleValueResponse(datagerry_infos)
+
+    return api_response.make_response()
 
 
 @system_blueprint.route('/config/', methods=['GET'])
-@system_blueprint.route('/config', methods=['GET'])
+@insert_request_user
 @login_required
 @right_required('base.system.view')
-def get_config_information():
+def get_config_information(request_user: UserModel):
     """TODO: document"""
     ssc = SystemConfigReader()
 
@@ -82,10 +85,12 @@ def get_config_information():
 
         config_dict['properties'].append([section, section_values])
 
-    if len(config_dict) < 1:
-        return make_response(config_dict, 204)
+    api_response = GetSingleValueResponse(config_dict)
 
-    return make_response(config_dict)
+    if len(config_dict) < 1:
+        return api_response.make_response(204)
+
+    return api_response.make_response()
 
 
 @system_blueprint.route('/information/', methods=['GET'])
@@ -102,4 +107,6 @@ def get_system_information():
         }
     }
 
-    return make_response(system_infos)
+    api_response = GetSingleValueResponse(system_infos)
+
+    return api_response.make_response()

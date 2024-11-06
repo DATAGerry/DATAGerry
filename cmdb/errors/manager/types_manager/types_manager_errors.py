@@ -16,10 +16,9 @@
 """
 This module contains the classes of all TypesManager errors
 """
-from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class TypesManagerError(CMDBError):
+class TypesManagerError(Exception):
     """
     Base UsersManager error
     """

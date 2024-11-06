@@ -22,7 +22,7 @@ from flask import abort, request, current_app
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.framework.results import IterationResult

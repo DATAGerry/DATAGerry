@@ -16,10 +16,9 @@
 """
 This module contains the classes of all UsersManager errors
 """
-from cmdb.errors.cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class UserManagerError(CMDBError):
+class UserManagerError(Exception):
     """
     Base UsersManager error
     """

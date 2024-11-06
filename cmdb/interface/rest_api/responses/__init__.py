@@ -22,6 +22,7 @@ from .get_single_value_response import GetSingleValueResponse
 from .insert_single_response import InsertSingleResponse
 from .update_single_response import UpdateSingleResponse
 from .update_multi_response import UpdateMultiResponse
+from .login_response import LoginResponse
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -33,4 +34,5 @@ __all__ = [
     'InsertSingleResponse',
     'UpdateSingleResponse',
     'UpdateMultiResponse',
+    'LoginResponse',
 ]

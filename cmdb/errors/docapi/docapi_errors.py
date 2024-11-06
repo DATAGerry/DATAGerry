@@ -16,10 +16,9 @@
 """
 Contains DocAPI Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
+class DocapiError(Exception):
     """Base DocAPI Error"""
     def __init__(self, message: str):
         self.message = message

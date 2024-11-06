@@ -16,10 +16,9 @@
 """
 Contains Importer Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ImporterError(CMDBError):
+class ImporterError(Exception):
     """
     Base Importer Error
     """

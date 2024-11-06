@@ -22,11 +22,13 @@ from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.interface.route_utils import make_response, insert_request_user, login_required
+
 from cmdb.search.params import SearchParam
 from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.route_utils import insert_request_user, login_required
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -59,9 +61,9 @@ def quick_search_result_counter(request_user: UserModel):
         return abort(400)
 
     if len(result) > 0:
-        return make_response(result[0])
+        return GetSingleValueResponse(result[0]).make_response()
 
-    return make_response({'active': 0, 'inactive': 0, 'total': 0})
+    return GetSingleValueResponse({'active': 0, 'inactive': 0, 'total': 0}).make_response()
 
 
 @search_blueprint.route('/', methods=['GET', 'POST'])
@@ -105,10 +107,12 @@ def search_framework(request_user: UserModel):
         result = searcher.aggregate(pipeline=query, request_user=request_user, limit=limit, skip=skip,
                                     resolve=resolve_object_references, active=only_active)
     except Exception as err:
-        LOGGER.error('[search_framework]: %s',err)
-        return make_response([], 204)
+        LOGGER.error("[search_framework]: Exception: %s, Type: %s",err, type(err))
+        return GetSingleValueResponse([]).make_response(204)
 
-    return make_response(result)
+    api_response = GetSingleValueResponse(result)
+
+    return api_response.make_response()
 
 
 def _fetch_only_active_objs():

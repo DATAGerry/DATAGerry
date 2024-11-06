@@ -24,7 +24,7 @@ from pymongo.errors import OperationFailure
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.utils.system_reader import SystemSettingsReader

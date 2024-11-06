@@ -19,8 +19,9 @@ from flask import abort, jsonify, current_app
 
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
-from cmdb.interface.route_utils import make_response, login_required, insert_request_user
+from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.helpers import load_class
 from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
@@ -39,7 +40,7 @@ exporter_blueprint = APIBlueprint('exporter', __name__)
 @login_required
 def get_export_file_types():
     """TODO: document"""
-    return make_response(SupportedExporterExtension().convert_to())
+    return GetSingleValueResponse(SupportedExporterExtension().convert_to()).make_response()
 
 
 @exporter_blueprint.route('/', methods=['GET'])

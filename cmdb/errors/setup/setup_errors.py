@@ -16,10 +16,9 @@
 """
 Contains Setup Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class SetupError(CMDBError):
+class SetupError(Exception):
     """
     Base Setup Error
     """

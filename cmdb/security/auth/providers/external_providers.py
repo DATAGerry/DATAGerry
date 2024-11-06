@@ -21,7 +21,7 @@ from ldap3 import Server, Connection
 from ldap3.core.exceptions import LDAPExceptionError
 
 from cmdb.manager.users_manager import UsersManager
-from cmdb.security.security import SecurityManager
+from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.auth.auth_providers import AuthenticationProvider

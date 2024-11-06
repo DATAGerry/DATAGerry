@@ -16,10 +16,9 @@
 """
 Contains Config File Error Classes
 """
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ConfigFileError(CMDBError):
+class ConfigFileError(Exception):
     """
     Base ConfigFile Error
     """
