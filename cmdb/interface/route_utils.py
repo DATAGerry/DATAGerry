@@ -26,14 +26,14 @@ from werkzeug._internal import _wsgi_decoding_dance
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
-from cmdb.security.auth.auth_module import AuthModule
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
+from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.validator import TokenValidator
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 
@@ -87,9 +87,8 @@ def user_has_right(required_right: str) -> bool:
     try:
         decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
     except TokenValidationError as err:
-        #ERROR-FIX
         LOGGER.debug("[user_has_right] Error: %s", str(err))
-        return abort(401)
+        return abort(401, "Invalid token!")
 
     try:
         user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
@@ -224,10 +223,10 @@ def parse_authorization_header(header):
 
                 users_manager = UsersManager(current_app.database_manager)
                 security_manager = SecurityManager(current_app.database_manager)
+                settings_reader = SettingsReaderManager(current_app.database_manager)
 
-                auth_settings = SystemSettingsReader(current_app.database_manager).get_all_values_from_section(
-                                                                                   'auth',
-                                                                                   AuthModule.__DEFAULT_SETTINGS__)
+                auth_settings = settings_reader.get_all_values_from_section('auth',
+                                                                            AuthModule.__DEFAULT_SETTINGS__)
                 auth_module = AuthModule(auth_settings,
                                          security_manager=security_manager,
                                          users_manager=users_manager)

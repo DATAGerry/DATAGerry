@@ -14,30 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+from cmdb.interface.rest_api.responses.messages.import_message import ImportMessage
 # -------------------------------------------------------------------------------------------------------------------- #
-
-class BaseImporterResponse:
-    """Base response after import action"""
-
-    def __init__(self, message: str):
-        self.message: str = message
-
-#CLASS-FIX
-class ImporterObjectResponse(BaseImporterResponse):
-    """Response of an bulk object import"""
-
-    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
-        self.success_imports: list[ImportSuccessMessage] = success_imports or []
-        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
-        super().__init__(message=message)
-
-#CLASS-FIX
-class ImportMessage:
-    """Simple class wrapper for json encoding"""
-
-    def __init__(self, obj: dict = None):
-        self.obj = obj
-
 
 class ImportSuccessMessage(ImportMessage):
     """Message wrapper for successfully imported objects"""
@@ -49,17 +27,4 @@ class ImportSuccessMessage(ImportMessage):
             obj (optional): cmdb object instance
         """
         self.public_id = public_id
-        super().__init__(obj=obj)
-
-
-class ImportFailedMessage(ImportMessage):
-    """Message wrapper for failed imported objects"""
-
-    def __init__(self, error_message: str, obj: dict = None):
-        """Init message
-        Args:
-            error_message: reason why it failed - exception error or something
-            obj (optional): failed dict
-        """
-        self.error_message = error_message
         super().__init__(obj=obj)

@@ -24,7 +24,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
 from cmdb.utils.helpers import load_class
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.type import TypeNotFoundError

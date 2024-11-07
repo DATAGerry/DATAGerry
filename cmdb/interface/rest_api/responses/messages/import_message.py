@@ -13,19 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
+"""TODO. document"""
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExporterConfig(BaseExporterConfig):
-    """TODO: document"""
-    def __init__(self, parameters: CollectionParameters, options: dict = None):
-        """
-        Args:
-            parameters: Rest API class for parameters passed by a http request on a collection route
-            options: dict of optional parameters for given route function.
-        """
-        self.parameters = parameters
-        self.options = options or None
-        super().__init__(config_type=ExporterConfigType.NATIVE)
+class ImportMessage:
+    """Simple class wrapper for json encoding"""
+
+    def __init__(self, obj: dict = None):
+        self.obj = obj

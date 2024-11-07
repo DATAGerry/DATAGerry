@@ -21,7 +21,7 @@ from flask import Blueprint, abort, request, current_app
 
 from cmdb.manager.users_manager import UsersManager
 
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.token.validator import TokenValidator
@@ -63,8 +63,8 @@ class APIBlueprint(Blueprint):
                             try:
                                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
                             except TokenValidationError:
-                                #ERROR-FIX
-                                return abort(401)
+                                return abort(401, "Invalid Token")
+
                             try:
                                 user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
 
@@ -87,6 +87,7 @@ class APIBlueprint(Blueprint):
                                         if user_dict[exe_key] == route_parameter:
                                             return f(*args, **kwargs)
                             except ManagerGetError:
+                                #ERROR-FIX
                                 return abort(404)
                         return abort(403, f'User has not the required right {right}')
 

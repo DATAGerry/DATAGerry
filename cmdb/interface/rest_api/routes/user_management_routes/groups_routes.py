@@ -24,14 +24,14 @@ from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.framework.results import IterationResult
+from cmdb.framework.models.group_model.group_delete_mode_enum import GroupDeleteMode
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.rights import flat_rights_tree, __all__ as rights
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.rest_api.routes.user_management_routes.group_parameters import GroupDeletionParameters,\
-                                                                                   GroupDeleteMode
+from cmdb.interface.rest_api.responses.response_parameters.group_parameters import GroupDeletionParameters
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import DeleteSingleResponse,\
                                               UpdateSingleResponse,\
                                               InsertSingleResponse,\

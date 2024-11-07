@@ -16,14 +16,14 @@
 """TODO: document"""
 from json import loads
 
-from cmdb.interface.rest_api.responses.helpers.api_parameters import Parameter, CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.utils.helpers import str_to_bool
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class TypeIterationParameters(CollectionParameters):
     """TODO: document"""
-    def __init__(self, query_string: Parameter, active: bool = True, **kwargs):
+    def __init__(self, query_string: str, active: bool = True, **kwargs):
         self.active = active
         super().__init__(query_string=query_string, **kwargs)
 
@@ -39,7 +39,7 @@ class TypeIterationParameters(CollectionParameters):
             optional['filter'] = loads(optional['filter'])
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
-        return cls(Parameter(query_string), active=active, **optional)
+        return cls(query_string, active=active, **optional)
 
 
     @classmethod

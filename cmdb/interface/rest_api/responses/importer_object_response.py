@@ -14,18 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
+from cmdb.interface.rest_api.responses.messages.import_success_message import ImportSuccessMessage
+from cmdb.interface.rest_api.responses.messages.import_failed_message import ImportFailedMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExporterConfig(BaseExporterConfig):
-    """TODO: document"""
-    def __init__(self, parameters: CollectionParameters, options: dict = None):
-        """
-        Args:
-            parameters: Rest API class for parameters passed by a http request on a collection route
-            options: dict of optional parameters for given route function.
-        """
-        self.parameters = parameters
-        self.options = options or None
-        super().__init__(config_type=ExporterConfigType.NATIVE)
+class ImporterObjectResponse:
+    """Response of an bulk object import"""
+
+    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
+        self.message = message
+        self.success_imports: list[ImportSuccessMessage] = success_imports or []
+        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
+
+        super().__init__()

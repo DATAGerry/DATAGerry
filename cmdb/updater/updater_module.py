@@ -16,7 +16,8 @@
 """TODO: document"""
 import logging
 
-from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+
 from cmdb.updater.updater_settings import UpdateSettings
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -35,13 +36,13 @@ class UpdaterModule:
 
     __UPDATER_VERSIONS_POOL__ = [20200512, 20200513, 20240603]
 
-    def __init__(self, system_settings_reader: SystemSettingsReader):
-        auth_settings_values = system_settings_reader.get_all_values_from_section(
+    def __init__(self, settings_reader: SettingsReaderManager):
+        auth_settings_values = settings_reader.get_all_values_from_section(
                                                         'updater',
                                                         default=UpdaterModule.get_last_version()['version']
                                                       )
         self.__settings: UpdateSettings = self.__init_settings(auth_settings_values)
-        self.system_settings_reader = system_settings_reader
+        self.settings_reader = settings_reader
 
 
     def __init_settings(self, auth_settings_values: dict) -> UpdateSettings:

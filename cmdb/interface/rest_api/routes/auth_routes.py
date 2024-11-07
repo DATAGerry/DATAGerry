@@ -23,14 +23,14 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.security_manager import SecurityManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import check_user_in_mysql_db
 from cmdb.interface.route_utils import (
@@ -103,10 +103,10 @@ def post_login():
         return abort(500, "Could not login")
 
     #PATH when its not cloud mode
-    system_settings_reader: SystemSettingsReader = SystemSettingsReader(current_app.database_manager)
+    settings_reader = SettingsReaderManager(current_app.database_manager)
 
     auth_module = AuthModule(
-        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
+        settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__),
         security_manager=security_manager,
         users_manager=users_manager)
 
@@ -138,10 +138,10 @@ def post_login():
 @auth_blueprint.protect(auth=True, right='base.system.view')
 def get_auth_settings(request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
-    auth_settings = system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
+    auth_settings = settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
     api_response = GetSingleValueResponse(auth_module.settings)
 
@@ -155,11 +155,11 @@ def get_installed_providers(request_user: UserModel):
     """TODO: document"""
     provider_names: list[dict] = []
 
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
     auth_module = AuthModule(
-        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
+        settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
@@ -174,11 +174,11 @@ def get_installed_providers(request_user: UserModel):
 @auth_blueprint.protect(auth=True, right='base.system.view')
 def get_provider_config(provider_class: str, request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
     auth_module = AuthModule(
-        system_settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
+        settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__))
 
     try:
         provider_class_config = auth_module.get_provider(provider_class).get_config()
@@ -198,9 +198,9 @@ def update_auth_settings(request_user: UserModel):
     """TODO: document"""
     new_auth_settings_values = request.get_json()
 
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
-    system_setting_writer: SystemSettingsWriter = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_WRITER,
+    settings_writer: SettingsWriterManager = ManagerProvider.get_manager(ManagerType.SETTINGS_WRITER_MANAGER,
                                                                                request_user)
 
     if not new_auth_settings_values:
@@ -212,10 +212,10 @@ def update_auth_settings(request_user: UserModel):
         LOGGER.debug("[update_auth_settings] Error: %s", str(err))
         return abort(500, "Could not initialise auth settings!")
 
-    update_result = system_setting_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
+    update_result = settings_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        api_response = GetSingleValueResponse(system_settings_reader.get_section('auth'))
+        api_response = GetSingleValueResponse(settings_reader.get_section('auth'))
         return api_response.make_response()
 
     return abort(400, 'Could not update auth settings')

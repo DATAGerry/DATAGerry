@@ -16,8 +16,9 @@
 """TODO: document"""
 import logging
 
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+
 from cmdb.utils.helpers import process_bar, load_class
-from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -28,10 +29,8 @@ LOGGER = logging.getLogger(__name__)
 class UpdateSettings:
     """Update data object"""
 
-    __DOCUMENT_IDENTIFIER = 'updater'
-
     def __init__(self, version: int):
-        self._id: str = UpdateSettings.__DOCUMENT_IDENTIFIER
+        self._id: str = 'updater'
         self.version = version
 
 
@@ -45,12 +44,12 @@ class UpdateSettings:
         return self.version
 
 
-    def run_updates(self, version: int, ssr: SystemSettingsReader):
+    def run_updates(self, version: int, settings_reader: SettingsReaderManager):
         """TODO: document"""
         #IMPORT-FIX
         from cmdb.updater.updater_module import UpdaterModule
-        ssr.get_all_values_from_section('updater')
-        updater_instance = UpdaterModule(ssr)
+        settings_reader.get_all_values_from_section('updater')
+        updater_instance = UpdaterModule(settings_reader)
         versions = updater_instance.__UPDATER_VERSIONS_POOL__
         current_version = updater_instance.get_last_version()['version']
 

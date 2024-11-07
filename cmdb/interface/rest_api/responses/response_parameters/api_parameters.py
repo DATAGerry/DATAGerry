@@ -15,41 +15,41 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from Crypto import Random
-from Crypto.PublicKey import RSA
-
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
-
-from cmdb.manager.settings_writer_manager import SettingsWriterManager
+from json import loads
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 KeyGenerator - CLASS                                                 #
+#                                                 APIParameters - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-class KeyGenerator:
-    """TODO: document"""
-    def __init__(self, dbm: MongoDatabaseManager):
-        self.settings_writer = SettingsWriterManager(dbm)
+class APIParameters:
+    """Rest API Parameter superclass"""
+
+    def __init__(self, query_string: str = None, projection: dict = None, **optional):
+        self.query_string: str = query_string or ''
+        self.projection: dict = projection
+        self.optional = optional
 
 
-    def generate_rsa_keypair(self):
+    @classmethod
+    def from_http(cls, query_string: str, **optional) -> "APIParameters":
         """TODO: document"""
-        key = RSA.generate(2048)
-        private_key = key.export_key()
-        public_key = key.publickey().export_key()
+        if 'projection' in optional:
+            optional['projection'] = loads(optional['projection'])
+        return cls(query_string, **optional)
 
-        asymmetric_key = {
-            'private': private_key,
-            'public': public_key
+
+    @classmethod
+    def to_dict(cls, parameters: "APIParameters") -> dict:
+        """Get the object as a dict"""
+        params: dict = {
+            'query_string': parameters.query_string
         }
+        if parameters.projection:
+            params.update({'projection': parameters.projection})
+        return params
 
-        self.settings_writer.write('security', {'asymmetric_key': asymmetric_key})
 
-
-    def generate_symmetric_aes_key(self):
-        """TODO: document"""
-        symmetric_aes_key = Random.get_random_bytes(32)
-
-        self.settings_writer.write('security', {'symmetric_aes_key': symmetric_aes_key})
+    def __repr__(self):
+        return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'

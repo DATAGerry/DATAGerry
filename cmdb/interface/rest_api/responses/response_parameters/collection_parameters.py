@@ -14,56 +14,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from enum import Enum
+import logging
 from json import loads
-from typing import NewType, Union
+from typing import Union
+
+from cmdb.interface.rest_api.responses.response_parameters.api_parameters import APIParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
-Parameter = NewType('Parameter', str)
+LOGGER = logging.getLogger(__name__)
 
-
-class SortOrder(Enum):
-    """Sort enum for http parameters"""
-    ASCENDING = 1
-    DESCENDING = -1
-
-
-class APIParameters:
-    """Rest API Parameter superclass"""
-
-    def __init__(self, query_string: Parameter = None, projection: dict = None, **optional):
-        self.query_string: Parameter = query_string or Parameter('')
-        self.projection: dict = projection
-        self.optional = optional
-
-
-    @classmethod
-    def from_http(cls, query_string: str, **optional) -> "APIParameters":
-        """TODO: document"""
-        if 'projection' in optional:
-            optional['projection'] = loads(optional['projection'])
-        return cls(Parameter(query_string), **optional)
-
-
-    @classmethod
-    def to_dict(cls, parameters: "APIParameters") -> dict:
-        """Get the object as a dict"""
-        params: dict = {
-            'query_string': parameters.query_string
-        }
-        if parameters.projection:
-            params.update({'projection': parameters.projection})
-        return params
-
-
-    def __repr__(self):
-        return f'Parameters: Query({self.query_string}) | Projection({self.projection}) |Optional({self.optional})'
-
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             CollectionParameters - CLASS                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CollectionParameters(APIParameters):
     """Rest API class for parameters passed by a http request on a collection route"""
 
-    def __init__(self, query_string: Parameter, limit: int = None, sort: str = None,
+    def __init__(self, query_string: str, limit: int = None, sort: str = None,
                  order: int = None, page: int = None, filter: Union[list[dict], dict] = None, **kwargs):
         """
         Constructor of the CollectionParameters.
@@ -78,8 +44,8 @@ class CollectionParameters(APIParameters):
             **kwargs:
         """
         self.limit: int = int(limit or 10)
-        self.sort: str = sort or Parameter('public_id')
-        self.order: int = int(order or SortOrder.ASCENDING.value)
+        self.sort: str = sort or 'public_id'
+        self.order: int = int(order or 1)
         self.page: int = int((page or 1) or page < 1)
 
         if self.limit == 0:
@@ -109,7 +75,7 @@ class CollectionParameters(APIParameters):
         if 'projection' in optional:
             optional['projection'] = loads(optional['projection'])
 
-        return cls(Parameter(query_string), **optional)
+        return cls(query_string, **optional)
 
 
     @classmethod

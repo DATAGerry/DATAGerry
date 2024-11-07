@@ -21,7 +21,7 @@ import logging
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.utils.system_config import SystemConfigReader
-from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb import __title__, __version__, __runtime__
 from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
@@ -42,11 +42,11 @@ system_blueprint = NestedBlueprint(settings_blueprint, url_prefix='/system')
 @login_required
 def get_datagerry_information(request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
     try:
-        db_version = system_settings_reader.get_all_values_from_section('updater').get('version')
+        db_version = settings_reader.get_all_values_from_section('updater').get('version')
     except Exception as err:
         LOGGER.warning(err)
         db_version = 0

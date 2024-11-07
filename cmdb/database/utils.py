@@ -30,7 +30,6 @@ from bson.tz_util import utc
 
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.importer.importer_response import BaseImporterResponse, ImportMessage
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.provider_config import AuthProviderConfig
@@ -102,8 +101,6 @@ def default(obj):
                         RenderResult,
                         TemplateManagementBase,
                         AuthSettingsDAO,
-                        ImportMessage,
-                        BaseImporterResponse,
                         MediaFileManagementBase,
                         AuthProviderConfig,
                         BaseRight,
@@ -152,4 +149,7 @@ def default(obj):
     if isinstance(obj, uuid.UUID):
         return {"$uuid": obj.hex}
 
-    raise TypeError(f"{obj} is not JSON serializable - type: {type(obj)}")
+    try:
+        return obj.__dict__
+    except Exception as err:
+        raise TypeError(f"{obj} not JSON serializable - Type: {type(obj)}. Error: {err}") from err

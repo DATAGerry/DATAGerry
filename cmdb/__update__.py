@@ -22,8 +22,8 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.user_management.constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
@@ -152,19 +152,19 @@ class UpdateRoutine:
         # update version updater settings
         try:
             updater_settings_values = UpdaterModule.__DEFAULT_SETTINGS__
-            ssr = SystemSettingsReader(self.dbm)
+            settings_reader = SettingsReaderManager(self.dbm)
 
             try:
-                updater_settings_values = ssr.get_all_values_from_section('updater')
+                updater_settings_values = settings_reader.get_all_values_from_section('updater')
                 updater_setting_instance = UpdateSettings(**updater_settings_values)
             except SectionError: #ERROR-FIX (UpdateSettings initialisation is not covered)
                 # create updater section if not exist
-                system_setting_writer: SystemSettingsWriter = SystemSettingsWriter(self.dbm)
+                settings_writer = SettingsWriterManager(self.dbm)
                 updater_setting_instance = UpdateSettings(updater_settings_values['version'])
-                system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
+                settings_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
             # start running update files
-            updater_setting_instance.run_updates(updater_settings_values.get('version'), ssr)
+            updater_setting_instance.run_updates(updater_settings_values.get('version'), settings_reader)
 
         except Exception as err:
             self.status = UpdateRoutine.UpateStatus.ERROR

@@ -28,7 +28,7 @@ from cmdb.database.utils import default
 from cmdb.framework.models.log_model.log_action_enum import LogAction
 from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.importer.importer_config import ObjectImporterConfig
-from cmdb.importer.importer_response import ImporterObjectResponse
+from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
 from cmdb.interface.rest_api.responses import GetSingleValueResponse
@@ -119,7 +119,7 @@ def get_default_parser_config(parser_type: str):
         parser: BaseObjectParser = __OBJECT_PARSER__[parser_type]
     except IndexError:
         return abort(404)
-    
+
     api_response = GetSingleValueResponse(parser.DEFAULT_CONFIG)
 
     return api_response.make_response()

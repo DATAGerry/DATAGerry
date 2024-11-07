@@ -19,12 +19,12 @@ from datetime import datetime, timedelta, timezone
 from authlib.jose import jwt
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb import __title__
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
-from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -48,10 +48,11 @@ class TokenGenerator:
         }
 
         #REFACTOR-FIX
+        settings_reader = SettingsReaderManager(dbm)
         self.auth_module = AuthModule(
-                                SystemSettingsReader(dbm).get_all_values_from_section(
+                                settings_reader.get_all_values_from_section(
                                                             'auth',
-                                                            default=AuthModule.__DEFAULT_SETTINGS__
+                                                            AuthModule.__DEFAULT_SETTINGS__
                                                           )
                            )
 

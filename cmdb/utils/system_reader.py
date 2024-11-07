@@ -16,12 +16,7 @@
 """
 Collection of system readers which loads configuration files and settings
 """
-from typing import Any, Union
-
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
-
-from cmdb.errors.database import NoDocumentFound
-from cmdb.errors.system_config import SectionError
+from typing import Any
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemReader:
@@ -59,77 +54,3 @@ class SystemReader:
             key/value list of all values inside a section
         """
         raise NotImplementedError
-
-
-
-class SystemSettingsReader(SystemReader):
-    """
-    Settings reader loads settings from database
-    """
-    COLLECTION = 'settings.conf'
-
-    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
-        """
-        init system settings reader
-        Args:
-            database_manager: database managers
-        """
-        if database:
-            dbm.connector.set_database(database)
-
-        self.dbm = dbm
-
-        super().__init__()
-
-
-    def get_value(self, name, section) -> Union[dict, list]:
-        """
-        get a value from a given section
-        Args:
-            name: key of value
-            section: section of the value
-
-        Returns:
-            value
-        """
-        return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter={'_id': section})[name]
-
-
-    def get_section(self, section_name: str) -> dict:
-        """TODO: document"""
-        query_filter = {'_id': section_name}
-        return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter=query_filter)
-
-
-    def get_sections(self):
-        """
-        get all sections from config
-        Returns:
-            list of sections inside a config
-        """
-        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION, projection={'_id': 1})
-
-
-    def get_all_values_from_section(self, section, default=None) -> dict:
-        """
-        get all values from a section
-        Args:
-            section: section name
-            default: if no document was found
-
-        Returns:
-            key value dict of all elements inside section
-        """
-        try:
-            section_values = self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter={'_id': section})
-        except NoDocumentFound as err:
-            if default:
-                return default
-            raise SectionError(section) from err
-
-        return section_values
-
-
-    def get_all(self) -> list:
-        """TODO: document"""
-        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)
