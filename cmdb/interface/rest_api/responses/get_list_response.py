@@ -19,7 +19,7 @@ from werkzeug.wrappers import Response
 
 from cmdb.interface.rest_api.responses.base_api_response import BaseAPIResponse
 from cmdb.interface.rest_api.responses.helpers.operation_type_enum import OperationType
-from cmdb.interface.rest_api.responses.helpers.api_parameters import APIParameters
+from cmdb.interface.rest_api.responses.response_parameters.api_parameters import APIParameters
 from cmdb.interface.rest_api.responses.helpers.api_project import APIProjection, APIProjector
 # -------------------------------------------------------------------------------------------------------------------- #
 

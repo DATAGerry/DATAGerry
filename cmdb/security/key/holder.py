@@ -18,8 +18,7 @@ import logging
 from flask import current_app
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-
-from cmdb.utils.system_reader import SystemSettingsReader
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -35,7 +34,7 @@ class KeyHolder:
         Args:
             key_directory: key based directory
         """
-        self.ssr = SystemSettingsReader(dbm)
+        self.settings_reader = SettingsReaderManager(dbm)
         self.rsa_public = self.get_public_key()
         self.rsa_private = self.get_private_key()
 
@@ -45,7 +44,7 @@ class KeyHolder:
         if current_app.cloud_mode:
             return current_app.asymmetric_key['public']
 
-        return self.ssr.get_value('asymmetric_key', 'security')['public']
+        return self.settings_reader.get_value('asymmetric_key', 'security')['public']
 
 
     def get_private_key(self):
@@ -53,4 +52,4 @@ class KeyHolder:
         if current_app.cloud_mode:
             return current_app.asymmetric_key['private']
 
-        return self.ssr.get_value('asymmetric_key', 'security')['private']
+        return self.settings_reader.get_value('asymmetric_key', 'security')['private']

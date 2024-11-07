@@ -25,9 +25,9 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.updater.updater_module import UpdaterModule
-from cmdb.utils.system_reader import SystemSettingsReader
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
@@ -187,10 +187,10 @@ class CheckRoutine:
             (bool): True if updates are available else raises an error
         """
         try:
-            ssr = SystemSettingsReader(self.dbm)
-            ssr.get_all_values_from_section('updater')
+            settings_reader = SettingsReaderManager(self.dbm)
+            settings_reader.get_all_values_from_section('updater')
 
-            upd_module = UpdaterModule(ssr)
+            upd_module = UpdaterModule(settings_reader)
             new_version = upd_module.get_last_version()['version']
             current_version = upd_module.settings.version
 

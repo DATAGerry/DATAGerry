@@ -31,8 +31,8 @@ from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.security_manager import SecurityManager
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
 
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -69,8 +69,8 @@ class ManagerProvider:
             ManagerType.LOCATIONS_MANAGER: LocationsManager,
             ManagerType.SECTION_TEMPLATES_MANAGER: SectionTemplatesManager,
             ManagerType.OBJECT_LINKS_MANAGER: ObjectLinksManager,
-            ManagerType.SYSTEM_SETTINGS_READER: SystemSettingsReader,
-            ManagerType.SYSTEM_SETTINGS_WRITER: SystemSettingsWriter,
+            ManagerType.SETTINGS_READER_MANAGER: SettingsReaderManager,
+            ManagerType.SETTINGS_WRITER_MANAGER: SettingsWriterManager,
             ManagerType.SECURITY_MANAGER: SecurityManager
         }
 

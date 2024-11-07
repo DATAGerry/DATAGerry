@@ -15,41 +15,39 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from Crypto import Random
-from Crypto.PublicKey import RSA
-
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
-
-from cmdb.manager.settings_writer_manager import SettingsWriterManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 KeyGenerator - CLASS                                                 #
+#                                                   APIPager - CLASS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-class KeyGenerator:
-    """TODO: document"""
-    def __init__(self, dbm: MongoDatabaseManager):
-        self.settings_writer = SettingsWriterManager(dbm)
+class APIPager:
+    """
+    Pager for api responses.
+    Shows data of the current page and meta data of other pages.
+    """
+
+    __slots__ = 'page', 'page_size', 'total_pages'
+
+    def __init__(self, page: int, page_size: int, total_pages: int = None):
+        """
+        Constructor of the APIPager.
+
+        Args:
+            page: Current page number.
+            page_size: Number of elements on this page.
+            total_pages: Total number of pages for this query.
+        """
+        self.page = page
+        self.page_size = page_size
+        self.total_pages = total_pages
 
 
-    def generate_rsa_keypair(self):
+    def to_dict(self) -> dict:
         """TODO: document"""
-        key = RSA.generate(2048)
-        private_key = key.export_key()
-        public_key = key.publickey().export_key()
-
-        asymmetric_key = {
-            'private': private_key,
-            'public': public_key
+        return {
+            'page': self.page,
+            'page_size': self.page_size,
+            'total_pages': self.total_pages,
         }
-
-        self.settings_writer.write('security', {'asymmetric_key': asymmetric_key})
-
-
-    def generate_symmetric_aes_key(self):
-        """TODO: document"""
-        symmetric_aes_key = Random.get_random_bytes(32)
-
-        self.settings_writer.write('security', {'symmetric_aes_key': symmetric_aes_key})

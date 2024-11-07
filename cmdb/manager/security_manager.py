@@ -26,9 +26,8 @@ from bson.json_util import dumps
 from flask import current_app
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.errors.database import NoDocumentFound
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -48,8 +47,8 @@ class SecurityManager:
         if database:
             dbm.connector.set_database(database)
 
-        self.ssr = SystemSettingsReader(dbm)
-        self.ssw = SystemSettingsWriter(dbm)
+        self.settings_reader = SettingsReaderManager(dbm)
+        self.settings_writer = SettingsWriterManager(dbm)
         self.salt = "cmdb"
 
 
@@ -104,7 +103,7 @@ class SecurityManager:
 
     def generate_symmetric_aes_key(self):
         """TODO: document"""
-        return self.ssw.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
+        return self.settings_writer.write('security', {'symmetric_aes_key': Random.get_random_bytes(32)})
 
 
     def get_symmetric_aes_key(self):
@@ -114,10 +113,10 @@ class SecurityManager:
                 return current_app.symmetric_key
 
             try:
-                symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
+                symmetric_key = self.settings_reader.get_value('symmetric_aes_key', 'security')
             except NoDocumentFound:
                 self.generate_symmetric_aes_key()
-                symmetric_key = self.ssr.get_value('symmetric_aes_key', 'security')
+                symmetric_key = self.settings_reader.get_value('symmetric_aes_key', 'security')
             return symmetric_key
 
 

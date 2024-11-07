@@ -56,7 +56,7 @@ class SystemConfigReader:
     def __setattr__(self, name, value):
         return setattr(self.instance, name, value)
 
-
+    #CLASS-FIX
     class SystemConfReader(SystemReader):
         """TODO: document"""
         DEFAULT_CONFIG_FILE_LESS = False

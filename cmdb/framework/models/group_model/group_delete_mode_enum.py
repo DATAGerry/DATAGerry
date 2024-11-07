@@ -14,18 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
+from enum import Enum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExporterConfig(BaseExporterConfig):
+class GroupDeleteMode(Enum):
     """TODO: document"""
-    def __init__(self, parameters: CollectionParameters, options: dict = None):
-        """
-        Args:
-            parameters: Rest API class for parameters passed by a http request on a collection route
-            options: dict of optional parameters for given route function.
-        """
-        self.parameters = parameters
-        self.options = options or None
-        super().__init__(config_type=ExporterConfigType.NATIVE)
+    NONE = None
+    MOVE = 'MOVE'
+    DELETE = 'DELETE'

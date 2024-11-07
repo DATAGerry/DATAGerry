@@ -21,10 +21,9 @@ from typing import Optional
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
-from cmdb.importer.importer_response import BaseImporterResponse,\
-                                            ImporterObjectResponse,\
-                                            ImportFailedMessage,\
-                                            ImportSuccessMessage
+from cmdb.interface.rest_api.responses import ImporterObjectResponse
+from cmdb.interface.rest_api.responses.messages.import_failed_message import ImportFailedMessage
+from cmdb.interface.rest_api.responses.messages.import_success_message import ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
 from cmdb.user_management.models.user import UserModel
@@ -75,7 +74,7 @@ class BaseImporter:
         return bool(self.config)
 
 
-    def start_import(self) -> BaseImporterResponse:
+    def start_import(self) -> ImporterObjectResponse:
         """Starting the import process"""
         raise NotImplementedError
 
@@ -219,5 +218,5 @@ class TypeImporter(BaseImporter):
         super().__init__(file=file, file_type=file_type, config=config)
 
 
-    def start_import(self) -> BaseImporterResponse:
+    def start_import(self) -> ImporterObjectResponse:
         raise NotImplementedError

@@ -31,6 +31,6 @@ class ManagerType(Enum):
     LOCATIONS_MANAGER = 'LocationsManager'
     SECTION_TEMPLATES_MANAGER = 'SectionTemplatesManager'
     OBJECT_LINKS_MANAGER = 'ObjectLinksManager'
-    SYSTEM_SETTINGS_READER = 'SystemSettingsReader'
-    SYSTEM_SETTINGS_WRITER = 'SystemSettingsWriter'
+    SETTINGS_READER_MANAGER = 'SettingsReaderManager'
+    SETTINGS_WRITER_MANAGER = 'SettingsWriterManager'
     SECURITY_MANAGER = 'SecurityManager'

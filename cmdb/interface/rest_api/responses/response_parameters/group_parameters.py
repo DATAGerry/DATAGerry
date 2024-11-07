@@ -14,23 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from enum import Enum
-
-from cmdb.interface.rest_api.responses.helpers.api_parameters import APIParameters, Parameter
+from cmdb.framework.models.group_model.group_delete_mode_enum import GroupDeleteMode
+from cmdb.interface.rest_api.responses.response_parameters.api_parameters import APIParameters
 # -------------------------------------------------------------------------------------------------------------------- #
-
-#CLASS-FIX
-class GroupDeleteMode(Enum):
-    """TODO: document"""
-    NONE = None
-    MOVE = 'MOVE'
-    DELETE = 'DELETE'
-
 
 class GroupDeletionParameters(APIParameters):
     """TODO: document"""
 
-    def __init__(self, query_string: Parameter, action: GroupDeleteMode = None, group_id: int = None, **kwargs):
+    def __init__(self, query_string: str, action: GroupDeleteMode = None, group_id: int = None, **kwargs):
         """
         Constructor of the GroupDeletionParameters.
 
@@ -48,7 +39,7 @@ class GroupDeletionParameters(APIParameters):
     @classmethod
     def from_http(cls, query_string: str, **optional) -> "GroupDeletionParameters":
         """TODO: document"""
-        return cls(Parameter(query_string), **optional)
+        return cls(query_string, **optional)
 
 
     @classmethod

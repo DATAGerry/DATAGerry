@@ -19,8 +19,8 @@ from flask import request, abort
 
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
 
 from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.user_management.models.user import UserModel
@@ -40,12 +40,11 @@ LOGGER = logging.getLogger(__name__)
 @insert_request_user
 def get_date_settings(request_user: UserModel):
     """TODO: document"""
-    try:
-        system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
-                                                                                request_user)
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
+                                                                        request_user)
 
-        date_settings = system_settings_reader.get_all_values_from_section('date',
-                                                                        default=DateSettingsDAO.__DEFAULT_SETTINGS__)
+    try:
+        date_settings = settings_reader.get_all_values_from_section('date', DateSettingsDAO.__DEFAULT_SETTINGS__)
 
         date_settings = DateSettingsDAO(**date_settings)
 
@@ -65,9 +64,9 @@ def update_date_settings(request_user: UserModel):
     """TODO: document"""
     new_auth_settings_values = request.get_json()
 
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
-    system_setting_writer: SystemSettingsWriter = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_WRITER,
+    settings_writer: SettingsWriterManager = ManagerProvider.get_manager(ManagerType.SETTINGS_WRITER_MANAGER,
                                                                                request_user)
 
     if not new_auth_settings_values:
@@ -77,10 +76,10 @@ def update_date_settings(request_user: UserModel):
     except Exception as err:
         return abort(400, err)
 
-    update_result = system_setting_writer.write(_id='date', data=new_auth_setting_instance.__dict__)
+    update_result = settings_writer.write(_id='date', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        api_response = GetSingleValueResponse(system_settings_reader.get_section('date'))
+        api_response = GetSingleValueResponse(settings_reader.get_section('date'))
 
         return api_response.make_response()
 

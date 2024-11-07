@@ -24,49 +24,10 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 SystemWriter - CLASS                                                 #
+#                                             SettingsWriterManager - CLASS                                            #
 # -------------------------------------------------------------------------------------------------------------------- #
-class SystemWriter:
-    """
-    Superclass for general write permissions
-    Watch out with the collection constants. In Mongo the Settings Collection is pre-defined
-    """
-    COLLECTION = 'settings.*'
-
-    def __init__(self, dbm: MongoDatabaseManager):
-        """
-        Default constructor
-        Args:
-            writer: Database managers instance
-        """
-        self.dbm = dbm
-
-
-    def write(self, _id: str, data: dict):
-        """
-        write data into database
-        it' the only module where no public_id is used
-        Args:
-            _id: database entry identifier
-            data: data to write
-
-        Returns:
-            acknowledgment: based on database managers
-        """
-        raise NotImplementedError
-
-
-    def verify(self, _id: int, data: dict) -> bool:
-        """
-        Checks if configuration entry exists
-        Returns: True if exists - else False
-
-        """
-        raise NotImplementedError
-
-
-#CLASS-FIX
-class SystemSettingsWriter(SystemWriter):
+#BASECLASS-FIX (make the base class 'BaseManager')
+class SettingsWriterManager:
     """TODO: document"""
     COLLECTION = 'settings.conf'
 
@@ -79,7 +40,7 @@ class SystemSettingsWriter(SystemWriter):
         if database:
             dbm.connector.set_database(database)
 
-        super().__init__(dbm)
+        self.dbm = dbm
 
 
     def write(self, _id: str, data: dict):

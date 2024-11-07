@@ -28,7 +28,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.framework.results import IterationResult
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleValueResponse
 from cmdb.interface.route_utils import login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint

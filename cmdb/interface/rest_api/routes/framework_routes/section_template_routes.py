@@ -30,7 +30,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import UpdateSingleResponse,\
                                               GetMultiResponse,\
                                               GetSingleValueResponse

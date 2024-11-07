@@ -14,18 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
+from cmdb.interface.rest_api.responses.messages.import_message import ImportMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExporterConfig(BaseExporterConfig):
-    """TODO: document"""
-    def __init__(self, parameters: CollectionParameters, options: dict = None):
-        """
+class ImportFailedMessage(ImportMessage):
+    """Message wrapper for failed imported objects"""
+
+    def __init__(self, error_message: str, obj: dict = None):
+        """Init message
         Args:
-            parameters: Rest API class for parameters passed by a http request on a collection route
-            options: dict of optional parameters for given route function.
+            error_message: reason why it failed - exception error or something
+            obj (optional): failed dict
         """
-        self.parameters = parameters
-        self.options = options or None
-        super().__init__(config_type=ExporterConfigType.NATIVE)
+        self.error_message = error_message
+        super().__init__(obj=obj)

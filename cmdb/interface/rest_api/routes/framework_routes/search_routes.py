@@ -79,8 +79,8 @@ def search_framework(request_user: UserModel):
         only_active = _fetch_only_active_objs()
         search_params: dict = request.args.get('query') or '{}'
         resolve_object_references: bool = request.args.get('resolve', False)
-    except ValueError as err:
-        return abort(400, err)
+    except ValueError:
+        return abort(400, "Could not retrieve the parameters from the request!")
 
     try:
         if request.method == 'GET':
@@ -89,7 +89,7 @@ def search_framework(request_user: UserModel):
             search_params = json.loads(request.data)
             search_parameters = SearchParam.from_request(search_params)
         else:
-            return abort(405)
+            return abort(405, f"Method: {request.method} not allowed!")
     except Exception as err:
         LOGGER.error('[search_framework]: %s', err)
         return abort(400, err)

@@ -24,7 +24,7 @@ from cmdb.importer.parser_object import JsonObjectParser
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig
-from cmdb.importer.importer_response import ImporterObjectResponse
+from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject

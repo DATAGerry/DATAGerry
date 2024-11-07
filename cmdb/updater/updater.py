@@ -23,10 +23,10 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.updater.updater_settings import UpdateSettings
-from cmdb.utils.system_reader import SystemSettingsReader
-from cmdb.utils.system_writer import SystemSettingsWriter
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -74,12 +74,12 @@ class Updater(BaseManager):
 
     def increase_updater_version(self, value: int):
         """TODO: document"""
-        ssr = SystemSettingsReader(self.dbm)
-        system_setting_writer = SystemSettingsWriter(self.dbm)
-        updater_settings_values = ssr.get_all_values_from_section('updater')
+        settings_reader = SettingsReaderManager(self.dbm)
+        settings_writer = SettingsWriterManager(self.dbm)
+        updater_settings_values = settings_reader.get_all_values_from_section('updater')
         updater_setting_instance = UpdateSettings(**updater_settings_values)
         updater_setting_instance.version = value
-        system_setting_writer.write(_id='updater', data=updater_setting_instance.__dict__)
+        settings_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
 
     def error(self, msg):

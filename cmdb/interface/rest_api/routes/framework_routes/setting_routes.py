@@ -19,12 +19,12 @@ from flask import current_app
 
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.interface.route_utils import login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.interface.rest_api.responses import GetSingleValueResponse
 from cmdb.user_management.models.user import UserModel
-from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -44,10 +44,10 @@ with current_app.app_context():
 @right_required('base.system.view')
 def get_settings_from_section(section: str, request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
-    section_settings = system_settings_reader.get_all_values_from_section(section=section)
+    section_settings = settings_reader.get_all_values_from_section(section=section)
 
     if len(section_settings) < 1:
         return GetSingleValueResponse([]).make_response(204)
@@ -64,10 +64,10 @@ def get_settings_from_section(section: str, request_user: UserModel):
 @right_required('base.system.view')
 def get_value_from_section(section: str, name: str, request_user: UserModel):
     """TODO: document"""
-    system_settings_reader: SystemSettingsReader = ManagerProvider.get_manager(ManagerType.SYSTEM_SETTINGS_READER,
+    settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
                                                                                request_user)
 
-    section_settings = system_settings_reader.get_value(name=name, section=section)
+    section_settings = settings_reader.get_value(name=name, section=section)
 
     if len(section_settings) < 1:
         return GetSingleValueResponse([]).make_response(204)

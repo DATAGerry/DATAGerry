@@ -542,14 +542,9 @@ class TypeModel(CmdbDAO):
                   x['type'] == input_type and (value in x.get(_filter, None) if isinstance(x.get(_filter, None), list)
                                                else x.get(_filter, None) == value)]
         if fields:
-            try:
-                return fields
-            except (RequiredInitKeyNotFoundError, Exception) as err:
-                #ERROR-FIX
-                raise FieldInitError(str(value)) from err
-        else:
-            #ERROR-FIX
-            raise FieldNotFoundError(value)
+            return fields
+
+        raise FieldNotFoundError(value)
 
 
     def get_field(self, name) -> dict:

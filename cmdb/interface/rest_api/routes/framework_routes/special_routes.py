@@ -15,7 +15,7 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from flask import request, abort
+from flask import abort
 
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
@@ -54,31 +54,11 @@ def get_intro_starter(request_user: UserModel):
     types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES_MANAGER, request_user)
 
     try:
-        steps = []
         categories_total = categories_manager.count_categories()
         types_total = types_manager.count_types()
         objects_total = objects_manager.count_objects()
 
-        if _fetch_only_active_objs():
-            result = []
-
-            cursor = objects_manager.group_objects_by_value('active', {'active': {"$eq": True}})
-            for document in cursor:
-                result.append(document)
-            objects_total = result[0]['count'] if result else 0
-
-        steps.append({'step': 1, 'label': 'Category', 'icon': 'check-circle',
-                      'link': '/framework/category/add', 'state': categories_total > 0})
-
-        steps.append({'step': 2, 'label': 'Type', 'icon': 'check-circle',
-                      'link': '/framework/type/add', 'state': types_total > 0})
-
-        steps.append({'step': 3, 'label': 'Object', 'icon': 'check-circle',
-                      'link': '/framework/object/add', 'state': objects_total > 0})
-
-        intro_instance = {
-            'steps': steps,
-            'execute': (types_total > 0 or categories_total > 0 or objects_total > 0)}
+        intro_instance = {'execute': (types_total > 0 or categories_total > 0 or objects_total > 0)}
 
         api_response = GetSingleValueResponse(intro_instance)
 
@@ -128,16 +108,3 @@ def create_initial_profiles(data: str, request_user: UserModel):
     api_response = GetSingleValueResponse(created_ids)
 
     return api_response.make_response()
-
-
-def _fetch_only_active_objs():
-    """
-    Checking if request have cookie parameter for object active state
-    Returns:
-        True if cookie is set or value is true else false
-    """
-    if request.args.get('onlyActiveObjCookie') is not None:
-        value = request.args.get('onlyActiveObjCookie')
-        return value in ['True', 'true']
-
-    return False

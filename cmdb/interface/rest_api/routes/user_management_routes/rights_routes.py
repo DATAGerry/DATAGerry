@@ -22,7 +22,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.right import BaseRight
 from cmdb.user_management.rights import __all__ as right_tree
 from cmdb.user_management.models.right import _nameToLevel
-from cmdb.interface.rest_api.responses.helpers.api_parameters import CollectionParameters
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses import GetMultiResponse,\
                                               GetSingleResponse
