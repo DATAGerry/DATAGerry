@@ -151,18 +151,18 @@ class APIBlueprint(Blueprint):
 
 
     @classmethod
-    def parse_location_parameters(cls, **optional):
+    def parse_request_parameters(cls, **optional):
         """TODO: document"""
         def _parse(f):
             @wraps(f)
             def _decorate(*args, **kwargs):
                 """TODO: document"""
                 try:
-                    location_args = request.args.to_dict()
+                    request_args = request.args.to_dict()
                 except Exception as error:
                     return abort(400, str(error))
 
-                return f(location_args)
+                return f(request_args)
 
             return _decorate
 

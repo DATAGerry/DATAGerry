@@ -23,7 +23,7 @@ from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.interface.route_utils import login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -50,9 +50,9 @@ def get_settings_from_section(section: str, request_user: UserModel):
     section_settings = settings_reader.get_all_values_from_section(section=section)
 
     if len(section_settings) < 1:
-        return GetSingleValueResponse([]).make_response(204)
+        return DefaultResponse([]).make_response(204)
 
-    api_response = GetSingleValueResponse(section_settings)
+    api_response = DefaultResponse(section_settings)
 
     return api_response.make_response()
 
@@ -70,8 +70,8 @@ def get_value_from_section(section: str, name: str, request_user: UserModel):
     section_settings = settings_reader.get_value(name=name, section=section)
 
     if len(section_settings) < 1:
-        return GetSingleValueResponse([]).make_response(204)
+        return DefaultResponse([]).make_response(204)
 
-    api_response = GetSingleValueResponse(section_settings)
+    api_response = DefaultResponse(section_settings)
 
     return api_response.make_response()

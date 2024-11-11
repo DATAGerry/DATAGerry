@@ -30,6 +30,7 @@ from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
+from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
@@ -135,10 +136,15 @@ class CheckRoutine:
                         LOGGER.info("CHECK: No Root Location => Creating a new Root Location!")
                         self.dbm.set_root_location(collection.COLLECTION, create=True)
 
-                # setup section templates if valid test
+                #Setup section templates if valid test
                 if collection == CmdbSectionTemplate and collection_test:
                     # Add predefined templates if they don't exist
                     self.dbm.init_predefined_templates(collection.COLLECTION)
+
+                #Setup general category
+                if collection == CmdbReportCategory and collection_test:
+                    # Add predefined templates if they don't exist
+                    self.dbm.create_general_report_category(collection.COLLECTION)
 
             # user management collections
             for collection in USER_MANAGEMENT_COLLECTION:

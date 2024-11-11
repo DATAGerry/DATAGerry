@@ -24,7 +24,7 @@ from cmdb.manager.settings_writer_manager import SettingsWriterManager
 
 from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.user_management.models.user import UserModel
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 
@@ -48,7 +48,7 @@ def get_date_settings(request_user: UserModel):
 
         date_settings = DateSettingsDAO(**date_settings)
 
-        api_response = GetSingleValueResponse(date_settings)
+        api_response = DefaultResponse(date_settings)
 
         return api_response.make_response()
     except Exception as err:
@@ -79,7 +79,7 @@ def update_date_settings(request_user: UserModel):
     update_result = settings_writer.write(_id='date', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        api_response = GetSingleValueResponse(settings_reader.get_section('date'))
+        api_response = DefaultResponse(settings_reader.get_section('date'))
 
         return api_response.make_response()
 

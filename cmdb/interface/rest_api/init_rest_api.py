@@ -92,6 +92,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.routes.framework_routes.docapi_routes import docapi_blueprint, docs_blueprint
     from cmdb.interface.rest_api.routes.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.special_routes import special_blueprint
+    from cmdb.interface.rest_api.routes.report_routes.report_category_routes import report_categories_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(setup_blueprint, url_prefix='/setup')
@@ -117,6 +118,7 @@ def register_blueprints(app):
     app.register_blueprint(docs_blueprint, url_prefix='/docs')
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
+    app.register_blueprint(report_categories_blueprint, url_prefix='/report_categories')
 
     if cmdb.__MODE__ == 'DEBUG':
         from cmdb.interface.rest_api.routes.debug_routes import debug_blueprint

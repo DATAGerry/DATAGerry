@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module contains the implementation of the SectionTemplatesManager"""
+"""
+This module contains the implementation of the SectionTemplatesManager
+"""
 import logging
 from deepdiff import DeepDiff
 
@@ -51,7 +53,7 @@ class SectionTemplatesManager(BaseManager):
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (MongoDatabaseManager): Active database managers instance.
+            dbm (MongoDatabaseManager): Database connection
         """
         if database:
             dbm.connector.set_database(database)
@@ -78,15 +80,17 @@ class SectionTemplatesManager(BaseManager):
         """
         try:
             new_section_template = CmdbSectionTemplate(**data)
-        except Exception as error:
-            LOGGER.debug('[insert_section_template] Error while creating object - error: %s', error)
-            raise ManagerInsertError(error) from error
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug('[insert_section_template] Error while creating object - error: %s', err)
+            raise ManagerInsertError(err) from err
 
         try:
             ack = self.insert(new_section_template.__dict__)
-        except Exception as error:
-            LOGGER.debug('[insert_section_template] Error while inserting section template - error: %s', error)
-            raise ManagerInsertError(error) from error
+            #TODO: ERROR-FIX
+        except Exception as err:
+            LOGGER.debug('[insert_section_template] Error while inserting section template - error: %s', err)
+            raise ManagerInsertError(err) from err
 
         return ack
 

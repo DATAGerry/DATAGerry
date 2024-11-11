@@ -33,7 +33,7 @@ from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import UpdateSingleResponse,\
                                               GetMultiResponse,\
-                                              GetSingleValueResponse
+                                              DefaultResponse
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -51,7 +51,7 @@ section_template_blueprint = APIBlueprint('section_templates', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['POST'])
-@section_template_blueprint.parse_location_parameters()
+@section_template_blueprint.parse_request_parameters()
 @insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.add')
 def create_section_template(params: dict, request_user: UserModel):
@@ -78,7 +78,7 @@ def create_section_template(params: dict, request_user: UserModel):
         LOGGER.debug("[create_section_template] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create the section template!")
 
-    api_response = GetSingleValueResponse(created_section_template_id)
+    api_response = DefaultResponse(created_section_template_id)
 
     return api_response.make_response()
 
@@ -141,7 +141,7 @@ def get_section_template(public_id: int, request_user: UserModel):
     if not section_template_instance:
         section_template_instance = []
 
-    api_response = GetSingleValueResponse(section_template_instance)
+    api_response = DefaultResponse(section_template_instance)
 
     return api_response.make_response()
 
@@ -166,17 +166,18 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
         counts: dict = template_manager.get_global_template_usage_count(instance.name, instance.is_global)
 
     except ManagerGetError as err:
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
 
-    api_response = GetSingleValueResponse(counts)
+    api_response = DefaultResponse(counts)
 
     return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
-@section_template_blueprint.parse_location_parameters()
+@section_template_blueprint.parse_request_parameters()
 @insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.edit')
 def update_section_template(params: dict, request_user: UserModel):
@@ -184,7 +185,7 @@ def update_section_template(params: dict, request_user: UserModel):
     Updates a CmdbSectionTemplate
 
     Args:
-        params (dict): new CmdbSectionTemplate parameters
+        params (dict): updated CmdbSectionTemplate parameters
     Returns:
         _type_: _description_
     """
@@ -209,12 +210,14 @@ def update_section_template(params: dict, request_user: UserModel):
             raise NoDocumentFound(template_manager.collection)
 
     except ManagerGetError as err:
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return abort(400, f"Could not retrieve SectionTemplate with ID: {params['public_id']}!")
     except ManagerUpdateError as err:
+        #TODO: ERROR-FIX
         LOGGER.debug("[update_section_template] ManagerUpdateError: %s", err.message)
         return abort(400, f"Could not update SectionTemplate with ID: {params['public_id']}!")
-    except NoDocumentFound as err:
+    except NoDocumentFound:
         return abort(404, "Section template not found!")
 
     api_response = UpdateSingleResponse(result)
@@ -241,6 +244,7 @@ def delete_section_template(public_id: int, request_user: UserModel):
         if template_instance.is_global:
             template_manager.cleanup_global_section_templates(template_instance.name)
 
+        #TODO: REFACTOR-FIX
         ack: bool = template_manager.delete({'public_id':public_id})
 
     except ManagerGetError as err:
@@ -252,6 +256,6 @@ def delete_section_template(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_section_template] ManagerDeleteError: %s", err)
         return abort(400, f"Could not delete SectionTemplate with public_id: {public_id}!")
 
-    api_response = GetSingleValueResponse(ack)
+    api_response = DefaultResponse(ack)
 
     return api_response.make_response()

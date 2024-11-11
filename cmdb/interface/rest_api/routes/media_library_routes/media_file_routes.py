@@ -42,7 +42,7 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses import (
     InsertSingleResponse,
     GetMultiResponse,
-    GetSingleValueResponse,
+    DefaultResponse,
 )
 
 from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
@@ -217,7 +217,7 @@ def update_file(request_user: UserModel):
         #ERROR-FIX
         return abort(500)
 
-    api_response = GetSingleValueResponse(data)
+    api_response = DefaultResponse(data)
 
     return api_response.make_response()
 
@@ -254,7 +254,7 @@ def get_file(filename: str, request_user: UserModel):
         #ERROR-FIX
         return abort(404, f"Could not retrieve file with filename: {filename}")
 
-    api_response = GetSingleValueResponse(result)
+    api_response = DefaultResponse(result)
 
     return api_response.make_response()
 
@@ -329,6 +329,6 @@ def delete_file(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_file] MediaFileManagerDeleteError: %s", err)
         return abort(404)
 
-    api_response = GetSingleValueResponse(file_to_delete)
+    api_response = DefaultResponse(file_to_delete)
 
     return api_response.make_response()

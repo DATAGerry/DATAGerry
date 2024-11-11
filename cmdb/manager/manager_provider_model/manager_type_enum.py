@@ -34,3 +34,4 @@ class ManagerType(Enum):
     SETTINGS_READER_MANAGER = 'SettingsReaderManager'
     SETTINGS_WRITER_MANAGER = 'SettingsWriterManager'
     SECURITY_MANAGER = 'SecurityManager'
+    REPORT_CATEGORIES_MANAGER = 'ReportCategoriesManager'

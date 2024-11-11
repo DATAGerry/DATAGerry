@@ -39,7 +39,7 @@ from cmdb.interface.rest_api.responses import DeleteSingleResponse,\
                                               InsertSingleResponse,\
                                               GetMultiResponse,\
                                               GetSingleResponse,\
-                                              GetSingleValueResponse
+                                              DefaultResponse
 
 from cmdb.errors.manager import ManagerGetError,\
                                 ManagerInsertError,\
@@ -197,7 +197,7 @@ def count_objects(public_id: int, request_user: UserModel):
 
     try:
         objects_count = objects_manager.count_objects({'type_id':public_id})
-        api_response = GetSingleValueResponse(objects_count)
+        api_response = DefaultResponse(objects_count)
     except ManagerGetError:
         #ERROR-FIX
         return abort(404)

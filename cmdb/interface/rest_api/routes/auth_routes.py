@@ -40,7 +40,7 @@ from cmdb.interface.route_utils import (
     create_new_admin_user,
     retrive_user,
 )
-from cmdb.interface.rest_api.responses import GetSingleValueResponse, LoginResponse
+from cmdb.interface.rest_api.responses import DefaultResponse, LoginResponse
 
 from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 from cmdb.errors.provider import AuthenticationProviderNotActivated, AuthenticationProviderNotFoundError
@@ -143,7 +143,7 @@ def get_auth_settings(request_user: UserModel):
 
     auth_settings = settings_reader.get_all_values_from_section('auth', default=AuthModule.__DEFAULT_SETTINGS__)
     auth_module = AuthModule(auth_settings)
-    api_response = GetSingleValueResponse(auth_module.settings)
+    api_response = DefaultResponse(auth_module.settings)
 
     return api_response.make_response()
 
@@ -164,7 +164,7 @@ def get_installed_providers(request_user: UserModel):
     for provider in auth_module.providers:
         provider_names.append({'class_name': provider.get_name(), 'external': provider.EXTERNAL_PROVIDER})
 
-    api_response = GetSingleValueResponse(provider_names)
+    api_response = DefaultResponse(provider_names)
 
     return api_response.make_response()
 
@@ -185,7 +185,7 @@ def get_provider_config(provider_class: str, request_user: UserModel):
     except StopIteration:
         return abort(404, 'Provider not found')
 
-    api_response = GetSingleValueResponse(provider_class_config)
+    api_response = DefaultResponse(provider_class_config)
 
     return api_response.make_response()
 
@@ -215,7 +215,7 @@ def update_auth_settings(request_user: UserModel):
     update_result = settings_writer.write(_id='auth', data=new_auth_setting_instance.__dict__)
 
     if update_result.acknowledged:
-        api_response = GetSingleValueResponse(settings_reader.get_section('auth'))
+        api_response = DefaultResponse(settings_reader.get_section('auth'))
         return api_response.make_response()
 
     return abort(400, 'Could not update auth settings')

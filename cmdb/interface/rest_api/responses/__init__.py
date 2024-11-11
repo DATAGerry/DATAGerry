@@ -19,7 +19,7 @@ from .delete_single_response import DeleteSingleResponse
 from .get_list_response import GetListResponse
 from .get_multi_response import GetMultiResponse
 from .get_single_response import GetSingleResponse
-from .get_single_value_response import GetSingleValueResponse
+from .default_response import DefaultResponse
 from .insert_single_response import InsertSingleResponse
 from .update_single_response import UpdateSingleResponse
 from .update_multi_response import UpdateMultiResponse
@@ -33,7 +33,7 @@ __all__ = [
     'GetListResponse',
     'GetMultiResponse',
     'GetSingleResponse',
-    'GetSingleValueResponse',
+    'DefaultResponse',
     'InsertSingleResponse',
     'UpdateSingleResponse',
     'UpdateMultiResponse',
