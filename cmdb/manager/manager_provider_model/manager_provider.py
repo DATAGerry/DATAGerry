@@ -33,6 +33,7 @@ from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
+from cmdb.manager.report_categories_manager import ReportCategoriesManager
 
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -71,7 +72,8 @@ class ManagerProvider:
             ManagerType.OBJECT_LINKS_MANAGER: ObjectLinksManager,
             ManagerType.SETTINGS_READER_MANAGER: SettingsReaderManager,
             ManagerType.SETTINGS_WRITER_MANAGER: SettingsWriterManager,
-            ManagerType.SECURITY_MANAGER: SecurityManager
+            ManagerType.SECURITY_MANAGER: SecurityManager,
+            ManagerType.REPORT_CATEGORIES_MANAGER: ReportCategoriesManager,
         }
 
         return manager_classes.get(manager_type)

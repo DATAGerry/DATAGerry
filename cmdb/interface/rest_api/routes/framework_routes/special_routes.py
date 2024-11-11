@@ -27,7 +27,7 @@ from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
 from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
 from cmdb.user_management.models.user import UserModel
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 
 from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -60,7 +60,7 @@ def get_intro_starter(request_user: UserModel):
 
         intro_instance = {'execute': (types_total > 0 or categories_total > 0 or objects_total > 0)}
 
-        api_response = GetSingleValueResponse(intro_instance)
+        api_response = DefaultResponse(intro_instance)
 
         resp = api_response.make_response()
     except Exception:
@@ -105,6 +105,6 @@ def create_initial_profiles(data: str, request_user: UserModel):
         LOGGER.debug("[create_initial_profiles] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create initial profiles!")
 
-    api_response = GetSingleValueResponse(created_ids)
+    api_response = DefaultResponse(created_ids)
 
     return api_response.make_response()

@@ -26,7 +26,7 @@ from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.user_management.models.user import UserModel
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
@@ -63,7 +63,7 @@ def add_type(request_user: UserModel):
             #ERROR-FIX
             error_collection.update({"public_id": new_type_data['public_id'], "message": err})
 
-    api_response = GetSingleValueResponse(error_collection)
+    api_response = DefaultResponse(error_collection)
 
     return api_response.make_response()
 
@@ -92,6 +92,6 @@ def update_type(request_user: UserModel):
             #ERROR-FIX
             error_collection.update({"public_id": add_data_dump['public_id'], "message": err})
 
-    api_response = GetSingleValueResponse(error_collection)
+    api_response = DefaultResponse(error_collection)
 
     return api_response.make_response()

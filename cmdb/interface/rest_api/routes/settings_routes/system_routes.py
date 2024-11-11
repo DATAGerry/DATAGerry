@@ -27,7 +27,7 @@ from cmdb import __title__, __version__, __runtime__
 from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import login_required, right_required, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -59,7 +59,7 @@ def get_datagerry_information(request_user: UserModel):
         'starting_parameters': sys.argv
     }
 
-    api_response = GetSingleValueResponse(datagerry_infos)
+    api_response = DefaultResponse(datagerry_infos)
 
     return api_response.make_response()
 
@@ -85,7 +85,7 @@ def get_config_information(request_user: UserModel):
 
         config_dict['properties'].append([section, section_values])
 
-    api_response = GetSingleValueResponse(config_dict)
+    api_response = DefaultResponse(config_dict)
 
     if len(config_dict) < 1:
         return api_response.make_response(204)
@@ -107,6 +107,6 @@ def get_system_information():
         }
     }
 
-    api_response = GetSingleValueResponse(system_infos)
+    api_response = DefaultResponse(system_infos)
 
     return api_response.make_response()

@@ -25,6 +25,7 @@ from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
 
+from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.models.type_model.type import TypeModel
 from cmdb.framework.models.category_model.category import CategoryModel
 from cmdb.framework.models.link import ObjectLinkModel
@@ -43,5 +44,6 @@ __COLLECTIONS__ = [
     CmdbMetaLog,
     ObjectLinkModel,
     CmdbLocation,
-    CmdbSectionTemplate
+    CmdbSectionTemplate,
+    CmdbReportCategory
 ]

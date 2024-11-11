@@ -18,7 +18,7 @@ import json
 import logging
 from flask import request, abort
 
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import check_db_exists,\
                                        init_db_routine,\
@@ -89,6 +89,6 @@ def setup_datagerry():
         LOGGER.debug("[setup_datagerry] Error: %s, Type: %s", err, type(err))
         return abort(400, "There is an issue with the users json file!")
 
-    api_response = GetSingleValueResponse(True)
+    api_response = DefaultResponse(True)
 
     return api_response.make_response()

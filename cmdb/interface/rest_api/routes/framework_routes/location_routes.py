@@ -35,7 +35,7 @@ from cmdb.interface.rest_api.responses.response_parameters.collection_parameters
 from cmdb.interface.rest_api.responses import (
     UpdateSingleResponse,
     GetMultiResponse,
-    GetSingleValueResponse,
+    DefaultResponse,
 )
 
 from cmdb.errors.manager import ManagerInsertError,\
@@ -54,7 +54,7 @@ location_blueprint = APIBlueprint('locations', __name__)
 @location_blueprint.route('/', methods=['POST'])
 @insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
-@location_blueprint.parse_location_parameters()
+@location_blueprint.parse_request_parameters()
 def create_location(params: dict, request_user: UserModel):
     """
     Creates a location in the database
@@ -106,7 +106,7 @@ def create_location(params: dict, request_user: UserModel):
         LOGGER.debug("[ManagerInsertError] ManagerInsertError: %s", err.message)
         return abort(400, "Could not insert the new location in database)!")
 
-    api_response = GetSingleValueResponse(created_location_id)
+    api_response = DefaultResponse(created_location_id)
 
     return api_response.make_response()
 
@@ -223,7 +223,7 @@ def get_location(public_id: int, request_user: UserModel):
         LOGGER.debug("[get_location] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the location from database!")
 
-    api_response = GetSingleValueResponse(location_instance)
+    api_response = DefaultResponse(location_instance)
 
     return api_response.make_response()
 
@@ -247,7 +247,7 @@ def get_location_for_object(object_id: int, request_user: UserModel):
         LOGGER.debug("[get_location_for_object] ManagerGetError: %s", err.message)
         return abort(404, "Could not retrieve the location from database!")
 
-    api_response = GetSingleValueResponse(location_instance)
+    api_response = DefaultResponse(location_instance)
 
     return api_response.make_response()
 
@@ -277,7 +277,7 @@ def get_parent(object_id: int, request_user: UserModel):
         #ERROR-FIX
         LOGGER.debug("[get_parent] Exception: %s, Type: %s", err, type(err))
 
-    api_response = GetSingleValueResponse(parent)
+    api_response = DefaultResponse(parent)
 
     return api_response.make_response()
 
@@ -311,7 +311,7 @@ def get_children(object_id: int, request_user: UserModel):
         #ERROR-FIX
         LOGGER.debug("[get_children] Exception: %s, Type: %s", err, type(err))
 
-    api_response = GetSingleValueResponse(children)
+    api_response = DefaultResponse(children)
 
     return api_response.make_response()
 
@@ -320,7 +320,7 @@ def get_children(object_id: int, request_user: UserModel):
 @location_blueprint.route('/update_location', methods=['PUT', 'PATCH'])
 @insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
-@location_blueprint.parse_location_parameters()
+@location_blueprint.parse_request_parameters()
 def update_location_for_object(params: dict, request_user: UserModel):
     """
     Updates a location
@@ -393,6 +393,6 @@ def delete_location_for_object(object_id: int, request_user: UserModel):
         LOGGER.debug("[delete_location_for_object] ManagerDeleteError: %s", err.message)
         return abort(400, f"Could not delete the location with ID: {object_id} !")
 
-    api_response = GetSingleValueResponse(ack)
+    api_response = DefaultResponse(ack)
 
     return api_response.make_response()

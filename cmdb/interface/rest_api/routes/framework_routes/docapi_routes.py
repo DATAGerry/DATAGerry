@@ -29,7 +29,7 @@ from cmdb.docapi.docapi_base import DocApiRenderer
 from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleValueResponse
+from cmdb.interface.rest_api.responses import GetMultiResponse, DefaultResponse
 from cmdb.interface.route_utils import login_required, insert_request_user, right_required
 from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
 from cmdb.user_management.models.user import UserModel
@@ -76,7 +76,7 @@ def add_template(request_user: UserModel):
         LOGGER.debug("[add_template] DocapiInsertError: %s", err.message)
         return abort(500, "An error occured when trying to insert the template!")
 
-    api_response = GetSingleValueResponse(ack)
+    api_response = DefaultResponse(ack)
 
     return api_response.make_response()
 
@@ -134,7 +134,7 @@ def get_template_list_filtered(searchfilter: str, request_user: UserModel):
         LOGGER.debug("[get_template_list_filtered] Error: %s, Type: %s", err, type(err))
         return abort(404, f"Could not retrieve template list for filter: {searchfilter}")
 
-    api_response = GetSingleValueResponse(tpl)
+    api_response = DefaultResponse(tpl)
 
     return api_response.make_response()
 
@@ -157,7 +157,7 @@ def get_template(public_id, request_user: UserModel):
         LOGGER.debug("DocapiGetError: %s", err.message)
         return abort(404, f"Could not retrieve template with ID: {public_id}!")
 
-    api_response = GetSingleValueResponse(tpl)
+    api_response = DefaultResponse(tpl)
 
     return api_response.make_response()
 
@@ -178,7 +178,7 @@ def get_template_by_name(name: str, request_user: UserModel):
         LOGGER.debug("DocapiGetError: %s", err.message)
         return abort(404, f"Could not retrieve template with name: {name}!")
 
-    api_response = GetSingleValueResponse(tpl)
+    api_response = DefaultResponse(tpl)
 
     return api_response.make_response()
 
@@ -215,7 +215,7 @@ def update_template(request_user: UserModel):
         LOGGER.debug("[update_template] DocapiUpdateError: %s", err.message)
         return abort(500, "Could not update the template!")
 
-    api_response = GetSingleValueResponse(update_tpl_instance)
+    api_response = DefaultResponse(update_tpl_instance)
 
     return api_response.make_response()
 
@@ -237,7 +237,7 @@ def delete_template(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_template] DocapiDeleteError: %s", err.message)
         return abort(400, f"Could not delete the template with ID:{public_id}!")
 
-    api_response = GetSingleValueResponse(ack)
+    api_response = DefaultResponse(ack)
 
     return api_response.make_response()
 

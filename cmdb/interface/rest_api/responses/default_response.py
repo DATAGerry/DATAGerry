@@ -25,9 +25,9 @@ from cmdb.interface.rest_api.responses.helpers.operation_type_enum import Operat
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                            GetSingleValueResponse - CLASS                                            #
+#                                                DefaultResponse - CLASS                                               #
 # -------------------------------------------------------------------------------------------------------------------- #
-class GetSingleValueResponse(BaseAPIResponse):
+class DefaultResponse(BaseAPIResponse):
     """TODO: document"""
     def __init__(self, value: Any):
         """TODO: document"""

@@ -446,7 +446,7 @@ class MongoDatabaseManager(DatabaseManager):
 
 # ------------------------------------------- CmdbSectionTemplate - Section ------------------------------------------ #
 
-    def init_predefined_templates(self, collection):
+    def init_predefined_templates(self, collection: str):
         """
         Checks if all predefined templates are created, else create them
         """
@@ -469,3 +469,27 @@ class MongoDatabaseManager(DatabaseManager):
                 # The template does not exist, create it
                 LOGGER.info("Creating Template: %s", {template_name})
                 self.insert(collection, predefined_template)
+
+
+    def create_general_report_category(self, collection: str):
+        """
+        Creates the General Report Category
+        """
+        ## check if counter is created in db, else create one
+        counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
+
+        if not counter:
+            self._init_public_id_counter(collection)
+
+        result = self.get_collection(collection).find_one(filter={'name': 'General'})
+
+        if not result:
+            # The template does not exist, create it
+            LOGGER.info("Creating 'General' Report Category")
+
+            general_category = {
+                'name': 'General',
+                'predefined': True,
+            }
+
+            self.insert(collection, general_category)

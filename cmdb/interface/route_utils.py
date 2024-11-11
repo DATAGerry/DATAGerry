@@ -35,6 +35,7 @@ from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
+from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 
 from cmdb.errors.manager import ManagerGetError
@@ -328,6 +329,9 @@ def init_db_routine(db_name: str):
 
     # Generate predefined section templates
     current_app.database_manager.init_predefined_templates(CmdbSectionTemplate.COLLECTION)
+
+    # Generate 'General' report category
+    current_app.database_manager.create_general_report_category(CmdbReportCategory.COLLECTION)
 
 
 def create_new_admin_user(user_data: dict):

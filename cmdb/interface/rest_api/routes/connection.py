@@ -20,7 +20,7 @@ from flask import current_app, abort
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __title__, __version__
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.blueprint import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -48,7 +48,7 @@ def connection_response():
             'connected': dbm.status()
         }
 
-        api_response = GetSingleValueResponse(infos)
+        api_response = DefaultResponse(infos)
 
         return api_response.make_response()
     except Exception as err:

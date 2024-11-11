@@ -28,7 +28,7 @@ from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, Quic
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user, login_required
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -61,9 +61,9 @@ def quick_search_result_counter(request_user: UserModel):
         return abort(400)
 
     if len(result) > 0:
-        return GetSingleValueResponse(result[0]).make_response()
+        return DefaultResponse(result[0]).make_response()
 
-    return GetSingleValueResponse({'active': 0, 'inactive': 0, 'total': 0}).make_response()
+    return DefaultResponse({'active': 0, 'inactive': 0, 'total': 0}).make_response()
 
 
 @search_blueprint.route('/', methods=['GET', 'POST'])
@@ -108,9 +108,9 @@ def search_framework(request_user: UserModel):
                                     resolve=resolve_object_references, active=only_active)
     except Exception as err:
         LOGGER.error("[search_framework]: Exception: %s, Type: %s",err, type(err))
-        return GetSingleValueResponse([]).make_response(204)
+        return DefaultResponse([]).make_response(204)
 
-    api_response = GetSingleValueResponse(result)
+    api_response = DefaultResponse(result)
 
     return api_response.make_response()
 

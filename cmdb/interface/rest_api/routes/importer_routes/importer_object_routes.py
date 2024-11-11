@@ -31,7 +31,7 @@ from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
-from cmdb.interface.rest_api.responses import GetSingleValueResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.route_utils import insert_request_user,\
                                        login_required,\
                                        right_required
@@ -78,7 +78,7 @@ def get_importer():
             'icon': __OBJECT_IMPORTER__.get(importer).ICON
         })
 
-    api_response = GetSingleValueResponse(importer_response)
+    api_response = DefaultResponse(importer_response)
 
     return api_response.make_response()
 
@@ -93,7 +93,7 @@ def get_default_importer_config(importer_type):
     except IndexError:
         return abort(404)
 
-    api_response = GetSingleValueResponse({'manually_mapping': importer.MANUALLY_MAPPING})
+    api_response = DefaultResponse({'manually_mapping': importer.MANUALLY_MAPPING})
 
     return api_response.make_response()
 
@@ -105,7 +105,7 @@ def get_parser():
     """TODO: document"""
     parser = list(__OBJECT_PARSER__)
 
-    api_response = GetSingleValueResponse(parser)
+    api_response = DefaultResponse(parser)
 
     return api_response.make_response()
 
@@ -120,7 +120,7 @@ def get_default_parser_config(parser_type: str):
     except IndexError:
         return abort(404)
 
-    api_response = GetSingleValueResponse(parser.DEFAULT_CONFIG)
+    api_response = DefaultResponse(parser.DEFAULT_CONFIG)
 
     return api_response.make_response()
 
@@ -158,7 +158,7 @@ def parse_objects():
         LOGGER.debug("[parse_objects] Error: %s, Type: %s", err, type(err))
         return abort(500, "Could not generate parsed output!")
 
-    api_response = GetSingleValueResponse(parsed_output)
+    api_response = DefaultResponse(parsed_output)
 
     return api_response.make_response()
 
@@ -288,6 +288,6 @@ def import_objects(request_user: UserModel):
             #ERROR-FIX
             LOGGER.debug("[import_objects] ManagerInsertError: %s", err.message)
 
-    api_response = GetSingleValueResponse(import_response)
+    api_response = DefaultResponse(import_response)
 
     return api_response.make_response()
