@@ -23,7 +23,7 @@ from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.media_files_manager import MediaFilesManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.interface.route_utils import (
     insert_request_user,
     login_required,

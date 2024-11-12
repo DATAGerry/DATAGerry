@@ -20,7 +20,8 @@ from typing import Union
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.user_management.models.settings import UserSettingModel, UserSettingType
+from cmdb.models.settings_model.user_setting import UserSettingModel
+from cmdb.models.settings_model.user_setting_type_enum import UserSettingType
 
 from cmdb.errors.manager import ManagerDeleteError, ManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #

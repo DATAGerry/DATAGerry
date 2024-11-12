@@ -20,9 +20,9 @@ import pytest
 
 from cmdb.manager.rights_manager import RightsManager
 
-from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.models.user import UserModel
-from cmdb.user_management.rights import __all__ as rights
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.group_model.group import UserGroupModel
+from cmdb.models.right_model.all_rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 

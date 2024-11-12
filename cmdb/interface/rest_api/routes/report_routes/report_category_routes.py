@@ -28,10 +28,9 @@ from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.results import IterationResult
-
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -66,14 +65,14 @@ def create_report_category(params: dict, request_user: UserModel):
 
     try:
         params['public_id'] = report_categories_manager.get_next_public_id()
-        # It is not possible to create predefined Re
+        # It is not possible to create a predefined CmdbReportCategory
         params['predefined'] = False
 
         new_report_category_id = report_categories_manager.insert_report_category(params)
     except ManagerInsertError as err:
         #TODO: ERROR-FIX
         LOGGER.debug("[create_report_category] ManagerInsertError: %s", err.message)
-        return abort(400, "Could not create the section template!")
+        return abort(400, "Could not create the report category!")
 
     api_response = DefaultResponse(new_report_category_id)
 
@@ -112,12 +111,13 @@ def get_report_category(public_id: int, request_user: UserModel):
 @insert_request_user
 @report_categories_blueprint.parse_collection_parameters()
 def get_report_categories(params: CollectionParameters, request_user: UserModel):
-    """Returns all CmdbReportCategory based on the params
+    """
+    Returns all CmdbReportCategories based on the params
 
     Args:
         params (CollectionParameters): Parameters to identify documents in database
     Returns:
-        (GetMultiResponse): All CmdbReportCategory considering the params
+        (GetMultiResponse): All CmdbReportCategories considering the params
     """
     report_categories_manager: ReportCategoriesManager = ManagerProvider.get_manager(
                                                                             ManagerType.REPORT_CATEGORIES_MANAGER,
@@ -127,9 +127,9 @@ def get_report_categories(params: CollectionParameters, request_user: UserModel)
         builder_params: BuilderParameters = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
         iteration_result: IterationResult[CmdbReportCategory] = report_categories_manager.iterate(builder_params)
-        template_list: list[dict] = [template_.__dict__ for template_ in iteration_result.results]
+        report_category_list: list[dict] = [report_category_.__dict__ for report_category_ in iteration_result.results]
 
-        api_response = GetMultiResponse(template_list,
+        api_response = GetMultiResponse(report_category_list,
                                         iteration_result.total,
                                         params,
                                         request.url,
@@ -143,7 +143,7 @@ def get_report_categories(params: CollectionParameters, request_user: UserModel)
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-@report_categories_blueprint.route('/', methods=['PUT', 'PATCH'])
+@report_categories_blueprint.route('/', methods=['PUT'])
 @report_categories_blueprint.parse_request_parameters()
 @insert_request_user
 def update_report_category(params: dict, request_user: UserModel):
@@ -153,7 +153,7 @@ def update_report_category(params: dict, request_user: UserModel):
     Args:
         params (dict): updated CmdbReportCategory parameters
     Returns:
-        UpdateSingleResponse: Response with 
+        UpdateSingleResponse: Response with UpdateResult
     """
     report_categories_manager: ReportCategoriesManager = ManagerProvider.get_manager(
                                                                             ManagerType.REPORT_CATEGORIES_MANAGER,
@@ -163,6 +163,7 @@ def update_report_category(params: dict, request_user: UserModel):
         current_category: CmdbReportCategory = report_categories_manager.get_report_category(params['public_id'])
 
         if current_category:
+            #TODO: REFACTOR-FIX
             result = report_categories_manager.update({'public_id':params['public_id']}, params)
         else:
             raise NoDocumentFound(report_categories_manager.collection)
@@ -187,7 +188,13 @@ def update_report_category(params: dict, request_user: UserModel):
 @report_categories_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @insert_request_user
 def delete_report_category(public_id: int, request_user: UserModel):
-    """TODO: document"""
+    """
+    Deletes the CmdbReportCategory with the given public_id
+    
+    Args:
+        public_id (int): public_id of CmdbReportCategory which should be retrieved
+        request_user (UserModel): User which is requesting the CmdbReportCategory
+    """
     report_categories_manager: ReportCategoriesManager = ManagerProvider.get_manager(
                                                                             ManagerType.REPORT_CATEGORIES_MANAGER,
                                                                             request_user)

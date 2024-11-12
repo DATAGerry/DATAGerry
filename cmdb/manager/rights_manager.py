@@ -17,7 +17,7 @@
 import logging
 from multiprocessing.managers import BaseManager
 
-from cmdb.user_management.models.right import BaseRight
+from cmdb.models.right_model.base_right import BaseRight
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError

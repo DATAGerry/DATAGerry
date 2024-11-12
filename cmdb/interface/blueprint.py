@@ -23,7 +23,7 @@ from cmdb.manager.users_manager import UsersManager
 
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_authorization_header
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.security.token.validator import TokenValidator
 
 from cmdb.errors.manager import ManagerGetError

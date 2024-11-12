@@ -14,24 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-import logging
-import jinja2
+from cmdb.models.right_model.levels_enum import Levels
 # -------------------------------------------------------------------------------------------------------------------- #
 
-LOGGER = logging.getLogger(__name__)
+GLOBAL_RIGHT_IDENTIFIER = '*'
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                TemplateEngine - CLASS                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
-class TemplateEngine:
-    """TODO: document"""
+LEVEL_TO_NAME = {
+    Levels.CRITICAL: 'CRITICAL',
+    Levels.DANGER: 'DANGER',
+    Levels.SECURE: 'SECURE',
+    Levels.PROTECTED: 'PROTECTED',
+    Levels.PERMISSION: 'PERMISSION',
+    Levels.NOTSET: 'NOTSET',
+}
 
-    def __init__(self):
-        pass
-
-
-    def render_template_string(self, template_string, template_data):
-        """TODO: document"""
-        environment = jinja2.Environment(undefined=jinja2.ChainableUndefined)
-        template = environment.from_string(template_string)
-        return template.render(template_data)
+NAME_TO_LEVEL = {
+    'CRITICAL': Levels.CRITICAL,
+    'DANGER': Levels.DANGER,
+    'SECURE': Levels.SECURE,
+    'PROTECTED': Levels.PROTECTED,
+    'PERMISSION': Levels.PERMISSION,
+    'NOTSET': Levels.NOTSET,
+}

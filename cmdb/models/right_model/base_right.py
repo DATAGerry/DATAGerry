@@ -14,44 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from enum import IntEnum
+import logging
+from cmdb.models.right_model.levels_enum import Levels
+from cmdb.models.right_model.constants import GLOBAL_RIGHT_IDENTIFIER, LEVEL_TO_NAME
 
 from cmdb.errors.security import InvalidLevelRightError, MinLevelRightError, MaxLevelRightError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-GLOBAL_RIGHT_IDENTIFIER = '*'
+LOGGER = logging.getLogger(__name__)
 
-class Levels(IntEnum):
-    """
-    Class wrapper for different security levels
-    """
-    CRITICAL = 100
-    DANGER = 80
-    SECURE = 50
-    PROTECTED = 30
-    PERMISSION = 10
-    NOTSET = 0
-
-
-_levelToName = {
-    Levels.CRITICAL: 'CRITICAL',
-    Levels.DANGER: 'DANGER',
-    Levels.SECURE: 'SECURE',
-    Levels.PROTECTED: 'PROTECTED',
-    Levels.PERMISSION: 'PERMISSION',
-    Levels.NOTSET: 'NOTSET',
-}
-
-_nameToLevel = {
-    'CRITICAL': Levels.CRITICAL,
-    'DANGER': Levels.DANGER,
-    'SECURE': Levels.SECURE,
-    'PROTECTED': Levels.PROTECTED,
-    'PERMISSION': Levels.PERMISSION,
-    'NOTSET': Levels.NOTSET,
-}
-
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   BaseRight - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 class BaseRight:
     """TODO: document"""
     MIN_LEVEL = Levels.NOTSET
@@ -87,7 +61,7 @@ class BaseRight:
     @classmethod
     def get_levels(cls):
         """TODO: document"""
-        return _levelToName
+        return LEVEL_TO_NAME
 
 
     @property

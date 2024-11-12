@@ -14,31 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.user_management.models.right import BaseRight, Levels
+from cmdb.models.right_model.base_right import BaseRight
+from cmdb.models.right_model.levels_enum import Levels
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ImportRight(BaseRight):
+class SystemRight(BaseRight):
     """TODO: document"""
-    MIN_LEVEL = Levels.PROTECTED
-    PREFIX = f'{BaseRight.PREFIX}.import'
+    MIN_LEVEL = Levels.SECURE
+    PREFIX = f'{BaseRight.PREFIX}.system'
 
     def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
         super().__init__(level, name, description=description)
-
-
-class ImportObjectRight(ImportRight):
-    """TODO: document"""
-    MIN_LEVEL = Levels.PROTECTED
-    PREFIX = f'{ImportRight.PREFIX}.object'
-
-    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super().__init__(name, level, description=description)
-
-
-class ImportTypeRight(ImportRight):
-    """TODO: document"""
-    MIN_LEVEL = Levels.SECURE
-    PREFIX = f'{ImportRight.PREFIX}.type'
-
-    def __init__(self, name: str, level: Levels = Levels.SECURE, description: str = None):
-        super().__init__(name, level, description=description)

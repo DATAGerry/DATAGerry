@@ -14,24 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-import logging
-import jinja2
+from enum import Enum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-LOGGER = logging.getLogger(__name__)
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                TemplateEngine - CLASS                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
-class TemplateEngine:
-    """TODO: document"""
-
-    def __init__(self):
-        pass
-
-
-    def render_template_string(self, template_string, template_data):
-        """TODO: document"""
-        environment = jinja2.Environment(undefined=jinja2.ChainableUndefined)
-        template = environment.from_string(template_string)
-        return template.render(template_data)
+class UserSettingType(Enum):
+    """
+    Type of user settings. Applied only on user application level.
+    SERVER means only backend settings. APPLICATION only the frontend.
+    Global means both.
+    """
+    GLOBAL = 'GLOBAL'
+    APPLICATION = 'APPLICATION'
+    SERVER = 'SERVER'

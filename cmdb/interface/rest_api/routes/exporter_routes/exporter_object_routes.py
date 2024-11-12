@@ -19,12 +19,12 @@ from flask import abort, jsonify, current_app
 
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.utils.helpers import load_class
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.type import TypeNotFoundError

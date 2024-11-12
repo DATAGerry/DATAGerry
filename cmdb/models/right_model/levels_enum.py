@@ -14,24 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-import logging
-import jinja2
+from enum import IntEnum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-LOGGER = logging.getLogger(__name__)
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                TemplateEngine - CLASS                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
-class TemplateEngine:
-    """TODO: document"""
-
-    def __init__(self):
-        pass
-
-
-    def render_template_string(self, template_string, template_data):
-        """TODO: document"""
-        environment = jinja2.Environment(undefined=jinja2.ChainableUndefined)
-        template = environment.from_string(template_string)
-        return template.render(template_data)
+class Levels(IntEnum):
+    """
+    Class wrapper for different security levels
+    """
+    CRITICAL = 100
+    DANGER = 80
+    SECURE = 50
+    PROTECTED = 30
+    PERMISSION = 10
+    NOTSET = 0

@@ -21,7 +21,7 @@ from flask import current_app
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider

@@ -22,13 +22,13 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.wrappers import Request
 
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.types_manager import TypesManager
 
 from cmdb.importer.importer_helper import load_parser_class
-from cmdb.user_management.models.user import UserModel
-from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #

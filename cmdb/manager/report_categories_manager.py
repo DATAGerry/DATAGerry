@@ -81,20 +81,20 @@ class ReportCategoriesManager(BaseManager):
 
     def get_report_category(self, public_id: int) -> CmdbReportCategory:
         """
-        Retrives a CmdbSectionTemplate from the database with the given public_id
+        Retrives a CmdbReportCategory from the database with the given public_id
 
         Args:
-            public_id (int): public_id of the CmdbSectionTemplate which should be retrieved
+            public_id (int): public_id of the CmdbReportCategory which should be retrieved
         Raises:
-            ManagerGetError: Raised if the CmdbSectionTemplate could not ne retrieved
+            ManagerGetError: Raised if the CmdbReportCategory could not ne retrieved
         Returns:
-            CmdbSectionTemplate: The requested CmdbSectionTemplate if it exists, else None
+            CmdbReportCategory: The requested CmdbReportCategory if it exists, else None
         """
         try:
             requested_report_category = self.get_one(public_id)
         except Exception as err:
             #TODO: ERROR-FIX
-            raise ManagerGetError(f"CmdbReportCategory with ID: {public_id}! 'GET' Error: {err}") from err
+            raise ManagerGetError(f"Report Category with ID: {public_id}! 'GET' Error: {err}") from err
 
         if requested_report_category:
             requested_report_category = CmdbReportCategory.from_data(requested_report_category)
@@ -105,8 +105,7 @@ class ReportCategoriesManager(BaseManager):
         raise ManagerGetError(f'Report Category with ID: {public_id} not found!')
 
 
-    def iterate(self,
-                builder_params: BuilderParameters) -> IterationResult[CmdbReportCategory]:
+    def iterate(self, builder_params: BuilderParameters) -> IterationResult[CmdbReportCategory]:
         """
         Performs an aggregation on the database
 

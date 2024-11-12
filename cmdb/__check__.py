@@ -28,11 +28,11 @@ from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
 from cmdb.updater.updater_module import UpdaterModule
-from cmdb.models.cmdb_location import CmdbLocation
-from cmdb.models.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.user_management.models.user import UserModel
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 
 from cmdb.errors.system_config import SectionError

@@ -28,7 +28,7 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.models.type_model.type import TypeModel
 from cmdb.models.type_model.type_field_section import TypeFieldSection
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 

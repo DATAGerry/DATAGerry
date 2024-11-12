@@ -19,14 +19,14 @@ import logging
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.type_model.type import TypeModel
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.search.params import SearchParam
 from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
-from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 # -------------------------------------------------------------------------------------------------------------------- #
