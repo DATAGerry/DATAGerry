@@ -8,6 +8,6 @@
             [loading]="loading" [pageSize]="10"></cmdb-table>
 
 <ng-template #actionsTemplate let-item="item">
-  <button *ngIf="!item.predefined" class="btn btn-warning btn-sm" (click)="editCategory(item.public_id)">Edit</button>
-  <button *ngIf="!item.predefined" class="btn btn-danger btn-sm" (click)="deleteCategory(item.public_id)">Delete</button>
+  <i  *ngIf="!item.predefined" class="far fa-edit icon-margin" (click)="editCategory(item.public_id)"></i>
+  <i  *ngIf="!item.predefined" class="far fa-trash-alt"  (click)="deleteCategory(item.public_id)"></i>
 </ng-template>
