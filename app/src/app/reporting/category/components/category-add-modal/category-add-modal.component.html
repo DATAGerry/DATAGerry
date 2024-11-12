@@ -1,0 +1,29 @@
+<div class="modal-header">
+    <h4 class="modal-title">Add New Category</h4>
+    <button type="button" class="close" (click)="modal.dismiss('cancel')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="categoryNameInput">Category Name</label>
+        <input
+          type="text"
+          id="categoryNameInput"
+          formControlName="name"
+          class="form-control"
+          required
+        />
+        <div *ngIf="name.invalid && (name.dirty || name.touched)" class="invalid-feedback">
+          <div *ngIf="name.errors?.required">Name is required.</div>
+          <div *ngIf="name.errors?.minlength">Name must be at least 3 characters long.</div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
+    <button type="button" class="btn btn-primary" [disabled]="addCategoryForm.invalid" (click)="onSubmit()">Add Category</button>
+  </div>
+  

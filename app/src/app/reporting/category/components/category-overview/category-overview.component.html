@@ -1,0 +1,13 @@
+<div class="d-flex justify-content-between align-items-center">
+  <h1>Report Categories Overview  </h1>
+  <button class="btn btn-primary" (click)="navigateToAddCategory()">Add Category</button>
+</div>
+<hr/>
+
+<cmdb-table [items]="categories" [columns]="columns" [totalItems]="totalCategories"
+            [loading]="loading" [pageSize]="10"></cmdb-table>
+
+<ng-template #actionsTemplate let-item="item">
+  <button *ngIf="!item.predefined" class="btn btn-warning btn-sm" (click)="editCategory(item.public_id)">Edit</button>
+  <button *ngIf="!item.predefined" class="btn btn-danger btn-sm" (click)="deleteCategory(item.public_id)">Delete</button>
+</ng-template>
