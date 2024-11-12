@@ -19,15 +19,15 @@ from datetime import datetime, timezone
 
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.models.cmdb_object import CmdbObject
 from cmdb.importer.parser_object import JsonObjectParser
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
 from cmdb.importer.importer_config import ObjectImporterConfig
-from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
+from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError

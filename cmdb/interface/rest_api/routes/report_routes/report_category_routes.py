@@ -13,6 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
+"""
+TODO: document
+"""
 import logging
 from flask import abort, request
 
@@ -26,7 +29,7 @@ from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.user_management.models.user import UserModel
-from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.results import IterationResult
 
 

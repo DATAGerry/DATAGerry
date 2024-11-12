@@ -13,17 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This module contains the implementation of the LocationsManager"""
+"""
+This module contains the implementation of the LocationsManager
+"""
 import logging
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.cmdb_objects.cmdb_location import CmdbLocation
+from cmdb.models.cmdb_location import CmdbLocation
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #

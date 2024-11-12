@@ -13,30 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from typing import TypeVar, Generic, Union, Type
+"""
+TODO: document
+"""
+import logging
 
-from cmdb.models.cmdb_dao import CmdbDAO
+from cmdb.interface.blueprint import APIBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
-C = TypeVar('C', bound=CmdbDAO)
+LOGGER = logging.getLogger(__name__)
 
-
-class IterationResult(Generic[C]):
-    """Framework Result for a iteration call over a collection"""
-
-    def __init__(self, results: list[Union[C, dict]], total: int):
-        """
-        Constructor of IterationResult
-        Args:
-            results: List of raw oder generic database results
-            total: Total number of elements in the query.
-        """
-        self.results = results
-        self.count = len(self.results)
-        self.total = total
-
-
-    def convert_to(self, c: Type[C]):
-        """Converts the results inside the instance to a passed CmdbDAO subtype."""
-        self.results = [c.from_data(result) for result in self.results]
+reports_blueprint = APIBlueprint('reports', __name__)

@@ -16,7 +16,7 @@
 """TODO: document"""
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
 from cmdb.docapi.docapi_template.docapi_template_type import DocapiTemplateType
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #

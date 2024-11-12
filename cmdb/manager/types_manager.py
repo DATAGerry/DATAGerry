@@ -22,18 +22,17 @@ from typing import Union
 from bson import json_util
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.database.utils import object_hook
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.type_model.type import TypeModel
-from cmdb.database.utils import object_hook
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
-from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.type_model.type_field_section import TypeFieldSection
+from cmdb.models.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 
-from cmdb.errors.manager import ManagerGetError,\
-                                ManagerInsertError
+from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.errors.manager.types_manager import TypesManagerGetError,\
                                               TypesManagerUpdateError,\
                                               TypesManagerDeleteError,\

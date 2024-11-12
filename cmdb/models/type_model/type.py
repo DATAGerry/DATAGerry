@@ -15,18 +15,17 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Represents a type in DATAGERRY
-Extends: CmdbDAO
 """
 import logging
 from datetime import datetime, timezone
 from dateutil.parser import parse
 
 from cmdb.security.acl.control import AccessControlList
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
-from cmdb.framework.models.type_model.type_summary import TypeSummary
-from cmdb.framework.models.type_model.type_external_link import TypeExternalLink
-from cmdb.framework.models.type_model.type_section import TypeSection
-from cmdb.framework.models.type_model.type_render_meta import TypeRenderMeta
+from cmdb.models.cmdb_dao import CmdbDAO
+from cmdb.models.type_model.type_summary import TypeSummary
+from cmdb.models.type_model.type_external_link import TypeExternalLink
+from cmdb.models.type_model.type_section import TypeSection
+from cmdb.models.type_model.type_render_meta import TypeRenderMeta
 
 from cmdb.errors.cmdb_object import RequiredInitKeyNotFoundError
 from cmdb.errors.type import FieldNotFoundError, FieldInitError

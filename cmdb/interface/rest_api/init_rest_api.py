@@ -62,12 +62,12 @@ def create_rest_api(database_manager: MongoDatabaseManager):
     return app
 
 
-def register_converters(app):
+def register_converters(app: BaseCmdbApp):
     """TODO: document"""
     app.url_map.converters['regex'] = RegexConverter
 
 
-def register_blueprints(app):
+def register_blueprints(app: BaseCmdbApp):
     """TODO: document"""
     from cmdb.interface.rest_api.routes.auth_routes import auth_blueprint
     from cmdb.interface.rest_api.routes.system_routes.setup_routes import setup_blueprint
@@ -93,6 +93,7 @@ def register_blueprints(app):
     from cmdb.interface.rest_api.routes.media_library_routes.media_file_routes import media_file_blueprint
     from cmdb.interface.rest_api.routes.framework_routes.special_routes import special_blueprint
     from cmdb.interface.rest_api.routes.report_routes.report_category_routes import report_categories_blueprint
+    from cmdb.interface.rest_api.routes.report_routes.report_routes import reports_blueprint
 
     app.register_blueprint(auth_blueprint, url_prefix='/auth')
     app.register_blueprint(setup_blueprint, url_prefix='/setup')
@@ -119,6 +120,7 @@ def register_blueprints(app):
     app.register_blueprint(media_file_blueprint)
     app.register_blueprint(special_blueprint)
     app.register_blueprint(report_categories_blueprint, url_prefix='/report_categories')
+    app.register_blueprint(reports_blueprint, url_prefix='/reports')
 
     if cmdb.__MODE__ == 'DEBUG':
         from cmdb.interface.rest_api.routes.debug_routes import debug_blueprint

@@ -17,8 +17,8 @@
 import logging
 from datetime import datetime
 
-from cmdb.framework.models.log_model.log_action_enum import LogAction
-from cmdb.framework.models.log_model.cmdb_meta_log import CmdbMetaLog
+from cmdb.models.log_model.log_action_enum import LogAction
+from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

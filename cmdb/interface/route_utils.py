@@ -34,8 +34,8 @@ from cmdb.security.token.generator import TokenGenerator
 from cmdb.user_management.models.group import UserGroupModel
 from cmdb.user_management.models.user import UserModel
 from cmdb.user_management.constants import __FIXED_GROUPS__, __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 
 from cmdb.errors.manager import ManagerGetError

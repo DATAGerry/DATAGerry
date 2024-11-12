@@ -25,7 +25,7 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.section_templates_manager import SectionTemplatesManager
 
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint

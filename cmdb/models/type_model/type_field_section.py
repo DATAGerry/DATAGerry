@@ -14,76 +14,67 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This class represents a TypeMultiDataSection
+This class represents a type field section
 Extends: TypeSection
 """
 import logging
 import json
 
-from cmdb.framework.models.type_model.type_section import TypeSection
+from cmdb.models.type_model.type_section import TypeSection
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                               TypeMultiDataSection                                                   #
+#                                                   TypeFieldSection                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-
-class TypeMultiDataSection(TypeSection):
+class TypeFieldSection(TypeSection):
     """
-    This class represents a TypeMultiDataSection
+    This class represents a type field section
     Extends: TypeSection
     """
 
-    def __init__(self,
-                 type: str,
-                 name: str,
-                 label: str = None,
-                 fields: list = None,
-                 hidden_fields: list = None):
+    def __init__(self, type: str, name: str, label: str = None, fields: list = None):
         self.fields = fields or []
-        self.hidden_fields = hidden_fields or []
         super().__init__(type=type, name=name, label=label)
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
     @classmethod
-    def from_data(cls, data: dict) -> "TypeMultiDataSection":
+    def from_data(cls, data: dict) -> "TypeFieldSection":
         """
-        Generates a TypeMultiDataSection object from a dict
+        Generates a TypeFieldSection object from a dict
 
         Args:
-            data (dict): Data with which the TypeMultiDataSection should be instantiated
+            data (dict): Data with which the TypeFieldSection should be instantiated
 
         Returns:
-            TypeMultiDataSection: TypeMultiDataSection class with given data
+            TypeFieldSection: TypeFieldSection class with given data
         """
         return cls(
             type = data.get('type'),
             name = data.get('name'),
             label = data.get('label', None),
-            fields = data.get('fields', None),
-            hidden_fields = data.get('hidden_fields', [])
+            fields = data.get('fields', None)
         )
 
 
     @classmethod
-    def to_json(cls, instance: "TypeMultiDataSection") -> dict:
+    def to_json(cls, instance: "TypeFieldSection") -> dict:
         """
-        Returns a TypeMultiDataSection as JSON representation
+        Returns a TypeFieldSection as JSON representation
 
         Args:
-            instance (TypeMultiDataSection): TypeMultiDataSection which should be transformed
+            instance (TypeFieldSection): TypeFieldSection which should be transformed
 
         Returns:
-            dict: JSON representation of the given TypeMultiDataSection
+            dict: JSON representation of the given TypeFieldSection
         """
         return {
             'type': instance.type,
             'name': instance.name,
             'label': instance.label,
-            'fields': instance.fields,
-            'hidden_fields': instance.hidden_fields
+            'fields': instance.fields
         }
 
 # -------------------------------------------------- GENERAL METHODS ------------------------------------------------- #
@@ -98,15 +89,5 @@ class TypeMultiDataSection(TypeSection):
         return self.fields
 
 
-    def get_hidden_fields(self) -> list:
-        """
-        Retrieves all hidden fields of the section
-
-        Returns:
-            list: All hidden fields of the section
-        """
-        return self.fields
-
-
     def __str__(self):
-        return json.dumps(TypeMultiDataSection.to_json(self))
+        return json.dumps(TypeFieldSection.to_json(self))

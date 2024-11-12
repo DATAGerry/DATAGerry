@@ -19,7 +19,7 @@ a location in Datagarry
 """
 import logging
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

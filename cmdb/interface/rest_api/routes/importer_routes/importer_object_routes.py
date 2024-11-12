@@ -25,8 +25,8 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.database.utils import default
-from cmdb.framework.models.log_model.log_action_enum import LogAction
-from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.models.log_model.log_action_enum import LogAction
+from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.importer.importer_config import ObjectImporterConfig
 from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser

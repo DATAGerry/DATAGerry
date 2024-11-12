@@ -35,3 +35,4 @@ class ManagerType(Enum):
     SETTINGS_WRITER_MANAGER = 'SettingsWriterManager'
     SECURITY_MANAGER = 'SecurityManager'
     REPORT_CATEGORIES_MANAGER = 'ReportCategoriesManager'
+    REPORTS_MANAGER = 'ReportsManager'

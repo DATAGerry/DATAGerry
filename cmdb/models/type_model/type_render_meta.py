@@ -18,12 +18,12 @@ This class represents type render meta
 """
 import logging
 
-from cmdb.framework.models.type_model.type_section import TypeSection
-from cmdb.framework.models.type_model.type_external_link import TypeExternalLink
-from cmdb.framework.models.type_model.type_summary import TypeSummary
-from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
-from cmdb.framework.models.type_model.type_reference_section import TypeReferenceSection
-from cmdb.framework.models.type_model.type_multi_data_section import TypeMultiDataSection
+from cmdb.models.type_model.type_section import TypeSection
+from cmdb.models.type_model.type_external_link import TypeExternalLink
+from cmdb.models.type_model.type_summary import TypeSummary
+from cmdb.models.type_model.type_field_section import TypeFieldSection
+from cmdb.models.type_model.type_reference_section import TypeReferenceSection
+from cmdb.models.type_model.type_multi_data_section import TypeMultiDataSection
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

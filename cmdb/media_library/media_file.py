@@ -17,9 +17,8 @@
 from datetime import date
 
 from cmdb.media_library.media_file_base import MediaFileManagementBase
-
 from cmdb.media_library.media_file_metadata import FileMetadata
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #

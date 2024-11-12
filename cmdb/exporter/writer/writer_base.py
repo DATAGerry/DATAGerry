@@ -19,9 +19,10 @@ import datetime
 import time
 from flask import Response
 
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.models.cmdb_object import CmdbObject
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.user_management.models.user import UserModel
@@ -29,7 +30,6 @@ from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.exporter.config.config_type import ExporterConfig
 from cmdb.exporter.format.format_base import BaseExporterFormat
 from cmdb.utils.helpers import load_class
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

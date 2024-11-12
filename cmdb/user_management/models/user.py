@@ -17,7 +17,7 @@
 from datetime import datetime, timezone
 from dateutil import parser
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class UserModel(CmdbDAO):

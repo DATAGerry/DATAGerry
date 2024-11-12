@@ -21,9 +21,8 @@ import logging
 from typing import Union
 from dateutil.parser import parse
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 
-from cmdb.errors.type import FieldNotFoundError
 from cmdb.errors.manager.object_manager import TypeNotSetError
 # -------------------------------------------------------------------------------------------------------------------- #
 

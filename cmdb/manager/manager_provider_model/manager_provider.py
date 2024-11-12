@@ -34,6 +34,7 @@ from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.manager.report_categories_manager import ReportCategoriesManager
+from cmdb.manager.reports_manager import ReportsManager
 
 from cmdb.user_management.models.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -44,7 +45,31 @@ LOGGER = logging.getLogger(__name__)
 #                                                ManagerProvider - CLASS                                               #
 # -------------------------------------------------------------------------------------------------------------------- #
 class ManagerProvider:
-    """Provides Managers for stateless API route requests"""
+    """
+    Provides Managers for stateless API route requests
+    """
+
+    @classmethod
+    def get_manager(cls, manager_type: ManagerType, request_user: UserModel):
+        """Retrieves a manager based on the provided ManagerType and 'cloud_mode' app flag
+
+        Args:
+            manager_type (ManagerType): Enum of possible Managers
+            request_user (UserModel): The user which is making the API call
+
+        Returns:
+            Manager: Returns the manager of the provided ManagerType
+        """
+        manager_class = cls.__get_manager_class(manager_type)
+
+        if not manager_class:
+            LOGGER.error("No manager found for type: %s", manager_type)
+            return None
+
+        manager_args = cls.__get_manager_args(request_user)
+
+        return manager_class(*manager_args)
+
 
     @staticmethod
     def __get_manager_class(manager_type: ManagerType):
@@ -74,6 +99,7 @@ class ManagerProvider:
             ManagerType.SETTINGS_WRITER_MANAGER: SettingsWriterManager,
             ManagerType.SECURITY_MANAGER: SecurityManager,
             ManagerType.REPORT_CATEGORIES_MANAGER: ReportCategoriesManager,
+            ManagerType.REPORTS_MANAGER: ReportsManager,
         }
 
         return manager_classes.get(manager_type)
@@ -97,25 +123,3 @@ class ManagerProvider:
             return common_args + (request_user.database,)
 
         return common_args
-
-
-    @classmethod
-    def get_manager(cls, manager_type: ManagerType, request_user: UserModel):
-        """Retrieves a manager based on the provided ManagerType and 'cloud_mode' app flag
-
-        Args:
-            manager_type (ManagerType): Enum of possible Managers
-            request_user (UserModel): The user which is making the API call
-
-        Returns:
-            Manager: Returns the manager of the provided ManagerType
-        """
-        manager_class = cls.__get_manager_class(manager_type)
-
-        if not manager_class:
-            LOGGER.error("No manager found for type: %s", manager_type)
-            return None
-
-        manager_args = cls.__get_manager_args(request_user)
-
-        return manager_class(*manager_args)

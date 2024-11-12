@@ -22,7 +22,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
-from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
@@ -133,7 +133,3 @@ class ReportCategoriesManager(BaseManager):
             raise ManagerIterationError(err) from err
 
         return iteration_result
-
-# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
-
-# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #

@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.updater.updater import Updater
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.models.cmdb_object import CmdbObject
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
