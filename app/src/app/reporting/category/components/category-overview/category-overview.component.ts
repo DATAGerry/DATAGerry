@@ -24,6 +24,7 @@ import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 import { AddCategoryModalComponent } from '../category-add-modal/category-add-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Sort, SortDirection } from 'src/app/layout/table/table.types';
 
 @Component({
     selector: 'app-category-overview',
@@ -37,6 +38,7 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     public limit: number = 10;
     public page: number = 1;
     public loading: boolean = false;
+    public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
 
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
@@ -76,8 +78,8 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
             filter: undefined,
             limit: this.limit,
             page: this.page,
-            sort: 'public_id',
-            order: 1
+            sort: this.sort.name,
+            order: this.sort.order
         };
         this.categoryService.getAllCategories(params).pipe(takeUntil(this.unsubscribe$)).subscribe(
             (response: APIGetMultiResponse<any>) => {
@@ -124,6 +126,17 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         this.page = newPage;
         this.loadCategories();
     }
+
+
+    /**
+     * Updates the sort criteria and reloads the categories.
+     * @param sort - The new sort criteria.
+     */
+    public onSortChange(sort: Sort): void {
+        this.sort = sort;
+        this.loadCategories();
+    }
+
 
     /* ------------------------------------------------ REST OF THE FUNCTIONS ------------------------------------------------ */
 
