@@ -1,3 +1,21 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2024 becon GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
+
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -29,48 +47,19 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
 
     constructor(private api: ApiCallService) { }
 
-    /**
-     * Posts a dummy report category to the backend.
-     */
-    public postDummyCategory(): Observable<T> {
-        // const options = this.options;
-        // options.params = new HttpParams();
-
-        let httpParams = new HttpParams();
-
-        const dummyData = {
-            name: 'Dummy Category',
-            predefined: false
-        };
-
-        for (let key in dummyData) {
-            let val: string = String(dummyData[key]);
-            httpParams = httpParams.set(key, val);
-        }
-
-        this.options.params = httpParams;
-
-
-
-
-        console.log('Sending dummy data:', dummyData); // Log the data
-
-        return this.api.callPost<T>(this.servicePrefix + '/', dummyData, this.options).pipe(
-            map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => {
-                return apiResponse.body.raw as T;
-            }),
-            catchError((error) => {
-                console.error('Error response from server:', error); // Log the error response
-                throw error;
-            })
-        );
-    }
-
 
     /**
      * Fetches all report categories from the backend.
      */
-    public getAllCategories(params: CollectionParameters = { filter: undefined, limit: 10, sort: 'public_id', order: 1, page: 1 }): Observable<APIGetMultiResponse<T>> {
+    public getAllCategories(params: CollectionParameters =
+        {
+            filter: undefined,
+            limit: 10,
+            sort: 'public_id',
+            order: 1,
+            page: 2
+        }): Observable<APIGetMultiResponse<T>> {
+
         const options = this.options;
         let httpParams: HttpParams = new HttpParams();
 
@@ -90,6 +79,7 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
         );
     }
 
+
     /**
      * Fetches a single report category by its public ID.
      */
@@ -102,17 +92,25 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
         );
     }
 
-    /**
-     * Creates a new report category.
-     */
-    public createCategory(categoryData: { name: string; predefined: boolean }): Observable<T> {
-        const options = this.options;
-        options.params = new HttpParams();
 
-        return this.api.callPost<T>(this.servicePrefix + '/', categoryData, options).pipe(
-            map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => apiResponse.body.raw as T)
+    public createCategory(categoryData: { name: string; predefined: boolean }): Observable<T> {
+        let httpParams = new HttpParams();
+
+        for (let key in categoryData) {
+            let val: string = String(categoryData[key]);
+            httpParams = httpParams.set(key, val);
+        }
+
+        this.options.params = httpParams;
+
+        return this.api.callPost<T>(this.servicePrefix + '/', categoryData, this.options).pipe(
+            map((apiResponse: HttpResponse<APIInsertSingleResponse<T>>) => apiResponse.body.raw as T),
+            catchError((error) => {
+                throw error;
+            })
         );
     }
+
 
     /**
      * Updates an existing report category by its public ID.
