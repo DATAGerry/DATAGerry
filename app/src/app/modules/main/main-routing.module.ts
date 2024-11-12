@@ -122,6 +122,15 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         loadChildren: () => import('../../filemanager/filemanager.module').then(m => m.FilemanagerModule)
+    },
+    {
+        path: 'reports',
+        data: {
+            breadcrumb: 'Reports'
+        },
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        loadChildren: () => import('../../reporting/reporting.module').then(m => m.ReportingModule)
     }
 ];
 
