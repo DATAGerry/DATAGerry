@@ -19,20 +19,20 @@ This module contains the implementation of the SectionTemplatesManager
 import logging
 from deepdiff import DeepDiff
 
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.type_model.type import TypeModel
-from cmdb.framework.models.type_model.type_field_section import TypeFieldSection
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.type_model.type_field_section import TypeFieldSection
+from cmdb.models.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.framework.results.list import ListResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -29,7 +29,7 @@ from bson.timestamp import Timestamp
 from bson.tz_util import utc
 
 from cmdb.framework.rendering.render_result import RenderResult
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.provider_config import AuthProviderConfig

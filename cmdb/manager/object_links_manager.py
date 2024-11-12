@@ -22,7 +22,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.framework.models.link import ObjectLinkModel
+from cmdb.models.link import ObjectLinkModel
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.results import IterationResult

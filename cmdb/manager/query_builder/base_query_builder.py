@@ -20,8 +20,8 @@ from typing import Union
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
 from cmdb.user_management.models.user import UserModel
-from cmdb.framework.models.log_model.log_action_enum import LogAction
-from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.models.log_model.log_action_enum import LogAction
+from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from .builder import Builder
 from .builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #

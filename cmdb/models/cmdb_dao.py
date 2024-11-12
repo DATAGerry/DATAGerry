@@ -17,7 +17,7 @@
 import logging
 from pymongo import IndexModel
 
-from cmdb.cmdb_objects.cmdb_versioning import Versioning
+from cmdb.models.cmdb_versioning import Versioning
 from cmdb.utils.helpers import debug_print
 
 from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
@@ -29,8 +29,9 @@ LOGGER = logging.getLogger(__name__)
 #                                                    CmdbDAO - CLASS                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
 class CmdbDAO:
-    """The data access object is the basic presentation if objects and
-    their necessary dependent classes are to be stored in the database.
+    """
+    The data access object is the basic presentation if objects and their necessary dependent classes are to be stored
+    in the database
 
     Attributes:
         DAO_ASCENDING (int): models sort order ascending
@@ -43,7 +44,7 @@ class CmdbDAO:
         VERSIONING_PATCH (int): addend for small patches
 
     Note:
-        COLLECTION and REQUIRED_INIT_KEYS should always be overwritten by inherited classes!!!
+        COLLECTION and REQUIRED_INIT_KEYS should always be overwritten by inherited classes
     """
 
     DAO_ASCENDING = 1

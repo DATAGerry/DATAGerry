@@ -16,8 +16,8 @@
 """TODO: document"""
 import logging
 
-from cmdb.framework.models.type_model.type import TypeModel
-from cmdb.framework.models.category_model.category import CategoryModel
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.category_model.category import CategoryModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

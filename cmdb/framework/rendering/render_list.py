@@ -19,9 +19,9 @@ from typing import Union
 
 from cmdb.manager.objects_manager import ObjectsManager
 
+from cmdb.models.cmdb_object import CmdbObject
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.rendering.render_result import RenderResult
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 # -------------------------------------------------------------------------------------------------------------------- #
 

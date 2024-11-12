@@ -21,17 +21,16 @@ Except for the managers, this module can be used completely modular.
 The respective DAO is used to apply the attributes and to convert
 the elements for the database.
 """
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
-from cmdb.cmdb_objects.cmdb_location import CmdbLocation
-from cmdb.cmdb_objects.cmdb_section_template import CmdbSectionTemplate
-
-from cmdb.framework.models.reports_model.cmdb_report_category import CmdbReportCategory
-from cmdb.framework.models.type_model.type import TypeModel
-from cmdb.framework.models.category_model.category import CategoryModel
-from cmdb.framework.models.link import ObjectLinkModel
-from cmdb.framework.models.log_model.cmdb_meta_log import CmdbMetaLog
-from cmdb.framework.models.log_model.cmdb_log import CmdbLog
-from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.cmdb_location import CmdbLocation
+from cmdb.models.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.category_model.category import CategoryModel
+from cmdb.models.link import ObjectLinkModel
+from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
+from cmdb.models.log_model.cmdb_log import CmdbLog
+from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 # -------------------------------------------------------------------------------------------------------------------- #
 
 CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)

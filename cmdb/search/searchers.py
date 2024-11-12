@@ -19,8 +19,8 @@ import logging
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
-from cmdb.framework.models.type_model.type import TypeModel
+from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.type_model.type import TypeModel
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.search.params import SearchParam

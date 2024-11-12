@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.updater.updater import Updater
-from cmdb.framework.models.type_model.type import TypeModel
+from cmdb.models.type_model.type import TypeModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

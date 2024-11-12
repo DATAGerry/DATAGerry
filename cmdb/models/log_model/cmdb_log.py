@@ -16,7 +16,7 @@
 """TODO: document"""
 import logging
 
-from cmdb.framework.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

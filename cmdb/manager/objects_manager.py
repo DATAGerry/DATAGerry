@@ -22,16 +22,16 @@ from typing import Union
 from bson import Regex, json_util
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.database.utils import object_hook
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.cmdb_objects.cmdb_object import CmdbObject
+from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.type_model.type import TypeModel
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.user_management.models.user import UserModel
 from cmdb.security.acl.helpers import verify_access
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.framework.models.type_model.type import TypeModel
-from cmdb.database.utils import object_hook
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError,\

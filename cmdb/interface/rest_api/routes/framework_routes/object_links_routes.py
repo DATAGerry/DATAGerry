@@ -22,7 +22,7 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.object_links_manager import ObjectLinksManager
 
-from cmdb.framework.models.link import ObjectLinkModel
+from cmdb.models.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.user_management.models.user import UserModel

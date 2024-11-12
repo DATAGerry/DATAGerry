@@ -23,8 +23,8 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.categories_manager import CategoriesManager
 
-from cmdb.framework.models.category_model.category import CategoryModel
-from cmdb.framework.models.category_model.category_tree import CategoryTree
+from cmdb.models.category_model.category import CategoryModel
+from cmdb.models.category_model.category_tree import CategoryTree
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint

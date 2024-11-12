@@ -16,7 +16,7 @@
 """TODO: document"""
 import logging
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
 
 from cmdb.errors.security import RightNotFoundError

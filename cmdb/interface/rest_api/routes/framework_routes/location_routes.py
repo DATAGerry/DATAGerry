@@ -24,11 +24,11 @@ from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.cmdb_objects.cmdb_location import CmdbLocation
 from cmdb.user_management.models.user import UserModel
 from cmdb.framework.rendering.render_list import RenderList
-from cmdb.framework.models.location_node import LocationNode
 from cmdb.framework.results import IterationResult
+from cmdb.models.location_node import LocationNode
+from cmdb.models.cmdb_location import CmdbLocation
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters

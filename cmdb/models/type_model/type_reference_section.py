@@ -19,8 +19,8 @@ Extends: TypeSection
 """
 import logging
 
-from cmdb.framework.models.type_model.type_section import TypeSection
-from cmdb.framework.models.type_model.type_reference_section_entry import TypeReferenceSectionEntry
+from cmdb.models.type_model.type_section import TypeSection
+from cmdb.models.type_model.type_reference_section_entry import TypeReferenceSectionEntry
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

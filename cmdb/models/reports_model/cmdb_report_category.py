@@ -19,17 +19,17 @@ a category of a report in Datagarry
 """
 import logging
 
-from cmdb.cmdb_objects.cmdb_dao import CmdbDAO
+from cmdb.models.cmdb_dao import CmdbDAO
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 CmdbLocation - CLASS                                                 #
+#                                              CmdbReportCategory - CLASS                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
 class CmdbReportCategory(CmdbDAO):
     """
-    The CMDB location is the basic data wrapper for storing and holding locations within the CMDB.
+    TODO: document
 
     Attributes:
         COLLECTION (str):    Name of the database collection
