@@ -1,5 +1,21 @@
+/*
+* DATAGERRY - OpenSource Enterprise CMDB
+* Copyright (C) 2024 becon GmbH
+*
+* This program is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as
+* published by the Free Software Foundation, either version 3 of the
+* License, or (at your option) any later version.
+*
+* This program is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+* GNU Affero General Public License for more details.
+
+* You should have received a copy of the GNU Affero General Public License
+* along with this program. If not, see <https://www.gnu.org/licenses/>.
+*/
 import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
-import { Router } from '@angular/router';
 
 import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
@@ -7,6 +23,7 @@ import { ReportCategoryService } from 'src/app/reporting/services/report-categor
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 import { AddCategoryModalComponent } from '../category-add-modal/category-add-modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-category-overview',
@@ -23,7 +40,12 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
 
     public columns: Array<any>;
 
-    constructor(private categoryService: ReportCategoryService, private router: Router) { }
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+
+    constructor(
+        private categoryService: ReportCategoryService,
+        private modalService: NgbModal) { }
+
 
     ngOnInit(): void {
         this.columns = [
@@ -31,8 +53,6 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
             { display: 'Name', name: 'name', data: 'name', sortable: true, style: { width: 'auto', 'text-align': 'center' } },
             { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '100px', 'text-align': 'center' } }
         ];
-
-        this.postDummyData();
 
         this.loadCategories();
     }
@@ -43,22 +63,11 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     }
 
 
-    private postDummyData(): void {
-        const dummyCategory = {
-            name: 'Sample Category',
-            predefined: false
-        };
+    /* --------------------------------------------------- REPORT CATEGORY API -------------------------------------------------- */
 
-        this.categoryService.postDummyCategory().subscribe(
-            (response) => {
-                console.log('Dummy data posted successfully:', response);
-            },
-            (error) => {
-                console.error('Error posting dummy data:', error);
-            }
-        );
-    }
-
+    /**
+     * Loads the list of categories with specified parameters.
+     */
     private loadCategories(): void {
         this.loading = true;
         const params: CollectionParameters = {
@@ -73,8 +82,6 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
                 this.categories = response.results;
                 this.totalCategories = response.total;
                 this.loading = false;
-
-                console.log('categories', response.results)
             }
         );
     }
@@ -83,6 +90,11 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         console.log('Edit category with ID:', id);
     }
 
+    /**
+     * Deletes a category by ID after user confirmation.
+     * Reloads the category list on successful deletion, or logs an error if deletion fails.
+     * @param id - The ID of the category to delete.
+     */
     public deleteCategory(id: number): void {
         if (confirm('Are you sure you want to delete this category?')) {
             this.categoryService.deleteCategory(id).pipe(takeUntil(this.unsubscribe$)).subscribe(
@@ -97,9 +109,23 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         }
     }
 
-    public navigateToAddCategory(): void {
-        console.log('navigateToAddCategory')
-        this.router.navigate(['/reports/categories/add']);
+
+    /* ------------------------------------------------ REST OF THE FUNCTIONS ------------------------------------------------ */
+
+    /**
+     * Opens the Add Category modal and handles the result.
+     * Reloads categories on success and shows an error toast on failure.
+     */
+    public openAddCategoryModal(): void {
+        const modalRef = this.modalService.open(AddCategoryModalComponent, { size: 'lg' });
+        modalRef.result.then(
+            (result) => {
+                if (result === 'success') {
+                    this.loadCategories();
+                }
+            },
+            (error) => { }
+        );
     }
 
 }
