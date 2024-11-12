@@ -26,14 +26,13 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     constructor(private categoryService: ReportCategoryService, private router: Router) { }
 
     ngOnInit(): void {
-        // Define the columns for the table
         this.columns = [
-            { display: 'Public ID', name: 'public_id', data: 'public_id', sortable: true },
-            { display: 'Name', name: 'name', data: 'name', sortable: true },
-            { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false }
+            { display: 'Public ID', name: 'public_id', data: 'public_id', sortable: true, style: { width: '120px', 'text-align': 'center' } },
+            { display: 'Name', name: 'name', data: 'name', sortable: true, style: { width: 'auto', 'text-align': 'center' } },
+            { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '100px', 'text-align': 'center' } }
         ];
 
-        this.postDummyData(); // Call the method in ngOnInit
+        this.postDummyData();
 
         this.loadCategories();
     }
@@ -82,7 +81,6 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
 
     public editCategory(id: number): void {
         console.log('Edit category with ID:', id);
-        // Logic for editing category, possibly navigating to an edit form
     }
 
     public deleteCategory(id: number): void {
@@ -103,7 +101,5 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         console.log('navigateToAddCategory')
         this.router.navigate(['/reports/categories/add']);
     }
-
-
 
 }
