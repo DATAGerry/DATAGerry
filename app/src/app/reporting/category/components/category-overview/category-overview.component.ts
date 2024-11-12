@@ -34,7 +34,9 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     private unsubscribe$ = new ReplaySubject<void>(1);
     public categories: Array<any> = [];
     public totalCategories: number = 0;
-    public loading = false;
+    public limit: number = 10;
+    public page: number = 1;
+    public loading: boolean = false;
 
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
@@ -71,11 +73,11 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     private loadCategories(): void {
         this.loading = true;
         const params: CollectionParameters = {
-            filter: {},
-            limit: 10,
+            filter: undefined,
+            limit: this.limit,
+            page: this.page,
             sort: 'public_id',
-            order: 1,
-            page: 1
+            order: 1
         };
         this.categoryService.getAllCategories(params).pipe(takeUntil(this.unsubscribe$)).subscribe(
             (response: APIGetMultiResponse<any>) => {
@@ -86,9 +88,11 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         );
     }
 
+
     public editCategory(id: number): void {
         console.log('Edit category with ID:', id);
     }
+
 
     /**
      * Deletes a category by ID after user confirmation.
@@ -100,7 +104,7 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
             this.categoryService.deleteCategory(id).pipe(takeUntil(this.unsubscribe$)).subscribe(
                 () => {
                     alert('Category deleted successfully');
-                    this.loadCategories(); // Reload categories after deletion
+                    this.loadCategories();
                 },
                 error => {
                     console.error('Error deleting category:', error);
@@ -109,6 +113,17 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         }
     }
 
+
+    /* ------------------------------------------------ SORTING AND PAGINATOIN ------------------------------------------------ */
+
+    /**
+     * Handles pagination by updating the current page and reloading the categories.
+     * @param newPage - The new page number to load.
+     */
+    public onPageChange(newPage: number): void {
+        this.page = newPage;
+        this.loadCategories();
+    }
 
     /* ------------------------------------------------ REST OF THE FUNCTIONS ------------------------------------------------ */
 
