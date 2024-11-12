@@ -17,17 +17,17 @@
 import logging
 from datetime import datetime, timezone
 
-from cmdb.manager.base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.base_manager import BaseManager
 
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_log import CmdbLog
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management.models.user import UserModel
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #

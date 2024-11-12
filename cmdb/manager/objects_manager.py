@@ -23,13 +23,13 @@ from bson import Regex, json_util
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.database.utils import object_hook
-from cmdb.manager.base_manager import BaseManager
-
-from cmdb.models.cmdb_object import CmdbObject
-from cmdb.models.type_model.type import TypeModel
 from cmdb.manager.query_builder.builder import Builder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.user_management.models.user import UserModel
+from cmdb.manager.base_manager import BaseManager
+
+from cmdb.models.object_model.cmdb_object import CmdbObject
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.security.acl.helpers import verify_access
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.results import IterationResult

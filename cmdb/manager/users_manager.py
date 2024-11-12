@@ -18,11 +18,11 @@ import logging
 from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.framework.results import IterationResult
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.errors.manager import ManagerUpdateError,\
                                 ManagerDeleteError,\

@@ -19,9 +19,9 @@ from flask import request, abort
 from cmdb.manager.rights_manager import RightsManager
 
 from cmdb.framework.results import IterationResult
-from cmdb.user_management.models.right import BaseRight
-from cmdb.user_management.rights import __all__ as right_tree
-from cmdb.user_management.models.right import _nameToLevel
+from cmdb.models.right_model.base_right import BaseRight
+from cmdb.models.right_model.constants import NAME_TO_LEVEL
+from cmdb.models.right_model.all_rights import __all__ as right_tree
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses import GetMultiResponse,\
@@ -134,6 +134,6 @@ def get_levels():
         Calling the route over HTTP HEAD method will result in an empty body.
     """
 
-    api_response = GetSingleResponse(_nameToLevel, body=request.method == 'HEAD')
+    api_response = GetSingleResponse(NAME_TO_LEVEL, body=request.method == 'HEAD')
 
     return api_response.make_response()

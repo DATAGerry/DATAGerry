@@ -18,12 +18,12 @@ import logging
 from datetime import datetime, timezone
 from enum import Enum
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.users_manager import UsersManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.updater.updater_module import UpdaterModule

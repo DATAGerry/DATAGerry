@@ -25,11 +25,11 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.objects_manager import ObjectsManager
 
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
-from cmdb.models.cmdb_location import CmdbLocation
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.framework.results.iteration import IterationResult
-from cmdb.user_management.models.user import UserModel
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.routes.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.interface.blueprint import APIBlueprint

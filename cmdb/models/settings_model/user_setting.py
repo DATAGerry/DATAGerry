@@ -14,86 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from enum import Enum
+import logging
 from json import dumps
-from typing import Any
 from pymongo import IndexModel
 
 from cmdb.database.utils import default
+
+from cmdb.models.settings_model.user_setting_type_enum import UserSettingType
+from cmdb.models.settings_model.user_setting_payload import UserSettingPayload
 # -------------------------------------------------------------------------------------------------------------------- #
 
-#CLASS-FIX
-class UserSettingType(Enum):
-    """
-    Type of user settings. Applied only on user application level.
-    SERVER means only backend settings. APPLICATION only the frontend.
-    Global means both.
-    """
-    GLOBAL = 'GLOBAL'
-    APPLICATION = 'APPLICATION'
-    SERVER = 'SERVER'
+LOGGER = logging.getLogger(__name__)
 
-#CLASS-FIX
-class UserSettingPayload:
-    """
-    Payload wrapper user settings.
-    """
-    __slots__ = 'name', 'payload'
-
-    def __init__(self, payload: Any):
-        """
-        Constructor of `UserSettingPayload`.
-
-        Args:
-            payload (Any): Settings option/body/payload.
-        """
-        self.payload: Any = payload
-
-
-    @classmethod
-    def from_data(cls, data: dict) -> "UserSettingPayload":
-        """
-        Create a `UserSettingEntry` instance from database.
-
-        Args:
-            data (dict): Database user settings values.
-
-        Returns:
-            UserSettingPayload: Instance of `UserSettingEntry`.
-        """
-        return cls(
-            payload=data
-        )
-
-
-    @classmethod
-    def to_data(cls, instance: "UserSettingPayload") -> str:
-        """
-        Get the setting to database format.
-
-        Args:
-            instance (UserSettingPayload): Instance of `UserSettingPayload`.
-
-        Returns:
-            str: JSON dump data of `UserSettingPayload`.
-        """
-        return dumps(UserSettingPayload.to_dict(instance), default=default)
-
-
-    @classmethod
-    def to_dict(cls, instance: "UserSettingPayload") -> dict:
-        """
-        Get the dictionary values of `UserSettingEntry`
-
-        Args:
-            instance (UserSettingPayload): Instance of `UserSettingEntry`.
-
-        Returns:
-            dict: Return the `UserSettingEntry` as dict.
-        """
-        return instance.payload
-
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               UserSettingModel - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class UserSettingModel:
     """
     User settings model. Holds all stored user-settings for a specific user.

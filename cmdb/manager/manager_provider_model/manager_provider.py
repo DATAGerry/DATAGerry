@@ -36,7 +36,7 @@ from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.manager.report_categories_manager import ReportCategoriesManager
 from cmdb.manager.reports_manager import ReportsManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

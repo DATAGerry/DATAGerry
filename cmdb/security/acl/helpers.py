@@ -19,7 +19,7 @@ import logging
 from cmdb.security.acl.control import AccessControlList
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.models.type_model.type import TypeModel
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.security import AccessDeniedError
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -20,7 +20,7 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

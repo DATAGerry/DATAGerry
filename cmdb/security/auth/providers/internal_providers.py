@@ -22,7 +22,7 @@ from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.security.auth.auth_providers import AuthenticationProvider
 from cmdb.security.auth.provider_config import AuthProviderConfig
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.provider import AuthenticationError

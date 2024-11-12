@@ -19,7 +19,8 @@ from datetime import datetime, timezone
 
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.importer.parser_object import JsonObjectParser
 from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
 from cmdb.importer.importer_base import ObjectImporter
@@ -28,7 +29,6 @@ from cmdb.importer.mapper import Mapping, MapEntry
 from cmdb.importer.parser_object import JsonObjectParserResponse, CsvObjectParserResponse, ExcelObjectParserResponse
 from cmdb.importer.improve_object import ImproveObject
 from cmdb.interface.rest_api.responses import ImporterObjectResponse
-from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 from cmdb.errors.importer import ImportRuntimeError, ParserRuntimeError

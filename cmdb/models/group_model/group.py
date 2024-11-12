@@ -17,7 +17,8 @@
 import logging
 
 from cmdb.models.cmdb_dao import CmdbDAO
-from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight
+from cmdb.models.right_model.base_right import BaseRight
+from cmdb.models.right_model.constants import GLOBAL_RIGHT_IDENTIFIER
 
 from cmdb.errors.security import RightNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -22,10 +22,10 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.object_links_manager import ObjectLinksManager
 
-from cmdb.models.link import ObjectLinkModel
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management.models.user import UserModel
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters

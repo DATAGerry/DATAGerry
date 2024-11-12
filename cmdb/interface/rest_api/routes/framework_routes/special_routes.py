@@ -25,9 +25,9 @@ from cmdb.manager.categories_manager import CategoriesManager
 
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
-from cmdb.user_management.models.user import UserModel
 from cmdb.interface.rest_api.responses import DefaultResponse
+from cmdb.framework.datagerry_assistant.profile_assistant import ProfileAssistant
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 # -------------------------------------------------------------------------------------------------------------------- #

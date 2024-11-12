@@ -25,9 +25,9 @@ from cmdb.manager.users_manager import UsersManager
 
 from cmdb.framework.results import IterationResult
 from cmdb.models.group_model.group_delete_mode_enum import GroupDeleteMode
-from cmdb.user_management.models.user import UserModel
-from cmdb.user_management.models.group import UserGroupModel
-from cmdb.user_management.rights import flat_rights_tree, __all__ as rights
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.group_model.group import UserGroupModel
+from cmdb.models.right_model.all_rights import flat_rights_tree, __all__ as rights
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.group_parameters import GroupDeletionParameters
 from cmdb.interface.route_utils import insert_request_user

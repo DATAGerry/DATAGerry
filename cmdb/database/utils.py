@@ -30,13 +30,13 @@ from bson.tz_util import utc
 
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.models.cmdb_dao import CmdbDAO
+from cmdb.models.right_model.base_right import BaseRight
 from cmdb.media_library.media_file_base import MediaFileManagementBase
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.provider_config import AuthProviderConfig
 from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.search.search_result import SearchResult, SearchResultMap
 from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
-from cmdb.user_management.models.right import BaseRight
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

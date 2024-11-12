@@ -22,10 +22,10 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.models.cmdb_location import CmdbLocation
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.framework.results.iteration import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management.models.user import UserModel
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #

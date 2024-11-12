@@ -21,7 +21,7 @@ from pytest import fixture
 from pymongo.mongo_client import MongoClient
 from pymongo.collection import Collection
 
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.type_model.type import TypeModel
 from cmdb.models.type_model.type_summary import TypeSummary
 from cmdb.models.type_model.type_field_section import TypeFieldSection

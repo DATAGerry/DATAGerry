@@ -20,18 +20,26 @@ from flask import request, abort
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 
+from cmdb.database.utils import default
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.types_manager import TypesManager
 from cmdb.manager.logs_manager import LogsManager
 
-from cmdb.database.utils import default
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.importer.importer_config import ObjectImporterConfig
-from cmdb.interface.rest_api.responses import ImporterObjectResponse
 from cmdb.importer.parser_base import BaseObjectParser
+from cmdb.importer.importer_helper import load_parser_class,\
+                                          load_importer_class,\
+                                          load_importer_config_class,\
+                                          __OBJECT_IMPORTER__,\
+                                          __OBJECT_PARSER__, \
+                                          __OBJECT_IMPORTER_CONFIG__
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
-from cmdb.interface.rest_api.responses import DefaultResponse
+from cmdb.interface.rest_api.responses import DefaultResponse, ImporterObjectResponse
 from cmdb.interface.route_utils import insert_request_user,\
                                        login_required,\
                                        right_required
@@ -42,16 +50,7 @@ from cmdb.interface.rest_api.routes.importer_routes.importer_route_utils import 
     generate_parsed_output,
     verify_import_access,
 )
-from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
-from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.framework.rendering.cmdb_render import CmdbRender
-from cmdb.importer.importer_helper import load_parser_class,\
-                                          load_importer_class,\
-                                          load_importer_config_class,\
-                                          __OBJECT_IMPORTER__,\
-                                          __OBJECT_PARSER__, \
-                                          __OBJECT_IMPORTER_CONFIG__
 
 from cmdb.errors.manager import ManagerInsertError
 from cmdb.errors.security import AccessDeniedError

@@ -31,13 +31,13 @@ from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager
 
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
-from cmdb.models.cmdb_location import CmdbLocation
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
-from cmdb.models.link import ObjectLinkModel
+from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList

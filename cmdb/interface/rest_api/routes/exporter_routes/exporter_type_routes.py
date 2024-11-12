@@ -20,15 +20,15 @@ import time
 import logging
 from flask import abort, jsonify, Response
 
+from cmdb.database.utils import default
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.types_manager import TypesManager
 
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import RootBlueprint
-from cmdb.database.utils import default
-from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
-from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 
 from cmdb.errors.type import TypeNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -25,14 +25,14 @@ from cmdb.manager.types_manager import TypesManager
 
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.rendering.render_result import RenderResult
-from cmdb.models.cmdb_object import CmdbObject
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.type_model.type import TypeModel
 from cmdb.models.type_model.type_reference import TypeReference
 from cmdb.models.type_model.type_external_link import TypeExternalLink
 from cmdb.models.type_model.type_field_section import TypeFieldSection
 from cmdb.models.type_model.type_reference_section import TypeReferenceSection
 from cmdb.models.type_model.type_multi_data_section import TypeMultiDataSection
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.manager.object_manager import ObjectManagerGetError

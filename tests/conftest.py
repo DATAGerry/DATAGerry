@@ -16,7 +16,6 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from datetime import datetime
-
 import pytest
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
@@ -26,7 +25,7 @@ from cmdb.manager.users_manager import UsersManager
 
 from cmdb.security.key.generator import KeyGenerator
 from cmdb.user_management.constants import __FIXED_GROUPS__
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.database import DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #

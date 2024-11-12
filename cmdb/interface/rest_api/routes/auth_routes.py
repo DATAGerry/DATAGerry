@@ -24,13 +24,13 @@ from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
+from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.manager.users_manager import UsersManager
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import check_user_in_mysql_db
 from cmdb.interface.route_utils import (

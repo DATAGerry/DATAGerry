@@ -14,14 +14,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.user_management.rights.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
-from cmdb.user_management.models.right import GLOBAL_RIGHT_IDENTIFIER, BaseRight, Levels
-from cmdb.user_management.rights.system_rights import SystemRight
-from cmdb.user_management.rights.user_management_rights import UserManagementRight, UserRight, GroupRight
-from cmdb.user_management.rights.framework_rights import FrameworkRight, ObjectRight, TypeRight, CategoryRight, \
-    LogRight, SectionTemplateRight
-from cmdb.user_management.rights.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
-from cmdb.user_management.rights.docapi_rights import DocapiRight, DocapiTemplateRight
+from cmdb.models.right_model.levels_enum import Levels
+from cmdb.models.right_model.import_rights import ImportRight, ImportObjectRight, ImportTypeRight
+from cmdb.models.right_model.base_right import BaseRight
+from cmdb.models.right_model.system_rights import SystemRight
+from cmdb.models.right_model.constants import GLOBAL_RIGHT_IDENTIFIER
+from cmdb.models.right_model.user_management_rights import UserManagementRight, UserRight, GroupRight
+from cmdb.models.right_model.framework_rights import (
+    FrameworkRight,
+    ObjectRight,
+    TypeRight,
+    CategoryRight,
+    LogRight,
+    SectionTemplateRight,
+)
+from cmdb.models.right_model.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
+from cmdb.models.right_model.docapi_rights import DocapiRight, DocapiTemplateRight
 # -------------------------------------------------------------------------------------------------------------------- #
 
 SYSTEM_RIGHTS = (
@@ -156,6 +164,7 @@ __all__ = (
     DOCAPI_RIGHTS
 )
 
+# ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 
 def flat_rights_tree(right_tree) -> list[BaseRight]:
     """

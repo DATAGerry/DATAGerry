@@ -17,7 +17,7 @@
 import logging
 from werkzeug.wrappers import Response
 
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.interface.rest_api.responses.base_api_response import BaseAPIResponse
 from cmdb.interface.rest_api.responses.helpers.operation_type_enum import OperationType
 # -------------------------------------------------------------------------------------------------------------------- #

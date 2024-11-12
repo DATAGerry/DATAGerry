@@ -26,7 +26,7 @@ from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.framework.results import IterationResult
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.blueprint import APIBlueprint

@@ -26,7 +26,7 @@ from cmdb.interface.rest_api.responses.messages.import_failed_message import Imp
 from cmdb.interface.rest_api.responses.messages.import_success_message import ImportSuccessMessage
 from cmdb.importer.parser_base import BaseObjectParser
 from cmdb.importer.parser_response import ObjectParserResponse
-from cmdb.user_management.models.user import UserModel
+from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
                                                ObjectManagerInsertError,\

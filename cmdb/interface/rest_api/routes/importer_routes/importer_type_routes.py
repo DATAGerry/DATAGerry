@@ -20,16 +20,16 @@ from datetime import datetime, timezone
 from bson import json_util
 from flask import request, abort
 
+from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
+from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.types_manager import TypesManager
 
+from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import NestedBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.user_management.models.user import UserModel
-from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
-from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
