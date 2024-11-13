@@ -116,10 +116,16 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
      * Updates an existing report category by its public ID.
      */
     public updateCategory(categoryData: { public_id: number; name: string; predefined: boolean }): Observable<T> {
-        const options = this.options;
-        options.params = new HttpParams();
+        let httpParams = new HttpParams();
 
-        return this.api.callPut<T>(`${this.servicePrefix}/${categoryData.public_id}`, categoryData, options).pipe(
+        for (let key in categoryData) {
+            let val: string = String(categoryData[key]);
+            httpParams = httpParams.set(key, val);
+        }
+
+        this.options.params = httpParams;
+
+        return this.api.callPut<T>(`${this.servicePrefix}/${categoryData.public_id}`, categoryData, this.options).pipe(
             map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => apiResponse.body.result as T)
         );
     }

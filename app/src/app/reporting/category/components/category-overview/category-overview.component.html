@@ -10,6 +10,6 @@
             [loading]="loading" [pageSize]="10"  (pageChange)="onPageChange($event)" (sortChange)="onSortChange($event)"></cmdb-table>
 
 <ng-template #actionsTemplate let-item="item">
-  <i  *ngIf="!item.predefined" class="far fa-edit icon-margin" (click)="editCategory(item.public_id)"></i>
-  <i  *ngIf="!item.predefined" class="far fa-trash-alt"  (click)="deleteCategory(item.public_id)"></i>
+  <i *ngIf="!item.predefined" class="far fa-edit icon-margin" (click)="openEditCategoryModal(item)"></i>
+  <i *ngIf="!item.predefined" class="far fa-trash-alt" (click)="openDeleteCategoryModal(item)"></i>
 </ng-template>

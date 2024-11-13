@@ -1,29 +1,26 @@
 <div class="modal-header">
-  <h4 class="modal-title">Add New Category</h4>
-  <button type="button" class="close" (click)="modal.dismiss('cancel')">
-    <span aria-hidden="true">&times;</span>
+  <h4 class="modal-title">{{ mode === 'add' ? 'Add New Category' : mode === 'edit' ? 'Edit Category' : 'Delete Category' }}</h4>
+  <button type="button" class="close" aria-label="Close" (click)="modal.dismiss('Cross click')">
+      <span aria-hidden="true">&times;</span>
   </button>
 </div>
 <div class="modal-body">
-  <form [formGroup]="addCategoryForm" (ngSubmit)="onSubmit()">
-    <div class="form-group">
-      <label for="categoryNameInput">Category Name</label>
-      <input
-        type="text"
-        id="categoryNameInput"
-        formControlName="name"
-        class="form-control"
-        [ngClass]="{ 'is-invalid': name.invalid && (name.dirty || name.touched) }"
-        required
-      />
-      <div *ngIf="name.invalid && (name.dirty || name.touched)" class="invalid-feedback">
-        <div *ngIf="name.errors?.required">Name is required.</div>
-        <div *ngIf="name.errors?.minlength">Name must be at least 3 characters long.</div>
-      </div>
-    </div>
-  </form>
+  <ng-container *ngIf="mode !== 'delete'; else deleteTemplate">
+      <form [formGroup]="addCategoryForm">
+          <div class="form-group">
+              <label for="categoryName">Category Name</label>
+              <input id="categoryName" type="text" class="form-control" formControlName="name">
+          </div>
+      </form>
+  </ng-container>
+  <ng-template #deleteTemplate>
+      <p>Are you sure you want to delete <strong>{{ categoryData.name }}</strong>?</p>
+  </ng-template>
 </div>
 <div class="modal-footer">
-  <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss('cancel')">Cancel</button>
-  <button type="button" class="btn btn-primary" [disabled]="addCategoryForm.invalid" (click)="onSubmit()">Add Category</button>
+  <button type="button" class="btn btn-outline-secondary" (click)="modal.dismiss()">Cancel</button>
+  <button *ngIf="mode !== 'delete'" type="button" class="btn btn-primary" [disabled]="!addCategoryForm.valid" (click)="onSubmit()">
+      {{ mode === 'add' ? 'Add' : 'Update' }}
+  </button>
+  <button *ngIf="mode === 'delete'" type="button" class="btn btn-danger" (click)="onSubmit()">Delete</button>
 </div>
