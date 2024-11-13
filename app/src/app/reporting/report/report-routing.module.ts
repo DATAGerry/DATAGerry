@@ -16,11 +16,17 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { Routes, RouterModule } from '@angular/router';
 import { ReportOverviewComponent } from './components/report-overview/report-overview.component';
 
 const routes: Routes = [
-    { path: '', component: ReportOverviewComponent }, // Default path for report overview
+    {
+        path: 'overview',
+        component: ReportOverviewComponent,
+        data: {
+            breadcrumb: 'Report Overview'
+        }
+    },
 ];
 
 @NgModule({
@@ -28,3 +34,4 @@ const routes: Routes = [
     exports: [RouterModule]
 })
 export class ReportRoutingModule { }
+
