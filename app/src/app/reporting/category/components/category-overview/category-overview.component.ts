@@ -140,19 +140,59 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
 
     /* ------------------------------------------------ REST OF THE FUNCTIONS ------------------------------------------------ */
 
+
     /**
-     * Opens the Add Category modal and handles the result.
-     * Reloads categories on success and shows an error toast on failure.
+     * Opens the Add Category modal in 'add' mode.
+     * Reloads categories on successful addition.
      */
     public openAddCategoryModal(): void {
         const modalRef = this.modalService.open(AddCategoryModalComponent, { size: 'lg' });
+        modalRef.componentInstance.mode = 'add';
         modalRef.result.then(
             (result) => {
                 if (result === 'success') {
                     this.loadCategories();
                 }
-            },
-            (error) => { }
+            }
+        );
+    }
+
+    /**
+     * Opens the Edit Category modal in 'edit' mode with the selected category's data.
+     * Reloads categories on successful update.
+     * @param category - The category to edit.
+     */
+    public openEditCategoryModal(category: any): void {
+        const modalRef = this.modalService.open(AddCategoryModalComponent, { size: 'lg' });
+        modalRef.componentInstance.mode = 'edit';
+        modalRef.componentInstance.categoryData = { ...category };
+        modalRef.result.then(
+            (result) => {
+                if (result === 'updated') {
+                    this.loadCategories();
+                }
+            }
+        );
+    }
+
+
+
+    /**
+     * Opens the Delete Category modal in 'delete' mode with the selected category's data.
+     * Reloads categories on successful deletion.
+     * @param category - The category to delete.
+     */
+    public openDeleteCategoryModal(category: any): void {
+        console.log('delete', category)
+        const modalRef = this.modalService.open(AddCategoryModalComponent, { size: 'lg' });
+        modalRef.componentInstance.mode = 'delete';
+        modalRef.componentInstance.categoryData = { ...category };
+        modalRef.result.then(
+            (result) => {
+                if (result === 'deleted') {
+                    this.loadCategories();
+                }
+            }
         );
     }
 

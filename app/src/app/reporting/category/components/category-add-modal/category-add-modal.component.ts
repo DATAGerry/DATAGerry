@@ -26,7 +26,8 @@ import { ReportCategoryService } from 'src/app/reporting/services/report-categor
     styleUrls: ['./category-add-modal.component.scss']
 })
 export class AddCategoryModalComponent implements OnInit {
-    @Input() predefined: boolean = false;
+    @Input() mode: 'add' | 'edit' | 'delete';
+    @Input() categoryData: any = { name: '', predefined: false };
 
     public addCategoryForm: UntypedFormGroup;
 
@@ -34,27 +35,72 @@ export class AddCategoryModalComponent implements OnInit {
 
     ngOnInit(): void {
         this.addCategoryForm = new UntypedFormGroup({
-            name: new UntypedFormControl('', [Validators.required, Validators.minLength(3)])
+            name: new UntypedFormControl(this.categoryData.name, [Validators.required, Validators.minLength(3)])
         });
     }
 
-    public get name() {
-        return this.addCategoryForm.get('name');
+    /**
+     * Handles form submission based on the current mode.
+     * Executes add, edit, or delete operations for categories.
+     */
+    public onSubmit(): void {
+        if (this.mode === 'delete') {
+            this.deleteCategory();
+        } else if (this.addCategoryForm.valid) {
+            const categoryData = {
+                public_id: this.categoryData.public_id,
+                name: this.addCategoryForm.value.name,
+                predefined: this.categoryData.predefined
+            };
+            if (this.mode === 'add') {
+                this.addCategory(categoryData);
+            } else if (this.mode === 'edit') {
+                this.updateCategory(categoryData);
+            }
+        }
     }
 
-    public onSubmit(): void {
-        if (this.addCategoryForm.valid) {
-            const categoryData = { name: this.name.value, predefined: this.predefined };
-            this.categoryService.createCategory(categoryData).subscribe(
-                () => {
-                    this.modal.close('success');
-                },
-                (error) => {
-                    console.error('Error creating category:', error);
-                    this.modal.dismiss('error');
-                }
-            );
-        }
+    /**
+     * Adds a new category with the provided data.
+     * Closes the modal on success or logs an error and dismisses the modal on failure.
+     * @param categoryData - The data for the new category.
+     */
+    private addCategory(categoryData: { name: string; predefined: boolean }) {
+        this.categoryService.createCategory(categoryData).subscribe(
+            () => this.modal.close('success'),
+            (error) => {
+                console.error('Error creating category:', error);
+                this.modal.dismiss('error');
+            }
+        );
+    }
 
+    /**
+     * Updates an existing category with the provided data.
+     * Closes the modal on success or logs an error and dismisses the modal on failure.
+     * @param categoryData - The updated data for the category.
+     */
+    private updateCategory(categoryData: { public_id: number; name: string; predefined: boolean }) {
+        this.categoryService.updateCategory(categoryData).subscribe(
+            () => this.modal.close('updated'),
+            (error) => {
+                console.error('Error updating category:', error);
+                this.modal.dismiss('error');
+            }
+        );
+    }
+
+    /**
+     * Deletes the current category.
+     * Closes the modal on success or logs an error and dismisses the modal on failure.
+     */
+    private deleteCategory() {
+        this.categoryService.deleteCategory(this.categoryData.public_id).subscribe(
+            () => this.modal.close('deleted'),
+            (error) => {
+                console.error('Error deleting category:', error);
+                this.modal.dismiss('error');
+            }
+        );
     }
 }
