@@ -7,7 +7,7 @@
 <hr/>
 
 <cmdb-table [items]="categories" [columns]="columns" [totalItems]="totalCategories"
-            [loading]="loading" [pageSize]="10"  (pageChange)="onPageChange($event)"></cmdb-table>
+            [loading]="loading" [pageSize]="10"  (pageChange)="onPageChange($event)" (sortChange)="onSortChange($event)"></cmdb-table>
 
 <ng-template #actionsTemplate let-item="item">
   <i  *ngIf="!item.predefined" class="far fa-edit icon-margin" (click)="editCategory(item.public_id)"></i>
