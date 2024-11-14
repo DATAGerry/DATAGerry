@@ -20,7 +20,8 @@ from werkzeug.wrappers import Response
 
 from cmdb.interface.rest_api.responses.base_api_response import BaseAPIResponse
 from cmdb.interface.rest_api.responses.helpers.operation_type_enum import OperationType
-from cmdb.interface.rest_api.responses.helpers.api_project import APIProjection, APIProjector
+from cmdb.interface.rest_api.responses.helpers.api_projection import APIProjection
+from cmdb.interface.rest_api.responses.helpers.api_projector import APIProjector
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses.helpers.api_pagination import APIPagination
 from cmdb.interface.rest_api.responses.helpers.api_pager import APIPager

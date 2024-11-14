@@ -24,8 +24,8 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.models.user_model.user import UserModel
-from cmdb.security.auth.auth_providers import AuthenticationProvider
-from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.base_authentication_provider import BaseAuthenticationProvider
+from cmdb.security.auth.providers.ldap_auth_config import LdapAuthenticationProviderConfig
 
 from cmdb.errors.provider import GroupMappingError, AuthenticationError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError
@@ -35,62 +35,9 @@ from cmdb.errors.manager.user_manager import UserManagerGetError, UserManagerIns
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                       LdapAuthenticationProviderConfig - CLASS                                       #
+#                                          LdapAuthenticationProvider - CLASS                                          #
 # -------------------------------------------------------------------------------------------------------------------- #
-#CLASS-FIX
-class LdapAuthenticationProviderConfig(AuthProviderConfig):
-    """TODO: document"""
-
-    DEFAULT_CONFIG_VALUES = {
-        'active': False,
-        'default_group': 2,
-        'server_config': {
-            'host': 'localhost',
-            'port': 389,
-            'use_ssl': False
-        },
-        'connection_config': {
-            'user': 'cn=reader,dc=example,dc=com',
-            'password': 'secret1234',
-            'version': 3
-        },
-        'search': {
-            'basedn': 'dc=example,dc=com',
-            'searchfilter': '(uid=%username%)'
-        },
-        'groups': {
-            'active': False,
-            'searchfiltergroup': '(memberUid=%username%)',
-            'mapping': []
-        }
-    }
-
-    def __init__(self, active: bool = None, default_group: int = None, server_config: dict = None,
-                 connection_config: dict = None, search: dict = None, groups: dict = None, *args, **kwargs):
-        active = active or False
-        self.default_group = int(default_group or LdapAuthenticationProviderConfig. \
-                                 DEFAULT_CONFIG_VALUES.get('default_group'))
-        self.server_config: dict = server_config or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('server_config')
-        self.connection_config: dict = connection_config or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('connection_config')
-        self.search: dict = search or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('search')
-        self.groups: dict = groups or LdapAuthenticationProviderConfig. \
-            DEFAULT_CONFIG_VALUES.get('groups')
-        super().__init__(active)
-
-
-    def mapping(self, group_dn: str) -> int:
-        """Get a group mapping by the group_dn"""
-        try:
-            return next(int(group['group_id']) for group in self.groups['mapping'] if
-                        group['group_dn'].lower() == group_dn.lower())
-        except StopIteration as err:
-            raise GroupMappingError(str(err)) from err
-
-
-class LdapAuthenticationProvider(AuthenticationProvider):
+class LdapAuthenticationProvider(BaseAuthenticationProvider):
     """TODO: document"""
     PASSWORD_ABLE: bool = False
     EXTERNAL_PROVIDER: bool = True
@@ -137,7 +84,7 @@ class LdapAuthenticationProvider(AuthenticationProvider):
         return user_group
 
 
-    def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
+    def authenticate(self, user_name: str, password: str) -> UserModel:
         """TODO: document"""
         #REFACTOR-FIX
         try:

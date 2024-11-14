@@ -20,8 +20,8 @@ from flask import current_app
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
-from cmdb.security.auth.auth_providers import AuthenticationProvider
-from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.base_authentication_provider import BaseAuthenticationProvider
+from cmdb.security.auth.providers.local_auth_config import LocalAuthenticationProviderConfig
 from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager import ManagerGetError
@@ -30,14 +30,10 @@ from cmdb.errors.provider import AuthenticationError
 
 LOGGER = logging.getLogger(__name__)
 
-
-class LocalAuthenticationProviderConfig(AuthProviderConfig):
-    """TODO: document"""
-    def __init__(self, active: bool = None, **kwargs):
-        super().__init__(active, **kwargs)
-
-
-class LocalAuthenticationProvider(AuthenticationProvider):
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                          LocalAuthenticationProvider - CLASS                                         #
+# -------------------------------------------------------------------------------------------------------------------- #
+class LocalAuthenticationProvider(BaseAuthenticationProvider):
     """TODO: document"""
     PROVIDER_CONFIG_CLASS = LocalAuthenticationProviderConfig
 
@@ -50,7 +46,7 @@ class LocalAuthenticationProvider(AuthenticationProvider):
                          users_manager=users_manager)
 
 
-    def authenticate(self, user_name: str, password: str, *args, **kwargs) -> UserModel:
+    def authenticate(self, user_name: str, password: str) -> UserModel:
         """TODO: document"""
         try:
             if current_app.cloud_mode:

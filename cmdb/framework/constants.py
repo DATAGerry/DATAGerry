@@ -23,6 +23,7 @@ the elements for the database.
 """
 from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.models.type_model.type import TypeModel
@@ -44,5 +45,6 @@ __COLLECTIONS__ = [
     ObjectLinkModel,
     CmdbLocation,
     CmdbSectionTemplate,
-    CmdbReportCategory
+    CmdbReportCategory,
+    CmdbReport
 ]

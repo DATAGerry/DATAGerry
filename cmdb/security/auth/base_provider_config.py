@@ -22,7 +22,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              AuthProviderConfig - CLASS                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
-class AuthProviderConfig:
+class BaseAuthProviderConfig:
     """Base provider config"""
 
     DEFAULT_CONFIG_VALUES = {

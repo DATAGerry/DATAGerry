@@ -72,10 +72,10 @@ class CmdbReport(CmdbDAO):
             'required': True,
         },
         'conditions': {
-            'type': 'list',
+            'type': 'dict',
         },
         'report_query': {
-            'type': 'list',
+            'type': 'dict',
         },
         'predefined': {
             'type': 'boolean',
@@ -91,8 +91,8 @@ class CmdbReport(CmdbDAO):
             name: str,
             type_id: int,
             selected_fields: list,
-            conditions: list,
-            report_query: list,
+            conditions: dict,
+            report_query: dict,
             predefined: bool = False,
             **kwargs):
         """TODO: document"""

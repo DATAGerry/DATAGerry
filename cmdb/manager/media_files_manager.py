@@ -19,10 +19,11 @@ from datetime import datetime, timezone
 from gridfs.grid_file import GridOutCursor, GridOut
 from gridfs.errors import NoFile
 
+from cmdb.database.database_gridfs import DatabaseGridFS
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.database.database_gridfs import DatabaseGridFS
+from cmdb.interface.rest_api.responses import GridFsResponse
 from cmdb.media_library.media_file import MediaFile
 from cmdb.media_library.media_file import FileMetadata
 
@@ -146,13 +147,4 @@ class MediaFilesManager(BaseManager):
         return True
 
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                GridFsResponse - CLASS                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
-#CLASS-FIX
-class GridFsResponse:
-    """TODO: document"""
-    def __init__(self, result, total: int = None):
-        self.result = result
-        self.count = len(result)
-        self.total = total or 0
+
