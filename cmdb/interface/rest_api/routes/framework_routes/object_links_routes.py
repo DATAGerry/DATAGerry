@@ -85,7 +85,7 @@ def create_object_link(request_user: UserModel):
         LOGGER.debug("[create_object_link] ManagerGetError: %s", err.message)
         return abort(400, "Could not retrieve the created ObjectLink!")
     except AccessDeniedError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(403, "No permission to create an ObjectLink!")
 
     api_response = InsertSingleResponse(ObjectLinkModel.to_json(raw_doc), result_id)
@@ -124,7 +124,7 @@ def get_links(params: CollectionParameters, request_user: UserModel):
                                         request.method == 'HEAD')
 
     except ManagerIterationError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except ManagerGetError:
         return abort(404, "No object links found!")
@@ -161,7 +161,7 @@ def delete_link(public_id: int, request_user: UserModel):
         LOGGER.debug("[delete_link] ManagerDeleteError: %s", err.message)
         return abort(400, f"Could not delete the ObjectLink with public_id: {public_id}!")
     except AccessDeniedError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(403, "No permission to delete an ObjectLink!")
 
     return api_response.make_response()

@@ -32,7 +32,6 @@ API_VERSION = '1.0'
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                BaseAPIResponse - CLASS                                               #
 # -------------------------------------------------------------------------------------------------------------------- #
-#RENAME-FILE-FIX
 class BaseAPIResponse:
     """Basic `abstract` response class"""
     def __init__(self, operation_type: OperationType, url: str = None, body: bool = None):

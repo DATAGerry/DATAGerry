@@ -47,7 +47,7 @@ class TokenGenerator:
             'alg': 'RS512'
         }
 
-        #REFACTOR-FIX
+        #TODO: REFACTOR-FIX
         settings_reader = SettingsReaderManager(dbm)
         self.auth_module = AuthModule(
                                 settings_reader.get_all_values_from_section(

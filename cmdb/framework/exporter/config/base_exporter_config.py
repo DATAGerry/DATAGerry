@@ -14,21 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from abc import ABC, abstractmethod
+from cmdb.framework.exporter.config.exporter_config_type_enum import ExporterConfigType
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class BaseExporterFormat(ABC):
+class BaseExporterConfig:
     """TODO: document"""
-    FILE_EXTENSION = None
-    LABEL = None
-    MULTITYPE_SUPPORT = False
-    ICON = None
-    DESCRIPTION = None
-    ACTIVE = None
 
-    def __init__(self, file_name=''):
-        self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
-
-    @abstractmethod
-    def export(self, data, *args):
-        """TODO: document"""
+    def __init__(self, config_type: ExporterConfigType):
+        """
+        Args:
+            config_type: Type of exported data (CmdbObject = NATIVE, RenderResult = RENDER)
+        """
+        self.config_type = config_type

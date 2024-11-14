@@ -64,7 +64,7 @@ def get_intro_starter(request_user: UserModel):
 
         resp = api_response.make_response()
     except Exception:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
 
     return resp

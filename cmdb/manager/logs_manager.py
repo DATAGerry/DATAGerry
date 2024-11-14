@@ -26,7 +26,7 @@ from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_log import CmdbLog
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
-from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError

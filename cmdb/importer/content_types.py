@@ -26,21 +26,21 @@ class BASEContent:
     CONTENT_TYPE = ''
     FILE_TYPE = ''
 
-
+#TODO: CLASS-FIX
 class JSONContent(BASEContent):
     """Identifier for JavaScript Object Notation files"""
     ICON = 'fas fa-file-code'
     CONTENT_TYPE = 'application/json'
     FILE_TYPE = 'json'
 
-
+#TODO: CLASS-FIX
 class CSVContent(BASEContent):
     """Identifier for Comma-Separated Values files"""
     ICON = 'fas fa-file-csv'
     CONTENT_TYPE = 'text/csv'
     FILE_TYPE = 'csv'
 
-
+#TODO: CLASS-FIX
 class XLSXContent(BASEContent):
     """Identifier for Excel files"""
     ICON = 'fas fa-file-excel'

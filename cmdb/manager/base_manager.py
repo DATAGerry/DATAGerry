@@ -97,7 +97,7 @@ class BaseManager:
                 total = next(total_cursor)['total']
 
             return aggregation_result , total
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

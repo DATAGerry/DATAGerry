@@ -26,7 +26,7 @@ from cmdb.interface.route_utils import auth_is_valid, user_has_right, parse_auth
 from cmdb.models.user_model.user import UserModel
 from cmdb.security.token.validator import TokenValidator
 
-from cmdb.errors.manager import ManagerGetError
+from cmdb.errors.manager.user_manager import UserManagerGetError
 from cmdb.errors.security import TokenValidationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -86,9 +86,8 @@ class APIBlueprint(Blueprint):
 
                                         if user_dict[exe_key] == route_parameter:
                                             return f(*args, **kwargs)
-                            except ManagerGetError:
-                                #ERROR-FIX
-                                return abort(404)
+                            except UserManagerGetError:
+                                return abort(403, "Could not retrieve user!")
                         return abort(403, f'User has not the required right {right}')
 
                 return f(*args, **kwargs)
@@ -197,7 +196,7 @@ class APIBlueprint(Blueprint):
         return _parse
 
 
-#CLASS-FIX
+#TODO: CLASS-FIX
 class RootBlueprint(Blueprint):
     """Wrapper class for Blueprints with nested elements"""
     def __init__(self, *args, **kwargs):
@@ -230,7 +229,7 @@ class RootBlueprint(Blueprint):
         return _parse
 
 
-#CLASS-FIX
+#TODO: CLASS-FIX
 class NestedBlueprint:
     """Default Blueprint class but with parent prefix route
     """

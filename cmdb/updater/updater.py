@@ -44,7 +44,7 @@ class Updater(BaseManager):
         self.objects_manager = ObjectsManager(self.dbm)
         self.types_manager = TypesManager(self.dbm)
 
-        #REFACTOR-FIX (get the correct database)
+        #TODO: REFACTOR-FIX (get the correct database)
         super().__init__(scr.get_value('database_name', 'Database'), self.dbm)
 
 

@@ -553,7 +553,7 @@ class TypeModel(CmdbDAO):
             try:
                 return field[0]
             except (RequiredInitKeyNotFoundError, Exception) as err:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 raise FieldInitError(name) from err
 
         raise FieldNotFoundError(name)

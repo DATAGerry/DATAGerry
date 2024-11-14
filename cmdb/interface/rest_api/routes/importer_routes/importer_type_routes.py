@@ -60,7 +60,7 @@ def add_type(request_user: UserModel):
             type_instance = TypeModel.from_data(new_type_data)
             types_manager.insert_type(type_instance)
         except (ManagerInsertError, Exception) as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             error_collection.update({"public_id": new_type_data['public_id'], "message": err})
 
     api_response = DefaultResponse(error_collection)
@@ -83,13 +83,13 @@ def update_type(request_user: UserModel):
         try:
             update_type_instance = TypeModel.from_data(add_data_dump)
         except Exception:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             return abort(400)
         try:
             types_manager.get_type(update_type_instance.public_id)
             types_manager.update_type(update_type_instance.public_id, update_type_instance)
         except (ManagerGetError, Exception) as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             error_collection.update({"public_id": add_data_dump['public_id'], "message": err})
 
     api_response = DefaultResponse(error_collection)

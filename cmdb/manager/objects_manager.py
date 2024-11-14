@@ -108,7 +108,7 @@ class ObjectsManager(BaseManager):
             LOGGER.debug("[insert_object] Error while inserting object. Error: %s", str(err))
             raise ObjectManagerInsertError(err) from err
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("[insert_object] Error while inserting object. Exception: %s", str(err))
             raise ObjectManagerInsertError(err) from err
 
@@ -161,7 +161,7 @@ class ObjectsManager(BaseManager):
 
             iteration_result: IterationResult[CmdbObject] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CmdbObject)
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         except Exception as err:
             raise ManagerIterationError(err) from err
 
@@ -183,11 +183,11 @@ class ObjectsManager(BaseManager):
             cur_object = CmdbObject(**obj)
 
             try:
-                #ERROR-FIX (Separate try-except bloc for get_object_type())
+                #TODO: ERROR-FIX
                 cur_type = self.get_object_type(cur_object.type_id)
                 verify_access(cur_type, user, permission)
             except Exception:
-                #ERROR-FIX (Raise kinda AccesDeniedError)
+                #TODO: ERROR-FIX (Raise kinda AccesDeniedError)
                 continue
 
             ack.append(CmdbObject(**obj))
@@ -237,7 +237,7 @@ class ObjectsManager(BaseManager):
                 cur_type = self.get_object_type(cur_object.type_id)
                 verify_access(cur_type, user, permission)
             except Exception:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 continue
 
             ack.append(obj)
@@ -366,7 +366,7 @@ class ObjectsManager(BaseManager):
         try:
             results = list(self.aggregate_from_other_collection(TypeModel.COLLECTION, query))
         except ManagerIterationError as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("[get_mds_references_for_object] aggregation error: %s", err.message)
 
         matching_results = []
@@ -390,7 +390,7 @@ class ObjectsManager(BaseManager):
         return matching_results
 
 
-    #REFACTOR-FIX
+    #TODO: REFACTOR-FIX
     def references(self,
                    object_: CmdbObject,
                    criteria: dict,
@@ -403,7 +403,7 @@ class ObjectsManager(BaseManager):
         """TODO: document"""
         query = []
 
-        #ERROR-FIX (it is only one of these)
+        #TODO: ERROR-FIX (it is only one of these)
         if isinstance(criteria, dict):
             query.append(criteria)
         elif isinstance(criteria, list):
@@ -467,13 +467,13 @@ class ObjectsManager(BaseManager):
         object_type = self.get_object_type(instance.get('type_id'))
 
         if not object_type.active:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise AccessDeniedError(f'Objects cannot be updated because type `{object_type.name}` is deactivated.')
         verify_access(object_type, user, permission)
 
         update_result = self.update(criteria={'public_id': public_id}, data=instance)
 
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         if update_result.matched_count != 1:
             raise ManagerUpdateError('Something happened during the update!')
 
@@ -493,7 +493,7 @@ class ObjectsManager(BaseManager):
         try:
             update_result = self.update_many(criteria=query, update=update, add_to_set=add_to_set)
         except (ManagerUpdateError, AccessDeniedError) as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise err
 
         return update_result
@@ -513,7 +513,7 @@ class ObjectsManager(BaseManager):
             raise ObjectManagerDeleteError(str(err)) from err
 
         if not object_type.active:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise AccessDeniedError(f'Objects cannot be removed because type `{object_type.name}` is deactivated.')
 
         verify_access(object_type, user, permission)
@@ -599,7 +599,7 @@ class ObjectsManager(BaseManager):
             try:
                 obj_result.results.sort(key=lambda x: getattr(x, sort), reverse=descending_order)
             except Exception as err:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 LOGGER.debug("References sorting error: %s", err)
 
             # just keep the given limit of objects if limit > 0
@@ -612,12 +612,12 @@ class ObjectsManager(BaseManager):
                 try:
                     obj_result.results = obj_result.results[skip:list_length]
                 except Exception as err:
-                    #ERROR-FIX
+                    #TODO: ERROR-FIX
                     LOGGER.debug("References list slice error: %s", err)
 
             # obj_result.total = len(obj_result.results)
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.info("[__merge_mds_references] Error: %s", err)
 
         return obj_result

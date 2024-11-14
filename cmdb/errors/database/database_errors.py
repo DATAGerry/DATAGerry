@@ -46,7 +46,7 @@ class ServerTimeoutError(DataBaseError):
         super().__init__(self.message)
 
 
-#ERROR-FIX (never used)
+#TODO: ERROR-FIX (never used)
 class DatabaseAlreadyExists(DataBaseError):
     """
     Error when database already exists
@@ -65,7 +65,7 @@ class DatabaseNotExists(DataBaseError):
         super().__init__(self.message)
 
 
-#ERROR-FIX (not used)
+#TODO: ERROR-FIX (not used)
 class CollectionAlreadyExists(DataBaseError):
     """
     Error if you try to create a collection that alrady exists
@@ -75,7 +75,7 @@ class CollectionAlreadyExists(DataBaseError):
         super().__init__(self.message)
 
 
-#ERROR-FIX (Use the Pymongo error)
+#TODO: ERROR-FIX (Use the Pymongo error)
 class NoDocumentFound(DataBaseError):
     """
     Error if no document was found
@@ -91,4 +91,13 @@ class DocumentCouldNotBeDeleted(DataBaseError):
     """
     def __init__(self, collection: str):
         self.message = f"A document could not be deleted from Collection: {collection}"
+        super().__init__(self.message)
+
+
+class SetDatabaseError(DataBaseError):
+    """
+    Error if database could not be set for a connector
+    """
+    def __init__(self, err: str, db_name: str):
+        self.message = f"Couldn't set connector to database: {db_name}. Error: {err}"
         super().__init__(self.message)

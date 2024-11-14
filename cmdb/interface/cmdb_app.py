@@ -29,7 +29,7 @@ class BaseCmdbApp(Flask):
     """TODO: document"""
 
     def __init__(self, import_name: str, database_manager: MongoDatabaseManager = None):
-        #REFACTOR-FIX (replace self.database_manager with self.dbm)
+        #TODO: REFACTOR-FIX (replace self.database_manager with self.dbm)
         self.database_manager: MongoDatabaseManager = database_manager
         self.temp_folder: str = '/tmp/'
         self.cloud_mode = __CLOUD_MODE__

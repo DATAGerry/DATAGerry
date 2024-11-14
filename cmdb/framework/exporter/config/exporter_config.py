@@ -15,7 +15,8 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.exporter.config.config_base import BaseExporterConfig, ExporterConfigType
+from cmdb.framework.exporter.config.base_exporter_config import BaseExporterConfig
+from cmdb.framework.exporter.config.exporter_config_type_enum import ExporterConfigType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class ExporterConfig(BaseExporterConfig):

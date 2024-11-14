@@ -82,7 +82,7 @@ class ObjectTemplateData(AbstractTemplateData):
             except ObjectManagerGetError:
                 continue
             except Exception as err:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 LOGGER.error(err)
 
         return data

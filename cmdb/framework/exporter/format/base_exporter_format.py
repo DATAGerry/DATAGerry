@@ -13,15 +13,28 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: ducoment"""
-from cmdb.exporter.config.config_type import ExporterConfigType
+"""TODO: document"""
+from cmdb.framework.exporter.config.exporter_config_type_enum import ExporterConfigType
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ExporterUtils:
-    """
-    The utils module contains classes and funtions of general utility used in multiple places throughout Exporter.
-    Some of these are exporter-specific algorithms while others are more python tricks.
-    """
+class BaseExporterFormat:
+    """TODO: document"""
+    FILE_EXTENSION = None
+    LABEL = None
+    MULTITYPE_SUPPORT = False
+    ICON = None
+    DESCRIPTION = None
+    ACTIVE = None
+
+
+    def __init__(self, file_name=''):
+        self.file_name = f'{file_name}.{self.FILE_EXTENSION}'
+
+
+    def export(self, data, *args):
+        """TODO: document"""
+
+
     @staticmethod
     def summary_renderer(obj, field, view: str = 'native') -> str:
         """TODO: ducoment"""

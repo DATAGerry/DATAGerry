@@ -38,7 +38,7 @@ class JsonObjectParserResponse(ObjectParserResponse):
     def __init__(self, count: int, entries: list):
         super().__init__(count=count, entries=entries)
 
-
+#TODO: CLASS-FIX
 class JsonObjectParser(BaseObjectParser, JSONContent):
     """TODO: document"""
 
@@ -59,7 +59,7 @@ class JsonObjectParser(BaseObjectParser, JSONContent):
 
         return JsonObjectParserResponse(count=len(parsed), entries=parsed)
 
-
+#TODO: CLASS-FIX
 class CsvObjectParserResponse(ObjectParserResponse):
     """TODO: document"""
 
@@ -78,7 +78,7 @@ class CsvObjectParserResponse(ObjectParserResponse):
         """TODO: document"""
         return self.header
 
-
+#TODO: CLASS-FIX
 class CsvObjectParser(BaseObjectParser, CSVContent):
     """TODO: document"""
 
@@ -142,7 +142,7 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
             raise ParserRuntimeError(f"[{self.__class__.__name__}]: An error occured: {str(err)}") from err
         return CsvObjectParserResponse(**parsed)
 
-
+#TODO: CLASS-FIX
 class ExcelObjectParserResponse(ObjectParserResponse):
     """TODO: document"""
 
@@ -161,7 +161,7 @@ class ExcelObjectParserResponse(ObjectParserResponse):
         """TODO: document"""
         return self.header
 
-
+#TODO: CLASS-FIX
 class ExcelObjectParser(BaseObjectParser, XLSXContent):
     """TODO: document"""
     DEFAULT_CONFIG = {

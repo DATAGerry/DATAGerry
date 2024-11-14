@@ -73,7 +73,7 @@ class UpdateRoutine:
     def __check_database(self):
         """TODO: document"""
         LOGGER.info('SETUP ROUTINE: Checking database connection')
-        #REFACTOR-FIX
+        #TODO: REFACTOR-FIX
         try:
             connection_test = self.dbm.connector.is_connected()
         except ServerTimeoutError:

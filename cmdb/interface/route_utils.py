@@ -41,6 +41,7 @@ from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.security import TokenValidationError
 from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
+from cmdb.errors.database import SetDatabaseError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -128,7 +129,7 @@ def insert_request_user(func):
             with current_app.app_context():
                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
         except TokenValidationError:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             return abort(401)
 
         try:
@@ -255,6 +256,8 @@ def parse_authorization_header(header):
                                             })
 
                 return None
+        except SetDatabaseError:
+            return None
         except Exception:
             return None
 
@@ -376,5 +379,5 @@ def retrive_user(user_data: dict):
     try:
         return users_manager.get_user_by({'email': user_data['email']})
     except Exception:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return None

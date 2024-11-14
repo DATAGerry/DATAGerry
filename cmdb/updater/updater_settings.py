@@ -46,7 +46,7 @@ class UpdateSettings:
 
     def run_updates(self, version: int, settings_reader: SettingsReaderManager):
         """TODO: document"""
-        #IMPORT-FIX
+        #TODO: IMPORT-FIX
         from cmdb.updater.updater_module import UpdaterModule
         settings_reader.get_all_values_from_section('updater')
         updater_instance = UpdaterModule(settings_reader)

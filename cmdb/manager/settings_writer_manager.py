@@ -26,7 +26,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                             SettingsWriterManager - CLASS                                            #
 # -------------------------------------------------------------------------------------------------------------------- #
-#BASECLASS-FIX (make the base class 'BaseManager')
+#TODO: BASECLASS-FIX (make the base class 'BaseManager')
 class SettingsWriterManager:
     """TODO: document"""
     COLLECTION = 'settings.conf'
@@ -64,7 +64,7 @@ class SettingsWriterManager:
         try:
             verify_document = self.dbm.find_one_by(collection=self.COLLECTION, filter={'_id': _id})
         except Exception:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             return False
 
         if verify_document != data and data is not None:

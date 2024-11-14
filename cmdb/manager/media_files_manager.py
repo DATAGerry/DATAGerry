@@ -24,8 +24,8 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
 from cmdb.interface.rest_api.responses import GridFsResponse
-from cmdb.media_library.media_file import MediaFile
-from cmdb.media_library.media_file import FileMetadata
+from cmdb.framework.media_library.media_file import MediaFile
+from cmdb.framework.media_library.media_file import FileMetadata
 
 from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
                                                    MediaFileManagerInsertError,\
@@ -64,7 +64,7 @@ class MediaFilesManager(BaseManager):
                 media_file.public_id = self.get_new_media_file_id()
                 media_file.metadata = FileMetadata(**metadata).__dict__
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise MediaFileManagerInsertError(str(err)) from err
 
         return media_file._file
@@ -99,7 +99,7 @@ class MediaFilesManager(BaseManager):
             for grid in iterator:
                 results.append(MediaFile.to_json(MediaFile(**grid._file)))
         except (Exception, MediaFileManagerGetError) as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise MediaFileManagerGetError(str(err)) from err
 
         return GridFsResponse(results, records_total)
@@ -141,10 +141,7 @@ class MediaFilesManager(BaseManager):
             file_id = self.fs.get_last_version(**{'public_id': public_id})._id
             self.fs.delete(file_id)
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise MediaFileManagerDeleteError(f'Could not delete file with ID: {file_id}') from err
 
         return True
-
-
-

@@ -26,14 +26,3 @@ class ExporterConfigType(Enum):
 
     def __str__(self):
         return self.name
-
-
-class BaseExporterConfig:
-    """TODO: document"""
-
-    def __init__(self, config_type: ExporterConfigType):
-        """
-        Args:
-            config_type: Type of exported data (CmdbObject = NATIVE, RenderResult = RENDER)
-        """
-        self.config_type = config_type

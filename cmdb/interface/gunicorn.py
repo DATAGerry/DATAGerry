@@ -82,7 +82,7 @@ class WebCmdbService(AbstractCmdbService):
         """ignore incomming events"""
 
 
-#CLASS-FIX
+#TODO: CLASS-FIX
 class HTTPServer(BaseApplication):
     """Basic server main_application"""
 
@@ -131,7 +131,7 @@ class HTTPServer(BaseApplication):
         return (multiprocessing.cpu_count() * 2) + 1
 
 
-#CLASS-FIX
+#TODO: CLASS-FIX
 class DispatcherMiddleware:
     """TODO: document"""
 
