@@ -1,0 +1,64 @@
+<div class="container">
+    <h2>Create Report</h2>
+    <form [formGroup]="createReportForm" (ngSubmit)="onSubmit()">
+        <!-- Name Input -->
+        <div class="form-group">
+            <label for="name">Report Name:</label>
+            <input
+                type="text"
+                id="name"
+                formControlName="name"
+                class="form-control"
+                placeholder="Enter report name"
+            />
+        </div>
+
+        <!-- Category Dropdown -->
+        <div class="form-group">
+            <label for="category">Category:</label>
+            <ng-select
+                [items]="categories"
+                bindLabel="name"
+                bindValue="public_id"
+                formControlName="category"
+                placeholder="Select a category"
+                [loading]="!categories.length"
+            ></ng-select>
+        </div>
+
+        <!-- Type Dropdown -->
+        <div class="form-group">
+            <label for="type">Type:</label>
+            <ng-select
+                [items]="types"
+                bindLabel="label"
+                bindValue="public_id"
+                formControlName="type"
+                placeholder="Select a type"
+                [loading]="typeLoading"
+            ></ng-select>
+        </div>
+
+        <!-- Fields Dropdown -->
+        <div class="form-group">
+            <label for="fields">Fields:</label>
+            <ng-select
+                [items]="fields"
+                bindLabel="label"
+                bindValue="name"
+                formControlName="fields"
+                placeholder="Select fields"
+                [multiple]="true"
+                [closeOnSelect]="false"
+            ></ng-select>
+        </div>
+
+        <!-- Filter Builder -->
+        <app-filter-builder [fields]="fields" (conditionsChange)="onConditionsChange($event)"></app-filter-builder>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary" [disabled]="createReportForm.invalid">
+            Submit Report
+        </button>
+    </form>
+</div>

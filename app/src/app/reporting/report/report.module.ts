@@ -17,16 +17,32 @@
 */
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ReportRoutingModule } from './report-routing.module';
+import { QueryBuilderModule } from 'shout-angular-query-builder';
+
+
 import { ReportOverviewComponent } from './components/report-overview/report-overview.component';
+import { CreateReportComponent } from './components/create-report/create-report.component';
+import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
     declarations: [
-        ReportOverviewComponent
+        ReportOverviewComponent,
+        CreateReportComponent,
+        FilterBuilderComponent
     ],
     imports: [
         CommonModule,
-        ReportRoutingModule
+        ReportRoutingModule,
+        FormsModule,
+        ReactiveFormsModule,
+        QueryBuilderModule,
+        NgSelectModule
+    ],
+    exports: [
+        FilterBuilderComponent
     ]
 })
 export class ReportModule { }

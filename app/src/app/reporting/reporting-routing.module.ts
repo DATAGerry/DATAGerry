@@ -23,7 +23,7 @@ import { ReportCategoryRoutingModule } from './category/report-category-routing.
 const routes: Routes = [
     {
         path: '',
-        redirectTo: 'reports',
+        redirectTo: 'reports/overview',
         pathMatch: 'full'
     }
 ];

@@ -1,0 +1,9 @@
+<div *ngIf="fields && fields.length > 0 && showQueryBuilder">
+    <h3>Fields Filter</h3>
+    <query-builder
+        [(ngModel)]="query"
+        [config]="config"
+        [classNames]="classNames"
+        (ngModelChange)="onQueryChange($event)">
+    </query-builder>
+</div>

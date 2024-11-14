@@ -57,7 +57,7 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
             limit: 10,
             sort: 'public_id',
             order: 1,
-            page: 2
+            page: 1
         }): Observable<APIGetMultiResponse<T>> {
 
         const options = this.options;

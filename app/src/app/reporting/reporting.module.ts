@@ -31,7 +31,6 @@ import { ReportRoutingModule } from './report/report-routing.module';
         ReportingRoutingModule, // Main routing module for reporting
         ReportModule,
         ReportCategoryModule,
-        ReportRoutingModule
     ]
 })
 export class ReportingModule { }
