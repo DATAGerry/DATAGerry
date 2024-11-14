@@ -16,8 +16,9 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { NgModule } from '@angular/core';
-import { Routes, RouterModule } from '@angular/router';
+import { RouterModule, Routes } from '@angular/router';
 import { ReportOverviewComponent } from './components/report-overview/report-overview.component';
+import { CreateReportComponent } from './components/create-report/create-report.component';
 
 const routes: Routes = [
     {
@@ -27,11 +28,17 @@ const routes: Routes = [
             breadcrumb: 'Report Overview'
         }
     },
+    {
+        path: 'create',
+        component: CreateReportComponent,
+        data: {
+            breadcrumb: 'Create Report'
+        }
+    },
 ];
 
 @NgModule({
     imports: [RouterModule.forChild(routes)],
-    exports: [RouterModule]
+    exports: [RouterModule],
 })
 export class ReportRoutingModule { }
-
