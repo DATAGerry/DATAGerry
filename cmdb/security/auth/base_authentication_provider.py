@@ -19,23 +19,23 @@ import logging
 from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
-from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.base_provider_config import BaseAuthProviderConfig
 from cmdb.models.user_model.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                            AuthenticationProvider - CLASS                                            #
+#                                          BaseAuthenticationProvider - CLASS                                          #
 # -------------------------------------------------------------------------------------------------------------------- #
-class AuthenticationProvider:
+class BaseAuthenticationProvider:
     """Provider super class"""
     PASSWORD_ABLE: bool = True
     EXTERNAL_PROVIDER: bool = False
-    PROVIDER_CONFIG_CLASS: 'AuthProviderConfig' = AuthProviderConfig
+    PROVIDER_CONFIG_CLASS: 'BaseAuthProviderConfig' = BaseAuthProviderConfig
 
     def __init__(self,
-                 config: AuthProviderConfig = None,
+                 config: BaseAuthProviderConfig = None,
                  security_manager: SecurityManager = None,
                  users_manager: UsersManager = None):
         """
@@ -48,12 +48,12 @@ class AuthenticationProvider:
         self.config = config or self.PROVIDER_CONFIG_CLASS(**self.PROVIDER_CONFIG_CLASS.DEFAULT_CONFIG_VALUES)
 
 
-    def authenticate(self, user_name: str, password: str, **kwargs) -> UserModel:
+    def authenticate(self, user_name: str, password: str) -> UserModel:
         """TODO: document"""
         raise NotImplementedError
 
 
-    def get_config(self) -> AuthProviderConfig:
+    def get_config(self) -> BaseAuthProviderConfig:
         """TODO: document"""
         return self.config
 

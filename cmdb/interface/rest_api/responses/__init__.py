@@ -25,6 +25,7 @@ from .update_single_response import UpdateSingleResponse
 from .update_multi_response import UpdateMultiResponse
 from .login_response import LoginResponse
 from .importer_object_response import ImporterObjectResponse
+from .gridfs_response import GridFsResponse
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -39,4 +40,5 @@ __all__ = [
     'UpdateMultiResponse',
     'LoginResponse',
     'ImporterObjectResponse',
+    'GridFsResponse',
 ]

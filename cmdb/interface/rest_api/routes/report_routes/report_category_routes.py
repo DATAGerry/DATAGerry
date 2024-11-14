@@ -143,7 +143,7 @@ def get_report_categories(params: CollectionParameters, request_user: UserModel)
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-@report_categories_blueprint.route('/', methods=['PUT'])
+@report_categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @report_categories_blueprint.parse_request_parameters()
 @insert_request_user
 def update_report_category(params: dict, request_user: UserModel):
@@ -158,13 +158,16 @@ def update_report_category(params: dict, request_user: UserModel):
     report_categories_manager: ReportCategoriesManager = ManagerProvider.get_manager(
                                                                             ManagerType.REPORT_CATEGORIES_MANAGER,
                                                                             request_user)
+    params['public_id'] = int(params['public_id'])
+    params['predefined'] = params['predefined'] in ["True", "true"]
 
     try:
-        current_category: CmdbReportCategory = report_categories_manager.get_report_category(params['public_id'])
+        current_category = report_categories_manager.get_report_category(params['public_id'])
 
         if current_category:
             #TODO: REFACTOR-FIX
-            result = report_categories_manager.update({'public_id':params['public_id']}, params)
+            report_categories_manager.update({'public_id': params['public_id']}, params)
+            current_category = report_categories_manager.get_report_category(params['public_id'])
         else:
             raise NoDocumentFound(report_categories_manager.collection)
 
@@ -179,7 +182,7 @@ def update_report_category(params: dict, request_user: UserModel):
     except NoDocumentFound:
         return abort(404, "Report Category not found!")
 
-    api_response = UpdateSingleResponse(result)
+    api_response = UpdateSingleResponse(current_category.__dict__)
 
     return api_response.make_response()
 

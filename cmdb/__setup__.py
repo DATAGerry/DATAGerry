@@ -44,7 +44,7 @@ LOGGER = logging.getLogger(__name__)
 class SetupRoutine:
     """TODO: document"""
 
-    #CLASS-FIX
+    #TODO: CLASS-FIX
     class SetupStatus(Enum):
         """TODO: document"""
         NOT = 0

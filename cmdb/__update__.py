@@ -41,7 +41,7 @@ LOGGER = logging.getLogger(__name__)
 class UpdateRoutine:
     """TODO: document"""
 
-    #CLASS-FIX
+    #TODO: CLASS-FIX
     class UpateStatus(Enum):
         """TODO: document"""
         NOT = 0

@@ -22,11 +22,11 @@ from cmdb.manager.users_manager import UsersManager
 from cmdb.manager.security_manager import SecurityManager
 
 from cmdb.models.user_model.user import UserModel
-from cmdb.security.auth.auth_providers import AuthenticationProvider
+from cmdb.security.auth.base_authentication_provider import BaseAuthenticationProvider
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
-from cmdb.security.auth.providers.external_providers import LdapAuthenticationProvider
-from cmdb.security.auth.providers.internal_providers import LocalAuthenticationProvider
-from cmdb.security.auth.provider_config import AuthProviderConfig
+from cmdb.security.auth.providers.ldap_auth_provider import LdapAuthenticationProvider
+from cmdb.security.auth.providers.local_auth_provider import LocalAuthenticationProvider
+from cmdb.security.auth.base_provider_config import BaseAuthProviderConfig
 
 from cmdb.errors.provider import AuthenticationProviderNotActivated,\
                                  AuthenticationProviderNotFoundError,\
@@ -42,12 +42,12 @@ LOGGER = logging.getLogger(__name__)
 class AuthModule:
     """Authentication module class"""
 
-    __pre_installed_providers: list[AuthenticationProvider] = [
+    __pre_installed_providers: list[BaseAuthenticationProvider] = [
         LocalAuthenticationProvider,
         LdapAuthenticationProvider
     ]
 
-    __installed_providers: list[AuthenticationProvider] = __pre_installed_providers
+    __installed_providers: list[BaseAuthenticationProvider] = __pre_installed_providers
 
     __DEFAULT_SETTINGS__ = {
         '_id': 'auth',
@@ -97,7 +97,7 @@ class AuthModule:
 
 
     @classmethod
-    def register_provider(cls, provider: AuthenticationProvider) -> AuthenticationProvider:
+    def register_provider(cls, provider: BaseAuthenticationProvider) -> BaseAuthenticationProvider:
         """Install a provider
         Notes:
             This only means that a provider is installed, not that the provider is used or activated!
@@ -107,7 +107,7 @@ class AuthModule:
 
 
     @classmethod
-    def unregister_provider(cls, provider: AuthenticationProvider) -> bool:
+    def unregister_provider(cls, provider: BaseAuthenticationProvider) -> bool:
         """Uninstall a provider"""
         try:
             AuthModule.__installed_providers.remove(provider)
@@ -117,7 +117,7 @@ class AuthModule:
 
 
     @staticmethod
-    def get_provider_class(provider_name: str) -> 'AuthenticationProvider':
+    def get_provider_class(provider_name: str) -> 'BaseAuthenticationProvider':
         """Get a specific provider class by class name"""
         return next(_ for _ in AuthModule.__installed_providers if _.__qualname__ == provider_name)
 
@@ -136,25 +136,25 @@ class AuthModule:
 
 
     @classmethod
-    def get_installed_providers(cls) -> list['AuthenticationProvider']:
+    def get_installed_providers(cls) -> list['BaseAuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @classmethod
-    def get_installed_internals(cls) -> list['AuthenticationProvider']:
+    def get_installed_internals(cls) -> list['BaseAuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @classmethod
-    def get_installed_external(cls) -> list['AuthenticationProvider']:
+    def get_installed_external(cls) -> list['BaseAuthenticationProvider']:
         """Get all installed providers as static list"""
         return cls.__installed_providers
 
 
     @property
-    def providers(self) -> list['AuthenticationProvider']:
+    def providers(self) -> list['BaseAuthenticationProvider']:
         """Get all installed providers as property list"""
         return AuthModule.__installed_providers
 
@@ -165,14 +165,14 @@ class AuthModule:
         return self.__settings
 
 
-    def get_provider(self, provider_name: str) -> AuthenticationProvider:
+    def get_provider(self, provider_name: str) -> BaseAuthenticationProvider:
         """Get a initialized provider instance"""
         try:
             _provider_class_name: Type[str] = provider_name
             if not AuthModule.provider_exists(provider_name=_provider_class_name):
                 return None
-            _provider_class: Type[AuthenticationProvider] = AuthModule.get_provider_class(_provider_class_name)
-            _provider_config_class: Type[AuthProviderConfig] = _provider_class.PROVIDER_CONFIG_CLASS
+            _provider_class: Type[BaseAuthenticationProvider] = AuthModule.get_provider_class(_provider_class_name)
+            _provider_config_class: Type[BaseAuthProviderConfig] = _provider_class.PROVIDER_CONFIG_CLASS
             _provider_config_values: dict = self.settings.get_provider_settings(_provider_class_name) \
                 .get('config', _provider_config_class.DEFAULT_CONFIG_VALUES)
             _provider_config_instance = _provider_config_class(**_provider_config_values)
@@ -209,7 +209,7 @@ class AuthModule:
             if not self.provider_exists(provider_class_name):
                 raise AuthenticationProviderNotFoundError(f"Provider with name {provider_class_name} does not exist!")
 
-            provider: Type[AuthenticationProvider] = self.get_provider_class(provider_class_name)
+            provider: Type[BaseAuthenticationProvider] = self.get_provider_class(provider_class_name)
             provider_config_class: Type[str] = provider.PROVIDER_CONFIG_CLASS
             provider_config_settings = self.settings.get_provider_settings(provider.get_name())
 

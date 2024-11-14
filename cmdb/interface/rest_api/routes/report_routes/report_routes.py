@@ -19,6 +19,7 @@ TODO: document
 import logging
 from flask import abort, request
 
+from cmdb.database.mongo_query_builder import MongoDBQueryBuilder
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
@@ -26,6 +27,7 @@ from cmdb.manager.reports_manager import ReportsManager
 
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report import CmdbReport
+from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
@@ -64,8 +66,10 @@ def create_report(params: dict, request_user: UserModel):
 
     try:
         params['public_id'] = reports_manager.get_next_public_id()
-        #TODO: CREATE a mongodb query builder
-        params['report_query'] = []
+        params['report_category_id'] = int(params['report_category_id'])
+        params['type_id'] = int(params['type_id'])
+        params['predefined'] = params['predefined'] in ["True", "true"]
+        params['report_query'] = MongoDBQueryBuilder(params['conditions'], params['type_id']).build()
 
         new_report_id = reports_manager.insert_report(params)
     except ManagerInsertError as err:
@@ -136,22 +140,42 @@ def get_reports(params: CollectionParameters, request_user: UserModel):
     return api_response.make_response()
 
 
-# @reports_blueprint.route('/<int:public_id>/run', methods=['GET'])
-# @insert_request_user
-# def run_report_query(public_id: int, request_user: UserModel):
-#     """
-#     Returns the result of the query of the report
+@reports_blueprint.route('/<int:public_id>/run', methods=['GET'])
+@insert_request_user
+def run_report_query(public_id: int, request_user: UserModel):
+    """
+    Returns the result of the query of the report
 
-#     Args:
-#         params (int): public_id of the CmdbReport
-#     Returns:
-#         (DefaultResponse): Dict of the query result
-#     """
-#     reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
+    Args:
+        params (int): public_id of the CmdbReport
+    Returns:
+        (DefaultResponse): Dict of the query result
+    """
+    try:
+        reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
+
+        requested_report = reports_manager.get_report(public_id)
+
+        # request_query = requested_report.report_query
+
+        # Filter only objects with the given type_id
+        # if "$and" in request_query:
+        #     request_query["$and"].append({"type_id": requested_report.type_id})
+        # else:
+        #     request_query["$or"].append({"type_id": requested_report.type_id})
+
+        result = reports_manager.get_many_from_other_collection(CmdbObject.COLLECTION,
+                                                                requirements=requested_report.report_query)
+        api_response = DefaultResponse(result)
+    except Exception as err:
+        LOGGER.debug("[run_report_query] Exception: %s, Type: %s", err, type(err))
+        return abort (400, "Could not run the requested report!")
+
+    return api_response.make_response()
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-@reports_blueprint.route('/', methods=['PUT'])
+@reports_blueprint.route('/<int:public_id>', methods=['PUT','PATCH'])
 @reports_blueprint.parse_request_parameters()
 @insert_request_user
 def update_report(params: dict, request_user: UserModel):
@@ -165,14 +189,19 @@ def update_report(params: dict, request_user: UserModel):
     """
     reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
 
+    params['public_id'] = int(params['public_id'])
+    params['report_category_id'] = int(params['report_category_id'])
+    params['type_id'] = int(params['type_id'])
+    params['predefined'] = params['predefined'] in ["True", "true"]
+
     try:
-        current_report: CmdbReport = reports_manager.get_report(params['public_id'])
+        current_report = reports_manager.get_report(params['public_id'])
 
         if current_report:
-            #TODO: Create new report_query with mongo db query builder
-            params['report_query'] = []
+            params['report_query'] = MongoDBQueryBuilder(params['conditions'], params['type_id']).build()
             #TODO: REFACTOR-FIX
-            result = reports_manager.update({'public_id':params['public_id']}, params)
+            reports_manager.update({'public_id':params['public_id']}, params)
+            current_report = reports_manager.get_report(params['public_id'])
         else:
             raise NoDocumentFound(reports_manager.collection)
 
@@ -187,7 +216,7 @@ def update_report(params: dict, request_user: UserModel):
     except NoDocumentFound:
         return abort(404, "Report not found!")
 
-    api_response = UpdateSingleResponse(result)
+    api_response = UpdateSingleResponse(current_report.__dict__)
 
     return api_response.make_response()
 
