@@ -20,8 +20,10 @@ from pymongo import IndexModel
 
 LOGGER = logging.getLogger(__name__)
 
-
-class MediaFileManagementBase:
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 BaseMediaFile - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+class BaseMediaFile:
     """TODO: document"""
     ASCENDING = 1
     DESCENDING = -1

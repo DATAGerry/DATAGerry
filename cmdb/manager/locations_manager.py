@@ -24,7 +24,7 @@ from cmdb.manager.base_manager import BaseManager
 
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.location_model.cmdb_location import CmdbLocation
-from cmdb.framework.results.iteration import IterationResult
+from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
@@ -105,7 +105,7 @@ class LocationsManager(BaseManager):
             if location:
                 resource = CmdbLocation(**location)
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return resource
@@ -130,7 +130,7 @@ class LocationsManager(BaseManager):
             if location:
                 location = CmdbLocation(**location)
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         if not location:
@@ -153,7 +153,7 @@ class LocationsManager(BaseManager):
             for location in locations:
                 locations_list.append(CmdbLocation(**location))
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return locations_list

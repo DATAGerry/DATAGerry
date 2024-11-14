@@ -27,7 +27,7 @@ class ConfigFileError(Exception):
 
 # ------------------------------------------------ CONFIG FILE ERRORS ------------------------------------------------ #
 
-#ERROR-FIX (not used)
+#TODO: ERROR-FIX (not used)
 class ConfigFileSetError(ConfigFileError):
     """
     Error if code tries to set values or sections while a config file is loaded
@@ -64,7 +64,7 @@ class SectionError(ConfigFileError):
         super().__init__(self.message)
 
 
-#ERROR-FIX (not used)
+#TODO: ERROR-FIX (not used)
 class KeySectionError(ConfigFileError):
     """
     Error if key does not exist in section

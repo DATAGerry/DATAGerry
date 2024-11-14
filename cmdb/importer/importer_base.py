@@ -78,7 +78,7 @@ class BaseImporter:
         """Starting the import process"""
         raise NotImplementedError
 
-
+#TODO: CLASS-FIX
 class ObjectImporter(BaseImporter):
     """Superclass for object importers"""
 
@@ -206,7 +206,7 @@ class ObjectImporter(BaseImporter):
         Should call the _import method"""
         raise NotImplementedError
 
-
+#TODO: CLASS-FIX
 class TypeImporter(BaseImporter):
     """Superclass for type importers
     Notes: Currently not implemented

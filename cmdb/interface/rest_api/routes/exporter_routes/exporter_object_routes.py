@@ -17,8 +17,9 @@
 import logging
 from flask import abort, jsonify, current_app
 
-from cmdb.exporter.config.config_type import ExporterConfig
-from cmdb.exporter.writer.writer_base import SupportedExporterExtension, BaseExportWriter
+from cmdb.framework.exporter.config.exporter_config import ExporterConfig
+from cmdb.framework.exporter.writer.base_export_writer import BaseExportWriter
+from cmdb.framework.exporter.writer.supported_exporter_extension import SupportedExporterExtension
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.route_utils import login_required, insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
@@ -34,7 +35,7 @@ LOGGER = logging.getLogger(__name__)
 
 exporter_blueprint = APIBlueprint('exporter', __name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @exporter_blueprint.route('/extensions', methods=['GET'])
 @login_required
@@ -51,8 +52,8 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
     try:
         _config = ExporterConfig(parameters=params, options=params.optional)
-        _class = 'ZipExportType' if params.optional.get('zip', False) in ['true'] \
-            else params.optional.get('classname', 'JsonExportType')
+        _class = 'ZipExportFormat' if params.optional.get('zip', False) in ['true'] \
+            else params.optional.get('classname', 'JsonExportFormat')
         exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
 
         if current_app.cloud_mode:
@@ -62,10 +63,10 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
 
         exporter.from_database(current_app.database_manager, request_user, AccessControlPermission.READ)
     except TypeNotFoundError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except ModuleNotFoundError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except Exception as err:
         LOGGER.debug("[export_objects] Exception: %s, Type: %s", err, type(err))

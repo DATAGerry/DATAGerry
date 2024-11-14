@@ -274,7 +274,7 @@ def get_parent(object_id: int, request_user: UserModel):
             parent_id = current_location.parent
             parent = locations_manager.get_location(parent_id)
     except Exception as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_parent] Exception: %s, Type: %s", err, type(err))
 
     api_response = DefaultResponse(parent)
@@ -308,7 +308,7 @@ def get_children(object_id: int, request_user: UserModel):
             children = locations_manager.get_locations_by(parent=location_public_id)
 
     except Exception as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_children] Exception: %s, Type: %s", err, type(err))
 
     api_response = DefaultResponse(children)

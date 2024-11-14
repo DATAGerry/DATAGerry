@@ -132,7 +132,7 @@ def parse_objects():
     # TODO: check if request user has the permission 'base.import.object.*'
     # Check if file exists
     try:
-        #REFACTOR-FIX (get_file_in_request-function)
+        #TODO: REFACTOR-FIX (get_file_in_request-function)
         request_file: FileStorage = get_file_in_request('file', request.files)
     except Exception as err:
         LOGGER.debug("[parse_objects] Exception: %s, Type: %s", err, type(err))
@@ -153,7 +153,7 @@ def parse_objects():
     try:
         parsed_output = generate_parsed_output(request_file, file_format, parser_config).output()
     except (ParserRuntimeError, Exception) as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[parse_objects] Error: %s, Type: %s", err, type(err))
         return abort(500, "Could not generate parsed output!")
 
@@ -202,7 +202,7 @@ def import_objects(request_user: UserModel):
             raise AccessDeniedError(f'Objects cannot be created because type `{type_.name}` is deactivated.')
         verify_import_access(request_user, type_, types_manager)
     except ObjectManagerGetError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
         return abort(404, "Could not import objects !")
     except AccessDeniedError:
@@ -212,7 +212,7 @@ def import_objects(request_user: UserModel):
     try:
         parser_class = load_parser_class('object', file_format)
     except ParserLoadError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
         return abort(406)
 
@@ -222,7 +222,7 @@ def import_objects(request_user: UserModel):
     try:
         importer_config_class = load_importer_config_class('object', file_format)
     except ImporterLoadError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
         return abort(406)
     importer_config = importer_config_class(**importer_config_request)
@@ -231,7 +231,7 @@ def import_objects(request_user: UserModel):
     try:
         importer_class = load_importer_class('object', file_format)
     except ImporterLoadError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[import_objects] ImporterLoadError: %s", err.message)
         return abort(406)
     importer = importer_class(working_file, importer_config, parser, objects_manager, request_user)
@@ -239,11 +239,11 @@ def import_objects(request_user: UserModel):
     try:
         import_response: ImporterObjectResponse = importer.start_import()
     except ImportRuntimeError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.error("Error while importing objects: %s", err.message)
         return abort(500)
     except AccessDeniedError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(403)
 
     # close request file
@@ -280,11 +280,11 @@ def import_objects(request_user: UserModel):
             LOGGER.debug("[import_objects] ObjectManagerGetError: %s", err.message)
             return abort(404)
         except InstanceRenderError as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("[import_objects] InstanceRenderError: %s", err.message)
             return abort(500)
         except ManagerInsertError as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("[import_objects] ManagerInsertError: %s", err.message)
 
     api_response = DefaultResponse(import_response)

@@ -69,7 +69,7 @@ def insert_user(data: dict, request_user: UserModel):
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
-    #REFATOR-FIX
+    #TODO: REFATOR-FIX
     try:
         user_password = data['password']
         data['password'] = security_manager.generate_hmac(data['password'])
@@ -127,7 +127,7 @@ def insert_user(data: dict, request_user: UserModel):
         #Confirm that user is created
         user = users_manager.get_user(result_id)
     except ManagerGetError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[insert_user] ManagerGetError: %s", err.message)
         return abort(404, "An error occured when creating the user!")
     except ManagerInsertError as err:
@@ -172,10 +172,10 @@ def get_users(params: CollectionParameters, request_user: UserModel):
                                         url=request.url,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(404)
 
     return api_response.make_response()
@@ -205,7 +205,7 @@ def get_user(public_id: int, request_user: UserModel):
     try:
         user: UserModel = users_manager.get_user(public_id)
     except UserManagerGetError:
-        #MESSAGE-FIX
+        #TODO: MESSAGE-FIX
         return abort(404)
 
     api_response = GetSingleResponse(UserModel.to_dict(user), body=request.method == 'HEAD')
@@ -239,7 +239,7 @@ def update_user(public_id: int, data: dict, request_user: UserModel):
 
         api_response = UpdateSingleResponse(UserModel.to_dict(user))
     except ManagerGetError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[update_user] ManagerUpdateError: %s", err.message)
@@ -269,7 +269,7 @@ def change_user_password(public_id: int, request_user: UserModel):
     try:
         user = users_manager.get_user(public_id)
     except UserManagerGetError:
-        #MESSAGE-FIX
+        #TODO: MESSAGE-FIX
         return abort(404)
 
     try:
@@ -278,7 +278,7 @@ def change_user_password(public_id: int, request_user: UserModel):
         users_manager.update_user(public_id, user)
         api_response = UpdateSingleResponse(UserModel.to_dict(user))
     except ManagerGetError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
         LOGGER.debug("[change_user_password] ManagerUpdateError: %s", err.message)
@@ -309,11 +309,11 @@ def delete_user(public_id: int, request_user: UserModel):
         deleted_group = users_manager.delete_user(public_id)
         api_response = DeleteSingleResponse(raw=UserModel.to_dict(deleted_group))
     except ManagerGetError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[delete_user] ManagerGetError: %s", err.message)
         return abort(404, f"Could not delete user with ID: {public_id} !")
     except ManagerDeleteError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[delete_user] ManagerDeleteError: %s", err.message)
         return abort(404, f"Could not delete user with ID: {public_id} !")
 

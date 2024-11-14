@@ -86,7 +86,7 @@ class LdapAuthenticationProvider(BaseAuthenticationProvider):
 
     def authenticate(self, user_name: str, password: str) -> UserModel:
         """TODO: document"""
-        #REFACTOR-FIX
+        #TODO: REFACTOR-FIX
         try:
             ldap_connection_status = self.connect()
             if not ldap_connection_status:
@@ -135,7 +135,7 @@ class LdapAuthenticationProvider(BaseAuthenticationProvider):
                 except ManagerUpdateError as err:
                     raise AuthenticationError(str(err)) from err
         except ManagerGetError as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.warning('[LdapAuthenticationProvider] UserModel exists on LDAP but not in database: %s', err)
             LOGGER.debug('[LdapAuthenticationProvider] Try creating user: %s', user_name)
             try:
@@ -147,7 +147,7 @@ class LdapAuthenticationProvider(BaseAuthenticationProvider):
                 new_user_data['authenticator'] = LdapAuthenticationProvider.get_name()
 
             except Exception as error:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 LOGGER.debug('[LdapAuthenticationProvider] %s',error)
                 raise AuthenticationError(str(error)) from error
             LOGGER.debug('[LdapAuthenticationProvider] New user was init')
@@ -155,14 +155,14 @@ class LdapAuthenticationProvider(BaseAuthenticationProvider):
             try:
                 user_id = self.users_manager.insert_user(new_user_data)
             except UserManagerInsertError as error:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] UserManagerInsertError: %s', error.message)
                 raise AuthenticationError(str(error)) from error
 
             try:
                 user_instance: UserModel = self.users_manager.get_user(user_id)
             except UserManagerGetError as error:
-                #ERROR-FIX
+                #TODO: ERROR-FIX
                 LOGGER.debug('[authenticate] ManagerGetError: %s', error.message)
                 raise AuthenticationError(str(error)) from error
 

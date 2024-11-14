@@ -19,6 +19,7 @@ import datetime
 import time
 from flask import Response
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.objects_manager import ObjectsManager
 
@@ -27,52 +28,13 @@ from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.exporter.config.config_type import ExporterConfig
-from cmdb.exporter.format.format_base import BaseExporterFormat
-from cmdb.utils.helpers import load_class
+from cmdb.framework.exporter.config.exporter_config import ExporterConfig
+from cmdb.framework.exporter.format.base_exporter_format import BaseExporterFormat
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                          SupportedExporterExtension - CLASS                                          #
-# -------------------------------------------------------------------------------------------------------------------- #
-class SupportedExporterExtension:
-    """Supported export extensions for exporting (csv, json, xlsx, xml)"""
 
-
-    def __init__(self, extensions=None):
-        """
-        Constructor of SupportedExporterExtension
-        Args:
-            extensions: List of export extension
-        """
-        arguments = extensions if extensions else []
-        self.extensions = [*["CsvExportType", "JsonExportType", "XlsxExportType", "XmlExportType"], *arguments]
-
-
-    def get_extensions(self):
-        """Get list of supported export extension"""
-        return self.extensions
-
-
-    def convert_to(self):
-        """Converts the supported export extension inside the list to a passed BaseExporterFormat list."""
-        _list = []
-        for type_element in self.get_extensions():
-            type_element_class = load_class('cmdb.exporter.exporter_base.' + type_element)
-            _list.append({
-                'extension': type_element,
-                'label': type_element_class.LABEL,
-                'icon': type_element_class.ICON,
-                'multiTypeSupport': type_element_class.MULTITYPE_SUPPORT,
-                'helperText': type_element_class.DESCRIPTION,
-                'active': type_element_class.ACTIVE
-            })
-        return _list
-
-
-#TODO: CLASS-FIX
 class  BaseExportWriter:
     """TODO: document"""
 
@@ -88,9 +50,14 @@ class  BaseExportWriter:
         self.data: list[RenderResult] = []
 
 
-    def from_database(self, database_manager, user: UserModel, permission: AccessControlPermission):
+    def from_database(
+            self,
+            dbm: MongoDatabaseManager,
+            user: UserModel,
+            permission: AccessControlPermission
+        ):
         """Get all objects from the collection"""
-        objects_manager = ObjectsManager(database_manager)
+        objects_manager = ObjectsManager(dbm)
 
         export_params = self.export_config.parameters
         builder_params = BuilderParameters(criteria=export_params.filter,

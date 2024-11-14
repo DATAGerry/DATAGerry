@@ -51,7 +51,7 @@ def get_date_settings(request_user: UserModel):
 
         return api_response.make_response()
     except Exception as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_date_settings] Exception: %s, Type: %s", err, type(err))
         return abort(500)
 

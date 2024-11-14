@@ -66,7 +66,7 @@ def add_template(request_user: UserModel):
     try:
         template_instance = DocapiTemplate(**new_tpl_data)
     except Exception as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug(str(err))
         return abort(400)
 
@@ -104,7 +104,7 @@ def get_template_list(params: CollectionParameters, request_user: UserModel):
                                         url=request.url,
                                         body=request.method == 'HEAD')
     except ManagerIterationError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except ManagerGetError:
         return abort(404, "Could not retrieve template list!")
@@ -206,7 +206,7 @@ def update_template(request_user: UserModel):
     try:
         update_tpl_instance = DocapiTemplate(**new_tpl_data)
     except Exception:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
 
     try:

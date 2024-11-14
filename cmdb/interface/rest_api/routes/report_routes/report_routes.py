@@ -156,14 +156,6 @@ def run_report_query(public_id: int, request_user: UserModel):
 
         requested_report = reports_manager.get_report(public_id)
 
-        # request_query = requested_report.report_query
-
-        # Filter only objects with the given type_id
-        # if "$and" in request_query:
-        #     request_query["$and"].append({"type_id": requested_report.type_id})
-        # else:
-        #     request_query["$or"].append({"type_id": requested_report.type_id})
-
         result = reports_manager.get_many_from_other_collection(CmdbObject.COLLECTION,
                                                                 requirements=requested_report.report_query)
         api_response = DefaultResponse(result)

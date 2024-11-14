@@ -16,14 +16,17 @@
 """
 This package provides all errors for the database
 """
-from .database_errors import DataBaseError, \
-                             DatabaseConnectionError, \
-                             ServerTimeoutError, \
-                             DatabaseAlreadyExists, \
-                             DatabaseNotExists, \
-                             CollectionAlreadyExists, \
-                             NoDocumentFound, \
-                             DocumentCouldNotBeDeleted
+from .database_errors import (
+    DataBaseError,
+    DatabaseConnectionError,
+    ServerTimeoutError,
+    DatabaseAlreadyExists,
+    DatabaseNotExists,
+    CollectionAlreadyExists,
+    NoDocumentFound,
+    DocumentCouldNotBeDeleted,
+    SetDatabaseError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__ = [
@@ -35,4 +38,5 @@ __all__ = [
     'CollectionAlreadyExists',
     'NoDocumentFound',
     'DocumentCouldNotBeDeleted',
+    'SetDatabaseError',
 ]

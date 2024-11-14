@@ -26,7 +26,7 @@ class ParserResponse:
         """TODO: document"""
         raise NotImplementedError
 
-
+#TODO: CLASS-FIX
 class ObjectParserResponse(ParserResponse):
     """Response for object imports"""
 
@@ -38,7 +38,7 @@ class ObjectParserResponse(ParserResponse):
     def output(self) -> dict:
         return self.__dict__
 
-
+#TODO: CLASS-FIX
 class TypeParserResponse(ParserResponse):
     """Response for type imports"""
 

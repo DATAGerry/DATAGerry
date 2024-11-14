@@ -29,8 +29,7 @@ from cmdb.manager.base_manager import BaseManager
 from cmdb.models.type_model.type import TypeModel
 from cmdb.models.type_model.type_field_section import TypeFieldSection
 from cmdb.models.object_model.cmdb_object import CmdbObject
-from cmdb.framework.results import IterationResult
-from cmdb.framework.results.list import ListResult
+from cmdb.framework.results import IterationResult, ListResult
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError
 from cmdb.errors.manager.types_manager import TypesManagerGetError,\
@@ -125,7 +124,7 @@ class TypesManager(BaseManager):
         try:
             return TypeModel.from_data(requested_type)
         except Exception as err:
-            #ERROR-FIX (Needs a TypesManagerGetError)
+            #TODO: ERROR-FIX (Needs a TypesManagerGetError)
             raise ManagerGetError(str(err)) from err
 
 
@@ -184,7 +183,7 @@ class TypesManager(BaseManager):
         try:
             return [TypeModel.from_data(type) for type in raw_types]
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise ManagerGetError(err) from err
 
 
@@ -193,7 +192,7 @@ class TypesManager(BaseManager):
         try:
             return [TypeModel.from_data(data) for data in self.get_many(sort=sort, **requirements)]
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             raise ManagerGetError(err) from err
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
@@ -210,7 +209,7 @@ class TypesManager(BaseManager):
             If a TypeModel instance was passed as type argument,
             it will be auto converted via the model `to_json` method.
         """
-        #REFACTOR-FIX try/except block
+        #TODO: REFACTOR-FIX try/except block
         if isinstance(update_type, TypeModel):
             new_version_type = TypeModel.to_json(update_type)
         else:
@@ -238,7 +237,7 @@ class TypesManager(BaseManager):
         Returns:
             TypeModel: The deleted type as its model.
         """
-        #REFACTOR-FIX try/except block
+        #TODO: REFACTOR-FIX try/except block
         raw_type: TypeModel = self.get_type(public_id)
 
         try:
@@ -272,7 +271,7 @@ class TypesManager(BaseManager):
 
                 data_set["data"].append(new_field)
         except Exception as err:
-            #TODO- ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("Error in create_mds_field_entries(): %s", err)
 
         return data_set
@@ -300,7 +299,7 @@ class TypesManager(BaseManager):
                 del data_set["data"][idx]
 
         except Exception as err:
-            #ERROR-FIX
+            #TODO: ERROR-FIX
             LOGGER.debug("Error in delete_mds_field_entries(): %s", err)
 
         return data_set

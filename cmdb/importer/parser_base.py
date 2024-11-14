@@ -44,7 +44,7 @@ class BaseParser:
         """TODO: document"""
         raise NotImplementedError
 
-
+#TODO: CLASS-FIX
 class BaseObjectParser(BaseParser):
     """TODO: document"""
 
@@ -57,7 +57,7 @@ class BaseObjectParser(BaseParser):
     def parse(self, file) -> ObjectParserResponse:
         raise NotImplementedError
 
-
+#TODO: CLASS-FIX
 class BaseTypeParser(BaseParser):
     """TODO: document"""
 

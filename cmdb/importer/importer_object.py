@@ -72,7 +72,7 @@ class JsonObjectImporterConfig(ObjectImporterConfig, JSONContent):
             overwrite_public=overwrite_public
         )
 
-
+#TODO: CLASS-FIX
 class JsonObjectImporter(ObjectImporter, JSONContent):
     """Object importer for JSON"""
 
@@ -148,7 +148,7 @@ class JsonObjectImporter(ObjectImporter, JSONContent):
 
         return import_result
 
-
+#TODO: CLASS-FIX
 class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
     """TODO: document"""
 
@@ -159,7 +159,7 @@ class CsvObjectImporterConfig(ObjectImporterConfig, CSVContent):
         super().__init__(type_id=type_id, mapping=mapping, start_element=start_element,
                                                       max_elements=max_elements, overwrite_public=overwrite_public)
 
-
+#TODO: CLASS-FIX
 class CsvObjectImporter(ObjectImporter, CSVContent):
     """TODO: document"""
 
@@ -267,7 +267,7 @@ class CsvObjectImporter(ObjectImporter, CSVContent):
 
         return import_result
 
-
+#TODO: CLASS-FIX
 class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
     """TODO: document"""
     MANUALLY_MAPPING = True
@@ -277,7 +277,7 @@ class ExcelObjectImporterConfig(ObjectImporterConfig, XLSXContent):
         super().__init__(type_id=type_id, mapping=mapping, start_element=start_element,
                                                         max_elements=max_elements, overwrite_public=overwrite_public)
 
-
+#TODO: CLASS-FIX
 class ExcelObjectImporter(ObjectImporter, XLSXContent):
     """TODO: document"""
 

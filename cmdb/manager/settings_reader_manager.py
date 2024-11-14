@@ -30,7 +30,7 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                             SystemSettingsReader - CLASS                                             #
 # -------------------------------------------------------------------------------------------------------------------- #
-#BASECLASS-FIX (make the base class 'BaseManager')
+#TODO: BASECLASS-FIX (make the base class 'BaseManager')
 class SettingsReaderManager(SystemReader):
     """
     Settings reader loads settings from database

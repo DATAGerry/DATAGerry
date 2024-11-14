@@ -30,8 +30,7 @@ from cmdb.models.type_model.type import TypeModel
 from cmdb.models.type_model.type_field_section import TypeFieldSection
 from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.object_model.cmdb_object import CmdbObject
-from cmdb.framework.results import IterationResult
-from cmdb.framework.results.list import ListResult
+from cmdb.framework.results import IterationResult, ListResult
 from cmdb.security.acl.permission import AccessControlPermission
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError

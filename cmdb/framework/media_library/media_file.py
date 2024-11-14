@@ -14,16 +14,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import date
 
-from cmdb.media_library.media_file_base import MediaFileManagementBase
-from cmdb.media_library.media_file_metadata import FileMetadata
+from cmdb.framework.media_library.base_media_file import BaseMediaFile
+from cmdb.framework.media_library.media_file_metadata import FileMetadata
 from cmdb.models.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class MediaFile(MediaFileManagementBase):
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   MediaFile - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
+class MediaFile(BaseMediaFile):
     """Media Libary File"""
 
     COLLECTION = 'media.libary'

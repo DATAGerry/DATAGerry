@@ -33,7 +33,7 @@ class BaseImporterConfig:
         """TODO: document"""
         return self.mapping
 
-
+#TODO: CLASS-FIX
 class ObjectImporterConfig(BaseImporterConfig):
     """TODO: document"""
 

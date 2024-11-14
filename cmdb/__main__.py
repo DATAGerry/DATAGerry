@@ -31,7 +31,7 @@ import cmdb
 from cmdb import __title__
 from cmdb.__check__ import CheckRoutine
 from cmdb.__update__ import UpdateRoutine
-from cmdb.__setup__ import SetupRoutine
+from cmdb.setup_routine import SetupRoutine
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.system_config import SystemConfigReader
 import cmdb.process_management.process_manager

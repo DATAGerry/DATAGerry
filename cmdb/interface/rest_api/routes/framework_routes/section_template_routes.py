@@ -111,7 +111,7 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
                                         request.url,
                                         request.method == 'HEAD')
     except ManagerIterationError as err:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         LOGGER.debug("[get_all_section_templates] ManagerIterationError: %s", err.message)
         return abort(400, "Could not retrieve SectionTemplates!")
 

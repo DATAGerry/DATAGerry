@@ -83,10 +83,10 @@ def get_rights(params: CollectionParameters):
 
         return api_response.make_response()
     except ManagerIterationError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(400)
     except ManagerGetError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(404)
 
 
@@ -113,7 +113,7 @@ def get_right(name: str):
     try:
         right = rights_manager.get_right(name)
     except ManagerGetError:
-        #ERROR-FIX
+        #TODO: ERROR-FIX
         return abort(404)
 
     api_response = GetSingleResponse(BaseRight.to_dict(right), body=request.method == 'HEAD')
