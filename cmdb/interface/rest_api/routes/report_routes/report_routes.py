@@ -17,6 +17,7 @@
 TODO: document
 """
 import logging
+from ast import literal_eval
 from flask import abort, request
 
 from cmdb.database.mongo_query_builder import MongoDBQueryBuilder
@@ -69,6 +70,8 @@ def create_report(params: dict, request_user: UserModel):
         params['report_category_id'] = int(params['report_category_id'])
         params['type_id'] = int(params['type_id'])
         params['predefined'] = params['predefined'] in ["True", "true"]
+        params['conditions'] = literal_eval(params['conditions'])
+        params['selected_fields'] = literal_eval(params['selected_fields'])
         params['report_query'] = MongoDBQueryBuilder(params['conditions'], params['type_id']).build()
 
         new_report_id = reports_manager.insert_report(params)
@@ -76,6 +79,8 @@ def create_report(params: dict, request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[create_report] ManagerInsertError: %s", err.message)
         return abort(400, "Could not create the report!")
+    except Exception as err:
+        LOGGER.debug("[create_report] Exception: %s, Type: %s", err, type(err))
 
     api_response = DefaultResponse(new_report_id)
 
@@ -181,12 +186,14 @@ def update_report(params: dict, request_user: UserModel):
     """
     reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
 
-    params['public_id'] = int(params['public_id'])
-    params['report_category_id'] = int(params['report_category_id'])
-    params['type_id'] = int(params['type_id'])
-    params['predefined'] = params['predefined'] in ["True", "true"]
-
     try:
+        params['public_id'] = int(params['public_id'])
+        params['report_category_id'] = int(params['report_category_id'])
+        params['type_id'] = int(params['type_id'])
+        params['predefined'] = params['predefined'] in ["True", "true"]
+        params['conditions'] = literal_eval(params['conditions'])
+        params['selected_fields'] = literal_eval(params['selected_fields'])
+
         current_report = reports_manager.get_report(params['public_id'])
 
         if current_report:
