@@ -1,9 +1,18 @@
 <div *ngIf="fields && fields.length > 0 && showQueryBuilder">
-    <h3>Fields Filter</h3>
+    <h4>Fields Filter</h4>
     <query-builder
         [(ngModel)]="query"
         [config]="config"
         [classNames]="classNames"
         (ngModelChange)="onQueryChange($event)">
+        <ng-container *queryInput="let rule">
+            <input
+                *ngIf="!shouldHideValueField(rule.operator)"
+                [(ngModel)]="rule.value"
+                class="form-control"
+                type="text"
+            />
+        </ng-container>
+        
     </query-builder>
 </div>
