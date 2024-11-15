@@ -23,6 +23,7 @@ import { ReplaySubject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { ReportService } from 'src/app/reporting/services/report.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
     selector: 'app-create-report',
@@ -37,6 +38,7 @@ export class CreateReportComponent implements OnInit, OnDestroy {
     public typeLoading = false;
     private unsubscribe$ = new ReplaySubject<void>(1);
     public conditions: any = {}; // Holds the conditions from FilterBuilderComponent
+    public filterBuilderValidation: boolean = true;
 
 
     /* --------------------------------------------------- LIFECYCLE METHODS -------------------------------------------------- */
@@ -47,7 +49,8 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         private categoryService: ReportCategoryService,
         private typeService: TypeService,
         private reportService: ReportService,
-        private toast: ToastService
+        private toast: ToastService,
+        private router: Router
 
     ) { }
 
@@ -57,7 +60,7 @@ export class CreateReportComponent implements OnInit, OnDestroy {
             name: ['', [Validators.required, Validators.minLength(3)]],
             category: [null, Validators.required],
             type: [null, Validators.required],
-            fields: [[]]
+            fields: [[], Validators.required]
         });
 
         this.loadCategories();
@@ -141,11 +144,15 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         console.log('conditions', this.conditions)
     }
 
+    onFilterBuilderValidation(validation: any) {
+        this.filterBuilderValidation = validation;
+    }
+
     /**
      * Submits the report form if valid, sending data to the report service for creation.
      */
     onSubmit(): void {
-        if (this.createReportForm.valid) {
+        if (this.createReportForm.valid || !this.filterBuilderValidation) {
             const formValues = this.createReportForm.value;
 
             const reportData = {
@@ -167,7 +174,7 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                     console.error('Error creating report:', error);
                 },
                 complete: () => {
-                    console.log('Rprocess completed.');
+                    this.router.navigate(['/reports/overview']);
                 }
             });
 

@@ -1,4 +1,3 @@
-
 /*
 * DATAGERRY - OpenSource Enterprise CMDB
 * Copyright (C) 2024 becon GmbH
@@ -27,6 +26,7 @@ import { QueryBuilderConfig, QueryBuilderClassNames } from 'shout-angular-query-
 export class FilterBuilderComponent implements OnInit, OnChanges {
     @Input() fields: Array<{ name: string; label: string; type?: string; options?: Array<{ name: string; value: any }> }> = [];
     @Output() conditionsChange = new EventEmitter<any>();
+    @Output() filterBuilderValidation = new EventEmitter<any>();
 
 
     public query = { condition: 'and', rules: [] };
@@ -116,10 +116,12 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
      */
     onQueryChange(): void {
         this.conditionsChange.emit(this.query);
+        this.isAnyFieldEmpty()
     }
 
 
     /* --------------------------------------------------- TEMPLATE HELPER -------------------------------------------------- */
+
 
     /**
      * Determines if the value field should be hidden based on the selected operator.
@@ -129,4 +131,12 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
     }
 
 
+    /**
+     * Checks if any field in the query rules is empty (excluding null checks) and emits validation status.
+     */
+    isAnyFieldEmpty() {
+        let isAnyFieldEmpty = this.query.rules.filter(rule => rule.value === '' && rule.operator !== 'is null' && rule.operator !== 'is not null').length > 0;
+        console.log('isAnyFieldEmpty', isAnyFieldEmpty)
+        this.filterBuilderValidation.emit(!isAnyFieldEmpty)
+    }
 }

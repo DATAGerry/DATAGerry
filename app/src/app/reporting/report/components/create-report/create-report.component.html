@@ -3,7 +3,7 @@
     <form [formGroup]="createReportForm" (ngSubmit)="onSubmit()">
         <!-- Name Input -->
         <div class="form-group">
-            <label for="name">Report Name:</label>
+            <label for="name">Report Name <span class="required">*</span>:</label>
             <input
                 type="text"
                 id="name"
@@ -15,7 +15,7 @@
 
         <!-- Category Dropdown -->
         <div class="form-group">
-            <label for="category">Category:</label>
+            <label for="category">Category <span class="required">*</span>:</label>
             <ng-select
                 [items]="categories"
                 bindLabel="name"
@@ -28,7 +28,7 @@
 
         <!-- Type Dropdown -->
         <div class="form-group">
-            <label for="type">Type:</label>
+            <label for="type">Type <span class="required">*</span>:</label>
             <ng-select
                 [items]="types"
                 bindLabel="label"
@@ -41,7 +41,7 @@
 
         <!-- Fields Dropdown -->
         <div class="form-group">
-            <label for="fields">Fields:</label>
+            <label for="fields">Fields <span class="required">*</span>:</label>
             <ng-select
                 [items]="fields"
                 bindLabel="label"
@@ -54,10 +54,10 @@
         </div>
 
         <!-- Filter Builder -->
-        <app-filter-builder [fields]="fields" (conditionsChange)="onConditionsChange($event)"></app-filter-builder>
+        <app-filter-builder [fields]="fields" (conditionsChange)="onConditionsChange($event)" (filterBuilderValidation)="onFilterBuilderValidation($event)"></app-filter-builder>
 
         <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary" [disabled]="createReportForm.invalid">
+        <button type="submit" class="btn btn-sm btn-success submit-report" [disabled]="createReportForm.invalid || !filterBuilderValidation">
             Submit Report
         </button>
     </form>
