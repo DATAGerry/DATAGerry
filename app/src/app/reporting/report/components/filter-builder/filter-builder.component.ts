@@ -136,7 +136,6 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
      */
     isAnyFieldEmpty() {
         let isAnyFieldEmpty = this.query.rules.filter(rule => rule.value === '' && rule.operator !== 'is null' && rule.operator !== 'is not null').length > 0;
-        console.log('isAnyFieldEmpty', isAnyFieldEmpty)
         this.filterBuilderValidation.emit(!isAnyFieldEmpty)
     }
 }
