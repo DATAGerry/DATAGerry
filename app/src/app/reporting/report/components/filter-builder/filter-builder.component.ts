@@ -25,7 +25,7 @@ import { QueryBuilderConfig, QueryBuilderClassNames } from 'shout-angular-query-
     styleUrls: ['./filter-builder.component.scss']
 })
 export class FilterBuilderComponent implements OnInit, OnChanges {
-    @Input() fields: Array<{ name: string; label: string; type?: string }> = [];
+    @Input() fields: Array<{ name: string; label: string; type?: string; options?: Array<{ name: string; value: any }> }> = [];
     @Output() conditionsChange = new EventEmitter<any>();
 
 
@@ -75,12 +75,17 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
 
             this.fields.forEach(field => {
                 let fieldType = field.type;
-                let operators = ['=', '!=']; // Default operators for non-numeric types
+                let operators = ['=', '!=', 'contains', 'is null', 'is not null', 'like']; // Default operators for non-numeric types
 
                 // Check if the fieldType is specifically 'number' or 'date'
                 if (fieldType === 'number' || fieldType === 'date') {
                     operators = ['=', '!=', '<', '>', '<=', '>='];
-                } else {
+                }
+                else if (fieldType === 'select') {
+                    operators = ['=', '!=', 'in', 'not in'];
+                    fieldType = 'category';
+                }
+                else {
                     // Treat any other type as 'string'
                     fieldType = 'string';
                 }
@@ -89,7 +94,8 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
                     name: field.label,
                     type: fieldType,
                     operators: operators,
-                    defaultValue: ''
+                    defaultValue: '',
+                    ...(fieldType === 'category' && field.options ? { options: field.options } : {}) // Only add options if category
                 };
             });
 
@@ -111,4 +117,16 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
     onQueryChange(): void {
         this.conditionsChange.emit(this.query);
     }
+
+
+    /* --------------------------------------------------- TEMPLATE HELPER -------------------------------------------------- */
+
+    /**
+     * Determines if the value field should be hidden based on the selected operator.
+     */
+    shouldHideValueField(operator: string): boolean {
+        return operator === 'is null' || operator === 'is not null';
+    }
+
+
 }
