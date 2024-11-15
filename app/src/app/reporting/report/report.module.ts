@@ -26,6 +26,7 @@ import { ReportOverviewComponent } from './components/report-overview/report-ove
 import { CreateReportComponent } from './components/create-report/create-report.component';
 import { FilterBuilderComponent } from './components/filter-builder/filter-builder.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { TableModule } from 'src/app/layout/table/table.module';
 
 @NgModule({
     declarations: [
@@ -39,7 +40,8 @@ import { NgSelectModule } from '@ng-select/ng-select';
         FormsModule,
         ReactiveFormsModule,
         QueryBuilderModule,
-        NgSelectModule
+        NgSelectModule,
+        TableModule
     ],
     exports: [
         FilterBuilderComponent

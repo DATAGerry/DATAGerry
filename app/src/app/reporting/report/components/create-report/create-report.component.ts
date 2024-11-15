@@ -93,7 +93,9 @@ export class CreateReportComponent implements OnInit, OnDestroy {
             (response) => {
                 this.categories = response.results;
             },
-            (error) => console.error('Error loading categories:', error)
+            (error) => {
+                this.toast.error(error?.error?.message)
+            }
         );
     }
 
@@ -111,7 +113,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                 this.typeLoading = false;
             },
             (error) => {
-                console.error('Error loading types:', error);
                 this.typeLoading = false;
             }
         );
@@ -141,12 +142,17 @@ export class CreateReportComponent implements OnInit, OnDestroy {
     onConditionsChange(conditions: any): void {
         // Receive conditions from FilterBuilderComponent
         this.conditions = conditions;
-        console.log('conditions', this.conditions)
     }
 
+
+    /**
+     * Updates the validation status from the filter builder.
+     * @param validation - The validation result to set.
+     */
     onFilterBuilderValidation(validation: any) {
         this.filterBuilderValidation = validation;
     }
+
 
     /**
      * Submits the report form if valid, sending data to the report service for creation.
@@ -171,7 +177,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                 },
                 error: (error) => {
                     this.toast.error(error?.error?.message)
-                    console.error('Error creating report:', error);
                 },
                 complete: () => {
                     this.router.navigate(['/reports/overview']);

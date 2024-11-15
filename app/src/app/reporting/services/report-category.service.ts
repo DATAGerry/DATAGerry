@@ -45,6 +45,7 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
         observe: resp
     };
 
+
     constructor(private api: ApiCallService) { }
 
 
@@ -92,7 +93,12 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
         );
     }
 
-
+    /**
+     * Creates a new category using the provided category data.
+     * Constructs HTTP parameters from category data and sends a POST request.
+     * @param categoryData - The data for the new category.
+     * @returns An observable with the response data of the created category.
+     */
     public createCategory(categoryData: { name: string; predefined: boolean }): Observable<T> {
         let httpParams = new HttpParams();
 
@@ -129,6 +135,7 @@ export class ReportCategoryService<T = any> implements ApiServicePrefix {
             map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => apiResponse.body.result as T)
         );
     }
+
 
     /**
      * Deletes a report category by its public ID.
