@@ -1,5 +1,22 @@
-<button  type="button" class="btn btn-sm btn-success" [routerLink]="['/reports/create']">
-    Create New Report  </button>
-<button  type="button" class="btn btn-sm btn-success" [routerLink]="['/reports/categories']">
-    Edit Categories
-  </button>
+<div class="d-flex justify-content-between align-items-center">
+    <h1>Reports Overview</h1>
+    <div>
+    <button type="button" class="btn btn-sm btn-secondary ml-2 text-white margin" [routerLink]="['/reports/categories']">
+        <i class="fas fa-edit"></i> Edit Report Categories
+      </button>
+    <button type="button" class="btn btn-sm btn-success" [routerLink]="['/reports/create']">
+      <i class="fas fa-plus"></i> Create Report
+    </button>
+</div>
+  </div>
+  <hr/>
+  
+  <cmdb-table [items]="reports" [columns]="columns" [totalItems]="totalReports"
+  [loading]="loading" [pageSize]="10" (pageChange)="onPageChange($event)"
+  (sortChange)="onSortChange($event)"></cmdb-table>
+
+<ng-template #actionsTemplate let-item="item">
+<i class="fas fa-play icon-margin" (click)="runReport(item.public_id)"></i>
+<i class="far fa-edit icon-margin" (click)="editReport(item.public_id)"></i>
+<i class="far fa-trash-alt" (click)="openDeleteReportModal(item)"></i>
+</ng-template>
