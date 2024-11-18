@@ -23,7 +23,10 @@ import { CategoryFormComponent } from './components/category-form/category-form.
 const routes: Routes = [
     {
         path: 'categories',
-        component: CategoryOverviewComponent
+        component: CategoryOverviewComponent,
+        data: {
+            breadcrumb: 'Categories'
+        }
     },
     {
         path: 'categories/add',

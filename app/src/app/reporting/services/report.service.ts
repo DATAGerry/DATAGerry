@@ -79,14 +79,20 @@ export class ReportService<T = any> implements ApiServicePrefix {
     /**
      * Fetches a single report by its public ID.
      */
-    public getReportById(publicID: number): Observable<T> {
+    public getReportById(publicID: number): Observable<any> {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callGet<T>(`${this.servicePrefix}/${publicID}`, options).pipe(
-            map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => apiResponse.body.result as T)
+        return this.api.callGet<any>(`${this.servicePrefix}/${publicID}`, options).pipe(
+            map((apiResponse: HttpResponse<any>) => apiResponse.body),
+            catchError((error) => {
+                throw error;
+            })
         );
     }
+
+
+
 
 
     /**
@@ -135,11 +141,41 @@ export class ReportService<T = any> implements ApiServicePrefix {
      * Runs a report by its public ID.
      */
     public runReport(publicID: number): Observable<T> {
-        const options = this.options;
-        options.params = new HttpParams();
+        let httpParams = new HttpParams();
+        this.options.params = httpParams;
 
-        return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/run`, options).pipe(
+        return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/run`, this.options).pipe(
             map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => apiResponse.body.result as T)
+        );
+    }
+
+
+    public updateReport(public_id: number, reportData: {
+        report_category_id: number;
+        name: string;
+        type_id: number;
+        selected_fields: string[];
+        conditions: any;
+        report_query: {};
+        predefined: boolean;
+    }): Observable<any> {
+        let httpParams = new HttpParams();
+        // for (let key in reportData) {
+        //     let val: string = typeof reportData[key] === 'object' ? JSON.stringify(reportData[key]) : String(reportData[key]);
+        //     httpParams = httpParams.set(key, val);
+        // }
+        for (let key in reportData) {
+            let val: string = String(reportData[key]);
+            httpParams = httpParams.set(key, val);
+        }
+
+        this.options.params = httpParams;
+
+        return this.api.callPut<any>(`${this.servicePrefix}/${public_id}`, reportData, this.options).pipe(
+            map((apiResponse: HttpResponse<any>) => apiResponse.body),
+            catchError((error) => {
+                throw error;
+            })
         );
     }
 }

@@ -1,5 +1,5 @@
 <div class="container">
-    <h2>Create Report</h2>
+    <h2>{{isEditMode ? 'Edit Report' : 'Create Report'}}</h2>
     <hr/>
     <form [formGroup]="createReportForm" (ngSubmit)="onSubmit()">
         <!-- Name Input -->
@@ -54,12 +54,20 @@
             ></ng-select>
         </div>
 
-        <!-- Filter Builder -->
-        <app-filter-builder [fields]="fields" (conditionsChange)="onConditionsChange($event)" (filterBuilderValidation)="onFilterBuilderValidation($event)"></app-filter-builder>
-
+   <!-- Filter Builder Component -->
+   <div *ngIf="filterBuilderReady">
+    <app-filter-builder 
+      [fields]="fields"
+      [conditions]="conditions"
+      (conditionsChange)="onConditionsChange($event)"
+      (filterBuilderValidation)="onFilterBuilderValidation($event)"
+      >
+    </app-filter-builder>
+  </div>
+<div>
         <!-- Submit Button -->
         <button type="submit" class="btn btn-sm btn-success submit-report" [disabled]="createReportForm.invalid || !filterBuilderValidation">
-            Submit Report
-        </button>
+Save        </button>
+</div>
     </form>
 </div>

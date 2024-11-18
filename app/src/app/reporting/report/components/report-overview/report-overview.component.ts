@@ -17,7 +17,7 @@
 */
 import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { take, takeUntil } from 'rxjs/operators';
 import { ReportService } from 'src/app/reporting/services/report.service';
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
@@ -26,6 +26,7 @@ import { Sort, SortDirection } from 'src/app/layout/table/table.types';
 import { AddCategoryModalComponent } from 'src/app/framework/category/components/modals/add-category-modal/add-category-modal.component';
 import { DeleteConfirmationModalComponent } from '../../report-modal/delete-confirmation-modal.component';
 import { ToastService } from 'src/app/layout/toast/toast.service';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-report-overview',
@@ -50,7 +51,8 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   constructor(
     private reportService: ReportService,
     private modalService: NgbModal,
-    private toast: ToastService
+    private toast: ToastService,
+    private router: Router
   ) { }
 
 
@@ -114,9 +116,22 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
    * Runs the report with the specified ID.
    * @param id - The ID of the report to run.
    */
-  public runReport(id: number): void {
-    console.log('Run report with ID:', id);
-    // Implement run report functionality
+  public runReport(reportId: number): void {
+    console.log('Run report with ID:', reportId);
+
+    this.reportService.runReport(reportId).pipe(
+      takeUntil(this.unsubscribe$)
+    ).subscribe({
+      next: (response) => {
+        console.log('response run', response)
+      },
+
+      error: (err) => {
+        console.log('run error', err)
+      }
+    }
+
+    );
   }
 
 
@@ -125,8 +140,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
    * @param id - The ID of the report to edit.
    */
   public editReport(id: number): void {
-    console.log('Edit report with ID:', id);
-    // Implement edit report functionality
+    this.router.navigate(['/reports/edit', id]);
   }
 
 

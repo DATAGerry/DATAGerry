@@ -27,6 +27,8 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
     @Input() fields: Array<{ name: string; label: string; type?: string; options?: Array<{ name: string; value: any }> }> = [];
     @Output() conditionsChange = new EventEmitter<any>();
     @Output() filterBuilderValidation = new EventEmitter<any>();
+    @Input() conditions: any; // Receive conditions from parent component
+
 
 
     public query = { condition: 'and', rules: [] };
@@ -39,6 +41,9 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
 
     ngOnInit(): void {
         this.initializeConfig();
+        if (this.conditions) {
+            this.query = { ...this.conditions }; // Initialize with edit conditions if available
+        }
     }
 
 
