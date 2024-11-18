@@ -41,6 +41,7 @@ exporter_blueprint = APIBlueprint('exporter', __name__)
 @login_required
 def get_export_file_types():
     """TODO: document"""
+    #TODO: ERROR-FIX (try-catch block)
     return DefaultResponse(SupportedExporterExtension().convert_to()).make_response()
 
 

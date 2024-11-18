@@ -13,17 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""Response classes. These include already parsed data and additional information based on their types."""
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class BaseParserResponse:
+    """Basic response only includes the number of parsed elements"""
+
+    def __init__(self, count: int):
+        self.count: int = count
+
+
+    def output(self) -> dict:
+        """TODO: document"""
+        raise NotImplementedError

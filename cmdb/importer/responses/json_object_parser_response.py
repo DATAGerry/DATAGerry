@@ -13,17 +13,19 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+import logging
+
+from cmdb.importer.responses.object_parser_response import ObjectParserResponse
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                           JsonObjectParserResponse - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
+class JsonObjectParserResponse(ObjectParserResponse):
+    """TODO: document"""
+
+    def __init__(self, count: int, entries: list):
+        super().__init__(count=count, entries=entries)

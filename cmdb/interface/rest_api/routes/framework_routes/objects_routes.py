@@ -41,7 +41,7 @@ from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
-from cmdb.interface.rest_api.responses.messages.response_failed_message import ResponseFailedMessage
+from cmdb.importer.messages.response_failed_message import ResponseFailedMessage
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters

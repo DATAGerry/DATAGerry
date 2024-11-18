@@ -14,37 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Mapping module. The connection classes of data to the respective memory areas (e.g. fields) are created here."""
+import logging
+from typing import Iterator
 from collections.abc import Iterable
-from typing import Iterator, Any
+
+from cmdb.importer.mapper.map_entry import MapEntry
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class MapEntry:
-    """TODO: document"""
-
-    def __init__(self, name: Any, value: str, **options):
-        self.name: Any = name
-        self.value: Any = value
-        self.option: dict = options
-
-
-    def get_name(self) -> Any:
-        """TODO: document"""
-        return self.name
-
-
-    def get_value(self) -> Any:
-        """TODO: document"""
-        return self.value
-
-
-    def has_option(self, option: dict) -> bool:
-        """TODO: document"""
-        return option.items() <= self.get_option().items()
-
-
-    def get_option(self) -> dict:
-        """TODO: document"""
-        return self.option
+LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    Mapping - CLASS                                                   #

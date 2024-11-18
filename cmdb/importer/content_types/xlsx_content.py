@@ -13,35 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Basic identifiers for the identification of the corresponding importers based on the file type.
-The Content-Type entity header is used to indicate the media type of the resource.
-"""
+"""TODO: document"""
+from cmdb.importer.content_types.base_content import BaseContent
+# -------------------------------------------------------------------------------------------------------------------- #
 
-class BASEContent:
-    """Empty general content type
-    Notes:
-        Should not be used
-    """
-    ICON = ''
-    CONTENT_TYPE = ''
-    FILE_TYPE = ''
-
-#TODO: CLASS-FIX
-class JSONContent(BASEContent):
-    """Identifier for JavaScript Object Notation files"""
-    ICON = 'fas fa-file-code'
-    CONTENT_TYPE = 'application/json'
-    FILE_TYPE = 'json'
-
-#TODO: CLASS-FIX
-class CSVContent(BASEContent):
-    """Identifier for Comma-Separated Values files"""
-    ICON = 'fas fa-file-csv'
-    CONTENT_TYPE = 'text/csv'
-    FILE_TYPE = 'csv'
-
-#TODO: CLASS-FIX
-class XLSXContent(BASEContent):
+class XLSXContent(BaseContent):
     """Identifier for Excel files"""
     ICON = 'fas fa-file-excel'
     CONTENT_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

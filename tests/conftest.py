@@ -24,7 +24,7 @@ from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.users_manager import UsersManager
 
 from cmdb.security.key.generator import KeyGenerator
-from cmdb.user_management.constants import __FIXED_GROUPS__
+from cmdb.models.user_management_constants import __FIXED_GROUPS__
 from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.database import DatabaseNotExists

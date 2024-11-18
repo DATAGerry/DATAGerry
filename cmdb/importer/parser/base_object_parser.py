@@ -16,49 +16,16 @@
 """TODO: document"""
 import logging
 
-from cmdb.importer.parser_response import ParserResponse, ObjectParserResponse
+from cmdb.importer.responses.object_parser_response import ObjectParserResponse
+from cmdb.importer.parser.base_parser import BaseParser
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
-class BaseParser:
-    """TODO: document"""
-    DEFAULT_CONFIG = {}
-
-    def __new__(cls, *args, **kwargs):
-        return super(BaseParser, cls).__new__(cls)
-
-
-    def __init__(self, parser_config: dict = None):
-        _parser_config = parser_config or self.DEFAULT_CONFIG
-        self.parser_config: dict = {**self.DEFAULT_CONFIG, **_parser_config}
-
-
-    def get_config(self) -> dict:
-        """TODO: document"""
-        return self.parser_config
-
-
-    def parse(self, file) -> ParserResponse:
-        """TODO: document"""
-        raise NotImplementedError
-
-#TODO: CLASS-FIX
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               BaseObjectParser - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class BaseObjectParser(BaseParser):
-    """TODO: document"""
-
-    DEFAULT_CONFIG = {}
-
-    def __init__(self, parser_config: dict):
-        super().__init__(parser_config)
-
-
-    def parse(self, file) -> ObjectParserResponse:
-        raise NotImplementedError
-
-#TODO: CLASS-FIX
-class BaseTypeParser(BaseParser):
     """TODO: document"""
 
     DEFAULT_CONFIG = {}

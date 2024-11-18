@@ -13,17 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.content_types.base_content import BaseContent
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class CSVContent(BaseContent):
+    """Identifier for Comma-Separated Values files"""
+    ICON = 'fas fa-file-csv'
+    CONTENT_TYPE = 'text/csv'
+    FILE_TYPE = 'csv'

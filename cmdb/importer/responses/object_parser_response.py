@@ -13,21 +13,11 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Response classes. These include already parsed data and additional information based on their types."""
+"""TODO: document"""
+from cmdb.importer.responses.base_parser_response import BaseParserResponse
+# -------------------------------------------------------------------------------------------------------------------- #
 
-class ParserResponse:
-    """Basic response only includes the number of parsed elements"""
-
-    def __init__(self, count: int):
-        self.count: int = count
-
-
-    def output(self) -> dict:
-        """TODO: document"""
-        raise NotImplementedError
-
-#TODO: CLASS-FIX
-class ObjectParserResponse(ParserResponse):
+class ObjectParserResponse(BaseParserResponse):
     """Response for object imports"""
 
     def __init__(self, count: int, entries: list = None):
@@ -37,15 +27,3 @@ class ObjectParserResponse(ParserResponse):
 
     def output(self) -> dict:
         return self.__dict__
-
-#TODO: CLASS-FIX
-class TypeParserResponse(ParserResponse):
-    """Response for type imports"""
-
-    def __init__(self, count: int):
-        super().__init__(count)
-        raise NotImplementedError
-
-
-    def output(self) -> dict:
-        raise NotImplementedError

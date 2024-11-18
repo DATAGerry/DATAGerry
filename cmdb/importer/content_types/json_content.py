@@ -13,17 +13,12 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.content_types.base_content import BaseContent
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class JSONContent(BaseContent):
+    """Identifier for JavaScript Object Notation files"""
+    ICON = 'fas fa-file-code'
+    CONTENT_TYPE = 'application/json'
+    FILE_TYPE = 'json'

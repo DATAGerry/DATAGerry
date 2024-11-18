@@ -13,17 +13,17 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.messages.import_success_message import ImportSuccessMessage
+from cmdb.importer.messages.import_failed_message import ImportFailedMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class ImporterObjectResponse:
+    """Response of an bulk object import"""
+
+    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
+        self.message = message
+        self.success_imports: list[ImportSuccessMessage] = success_imports or []
+        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
+
+        super().__init__()

@@ -16,16 +16,16 @@
 """Module of basic importers"""
 from datetime import datetime, timezone
 import logging
-from typing import Optional
 
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.importer.importer_config import ObjectImporterConfig, BaseImporterConfig
-from cmdb.interface.rest_api.responses import ImporterObjectResponse
-from cmdb.interface.rest_api.responses.messages.import_failed_message import ImportFailedMessage
-from cmdb.interface.rest_api.responses.messages.import_success_message import ImportSuccessMessage
-from cmdb.importer.parser_base import BaseObjectParser
-from cmdb.importer.parser_response import ObjectParserResponse
+from cmdb.importer.importers.base_importer import BaseImporter
+from cmdb.importer.configs.object_importer_config import ObjectImporterConfig
+from cmdb.importer.responses.importer_object_response import ImporterObjectResponse
+from cmdb.importer.messages.import_failed_message import ImportFailedMessage
+from cmdb.importer.messages.import_success_message import ImportSuccessMessage
+from cmdb.importer.parser.base_object_parser import BaseObjectParser
+from cmdb.importer.responses.object_parser_response import ObjectParserResponse
 from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
@@ -36,49 +36,8 @@ from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                 BaseImporter - CLASS                                                 #
+#                                                ObjectImporter - CLASS                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
-class BaseImporter:
-    """Superclass for all importer"""
-
-    def __init__(self, file, file_type: str, config: BaseImporterConfig = None):
-        """
-        Init constructor for importer classes
-        Args:
-            file: File instance, name, content or loaded path to file
-            file_type: file type - used with content-type
-            config: importer configuration
-        """
-        self.file = file
-        self.file_type: str = file_type
-        self.config = config
-
-
-    def get_file_type(self) -> str:
-        """Get the name of the file-type"""
-        return self.file_type
-
-
-    def get_file(self):
-        """Get the loaded file"""
-        return self.file
-
-
-    def get_config(self) -> Optional[BaseImporterConfig]:
-        """Get the configuration object"""
-        return self.config
-
-
-    def has_config(self) -> bool:
-        """Check if importer has a config"""
-        return bool(self.config)
-
-
-    def start_import(self) -> ImporterObjectResponse:
-        """Starting the import process"""
-        raise NotImplementedError
-
-#TODO: CLASS-FIX
 class ObjectImporter(BaseImporter):
     """Superclass for object importers"""
 
@@ -204,19 +163,4 @@ class ObjectImporter(BaseImporter):
     def start_import(self) -> ImporterObjectResponse:
         """Starting the import process.
         Should call the _import method"""
-        raise NotImplementedError
-
-#TODO: CLASS-FIX
-class TypeImporter(BaseImporter):
-    """Superclass for type importers
-    Notes: Currently not implemented
-    """
-    DEFAULT_CONFIG = {}
-
-    def __init__(self, file, file_type, config: dict = None):
-        self.config = config
-        super().__init__(file=file, file_type=file_type, config=config)
-
-
-    def start_import(self) -> ImporterObjectResponse:
         raise NotImplementedError

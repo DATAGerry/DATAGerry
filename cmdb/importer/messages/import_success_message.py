@@ -13,17 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.messages.import_message import ImportMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class ImportSuccessMessage(ImportMessage):
+    """Message wrapper for successfully imported objects"""
+
+    def __init__(self, public_id: int, obj: dict = None):
+        """Init message
+        Args:
+            public_id: ID of the new object
+            obj (optional): cmdb object instance
+        """
+        self.public_id = public_id
+        super().__init__(obj=obj)
