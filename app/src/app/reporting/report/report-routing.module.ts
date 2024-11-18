@@ -25,7 +25,7 @@ const routes: Routes = [
         path: 'overview',
         component: ReportOverviewComponent,
         data: {
-            breadcrumb: 'Report Overview'
+            breadcrumb: 'Overview'
         }
     },
     {
@@ -35,6 +35,11 @@ const routes: Routes = [
             breadcrumb: 'Create Report'
         }
     },
+    {
+        path: 'edit/:id',  // Add edit route with report ID
+        component: CreateReportComponent,
+        data: { breadcrumb: 'Edit Report' }
+    }
 ];
 
 @NgModule({

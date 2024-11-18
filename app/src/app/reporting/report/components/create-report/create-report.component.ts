@@ -19,11 +19,11 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ReportCategoryService } from 'src/app/reporting/services/report-category.service';
 import { TypeService } from 'src/app/framework/services/type.service';
-import { ReplaySubject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { Observable, ReplaySubject, forkJoin, throwError } from 'rxjs';
+import { catchError, takeUntil, tap } from 'rxjs/operators';
 import { ReportService } from 'src/app/reporting/services/report.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 @Component({
     selector: 'app-create-report',
@@ -37,8 +37,11 @@ export class CreateReportComponent implements OnInit, OnDestroy {
     public fields = [];
     public typeLoading = false;
     private unsubscribe$ = new ReplaySubject<void>(1);
-    public conditions: any = {}; // Holds the conditions from FilterBuilderComponent
+    public conditions: any = {};
     public filterBuilderValidation: boolean = true;
+    public isEditMode = false;
+    public reportId: number;
+    public filterBuilderReady = false;
 
 
     /* --------------------------------------------------- LIFECYCLE METHODS -------------------------------------------------- */
@@ -50,8 +53,8 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         private typeService: TypeService,
         private reportService: ReportService,
         private toast: ToastService,
-        private router: Router
-
+        private router: Router,
+        private route: ActivatedRoute,
     ) { }
 
 
@@ -63,15 +66,36 @@ export class CreateReportComponent implements OnInit, OnDestroy {
             fields: [[], Validators.required]
         });
 
-        this.loadCategories();
-        this.loadTypes();
-
-        // Subscribe to type change and load corresponding fields
-        this.createReportForm.get('type').valueChanges
-            .pipe(takeUntil(this.unsubscribe$))
-            .subscribe((typeId) => {
-                this.loadFieldsForType(typeId);
+        // Load types and categories first
+        forkJoin([
+            this.loadTypes(),
+            this.loadCategories()
+        ]).subscribe(() => {
+            // After types and categories are loaded, proceed to check if we are in edit mode
+            this.route.paramMap.subscribe((params) => {
+                const id = params.get('id');
+                if (id) {
+                    this.isEditMode = true;
+                    this.reportId = +id;
+                    this.loadReportData(this.reportId);
+                }
             });
+
+            // Subscribe to type change and load corresponding fields
+            this.createReportForm.get('type').valueChanges
+                .pipe(takeUntil(this.unsubscribe$))
+                .subscribe((typeId) => {
+                    this.loadFieldsForType(typeId);
+                    // Clear selected fields when the type changes
+                    this.createReportForm.get('fields').setValue([]);
+                    this.conditions = {
+                        condition: 'and',
+                        rules: []
+                    };
+                    this.filterBuilderReady = false; // Reset filter builder to re-render with new fields
+                    setTimeout(() => (this.filterBuilderReady = true), 0);
+                });
+        });
     }
 
 
@@ -84,60 +108,97 @@ export class CreateReportComponent implements OnInit, OnDestroy {
 
 
     /**
-     * Loads the list of categories with default parameters.
-     * Updates the categories array or logs an error if loading fails.
+     * Loads the categories and updates the categories list.
+     * Returns an observable for further actions if needed.
+     * @returns An observable of the API response.
      */
-    private loadCategories(): void {
+    private loadCategories(): Observable<any> {
         const params = { limit: 0, page: 1, sort: 'public_id', order: 1 };
-        this.categoryService.getAllCategories(params).pipe(takeUntil(this.unsubscribe$)).subscribe(
-            (response) => {
+        return this.categoryService.getAllCategories(params).pipe(
+            tap((response) => {
                 this.categories = response.results;
-            },
-            (error) => {
-                this.toast.error(error?.error?.message)
-            }
+            }),
+            catchError((error) => {
+                this.toast.error(error?.error?.message);
+                return throwError(() => error);
+            })
         );
     }
 
 
     /**
-     * Loads the list of types with default parameters.
-     * Updates the types array and loading state or logs an error if loading fails.
+     * Loads the types with default parameters and updates the component state.
+     * Sets the loading state and returns an observable for further actions.
+     * @returns An observable of the API response.
      */
-    private loadTypes(): void {
+    private loadTypes(): Observable<any> {
         this.typeLoading = true;
         const params = { limit: 0, page: 1, sort: 'public_id', order: 1 };
-        this.typeService.getTypes(params).pipe(takeUntil(this.unsubscribe$)).subscribe(
-            (response) => {
+        return this.typeService.getTypes(params).pipe(
+            tap((response) => {
                 this.types = response.results;
                 this.typeLoading = false;
-            },
-            (error) => {
+            }),
+            catchError((error) => {
                 this.typeLoading = false;
-            }
+                this.toast.error(error?.error?.message);
+                return throwError(() => error);
+            })
         );
     }
 
 
     /**
-     * Loads fields for the specified type ID if fields are available.
-     * Updates the fields array based on the selected type.
+     * Loads the fields for the specified type ID and updates the filter builder readiness.
+     * Sets the fields array and filterBuilderReady flag based on the selected type.
      * @param typeId - The ID of the type to load fields for.
      */
     private loadFieldsForType(typeId: number): void {
         const selectedType = this.types.find((type) => type.public_id === typeId);
         if (selectedType && selectedType.fields && selectedType.fields.length > 0) {
             this.fields = selectedType.fields;
+            this.filterBuilderReady = true;
         } else {
             this.fields = [];
+            this.filterBuilderReady = false;
         }
     }
+
+
+    /**
+     * Loads report data for editing.
+     * @param id - The ID of the report to load.
+     */
+    private loadReportData(id: number): void {
+        this.reportService.getReportById(id).pipe(takeUntil(this.unsubscribe$)).subscribe(
+            (report) => {
+                this.createReportForm.patchValue({
+                    name: report.name,
+                    category: report.report_category_id,
+                    type: report.type_id,
+                    fields: report.selected_fields
+                });
+
+                // Load fields for the selected type
+                this.loadFieldsForType(report.type_id);
+
+                // Set conditions and make filter builder ready
+                this.conditions = report.conditions;
+                this.filterBuilderReady = true; // Ensure FilterBuilderComponent renders with conditions
+            },
+            (error) => {
+                this.toast.error('Error loading report data');
+            }
+        );
+    }
+
 
     /* --------------------------------------------------- ACTION METHODS -------------------------------------------------- */
 
 
     /**
-     * Updates the conditions based on changes from the FilterBuilderComponent.
+     * Updates the conditions based on changes from the filter builder component.
+     * @param conditions - The new conditions to set.
      */
     onConditionsChange(conditions: any): void {
         // Receive conditions from FilterBuilderComponent
@@ -149,18 +210,17 @@ export class CreateReportComponent implements OnInit, OnDestroy {
      * Updates the validation status from the filter builder.
      * @param validation - The validation result to set.
      */
-    onFilterBuilderValidation(validation: any) {
+    onFilterBuilderValidation(validation: any): void {
         this.filterBuilderValidation = validation;
     }
 
 
     /**
-     * Submits the report form if valid, sending data to the report service for creation.
+     * Handles form submission, creating or updating a report based on the form data and current mode.
      */
     onSubmit(): void {
         if (this.createReportForm.valid || !this.filterBuilderValidation) {
             const formValues = this.createReportForm.value;
-
             const reportData = {
                 report_category_id: formValues.category,
                 name: formValues.name,
@@ -171,18 +231,28 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                 predefined: false
             };
 
-            this.reportService.createReport(reportData).subscribe({
-                next: (response) => {
-                    console.log('Report created successfully:', response);
-                },
-                error: (error) => {
-                    this.toast.error(error?.error?.message)
-                },
-                complete: () => {
-                    this.router.navigate(['/reports/overview']);
-                }
-            });
+            if (this.isEditMode) {
+                this.reportService.updateReport(this.reportId, reportData).subscribe({
+                    next: () => {
+                        this.toast.success('Report updated successfully');
+                        this.router.navigate(['/reports/overview']);
+                    },
+                    error: (error) => {
+                        this.toast.error(error?.error?.message);
+                    }
+                });
 
+            } else {
+                this.reportService.createReport(reportData).subscribe({
+                    next: (response) => {
+                        this.toast.success('Report created successfully');
+                        this.router.navigate(['/reports/overview']);
+                    },
+                    error: (error) => {
+                        this.toast.error(error?.error?.message);
+                    }
+                });
+            }
         }
     }
 }
