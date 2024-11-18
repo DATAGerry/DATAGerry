@@ -19,7 +19,7 @@ import io
 import zipfile
 
 from cmdb.utils.helpers import load_class
-from cmdb.exporter.format.base_exporter_format import BaseExporterFormat
+from cmdb.framework.exporter.format.base_exporter_format import BaseExporterFormat
 from cmdb.framework.rendering.render_result import RenderResult
 # -------------------------------------------------------------------------------------------------------------------- #
 

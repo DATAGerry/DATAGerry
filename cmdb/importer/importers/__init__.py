@@ -13,18 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from cmdb.interface.rest_api.responses.messages.import_message import ImportMessage
-# -------------------------------------------------------------------------------------------------------------------- #
-
-class ImportSuccessMessage(ImportMessage):
-    """Message wrapper for successfully imported objects"""
-
-    def __init__(self, public_id: int, obj: dict = None):
-        """Init message
-        Args:
-            public_id: ID of the new object
-            obj (optional): cmdb object instance
-        """
-        self.public_id = public_id
-        super().__init__(obj=obj)

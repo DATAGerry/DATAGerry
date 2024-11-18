@@ -26,7 +26,7 @@ from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
-from cmdb.user_management.constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
+from cmdb.models.user_management_constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 
 from cmdb.errors.database import ServerTimeoutError
 from cmdb.errors.setup import CollectionInitError

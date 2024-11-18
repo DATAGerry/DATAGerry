@@ -30,16 +30,19 @@ from cmdb.manager.logs_manager import LogsManager
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
-from cmdb.importer.importer_config import ObjectImporterConfig
-from cmdb.importer.parser_base import BaseObjectParser
-from cmdb.importer.importer_helper import load_parser_class,\
-                                          load_importer_class,\
-                                          load_importer_config_class,\
-                                          __OBJECT_IMPORTER__,\
-                                          __OBJECT_PARSER__, \
-                                          __OBJECT_IMPORTER_CONFIG__
+from cmdb.importer.configs.object_importer_config import ObjectImporterConfig
+from cmdb.importer.parser.base_object_parser import BaseObjectParser
+from cmdb.importer.helper.importer_helper import (
+    load_parser_class,
+    load_importer_class,
+    load_importer_config_class,
+    __OBJECT_IMPORTER__,
+    __OBJECT_PARSER__,
+    __OBJECT_IMPORTER_CONFIG__,
+)
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
-from cmdb.interface.rest_api.responses import DefaultResponse, ImporterObjectResponse
+from cmdb.interface.rest_api.responses import DefaultResponse
+from cmdb.importer.responses.importer_object_response import ImporterObjectResponse
 from cmdb.interface.route_utils import insert_request_user,\
                                        login_required,\
                                        right_required

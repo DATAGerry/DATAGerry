@@ -13,17 +13,16 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""Basic identifiers for the identification of the corresponding importers based on the file type.
+The Content-Type entity header is used to indicate the media type of the resource.
+"""
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class BaseContent:
+    """Empty general content type
+    Notes:
+        Should not be used
+    """
+    ICON = ''
+    CONTENT_TYPE = ''
+    FILE_TYPE = ''

@@ -13,17 +13,18 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.messages.import_message import ImportMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class ImportFailedMessage(ImportMessage):
+    """Message wrapper for failed imported objects"""
+
+    def __init__(self, error_message: str, obj: dict = None):
+        """Init message
+        Args:
+            error_message: reason why it failed - exception error or something
+            obj (optional): failed dict
+        """
+        self.error_message = error_message
+        super().__init__(obj=obj)

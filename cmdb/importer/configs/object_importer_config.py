@@ -14,26 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.importer.mapper import Mapping
+from cmdb.importer.configs.base_importer_config import BaseImporterConfig
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class BaseImporterConfig:
-    """TODO: document"""
-
-    DEFAULT_MAPPING: Mapping = Mapping()
-    MANUALLY_MAPPING: bool = True
-
-    def __init__(self, mapping: list = None):
-        if mapping:
-            mapping = Mapping.generate_mapping_from_list(mapping)
-        self.mapping: Mapping = mapping or self.DEFAULT_MAPPING
-
-
-    def get_mapping(self) -> Mapping:
-        """TODO: document"""
-        return self.mapping
-
-#TODO: CLASS-FIX
 class ObjectImporterConfig(BaseImporterConfig):
     """TODO: document"""
 

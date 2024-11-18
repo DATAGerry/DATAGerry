@@ -35,8 +35,10 @@ class SupportedExporterExtension:
             extensions: List of export extension
         """
         arguments = extensions if extensions else []
-        self.extensions = [*["CsvExportFormat", "JsonExportFormat", "XlsxExportFormat", "XmlExportFormat"], *arguments]
-
+        self.extensions = [*["CsvExportFormat",
+                             "JsonExportFormat",
+                             "XlsxExportFormat",
+                             "XmlExportFormat"], *arguments]
 
     def get_extensions(self):
         """Get list of supported export extension"""
@@ -48,7 +50,8 @@ class SupportedExporterExtension:
         extension_list = []
 
         for type_element in self.get_extensions():
-            type_element_class = load_class('cmdb.exporter.exporter_base.' + type_element)
+            type_element_class = load_class('cmdb.framework.exporter.format.' + type_element)
+
             extension_list.append({
                 'extension': type_element,
                 'label': type_element_class.LABEL,

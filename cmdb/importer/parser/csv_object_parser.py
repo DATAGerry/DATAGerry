@@ -15,14 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import csv
-import json
 import logging
-from openpyxl import load_workbook
 
 from cmdb.utils.cast import auto_cast
-from cmdb.importer.content_types import JSONContent, CSVContent, XLSXContent
-from cmdb.importer.parser_base import BaseObjectParser
-from cmdb.importer.parser_response import ObjectParserResponse
+from cmdb.importer.content_types import CSVContent
+from cmdb.importer.parser.base_object_parser import BaseObjectParser
+from cmdb.importer.responses.csv_object_parser_response import CsvObjectParserResponse
 
 from cmdb.errors.importer import ParserRuntimeError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -30,55 +28,8 @@ from cmdb.errors.importer import ParserRuntimeError
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                           JsonObjectParserResponse - CLASS                                           #
+#                                                CsvObjectParser - CLASS                                               #
 # -------------------------------------------------------------------------------------------------------------------- #
-class JsonObjectParserResponse(ObjectParserResponse):
-    """TODO: document"""
-
-    def __init__(self, count: int, entries: list):
-        super().__init__(count=count, entries=entries)
-
-#TODO: CLASS-FIX
-class JsonObjectParser(BaseObjectParser, JSONContent):
-    """TODO: document"""
-
-    DEFAULT_CONFIG = {
-        'indent': 2,
-        'encoding': 'UTF-8'
-    }
-
-    def __init__(self, parser_config: dict = None):
-        super().__init__(parser_config)
-
-
-    def parse(self, file) -> JsonObjectParserResponse:
-        run_config = self.get_config()
-
-        with open(file, 'r', encoding=run_config.get('encoding')) as json_file:
-            parsed = json.load(json_file)
-
-        return JsonObjectParserResponse(count=len(parsed), entries=parsed)
-
-#TODO: CLASS-FIX
-class CsvObjectParserResponse(ObjectParserResponse):
-    """TODO: document"""
-
-    def __init__(self, count: int, entries: list, entry_length: int, header: dict = None):
-        self.entry_length: int = entry_length
-        self.header: dict = header or {}
-        super().__init__(count=count, entries=entries)
-
-
-    def get_entry_length(self) -> int:
-        """TODO: document"""
-        return self.entry_length
-
-
-    def get_header_list(self) -> dict:
-        """TODO: document"""
-        return self.header
-
-#TODO: CLASS-FIX
 class CsvObjectParser(BaseObjectParser, CSVContent):
     """TODO: document"""
 
@@ -140,52 +91,5 @@ class CsvObjectParser(BaseObjectParser, CSVContent):
         except Exception as err:
             LOGGER.error(str(err))
             raise ParserRuntimeError(f"[{self.__class__.__name__}]: An error occured: {str(err)}") from err
+
         return CsvObjectParserResponse(**parsed)
-
-#TODO: CLASS-FIX
-class ExcelObjectParserResponse(ObjectParserResponse):
-    """TODO: document"""
-
-    def __init__(self, count: int, entries: list, entry_length: int, header: dict = None):
-        self.entry_length: int = entry_length
-        self.header: dict = header or {}
-        super().__init__(count=count, entries=entries)
-
-
-    def get_entry_length(self) -> int:
-        """TODO: document"""
-        return self.entry_length
-
-
-    def get_header_list(self) -> dict:
-        """TODO: document"""
-        return self.header
-
-#TODO: CLASS-FIX
-class ExcelObjectParser(BaseObjectParser, XLSXContent):
-    """TODO: document"""
-    DEFAULT_CONFIG = {
-        'sheet_name': 'Sheet1',
-        'header': True
-    }
-
-    def __init__(self, parser_config: dict = None):
-        super().__init__(parser_config)
-
-
-    def parse(self, file) -> ExcelObjectParserResponse:
-
-        run_config = self.get_config()
-        try:
-            working_sheet = run_config['sheet_name']
-        except (IndexError, ValueError, KeyError) as err:
-            raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
-
-        wb = load_workbook(file)
-
-        try:
-            wb[working_sheet]
-        except KeyError as err:
-            raise ParserRuntimeError(f"[ExcelObjectParser] An error occured: {str(err)}") from err
-
-        return ExcelObjectParserResponse(0, [], 0)

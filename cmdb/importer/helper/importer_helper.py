@@ -14,12 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.importer.parser_object import CsvObjectParser, JsonObjectParser
-from cmdb.importer.importer_object import JsonObjectImporter,\
-                                          CsvObjectImporter,\
-                                          JsonObjectImporterConfig, \
-                                          CsvObjectImporterConfig
-
+from cmdb.importer.parser.csv_object_parser import CsvObjectParser
+from cmdb.importer.parser.json_object_parser import JsonObjectParser
+from cmdb.importer.importers.csv_object_importer import CsvObjectImporter
+from cmdb.importer.configs.csv_object_importer_config import CsvObjectImporterConfig
+from cmdb.importer.importers.json_object_importer import JsonObjectImporter
+from cmdb.importer.configs.json_object_importer_config import JsonObjectImporterConfig
 from cmdb.errors.importer import ImporterLoadError, ParserLoadError
 # -------------------------------------------------------------------------------------------------------------------- #
 

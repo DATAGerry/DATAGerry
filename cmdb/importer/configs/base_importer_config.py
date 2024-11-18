@@ -13,17 +13,22 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""TODO: document"""
+from cmdb.importer.mapper.mapping import Mapping
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class BaseImporterConfig:
+    """TODO: document"""
+
+    DEFAULT_MAPPING: Mapping = Mapping()
+    MANUALLY_MAPPING: bool = True
+
+    def __init__(self, mapping: list = None):
+        if mapping:
+            mapping = Mapping.generate_mapping_from_list(mapping)
+        self.mapping: Mapping = mapping or self.DEFAULT_MAPPING
+
+
+    def get_mapping(self) -> Mapping:
+        """TODO: document"""
+        return self.mapping

@@ -19,7 +19,7 @@ from werkzeug.wrappers import Response
 
 from cmdb.interface.rest_api.responses.base_api_response import BaseAPIResponse
 from cmdb.interface.rest_api.responses.helpers.operation_type_enum import OperationType
-from cmdb.interface.rest_api.responses.messages.response_failed_message import ResponseFailedMessage
+from cmdb.importer.messages.response_failed_message import ResponseFailedMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

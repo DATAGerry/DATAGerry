@@ -13,17 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from cmdb.interface.rest_api.responses.messages.import_success_message import ImportSuccessMessage
-from cmdb.interface.rest_api.responses.messages.import_failed_message import ImportFailedMessage
+from cmdb.importer.content_types.csv_content import CSVContent
+from cmdb.importer.content_types.json_content import JSONContent
+from cmdb.importer.content_types.xlsx_content import XLSXContent
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ImporterObjectResponse:
-    """Response of an bulk object import"""
-
-    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
-        self.message = message
-        self.success_imports: list[ImportSuccessMessage] = success_imports or []
-        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
-
-        super().__init__()
+__all__ = [
+    'CSVContent',
+    'JSONContent',
+    'XLSXContent',
+]

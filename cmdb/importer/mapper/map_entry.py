@@ -13,17 +13,34 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-from .csv_export_format import CsvExportFormat
-from .json_export_format import JsonExportFormat
-from .xlsx_export_format import XlsxExportFormat
-from .xml_export_format import XmlExportFormat
-from .zip_export_format import ZipExportFormat
+"""Mapping module. The connection classes of data to the respective memory areas (e.g. fields) are created here."""
+from typing import Any
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__ = [
-    'CsvExportFormat',
-    'JsonExportFormat',
-    'XlsxExportFormat',
-    'XmlExportFormat',
-    'ZipExportFormat',
-]
+class MapEntry:
+    """TODO: document"""
+
+    def __init__(self, name: Any, value: str, **options):
+        self.name: Any = name
+        self.value: Any = value
+        self.option: dict = options
+
+
+    def get_name(self) -> Any:
+        """TODO: document"""
+        return self.name
+
+
+    def get_value(self) -> Any:
+        """TODO: document"""
+        return self.value
+
+
+    def has_option(self, option: dict) -> bool:
+        """TODO: document"""
+        return option.items() <= self.get_option().items()
+
+
+    def get_option(self) -> dict:
+        """TODO: document"""
+        return self.option
