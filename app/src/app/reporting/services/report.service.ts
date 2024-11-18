@@ -17,7 +17,7 @@
 */
 import { Injectable } from '@angular/core';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 
 import { ApiCallService, ApiServicePrefix, resp } from '../../services/api-call.service';
@@ -25,7 +25,8 @@ import {
     APIGetMultiResponse,
     APIGetSingleResponse,
     APIInsertSingleResponse,
-    APIDeleteSingleResponse
+    APIDeleteSingleResponse,
+    APIUpdateSingleResponse
 } from '../../services/models/api-response';
 import { CollectionParameters } from '../../services/models/api-parameter';
 
@@ -124,6 +125,8 @@ export class ReportService<T = any> implements ApiServicePrefix {
     }
 
 
+
+
     /**
      * Deletes a report by its public ID.
      */
@@ -151,6 +154,7 @@ export class ReportService<T = any> implements ApiServicePrefix {
 
 
     public updateReport(public_id: number, reportData: {
+        public_id: number
         report_category_id: number;
         name: string;
         type_id: number;
@@ -160,19 +164,22 @@ export class ReportService<T = any> implements ApiServicePrefix {
         predefined: boolean;
     }): Observable<any> {
         let httpParams = new HttpParams();
-        // for (let key in reportData) {
-        //     let val: string = typeof reportData[key] === 'object' ? JSON.stringify(reportData[key]) : String(reportData[key]);
-        //     httpParams = httpParams.set(key, val);
-        // }
+
+        console.log('report')
         for (let key in reportData) {
-            let val: string = String(reportData[key]);
+            let val: string = typeof reportData[key] === 'object' ? JSON.stringify(reportData[key]) : String(reportData[key]);
             httpParams = httpParams.set(key, val);
         }
+
+        // for (let key in reportData) {
+        //     let val: string = String(reportData[key]);
+        //     httpParams = httpParams.set(key, val);
+        // }
 
         this.options.params = httpParams;
 
         return this.api.callPut<any>(`${this.servicePrefix}/${public_id}`, reportData, this.options).pipe(
-            map((apiResponse: HttpResponse<any>) => apiResponse.body),
+            map((apiResponse: HttpResponse<APIUpdateSingleResponse<T>>) => apiResponse.body.result as T),
             catchError((error) => {
                 throw error;
             })

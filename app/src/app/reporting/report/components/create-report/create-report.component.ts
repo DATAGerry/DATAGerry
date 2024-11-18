@@ -222,6 +222,7 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         if (this.createReportForm.valid || !this.filterBuilderValidation) {
             const formValues = this.createReportForm.value;
             const reportData = {
+                public_id: this.reportId,
                 report_category_id: formValues.category,
                 name: formValues.name,
                 type_id: formValues.type,
