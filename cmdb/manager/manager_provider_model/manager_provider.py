@@ -35,6 +35,7 @@ from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.manager.report_categories_manager import ReportCategoriesManager
 from cmdb.manager.reports_manager import ReportsManager
+from cmdb.manager.webhooks_manager import WebhooksManager
 
 from cmdb.models.user_model.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -100,6 +101,7 @@ class ManagerProvider:
             ManagerType.SECURITY_MANAGER: SecurityManager,
             ManagerType.REPORT_CATEGORIES_MANAGER: ReportCategoriesManager,
             ManagerType.REPORTS_MANAGER: ReportsManager,
+            ManagerType.WEBHOOKS_MANAGER: WebhooksManager,
         }
 
         return manager_classes.get(manager_type)

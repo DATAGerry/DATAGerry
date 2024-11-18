@@ -51,6 +51,7 @@ class CheckRoutine:
     This class holds checks for the database check routines
     """
 
+    #TODO: CLASS-FIX
     class CheckStatus(Enum):
         """
         Enumeration of the status options for checks

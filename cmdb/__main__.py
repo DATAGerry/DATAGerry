@@ -29,9 +29,9 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 import cmdb
 from cmdb import __title__
-from cmdb.check_routine import CheckRoutine
-from cmdb.update_routine import UpdateRoutine
-from cmdb.setup_routine import SetupRoutine
+from cmdb.startup_routines.check_routine import CheckRoutine
+from cmdb.startup_routines.update_routine import UpdateRoutine
+from cmdb.startup_routines.setup_routine import SetupRoutine
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.system_config import SystemConfigReader
 import cmdb.process_management.process_manager

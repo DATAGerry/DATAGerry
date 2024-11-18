@@ -219,8 +219,11 @@ def update_section_template(params: dict, request_user: UserModel):
         return abort(400, f"Could not update SectionTemplate with ID: {params['public_id']}!")
     except NoDocumentFound:
         return abort(404, "Section template not found!")
+    except Exception as err:
+        LOGGER.debug("[update_section_template] Exception: %s, Type: %s", err, type(err))
+        return abort(404, "Unexcepted error occured during the update of the SectionTemplate!")
 
-    api_response = UpdateSingleResponse(result)
+    api_response = UpdateSingleResponse(result.acknowledged)
 
     return api_response.make_response()
 

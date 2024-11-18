@@ -36,3 +36,4 @@ class ManagerType(Enum):
     SECURITY_MANAGER = 'SecurityManager'
     REPORT_CATEGORIES_MANAGER = 'ReportCategoriesManager'
     REPORTS_MANAGER = 'ReportsManager'
+    WEBHOOKS_MANAGER = 'WebhooksManager'
