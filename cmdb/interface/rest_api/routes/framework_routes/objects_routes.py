@@ -408,9 +408,9 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
 
 
 @objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
-@objects_blueprint.parse_collection_parameters(view='native')
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
