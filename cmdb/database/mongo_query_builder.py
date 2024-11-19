@@ -57,8 +57,8 @@ class MongoDBQueryBuilder:
 
 
         possible_conditions = {
-            "and": {"$and": [{"$and": children}, {"type_id": self.type_id}]},
-            "or": {"$and": [{"$or": children}, {"type_id": self.type_id}]},
+            "and": {'$and': [{'$and': children}, {"type_id": self.type_id}]},
+            "or": {'$and': [{'$or': children}, {"type_id": self.type_id}]},
         }
 
         return possible_conditions[condition]
@@ -67,18 +67,18 @@ class MongoDBQueryBuilder:
     def __build_rule(self, field: str, operator: str, value: Union[int, str, list[str]] = None):
         """TODO: document"""
         possible_operators = {
-            "=": {field: {"$eq": value}},
-            "!=": {field: {"$ne": value}},
-            "<=": {field: {"$lte": value}},
-            ">=": {field: {"$gte": value}},
-            "<": {field: {"$lt": value}},
-            ">": {field: {"$gt": value}},
-            "in": {field: {"$in": value}},
-            "not in": {field: {"$nin": value}},
-            "contains":{field: {"$regex": value}},
-            "like": {field: "/"+str(value)+"/"},
-            "is null": {field : None},
-            "is not null": {"$ne": None},
+            "=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$eq": value}}]},
+            "!=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$ne": value}}]},
+            "<=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$lte": value}}]},
+            ">=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$gte": value}}]},
+            "<": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$lt": value}}]},
+            ">": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$gt": value}}]},
+            "in": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$in": value}}]},
+            "not in": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$nin": value}}]},
+            "contains": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$regex": value}}]},
+            "like": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value': "/"+str(value)+"/"}]},
+            "is null": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value': None}]},
+            "is not null": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$ne": None}}]},
         }
 
         return possible_operators[operator]
