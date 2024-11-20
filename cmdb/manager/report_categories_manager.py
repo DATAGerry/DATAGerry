@@ -116,7 +116,7 @@ class ReportCategoriesManager(BaseManager):
             ManagerIterationError: Raised when something goes wrong during the aggregate part
             ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
         Returns:
-            IterationResult[CmdbSectionTemplate]: Result which matches the Builderparameters
+            IterationResult[CmdbReportCategory]: Result which matches the Builderparameters
         """
         try:
             aggregation_result, total = self.iterate_query(builder_params)

@@ -65,13 +65,13 @@ class WebhooksManager(BaseManager):
             int: public_id of the newly created CmdbWebhook
         """
         try:
-            new_report_category = CmdbWebhook(**data)
+            new_webhook = CmdbWebhook(**data)
         except Exception as err:
             #TODO: ERROR-FIX
             raise ManagerInsertError(err) from err
 
         try:
-            ack = self.insert(new_report_category.__dict__)
+            ack = self.insert(new_webhook.__dict__)
             #TODO: ERROR-FIX
         except Exception as err:
             raise ManagerInsertError(err) from err
@@ -105,6 +105,7 @@ class WebhooksManager(BaseManager):
         #TODO: ERROR-FIX
         raise ManagerGetError(f'Webhook with ID: {public_id} not found!')
 
+
     def iterate(self, builder_params: BuilderParameters) -> IterationResult[CmdbWebhook]:
         """
         Performs an aggregation on the database
@@ -116,7 +117,7 @@ class WebhooksManager(BaseManager):
             ManagerIterationError: Raised when something goes wrong during the aggregate part
             ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
         Returns:
-            IterationResult[CmdbSectionTemplate]: Result which matches the Builderparameters
+            IterationResult[CmdbWebhook]: Result which matches the Builderparameters
         """
         try:
             aggregation_result, total = self.iterate_query(builder_params)
