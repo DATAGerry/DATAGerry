@@ -515,21 +515,24 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
                                            order=1)
 
         objects: list[CmdbObject] = objects_manager.iterate(builder_params, request_user).results
+
+        type_fields = sorted([field.get('name') for field in type_instance.fields])
+        unstructured: list[dict] = []
+
+        for object_ in objects:
+            object_fields = [field.get('name') for field in object_.fields]
+            if sorted(object_fields) != type_fields:
+                unstructured.append(object_.__dict__)
+
+        api_response = GetListResponse(unstructured, body=request.method == 'HEAD')
+
+        return api_response.make_response()
     except ManagerGetError:
         #TODO: ERROR-FIX
-        return abort(400)
-
-    type_fields = sorted([field.get('name') for field in type_instance.fields])
-    unstructured: list[dict] = []
-
-    for object_ in objects:
-        object_fields = [field.get('name') for field in object_.fields]
-        if sorted(object_fields) != type_fields:
-            unstructured.append(object_.__dict__)
-
-    api_response = GetListResponse(unstructured, body=request.method == 'HEAD')
-
-    return api_response.make_response()
+        return abort(400, "Could not retrive objects!")
+    except Exception as err:
+        LOGGER.debug("Clean GET Exception: %s, Type: %s", err, type(err))
+        return abort(500, "Clean could not be retrieved!")
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
@@ -792,13 +795,17 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                 objects_manager.update_many_objects(query={'public_id': obj.public_id},
                                                     update={'fields': {"name": name, "value": value}},
                                                     add_to_set=True)
+                
+        api_response = UpdateMultiResponse([])
+
+        return api_response.make_response()
+
     except ManagerUpdateError as err:
         LOGGER.debug("[update_unstructured_objects] ManagerUpdateError: %s", err.message)
         return abort(400, err.message)
-
-    api_response = UpdateMultiResponse([])
-
-    return api_response.make_response()
+    except Exception as err:
+        LOGGER.debug("Clean PUT Exception: %s, Type: %s", err, type(err))
+        return abort(500, "Could not clean objects!")
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 

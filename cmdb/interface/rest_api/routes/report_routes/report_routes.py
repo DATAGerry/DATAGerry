@@ -29,6 +29,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report import CmdbReport
+from cmdb.models.reports_model.mds_mode_enum import MdsMode
 from cmdb.interface.blueprint import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
@@ -70,6 +71,8 @@ def create_report(params: dict, request_user: UserModel):
         params['report_category_id'] = int(params['report_category_id'])
         params['type_id'] = int(params['type_id'])
         params['predefined'] = params['predefined'] in ["True", "true"]
+        params['mds_mode'] = params['mds_mode'] if params['mds_mode'] in [MdsMode.ROWS,
+                                                                          MdsMode.COLUMNS] else MdsMode.ROWS
         params['conditions'] = literal_eval(params['conditions'])
         params['selected_fields'] = literal_eval(params['selected_fields'])
         params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'], params['type_id']).build())}
@@ -124,6 +127,10 @@ def get_reports(params: CollectionParameters, request_user: UserModel):
     Returns:
         (GetMultiResponse): All CmdbReports considering the params
     """
+    test = MdsMode.ROWS
+    test2 = MdsMode.COLUMNS
+    LOGGER.debug(f"rows: {test}, columns: {test2}")
+
     reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
 
     try:
@@ -199,6 +206,8 @@ def update_report(params: dict, request_user: UserModel):
         params['predefined'] = params['predefined'] in ["True", "true"]
         params['conditions'] = literal_eval(params['conditions'])
         params['selected_fields'] = literal_eval(params['selected_fields'])
+        params['mds_mode'] = params['mds_mode'] if params['mds_mode'] in [MdsMode.ROWS,
+                                                                          MdsMode.COLUMNS] else MdsMode.ROWS
 
         current_report = reports_manager.get_report(params['public_id'])
 

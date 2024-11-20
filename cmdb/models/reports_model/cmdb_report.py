@@ -20,6 +20,7 @@ a report in Datagarry
 import logging
 
 from cmdb.models.cmdb_dao import CmdbDAO
+from cmdb.models.reports_model.mds_mode_enum import MdsMode
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -44,11 +45,12 @@ class CmdbReport(CmdbDAO):
     REQUIRED_INIT_KEYS = [
         'report_category_id',
         'name',
-        'predefined',
         'type_id',
         'selected_fields',
         'conditions',
         'report_query',
+        'predefined',
+        'mds_mode',
     ]
 
     SCHEMA: dict = {
@@ -81,6 +83,9 @@ class CmdbReport(CmdbDAO):
             'type': 'boolean',
             'default': False
         },
+        'mds_mode': {
+            'type': 'string',
+        },
     }
 
 # ---------------------------------------------------- CONSTRUCTOR --------------------------------------------------- #
@@ -94,6 +99,7 @@ class CmdbReport(CmdbDAO):
             conditions: dict,
             report_query: dict,
             predefined: bool = False,
+            mds_mode: str = MdsMode.ROWS,
             **kwargs):
         """TODO: document"""
         self.report_category_id = report_category_id
@@ -103,6 +109,7 @@ class CmdbReport(CmdbDAO):
         self.conditions = conditions
         self.report_query = report_query
         self.predefined = predefined
+        self.mds_mode = mds_mode
 
         super().__init__(**kwargs)
 
@@ -114,14 +121,15 @@ class CmdbReport(CmdbDAO):
         Convert data to instance of CmdbReport
         """
         return cls(
-            public_id=data.get('public_id'),
-            report_category_id=data.get('report_category_id'),
-            name=data.get('name'),
-            type_id=data.get('type_id'),
-            selected_fields=data.get('selected_fields'),
-            conditions=data.get('conditions'),
-            report_query=data.get('report_query'),
-            predefined=data.get('predefined'),
+            public_id = data.get('public_id'),
+            report_category_id = data.get('report_category_id'),
+            name = data.get('name'),
+            type_id = data.get('type_id'),
+            selected_fields = data.get('selected_fields'),
+            conditions = data.get('conditions'),
+            report_query = data.get('report_query'),
+            mds_mode = data.get('mds_mode'),
+            predefined = data.get('predefined'),
         )
 
 
@@ -137,4 +145,5 @@ class CmdbReport(CmdbDAO):
             'conditions': instance.conditions,
             'report_query': instance.report_query,
             'predefined': instance.predefined,
+            'mds_mode': instance.mds_mode,
         }

@@ -17,8 +17,7 @@
 from enum import Enum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class WebhookEventType(str, Enum):
-    """Types of Events"""
-    CREATE = 'CREATE'
-    UPDATE = 'UPDATE'
-    DELETE = 'DELETE'
+class MdsMode(str, Enum):
+    """MDS modes"""
+    ROWS = 'ROWS'
+    COLUMNS = 'COLUMNS'
