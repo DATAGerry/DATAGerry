@@ -252,11 +252,11 @@ def delete_report(public_id: int, request_user: UserModel):
         ack: bool = reports_manager.delete({'public_id':public_id})
     except ManagerGetError as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[delete_report_category] ManagerGetError: %s", err.message)
+        LOGGER.debug("[delete_report] ManagerGetError: %s", err.message)
         return abort(400, f"Could not retrieve Report with ID: {public_id}!")
     except ManagerDeleteError as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[delete_report_category] ManagerDeleteError: %s", err)
+        LOGGER.debug("[delete_report] ManagerDeleteError: %s", err)
         return abort(400, f"Could not delete Report with ID: {public_id}!")
 
     api_response = DefaultResponse(ack)

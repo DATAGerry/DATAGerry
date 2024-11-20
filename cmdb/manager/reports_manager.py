@@ -86,7 +86,7 @@ class ReportsManager(BaseManager):
         Args:
             public_id (int): public_id of the CmdbReport which should be retrieved
         Raises:
-            ManagerGetError: Raised if the CmdbReport could not ne retrieved
+            ManagerGetError: Raised if the CmdbReport could not be retrieved
         Returns:
             CmdbReport: The requested CmdbReport if it exists, else None
         """
