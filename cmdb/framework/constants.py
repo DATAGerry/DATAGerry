@@ -24,14 +24,15 @@ the elements for the database.
 from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.reports_model.cmdb_report import CmdbReport
-from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.type_model.type import TypeModel
 from cmdb.models.category_model.category import CategoryModel
 from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
 from cmdb.models.log_model.cmdb_log import CmdbLog
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.models.webhook_model.cmdb_webhook_model import CmdbWebhook
 # -------------------------------------------------------------------------------------------------------------------- #
 
 CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
@@ -46,5 +47,6 @@ __COLLECTIONS__ = [
     CmdbLocation,
     CmdbSectionTemplate,
     CmdbReportCategory,
-    CmdbReport
+    CmdbReport,
+    CmdbWebhook,
 ]

@@ -14,15 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-This module contains the implementation of the ReportsManager
+This module contains the implementation of the WebhooksEventManager
 """
 import logging
 
-from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
 
-from cmdb.models.reports_model.cmdb_report import CmdbReport
+from cmdb.models.webhook_model.cmdb_webhook_event_model import CmdbWebhookEvent
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
@@ -31,11 +31,11 @@ from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIter
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                            ReportCategoriesManager - CLASS                                           #
+#                                                WebhooksManager - CLASS                                               #
 # -------------------------------------------------------------------------------------------------------------------- #
-class ReportsManager(BaseManager):
+class WebhooksEventManager(BaseManager):
     """
-    The ReportsManager handles the interaction between the Reports-API and the database
+    The WebhooksEventManager handles the interaction between the Webhooks-API and the database
     Extends: BaseManager
     """
 
@@ -49,28 +49,29 @@ class ReportsManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
-        super().__init__(CmdbReport.COLLECTION, dbm)
+        super().__init__(CmdbWebhookEvent.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-    def insert_report(self, data: dict) -> int:
+
+    def insert_webhook_event(self, data: dict) -> int:
         """
-        Inserts a single CmdbReport in the database
+        Inserts a single CmdbWebhookEvent in the database
 
         Args:
-            data (dict): Data of the new CmdbReport
+            data (dict): Data of the new CmdbWebhookEvent
 
         Returns:
-            int: public_id of the newly created CmdbReport
+            int: public_id of the newly created CmdbWebhookEvent
         """
         try:
-            new_report_category = CmdbReport(**data)
+            new_webhook_event = CmdbWebhookEvent(**data)
         except Exception as err:
             #TODO: ERROR-FIX
             raise ManagerInsertError(err) from err
 
         try:
-            ack = self.insert(new_report_category.__dict__)
+            ack = self.insert(new_webhook_event.__dict__)
             #TODO: ERROR-FIX
         except Exception as err:
             raise ManagerInsertError(err) from err
@@ -79,33 +80,33 @@ class ReportsManager(BaseManager):
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
-    def get_report(self, public_id: int) -> CmdbReport:
+    def get_webhook_event(self, public_id: int) -> CmdbWebhookEvent:
         """
-        Retrives a CmdbReport from the database with the given public_id
+        Retrives a CmdbWebhookEvent from the database with the given public_id
 
         Args:
-            public_id (int): public_id of the CmdbReport which should be retrieved
+            public_id (int): public_id of the CmdbWebhookEvent which should be retrieved
         Raises:
-            ManagerGetError: Raised if the CmdbReport could not be retrieved
+            ManagerGetError: Raised if the CmdbWebhookEvent could not be retrieved
         Returns:
-            CmdbReport: The requested CmdbReport if it exists, else None
+            CmdbWebhookEvent: The requested CmdbWebhookEvent if it exists, else None
         """
         try:
-            requested_report_category = self.get_one(public_id)
+            requested_webhook_event = self.get_one(public_id)
         except Exception as err:
             #TODO: ERROR-FIX
-            raise ManagerGetError(f"Report with ID: {public_id}! 'GET' Error: {err}") from err
+            raise ManagerGetError(f"Webhook with ID: {public_id}! 'GET' Error: {err}") from err
 
-        if requested_report_category:
-            requested_report_category = CmdbReport.from_data(requested_report_category)
+        if requested_webhook_event:
+            requested_webhook_event = CmdbWebhookEvent.from_data(requested_webhook_event)
 
-            return requested_report_category
+            return requested_webhook_event
 
         #TODO: ERROR-FIX
-        raise ManagerGetError(f'Report with ID: {public_id} not found!')
+        raise ManagerGetError(f'Webhook with ID: {public_id} not found!')
 
 
-    def iterate(self, builder_params: BuilderParameters) -> IterationResult[CmdbReport]:
+    def iterate(self, builder_params: BuilderParameters) -> IterationResult[CmdbWebhookEvent]:
         """
         Performs an aggregation on the database
 
@@ -116,7 +117,7 @@ class ReportsManager(BaseManager):
             ManagerIterationError: Raised when something goes wrong during the aggregate part
             ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
         Returns:
-            IterationResult[CmdbReport]: Result which matches the Builderparameters
+            IterationResult[CmdbWebhookEvent]: Result which matches the Builderparameters
         """
         try:
             aggregation_result, total = self.iterate_query(builder_params)
@@ -125,8 +126,8 @@ class ReportsManager(BaseManager):
             raise ManagerIterationError(err) from err
 
         try:
-            iteration_result: IterationResult[CmdbReport] = IterationResult(aggregation_result, total)
-            iteration_result.convert_to(CmdbReport)
+            iteration_result: IterationResult[CmdbWebhookEvent] = IterationResult(aggregation_result, total)
+            iteration_result.convert_to(CmdbWebhookEvent)
         except Exception as err:
             #TODO: ERROR-FIX
             raise ManagerIterationError(err) from err
