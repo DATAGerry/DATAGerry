@@ -20,7 +20,7 @@ from werkzeug.exceptions import abort
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprints import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
 debug_blueprint = RootBlueprint('debug_rest', __name__, url_prefix='/debug')

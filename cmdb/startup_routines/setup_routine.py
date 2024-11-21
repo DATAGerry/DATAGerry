@@ -16,13 +16,13 @@
 """TODO: document"""
 import logging
 from datetime import datetime, timezone
-from enum import Enum
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.users_manager import UsersManager
 
+from cmdb.startup_routines.setup_status_enum import SetupStatus
 from cmdb.models.user_model.user import UserModel
 from cmdb.utils.system_config import SystemConfigReader
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
@@ -46,18 +46,8 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 class SetupRoutine:
     """TODO: document"""
-
-    #TODO: CLASS-FIX
-    class SetupStatus(Enum):
-        """TODO: document"""
-        NOT = 0
-        RUNNING = 1
-        ERROR = 2
-        FINISHED = 3
-
-
     def __init__(self, dbm: MongoDatabaseManager):
-        self.status = SetupRoutine.SetupStatus.NOT
+        self.status = SetupStatus.NOT
         # check if settings are loaded
 
         self.setup_system_config_reader = SystemConfigReader()
@@ -65,7 +55,7 @@ class SetupRoutine:
         system_config_reader_status = self.setup_system_config_reader.status()
 
         if system_config_reader_status is not True:
-            self.status = SetupRoutine.SetupStatus.ERROR
+            self.status = SetupStatus.ERROR
             raise RuntimeError(
                 f'The system configuration files were loaded incorrectly or nothing has been loaded at all. - \
                     system config reader status: {system_config_reader_status}')
@@ -79,11 +69,11 @@ class SetupRoutine:
     def setup(self) -> SetupStatus:
         """TODO: document"""
         LOGGER.info('SETUP ROUTINE: STARTED...')
-        self.status = SetupRoutine.SetupStatus.RUNNING
+        self.status = SetupStatus.RUNNING
 
         # check database
         if not self.__check_database():
-            self.status = SetupRoutine.SetupStatus.ERROR
+            self.status = SetupStatus.ERROR
             raise RuntimeError(
                 'The database managers could not be initialized. Perhaps the database cannot be reached, \
                 or the database was already initialized.'
@@ -95,7 +85,7 @@ class SetupRoutine:
                 self.__init_database()
 
             except Exception as err:
-                self.status = SetupRoutine.SetupStatus.ERROR
+                self.status = SetupStatus.ERROR
                 raise RuntimeError(
                     f'Something went wrong during the initialization of the database. \n Error: {err}'
                 ) from err
@@ -106,7 +96,7 @@ class SetupRoutine:
             try:
                 self.init_keys()
             except Exception as err:
-                self.status = SetupRoutine.SetupStatus.ERROR
+                self.status = SetupStatus.ERROR
 
                 raise RuntimeError(
                     f'Something went wrong during the generation of the rsa keypair. \n Error: {err}'
@@ -118,7 +108,7 @@ class SetupRoutine:
                 if self.dbm.count('management.groups') < 2:
                     self.__create_user_management()
             except Exception as err:
-                self.status = SetupRoutine.SetupStatus.ERROR
+                self.status = SetupStatus.ERROR
                 raise RuntimeError(
                     f'Something went wrong during the generation of the user management. \n Error: {err}'
                 ) from err
@@ -130,12 +120,12 @@ class SetupRoutine:
                 settings_writer.write(_id='updater', data=updater_setting_instance.__dict__)
 
             except Exception as err:
-                self.status = SetupRoutine.SetupStatus.ERROR
+                self.status = SetupStatus.ERROR
                 raise RuntimeError(
                     f'Something went wrong during the generation of the updater module. \n Error: {err}'
                 ) from err
 
-        self.status = SetupRoutine.SetupStatus.FINISHED
+        self.status = SetupStatus.FINISHED
         LOGGER.info('SETUP ROUTINE: FINISHED!')
         return self.status
 

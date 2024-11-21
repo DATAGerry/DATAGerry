@@ -31,7 +31,7 @@ from cmdb.framework.results import IterationResult
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import GetMultiResponse, DefaultResponse
 from cmdb.interface.route_utils import login_required, insert_request_user, right_required
-from cmdb.interface.blueprint import RootBlueprint, APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint, RootBlueprint
 from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.docapi import DocapiGetError, DocapiInsertError, DocapiUpdateError, DocapiDeleteError

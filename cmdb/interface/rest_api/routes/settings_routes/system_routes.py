@@ -26,7 +26,7 @@ from cmdb.utils.system_config import SystemConfigReader
 from cmdb import __title__, __version__, __runtime__
 from cmdb.interface.rest_api.routes.framework_routes.setting_routes import settings_blueprint
 from cmdb.interface.route_utils import login_required, right_required, insert_request_user
-from cmdb.interface.blueprint import NestedBlueprint
+from cmdb.interface.blueprints import NestedBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.models.user_model.user import UserModel
 # -------------------------------------------------------------------------------------------------------------------- #

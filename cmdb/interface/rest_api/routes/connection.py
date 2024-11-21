@@ -21,7 +21,7 @@ from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __title__, __version__
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprints import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

@@ -22,7 +22,7 @@ from cmdb.framework.exporter.writer.base_export_writer import BaseExportWriter
 from cmdb.framework.exporter.writer.supported_exporter_extension import SupportedExporterExtension
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.route_utils import login_required, insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.models.user_model.user import UserModel
 from cmdb.utils.helpers import load_class
@@ -55,7 +55,7 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
         _config = ExporterConfig(parameters=params, options=params.optional)
         _class = 'ZipExportFormat' if params.optional.get('zip', False) in ['true'] \
             else params.optional.get('classname', 'JsonExportFormat')
-        exporter_class = load_class('cmdb.exporter.exporter_base.' + _class)()
+        exporter_class = load_class('cmdb.framework.exporter.format.' + _class)()
 
         if current_app.cloud_mode:
             current_app.database_manager.connector.set_database(request_user.database)
@@ -63,12 +63,14 @@ def export_objects(params: CollectionParameters, request_user: UserModel):
         exporter = BaseExportWriter(exporter_class, _config)
 
         exporter.from_database(current_app.database_manager, request_user, AccessControlPermission.READ)
-    except TypeNotFoundError:
+    except TypeNotFoundError as err:
+        LOGGER.debug("[export_objects] TypeNotFoundError: %s", err)
         #TODO: ERROR-FIX
-        return abort(400)
-    except ModuleNotFoundError:
+        return abort(400, "Type not found for export!")
+    except ModuleNotFoundError as err:
+        LOGGER.debug("[export_objects] ModuleNotFoundError: %s", err)
         #TODO: ERROR-FIX
-        return abort(400)
+        return abort(400, "Module not found for export!")
     except Exception as err:
         LOGGER.debug("[export_objects] Exception: %s, Type: %s", err, type(err))
         return abort(404, jsonify(message='Not Found', error='Export objects Exception'))

@@ -343,7 +343,6 @@ def init_db_routine(db_name: str):
 
 def create_new_admin_user(user_data: dict):
     """Creates a new admin user"""
-    LOGGER.debug("[create_new_admin_user] called")
     with current_app.app_context():
         current_app.database_manager.connector.set_database(user_data['database'])
         users_manager = UsersManager(current_app.database_manager)

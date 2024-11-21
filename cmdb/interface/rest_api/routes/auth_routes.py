@@ -31,7 +31,7 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.generator import TokenGenerator
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import check_user_in_mysql_db
 from cmdb.interface.route_utils import (
     insert_request_user,

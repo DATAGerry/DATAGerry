@@ -23,9 +23,8 @@ from cmdb.models.right_model.base_right import BaseRight
 from cmdb.models.right_model.constants import NAME_TO_LEVEL
 from cmdb.models.right_model.all_rights import __all__ as right_tree
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.rest_api.responses import GetMultiResponse,\
-                                              GetSingleResponse
+from cmdb.interface.blueprints import APIBlueprint
+from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleResponse
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError
 # -------------------------------------------------------------------------------------------------------------------- #

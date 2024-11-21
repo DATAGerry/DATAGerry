@@ -28,7 +28,7 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
 from cmdb.interface.route_utils import login_required, insert_request_user
-from cmdb.interface.blueprint import NestedBlueprint
+from cmdb.interface.blueprints import NestedBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
 
 from cmdb.errors.manager import ManagerGetError, ManagerInsertError

@@ -30,7 +30,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.models.reports_model.mds_mode_enum import MdsMode
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse

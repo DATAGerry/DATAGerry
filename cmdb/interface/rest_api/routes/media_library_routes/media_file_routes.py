@@ -38,17 +38,19 @@ from cmdb.interface.rest_api.routes.media_library_routes.media_file_route_utils 
     create_attachment_name,
 )
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import (
     InsertSingleResponse,
     GetMultiResponse,
     DefaultResponse,
 )
 
-from cmdb.errors.manager.media_file_manager import MediaFileManagerGetError,\
-                                                   MediaFileManagerInsertError,\
-                                                   MediaFileManagerUpdateError,\
-                                                   MediaFileManagerDeleteError
+from cmdb.errors.manager.media_file_manager import (
+    MediaFileManagerGetError,
+    MediaFileManagerInsertError,
+    MediaFileManagerUpdateError,
+    MediaFileManagerDeleteError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

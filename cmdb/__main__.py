@@ -32,6 +32,9 @@ from cmdb import __title__
 from cmdb.startup_routines.check_routine import CheckRoutine
 from cmdb.startup_routines.update_routine import UpdateRoutine
 from cmdb.startup_routines.setup_routine import SetupRoutine
+from cmdb.startup_routines.setup_status_enum import SetupStatus
+from cmdb.startup_routines.check_status_enum import CheckStatus
+from cmdb.startup_routines.update_status_enum import UpateStatus
 from cmdb.utils.logger import get_logging_conf
 from cmdb.utils.system_config import SystemConfigReader
 import cmdb.process_management.process_manager
@@ -104,7 +107,7 @@ def _start_key_routine(dbm: MongoDatabaseManager):
         setup_status = setup_routine.get_setup_status()
         LOGGER.warning('The key generation did not go through as expected - Status %s', setup_status)
 
-    if setup_status == SetupRoutine.SetupStatus.FINISHED:
+    if setup_status == SetupStatus.FINISHED:
         sys.exit(0)
     else:
         sys.exit(1)
@@ -125,7 +128,7 @@ def _start_check_routines(dbm: MongoDatabaseManager):
         LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
         check_status = check_routine.get_check_status()
 
-    if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
+    if check_status == CheckStatus.HAS_UPDATES:
         # run update
         update_routine = UpdateRoutine(dbm)
 
@@ -136,12 +139,12 @@ def _start_check_routines(dbm: MongoDatabaseManager):
             update_status = update_routine.get_updater_status()
             LOGGER.warning('The update did not go through as expected - Status %s', update_status)
 
-        if update_status == UpdateRoutine.UpateStatus.FINISHED:
-            check_status = CheckRoutine.CheckStatus.FINISHED
+        if update_status == UpateStatus.FINISHED:
+            check_status = CheckStatus.FINISHED
         else:
             sys.exit(1)
 
-    if check_status == CheckRoutine.CheckStatus.FINISHED:
+    if check_status == CheckStatus.FINISHED:
         # run setup if needed
         setup_routine = SetupRoutine(dbm)
 
@@ -152,7 +155,7 @@ def _start_check_routines(dbm: MongoDatabaseManager):
             setup_status = setup_routine.get_setup_status()
             LOGGER.warning('The setup did not go through as expected - Status %s', setup_status)
 
-        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+        if setup_status == SetupStatus.FINISHED:
             pass
         else:
             sys.exit(1)

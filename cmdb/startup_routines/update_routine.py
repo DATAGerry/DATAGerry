@@ -15,11 +15,11 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from enum import Enum
 from pymongo.errors import CollectionInvalid
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
+from cmdb.startup_routines.update_status_enum import UpateStatus
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
@@ -40,18 +40,8 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 class UpdateRoutine:
     """TODO: document"""
-
-    #TODO: CLASS-FIX
-    class UpateStatus(Enum):
-        """TODO: document"""
-        NOT = 0
-        RUNNING = 1
-        ERROR = 2
-        FINISHED = 3
-
-
     def __init__(self, dbm: MongoDatabaseManager):
-        self.status = UpdateRoutine.UpateStatus.NOT
+        self.status = UpateStatus.NOT
         # check if settings are loaded
 
         self.setup_system_config_reader = SystemConfigReader()
@@ -59,7 +49,7 @@ class UpdateRoutine:
         self.dbm = dbm
 
         if system_config_reader_status is not True:
-            self.status = UpdateRoutine.UpateStatus.ERROR
+            self.status = UpateStatus.ERROR
             raise RuntimeError(
                 f'The system configuration files were loaded incorrectly or nothing has been loaded at all. - \
                     system config reader status: {system_config_reader_status}')
@@ -91,11 +81,11 @@ class UpdateRoutine:
     def start_update(self):
         """TODO: document"""
         LOGGER.info('UPDATE ROUTINE: Update database collection')
-        self.status = UpdateRoutine.UpateStatus.RUNNING
+        self.status = UpateStatus.RUNNING
 
         # check database
         if not self.__check_database():
-            self.status = UpdateRoutine.UpateStatus.ERROR
+            self.status = UpateStatus.ERROR
             raise RuntimeError(
                 'The database managers could not be initialized. Perhaps the database cannot be reached, \
                 or the database was already initialized.'
@@ -112,7 +102,7 @@ class UpdateRoutine:
             LOGGER.info('UPDATE ROUTINE: The update is faulty because no collection was detected.')
 
         LOGGER.info('UPDATE ROUTINE: Update database collection finished.')
-        self.status = UpdateRoutine.UpateStatus.FINISHED
+        self.status = UpateStatus.FINISHED
         LOGGER.info('UPDATE ROUTINE: FINISHED!')
 
         return self.status
@@ -167,7 +157,7 @@ class UpdateRoutine:
             updater_setting_instance.run_updates(updater_settings_values.get('version'), settings_reader)
 
         except Exception as err:
-            self.status = UpdateRoutine.UpateStatus.ERROR
+            self.status = UpateStatus.ERROR
             raise RuntimeError(
                 f'Something went wrong during the generation of the updater module. \n Error: {err}'
             ) from err

@@ -17,7 +17,6 @@
 This module contains logics for database validation and setup
 """
 import logging
-from enum import Enum
 from datetime import datetime, timezone
 from pymongo.errors import OperationFailure
 
@@ -27,6 +26,7 @@ from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
+from cmdb.startup_routines.check_status_enum import CheckStatus
 from cmdb.updater.updater_module import UpdaterModule
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.location_model.cmdb_location import CmdbLocation
@@ -50,20 +50,8 @@ class CheckRoutine:
     """
     This class holds checks for the database check routines
     """
-
-    #TODO: CLASS-FIX
-    class CheckStatus(Enum):
-        """
-        Enumeration of the status options for checks
-        """
-        NOT = 0
-        RUNNING = 1
-        HAS_UPDATES = 2
-        FINISHED = 3
-
-
     def __init__(self, dbm: MongoDatabaseManager):
-        self.status: int = CheckRoutine.CheckStatus.NOT
+        self.status: int = CheckStatus.NOT
         self.dbm = dbm
 
 
@@ -80,7 +68,7 @@ class CheckRoutine:
     def checker(self):
         """TODO: document"""
         LOGGER.info('STARTING Checks...')
-        self.status = CheckRoutine.CheckStatus.FINISHED
+        self.status = CheckStatus.FINISHED
 
         try:
             # check database
@@ -90,7 +78,7 @@ class CheckRoutine:
                                 The current database collections are not valid!
                                 An update is avaiable which will be installed automatically.
                                 """)
-                    self.status = CheckRoutine.CheckStatus.HAS_UPDATES
+                    self.status = CheckStatus.HAS_UPDATES
             LOGGER.info('FINISHED Checks!')
 
             return self.status
