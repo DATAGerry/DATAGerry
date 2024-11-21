@@ -20,19 +20,24 @@ from flask import request, abort
 
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.route_utils import check_db_exists,\
-                                       init_db_routine,\
-                                       create_new_admin_user
+from cmdb.interface.route_utils import (
+    check_db_exists,
+    init_db_routine,
+    create_new_admin_user,
+    delete_database,
+)
+
+from cmdb.errors.database.database_errors import DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 setup_blueprint = APIBlueprint('setup', __name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-@setup_blueprint.route('/create', methods=['POST'])
-def setup_datagerry():
+@setup_blueprint.route('/subscriptions', methods=['POST'])
+def create_subscription():
     """
     Creates a database and the given user
 
@@ -86,7 +91,71 @@ def setup_datagerry():
         with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
             json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
     except Exception as err:
-        LOGGER.debug("[setup_datagerry] Error: %s, Type: %s", err, type(err))
+        LOGGER.debug("[create_subscription] Error: %s, Type: %s", err, type(err))
+        return abort(400, "There is an issue with the users json file!")
+
+    api_response = DefaultResponse(True)
+
+    return api_response.make_response()
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+@setup_blueprint.route('/subscriptions', methods=['GET'])
+def get_all_subscriptions():
+    """
+    Retrieves all subscriptions
+    """
+    try:
+        with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
+            users_data = json.load(users_file)
+    except Exception as err:
+        LOGGER.debug("[get_all_subscriptions] Error: %s, Type: %s", err, type(err))
+        return abort(400, "There is an issue with the users json file!")
+
+    api_response = DefaultResponse(users_data)
+
+    return api_response.make_response()
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
+
+@setup_blueprint.route('/subscriptions', methods=['DELETE'])
+def delete_subscription():
+    """
+    Deletes a subscription
+    """
+    if not request.args:
+        return abort(400, 'No request arguments provided!')
+
+    delete_data: dict = request.args.to_dict()
+    try:
+        user_email = delete_data['email']
+    except KeyError:
+        return abort(400, "Email of the user which subscription should be deleted was not provided!")
+
+    # Retrieve user_data
+    try:
+        with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
+            users_data = json.load(users_file)
+
+            if user_email not in users_data:
+                return abort(400, "A user with this email does not exist!")
+
+        user_data = users_data[user_email]
+        user_db_name = user_data['database']
+
+        #Remove database
+        delete_database(user_db_name)
+
+        #Remove user
+        del users_data[user_email]
+
+        with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:
+            json.dump(users_data, cur_users_file, ensure_ascii=False, indent=4)
+
+    except DatabaseNotExists:
+        return abort(400, f"The database with the name {user_db_name} does not exist!")
+    except Exception as err:
+        LOGGER.debug("[delete_subscription] Error: %s, Type: %s", err, type(err))
         return abort(400, "There is an issue with the users json file!")
 
     api_response = DefaultResponse(True)
