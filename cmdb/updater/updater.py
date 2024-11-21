@@ -20,7 +20,7 @@ from abc import abstractmethod
 from cmdb.manager.base_manager import BaseManager
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.types_manager import TypesManager
-from cmdb.utils.system_config import SystemConfigReader
+from cmdb.utils.system_config_reader import SystemConfigReader
 from cmdb.manager.categories_manager import CategoriesManager
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager

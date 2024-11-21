@@ -36,7 +36,7 @@ from cmdb.startup_routines.setup_status_enum import SetupStatus
 from cmdb.startup_routines.check_status_enum import CheckStatus
 from cmdb.startup_routines.update_status_enum import UpateStatus
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.system_config import SystemConfigReader
+from cmdb.utils.system_config_reader import SystemConfigReader
 import cmdb.process_management.process_manager
 
 from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
@@ -44,10 +44,12 @@ from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
+
 LOGGER = logging.getLogger(__name__)
 
 app_manager = cmdb.process_management.process_manager.ProcessManager()
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def main(args: Namespace):
     """
