@@ -25,7 +25,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.search.params import SearchParam
 from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
 from cmdb.models.user_model.user import UserModel
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user, login_required
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.security.acl.permission import AccessControlPermission

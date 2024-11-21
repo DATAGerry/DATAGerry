@@ -30,7 +30,7 @@ from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.results import IterationResult
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
     UpdateSingleResponse,

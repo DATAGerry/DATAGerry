@@ -26,7 +26,7 @@ from cmdb.settings.date.date_settings import DateSettingsDAO
 from cmdb.models.user_model.user import UserModel
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
 date_blueprint = APIBlueprint('date', __name__)

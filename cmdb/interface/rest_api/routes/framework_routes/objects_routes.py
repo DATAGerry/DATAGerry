@@ -43,8 +43,7 @@ from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.importer.messages.response_failed_message import ResponseFailedMessage
 from cmdb.interface.route_utils import insert_request_user
-from cmdb.interface.blueprint import APIBlueprint
-from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import (
     GetListResponse,
     UpdateMultiResponse,
@@ -52,13 +51,16 @@ from cmdb.interface.rest_api.responses import (
     GetMultiResponse,
     DefaultResponse,
 )
+from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerUpdateError, ManagerInsertError, ManagerIterationError
-from cmdb.errors.manager.object_manager import ObjectManagerGetError,\
-                                               ObjectManagerUpdateError,\
-                                               ObjectManagerDeleteError,\
-                                               ObjectManagerInsertError
+from cmdb.errors.manager.object_manager import (
+    ObjectManagerGetError,
+    ObjectManagerUpdateError,
+    ObjectManagerDeleteError,
+    ObjectManagerInsertError,
+)
 from cmdb.errors.render import InstanceRenderError
 # -------------------------------------------------------------------------------------------------------------------- #
 

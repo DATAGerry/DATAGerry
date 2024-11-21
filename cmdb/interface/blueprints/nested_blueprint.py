@@ -13,17 +13,25 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-Blueprint for documentation routes
-"""
-from cmdb.interface.blueprints import RootBlueprint
+"""TODO: document"""
+import logging
 # -------------------------------------------------------------------------------------------------------------------- #
 
-doc_pages = RootBlueprint("doc_pages", __name__, static_folder="static", static_url_path="")
+LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
+#                                                NestedBlueprint - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
+class NestedBlueprint:
+    """Default Blueprint class but with parent prefix route
+    """
+    def __init__(self, blueprint, url_prefix):
+        self.blueprint = blueprint
+        self.prefix = '/' + url_prefix
+        super().__init__()
 
-@doc_pages.route("/")
-def default_page():
-    """TODO: document"""
-    return doc_pages.send_static_file("index.html")
+
+    def route(self, rule, **options):
+        """TODO: document"""
+        rule = self.prefix + rule
+        return self.blueprint.route(rule, **options)

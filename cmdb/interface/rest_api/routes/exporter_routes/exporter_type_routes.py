@@ -28,7 +28,7 @@ from cmdb.manager.types_manager import TypesManager
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
 from cmdb.interface.route_utils import login_required, insert_request_user
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprints import RootBlueprint
 
 from cmdb.errors.type import TypeNotFoundError
 # -------------------------------------------------------------------------------------------------------------------- #

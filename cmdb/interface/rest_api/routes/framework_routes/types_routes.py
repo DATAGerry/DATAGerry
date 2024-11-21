@@ -32,20 +32,24 @@ from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.routes.framework_routes.type_parameters import TypeIterationParameters
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import DeleteSingleResponse,\
-                                              UpdateSingleResponse,\
-                                              InsertSingleResponse,\
-                                              GetMultiResponse,\
-                                              GetSingleResponse,\
-                                              DefaultResponse
+from cmdb.interface.rest_api.responses import (
+    DeleteSingleResponse,
+    UpdateSingleResponse,
+    InsertSingleResponse,
+    GetMultiResponse,
+    GetSingleResponse,
+    DefaultResponse,
+)
 
-from cmdb.errors.manager import ManagerGetError,\
-                                ManagerInsertError,\
-                                ManagerUpdateError,\
-                                ManagerDeleteError,\
-                                ManagerIterationError
+from cmdb.errors.manager import (
+    ManagerGetError,
+    ManagerInsertError,
+    ManagerUpdateError,
+    ManagerDeleteError,
+    ManagerIterationError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

@@ -24,7 +24,7 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.report_categories_manager import ReportCategoriesManager
 
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
@@ -32,12 +32,14 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
 from cmdb.framework.results import IterationResult
 
-from cmdb.errors.manager import ManagerInsertError,\
-                                ManagerIterationError,\
-                                ManagerGetError,\
-                                ManagerUpdateError,\
-                                ManagerDeleteError,\
-                                DisallowedActionError
+from cmdb.errors.manager import (
+    ManagerInsertError,
+    ManagerIterationError,
+    ManagerGetError,
+    ManagerUpdateError,
+    ManagerDeleteError,
+    DisallowedActionError,
+)
 from cmdb.errors.database import NoDocumentFound
 # -------------------------------------------------------------------------------------------------------------------- #
 

@@ -19,7 +19,7 @@ import logging
 from flask import request, abort
 
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import (
     check_db_exists,
     init_db_routine,

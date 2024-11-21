@@ -27,7 +27,7 @@ from cmdb.manager.webhooks_manager import WebhooksManager
 
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.webhook_model.cmdb_webhook_model import CmdbWebhook
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters

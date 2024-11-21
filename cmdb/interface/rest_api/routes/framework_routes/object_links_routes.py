@@ -26,12 +26,10 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.interface.blueprint import APIBlueprint
+from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import DeleteSingleResponse,\
-                                              InsertSingleResponse,\
-                                              GetMultiResponse
+from cmdb.interface.rest_api.responses import DeleteSingleResponse, InsertSingleResponse, GetMultiResponse
 
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager import ManagerGetError, ManagerDeleteError, ManagerInsertError, ManagerIterationError
