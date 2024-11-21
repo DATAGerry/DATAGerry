@@ -771,17 +771,24 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
             incorrect = []
             correct = []
             obj_fields = obj.get_all_fields()
+
             for t_field in type_fields:
                 name = t_field["name"]
+
                 for field in obj_fields:
                     if name == field["name"]:
                         correct.append(field["name"])
                     else:
                         incorrect.append(field["name"])
+
             removed_type_fields = [item for item in incorrect if not item in correct]
+
             for field in removed_type_fields:
-                objects_manager.update_many_objects(query={'public_id': obj.public_id},
-                                                    update={'$pull': {'fields': {"name": field}}})
+                objects_manager.update(criteria={'public_id': obj.public_id},
+                                       data={'$pull': {'fields': {"name": field}}},
+                                       add_to_set=False)
+                # objects_manager.update_many_objects(query={'public_id': obj.public_id},
+                #                                     update={'$pull': {'fields': {"name": field}}})
 
         objects_by_type = objects_manager.iterate(builder_params, request_user).results
 
@@ -789,22 +796,24 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
             for t_field in type_fields:
                 name = t_field["name"]
                 value = None
+
                 if [item for item in obj.get_all_fields() if item["name"] == name]:
                     continue
+
                 if "value" in t_field:
                     value = t_field["value"]
 
                 objects_manager.update_many_objects(query={'public_id': obj.public_id},
                                                     update={'fields': {"name": name, "value": value}},
                                                     add_to_set=True)
-                
+
         api_response = UpdateMultiResponse([])
 
         return api_response.make_response()
 
     except ManagerUpdateError as err:
         LOGGER.debug("[update_unstructured_objects] ManagerUpdateError: %s", err.message)
-        return abort(400, err.message)
+        return abort(500, "Could not update an object with new schema!")
     except Exception as err:
         LOGGER.debug("Clean PUT Exception: %s, Type: %s", err, type(err))
         return abort(500, "Could not clean objects!")

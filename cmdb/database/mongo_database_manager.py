@@ -115,7 +115,7 @@ class MongoDatabaseManager(DatabaseManager):
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def update(self, collection: str, criteria: dict, data: dict, *args, **kwargs):
+    def update(self, collection: str, criteria: dict, data: dict, add_to_set: bool = True, *args, **kwargs):
         """
         Update document inside database
 
@@ -127,7 +127,7 @@ class MongoDatabaseManager(DatabaseManager):
         Returns:
             acknowledged
         """
-        formatted_data = {'$set': data}
+        formatted_data = {'$set': data} if add_to_set else data
 
         return self.get_collection(collection).update_one(criteria, formatted_data, *args, **kwargs)
 

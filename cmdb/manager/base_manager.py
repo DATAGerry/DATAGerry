@@ -290,7 +290,7 @@ class BaseManager:
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def update(self, criteria: dict, data: dict, *args, **kwargs):
+    def update(self, criteria: dict, data: dict, add_to_set: bool = True, *args, **kwargs):
         """
         Calls MongoDB update operation
         Args:
@@ -301,7 +301,7 @@ class BaseManager:
             UpdateResult
         """
         try:
-            return self.dbm.update(self.collection, criteria, data, *args, **kwargs)
+            return self.dbm.update(self.collection, criteria, data, add_to_set, *args, **kwargs)
         except Exception as err:
             raise ManagerUpdateError(err) from err
 
