@@ -45,6 +45,7 @@ from cmdb.errors.manager import ManagerGetError
 from cmdb.errors.security import TokenValidationError
 from cmdb.errors.manager.user_manager import UserManagerInsertError, UserManagerGetError
 from cmdb.errors.database import SetDatabaseError
+from cmdb.errors.database.database_errors import DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -384,3 +385,16 @@ def retrive_user(user_data: dict):
     except Exception:
         #TODO: ERROR-FIX
         return None
+
+
+def delete_database(db_name: str):
+    """Deletes the database"""
+    try:
+        with current_app.app_context():
+            current_app.database_manager.connector.set_database(db_name)
+            users_manager = UsersManager(current_app.database_manager)
+
+            users_manager.dbm.drop_database(db_name)
+    except Exception as err:
+        LOGGER.debug("[delete_database] Exception: %s, Type:%s", err, type(err))
+        raise DatabaseNotExists(db_name) from err
