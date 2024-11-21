@@ -43,9 +43,12 @@ export class CreateReportComponent implements OnInit, OnDestroy {
     public reportId: number;
     public filterBuilderReady = false;
 
+    public mdsModeOptions = [
+        { label: 'inside the rows', value: 'ROWS' },
+        { label: 'inside the columns', value: 'COLUMNS' }
+    ];
 
     /* --------------------------------------------------- LIFECYCLE METHODS -------------------------------------------------- */
-
 
     constructor(
         private fb: FormBuilder,
@@ -57,13 +60,13 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         private route: ActivatedRoute,
     ) { }
 
-
     ngOnInit(): void {
         this.createReportForm = this.fb.group({
             name: ['', [Validators.required, Validators.minLength(3)]],
             category: [null, Validators.required],
             type: [null, Validators.required],
-            fields: [[], Validators.required]
+            fields: [[], Validators.required],
+            mds_mode: ['ROWS', Validators.required]
         });
 
         // Load types and categories first
@@ -98,14 +101,12 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         });
     }
 
-
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
 
     /* --------------------------------------------------- LOADING FROM API -------------------------------------------------- */
-
 
     /**
      * Loads the categories and updates the categories list.
@@ -124,7 +125,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
             })
         );
     }
-
 
     /**
      * Loads the types with default parameters and updates the component state.
@@ -147,7 +147,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         );
     }
 
-
     /**
      * Loads the fields for the specified type ID and updates the filter builder readiness.
      * Sets the fields array and filterBuilderReady flag based on the selected type.
@@ -164,7 +163,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         }
     }
 
-
     /**
      * Loads report data for editing.
      * @param id - The ID of the report to load.
@@ -176,7 +174,8 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                     name: report.name,
                     category: report.report_category_id,
                     type: report.type_id,
-                    fields: report.selected_fields
+                    fields: report.selected_fields,
+                    mds_mode: report.mds_mode || 'ROWS'
                 });
 
                 // Load fields for the selected type
@@ -192,9 +191,7 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         );
     }
 
-
     /* --------------------------------------------------- ACTION METHODS -------------------------------------------------- */
-
 
     /**
      * Updates the conditions based on changes from the filter builder component.
@@ -205,7 +202,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
         this.conditions = conditions;
     }
 
-
     /**
      * Updates the validation status from the filter builder.
      * @param validation - The validation result to set.
@@ -213,7 +209,6 @@ export class CreateReportComponent implements OnInit, OnDestroy {
     onFilterBuilderValidation(validation: any): void {
         this.filterBuilderValidation = validation;
     }
-
 
     /**
      * Handles form submission, creating or updating a report based on the form data and current mode.
@@ -229,7 +224,8 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                 selected_fields: formValues.fields,
                 conditions: this.conditions,
                 report_query: {}, // Empty as required by backend
-                predefined: false
+                predefined: false,
+                mds_mode: formValues.mds_mode
             };
 
             if (this.isEditMode) {
@@ -255,5 +251,9 @@ export class CreateReportComponent implements OnInit, OnDestroy {
                 });
             }
         }
+    }
+
+    goBack(): void {
+        this.router.navigate(['/reports/overview'])
     }
 }

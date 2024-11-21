@@ -54,20 +54,44 @@
             ></ng-select>
         </div>
 
-   <!-- Filter Builder Component -->
-   <div *ngIf="filterBuilderReady">
-    <app-filter-builder 
-      [fields]="fields"
-      [conditions]="conditions"
-      (conditionsChange)="onConditionsChange($event)"
-      (filterBuilderValidation)="onFilterBuilderValidation($event)"
-      >
-    </app-filter-builder>
-  </div>
-<div>
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-sm btn-success submit-report" [disabled]="createReportForm.invalid || !filterBuilderValidation">
-Save        </button>
-</div>
+        <!-- Multivalue Dropdown -->
+        <div class="form-group">
+            <label for="mds_mode">multvalue:</label>
+            <ng-select
+                [items]="mdsModeOptions"
+                bindLabel="label"
+                bindValue="value"
+                formControlName="mds_mode"
+                placeholder="Select an option"
+                [multiple]="false"
+            ></ng-select>
+        </div>
+
+        <!-- Filter Builder Component -->
+        <div *ngIf="filterBuilderReady">
+            <app-filter-builder 
+                [fields]="fields"
+                [conditions]="conditions"
+                (conditionsChange)="onConditionsChange($event)"
+                (filterBuilderValidation)="onFilterBuilderValidation($event)"
+            >
+            </app-filter-builder>
+        </div>
+
+        <div class="d-flex justify-content-between align-items-center" style="height: 50px;">
+            <div class="btn-group float-left">
+                <button class="btn btn-secondary btn-sm custom-back-button" type="button" (click)="goBack()">
+                    <i class="fas fa-arrow-left"></i> Go Back
+                </button>                       
+            </div>
+
+            <div class="btn-group float-right">
+                <button type="submit" 
+                    class="btn btn-success btn-sm submit-report d-flex align-items-center" 
+                    [disabled]="createReportForm.invalid || !filterBuilderValidation">
+                    <i class="fas fa-save me-2"></i> Save
+                </button>
+            </div>
+        </div>
     </form>
 </div>
