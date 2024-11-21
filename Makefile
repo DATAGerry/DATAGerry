@@ -84,8 +84,8 @@ bin: requirements buildvars docs webapp
 		--hidden-import cmdb.updater.versions.updater_20200512 \
 		--hidden-import cmdb.updater.versions.updater_20200513 \
 		--hidden-import cmdb.updater.versions.updater_20240603 \
-		--hidden-import cmdb.exporter \
-		--hidden-import cmdb.exporter.exporter_base \
+		--hidden-import cmdb.framework.exporter \
+		--hidden-import cmdb.framework.exporter.format \
 		--hidden-import cmdb.interface.gunicorn \
 		--hidden-import gunicorn.glogging \
 		--hidden-import gunicorn.workers.sync \

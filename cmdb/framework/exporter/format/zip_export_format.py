@@ -49,7 +49,7 @@ class ZipExportFormat(BaseExporterFormat):
             zip file containing object files separated by types
         """
         # check what export type is requested and intitializes a new zip file in memory
-        export_type = load_class(f'cmdb.exporter.exporter_base.{args[0].get("classname", "")}')()
+        export_type = load_class(f'cmdb.framework.exporter.format.{args[0].get("classname", "")}')()
         zipped_file = io.BytesIO()
 
         # Build .zip file

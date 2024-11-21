@@ -24,7 +24,7 @@ from cmdb.updater.updater_module import UpdaterModule
 from cmdb.updater.updater_settings import UpdateSettings
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
-from cmdb.utils.system_config import SystemConfigReader
+from cmdb.utils.system_config_reader import SystemConfigReader
 from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_CLASSES
 from cmdb.models.user_management_constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTION
 
