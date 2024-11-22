@@ -89,6 +89,12 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
                 else if (fieldType === 'select') {
                     operators = ['=', '!=', 'in', 'not in'];
                     fieldType = 'category';
+                } else if (fieldType === 'checkbox') {
+                    fieldType = 'boolean';
+                    operators = ['=', '!='];
+                } else if (fieldType === 'radio') {
+                    fieldType = 'category';
+
                 }
                 else {
                     // Treat any other type as 'string'
