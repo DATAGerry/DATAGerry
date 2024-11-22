@@ -93,9 +93,6 @@ export class ReportService<T = any> implements ApiServicePrefix {
     }
 
 
-
-
-
     /**
      * Creates a new report.
      */
@@ -125,8 +122,6 @@ export class ReportService<T = any> implements ApiServicePrefix {
     }
 
 
-
-
     /**
      * Deletes a report by its public ID.
      */
@@ -148,11 +143,18 @@ export class ReportService<T = any> implements ApiServicePrefix {
         this.options.params = httpParams;
 
         return this.api.callGet<T>(`${this.servicePrefix}/${publicID}/run`, this.options).pipe(
-            map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => apiResponse.body.result as T)
+            map((apiResponse: HttpResponse<APIGetSingleResponse<T>>) => apiResponse.body as T)
         );
     }
 
 
+    /**
+     * Updates an existing report with the provided data.
+     * Constructs HTTP parameters from report data and sends a PUT request.
+     * @param public_id - The public ID of the report to update.
+     * @param reportData - The data to update the report with.
+     * @returns An observable with the updated report data.
+     */
     public updateReport(public_id: number, reportData: {
         public_id: number
         report_category_id: number;
@@ -165,7 +167,6 @@ export class ReportService<T = any> implements ApiServicePrefix {
     }): Observable<any> {
         let httpParams = new HttpParams();
 
-        console.log('report')
         for (let key in reportData) {
             let val: string = typeof reportData[key] === 'object' ? JSON.stringify(reportData[key]) : String(reportData[key]);
             httpParams = httpParams.set(key, val);
