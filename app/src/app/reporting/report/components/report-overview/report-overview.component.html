@@ -9,14 +9,23 @@
     </button>
 </div>
   </div>
-  <hr/>
-  
-  <cmdb-table [items]="reports" [columns]="columns" [totalItems]="totalReports"
+  <hr/>  
+  <!-- <cmdb-table [items]="reports" [columns]="columns" [totalItems]="totalReports"
   [loading]="loading" [pageSize]="10" (pageChange)="onPageChange($event)"
-  (sortChange)="onSortChange($event)"></cmdb-table>
+  (sortChange)="onSortChange($event)"></cmdb-table> -->
+
+  <cmdb-table [items]="reports" [columns]="columns" [totalItems]="totalReports"
+            [loading]="loading" [pageSize]="limit" [page]="page" [sort]="sort"
+            [sortable]="true" [searchEnabled]="true"
+            (pageChange)="onPageChange($event)"
+            (pageSizeChange)="onPageSizeChange($event)"
+            (sortChange)="onSortChange($event)"
+            (searchChange)="onSearchChange($event)">
+</cmdb-table>
+
 
 <ng-template #actionsTemplate let-item="item">
-<i class="fas fa-play icon-margin runBtn" (click)="runReport(item.public_id)"></i>
+<i class="fas fa-play icon-margin runBtn" (click)="runReport(item)"></i>
 <i class="far fa-edit icon-margin editBtn" (click)="editReport(item.public_id)"></i>
 <i class="far fa-trash-alt delBtn" (click)="openDeleteReportModal(item)"></i>
 </ng-template>
