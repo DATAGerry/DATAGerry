@@ -41,6 +41,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   public page: number = 1;
   public loading: boolean = false;
   public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
+  public filter: string;
 
   @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
@@ -58,9 +59,9 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.columns = [
-      { display: 'ID', name: 'public_id', data: 'public_id', sortable: true, style: { width: '80px', 'text-align': 'center' } },
-      { display: 'Name', name: 'name', data: 'name', sortable: true, style: { width: 'auto', 'text-align': 'center' } },
-      { display: 'Category', name: 'category', data: 'report_category_id', sortable: true, style: { width: '150px', 'text-align': 'center' } },
+      { display: 'ID', name: 'public_id', data: 'public_id', searchable: true, sortable: true, style: { width: '80px', 'text-align': 'center' } },
+      { display: 'Name', name: 'name', data: 'name', searchable: true, sortable: true, style: { width: 'auto', 'text-align': 'center' } },
+      { display: 'Category', name: 'category', data: 'report_category_id', searchable: true, sortable: true, style: { width: '150px', 'text-align': 'center' } },
       { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '150px', 'text-align': 'center' } }
     ];
 
@@ -82,6 +83,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   private loadReports(): void {
     this.loading = true;
     const params: CollectionParameters = {
+      filter: this.filterBuilder(),
       limit: this.limit,
       page: this.page,
       sort: this.sort.name,
@@ -116,23 +118,14 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
    * Runs the report with the specified ID.
    * @param id - The ID of the report to run.
    */
-  public runReport(reportId: number): void {
-    console.log('Run report with ID:', reportId);
+  public runReport(report: any): void {
+    const { public_id, type_id, selected_fields, mds_mode } = report;
 
-    this.reportService.runReport(reportId).pipe(
-      takeUntil(this.unsubscribe$)
-    ).subscribe({
-      next: (response) => {
-        console.log('response run', response)
-      },
-
-      error: (err) => {
-        console.log('run error', err)
-      }
-    }
-
-    );
+    this.router.navigate(['/reports/run', public_id], {
+      queryParams: { type_id, selected_fields: JSON.stringify(selected_fields), mds_mode }
+    });
   }
+
 
 
   /**
@@ -180,6 +173,60 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   public onSortChange(sort: Sort): void {
     this.sort = sort;
     this.loadReports();
+  }
+
+
+  /**
+   * Handles changes to the search input, updates the filter, resets to the first page, and reloads reports.
+   * @param search - The new search query.
+   */
+  public onSearchChange(search: any): void {
+    if (search) {
+      this.filter = search;
+    } else {
+      this.filter = undefined;
+    }
+    this.page = 1; // Reset to first page when search changes
+    this.loadReports();
+  }
+
+
+  /**
+   * Handles changes to the page size, updates the limit, resets to the first page, and reloads reports.
+   * @param limit - The new number of items per page.
+   */
+  public onPageSizeChange(limit: number): void {
+    this.limit = limit;
+    this.page = 1; // Reset to first page when page size changes
+    this.loadReports();
+  }
+
+
+  /**
+   * Builds a MongoDB aggregation pipeline based on the current filter.
+   * @returns An aggregation pipeline array.
+   */
+  private filterBuilder(): any {
+    const query = [];
+    if (this.filter) {
+      const searchableColumns = this.columns.filter(c => c.searchable);
+      const or = [];
+      // Searchable Columns
+      for (const column of searchableColumns) {
+        const regex: any = {};
+        regex[column.name] = {
+          $regex: String(this.filter),
+          $options: 'i'
+        };
+        or.push(regex);
+      }
+      query.push({
+        $match: {
+          $or: or
+        }
+      });
+    }
+    return query;
   }
 
   /* --------------------------------------------------- MODALS METHODS -------------------------------------------------- */
