@@ -19,13 +19,15 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { ReportRoutingModule } from './report/report-routing.module';
 import { ReportCategoryRoutingModule } from './category/report-category-routing.module';
+import { RunReportComponent } from './report/components/run-report/run-report.component';
 
 const routes: Routes = [
     {
         path: '',
         redirectTo: 'reports/overview',
         pathMatch: 'full'
-    }
+    },
+    { path: 'run/:id', component: RunReportComponent }
 ];
 
 @NgModule({

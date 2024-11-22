@@ -176,10 +176,6 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   }
 
 
-  /**
-   * Handles changes to the search input, updates the filter, resets to the first page, and reloads reports.
-   * @param search - The new search query.
-   */
   public onSearchChange(search: any): void {
     if (search) {
       this.filter = search;
@@ -206,6 +202,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
    * Builds a MongoDB aggregation pipeline based on the current filter.
    * @returns An aggregation pipeline array.
    */
+
   private filterBuilder(): any {
     const query = [];
     if (this.filter) {

@@ -22,15 +22,19 @@ import { ReportingRoutingModule } from './reporting-routing.module';
 // Import the feature modules
 import { ReportModule } from './report/report.module';
 import { ReportCategoryModule } from './category/report-category.module';
-import { ReportRoutingModule } from './report/report-routing.module';
+import { RunReportComponent } from './report/components/run-report/run-report.component';
+import { TableModule } from "../layout/table/table.module";
 
 @NgModule({
-    declarations: [],
+    declarations: [
+        RunReportComponent
+    ],
     imports: [
         CommonModule,
         ReportingRoutingModule, // Main routing module for reporting
         ReportModule,
         ReportCategoryModule,
+        TableModule
     ]
 })
 export class ReportingModule { }

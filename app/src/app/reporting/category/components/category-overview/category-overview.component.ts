@@ -25,6 +25,7 @@ import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 import { AddCategoryModalComponent } from '../category-add-modal/category-add-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'app-category-overview',
@@ -48,7 +49,8 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
 
     constructor(
         private categoryService: ReportCategoryService,
-        private modalService: NgbModal) { }
+        private modalService: NgbModal, private location: Location) { }
+
 
 
     ngOnInit(): void {
@@ -88,11 +90,6 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
                 this.loading = false;
             }
         );
-    }
-
-
-    public editCategory(id: number): void {
-        console.log('Edit category with ID:', id);
     }
 
 
@@ -194,6 +191,13 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
                 }
             }
         );
+    }
+
+    /**
+  * Navigates back to the previous page in the browser's history.
+  */
+    goBack(): void {
+        this.location.back()
     }
 
 }
