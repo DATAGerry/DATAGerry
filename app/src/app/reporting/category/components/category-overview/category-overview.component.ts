@@ -40,10 +40,10 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     public page: number = 1;
     public loading: boolean = false;
     public sort: Sort = { name: 'public_id', order: SortDirection.ASCENDING } as Sort;
+    public filter: string;
+    public columns: Array<any>;
 
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
-
-    public columns: Array<any>;
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
@@ -52,22 +52,21 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         private modalService: NgbModal, private location: Location) { }
 
 
-
     ngOnInit(): void {
         this.columns = [
-            { display: 'Public ID', name: 'public_id', data: 'public_id', sortable: true, style: { width: '120px', 'text-align': 'center' } },
-            { display: 'Name', name: 'name', data: 'name', sortable: true, style: { width: 'auto', 'text-align': 'center' } },
+            { display: 'Public ID', name: 'public_id', data: 'public_id', searchable: true, sortable: true, style: { width: '120px', 'text-align': 'center' } },
+            { display: 'Name', name: 'name', data: 'name', searchable: true, sortable: true, style: { width: 'auto', 'text-align': 'center' } },
             { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '100px', 'text-align': 'center' } }
         ];
 
         this.loadCategories();
     }
 
+
     ngOnDestroy(): void {
         this.unsubscribe$.next();
         this.unsubscribe$.complete();
     }
-
 
     /* --------------------------------------------------- REPORT CATEGORY API -------------------------------------------------- */
 
@@ -77,10 +76,10 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     private loadCategories(): void {
         this.loading = true;
         const params: CollectionParameters = {
-            filter: undefined,
+            filter: this.filterBuilder(),
             limit: this.limit,
             page: this.page,
-            sort: this.sort.name,
+            sort: this.sort.name === 'public_id_str' ? 'public_id' : this.sort.name,
             order: this.sort.order
         };
         this.categoryService.getAllCategories(params).pipe(takeUntil(this.unsubscribe$)).subscribe(
@@ -112,8 +111,7 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         }
     }
 
-
-    /* ------------------------------------------------ SORTING AND PAGINATOIN ------------------------------------------------ */
+    /* ------------------------------------------------ SORTING AND PAGINATION ------------------------------------------------ */
 
     /**
      * Handles pagination by updating the current page and reloading the categories.
@@ -135,7 +133,77 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
     }
 
 
+    /**
+     * Handles search input changes, updates the filter, resets to the first page, and reloads categories.
+     * @param search - The search input value.
+     */
+    public onSearchChange(search: any): void {
+        if (search) {
+            this.filter = search;
+        } else {
+            this.filter = undefined;
+        }
+        this.page = 1; // Reset to first page when search changes
+        this.loadCategories();
+    }
+
+
+    /**
+     * Handles changes to the page size, updates the limit, resets to the first page, and reloads categories.
+     * @param limit - The new number of items per page.
+     */
+    public onPageSizeChange(limit: number): void {
+        this.limit = limit;
+        this.page = 1; // Reset to first page when page size changes
+        this.loadCategories();
+    }
+
     /* ------------------------------------------------ REST OF THE FUNCTIONS ------------------------------------------------ */
+
+    /**
+     * Builds a MongoDB aggregation pipeline based on the current filter.
+     * @returns An aggregation pipeline array.
+     */
+    private filterBuilder(): any[] {
+        const query: any[] = [];
+
+        if (this.filter) {
+            const searchableColumns = this.columns.filter(c => c.searchable);
+            const or: any[] = [];
+
+            const addFields: any = {};
+
+            for (const column of searchableColumns) {
+                let fieldName = column.data || column.name;
+                let searchField = fieldName;
+
+                // Convert numeric fields to strings
+                if (fieldName === 'public_id') {
+                    addFields['public_id_str'] = { $toString: '$public_id' };
+                    searchField = 'public_id_str';
+                }
+
+                const regexCondition: any = {};
+                regexCondition[searchField] = {
+                    $regex: String(this.filter),
+                    $options: 'i'
+                };
+                or.push(regexCondition);
+            }
+
+            if (Object.keys(addFields).length > 0) {
+                query.push({ $addFields: addFields });
+            }
+
+            query.push({
+                $match: {
+                    $or: or
+                }
+            });
+        }
+
+        return query;
+    }
 
 
     /**
@@ -154,6 +222,7 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         );
     }
 
+
     /**
      * Opens the Edit Category modal in 'edit' mode with the selected category's data.
      * Reloads categories on successful update.
@@ -171,7 +240,6 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
             }
         );
     }
-
 
 
     /**
@@ -193,9 +261,10 @@ export class CategoryOverviewComponent implements OnInit, OnDestroy {
         );
     }
 
+
     /**
-  * Navigates back to the previous page in the browser's history.
-  */
+     * Navigates back to the previous page in the browser's history.
+     */
     goBack(): void {
         this.location.back()
     }
