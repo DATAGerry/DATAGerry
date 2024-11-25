@@ -113,6 +113,48 @@ class CmdbReport(CmdbDAO):
 
         super().__init__(**kwargs)
 
+
+    def get_selected_fields(self) -> list:
+        """TODO: document"""
+        return self.selected_fields
+
+
+    def remove_field_occurences(self, field_name: str):
+        """TODO: document"""
+        # Remove field from selected fields
+        if field_name in self.selected_fields:
+            self.selected_fields.remove(field_name)
+
+        # Remove field from conditions
+        self.conditions = self.clear_rules_of_field(self.conditions, field_name)
+
+
+    def clear_rules_of_field(self, conditions: dict, field_name: str):
+        """TODO: document"""
+        new_conditions = {}
+        new_conditions['condition'] = conditions['condition']
+        new_rules = []
+
+        rules = conditions['rules']
+
+        for a_rule in rules:
+            if "condition" in a_rule:
+                result = self.clear_rules_of_field(a_rule, field_name)
+
+                if result:
+                    new_rules.append(result)
+            else:
+                if a_rule['field'] == field_name:
+                    pass
+                else:
+                    new_rules.append(a_rule)
+
+        if len(new_rules) > 0:
+            new_conditions['rules'] = new_rules
+            return new_conditions
+
+        return None
+
 # --------------------------------------------------- CLASS METHODS -------------------------------------------------- #
 
     @classmethod

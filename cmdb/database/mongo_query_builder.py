@@ -31,15 +31,23 @@ class MongoDBQueryBuilder:
     The MongoDBQueryBuilder generates a MongoDB query from a dict of rules
     """
     def __init__(self, query_data: dict, type_id: int):
-        self.condition = query_data["condition"]
-        self.rules = query_data["rules"]
+        self.condition = None
+        self.rules = None
+
+        if query_data:
+            self.condition = query_data["condition"]
+            self.rules = query_data["rules"]
+
         self.type_id = type_id
 
     def build(self):
         """
         Builds the MongoDB query by using the self.conditions
         """
-        return self.__build_ruleset(self.condition, self.rules)
+        if self.condition and self.rules:
+            return self.__build_ruleset(self.condition, self.rules)
+
+        return {}
 
 
     def __build_ruleset(self, condition: str, rules: list[dict]):

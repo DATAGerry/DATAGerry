@@ -22,6 +22,7 @@ from bson import json_util
 from flask import abort, jsonify, request, current_app
 
 from cmdb.database.utils import default, object_hook
+from cmdb.database.mongo_query_builder import MongoDBQueryBuilder
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
@@ -29,6 +30,7 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager
+from cmdb.manager.reports_manager import ReportsManager
 
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.models.user_model.user import UserModel
@@ -38,6 +40,7 @@ from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.models.object_link_model.link import ObjectLinkModel
+from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.framework.results import IterationResult
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
@@ -754,6 +757,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
         UpdateMultiResponse: Which includes the json data of multiple updated objects.
     """
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
 
     try:
         update_type_instance = objects_manager.get_object_type(public_id)
@@ -766,6 +770,8 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                                            order=1)
 
         objects_by_type = objects_manager.iterate(builder_params, request_user).results
+        reports_for_type = objects_manager.get_many_from_other_collection(CmdbReport.COLLECTION,
+                                                                          type_id=public_id)
 
         for obj in objects_by_type:
             incorrect = []
@@ -789,6 +795,18 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                                        add_to_set=False)
                 # objects_manager.update_many_objects(query={'public_id': obj.public_id},
                 #                                     update={'$pull': {'fields': {"name": field}}})
+
+                # Check all reports and clear selected_fields and conditions
+                a_report: CmdbReport
+                for a_report in reports_for_type:
+                    a_report = CmdbReport(**a_report)
+                    a_report.remove_field_occurences(field)
+                    a_report.report_query = {'data': str(MongoDBQueryBuilder(a_report.conditions,
+                                                                             a_report.type_id).build())}
+
+                    reports_manager.update({'public_id': a_report.public_id}, a_report.__dict__)
+
+
 
         objects_by_type = objects_manager.iterate(builder_params, request_user).results
 
