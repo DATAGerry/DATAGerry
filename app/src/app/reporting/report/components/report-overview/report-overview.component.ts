@@ -17,7 +17,7 @@
 */
 import { Component, OnInit, OnDestroy, TemplateRef, ViewChild } from '@angular/core';
 import { ReplaySubject } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { takeUntil } from 'rxjs/operators';
 import { ReportService } from 'src/app/reporting/services/report.service';
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
@@ -59,9 +59,9 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.columns = [
-      { display: 'ID', name: 'public_id', data: 'public_id', searchable: true, sortable: true, style: { width: '80px', 'text-align': 'center' } },
+      { display: 'ID', name: 'public_id_str', data: 'public_id', searchable: true, sortable: true, style: { width: '80px', 'text-align': 'center' } },
       { display: 'Name', name: 'name', data: 'name', searchable: true, sortable: true, style: { width: 'auto', 'text-align': 'center' } },
-      { display: 'Category', name: 'category', data: 'report_category_id', searchable: true, sortable: true, style: { width: '150px', 'text-align': 'center' } },
+      { display: 'Category ID', name: 'category', data: 'report_category_id', searchable: true, sortable: true, style: { width: '150px', 'text-align': 'center' } },
       { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '150px', 'text-align': 'center' } }
     ];
 
@@ -76,6 +76,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
 
   /* --------------------------------------------------- API METHODS -------------------------------------------------- */
 
+
   /**
    * Loads reports based on the current pagination, sorting, and limit settings.
    * Updates the reports array and total reports count or logs an error if loading fails.
@@ -86,7 +87,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
       filter: this.filterBuilder(),
       limit: this.limit,
       page: this.page,
-      sort: this.sort.name,
+      sort: this.sort.name === 'public_id_str' ? 'public_id' : this.sort.name,
       order: this.sort.order
     };
 
@@ -111,7 +112,6 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
       });
   }
 
-
   /* --------------------------------------------------- ACTIONS -------------------------------------------------- */
 
   /**
@@ -125,7 +125,6 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
       queryParams: { type_id, selected_fields: JSON.stringify(selected_fields), mds_mode }
     });
   }
-
 
 
   /**
@@ -156,7 +155,6 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   }
 
 
-
   /**
    * Handles pagination by updating the current page and reloading reports.
    * @param newPage - The new page number to load.
@@ -165,6 +163,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
     this.page = newPage;
     this.loadReports();
   }
+
 
   /**
    * Updates the sort criteria and reloads the reports.
@@ -176,6 +175,10 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
   }
 
 
+  /**
+   * Handles search input changes, updates the filter, resets to the first page, and reloads reports.
+   * @param search - The search input value.
+   */
   public onSearchChange(search: any): void {
     if (search) {
       this.filter = search;
@@ -202,21 +205,43 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
    * Builds a MongoDB aggregation pipeline based on the current filter.
    * @returns An aggregation pipeline array.
    */
+  private filterBuilder(): any[] {
+    const query: any[] = [];
 
-  private filterBuilder(): any {
-    const query = [];
     if (this.filter) {
       const searchableColumns = this.columns.filter(c => c.searchable);
-      const or = [];
-      // Searchable Columns
+      const or: any[] = [];
+
+      const addFields: any = {};
+
       for (const column of searchableColumns) {
-        const regex: any = {};
-        regex[column.name] = {
+        let fieldName = column.data || column.name;
+        let searchField = fieldName;
+
+        // Convert numeric fields to strings
+        if (fieldName === 'public_id') {
+          addFields['public_id_str'] = { $toString: '$public_id' };
+          searchField = 'public_id_str';
+        }
+
+        if (fieldName === 'report_category_id') {
+          addFields['report_category_id'] = { $toString: '$report_category_id' };
+          searchField = 'report_category_id';
+        }
+
+        // Add regex condition
+        const regexCondition: any = {};
+        regexCondition[searchField] = {
           $regex: String(this.filter),
           $options: 'i'
         };
-        or.push(regex);
+        or.push(regexCondition);
       }
+
+      if (Object.keys(addFields).length > 0) {
+        query.push({ $addFields: addFields });
+      }
+
       query.push({
         $match: {
           $or: or
@@ -241,7 +266,7 @@ export class ReportOverviewComponent implements OnInit, OnDestroy {
         }
       },
       (error) => {
-        this.toast.error(error?.error?.message)
+        this.toast.error(error?.error?.message);
       }
     );
   }
