@@ -127,10 +127,6 @@ def get_reports(params: CollectionParameters, request_user: UserModel):
     Returns:
         (GetMultiResponse): All CmdbReports considering the params
     """
-    test = MdsMode.ROWS
-    test2 = MdsMode.COLUMNS
-    LOGGER.debug(f"rows: {test}, columns: {test2}")
-
     reports_manager: ReportsManager = ManagerProvider.get_manager(ManagerType.REPORTS_MANAGER, request_user)
 
     try:

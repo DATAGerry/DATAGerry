@@ -30,6 +30,7 @@ from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse,
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
+from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import (
@@ -210,6 +211,13 @@ def delete_report_category(public_id: int, request_user: UserModel):
         if report_category_instance.predefined:
             LOGGER.debug("[delete_report_category] Error: Trying to delete a predefined CmdbReportCategory")
             raise DisallowedActionError(f"Trying to delete a predefined CmdbReportCategory with id: {public_id}")
+
+        # It is not possbile to delete a category if a report is using it
+        reports_wtih_category = report_categories_manager.get_many_from_other_collection(CmdbReport.COLLECTION,
+                                                                                        report_category_id=public_id)
+
+        if len(reports_wtih_category) > 0:
+            return abort(403, f"ReportCategory with ID: {public_id} can not be deleted because it is used by reports!")
 
         #TODO: REFACTOR-FIX
         ack: bool = report_categories_manager.delete({'public_id':public_id})
