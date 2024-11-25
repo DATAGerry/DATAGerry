@@ -22,7 +22,7 @@
 
 
 <ng-template #actionsTemplate let-item="item">
-<i class="fas fa-play icon-margin runBtn" (click)="runReport(item)"></i>
-<i class="far fa-edit icon-margin editBtn" (click)="editReport(item.public_id)"></i>
-<i class="far fa-trash-alt delBtn" (click)="openDeleteReportModal(item)"></i>
+<i class="fas fa-play icon-margin btn-run" (click)="runReport(item)"></i>
+<i class="far fa-edit icon-margin btn-edit" (click)="editReport(item.public_id)"></i>
+<i class="far fa-trash-alt btn-delete" (click)="openDeleteReportModal(item)"></i>
 </ng-template>
