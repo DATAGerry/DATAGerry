@@ -571,45 +571,163 @@ export class RunReportComponent implements OnInit {
                             try {
                                 const jsonData = JSON.parse(text);
 
-                                // Flatten the JSON data
-                                const flattenedData = jsonData.map(item => {
+                                let flattenedData = [];
+                                jsonData.forEach(item => {
                                     const baseData = {
-                                        public_id: item.object_id,
-                                        active: item.active,
+                                        public_id: String(item.object_id), // Convert ID to string
+                                        active: String(item.active), // Convert boolean to string
                                         type_label: item.type_label
                                     };
 
-                                    // Add fields as columns with their original names
-                                    item.fields.forEach(field => {
-                                        let value = field.value;
+                                    // Filter and add selected fields
+                                    item.fields
+                                        .filter(field => this.selectedFields.includes(field.name))
+                                        .forEach(field => {
+                                            let value = field.value;
 
-                                        // Parse date fields
-                                        if (value && typeof value === 'object' && value.$date) {
-                                            value = new Date(value.$date).toLocaleDateString(); // Format date
-                                        }
+                                            // Parse date fields
+                                            if (value && typeof value === 'object' && '$date' in value) {
+                                                value = new Date(value.$date).toLocaleDateString();
+                                            }
 
-                                        baseData[field.name] = value ?? '';
-                                    });
+                                            // Convert numeric values to strings with padding
+                                            if (typeof value === 'number') {
+                                                value = `'${String(value)}`; // Add single quote to treat as string in Excel
+                                            }
 
-                                    // Add multi_data_sections as columns with newlines
-                                    item.multi_data_sections.forEach(section => {
-                                        section.values.forEach(value => {
-                                            value.data.forEach(dataItem => {
-                                                const columnName = dataItem.name; // Use the original name
-                                                baseData[columnName] = baseData[columnName]
-                                                    ? `${baseData[columnName]}\n${dataItem.value ?? ''}` // Use newline instead of pipe
-                                                    : dataItem.value ?? '';
+                                            // Center-align password field values
+                                            if (field.name.startsWith('password') && value) {
+                                                const strValue = String(value);
+                                                const padding = (20 - strValue.length) / 2; // Adjust 20 as needed
+                                                value =
+                                                    ' '.repeat(Math.floor(padding)) +
+                                                    strValue +
+                                                    ' '.repeat(Math.ceil(padding));
+                                            }
+
+                                            baseData[field.name] = value ?? '';
+                                        });
+
+                                    if (this.mdsMode === 'ROWS') {
+                                        // Compute Cartesian product for MDS in ROWS mode
+                                        const mdsValuesPerSection: any[][] = [];
+
+                                        item.multi_data_sections.forEach(section => {
+                                            const sectionValues = [];
+                                            section.values.forEach(value => {
+                                                const mdsFields: { [key: string]: any } = {};
+                                                value.data
+                                                    .filter(dataItem =>
+                                                        this.selectedFields.includes(dataItem.name)
+                                                    )
+                                                    .forEach(dataItem => {
+                                                        let fieldValue = dataItem.value;
+
+                                                        // Parse date fields
+                                                        if (
+                                                            fieldValue &&
+                                                            typeof fieldValue === 'object' &&
+                                                            '$date' in fieldValue
+                                                        ) {
+                                                            fieldValue = new Date(
+                                                                fieldValue.$date
+                                                            ).toLocaleDateString();
+                                                        }
+
+                                                        // Convert numeric values to strings
+                                                        if (typeof fieldValue === 'number') {
+                                                            fieldValue = `'${String(fieldValue)}`;
+                                                        }
+
+                                                        // Center-align password field values
+                                                        if (
+                                                            dataItem.name.startsWith('password') &&
+                                                            fieldValue
+                                                        ) {
+                                                            const strValue = String(fieldValue);
+                                                            const padding =
+                                                                (20 - strValue.length) / 2; // Adjust 20 as needed
+                                                            fieldValue =
+                                                                ' '.repeat(Math.floor(padding)) +
+                                                                strValue +
+                                                                ' '.repeat(Math.ceil(padding));
+                                                        }
+
+                                                        mdsFields[dataItem.name] = fieldValue ?? '';
+                                                    });
+                                                sectionValues.push(mdsFields);
+                                            });
+                                            mdsValuesPerSection.push(sectionValues);
+                                        });
+
+                                        // Compute Cartesian product
+                                        const cartesianProduct = this.computeCartesianProduct(
+                                            mdsValuesPerSection
+                                        );
+
+                                        // For each combination, create an item
+                                        cartesianProduct.forEach(combination => {
+                                            const row = { ...baseData };
+                                            combination.forEach(mdsFields => {
+                                                Object.entries(mdsFields).forEach(([key, value]) => {
+                                                    row[key] = value;
+                                                });
+                                            });
+                                            flattenedData.push(row);
+                                        });
+                                    } else {
+                                        // Default COLUMNS mode
+                                        const row = { ...baseData };
+
+                                        // Add MDS fields in COLUMNS mode
+                                        const mdsFieldValues = new Map<string, any[]>();
+                                        item.multi_data_sections.forEach(section => {
+                                            section.values.forEach(value => {
+                                                value.data
+                                                    .filter(dataItem =>
+                                                        this.selectedFields.includes(dataItem.name)
+                                                    )
+                                                    .forEach(dataItem => {
+                                                        let fieldValue = dataItem.value;
+
+                                                        // Parse date fields
+                                                        if (
+                                                            fieldValue &&
+                                                            typeof fieldValue === 'object' &&
+                                                            '$date' in fieldValue
+                                                        ) {
+                                                            fieldValue = new Date(
+                                                                fieldValue.$date
+                                                            ).toLocaleDateString();
+                                                        }
+
+                                                        // Convert numeric values to strings
+                                                        if (typeof fieldValue === 'number') {
+                                                            fieldValue = `'${String(fieldValue)}`;
+                                                        }
+
+                                                        if (!mdsFieldValues.has(dataItem.name)) {
+                                                            mdsFieldValues.set(dataItem.name, []);
+                                                        }
+                                                        mdsFieldValues
+                                                            .get(dataItem.name)
+                                                            .push(fieldValue ?? '');
+                                                    });
                                             });
                                         });
-                                    });
 
-                                    return baseData;
+                                        // Combine MDS field values with newline separator
+                                        mdsFieldValues.forEach((values, key) => {
+                                            row[key] = values.join('\n');
+                                        });
+
+                                        flattenedData.push(row);
+                                    }
                                 });
-
 
                                 // Convert the flattened data to CSV
                                 const csv = unparse(flattenedData, {
-                                    quotes: true, // Wrap all fields in quotes for Excel compatibility
+                                    quotes: false // Do not wrap fields in quotes
                                 });
 
                                 // Save the CSV file
