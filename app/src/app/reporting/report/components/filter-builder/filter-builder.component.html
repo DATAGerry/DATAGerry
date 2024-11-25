@@ -1,6 +1,8 @@
 <div *ngIf="fields && fields.length > 0 && showQueryBuilder">
-    <h4>Fields Filter</h4>
-    <query-builder
+    <h5>
+        <span class="bold-text">Fields Filter</span> <span class="required">*</span>:
+    </h5>
+        <query-builder
         [(ngModel)]="query"
         [config]="config"
         [classNames]="classNames"

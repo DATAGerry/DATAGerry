@@ -143,10 +143,31 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
 
 
     /**
-     * Checks if any field in the query rules is empty (excluding null checks) and emits validation status.
+     * Checks if any field in the query rules is empty (including nested rules and empty groups) and emits validation status.
+     * Returns true only if both conditions are true or false.
      */
     isAnyFieldEmpty() {
-        let isAnyFieldEmpty = this.query.rules.filter(rule => rule.value === '' && rule.operator !== 'is null' && rule.operator !== 'is not null').length > 0;
-        this.filterBuilderValidation.emit(!isAnyFieldEmpty)
+        const checkForEmptyFields = (rules: any[]): boolean => {
+            for (const rule of rules) {
+                if (rule.rules) {
+                    // If it's a nested group, check if it's empty or has empty fields
+                    if (rule.rules.length === 0 || checkForEmptyFields(rule.rules)) {
+                        return true;
+                    }
+                } else if (rule.value === '' && rule.operator !== 'is null' && rule.operator !== 'is not null') {
+                    // If the value is empty and the operator is not null checks, return true
+                    return true;
+                }
+            }
+            return false;
+        };
+
+        const hasEmptyFields = checkForEmptyFields(this.query.rules);
+        const isRulesEmpty = this.query.rules.length === 0;
+
+        // Combine conditions: true only if both are true, false only if both are false
+        const isValidationPassed = hasEmptyFields === isRulesEmpty;
+
+        this.filterBuilderValidation.emit(isValidationPassed);
     }
 }
