@@ -557,3 +557,15 @@ class TypeModel(CmdbDAO):
                 raise FieldInitError(name) from err
 
         raise FieldNotFoundError(name)
+
+
+    def get_all_mds_fields(self) -> list:
+        """TODO: document"""
+        mds_fields = []
+
+        for a_section in self.render_meta.sections:
+            if a_section.type == "multi-data-section":
+                for a_field in a_section.fields:
+                    mds_fields.append(a_field)
+
+        return mds_fields

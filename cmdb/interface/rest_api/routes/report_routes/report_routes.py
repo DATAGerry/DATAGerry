@@ -27,6 +27,7 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.reports_manager import ReportsManager
 from cmdb.manager.objects_manager import ObjectsManager
 
+from cmdb.models.type_model.type import TypeModel
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.models.reports_model.mds_mode_enum import MdsMode
@@ -75,8 +76,10 @@ def create_report(params: dict, request_user: UserModel):
                                                                           MdsMode.COLUMNS] else MdsMode.ROWS
         params['conditions'] = literal_eval(params['conditions'])
         params['selected_fields'] = literal_eval(params['selected_fields'])
-        params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'], params['type_id']).build())}
 
+        report_type = reports_manager.get_one_from_other_collection(TypeModel.COLLECTION, params['type_id'])
+        params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'],
+                                                                  TypeModel.from_data(report_type)).build())}
         new_report_id = reports_manager.insert_report(params)
     except ManagerInsertError as err:
         #TODO: ERROR-FIX
@@ -208,7 +211,9 @@ def update_report(params: dict, request_user: UserModel):
         current_report = reports_manager.get_report(params['public_id'])
 
         if current_report:
-            params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'], params['type_id']).build())}
+            report_type = reports_manager.get_one_from_other_collection(TypeModel.COLLECTION, params['type_id'])
+            params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'],
+                                                                      TypeModel.from_data(report_type)).build())}
             #TODO: REFACTOR-FIX
             reports_manager.update({'public_id': params['public_id']}, params)
             current_report = reports_manager.get_report(params['public_id'])
