@@ -1,0 +1,25 @@
+<div class="d-flex justify-content-between align-items-center">
+  <h1>Webhooks</h1>
+  <button class="btn btn-success" [routerLink]="['/webhooks/create']">
+    Add Webhook
+  </button>
+</div>
+<hr />
+
+<cmdb-table
+  [items]="webhooks"
+  [columns]="columns"
+  [totalItems]="totalWebhooks"
+  [pageSize]="limit"
+  [page]="page"
+  [loading]="loading"
+  (pageChange)="onPageChange($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+>
+</cmdb-table>
+
+<!-- Actions Template -->
+<ng-template #actionsTemplate let-item="item">
+<i class="far fa-edit icon-margin btn-edit" (click)="editWebhook(item.public_id)"></i>
+<i class="far fa-trash-alt btn-delete" (click)="deleteWebhook(item.public_id)"></i>
+</ng-template>
