@@ -18,6 +18,8 @@ The module builds a MongoDB query for a dict of conditions
 """
 import logging
 from typing import Union
+from dateutil import parser
+from datetime import datetime
 
 from cmdb.models.type_model.type import TypeModel
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -41,15 +43,20 @@ class MongoDBQueryBuilder:
             self.rules = query_data["rules"]
 
         self.report_type = report_type
+        self.date_fields = self.report_type.get_all_fields_of_type("date")
+        self.ref_fields = self.report_type.get_all_fields_of_type("ref")
+        self.ref_section_fields = self.report_type.get_all_fields_of_type("ref-section-field")
         self.mds_fields = self.report_type.get_all_mds_fields()
 
     def build(self):
         """
         Builds the MongoDB query by using the self.conditions
         """
-        if self.condition and self.rules:
-            return self.__build_ruleset(self.condition, self.rules)
-
+        try:
+            if self.condition and self.rules:
+                return self.__build_ruleset(self.condition, self.rules)
+        except Exception as err:
+            LOGGER.debug("[build] Exception %s, Type: %s", err, type(err))
         return {}
 
 
@@ -79,24 +86,39 @@ class MongoDBQueryBuilder:
         """TODO: document"""
         target_field_name = 'fields.name'
         target_field_value = 'fields.value'
+        target_value = value
+
+        if field in self.date_fields and value:
+            try:
+                target_value = datetime.strptime(value, '%Y-%m-%d')
+            except Exception as err:
+                LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
+
+        if (field in self.ref_fields or field in self.ref_section_fields) and value:
+            try:
+                target_value = int(value)
+            except Exception as err:
+                LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
 
         if field in self.mds_fields:
             target_field_name = 'multi_data_sections.values.data.name'
             target_field_value = 'multi_data_sections.values.data.value'
 
         possible_operators = {
-            "=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$eq": value}}]},
-            "!=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": value}}]},
-            "<=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lte": value}}]},
-            ">=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gte": value}}]},
-            "<": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lt": value}}]},
-            ">": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gt": value}}]},
-            "in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$in": value}}]},
-            "not in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$nin": value}}]},
-            "contains": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$regex": value}}]},
-            "like": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: "/"+str(value)+"/"}]},
-            "is null": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: None}]},
-            "is not null": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": None}}]},
+            "=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$eq": target_value}}]},
+            "!=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": target_value}}]},
+            "<=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lte": target_value}}]},
+            ">=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gte": target_value}}]},
+            "<": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lt": target_value}}]},
+            ">": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gt": target_value}}]},
+            "in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$in": target_value}}]},
+            "not in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$nin": target_value}}]},
+            "contains": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$regex": target_value}}]},
+            "like": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: "/"+str(target_value)+"/"}]},
+            "is null": {'$and':[{target_field_name: {'$eq':field}}, {'$or':[{target_field_value: None},
+                                                                            {target_field_value: ""}]}]},
+            "is not null": {'$and':[{target_field_name: {'$eq':field}}, {'$and':[{target_field_value: {"$ne": None}},
+                                                                                {target_field_value: {"$ne": ""}}]}]},
         }
 
         return possible_operators[operator]

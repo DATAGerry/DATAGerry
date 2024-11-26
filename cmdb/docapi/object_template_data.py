@@ -19,25 +19,12 @@ import logging
 from cmdb.manager.objects_manager import ObjectsManager
 
 from cmdb.framework.rendering.cmdb_render import CmdbRender
+from cmdb.docapi.abstract_template_data import AbstractTemplateData
 
 from cmdb.errors.manager.object_manager import ObjectManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                             AbstractTemplateData - CLASS                                             #
-# -------------------------------------------------------------------------------------------------------------------- #
-class AbstractTemplateData:
-    """TODO: document"""
-    def __init__(self):
-        self._template_data = {}
-
-
-    def get_template_data(self):
-        """TODO: document"""
-        return self._template_data
-
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              ObjectTemplateData - CLASS                                              #

@@ -15,23 +15,19 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-import jinja2
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                TemplateEngine - CLASS                                                #
+#                                             AbstractTemplateData - CLASS                                             #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TemplateEngine:
+class AbstractTemplateData:
     """TODO: document"""
-
     def __init__(self):
-        pass
+        self._template_data = {}
 
 
-    def render_template_string(self, template_string, template_data):
+    def get_template_data(self):
         """TODO: document"""
-        environment = jinja2.Environment(undefined=jinja2.ChainableUndefined)
-        template = environment.from_string(template_string)
-        return template.render(template_data)
+        return self._template_data

@@ -14,19 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.templates.template_engine import TemplateEngine
-from cmdb.templates.template_data import ObjectTemplateData
+from cmdb.docapi.template_engine import TemplateEngine
+from cmdb.docapi.object_template_data import ObjectTemplateData
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocumentGenerator:
-    """TODO: document"""
+LOGGER = logging.getLogger(__name__)
 
-    def generate_doc(self):
-        """TODO: document"""
-
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            ObjectDocumentGenerator - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ObjectDocumentGenerator:
     """TODO: document"""
     # default CSS to make the document styling in TinyMCE look like the styling in the PDF

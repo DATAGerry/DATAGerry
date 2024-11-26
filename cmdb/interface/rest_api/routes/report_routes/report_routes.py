@@ -16,7 +16,10 @@
 """
 TODO: document
 """
+import re
 import logging
+import json
+from datetime import datetime
 from ast import literal_eval
 from flask import abort, request
 
@@ -74,12 +77,14 @@ def create_report(params: dict, request_user: UserModel):
         params['predefined'] = params['predefined'] in ["True", "true"]
         params['mds_mode'] = params['mds_mode'] if params['mds_mode'] in [MdsMode.ROWS,
                                                                           MdsMode.COLUMNS] else MdsMode.ROWS
-        params['conditions'] = literal_eval(params['conditions'])
+        params['conditions'] = json.loads(params['conditions'])
+        # LOGGER.debug(f"conditions:{ params['conditions']}")
         params['selected_fields'] = literal_eval(params['selected_fields'])
 
         report_type = reports_manager.get_one_from_other_collection(TypeModel.COLLECTION, params['type_id'])
         params['report_query'] = {'data': str(MongoDBQueryBuilder(params['conditions'],
                                                                   TypeModel.from_data(report_type)).build())}
+        # LOGGER.debug(f"report_query:{ params['report_query']}")
         new_report_id = reports_manager.insert_report(params)
     except ManagerInsertError as err:
         #TODO: ERROR-FIX
@@ -87,6 +92,7 @@ def create_report(params: dict, request_user: UserModel):
         return abort(400, "Could not create the report!")
     except Exception as err:
         LOGGER.debug("[create_report] Exception: %s, Type: %s", err, type(err))
+        return abort(400, "Could not create the report!")
 
     api_response = DefaultResponse(new_report_id)
 
@@ -168,8 +174,15 @@ def run_report_query(public_id: int, request_user: UserModel):
 
         requested_report = reports_manager.get_report(public_id)
 
-        query_str = requested_report.report_query['data']
-        report_query = literal_eval(query_str)
+        query_str: str = requested_report.report_query['data']
+
+        processed_query_string = re.sub(DATETIME_PATTERN,
+                                        replace_datetime,
+                                        query_str.replace("datetime.datetime", "datetime"))
+        safe_globals = {"datetime": datetime}
+        report_query = eval(processed_query_string, safe_globals)
+
+        # LOGGER.debug(f"run_report_query: {report_query}")
 
         builder_params = BuilderParameters(criteria=report_query)
 
@@ -203,7 +216,7 @@ def update_report(params: dict, request_user: UserModel):
         params['report_category_id'] = int(params['report_category_id'])
         params['type_id'] = int(params['type_id'])
         params['predefined'] = params['predefined'] in ["True", "true"]
-        params['conditions'] = literal_eval(params['conditions'])
+        params['conditions'] = json.loads(params['conditions'])
         params['selected_fields'] = literal_eval(params['selected_fields'])
         params['mds_mode'] = params['mds_mode'] if params['mds_mode'] in [MdsMode.ROWS,
                                                                           MdsMode.COLUMNS] else MdsMode.ROWS
@@ -272,3 +285,16 @@ def delete_report(public_id: int, request_user: UserModel):
     api_response = DefaultResponse(ack)
 
     return api_response.make_response()
+
+# ------------------------------------------------------ HELPERS ----------------------------------------------------- #
+
+DATETIME_PATTERN = r"datetime\.datetime\((.*?)\)"
+
+# Replace matches with actual datetime objects
+def replace_datetime(match):
+    """TODO: document"""
+    # Extract arguments from the match (e.g., "2024, 11, 26, 0, 0")
+    args = match.group(1)
+    # Convert arguments into a Python datetime object
+
+    return repr(eval(f"datetime({args})"))
