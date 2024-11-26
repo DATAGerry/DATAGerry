@@ -18,6 +18,8 @@ The module builds a MongoDB query for a dict of conditions
 """
 import logging
 from typing import Union
+
+from cmdb.models.type_model.type import TypeModel
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -30,7 +32,7 @@ class MongoDBQueryBuilder:
     """
     The MongoDBQueryBuilder generates a MongoDB query from a dict of rules
     """
-    def __init__(self, query_data: dict, type_id: int):
+    def __init__(self, query_data: dict, report_type: TypeModel):
         self.condition = None
         self.rules = None
 
@@ -38,7 +40,8 @@ class MongoDBQueryBuilder:
             self.condition = query_data["condition"]
             self.rules = query_data["rules"]
 
-        self.type_id = type_id
+        self.report_type = report_type
+        self.mds_fields = self.report_type.get_all_mds_fields()
 
     def build(self):
         """
@@ -65,8 +68,8 @@ class MongoDBQueryBuilder:
 
 
         possible_conditions = {
-            "and": {'$and': [{'$and': children}, {"type_id": self.type_id}]},
-            "or": {'$and': [{'$or': children}, {"type_id": self.type_id}]},
+            "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
+            "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
         }
 
         return possible_conditions[condition]
@@ -74,19 +77,26 @@ class MongoDBQueryBuilder:
 
     def __build_rule(self, field: str, operator: str, value: Union[int, str, list[str]] = None):
         """TODO: document"""
+        target_field_name = 'fields.name'
+        target_field_value = 'fields.value'
+
+        if field in self.mds_fields:
+            target_field_name = 'multi_data_sections.values.data.name'
+            target_field_value = 'multi_data_sections.values.data.value'
+
         possible_operators = {
-            "=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$eq": value}}]},
-            "!=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$ne": value}}]},
-            "<=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$lte": value}}]},
-            ">=": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$gte": value}}]},
-            "<": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$lt": value}}]},
-            ">": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$gt": value}}]},
-            "in": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$in": value}}]},
-            "not in": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$nin": value}}]},
-            "contains": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$regex": value}}]},
-            "like": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value': "/"+str(value)+"/"}]},
-            "is null": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value': None}]},
-            "is not null": {'$and':[{'fields.name': {'$eq':field}}, {'fields.value':{"$ne": None}}]},
+            "=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$eq": value}}]},
+            "!=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": value}}]},
+            "<=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lte": value}}]},
+            ">=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gte": value}}]},
+            "<": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lt": value}}]},
+            ">": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gt": value}}]},
+            "in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$in": value}}]},
+            "not in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$nin": value}}]},
+            "contains": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$regex": value}}]},
+            "like": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: "/"+str(value)+"/"}]},
+            "is null": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: None}]},
+            "is not null": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": None}}]},
         }
 
         return possible_operators[operator]

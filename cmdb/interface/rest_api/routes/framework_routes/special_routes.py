@@ -71,8 +71,8 @@ def get_intro_starter(request_user: UserModel):
 
 
 @special_blueprint.route('/profiles', methods=['POST'])
-@insert_request_user
 @special_blueprint.parse_assistant_parameters()
+@insert_request_user
 @login_required
 def create_initial_profiles(data: str, request_user: UserModel):
     """
@@ -99,7 +99,7 @@ def create_initial_profiles(data: str, request_user: UserModel):
         return abort(400, "There exists either objects, types or categories in the DB")
 
     try:
-        profile_assistant = ProfileAssistant()
+        profile_assistant = ProfileAssistant(categories_manager)
         created_ids = profile_assistant.create_profiles(profiles)
     except ProfileCreationError as err:
         LOGGER.debug("[create_initial_profiles] ManagerInsertError: %s", err.message)

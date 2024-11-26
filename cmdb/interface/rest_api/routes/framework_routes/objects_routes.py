@@ -802,7 +802,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
                     a_report = CmdbReport(**a_report)
                     a_report.remove_field_occurences(field)
                     a_report.report_query = {'data': str(MongoDBQueryBuilder(a_report.conditions,
-                                                                             a_report.type_id).build())}
+                                                         TypeModel.from_data(update_type_instance)).build())}
 
                     reports_manager.update({'public_id': a_report.public_id}, a_report.__dict__)
 

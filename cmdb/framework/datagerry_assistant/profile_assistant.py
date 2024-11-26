@@ -18,7 +18,6 @@ This module contains the "ProfileAssistant" class
 """
 import logging
 from datetime import datetime, timezone
-from flask import current_app
 
 from cmdb.manager.categories_manager import CategoriesManager
 
@@ -40,6 +39,9 @@ class ProfileAssistant:
     """
     This class creates all types and categories selected in the DATAGERRY assistant
     """
+    def __init__(self, categories_manager: CategoriesManager):
+        self.categories_manager = categories_manager
+
 
     def create_profiles(self, profile_list):
         """
@@ -129,10 +131,9 @@ class ProfileAssistant:
             all_type_ids (dict): All created type_ids from the assistant
         """
         all_categories: list[dict] = self.get_all_categories(all_type_ids)
-        categories_manager = CategoriesManager(current_app.database_manager)
 
         for _, category in enumerate(all_categories):
-            categories_manager.insert_category(category)
+            self.categories_manager.insert_category(category)
 
 
     def get_all_categories(self, all_type_ids: dict) -> list[dict]:
