@@ -33,7 +33,7 @@ export class WebhookFormComponent implements OnInit {
     ) {
         this.webhookForm = this.fb.group({
             name: ['', Validators.required],
-            url: ['', [Validators.required]],
+            url: ['', [Validators.required, Validators.pattern(/^https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/.*)?$/)]],
             event_types: [[], Validators.required],
             active: [true],
         });
