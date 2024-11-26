@@ -569,3 +569,14 @@ class TypeModel(CmdbDAO):
                     mds_fields.append(a_field)
 
         return mds_fields
+
+
+    def get_all_fields_of_type(self, field_type: str) -> list:
+        """TODO: document"""
+        date_fields = []
+
+        for a_field in self.fields:
+            if a_field['type'] == field_type:
+                date_fields.append(a_field['name'])
+
+        return date_fields
