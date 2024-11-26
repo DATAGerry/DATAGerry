@@ -31,6 +31,7 @@ export class WebhookOverviewComponent implements OnInit {
             { display: 'ID', name: 'public_id_str', data: 'public_id', searchable: true, sortable: true, style: { width: '80px', 'text-align': 'center' } },
             { display: 'Name', name: 'name', data: 'name', sortable: true },
             { display: 'URL', name: 'url', data: 'url', sortable: true },
+            { display: 'Status', name: 'active', data: 'active', sortable: false, template: this.statusTemplate, style: { width: '140px', 'text-align': 'center' } },
             { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '80px', 'text-align': 'center' } },
         ];
 

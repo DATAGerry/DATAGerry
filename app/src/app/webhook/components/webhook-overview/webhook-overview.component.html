@@ -23,3 +23,10 @@
 <i class="far fa-edit icon-margin btn-edit" (click)="editWebhook(item.public_id)"></i>
 <i class="far fa-trash-alt btn-delete" (click)="deleteWebhook(item.public_id)"></i>
 </ng-template>
+
+<!-- status Template -->
+<ng-template #statusTemplate let-item="item">
+  <span [ngClass]="{'text-success': item.active, 'text-danger': !item.active}">
+    {{ item.active ? 'Active' : 'Not Active' }}
+  </span>
+ </ng-template>
