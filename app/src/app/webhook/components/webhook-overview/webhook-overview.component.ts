@@ -3,6 +3,8 @@ import { WebhookService } from '../../services/webhook.service';
 import { Webhook } from '../../models/webhook.model';
 import { Router } from '@angular/router';
 import { ToastService } from 'src/app/layout/toast/toast.service';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { DeleteConfirmationModalComponent } from '../modal/delete-confirmation-modal.component';
 
 @Component({
     selector: 'app-webhook-overview',
@@ -24,7 +26,11 @@ export class WebhookOverviewComponent implements OnInit {
 
     /* --------------------------------------------------- LIFECYCLE METHODS -------------------------------------------------- */
 
-    constructor(private webhookService: WebhookService, private router: Router, private toast: ToastService) { }
+    constructor(private webhookService: WebhookService,
+        private router: Router,
+        private toast: ToastService,
+        private modalService: NgbModal,
+    ) { }
 
     ngOnInit(): void {
         this.columns = [
@@ -86,6 +92,16 @@ export class WebhookOverviewComponent implements OnInit {
      */
     public deleteWebhook(publicId: number): void {
         console.log('Delete webhook:', publicId);
+
+        this.webhookService.deleteWebhook(publicId).subscribe({
+            next: (res) => {
+                this.toast.success('Webhook deleted Sucessfully')
+                this.loadWebhooks()
+            },
+            error: (err) => {
+                this.toast.error(err?.error?.message)
+            }
+        })
     }
 
 
@@ -107,5 +123,22 @@ export class WebhookOverviewComponent implements OnInit {
         this.limit = newLimit;
         this.page = 1;
         this.loadWebhooks();
+    }
+
+    /**
+ * Opens the Delete Report modal and deletes the report if confirmed.
+ * @param report - The report to delete.
+ */
+    public openDeleteReportModal(webhook: any): void {
+        const modalRef = this.modalService.open(DeleteConfirmationModalComponent, { size: 'lg' });
+        modalRef.componentInstance.webhook = webhook;
+        modalRef.result.then(
+            (result) => {
+                if (result === 'confirmed') {
+                    this.deleteWebhook(webhook.public_id);
+                }
+            },
+            () => { }
+        );
     }
 }
