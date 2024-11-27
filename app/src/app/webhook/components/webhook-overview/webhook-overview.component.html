@@ -21,7 +21,7 @@
 <!-- Actions Template -->
 <ng-template #actionsTemplate let-item="item">
 <i class="far fa-edit icon-margin btn-edit" (click)="editWebhook(item.public_id)"></i>
-<i class="far fa-trash-alt btn-delete" (click)="deleteWebhook(item.public_id)"></i>
+<i class="far fa-trash-alt btn-delete" (click)="openDeleteReportModal(item)"></i>
 </ng-template>
 
 <!-- status Template -->
