@@ -1,4 +1,5 @@
 export const environment = {
   production: true,
-  cloudMode: false
+  cloudMode: false,
+  apiUrl: '' //your API URL
 };
