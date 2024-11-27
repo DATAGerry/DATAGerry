@@ -16,106 +16,139 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { Injectable } from '@angular/core';
-import { isDevMode } from '@angular/core';
 import { HttpBackend, HttpClient } from '@angular/common/http';
-
-import { BehaviorSubject, Observable, lastValueFrom } from 'rxjs';
-/* ------------------------------------------------------------------------------------------------------------------ */
-
+import { BehaviorSubject, Observable, lastValueFrom, of } from 'rxjs';
+import { environment } from 'src/environments/environment';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ConnectionService {
 
-  private readonly devPort: number = 4000;  // fixed dev port
+    private readonly apiUrl: string;
+    private connectionSubject: BehaviorSubject<string>;
+    public connection: Observable<string>;
+    private connectionStatus: boolean = false;
+    private http: HttpClient;
 
-  private connectionSubject: BehaviorSubject<string>;
-  public connection: Observable<string>;
-  private connectionStatus: boolean = false;
-  private http: HttpClient;
-
-/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
+    /* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
 
     public get status(): boolean {
         return this.connectionStatus;
     }
 
-
-    public get currentConnection(): any {
+    public get currentConnection(): string | null {
         return this.connectionSubject.value;
     }
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    public constructor(private backend: HttpBackend) {
+    public constructor(private backend: HttpBackend, private toast: ToastService) {
         this.http = new HttpClient(backend);
-        this.connectionSubject = new BehaviorSubject<string>(JSON.parse(localStorage.getItem('connection')));
+        this.apiUrl = environment.apiUrl;
+
+        // Initialize connectionSubject with null to trigger setDefaultConnection
+        this.connectionSubject = new BehaviorSubject<string | null>(null);
         this.connection = this.connectionSubject.asObservable();
 
-        if (this.currentConnection === null) {
-            this.setDefaultConnection();
-        }
+        // Set default connection from environment
+        this.setDefaultConnection();
 
-        try {
-            const connectionStatusPromise = this.connect();
-            connectionStatusPromise.then(status => {
-                this.connectionStatus = status;
+        // Attempt to connect using the default API URL
+        this.connect().then(status => {
+            this.connectionStatus = status;
 
-                if (this.connectionStatus === false) {
-                    localStorage.removeItem('connection');
-                    this.connectionSubject.next(null);
-                }
-            });
-        } catch (e) {
+            if (!this.connectionStatus) {
+                this.connectionSubject.next(null);
+                this.toast.error('Initial connection failed. API URL has been reset to null.')
+            }
+        }).catch((error) => {
             this.connectionStatus = false;
-            localStorage.removeItem('connection');
             this.connectionSubject.next(null);
+            console.error(error);
+            this.toast.error(error?.error?.message)
+
+        });
+    }
+
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /**
+     * Sets the default connection URL from the environment configuration.
+     */
+    private setDefaultConnection(): void {
+        try {
+            this.connectionSubject.next(this.apiUrl);
+            console.log(`Default API URL set to: ${this.apiUrl}`);
+        } catch (error) {
+            this.toast.error(error?.error?.message)
         }
     }
 
-/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
-
-    private setDefaultConnection() {
-        if (isDevMode()) {
-            this.setConnectionURL('http', '127.0.0.1', this.devPort);
-        } else {
-            this.setConnectionURL(
-                window.location.protocol.substring(0, window.location.protocol.length - 1),
-                window.location.hostname,
-                +window.location.port
-            );
-        }
-    }
-
-
-    public async testConnection() {
+    /**
+     * Attempts to connect to the API endpoint.
+     * @returns Promise<boolean> indicating connection success.
+     */
+    public async testConnection(): Promise<boolean> {
         try {
             await this.connect();
+            console.log('Test connection successful.');
             return true;
-        } catch (e) {
+        } catch (error) {
+            this.toast.error(error?.error?.message)
             return false;
         }
     }
 
+    /**
+     * Connects to the API endpoint to verify its availability.
+     * @returns Promise<boolean> indicating connection success.
+     */
+    private async connect(): Promise<boolean> {
+        if (!this.currentConnection) {
+            this.toast.error('No API URL is set. Cannot attempt connection.')
+            return false;
+        }
 
-    private async connect() {
         console.log(`### CONNECTION TRY with URL: ${this.currentConnection}/rest/ ###`);
-        const conn_result$ = this.http.get<any>(`${this.currentConnection}/rest/`);
-
-        return await lastValueFrom(conn_result$);
+        try {
+            await lastValueFrom(this.http.get<any>(`${this.currentConnection}/rest/`));
+            console.log('Connection successful.');
+            return true;
+        } catch (error) {
+            console.error(`Connection attempt to ${this.currentConnection}/rest/ failed:`, error);
+            this.toast.error(error?.error?.message)
+            return false;
+        }
     }
 
-
-    public async testCustomURL(protocol: string, host: string, port: number) {
+    /**
+     * Tests a custom API URL provided by the user.
+     * @param protocol The protocol to use (e.g., 'http', 'https').
+     * @param host The host address.
+     * @param port The port number.
+     * @returns Promise<boolean> indicating if the custom URL is reachable.
+     */
+    public async testCustomURL(protocol: string, host: string, port: number): Promise<boolean> {
         const customURL = `${protocol}://${host}:${port}/rest/`;
         console.log(`Trying to connect to backend @ ${customURL}`);
-        const conn_test_result$ = this.http.get<any>(customURL);
-
-        return await lastValueFrom(conn_test_result$);
+        try {
+            await lastValueFrom(this.http.get<any>(customURL));
+            console.log(`Custom URL connection successful: ${customURL}`);
+            return true;
+        } catch (error) {
+            console.error(`Custom URL test failed for ${customURL}:`, error);
+            return false;
+        }
     }
 
-
-    public setConnectionURL(protocol: string, host: string, port: number) {
+    /**
+     * Sets a new connection URL based on provided protocol, host, and port.
+     * @param protocol The protocol to use (e.g., 'http', 'https').
+     * @param host The host address.
+     * @param port The port number.
+     */
+    public setConnectionURL(protocol: string, host: string, port: number): void {
         let href = '';
 
         if (port === 0) {
@@ -124,7 +157,11 @@ export class ConnectionService {
             href = `${protocol}://${host}:${port}`;
         }
 
-        localStorage.setItem('connection', JSON.stringify(href));
-        this.connectionSubject.next(href);
+        try {
+            this.connectionSubject.next(href);
+            console.log(`Connection URL updated to: ${href}`);
+        } catch (error) {
+            this.toast.error(error?.error?.message)
+        }
     }
 }
