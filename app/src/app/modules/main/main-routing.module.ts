@@ -131,6 +131,13 @@ const routes: Routes = [
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
         loadChildren: () => import('../../reporting/reporting.module').then(m => m.ReportingModule)
+    },
+    {
+        path: 'webhooks',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        loadChildren: () =>
+            import('../../webhook/webhook.module').then((m) => m.WebhookModule)
     }
 ];
 
