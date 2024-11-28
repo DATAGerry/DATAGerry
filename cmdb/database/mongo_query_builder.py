@@ -18,7 +18,6 @@ The module builds a MongoDB query for a dict of conditions
 """
 import logging
 from typing import Union
-from dateutil import parser
 from datetime import datetime
 
 from cmdb.models.type_model.type import TypeModel
@@ -35,18 +34,23 @@ class MongoDBQueryBuilder:
     The MongoDBQueryBuilder generates a MongoDB query from a dict of rules
     """
     def __init__(self, query_data: dict, report_type: TypeModel):
-        self.condition = None
-        self.rules = None
+        try:
+            self.condition = None
+            self.rules = None
 
-        if query_data:
-            self.condition = query_data["condition"]
-            self.rules = query_data["rules"]
+            if query_data:
+                self.condition = query_data["condition"]
+                self.rules = query_data["rules"]
 
-        self.report_type = report_type
-        self.date_fields = self.report_type.get_all_fields_of_type("date")
-        self.ref_fields = self.report_type.get_all_fields_of_type("ref")
-        self.ref_section_fields = self.report_type.get_all_fields_of_type("ref-section-field")
-        self.mds_fields = self.report_type.get_all_mds_fields()
+            self.report_type = report_type
+            self.date_fields = self.report_type.get_all_fields_of_type("date")
+            self.ref_fields = self.report_type.get_all_fields_of_type("ref")
+            self.ref_section_fields = self.report_type.get_all_fields_of_type("ref-section-field")
+            self.mds_fields = self.report_type.get_all_mds_fields()
+        except Exception as err:
+            LOGGER.debug("[__init__] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
+
 
     def build(self):
         """
@@ -73,7 +77,6 @@ class MongoDBQueryBuilder:
                 else:
                     children.append(self.__build_rule(rule["field"], rule["operator"]))
 
-
         possible_conditions = {
             "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
             "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
@@ -82,43 +85,79 @@ class MongoDBQueryBuilder:
         return possible_conditions[condition]
 
 
-    def __build_rule(self, field: str, operator: str, value: Union[int, str, list[str]] = None):
+    def __build_rule(self, field_name: str, operator: str, value: Union[int, str, list[str]] = None):
         """TODO: document"""
-        target_field_name = 'fields.name'
-        target_field_value = 'fields.value'
+        target_field = 'fields'
         target_value = value
 
-        if field in self.date_fields and value:
+        if field_name in self.date_fields and value:
             try:
                 target_value = datetime.strptime(value, '%Y-%m-%d')
             except Exception as err:
                 LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
 
-        if (field in self.ref_fields or field in self.ref_section_fields) and value:
+        if (field_name in self.ref_fields or field_name in self.ref_section_fields) and value:
             try:
                 target_value = int(value)
             except Exception as err:
                 LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
 
-        if field in self.mds_fields:
-            target_field_name = 'multi_data_sections.values.data.name'
-            target_field_value = 'multi_data_sections.values.data.value'
+        if field_name in self.mds_fields:
+            target_field = 'multi_data_sections.values.data'
 
-        possible_operators = {
-            "=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$eq": target_value}}]},
-            "!=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$ne": target_value}}]},
-            "<=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lte": target_value}}]},
-            ">=": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gte": target_value}}]},
-            "<": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$lt": target_value}}]},
-            ">": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$gt": target_value}}]},
-            "in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$in": target_value}}]},
-            "not in": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$nin": target_value}}]},
-            "contains": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: {"$regex": target_value}}]},
-            "like": {'$and':[{target_field_name: {'$eq':field}}, {target_field_value: "/"+str(target_value)+"/"}]},
-            "is null": {'$and':[{target_field_name: {'$eq':field}}, {'$or':[{target_field_value: None},
-                                                                            {target_field_value: ""}]}]},
-            "is not null": {'$and':[{target_field_name: {'$eq':field}}, {'$and':[{target_field_value: {"$ne": None}},
-                                                                                {target_field_value: {"$ne": ""}}]}]},
+        try:
+            return self.create_rule(target_field, operator, field_name, target_value)
+        except Exception as err:
+            raise Exception(err) from err
+
+
+# ------------------------------------------------------ HELPERS ----------------------------------------------------- #
+
+    def create_rule(self,
+                               target_field: str,
+                               operator: str,
+                               field_name: str,
+                               value: Union[int, str, list[int], list[str]] = None) -> dict:
+        """TODO:"""
+        return  {
+                    target_field: self.get_operator_fragment(operator, field_name, value)
+                }
+
+
+    def get_operator_fragment(self,
+                              operator: str,
+                              field_name: str,
+                              value: Union[int, str, list[int], list[str]] = None) -> dict:
+        """TODO: document"""
+        return {
+                    "$elemMatch": {
+                        "name": field_name,
+                        "value": self.get_value_fragment(operator, value)
+                    }
+               }
+
+
+    def get_value_fragment(self,
+                           operator: str,
+                           value: Union[int, str, list[int], list[str]] = None) -> Union[dict, str]:
+        """TODO: document"""
+
+        allowed_operators = {
+            "=": {"$eq": value},
+            "!=": {"$ne": value},
+            "<=": {"$lte": value},
+            ">=": {"$gte": value},
+            "<": {"$lt": value},
+            ">": {"$gt": value},
+            "in": {"$in": value},
+            "not in": {"$nin": value},
+            "contains": {"$regex": value},
+            "like": "/"+str(value)+"/",
+            "is null": {"$in": [None, ""]},
+            "is not null": {"$nin": [None, ""]},
         }
 
-        return possible_operators[operator]
+        if operator in allowed_operators:
+            return allowed_operators[operator]
+
+        raise Exception("Invalid operator: %s !", operator)

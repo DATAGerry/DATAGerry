@@ -32,6 +32,7 @@ from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.validator import TokenValidator
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.models.group_model.group import UserGroupModel
+from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.reports_model.cmdb_report_category import CmdbReportCategory
@@ -333,6 +334,10 @@ def init_db_routine(db_name: str):
     # Generate groups
     for group in __FIXED_GROUPS__:
         groups_manager.insert_group(group)
+
+    # Generate the root location
+    current_app.database_manager.set_root_location(CmdbLocation.COLLECTION, create=True)
+    LOGGER.info("Root Location created!")
 
     # Generate predefined section templates
     current_app.database_manager.init_predefined_templates(CmdbSectionTemplate.COLLECTION)

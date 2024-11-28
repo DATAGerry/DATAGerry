@@ -182,12 +182,17 @@ def run_report_query(public_id: int, request_user: UserModel):
         safe_globals = {"datetime": datetime}
         report_query = eval(processed_query_string, safe_globals)
 
-        # LOGGER.debug(f"run_report_query: {report_query}")
+        result = {}
 
-        builder_params = BuilderParameters(criteria=report_query)
+        #Only execute the report if there are conditions
+        if len(report_query) > 0:
+            # LOGGER.debug(f"run_report_query: {report_query}")
 
-        result = objects_manager.iterate(builder_params).results
+            builder_params = BuilderParameters(criteria=report_query)
 
+            result = objects_manager.iterate(builder_params).results
+
+            # LOGGER.debug(f"len results: {len(result)}")
         api_response = DefaultResponse(result)
     except Exception as err:
         LOGGER.debug("[run_report_query] Exception: %s, Type: %s", err, type(err))

@@ -341,21 +341,26 @@ class TypeModel(CmdbDAO):
                  active: bool = True,  selectable_as_parent: bool = True,
                  global_template_ids: list[int] = None, fields: list = None, version: str = None,
                  label: str = None, description: str = None, acl: AccessControlList = None):
-        self.name: str = name
-        self.label: str = label or self.name.title()
-        self.description: str = description
-        self.version: str = version or TypeModel.DEFAULT_VERSION
-        self.selectable_as_parent: bool = selectable_as_parent
-        self.global_template_ids: list = global_template_ids or []
-        self.active: bool = active
-        self.author_id: int = author_id
-        self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
-        self.editor_id: int = editor_id
-        self.last_edit_time: datetime = last_edit_time
-        self.render_meta: TypeRenderMeta = render_meta
-        self.fields: list = fields or []
-        self.acl: AccessControlList = acl
-        super().__init__(public_id=public_id)
+        try:
+            self.name: str = name
+            self.label: str = label or self.name.title()
+            self.description: str = description
+            self.version: str = version or TypeModel.DEFAULT_VERSION
+            self.selectable_as_parent: bool = selectable_as_parent
+            self.global_template_ids: list = global_template_ids or []
+            self.active: bool = active
+            self.author_id: int = author_id
+            self.creation_time: datetime = creation_time or datetime.now(timezone.utc)
+            self.editor_id: int = editor_id
+            self.last_edit_time: datetime = last_edit_time
+            self.render_meta: TypeRenderMeta = render_meta
+            self.fields: list = fields or []
+            self.acl: AccessControlList = acl
+
+            super().__init__(public_id=public_id)
+        except Exception as err:
+            LOGGER.debug("[__init__] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 # -------------------------------------------------- CLASS FUNCTIONS ------------------------------------------------- #
 
@@ -370,53 +375,61 @@ class TypeModel(CmdbDAO):
         Returns:
             TypeModel: TypeModel class with given data
         """
-        creation_time = data.get('creation_time', None)
-        if creation_time and isinstance(creation_time, str):
-            creation_time = parse(creation_time, fuzzy=True)
+        try:
+            creation_time = data.get('creation_time', None)
+            if creation_time and isinstance(creation_time, str):
+                creation_time = parse(creation_time, fuzzy=True)
 
-        last_edit_time = data.get('last_edit_time', None)
-        if last_edit_time and isinstance(last_edit_time, str):
-            last_edit_time = parse(last_edit_time, fuzzy=True)
+            last_edit_time = data.get('last_edit_time', None)
+            if last_edit_time and isinstance(last_edit_time, str):
+                last_edit_time = parse(last_edit_time, fuzzy=True)
 
-        return cls(
-            public_id = data.get('public_id'),
-            name = data.get('name'),
-            selectable_as_parent = data.get('selectable_as_parent', True),
-            global_template_ids = data.get('global_template_ids', []),
-            active = data.get('active', True),
-            author_id = data.get('author_id'),
-            creation_time = creation_time,
-            editor_id = data.get('editor_id', None),
-            last_edit_time = last_edit_time,
-            label = data.get('label', None),
-            version = data.get('version', None),
-            description = data.get('description', None),
-            render_meta = TypeRenderMeta.from_data(data.get('render_meta', {})),
-            fields = data.get('fields', None) or [],
-            acl = AccessControlList.from_data(data.get('acl', {}))
-        )
+            return cls(
+                public_id = data.get('public_id'),
+                name = data.get('name'),
+                selectable_as_parent = data.get('selectable_as_parent', True),
+                global_template_ids = data.get('global_template_ids', []),
+                active = data.get('active', True),
+                author_id = data.get('author_id'),
+                creation_time = creation_time,
+                editor_id = data.get('editor_id', None),
+                last_edit_time = last_edit_time,
+                label = data.get('label', None),
+                version = data.get('version', None),
+                description = data.get('description', None),
+                render_meta = TypeRenderMeta.from_data(data.get('render_meta', {})),
+                fields = data.get('fields', None) or [],
+                acl = AccessControlList.from_data(data.get('acl', {}))
+            )
+        except Exception as err:
+            LOGGER.debug("[from_data] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 
     @classmethod
     def to_json(cls, instance: "TypeModel") -> dict:
         """Convert a type instance to json conform data"""
-        return {
-            'public_id': instance.get_public_id(),
-            'name': instance.name,
-            'selectable_as_parent': instance.selectable_as_parent,
-            'global_template_ids': instance.global_template_ids,
-            'active': instance.active,
-            'author_id': instance.author_id,
-            'creation_time': instance.creation_time,
-            'editor_id': instance.editor_id,
-            'last_edit_time': instance.last_edit_time,
-            'label': instance.label,
-            'version': instance.version,
-            'description': instance.description,
-            'render_meta': TypeRenderMeta.to_json(instance.render_meta),
-            'fields': instance.fields,
-            'acl': AccessControlList.to_json(instance.acl)
-        }
+        try:
+            return {
+                'public_id': instance.get_public_id(),
+                'name': instance.name,
+                'selectable_as_parent': instance.selectable_as_parent,
+                'global_template_ids': instance.global_template_ids,
+                'active': instance.active,
+                'author_id': instance.author_id,
+                'creation_time': instance.creation_time,
+                'editor_id': instance.editor_id,
+                'last_edit_time': instance.last_edit_time,
+                'label': instance.label,
+                'version': instance.version,
+                'description': instance.description,
+                'render_meta': TypeRenderMeta.to_json(instance.render_meta),
+                'fields': instance.fields,
+                'acl': AccessControlList.to_json(instance.acl)
+            }
+        except Exception as err:
+            LOGGER.debug("[to_json] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 # ------------------------------------------------- GENERAL FUNCTIONS ------------------------------------------------ #
 

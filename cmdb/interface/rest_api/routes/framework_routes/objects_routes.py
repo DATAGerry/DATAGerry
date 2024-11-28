@@ -790,40 +790,51 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
             removed_type_fields = [item for item in incorrect if not item in correct]
 
             for field in removed_type_fields:
-                objects_manager.update(criteria={'public_id': obj.public_id},
-                                       data={'$pull': {'fields': {"name": field}}},
-                                       add_to_set=False)
-                # objects_manager.update_many_objects(query={'public_id': obj.public_id},
-                #                                     update={'$pull': {'fields': {"name": field}}})
+                try:
+                    objects_manager.update(criteria={'public_id': obj.public_id},
+                                        data={'$pull': {'fields': {"name": field}}},
+                                        add_to_set=False)
+                    # objects_manager.update_many_objects(query={'public_id': obj.public_id},
+                    #                                     update={'$pull': {'fields': {"name": field}}})
+                except Exception as error:
+                    LOGGER.debug("Clean Removed Type Fields - Update Object: %s, Type: %s", error, type(error))
+                    return abort(500, "Could not clean objects!")
+                    # Check all reports and clear selected_fields and conditions
 
-                # Check all reports and clear selected_fields and conditions
-                a_report: CmdbReport
-                for a_report in reports_for_type:
-                    a_report = CmdbReport(**a_report)
-                    a_report.remove_field_occurences(field)
-                    a_report.report_query = {'data': str(MongoDBQueryBuilder(a_report.conditions,
-                                                         TypeModel.from_data(update_type_instance)).build())}
+                try:
+                    for a_report in reports_for_type:
+                        a_report = CmdbReport.from_data(a_report)
+                        a_report.remove_field_occurences(field)
+                        a_report.report_query = {'data': str(MongoDBQueryBuilder(a_report.conditions,
+                                                            update_type_instance).build())}
 
-                    reports_manager.update({'public_id': a_report.public_id}, a_report.__dict__)
+                        reports_manager.update({'public_id': a_report.public_id}, a_report.__dict__)
+                except Exception as error:
+                    LOGGER.debug("Clean Removed Type Fields - Clean Reports: %s, Type: %s", error, type(error))
+                    return abort(500, "Could not clean objects!")
 
 
 
         objects_by_type = objects_manager.iterate(builder_params, request_user).results
 
-        for obj in objects_by_type:
-            for t_field in type_fields:
-                name = t_field["name"]
-                value = None
+        try:
+            for obj in objects_by_type:
+                for t_field in type_fields:
+                    name = t_field["name"]
+                    value = None
 
-                if [item for item in obj.get_all_fields() if item["name"] == name]:
-                    continue
+                    if [item for item in obj.get_all_fields() if item["name"] == name]:
+                        continue
 
-                if "value" in t_field:
-                    value = t_field["value"]
+                    if "value" in t_field:
+                        value = t_field["value"]
 
-                objects_manager.update_many_objects(query={'public_id': obj.public_id},
-                                                    update={'fields': {"name": name, "value": value}},
-                                                    add_to_set=True)
+                    objects_manager.update_many_objects(query={'public_id': obj.public_id},
+                                                        update={'fields': {"name": name, "value": value}},
+                                                        add_to_set=True)
+        except Exception as error:
+            LOGGER.debug("Clean Update Type Fields: %s, Type: %s", error, type(error))
+            return abort(500, "Could not clean objects!")
 
         api_response = UpdateMultiResponse([])
 
