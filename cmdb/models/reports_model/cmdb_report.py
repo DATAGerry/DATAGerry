@@ -102,16 +102,20 @@ class CmdbReport(CmdbDAO):
             mds_mode: str = MdsMode.ROWS,
             **kwargs):
         """TODO: document"""
-        self.report_category_id = report_category_id
-        self.name = name
-        self.type_id = type_id
-        self.selected_fields = selected_fields
-        self.conditions = conditions
-        self.report_query = report_query
-        self.predefined = predefined
-        self.mds_mode = mds_mode
+        try:
+            self.report_category_id = report_category_id
+            self.name = name
+            self.type_id = type_id
+            self.selected_fields = selected_fields
+            self.conditions = conditions
+            self.report_query = report_query
+            self.predefined = predefined
+            self.mds_mode = mds_mode
 
-        super().__init__(**kwargs)
+            super().__init__(**kwargs)
+        except Exception as err:
+            LOGGER.debug("[__init__] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 
     def get_selected_fields(self) -> list:
@@ -121,12 +125,16 @@ class CmdbReport(CmdbDAO):
 
     def remove_field_occurences(self, field_name: str):
         """TODO: document"""
-        # Remove field from selected fields
-        if field_name in self.selected_fields:
-            self.selected_fields.remove(field_name)
+        try:
+            # Remove field from selected fields
+            if field_name in self.selected_fields:
+                self.selected_fields.remove(field_name)
 
-        # Remove field from conditions
-        self.conditions = self.clear_rules_of_field(self.conditions, field_name)
+            # Remove field from conditions
+            self.conditions = self.clear_rules_of_field(self.conditions, field_name)
+        except Exception as err:
+            LOGGER.debug("[remove_field_occurences] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 
     def clear_rules_of_field(self, conditions: dict, field_name: str):
@@ -162,30 +170,38 @@ class CmdbReport(CmdbDAO):
         """
         Convert data to instance of CmdbReport
         """
-        return cls(
-            public_id = data.get('public_id'),
-            report_category_id = data.get('report_category_id'),
-            name = data.get('name'),
-            type_id = data.get('type_id'),
-            selected_fields = data.get('selected_fields'),
-            conditions = data.get('conditions'),
-            report_query = data.get('report_query'),
-            mds_mode = data.get('mds_mode'),
-            predefined = data.get('predefined'),
-        )
+        try:
+            return cls(
+                public_id = data.get('public_id'),
+                report_category_id = data.get('report_category_id'),
+                name = data.get('name'),
+                type_id = data.get('type_id'),
+                selected_fields = data.get('selected_fields'),
+                conditions = data.get('conditions'),
+                report_query = data.get('report_query'),
+                mds_mode = data.get('mds_mode'),
+                predefined = data.get('predefined'),
+            )
+        except Exception as err:
+            LOGGER.debug("[from_data] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
 
 
     @classmethod
     def to_json(cls, instance: "CmdbReport") -> dict:
         """Convert a CmdbReport instance to json conform data"""
-        return {
-            'public_id': instance.get_public_id(),
-            'report_category_id': instance.report_category_id,
-            'name': instance.name,
-            'type_id': instance.type_id,
-            'selected_fields': instance.selected_fields,
-            'conditions': instance.conditions,
-            'report_query': instance.report_query,
-            'predefined': instance.predefined,
-            'mds_mode': instance.mds_mode,
-        }
+        try:
+            return {
+                'public_id': instance.get_public_id(),
+                'report_category_id': instance.report_category_id,
+                'name': instance.name,
+                'type_id': instance.type_id,
+                'selected_fields': instance.selected_fields,
+                'conditions': instance.conditions,
+                'report_query': instance.report_query,
+                'predefined': instance.predefined,
+                'mds_mode': instance.mds_mode,
+            }
+        except Exception as err:
+            LOGGER.debug("[to_json] Exception: %s, Type: %s", err, type(err))
+            raise Exception(err) from err
