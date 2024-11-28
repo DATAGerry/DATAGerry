@@ -42,6 +42,7 @@ import { PasswordControl } from 'src/app/framework/type/builder/controls/text/pa
 import { TextControl } from 'src/app/framework/type/builder/controls/text/text.control';
 import { TextAreaControl } from 'src/app/framework/type/builder/controls/text/textarea.control';
 import { CmdbSectionTemplate } from 'src/app/framework/models/cmdb-section-template';
+import { NumberControl } from 'src/app/framework/type/builder/controls/number/number.control';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -75,6 +76,7 @@ export class SectionTemplateBuilderComponent implements OnInit {
 
     public basicControls = [
         new Controller('text', new TextControl()),
+        new Controller('number', new NumberControl()),
         new Controller('password', new PasswordControl()),
         new Controller('textarea', new TextAreaControl()),
         new Controller('checkbox', new CheckboxControl()),
