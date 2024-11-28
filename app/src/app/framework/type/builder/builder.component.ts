@@ -58,6 +58,7 @@ import { MultiSectionControl } from './controls/multi-section.control';
 import { SectionIdentifierService } from '../services/SectionIdentifierService.service';
 import { FieldIdentifierValidationService } from '../services/field-identifier-validation.service';
 import { BuilderUtils } from './utils/builder-utils';
+import { NumberControl } from './controls/number/number.control';
 /* ------------------------------------------------------------------------------------------------------------------ */
 declare var $: any;
 
@@ -136,6 +137,7 @@ export class BuilderComponent implements OnChanges, OnDestroy, AfterViewChecked 
 
     public basicControls = [
         new Controller('text', new TextControl()),
+        new Controller('number', new NumberControl()),
         new Controller('password', new PasswordControl()),
         new Controller('textarea', new TextAreaControl()),
         new Controller('checkbox', new CheckboxControl()),

@@ -33,6 +33,7 @@ import { TextFieldEditComponent } from './configs/text/text-field-edit.component
 import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
 import { SectionMultiFieldEditComponent } from './configs/section/section-multi-field-edit.component';
 import { TextareaEditComponent } from './configs/text/textarea-edit.component';
+import { NumberFieldEditComponent } from './configs/number/number-field-edit.component';
 import { RefFieldEditComponent } from './configs/special/ref-field-edit.component';
 import { LocationFieldEditComponent } from './configs/special/location-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/choice/choice-field-edit.component';
@@ -65,6 +66,7 @@ import { ColorChromeModule } from 'ngx-color/chrome';
         ConfigEditComponent,
         BuilderComponent,
         TextFieldEditComponent,
+        NumberFieldEditComponent,
         SectionFieldEditComponent,
         SectionMultiFieldEditComponent,
         TextareaEditComponent,
