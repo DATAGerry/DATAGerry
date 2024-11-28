@@ -210,7 +210,6 @@ export class RunReportComponent implements OnInit {
                 continue;
             }
 
-
             const baseItem: any = {
                 public_id: reportResult.public_id
             };
@@ -287,16 +286,39 @@ export class RunReportComponent implements OnInit {
 
                                 mdsFields[fieldName] = fieldValue;
                             }
-                            mdsValuesArray.push(mdsFields);
+                            if (Object.keys(mdsFields).length > 0) {
+                                mdsValuesArray.push(mdsFields);
+                            }
                         }
-                        mdsValuesPerSection.push(mdsValuesArray);
+                        if (mdsValuesArray.length > 0) {
+                            mdsValuesPerSection.push(mdsValuesArray);
+                        }
                     }
 
                     // Compute the Cartesian product of MDS values
                     const cartesianProduct = this.computeCartesianProduct(mdsValuesPerSection);
 
-                    // For each combination, create an item
-                    for (const combination of cartesianProduct) {
+                    if (cartesianProduct.length > 0) {
+                        // For each combination, create an item
+                        for (const combination of cartesianProduct) {
+                            const item = { ...baseItem };
+
+                            // Copy over the field values
+                            for (const [fieldName, fieldValue] of fieldValues.entries()) {
+                                item[fieldName] = fieldValue;
+                            }
+
+                            // Merge the MDS fields from the combination
+                            for (const mdsFields of combination) {
+                                for (const [fieldName, fieldValue] of Object.entries(mdsFields)) {
+                                    item[fieldName] = fieldValue;
+                                }
+                            }
+
+                            this.items.push(item);
+                        }
+                    } else {
+                        // If the Cartesian product is empty, add the base item
                         const item = { ...baseItem };
 
                         // Copy over the field values
@@ -304,17 +326,10 @@ export class RunReportComponent implements OnInit {
                             item[fieldName] = fieldValue;
                         }
 
-                        // Merge the MDS fields from the combination
-                        for (const mdsFields of combination) {
-                            for (const [fieldName, fieldValue] of Object.entries(mdsFields)) {
-                                item[fieldName] = fieldValue;
-                            }
-                        }
-
                         this.items.push(item);
                     }
                 } else {
-                    // If there are no MDS values, add the base item
+                    // If there are no MDS sections, add the base item
                     const item = { ...baseItem };
 
                     // Copy over the field values
@@ -324,9 +339,8 @@ export class RunReportComponent implements OnInit {
 
                     this.items.push(item);
                 }
-            }
-
-            else if (this.mdsMode === 'COLUMNS') {
+            } else if (this.mdsMode === 'COLUMNS') {
+                // Existing code for COLUMNS mode
 
                 // Create a single item, combining MDS field values
                 const item = { ...baseItem };
@@ -353,7 +367,6 @@ export class RunReportComponent implements OnInit {
 
                                 let fieldValue = mdsField.value;
 
-
                                 // Handle date formatting
                                 if (fieldValue && fieldValue.$date) {
                                     fieldValue = new Date(fieldValue.$date).toLocaleDateString();
@@ -374,7 +387,6 @@ export class RunReportComponent implements OnInit {
                     }
                 }
 
-
                 // Combine MDS field values using newline separator
                 for (const [fieldName, values] of mdsFieldValues.entries()) {
                     item[fieldName] = values.join('\n');
@@ -383,12 +395,8 @@ export class RunReportComponent implements OnInit {
                 // Only add the item if it has fields (other than public_id)
                 if (Object.keys(item).length > 1) {
                     this.items.push(item);
-                } else {
-                    // console.warn(`Item for public_id ${reportResult.public_id} has no data to display.`);
                 }
-            }
-
-            else {
+            } else {
                 // Default behavior if mdsMode is not specified
                 const item = { ...baseItem };
 
@@ -413,6 +421,11 @@ export class RunReportComponent implements OnInit {
      */
     private computeCartesianProduct(arrays: any[][]): any[][] {
         if (arrays.length === 0) {
+            return [[]]; // Return an array with an empty array
+        }
+
+        // If any of the arrays are empty, the Cartesian product should be empty
+        if (arrays.some(arr => arr.length === 0)) {
             return [];
         }
 
@@ -675,7 +688,10 @@ export class RunReportComponent implements OnInit {
                                             });
                                             flattenedData.push(row);
                                         });
-                                    } else {
+                                    }
+
+
+                                    else {
                                         // Default COLUMNS mode
                                         const row = { ...baseData };
 
