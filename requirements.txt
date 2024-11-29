@@ -9,7 +9,7 @@ certifi==2024.6.2
 cffi==1.16.0
 click==8.1.7
 coverage==7.5.4
-cryptography==42.0.8
+cryptography==43.0.1
 deepdiff==6.7.1
 docutils==0.21.2
 et-xmlfile==1.1.0
