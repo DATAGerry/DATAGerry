@@ -15,7 +15,7 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit, SimpleChanges } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
 import { ReplaySubject, Subscription } from 'rxjs';
@@ -76,6 +76,7 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
 
         this.isValid$ = this.form.valid;
 
+
         // Subscribe to form status changes and update isValid$ based on form validity
         this.form.statusChanges.subscribe(() => {
             this.isValid$ = this.form.valid;
@@ -92,6 +93,13 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
         this.subscriber.complete();
         if (this.activeIndexSubscription) {
             this.activeIndexSubscription.unsubscribe();
+        }
+    }
+
+
+    public ngOnChanges(changes: SimpleChanges): void {
+        if (changes.data && !changes.data.firstChange) {
+            this.updateFormControls(changes.data.currentValue);
         }
     }
 
@@ -158,5 +166,19 @@ export class SectionFieldEditComponent extends ConfigEditBaseComponent implement
                 this.isIdentifierValid = true;
             }
         }, 200);
+    }
+
+
+    /**
+     * Updates form controls with new data.
+     * @param newData - The new data object to patch into the form.
+     */
+    private updateFormControls(newData: any) {
+        if (newData) {
+            this.form.patchValue({
+                label: newData.label,
+                name: newData.name
+            });
+        }
     }
 }
