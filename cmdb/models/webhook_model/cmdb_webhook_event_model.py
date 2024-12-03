@@ -45,6 +45,7 @@ class CmdbWebhookEvent(CmdbDAO):
     REQUIRED_INIT_KEYS = [
         'event_time',
         'operation',
+        'webhook_id',
         'object_before',
         'object_after',
         'changes',
@@ -59,10 +60,12 @@ class CmdbWebhookEvent(CmdbDAO):
         'event_time': {
             'type': 'dict',
             'nullable': True,
-            'required': False
         },
         'operation': {
             'type': 'string',
+        },
+        'webhook_id': {
+            'type': 'integer'
         },
         'object_before': {
             'type': 'dict',
@@ -92,6 +95,7 @@ class CmdbWebhookEvent(CmdbDAO):
             self,
             event_time,
             operation: WebhookEventType,
+            webhook_id: int,
             object_before: dict,
             object_after: dict,
             changes: dict,
@@ -101,6 +105,7 @@ class CmdbWebhookEvent(CmdbDAO):
         """TODO: document"""
         self.event_time = event_time
         self.operation = operation
+        self.webhook_id = webhook_id
         self.object_before = object_before
         self.object_after = object_after
         self.changes = changes
@@ -120,6 +125,7 @@ class CmdbWebhookEvent(CmdbDAO):
             public_id = data.get('public_id'),
             event_time = data.get('event_time', None),
             operation = data.get('operation', None),
+            webhook_id = data.get('webhook_id', None),
             object_before = data.get('object_before', None),
             object_after = data.get('object_after', None),
             changes = data.get('changes', None),
@@ -135,6 +141,7 @@ class CmdbWebhookEvent(CmdbDAO):
             'public_id': instance.get_public_id(),
             'event_time': instance.event_time,
             'operation': instance.operation,
+            'webhook_id': instance.webhook_id,
             'object_before': instance.object_before,
             'object_after': instance.object_after,
             'changes': instance.changes,

@@ -54,7 +54,7 @@ class Update20200512(Updater):
 
         for category in new_categories:
             try:
-                self.categories_manager.insert_category(category.to_json())
+                self.categories_manager.insert_category(CategoryModel.to_json(category))
             except ObjectManagerInsertError:
                 continue
         self.__clear_up_types()

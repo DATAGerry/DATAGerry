@@ -31,10 +31,12 @@ from cmdb.manager.object_links_manager import ObjectLinksManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.logs_manager import LogsManager
 from cmdb.manager.reports_manager import ReportsManager
+from cmdb.manager.webhooks_manager import WebhooksManager
 
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.type_model.type import TypeModel
+from cmdb.models.webhook_model.webhook_event_type_enum import WebhookEventType
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.log_model.log_action_enum import LogAction
@@ -82,6 +84,7 @@ def insert_object(request_user: UserModel):
 
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
@@ -119,6 +122,9 @@ def insert_object(request_user: UserModel):
 
         try:
             current_object = objects_manager.get_object(new_object_id)
+
+            #EVENT: CREATE-EVENT
+            webhooks_manager.send_webhook_event(WebhookEventType.CREATE, CmdbObject.to_json(current_object))
         except Exception as err:
             #TODO: ERROR-FIX
             LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
@@ -549,6 +555,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
     """TODO: document"""
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     object_ids = request.args.getlist('objectIDs')
 
@@ -564,6 +571,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
         # deep copy
         active_state = request.get_json().get('active', None)
         new_data = copy.deepcopy(data)
+
         try:
             current_object_instance = objects_manager.get_object(obj_id, request_user, AccessControlPermission.READ)
             current_type_instance = objects_manager.get_object_type(current_object_instance.get_type_id())
@@ -628,6 +636,15 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
             objects_manager.update_object(obj_id, new_data, request_user, AccessControlPermission.UPDATE)
             results.append(new_data)
 
+            #EVENT: UPDATE-EVENT
+            try:
+                webhooks_manager.send_webhook_event(WebhookEventType.UPDATE,
+                                                    CmdbObject.to_json(current_object_instance),
+                                                    changes)
+            except Exception as error:
+                #TODO: ERROR-FIX
+                LOGGER.debug("[update_object] Webhook Event Exception: %s, Type:%s", error, type(error))
+
             # Generate log entry
             try:
                 log_data = {
@@ -674,6 +691,7 @@ def update_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     if isinstance(request.json, bool):
         state = request.json
@@ -693,6 +711,7 @@ def update_object_state(public_id: int, request_user: UserModel):
                                       found_object,
                                       request_user,
                                       AccessControlPermission.UPDATE)
+
     except AccessDeniedError as err:
         #TODO: ERROR-FIX
         LOGGER.error("AccessDeniedError: %s", err)
@@ -719,6 +738,10 @@ def update_object_state(public_id: int, request_user: UserModel):
         return abort(500)
 
     try:
+        #EVENT: UPDATE-EVENT
+        webhooks_manager.send_webhook_event(WebhookEventType.UPDATE,
+                                            CmdbObject.to_json(found_object),
+                                            {'state': state})
         # generate log
         change = {
             'old': not state,
@@ -865,6 +888,7 @@ def delete_object(public_id: int, request_user: UserModel):
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     current_location = None
 
@@ -920,6 +944,9 @@ def delete_object(public_id: int, request_user: UserModel):
         return abort(500)
 
     try:
+        #EVENT: DELETE-EVENT
+        webhooks_manager.send_webhook_event(WebhookEventType.DELETE, CmdbObject.to_json(current_object_instance))
+
         # generate log
         log_data = {
             'object_id': public_id,
@@ -976,7 +1003,7 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
             locations_manager.delete({'public_id':current_location.public_id})
 
             deleted = objects_manager.delete_object(public_id, request_user, permission=AccessControlPermission.DELETE)
-
+            # DELETE EVENT
         else:
             # something went wrong, either object or location don't exist
             return abort(404)
@@ -1012,6 +1039,7 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     """
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     try:
         # check if object exists
@@ -1048,6 +1076,8 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
             # # delete the current object and its location
             locations_manager.delete({'public_id':current_location.public_id})
             deleted = objects_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
+            #EVENT: DELETE-EVENT
+            webhooks_manager.send_webhook_event(WebhookEventType.DELETE, CmdbObject.to_json(current_object_instance))
         else:
             # something went wrong, either object or location don't exist
             return abort(404)
@@ -1074,6 +1104,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS_MANAGER, request_user)
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+    webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     try:
         ids = []
@@ -1103,6 +1134,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
             except ManagerGetError:
                 pass
 
+        current_object_instance: CmdbObject
         for current_object_instance in objects:
             try:
                 # Remove object links and references
@@ -1127,6 +1159,10 @@ def delete_many_objects(public_ids, request_user: UserModel):
                 ack.append(objects_manager.delete_object(current_object_instance.get_public_id(),
                                                          request_user,
                                                          AccessControlPermission.DELETE))
+
+                #EVENT: DELETE-EVENT
+                webhooks_manager.send_webhook_event(WebhookEventType.DELETE,
+                                                    CmdbObject.to_json(current_object_instance))
             except ObjectManagerDeleteError:
                 #TODO: ERROR-FIX
                 return abort(400)

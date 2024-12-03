@@ -166,6 +166,7 @@ class MongoDatabaseManager(DatabaseManager):
         result = self.get_collection(collection).update_many(criteria, formatted_data)
 
         if not result.acknowledged:
+            #TODO: ERROR-FIX
             raise DocumentCouldNotBeDeleted(collection)
 
         return result
@@ -349,7 +350,8 @@ class MongoDatabaseManager(DatabaseManager):
 
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
-        """removes all documents that match the filter from a collection.
+        """
+        Removes all documents that match the filter from a collection
 
         Args:
             collection (str): name of database collection

@@ -43,6 +43,7 @@ class MongoDBQueryBuilder:
                 self.rules = query_data["rules"]
 
             self.report_type = report_type
+            self.number_fields = self.report_type.get_all_fields_of_type("number")
             self.date_fields = self.report_type.get_all_fields_of_type("date")
             self.ref_fields = self.report_type.get_all_fields_of_type("ref")
             self.ref_section_fields = self.report_type.get_all_fields_of_type("ref-section-field")
@@ -96,7 +97,9 @@ class MongoDBQueryBuilder:
             except Exception as err:
                 LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
 
-        if (field_name in self.ref_fields or field_name in self.ref_section_fields) and value:
+        if (field_name in self.ref_fields or
+            field_name in self.ref_section_fields or
+            field_name in self.number_fields) and value:
             try:
                 target_value = int(value)
             except Exception as err:

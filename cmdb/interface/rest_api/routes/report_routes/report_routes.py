@@ -179,6 +179,7 @@ def run_report_query(public_id: int, request_user: UserModel):
         processed_query_string = re.sub(DATETIME_PATTERN,
                                         replace_datetime,
                                         query_str.replace("datetime.datetime", "datetime"))
+
         safe_globals = {"datetime": datetime}
         report_query = eval(processed_query_string, safe_globals)
 
