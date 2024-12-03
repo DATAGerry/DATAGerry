@@ -27,6 +27,7 @@ from cmdb.models.right_model.framework_rights import (
     CategoryRight,
     LogRight,
     SectionTemplateRight,
+    WebhookRight,
 )
 from cmdb.models.right_model.export_rights import ExportRight, ExportObjectRight, ExportTypeRight
 from cmdb.models.right_model.docapi_rights import DocapiRight, DocapiTemplateRight
@@ -44,7 +45,6 @@ SYSTEM_RIGHTS = (
 
 FRAMEWORK_RIGHTS = (
     FrameworkRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage the core framework'),
-
     (
         ObjectRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage objects from framework'),
         (
@@ -82,6 +82,15 @@ FRAMEWORK_RIGHTS = (
             SectionTemplateRight('add', description='Add section templates'),
             SectionTemplateRight('edit', Levels.PROTECTED, description='Edit section templates'),
             SectionTemplateRight('delete', Levels.SECURE, description='Delete section templates'),
+        )
+    ),
+    (
+        WebhookRight(GLOBAL_RIGHT_IDENTIFIER, description='Manage webhooks'),
+        (
+            WebhookRight('view', description='View webhooks'),
+            WebhookRight('add', description='Add webhooks'),
+            WebhookRight('edit', Levels.PROTECTED, description='Edit webhooks'),
+            WebhookRight('delete', Levels.DANGER, description='Delete webhooks'),
         )
     ),
     (

@@ -75,3 +75,13 @@ class LogRight(FrameworkRight):
 
     def __init__(self, name: str, level: Levels = Levels.PROTECTED, description: str = None):
         super().__init__(name, level, description=description)
+
+
+class WebhookRight(FrameworkRight):
+    """TODO: document"""
+    MIN_LEVEL = Levels.PROTECTED
+    MAX_LEVEL = Levels.DANGER
+    PREFIX = f'{FrameworkRight.PREFIX}.webhook'
+
+    def __init__(self, name: str, level: Levels = MIN_LEVEL, description: str = None):
+        super().__init__(name, level, description=description)
