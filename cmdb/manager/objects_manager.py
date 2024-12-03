@@ -525,16 +525,6 @@ class ObjectsManager(BaseManager):
             raise ObjectManagerDeleteError(str(err)) from err
 
 
-    def delete_many_objects(self, filter_query: dict, public_ids, user: UserModel):
-        """TODO: document"""
-        try:
-            ack = self.delete_many(filter_query)
-        except Exception as err:
-            raise ObjectManagerDeleteError(str(err)) from err
-
-        return ack
-
-
     def delete_all_object_references(self, public_id: int):
         """
         Delete all references to the object with the given public_id
@@ -542,16 +532,16 @@ class ObjectsManager(BaseManager):
         Args:
             public_id (int): public_id of targeted object
         """
-        object_instance: CmdbObject = self.get_object(public_id)
+        object_instance = self.get_object(public_id)
         # Get all objects which reference the targeted object
-        iteration_result: IterationResult = self.references(
-                                                    object_=object_instance,
-                                                    criteria={'$match': {'active': {'$eq': True}}},
-                                                    limit=0,
-                                                    skip=0,
-                                                    sort='public_id',
-                                                    order=1
-                                                )
+        iteration_result = self.references(
+                                object_=object_instance,
+                                criteria={'$match': {'active': {'$eq': True}}},
+                                limit=0,
+                                skip=0,
+                                sort='public_id',
+                                order=1
+                            )
 
         referenced_objects: list[dict] =  [object_.__dict__ for object_ in iteration_result.results]
 

@@ -17,12 +17,18 @@
 This module contains the implementation of the WebhooksManager
 """
 import logging
+import json
+from datetime import datetime, timezone
+import requests
 
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.database.utils import default
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.base_manager import BaseManager
+from cmdb.manager.webhooks_event_manager import WebhooksEventManager
 
 from cmdb.models.webhook_model.cmdb_webhook_model import CmdbWebhook
+from cmdb.models.webhook_model.webhook_event_type_enum import WebhookEventType
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
@@ -49,10 +55,11 @@ class WebhooksManager(BaseManager):
         if database:
             dbm.connector.set_database(database)
 
+        self.webhooks_event_manager = WebhooksEventManager(dbm)
+
         super().__init__(CmdbWebhook.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
-
 
     def insert_webhook(self, data: dict) -> int:
         """
@@ -133,3 +140,59 @@ class WebhooksManager(BaseManager):
             raise ManagerIterationError(err) from err
 
         return iteration_result
+
+# ------------------------------------------------------ HELPERS ----------------------------------------------------- #
+
+    def send_webhook_event(self, operation: WebhookEventType = None, event_object: dict = None, changes: dict = None):
+        """TODO: document"""
+        builder_params = BuilderParameters({})
+        webhooks: IterationResult[CmdbWebhook] = self.iterate(builder_params).results
+
+        try:
+            if len(webhooks) > 0:
+                # Check all webhooks
+                webhook: CmdbWebhook
+                for webhook in webhooks:
+                    # Check if operation is registered in the webhook
+                    if operation in webhook.event_types:
+                        webhook_url = webhook.url
+
+                        payload = self.build_payload(operation, event_object, changes)
+
+                        response: requests.Response = requests.post(
+                            webhook_url,
+                            data=json.dumps(payload, default=default, ensure_ascii=False, indent=2),
+                            headers={'Content-Type': 'application/json'},
+                            timeout=10,
+                        )
+
+                        payload['public_id'] = self.webhooks_event_manager.get_next_public_id()
+                        payload['webhook_id'] = webhook.public_id
+                        payload['response_code'] = response.status_code
+                        payload['status'] = response.status_code == 200
+
+                        self.webhooks_event_manager.insert_webhook_event(payload)
+        except Exception as err:
+            LOGGER.debug("[send_webhook_event] Exception: %s, Type: %s", err, type(err))
+
+
+    def build_payload(self, operation: WebhookEventType, event_object: dict, changes: dict = None) -> dict:
+        """TODO: document"""
+        payload = {}
+
+        payload['event_time'] = datetime.now(timezone.utc)
+        payload['operation'] = operation
+        payload['object_before'] = None
+        payload['object_after'] = None
+        payload['changes'] = None
+
+        if operation == WebhookEventType.CREATE:
+            payload['object_after'] = event_object
+
+        elif operation == WebhookEventType.UPDATE:
+            payload['object_before'] = event_object
+            payload['changes'] = changes
+        elif operation == WebhookEventType.DELETE:
+            payload['object_before'] = event_object
+
+        return payload

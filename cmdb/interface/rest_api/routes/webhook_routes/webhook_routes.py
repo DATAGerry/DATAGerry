@@ -121,7 +121,7 @@ def get_webhooks(params: CollectionParameters, request_user: UserModel):
     webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
     try:
-        builder_params: BuilderParameters = BuilderParameters(**CollectionParameters.get_builder_params(params))
+        builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
 
         iteration_result: IterationResult[CmdbWebhook] = webhooks_manager.iterate(builder_params)
         webhook_list: list[dict] = [webhook_.__dict__ for webhook_ in iteration_result.results]

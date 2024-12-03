@@ -46,7 +46,9 @@ class BaseManager:
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Auto disconnect the database connection when the Manager get destroyed."""
+        """
+        Auto disconnect the database connection when the Manager get destroyed
+        """
         self.dbm.connector.disconnect()
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #

@@ -47,7 +47,6 @@ from cmdb.errors.manager import (
     ManagerGetError,
     ManagerInsertError,
     ManagerUpdateError,
-    ManagerDeleteError,
     ManagerIterationError,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -299,10 +298,8 @@ def delete_type(public_id: int, request_user: UserModel):
         objects_count = objects_manager.count_objects({'type_id':public_id})
 
         if objects_count > 0:
-            raise ManagerDeleteError('Delete not possible if objects of this type exist')
+            return abort(405, "Delete not possible if objects of this type exist")
 
-        objects_ids = [object_.get_public_id() for object_ in objects_manager.get_objects_by(type_id=public_id)]
-        objects_manager.delete_many_objects({'type_id': public_id}, objects_ids, None)
         deleted_type = types_manager.delete_type(public_id)
 
         api_response = DeleteSingleResponse(raw=TypeModel.to_json(deleted_type))
@@ -310,9 +307,6 @@ def delete_type(public_id: int, request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[delete_type] ManagerGetError: %s", err.message)
         return abort(404)
-    except ManagerDeleteError as err:
-        LOGGER.debug("[delete_type] ManagerDeleteError: %s", err.message)
-        return abort(400, f"Could not delete the type with ID: {public_id}")
     except Exception as err:
         #TODO: ERROR-FIX
         return abort(400)
