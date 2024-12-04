@@ -140,7 +140,7 @@ Setup via RPM
 For Red Hat Enterprise Linux (RHEL) and RHEL-based systems such as CentOS or Oracle Linux,
 we offer an RPM file for installing DATAGERRY.
 
-Link to RPM Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
+Link to RPM Package: `BuildKite <https://buildkite.com/organizations/becon-gmbh/packages/registries/datagerry-rpm>`_
 
 The following RHEL/CentOS versions are supported and tested:
 
@@ -246,7 +246,7 @@ setup RabbitMQ for your distribution.
 
 Setup DATAGERRY
 ---------------
-Link to zip Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
+Link to zip Package: `BuildKite <https://buildkite.com/organizations/becon-gmbh/packages/registries/datagerry-zip>`_
 
 Extract the provided zip archive and execute the setup script as root:
 
@@ -303,7 +303,7 @@ the `MongoDB-Homepage <https://www.mongodb.com/docs/v6.0/tutorial/install-mongod
 The next step is to download the deb-package and install it via the following command (execute the command in the
 folder where the deb-package is).
 
-Link to deb Package: `Packagecloud <https://packagecloud.io/becon/datagerry>`_
+Link to deb Package: `BuildKite <https://buildkite.com/organizations/becon-gmbh/packages/registries/datagerry-deb>`_
 
 .. code-block:: console
 
