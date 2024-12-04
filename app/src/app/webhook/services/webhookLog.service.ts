@@ -46,7 +46,7 @@ export class WebhookLogService<T = any> implements ApiServicePrefix {
     /**
      * Fetches all webhook Logs.
      */
-    public getAllWebhooks(params: CollectionParameters = {
+    public getAllWebhookLogs(params: CollectionParameters = {
         filter: '',
         limit: 10,
         sort: 'public_id',
