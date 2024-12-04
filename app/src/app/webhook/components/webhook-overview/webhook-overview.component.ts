@@ -143,16 +143,35 @@ export class WebhookOverviewComponent implements OnInit {
     }
 
     /**
- * Opens the Delete Report modal and deletes the report if confirmed.
- * @param report - The report to delete.
- */
-    public openDeleteReportModal(webhook: any): void {
+     * Opens the Delete Report modal and deletes the report if confirmed.
+     * @param report - The report to delete.
+     */
+    public onDeleteWebhook(webhook: any): void {
+        this.openDeleteModal(
+            webhook,
+            `Delete Webhook: ${webhook.name}`,
+            `Do you want to delete the webhook "${webhook.name}"? This action cannot be undone.`
+        );
+    }
+
+    /**
+     * Opens a delete confirmation modal for the specified item.
+     * Passes the item details and a descriptive title to the modal, and deletes the item upon confirmation.
+     * @param item - The item to be deleted.
+     * @param title - The title to display in the modal.
+     * @param description - The description to display in the modal (currently unused in the code).
+     */
+    public openDeleteModal(item: any, title: string, description: string): void {
         const modalRef = this.modalService.open(DeleteConfirmationModalComponent, { size: 'lg' });
-        modalRef.componentInstance.webhook = webhook;
+        modalRef.componentInstance.title = title;
+        modalRef.componentInstance.item = item;
+        modalRef.componentInstance.itemType = 'Webhook';
+        modalRef.componentInstance.itemName = item.name;
+
         modalRef.result.then(
             (result) => {
                 if (result === 'confirmed') {
-                    this.deleteWebhook(webhook.public_id);
+                    this.deleteWebhook(item.public_id);
                 }
             },
             () => { }
