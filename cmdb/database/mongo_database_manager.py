@@ -25,7 +25,14 @@ from cmdb.database.counter import PublicIDCounter
 
 from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
 
-from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
+from cmdb.errors.database import (
+    NoDocumentFound,
+    DocumentDeleteError,
+    DocumentCreateError,
+    DocumentUpdateError,
+    DocumentGetError,
+    DocumentAggregationError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -53,70 +60,91 @@ class MongoDatabaseManager(DatabaseManager):
 
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
         """
-        Adds document to database
+        Adds a document to a collection
 
         Args:
             collection (str): name of database collection
-            data (dict): insert data
+            data (dict): data which should be inserted
             skip_public (bool): Skip the public id creation and counter increment
+
+        Raises:
+            DocumentCreateError: When a document could not be created
+        
         Returns:
             int: New public id of the document
         """
-        if skip_public:
-            return self.get_collection(collection).insert_one(data)
+        try:
+            if skip_public:
+                return self.get_collection(collection).insert_one(data)
 
-        if 'public_id' not in data:
-            data['public_id'] = self.get_next_public_id(collection)
+            if 'public_id' not in data:
+                data['public_id'] = self.get_next_public_id(collection)
 
-        self.get_collection(collection).insert_one(data)
-        self.update_public_id_counter(collection, data['public_id'])
+            self.get_collection(collection).insert_one(data)
+            self.update_public_id_counter(collection, data['public_id'])
 
-        return data['public_id']
+            return data['public_id']
+        except Exception as err:
+            LOGGER.debug("[insert] Can't insert document. Error: %s", err)
+            raise DocumentCreateError(collection, str(err)) from err
 
 
-    def _init_public_id_counter(self, collection: str):
+    def __init_public_id_counter(self, collection: str):
         """TODO:document"""
         docs_count = self.get_highest_id(collection)
-        self.get_collection(PublicIDCounter.COLLECTION).insert_one({
-            '_id': collection,
-            'counter': docs_count
-        })
+
+        self.get_collection(PublicIDCounter.COLLECTION).insert_one({'_id': collection, 'counter': docs_count})
 
         return docs_count
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def update(self, collection: str, criteria: dict, data: dict, add_to_set: bool = True, *args, **kwargs):
+    def update(self, collection: str, criteria: dict, data: dict, *args, add_to_set: bool = True, **kwargs):
         """
-        Update document inside database
+        Updates a document inside the given collection
 
         Args:
             collection (str): name of database collection
             criteria (dict): Filter to match document
             data: data to update
 
+        Raises:
+            DocumentUpdateError: When document could not be updated
+
         Returns:
-            acknowledged
+            UpdateResult
         """
-        formatted_data = {'$set': data} if add_to_set else data
+        try:
+            formatted_data = {'$set': data} if add_to_set else data
 
-        return self.get_collection(collection).update_one(criteria, formatted_data, *args, **kwargs)
+            return self.get_collection(collection).update_one(criteria, formatted_data, *args, **kwargs)
+        except Exception as err:
+            LOGGER.debug("[update] Can't update document. Error: %s", err)
+            raise DocumentUpdateError(collection, str(err)) from err
 
 
-    def unset_update_many(self, collection: str, filter: dict, data: str, *args, **kwargs):
-        """update document inside database
+    def unset_update_many(self, collection: str, criteria: dict, data: str, *args, **kwargs):
+        """
+        Updates documents inside database
 
         Args:
             collection (str): name of database collection
-            filter (dict): filter of document
+            criteria (dict): filter of document
             data: data to delete
 
-        Returns:
-            acknowledged
-        """
-        formatted_data = {'$unset': {data: 1}}
+        Raises:
+            DocumentUpdateError: When update has failed
 
-        return self.get_collection(collection).update_many(filter, formatted_data, *args, **kwargs)
+        Returns:
+            UpdateResult
+        """
+        try:
+            formatted_data = {'$unset': {data: 1}}
+
+            return self.get_collection(collection).update_many(criteria, formatted_data, *args, **kwargs)
+        except Exception as err:
+            LOGGER.debug("[unset_update_many] Can't update document. Error: %s", err)
+            raise DocumentUpdateError(collection, str(err)) from err
 
 
     def update_many(self, collection: str, criteria: dict, update: dict, add_to_set:bool = False) -> UpdateResult:
@@ -132,86 +160,147 @@ class MongoDatabaseManager(DatabaseManager):
             A boolean acknowledged as true if the operation ran with write
             concern or false if write concern was disabled
         """
-        formatted_data = {'$addToSet':update} if add_to_set else {'$set':update}
+        try:
+            formatted_data = {'$addToSet':update} if add_to_set else {'$set':update}
 
-        result = self.get_collection(collection).update_many(criteria, formatted_data)
-
-        if not result.acknowledged:
-            #TODO: ERROR-FIX
-            raise DocumentCouldNotBeDeleted(collection)
-
-        return result
+            return self.get_collection(collection).update_many(criteria, formatted_data)
+        except Exception as err:
+            LOGGER.debug("[update_many] Can't update document. Error: %s", err)
+            raise DocumentUpdateError(collection, str(err)) from err
 
 
     def increment_public_id_counter(self, collection: str):
-        """TODO: document"""
+        """
+        Increments the public_id counter for the given collection
+
+        Args:
+            collection (str): name of collection
+
+        Raises:
+            DocumentUpdateError: When counter could not be updated
+        """
         working_collection = self.get_collection(PublicIDCounter.COLLECTION)
+
         query = {
             '_id': collection
         }
+
         counter_doc = working_collection.find_one(query)
         counter_doc['counter'] = counter_doc['counter'] + 1
+        update_query = {'$set':{'counter':counter_doc['counter']}}
 
         try:
-            self.get_collection(PublicIDCounter.COLLECTION).update_one(
-                                                                query, {'$set':{'counter':counter_doc['counter']}}
-                                                            )
-        except Exception as error:
-            LOGGER.info('Public ID Counter not increased: reason => %s',error)
+            self.get_collection(PublicIDCounter.COLLECTION).update_one(query, update_query)
+        except Exception as err:
+            LOGGER.debug("[increment_public_id_counter] Can't increment PublicID-Counter. Error: %s", err)
+            raise DocumentUpdateError(collection, str(err)) from err
 
 
     def update_public_id_counter(self, collection: str, value: int):
-        """TODO: document"""
-        working_collection = self.get_collection(PublicIDCounter.COLLECTION)
-        query = {
-            '_id': collection
-        }
-        counter_doc = working_collection.find_one(query)
-        # init counter, if it was not found
-        if counter_doc is None:
-            self._init_public_id_counter(collection)
+        """
+        Updates the public_id counter
+
+        Args:
+            collection (str): name of collection
+            value (int): new value for counter
+
+        Raises:
+            DocumentUpdateError: When public_id counter could not be updated
+        """
+        try:
+            working_collection = self.get_collection(PublicIDCounter.COLLECTION)
+
+            query = {
+                '_id': collection
+            }
+
             counter_doc = working_collection.find_one(query)
-        # update counter only, if value is higher than counter
-        if value > counter_doc['counter']:
-            counter_doc['counter'] = value
 
-            formatted_data = {'$set':counter_doc}
+            # init counter, if it was not found
+            if counter_doc is None:
+                self.__init_public_id_counter(collection)
+                counter_doc = working_collection.find_one(query)
 
-            self.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
+            # update counter only, if value is higher than counter
+            if value > counter_doc['counter']:
+                counter_doc['counter'] = value
+
+                formatted_data = {'$set':counter_doc}
+
+                self.get_collection(PublicIDCounter.COLLECTION).update_one(query, formatted_data)
+        except Exception as err:
+            LOGGER.debug("[update_public_id_counter] Can't increment PublicID-Counter. Error: %s", err)
+            raise DocumentUpdateError(collection, str(err)) from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
     def find_all(self, collection, *args, **kwargs) -> list:
-        """calls find with all returns
+        """
+        Retrives documents from the given collection
 
         Args:
-            collection (str): name of database collection
+            collection (str): name of collection
             *args: arguments for search operation
             **kwargs: key arguments
+
+        Raises:
+            DocumentGetError: When documents could not be retrieved
 
         Returns:
             list: list of found documents
         """
-        found_documents = self.find(collection=collection, *args, **kwargs)
-        return list(found_documents)
+        try:
+            found_documents = self.find(collection, *args, **kwargs)
+
+            return list(found_documents)
+        except Exception as err:
+            LOGGER.debug("[find_all] Can't retrive documents. Error: %s", err)
+            raise DocumentGetError(collection, str(err)) from err
 
 
     def find(self, collection: str, *args, **kwargs):
-        """General find function"""
-        if 'projection' not in kwargs:
-            kwargs.update({'projection': {'_id': 0}})
+        """
+        General find function
+        
+        Args:
+            collection (str): name of collection
+            *args: arguments for search operation
+            **kwargs: key arguments
 
-        return self.get_collection(collection).find(*args, **kwargs)
+        Raises:
+            DocumentGetError: When documents could not be retrieved
+
+        Returns:
+            Cursor with results
+        """
+        try:
+            if 'projection' not in kwargs:
+                kwargs.update({'projection': {'_id': 0}})
+
+            return self.get_collection(collection).find(*args, **kwargs)
+        except Exception as err:
+            LOGGER.debug("[find] Can't retrive documents. Error: %s", err)
+            raise DocumentGetError(collection, str(err)) from err
 
 
     def find_one_by(self, collection: str, *args, **kwargs) -> dict:
-        """find one specific document by special requirements
+        """
+        Find one specific document by special requirements
+
         Args:
             collection (str): name of database collection
+
+        Raises:
+            DocumentGetError: When documents could not be retrieved
+
         Returns:
             found document
         """
-        cursor_result = self.find(collection, limit=1, *args, **kwargs)
+        try:
+            cursor_result = self.find(collection, limit=1, *args, **kwargs)
+        except Exception as err:
+            LOGGER.debug("[find_one_by] Can't retrive document. Error: %s", err)
+            raise DocumentGetError(collection, str(err)) from err
 
         for result in cursor_result.limit(-1):
             return result
@@ -227,16 +316,24 @@ class MongoDatabaseManager(DatabaseManager):
             collection (str): name of database collection
             public_id (int): public_id of document
 
+        Raises:
+            DocumentGetError: When documents could not be retrieved
+
         Returns:
             document with given public_id
         """
-        cursor_result = self.find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
-        for result in cursor_result.limit(-1):
-            return result
+        try:
+            cursor_result = self.find(collection, {'public_id': public_id}, limit=1, *args, **kwargs)
 
+            for result in cursor_result.limit(-1):
+                return result
+        except Exception as err:
+            LOGGER.debug("[find_one] Can't retrive document. Error: %s", err)
+            raise DocumentGetError(collection, str(err)) from err
 
     def count(self, collection: str, filter: dict = None, *args, **kwargs):
-        """Count documents based on filter parameters.
+        """
+        Count documents based on filter parameters
 
         Args:
             collection (str): name of database collection
@@ -248,6 +345,7 @@ class MongoDatabaseManager(DatabaseManager):
             returns the count of the documents
         """
         filter = filter or {}
+
         return self.get_collection(collection).count_documents(filter=filter, *args, **kwargs)
 
 
@@ -260,10 +358,17 @@ class MongoDatabaseManager(DatabaseManager):
             *args: arguments for search operation
             **kwargs: key arguments
 
+        Raises:
+            DocumentAggregationError: When the aggregate operation fails
+
         Returns:
             returns computed results
         """
-        return self.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
+        try:
+            return self.get_collection(collection).aggregate(*args, **kwargs, allowDiskUse=True)
+        except Exception as err:
+            LOGGER.debug("[aggregate] Aggregation failed. Error: %s", err)
+            raise DocumentAggregationError(str(err)) from err
 
 
     def get_highest_id(self, collection: str) -> int:
@@ -273,18 +378,26 @@ class MongoDatabaseManager(DatabaseManager):
         Args:
             collection (str): name of database collection
 
+        Raises:
+            DocumentGetError: When documents could not be retrieved
+
         Returns:
             int: highest public id
         """
         try:
-            formatted_sort = [('public_id', -1)]
+            try:
+                formatted_sort = [('public_id', -1)]
 
-            highest_id = self.find_one_by(collection=collection, sort=formatted_sort)
+                highest_id = self.find_one_by(collection=collection, sort=formatted_sort)
 
-            highest = int(highest_id['public_id'])
-        except NoDocumentFound:
-            return 0
-        return highest
+                highest = int(highest_id['public_id'])
+            except NoDocumentFound:
+                return 0
+
+            return highest
+        except Exception as err:
+            LOGGER.debug("[get_highest_id] Can't retrive document. Error: %s", err)
+            raise DocumentGetError(collection, str(err)) from err
 
 
     def get_next_public_id(self, collection: str) -> int:
@@ -293,7 +406,7 @@ class MongoDatabaseManager(DatabaseManager):
             found_counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
             new_id = found_counter['counter'] + 1
         except (NoDocumentFound, Exception):
-            docs_count = self._init_public_id_counter(collection)
+            docs_count = self.__init_public_id_counter(collection)
             new_id = docs_count + 1
         finally:
             self.increment_public_id_counter(collection)
@@ -309,15 +422,17 @@ class MongoDatabaseManager(DatabaseManager):
             collection (str): name of database collection
             filter (dict): filter query
 
+        Raises:
+            DocumentDeleteError: When documents could not be deleted
+
         Returns:
             acknowledged
         """
-        result = self.get_collection(collection).delete_one(criteria)
-
-        if result.deleted_count != 1:
-            raise DocumentCouldNotBeDeleted(collection)
-
-        return result
+        try:
+            return self.get_collection(collection).delete_one(criteria)
+        except Exception as err:
+            LOGGER.debug("[delete] Can't delete document. Error: %s", err)
+            raise DocumentDeleteError(collection, str(err)) from err
 
 
     def delete_many(self, collection: str, **requirements: dict) -> DeleteResult:
@@ -328,20 +443,22 @@ class MongoDatabaseManager(DatabaseManager):
             collection (str): name of database collection
             filter (dict): Specifies deletion criteria using query operators.
 
+        Raises:
+            DocumentDeleteError: When documents could not be deleted
+
         Returns:
             A boolean acknowledged as true if the operation ran
             with write concern or false if write concern was disabled
         """
-        requirements_filter = {}
-        for k, req in requirements.items():
-            requirements_filter.update({k: req})
+        try:
+            requirements_filter = {}
+            for k, req in requirements.items():
+                requirements_filter.update({k: req})
 
-        result = self.get_collection(collection).delete_many(requirements_filter)
-
-        if not result.acknowledged:
-            raise DocumentCouldNotBeDeleted(collection)
-
-        return result
+            return self.get_collection(collection).delete_many(requirements_filter)
+        except Exception as err:
+            LOGGER.debug("[delete_many] Can't delete documents. Error: %s", err)
+            raise DocumentDeleteError(collection, str(err)) from err
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                 CHECK ROUTINE SECTION                                                #
@@ -409,7 +526,7 @@ class MongoDatabaseManager(DatabaseManager):
             counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
 
             if not counter:
-                self._init_public_id_counter(collection)
+                self.__init_public_id_counter(collection)
 
             status = self.insert(collection, self.get_root_location_data())
         else:
@@ -427,7 +544,7 @@ class MongoDatabaseManager(DatabaseManager):
         counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
 
         if not counter:
-            self._init_public_id_counter(collection)
+            self.__init_public_id_counter(collection)
 
         predefined_template_creator = SectionTemplateCreator()
         predefined_templates: list[dict] = predefined_template_creator.get_predefined_templates()
@@ -452,7 +569,7 @@ class MongoDatabaseManager(DatabaseManager):
         counter = self.get_collection(PublicIDCounter.COLLECTION).find_one(filter={'_id': collection})
 
         if not counter:
-            self._init_public_id_counter(collection)
+            self.__init_public_id_counter(collection)
 
         result = self.get_collection(collection).find_one(filter={'name': 'General'})
 
