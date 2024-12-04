@@ -13,15 +13,13 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+from cmdb.framework.importer.content_types.csv_content import CSVContent
+from cmdb.framework.importer.content_types.json_content import JSONContent
+from cmdb.framework.importer.content_types.xlsx_content import XLSXContent
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+__all__ = [
+    'CSVContent',
+    'JSONContent',
+    'XLSXContent',
+]

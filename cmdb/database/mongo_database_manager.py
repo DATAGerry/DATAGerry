@@ -21,11 +21,9 @@ from pymongo.results import DeleteResult, UpdateResult
 
 from cmdb.database.database_manager import DatabaseManager
 from cmdb.database.mongo_connector import MongoConnector
-
 from cmdb.database.counter import PublicIDCounter
+
 from cmdb.framework.section_templates.section_template_creator import SectionTemplateCreator
-from cmdb.framework.constants import __COLLECTIONS__ as FRAMEWORK_COLLECTIONS
-from cmdb.models.user_management_constants import __COLLECTIONS__ as USER_MANAGEMENT_COLLECTIONS
 
 from cmdb.errors.database import NoDocumentFound, DocumentCouldNotBeDeleted
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -40,49 +38,22 @@ class MongoDatabaseManager(DatabaseManager):
     PyMongo (MongoDB) implementation of Database Manager
     Extends: DatabaseManager
     """
-
     def __init__(self, host: str, port: int, database_name: str, **kwargs):
         connector = MongoConnector(host, port, database_name, kwargs)
         super().__init__(connector)
 
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Auto disconnect the database connection when the Manager get destroyed"""
+        """
+        Auto disconnect the database connection when the manager get destroyed
+        """
         self.connector.disconnect()
-
-
-    def setup(self) -> bool:
-        """
-        Setup script
-
-        Returns:
-            acknowledged
-        """
-        collection = FRAMEWORK_COLLECTIONS + USER_MANAGEMENT_COLLECTIONS
-
-        def _gen_default_tables(collection_class):
-            #TODO: Check list_collection_names()-function
-            all_collections = self.connector.list_collection_names()
-
-            if collection_class not in all_collections:
-                self.create_collection(collection_class.COLLECTION)
-                self.create_indexes(collection_class.COLLECTION, collection_class.SUPER_INDEX_KEYS)
-                if len(collection_class.INDEX_KEYS) > 0:
-                    self.create_indexes(collection_class.COLLECTION, collection_class.INDEX_KEYS)
-
-        for coll in collection:
-            # generating the default database "tables"
-            try:
-                _gen_default_tables(coll)
-            except Exception:
-                return False
-
-        return True
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
     def insert(self, collection: str, data: dict, skip_public: bool = False) -> int:
-        """Adds document to database
+        """
+        Adds document to database
 
         Args:
             collection (str): name of database collection

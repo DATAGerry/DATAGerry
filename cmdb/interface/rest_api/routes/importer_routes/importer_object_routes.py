@@ -31,10 +31,10 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.log_model.log_action_enum import LogAction
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.framework.rendering.cmdb_render import CmdbRender
-from cmdb.importer.configs.object_importer_config import ObjectImporterConfig
-from cmdb.importer.parser.base_object_parser import BaseObjectParser
-from cmdb.importer.responses.importer_object_response import ImporterObjectResponse
-from cmdb.importer.helper.importer_helper import (
+from cmdb.framework.importer.configs.object_importer_config import ObjectImporterConfig
+from cmdb.framework.importer.parser.base_object_parser import BaseObjectParser
+from cmdb.framework.importer.responses.importer_object_response import ImporterObjectResponse
+from cmdb.framework.importer.helper.importer_helper import (
     load_parser_class,
     load_importer_class,
     load_importer_config_class,

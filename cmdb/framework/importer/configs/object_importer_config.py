@@ -14,14 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+from cmdb.framework.importer.configs.base_importer_config import BaseImporterConfig
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+class ObjectImporterConfig(BaseImporterConfig):
+    """TODO: document"""
+
+    def __init__(self, type_id: int, mapping: list = None, start_element: int = 0, max_elements: int = 0,
+                 overwrite_public: bool = True, *args, **kwargs):
+        self.type_id: int = type_id
+        self.start_element: int = start_element
+        self.max_elements: int = max_elements
+        self.overwrite_public: bool = overwrite_public
+        super().__init__(mapping=mapping)
+
+
+    def get_type_id(self):
+        """TODO: document"""
+        return self.type_id

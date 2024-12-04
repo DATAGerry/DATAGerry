@@ -14,14 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+from cmdb.framework.importer.messages.import_success_message import ImportSuccessMessage
+from cmdb.framework.importer.messages.import_failed_message import ImportFailedMessage
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+class ImporterObjectResponse:
+    """Response of an bulk object import"""
+
+    def __init__(self, message: str, success_imports: list = None, failed_imports: list = None):
+        self.message = message
+        self.success_imports: list[ImportSuccessMessage] = success_imports or []
+        self.failed_imports: list[ImportFailedMessage] = failed_imports or []
+
+        super().__init__()

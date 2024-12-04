@@ -14,14 +14,25 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+import logging
+
+from cmdb.framework.importer.responses.object_parser_response import ObjectParserResponse
+from cmdb.framework.importer.parser.base_parser import BaseParser
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               BaseObjectParser - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
+class BaseObjectParser(BaseParser):
+    """TODO: document"""
+
+    DEFAULT_CONFIG = {}
+
+    def __init__(self, parser_config: dict):
+        super().__init__(parser_config)
+
+
+    def parse(self, file) -> ObjectParserResponse:
+        raise NotImplementedError
