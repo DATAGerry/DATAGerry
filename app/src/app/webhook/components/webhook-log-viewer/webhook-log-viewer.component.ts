@@ -20,6 +20,10 @@ import { ToastService } from 'src/app/layout/toast/toast.service';
 import { WebhookLogService } from '../../services/webhookLog.service';
 import { DeleteConfirmationModalComponent } from '../modal/delete-confirmation-modal.component';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { ReplaySubject, takeUntil } from 'rxjs';
+import { CollectionParameters } from 'src/app/services/models/api-parameter';
+import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 
 @Component({
     selector: 'app-webhook-log-viewer',
@@ -31,6 +35,14 @@ export class WebhookLogViewerComponent implements OnInit {
     public loading = false;
     public datePlaceholder = 'YYYY-MM-DD';
     public columns: any[];
+    public totalLogs: number = 0;
+    public limit: number = 10;
+    public page: number = 1;
+    public sort: Sort = { name: 'webhook_id', order: SortDirection.ASCENDING } as Sort;
+    public filter: string;
+
+    private unsubscribe$ = new ReplaySubject<void>(1);
+
 
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
 
@@ -57,21 +69,44 @@ export class WebhookLogViewerComponent implements OnInit {
      */
     private loadLogs(): void {
         this.loading = true;
-        this.webhookService.getAllWebhooks().subscribe({
-            next: (data) => {
-                this.logs = data.results.map(log => ({
-                    ...log,
-                    event_time: this.formatEventDate(log.event_time),
-                    status: log.status ? 'Active' : 'Inactive',
-                }));
-            },
-            error: (err) => {
-                this.toast.error(err?.error?.message);
-                this.logs = [];
-            },
-            complete: () => (this.loading = false),
-        });
+
+
+        const params: CollectionParameters = {
+            filter: this.filterBuilder(),
+            limit: this.limit,
+            page: this.page,
+            sort: this.sort.name.replace('_str', ''),
+            order: this.sort.order,
+        };
+
+
+        this.webhookService
+            .getAllWebhooks(params)
+            .pipe(takeUntil(this.unsubscribe$))
+            .subscribe({
+                next: (response: APIGetMultiResponse<any>) => {
+                    if (response && response.results) {
+                        this.logs = response.results.map((log) => ({
+                            ...log,
+                            event_time: this.formatEventDate(log.event_time),
+                            status: log.status ? 'Active' : 'Inactive',
+                        }));
+                        this.totalLogs = response.total || 0;
+                    } else {
+                        this.logs = [];
+                        this.totalLogs = 0;
+                    }
+                    this.loading = false;
+                },
+                error: (err) => {
+                    this.toast.error(err?.error?.message);
+                    this.logs = [];
+                    this.totalLogs = 0;
+                    this.loading = false;
+                },
+            });
     }
+
 
 
     /**
@@ -140,4 +175,117 @@ export class WebhookLogViewerComponent implements OnInit {
             () => { }
         );
     }
+
+
+    /* --------------------------------------------------- Pagination, Sorting, and Search Handlers -------------------------------------------------- */
+
+
+
+
+    /**
+     * Handles changes to the current page in pagination and reloads the logs.
+     * @param newPage - The new page number to display.
+     */
+    public onPageChange(newPage: number): void {
+        this.page = newPage;
+        this.loadLogs();
+    }
+
+
+
+
+    /**
+     * Handles changes to the number of items displayed per page, resets to the first page, and reloads the logs.
+     * @param limit - The new number of items per page.
+     */
+    public onPageSizeChange(limit: number): void {
+        this.limit = limit;
+        this.page = 1;
+        this.loadLogs();
+    }
+
+
+
+
+    /**
+     * Handles changes to the sorting criteria and reloads the logs.
+     * @param sort - The new sort criteria.
+     */
+    public onSortChange(sort: Sort): void {
+        this.sort = sort;
+        this.loadLogs();
+    }
+
+
+
+
+    /**
+     * Handles changes to the search input, updates the filter, resets to the first page, and reloads the logs.
+     * @param search - The search query string.
+     */
+    public onSearchChange(search: string): void {
+        this.filter = search || undefined;
+        this.page = 1;
+        this.loadLogs();
+    }
+
+
+
+
+    /**
+     * Builds the filter query for searching.
+     */
+    private filterBuilder(): any[] {
+        const query: any[] = [];
+
+        if (this.filter) {
+            const searchableColumns = this.columns.filter((c) => c.searchable);
+            const orConditions: any[] = [];
+            const addFields: any = {};
+
+            for (const column of searchableColumns) {
+                let fieldName = column.data || column.name;
+                let searchField = fieldName;
+
+                // Handle numeric and date fields by converting them to strings
+                if (fieldName === 'webhook_id') {
+                    addFields['webhook_id_str'] = { $toString: '$webhook_id' };
+                    searchField = 'webhook_id_str';
+                }
+
+                if (fieldName === 'response_code') {
+                    addFields['response_code_str'] = { $toString: '$response_code' };
+                    searchField = 'response_code_str';
+                }
+
+                if (fieldName === 'event_time') {
+                    addFields['event_time_str'] = {
+                        $dateToString: { format: '%Y-%m-%d', date: '$event_time' },
+                    };
+                    searchField = 'event_time_str';
+                }
+
+                // Add regex condition
+                const regexCondition: any = {};
+                regexCondition[searchField] = {
+                    $regex: String(this.filter),
+                    $options: 'i',
+                };
+                orConditions.push(regexCondition);
+            }
+
+            if (Object.keys(addFields).length > 0) {
+                query.push({ $addFields: addFields });
+            }
+
+            query.push({
+                $match: {
+                    $or: orConditions,
+                },
+            });
+        }
+
+        return query;
+    }
+
 }
