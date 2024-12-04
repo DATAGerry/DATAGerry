@@ -15,21 +15,11 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-export interface Webhook {
+export interface WebhookLog {
+    event_time: any;
     public_id: number;
-    name: string;
-    url: string;
-    event_types: string[];
-    active: boolean;
-}
-
-export interface WebhookCreate {
-    name: string;
-    url: string;
-    event_types: string[];
-    active: boolean;
-}
-
-export interface WebhookUpdate extends WebhookCreate {
-    public_id: number;
+    webhook_id: number;
+    date: string;
+    status: 'successful' | 'failed';
+    response_code: number;
 }
