@@ -26,6 +26,9 @@ from .database_errors import (
     NoDocumentFound,
     DocumentCouldNotBeDeleted,
     SetDatabaseError,
+    GetCollectionError,
+    DeleteCollectionError,
+    CreateIndexesError,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -39,4 +42,7 @@ __all__ = [
     'NoDocumentFound',
     'DocumentCouldNotBeDeleted',
     'SetDatabaseError',
+    'GetCollectionError',
+    'DeleteCollectionError',
+    'CreateIndexesError',
 ]

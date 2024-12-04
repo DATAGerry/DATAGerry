@@ -14,14 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+from cmdb.framework.importer.content_types.base_content import BaseContent
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+class CSVContent(BaseContent):
+    """Identifier for Comma-Separated Values files"""
+    ICON = 'fas fa-file-csv'
+    CONTENT_TYPE = 'text/csv'
+    FILE_TYPE = 'csv'

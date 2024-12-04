@@ -14,13 +14,11 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Database-Connection
-Real connection to database over a given connector
+Connection to database over a given connector
 """
 import logging
 from pymongo import MongoClient
 from pymongo.database import Database
-from pymongo.errors import ConnectionFailure
 
 from cmdb.database.connection_status import ConnectionStatus
 
@@ -34,14 +32,13 @@ LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 class MongoConnector:
     """
-    PyMongo (MongoDB) implementation from connector
+    PyMongo (MongoDB) implementation with connector
     """
-
     def __init__(self, host: str, port: int, database_name: str, client_options: dict = None):
         if client_options:
-            self.client: MongoClient = MongoClient(host=host, port=int(port), connect=False, **client_options)
+            self.client = MongoClient(host=host, port=int(port), connect=False, **client_options)
         else:
-            self.client: MongoClient = MongoClient(host=host, port=int(port), connect=False)
+            self.client = MongoClient(host=host, port=int(port), connect=False)
 
         self.database: Database = self.client.get_database(database_name)
         self.host: str = host
@@ -53,7 +50,8 @@ class MongoConnector:
         Sets the database of the connector
 
         Raises:
-            SetDatabaseError: Raised when not possible to connect to database
+            SetDatabaseError: Raised when not possible to set connector to database name
+
         Args:
             db_name (str): name of the database
         """
@@ -71,8 +69,9 @@ class MongoConnector:
         """
         try:
             status = self.client.admin.command('ismaster')
+
             return ConnectionStatus(connected=True, message=str(status))
-        except ConnectionFailure as err:
+        except Exception as err:
             raise DatabaseConnectionError(err) from err
 
 

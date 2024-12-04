@@ -65,6 +65,15 @@ class DatabaseNotExists(DataBaseError):
         super().__init__(self.message)
 
 
+class SetDatabaseError(DataBaseError):
+    """
+    Error if database could not be set for a connector
+    """
+    def __init__(self, err: str, db_name: str):
+        self.message = f"Couldn't set connector to database: {db_name}. Error: {err}"
+        super().__init__(self.message)
+
+
 #TODO: ERROR-FIX (not used)
 class CollectionAlreadyExists(DataBaseError):
     """
@@ -72,6 +81,33 @@ class CollectionAlreadyExists(DataBaseError):
     """
     def __init__(self, collection_name: str):
         self.message = f"Collection {collection_name} already exists"
+        super().__init__(self.message)
+
+
+class GetCollectionError(DataBaseError):
+    """
+    Raised when a collection could not be retrieved
+    """
+    def __init__(self, collection_name:str, err: str):
+        self.message = f"Can't retrive collection: {collection_name}. Error: {err}"
+        super().__init__(self.message)
+
+
+class DeleteCollectionError(DataBaseError):
+    """
+    Raised when a collection could not be deleted
+    """
+    def __init__(self, collection_name:str, err: str):
+        self.message = f"Can't delete collection: {collection_name}. Error: {err}"
+        super().__init__(self.message)
+
+
+class CreateIndexesError(DataBaseError):
+    """
+    Raised when indexes could not be created
+    """
+    def __init__(self, err: str):
+        self.message = f"CreateIndexesError: {err}"
         super().__init__(self.message)
 
 
@@ -91,13 +127,4 @@ class DocumentCouldNotBeDeleted(DataBaseError):
     """
     def __init__(self, collection: str):
         self.message = f"A document could not be deleted from Collection: {collection}"
-        super().__init__(self.message)
-
-
-class SetDatabaseError(DataBaseError):
-    """
-    Error if database could not be set for a connector
-    """
-    def __init__(self, err: str, db_name: str):
-        self.message = f"Couldn't set connector to database: {db_name}. Error: {err}"
         super().__init__(self.message)

@@ -46,7 +46,7 @@ from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.framework.results import IterationResult
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
-from cmdb.importer.messages.response_failed_message import ResponseFailedMessage
+from cmdb.framework.importer.messages.response_failed_message import ResponseFailedMessage
 from cmdb.interface.route_utils import insert_request_user
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import (

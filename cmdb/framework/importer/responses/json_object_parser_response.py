@@ -14,14 +14,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from gridfs import GridFS
-from pymongo.database import Database
+import logging
+
+from cmdb.framework.importer.responses.object_parser_response import ObjectParserResponse
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DatabaseGridFS(GridFS):
-    """
-    Creation a GridFSBucket instance to use
-    """
-    def __init__(self, database: Database, collection_name: str):
-        super().__init__(database, collection_name)
-        self.message = f"Collection {collection_name} already exists"
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                           JsonObjectParserResponse - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
+class JsonObjectParserResponse(ObjectParserResponse):
+    """TODO: document"""
+
+    def __init__(self, count: int, entries: list):
+        super().__init__(count=count, entries=entries)
