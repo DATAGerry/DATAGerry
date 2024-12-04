@@ -121,10 +121,46 @@ class NoDocumentFound(DataBaseError):
         super().__init__(self.message)
 
 
-class DocumentCouldNotBeDeleted(DataBaseError):
+class DocumentCreateError(DataBaseError):
     """
-    Error if document could not be deleted from database
+    Raised if a document could not be created in a collection
     """
-    def __init__(self, collection: str):
-        self.message = f"A document could not be deleted from Collection: {collection}"
+    def __init__(self, collection: str, err: str):
+        self.message = f"Document could not be created in collection: {collection}. Error: {err}"
+        super().__init__(self.message)
+
+
+class DocumentUpdateError(DataBaseError):
+    """
+    Raised if a document could not be updated in a collection
+    """
+    def __init__(self, collection: str, err: str):
+        self.message = f"Document could not be updated in collection: {collection}. Error: {err}"
+        super().__init__(self.message)
+
+
+class DocumentDeleteError(DataBaseError):
+    """
+    Raised if a document could not be deleted from a collection
+    """
+    def __init__(self, collection: str, err: str):
+        self.message = f"Document could not be deleted from collection: {collection}. Error: {err}"
+        super().__init__(self.message)
+
+
+class DocumentGetError(DataBaseError):
+    """
+    Raised if a document could not be retrieved from a collection
+    """
+    def __init__(self, collection: str, err: str):
+        self.message = f"Document could not be retrieved from collection: {collection}. Error: {err}"
+        super().__init__(self.message)
+
+
+class DocumentAggregationError(DataBaseError):
+    """
+    Raised if an aggregation operation fails
+    """
+    def __init__(self, err: str):
+        self.message = f"Aggregation failed. Error: {err}"
         super().__init__(self.message)

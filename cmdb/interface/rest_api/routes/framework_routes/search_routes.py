@@ -21,9 +21,11 @@ from flask import request, abort
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.query_builder.quick_search_pipeline_builder import QuickSearchPipelineBuilder
+from cmdb.manager.query_builder.search_pipeline_builder import SearchPipelineBuilder
 
-from cmdb.search.params import SearchParam
-from cmdb.search.searchers import SearcherFramework, SearchPipelineBuilder, QuickSearchPipelineBuilder
+from cmdb.framework.search.search_param import SearchParam
+from cmdb.framework.search.searcher_framework import SearcherFramework
 from cmdb.models.user_model.user import UserModel
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user, login_required

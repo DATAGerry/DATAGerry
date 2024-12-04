@@ -24,11 +24,15 @@ from .database_errors import (
     DatabaseNotExists,
     CollectionAlreadyExists,
     NoDocumentFound,
-    DocumentCouldNotBeDeleted,
+    DocumentDeleteError,
     SetDatabaseError,
     GetCollectionError,
     DeleteCollectionError,
     CreateIndexesError,
+    DocumentCreateError,
+    DocumentUpdateError,
+    DocumentGetError,
+    DocumentAggregationError,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -40,9 +44,13 @@ __all__ = [
     'DatabaseNotExists',
     'CollectionAlreadyExists',
     'NoDocumentFound',
-    'DocumentCouldNotBeDeleted',
+    'DocumentDeleteError',
     'SetDatabaseError',
     'GetCollectionError',
     'DeleteCollectionError',
     'CreateIndexesError',
+    'DocumentCreateError',
+    'DocumentUpdateError',
+    'DocumentGetError',
+    'DocumentAggregationError',
 ]

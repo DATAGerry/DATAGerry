@@ -36,7 +36,8 @@ from cmdb.models.right_model.base_right import BaseRight
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.base_provider_config import BaseAuthProviderConfig
 from cmdb.settings.date_settings import DateSettingsDAO
-from cmdb.search.search_result import SearchResult, SearchResultMap
+from cmdb.framework.search.search_result import SearchResult
+from cmdb.framework.search.search_result_map import SearchResultMap
 
 # -------------------------------------------------------------------------------------------------------------------- #
 

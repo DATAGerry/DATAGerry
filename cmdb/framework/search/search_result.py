@@ -16,29 +16,18 @@
 """TODO: document"""
 import logging
 from typing import TypeVar, Generic
-
 from bson import Regex
+
+from cmdb.framework.search.search_result_map import SearchResultMap
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-R: TypeVar = TypeVar('R')
+R = TypeVar('R')
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                    SearchResultMap                                                   #
+#                                                 SearchResult - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-class SearchResultMap(Generic[R]):
-    """Result mapper for Result/Match binding"""
-    def __init__(self, result: R, matches: list[str] = None):
-        self.result = result
-        self.matches: list[str] = matches
-
-
-    def to_json(self) -> dict:
-        """Quick convert for the database"""
-        return {'result': self.result.__dict__, 'matches': self.matches}
-
-#TODO: CLASS-FIX
 class SearchResult(Generic[R]):
     """
     Generic search result base
