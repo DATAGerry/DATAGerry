@@ -1,11 +1,16 @@
 <div  class="d-flex justify-content-between align-items-center">
-    <h1>Webhook Log Viewer</h1>
-  </div>
-  <hr />
+  <h1>Webhook Log Viewer</h1>
+</div>
+<hr />
 
-  <cmdb-table
-    [items]="logs"
-    [columns]="columns"
-    [loading]="loading"
-  >
-  </cmdb-table>
+<cmdb-table
+  [items]="logs"
+  [columns]="columns"
+  [loading]="loading"
+>
+</cmdb-table>
+
+<!-- Actions Template -->
+<ng-template #actionsTemplate let-item="item">
+  <i class="far fa-trash-alt btn-delete" (click)="onDeleteLog(item)"></i>
+  </ng-template>

@@ -15,9 +15,11 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { WebhookLogService } from '../../services/webhookLog.service';
+import { DeleteConfirmationModalComponent } from '../modal/delete-confirmation-modal.component';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
     selector: 'app-webhook-log-viewer',
@@ -28,19 +30,23 @@ export class WebhookLogViewerComponent implements OnInit {
     public logs: any[] = [];
     public loading = false;
     public datePlaceholder = 'YYYY-MM-DD';
+    public columns: any[];
 
-    public columns = [
-        { display: 'Webhook ID', name: 'webhook_id', data: 'webhook_id', searchable: true, sortable: true, style: { width: '30px', 'text-align': 'center' } },
-        { display: 'Date', data: 'event_time', style: { 'text-align': 'center' } },
-        { display: 'Status', data: 'status', style: { 'text-align': 'center' } },
-        { display: 'Response Code', data: 'response_code', style: { width: '140px', 'text-align': 'center' } },
-    ];
+    @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
+
 
     constructor(
         private webhookService: WebhookLogService,
-        private toast: ToastService) { }
+        private toast: ToastService, private modalService: NgbModal,) { }
 
     ngOnInit(): void {
+        this.columns = [
+            { display: 'Webhook ID', name: 'webhook_id', data: 'webhook_id', searchable: true, sortable: true, style: { width: '30px', 'text-align': 'center' } },
+            { display: 'Date', data: 'event_time', style: { 'text-align': 'center' } },
+            { display: 'Status', data: 'status', style: { 'text-align': 'center' } },
+            { display: 'Response Code', data: 'response_code', style: { width: '140px', 'text-align': 'center' } },
+            { display: 'Actions', name: 'actions', template: this.actionsTemplate, sortable: false, style: { width: '80px', 'text-align': 'center' } }
+        ];
         this.loadLogs();
     }
 
@@ -78,5 +84,60 @@ export class WebhookLogViewerComponent implements OnInit {
             return new Date(eventTime.$date).toLocaleDateString('en-US');
         }
         return this.datePlaceholder;
+    }
+
+
+    /**
+ * Initiates the deletion process for the specified webhook.
+ * @param publicId - The public ID of the webhook to delete.
+ */
+    public deleteLog(publicId: number): void {
+        this.webhookService.deleteWebhookLog(publicId).subscribe({
+            next: (res) => {
+                this.toast.success('Webhook deleted Sucessfully');
+                this.loadLogs();
+            },
+            error: (err) => {
+                this.toast.error(err?.error?.message)
+            }
+        })
+    }
+
+    /**
+    * Opens the Delete Report modal and deletes the report if confirmed.
+    * @param report - The report to delete.
+    */
+    public onDeleteLog(log: any): void {
+        this.openDeleteModal(
+            log,
+            `Delete Log: ID: ${log.webhook_id}`,
+            `Do you want to delete the log "${log.webhook_id}"? This action cannot be undone.`
+        );
+    }
+
+
+    /**
+     * Opens a delete confirmation modal for the specified item.
+     * Passes the item details and a descriptive title to the modal, and deletes the item upon confirmation.
+     * @param item - The item to be deleted.
+     * @param title - The title to display in the modal.
+     * @param description - The description to display in the modal (currently unused in the code).
+     */
+    public openDeleteModal(item: any, title: string, description: string): void {
+        console.log('item', item)
+        const modalRef = this.modalService.open(DeleteConfirmationModalComponent, { size: 'lg' });
+        modalRef.componentInstance.title = title;
+        modalRef.componentInstance.item = item;
+        modalRef.componentInstance.itemType = 'log';
+        modalRef.componentInstance.itemName = item.webhook_id;
+
+        modalRef.result.then(
+            (result) => {
+                if (result === 'confirmed') {
+                    this.deleteLog(item.public_id);
+                }
+            },
+            () => { }
+        );
     }
 }

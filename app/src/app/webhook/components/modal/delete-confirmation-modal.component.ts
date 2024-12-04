@@ -23,10 +23,14 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     templateUrl: './delete-confirmation-modal.component.html',
 })
 export class DeleteConfirmationModalComponent {
-    @Input() webhook: any;
+    @Input() title: string;
+    @Input() item: any;
+    @Input() itemType: string;
+    @Input() itemName: string;
+    @Input() description: string;
+
 
     constructor(public modal: NgbActiveModal) { }
-
 
     /**
      * Closes the modal and confirms the deletion action.
