@@ -22,7 +22,7 @@ from cmdb.manager.manager_provider_model.manager_type_enum import ManagerType
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 from cmdb.manager.settings_writer_manager import SettingsWriterManager
 
-from cmdb.settings.date.date_settings import DateSettingsDAO
+from cmdb.settings.date_settings import DateSettingsDAO
 from cmdb.models.user_model.user import UserModel
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.route_utils import insert_request_user

@@ -86,6 +86,7 @@ class AuthModule:
                     auth_settings_values['providers'][provider_index]['config'] = provider.PROVIDER_CONFIG_CLASS(
                         **auth_settings_values['providers'][provider_index]['config']).__dict__
                 except Exception as err:
+                    #TODO: ERROR-FIX
                     LOGGER.error(
                         'Error while parsing auth provider settings for: %s: %s\n Fallback to default values!',
                         provider.get_name(),err)

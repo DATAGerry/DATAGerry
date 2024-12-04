@@ -20,9 +20,8 @@ import logging
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                      SearchParam                                                     #
+#                                                  SearchParam - CLASS                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
-
 class SearchParam:
     """TODO: document"""
     POSSIBLE_FORM_TYPES = [
@@ -68,7 +67,8 @@ class SearchParam:
                     )
                 )
             except Exception as err:
-                LOGGER.error('[SearchParamDAO](from_request): %s',err)
+                #TODO: ERROR-FIX
+                LOGGER.error("[from_request] Exception: %s, Type: %s", err, type(err))
                 continue
 
         return param_list

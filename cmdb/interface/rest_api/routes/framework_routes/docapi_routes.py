@@ -25,8 +25,8 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.docapi.docapi_renderer import DocApiRenderer
-from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
+from cmdb.framework.docapi.docapi_renderer import DocApiRenderer
+from cmdb.framework.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import GetMultiResponse, DefaultResponse

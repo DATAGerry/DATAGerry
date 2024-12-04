@@ -18,8 +18,8 @@ from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.docapi_templates_manager import DocapiTemplatesManager
 
 from cmdb.framework.rendering.cmdb_render import CmdbRender
-from cmdb.docapi.object_document_generator import ObjectDocumentGenerator
-from cmdb.docapi.pdf_document_type import PdfDocumentType
+from cmdb.framework.docapi.object_document_generator import ObjectDocumentGenerator
+from cmdb.framework.docapi.pdf_document_type import PdfDocumentType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class DocApiRenderer:

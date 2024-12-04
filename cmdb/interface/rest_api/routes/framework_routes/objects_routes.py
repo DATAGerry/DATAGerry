@@ -124,7 +124,8 @@ def insert_object(request_user: UserModel):
             current_object = objects_manager.get_object(new_object_id)
 
             #EVENT: CREATE-EVENT
-            webhooks_manager.send_webhook_event(WebhookEventType.CREATE, CmdbObject.to_json(current_object))
+            webhooks_manager.send_webhook_event(WebhookEventType.CREATE,
+                                                object_after=CmdbObject.to_json(current_object))
         except Exception as err:
             #TODO: ERROR-FIX
             LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
@@ -638,8 +639,11 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 
             #EVENT: UPDATE-EVENT
             try:
+                object_after = objects_manager.get_object(obj_id, request_user, AccessControlPermission.READ)
+
                 webhooks_manager.send_webhook_event(WebhookEventType.UPDATE,
                                                     CmdbObject.to_json(current_object_instance),
+                                                    CmdbObject.to_json(object_after),
                                                     changes)
             except Exception as error:
                 #TODO: ERROR-FIX
@@ -739,8 +743,11 @@ def update_object_state(public_id: int, request_user: UserModel):
 
     try:
         #EVENT: UPDATE-EVENT
+        object_after = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
+
         webhooks_manager.send_webhook_event(WebhookEventType.UPDATE,
                                             CmdbObject.to_json(found_object),
+                                            CmdbObject.to_json(object_after),
                                             {'state': state})
         # generate log
         change = {
@@ -945,7 +952,8 @@ def delete_object(public_id: int, request_user: UserModel):
 
     try:
         #EVENT: DELETE-EVENT
-        webhooks_manager.send_webhook_event(WebhookEventType.DELETE, CmdbObject.to_json(current_object_instance))
+        webhooks_manager.send_webhook_event(WebhookEventType.DELETE,
+                                            object_before=CmdbObject.to_json(current_object_instance))
 
         # generate log
         log_data = {
@@ -1077,7 +1085,8 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
             locations_manager.delete({'public_id':current_location.public_id})
             deleted = objects_manager.delete_object(public_id, request_user, AccessControlPermission.DELETE)
             #EVENT: DELETE-EVENT
-            webhooks_manager.send_webhook_event(WebhookEventType.DELETE, CmdbObject.to_json(current_object_instance))
+            webhooks_manager.send_webhook_event(WebhookEventType.DELETE,
+                                                object_before=CmdbObject.to_json(current_object_instance))
         else:
             # something went wrong, either object or location don't exist
             return abort(404)
@@ -1162,7 +1171,7 @@ def delete_many_objects(public_ids, request_user: UserModel):
 
                 #EVENT: DELETE-EVENT
                 webhooks_manager.send_webhook_event(WebhookEventType.DELETE,
-                                                    CmdbObject.to_json(current_object_instance))
+                                                    object_before=CmdbObject.to_json(current_object_instance))
             except ObjectManagerDeleteError:
                 #TODO: ERROR-FIX
                 return abort(400)

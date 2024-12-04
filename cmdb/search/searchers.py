@@ -16,6 +16,7 @@
 """TODO: document"""
 import logging
 
+from cmdb.manager.query_builder.pipeline_builder import PipelineBuilder
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.categories_manager import CategoriesManager
 
@@ -25,7 +26,6 @@ from cmdb.models.type_model.type import TypeModel
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.search.params import SearchParam
-from cmdb.search.query.pipe_builder import PipelineBuilder
 from cmdb.search.search_result import SearchResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.security.acl.builder import AccessControlQueryBuilder
@@ -90,6 +90,7 @@ class QuickSearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
+#TODO: CLASS-FIX
 class SearchReferencesPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
@@ -144,6 +145,7 @@ class SearchReferencesPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
+#TODO: CLASS-FIX
 class SearchPipelineBuilder(PipelineBuilder):
     """TODO: document"""
 
@@ -245,6 +247,7 @@ class SearchPipelineBuilder(PipelineBuilder):
         return self.pipeline
 
 
+#TODO: CLASS-FIX
 class SearcherFramework:
     """Framework searcher implementation for object search"""
     DEFAULT_LIMIT: int = 10
@@ -310,6 +313,7 @@ class SearcherFramework:
         try:
             matches_regex = plb.get_regex_pipes_values()
         except Exception as err:
+            #TODO: ERROR-FIX
             LOGGER.error('Extract regex pipes: %s',err)
             matches_regex = []
 

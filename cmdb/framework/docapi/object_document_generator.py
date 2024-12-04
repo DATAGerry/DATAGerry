@@ -18,8 +18,8 @@ import logging
 
 from cmdb.manager.objects_manager import ObjectsManager
 
-from cmdb.docapi.template_engine import TemplateEngine
-from cmdb.docapi.object_template_data import ObjectTemplateData
+from cmdb.framework.docapi.template_engine import TemplateEngine
+from cmdb.framework.docapi.object_template_data import ObjectTemplateData
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)

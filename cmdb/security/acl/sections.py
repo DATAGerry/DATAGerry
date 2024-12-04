@@ -21,12 +21,13 @@ from cmdb.security.acl.permission import AccessControlPermission
 
 T = TypeVar('T')
 
+# -------------------------------------------------------------------------------------------------------------------- #
 class AccessControlSectionDict(Dict[T, Set[AccessControlPermission]]):
     """TODO: document"""
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-
+#TODO: CLASS-FIX
 class AccessControlListSection(Generic[T]):
     """`AccessControlListSection` are a config element inside the complete ac-dict."""
 
@@ -78,6 +79,7 @@ class AccessControlListSection(Generic[T]):
         raise NotImplementedError
 
 
+#TODO: CLASS-FIX
 class GroupACL(AccessControlListSection[int]):
     """Wrapper class for the group section"""
 
