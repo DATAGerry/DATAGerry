@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.search.query.pipe_builder import PipelineBuilder
+from cmdb.manager.query_builder.pipeline_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -26,6 +26,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
 
 
     def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> list[dict]:
+        """TODO: document"""
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -34,19 +35,6 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        # return self.lookup_sub_(
-        #     from_='framework.types',
-        #     let_={'type_id': '$object.type_id'},
-        #     pipeline_=[
-        #         self.match_(query=self.expr_(expression={
-        #             '$eq': [
-        #                 '$$type_id',
-        #                 '$public_id'
-        #             ]
-        #         }))
-        #     ],
-        #     as_='type'
-        # )
         return {
             '$lookup': {
                 'from': 'framework.types',
@@ -75,6 +63,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         )
 
 
+#TODO: CLASS-FIX
 class AccessControlQueryBuilder(PipelineBuilder):
     """Query builder for restrict objects in aggregation calls."""
 
@@ -91,19 +80,7 @@ class AccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        # return self.lookup_sub_(
-        #     from_='framework.types',
-        #     let_={'type_id': '$type_id'},
-        #     pipeline_=[
-        #         self.match_(query=self.expr_(expression={
-        #             '$eq': [
-        #                 '$$type_id',
-        #                 '$public_id'
-        #             ]
-        #         }))
-        #     ],
-        #     as_='type'
-        # )
+        """TODO: document"""
         return {
             '$lookup': {
                 'from': 'framework.types',

@@ -30,6 +30,8 @@ from cmdb.errors.database import DatabaseConnectionError, SetDatabaseError
 LOGGER = logging.getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
+#                                                MongoConnector - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class MongoConnector:
     """
     PyMongo (MongoDB) implementation from connector
@@ -85,8 +87,9 @@ class MongoConnector:
 
     def is_connected(self) -> bool:
         """
-        check if client is connected successfully
-        Returns: True if connected / False if disconnected
+        Check if client is connected successfully
+
+        Returns (bool): True if connected / False if disconnected
         """
         return self.connect().get_status()
 

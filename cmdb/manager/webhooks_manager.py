@@ -143,7 +143,11 @@ class WebhooksManager(BaseManager):
 
 # ------------------------------------------------------ HELPERS ----------------------------------------------------- #
 
-    def send_webhook_event(self, operation: WebhookEventType = None, event_object: dict = None, changes: dict = None):
+    def send_webhook_event(self,
+                           operation: WebhookEventType = None,
+                           object_before: dict = None,
+                           object_after: dict = None,
+                           changes: dict = None):
         """TODO: document"""
         builder_params = BuilderParameters({})
         webhooks: IterationResult[CmdbWebhook] = self.iterate(builder_params).results
@@ -157,7 +161,7 @@ class WebhooksManager(BaseManager):
                     if operation in webhook.event_types:
                         webhook_url = webhook.url
 
-                        payload = self.build_payload(operation, event_object, changes)
+                        payload = self.build_payload(operation, object_before, object_after, changes)
 
                         response: requests.Response = requests.post(
                             webhook_url,
@@ -176,23 +180,18 @@ class WebhooksManager(BaseManager):
             LOGGER.debug("[send_webhook_event] Exception: %s, Type: %s", err, type(err))
 
 
-    def build_payload(self, operation: WebhookEventType, event_object: dict, changes: dict = None) -> dict:
+    def build_payload(self,
+                      operation: WebhookEventType,
+                      object_before: dict,
+                      object_after:dict,
+                      changes: dict = None) -> dict:
         """TODO: document"""
         payload = {}
 
         payload['event_time'] = datetime.now(timezone.utc)
         payload['operation'] = operation
-        payload['object_before'] = None
-        payload['object_after'] = None
-        payload['changes'] = None
-
-        if operation == WebhookEventType.CREATE:
-            payload['object_after'] = event_object
-
-        elif operation == WebhookEventType.UPDATE:
-            payload['object_before'] = event_object
-            payload['changes'] = changes
-        elif operation == WebhookEventType.DELETE:
-            payload['object_before'] = event_object
+        payload['object_before'] = object_before
+        payload['object_after'] = object_after
+        payload['changes'] = changes
 
         return payload

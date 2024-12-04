@@ -38,12 +38,11 @@ class SearchResultMap(Generic[R]):
         """Quick convert for the database"""
         return {'result': self.result.__dict__, 'matches': self.matches}
 
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                     SearchResult                                                     #
-# -------------------------------------------------------------------------------------------------------------------- #
+#TODO: CLASS-FIX
 class SearchResult(Generic[R]):
-    """Generic search result base"""
-
+    """
+    Generic search result base
+    """
     def __init__(self,
                  results: list[R],
                  total_results: int,

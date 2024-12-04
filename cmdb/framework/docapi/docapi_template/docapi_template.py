@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.docapi.docapi_template.docapi_template_base import TemplateManagementBase
-from cmdb.docapi.docapi_template.docapi_template_type_enum import DocapiTemplateType
+from cmdb.framework.docapi.docapi_template.docapi_template_base import TemplateManagementBase
+from cmdb.framework.docapi.docapi_template.docapi_template_type_enum import DocapiTemplateType
 from cmdb.models.cmdb_dao import CmdbDAO
 
 from cmdb.errors.cmdb_object import NoPublicIDError

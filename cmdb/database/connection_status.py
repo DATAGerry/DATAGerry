@@ -13,10 +13,14 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Manages database connection status"""
-
+"""
+Manages database connection status
+"""
 # -------------------------------------------------------------------------------------------------------------------- #
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               ConnectionStatus - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class ConnectionStatus:
     """Class representing the status of connection to database"""
 
@@ -26,5 +30,7 @@ class ConnectionStatus:
 
 
     def get_status(self) -> bool:
-        """Returns the connected status"""
+        """
+        Returns the connected status
+        """
         return self.connected

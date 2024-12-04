@@ -14,7 +14,14 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+# -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                DateSettingsDAO - CLASS                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
 class DateSettingsDAO:
     """Regional Date Settings"""
 
@@ -22,6 +29,7 @@ class DateSettingsDAO:
             'date_format': 'YYYY-MM-DDThh:mm:ssZ',
             'timezone': 'UTC',
         }
+
 
     def __init__(self, date_format: str, timezone: str):
         self._id: str = 'date'

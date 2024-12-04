@@ -22,9 +22,9 @@ from datetime import datetime, timezone
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.base_manager import BaseManager
-
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
-from cmdb.docapi.docapi_template.docapi_template import DocapiTemplate
+
+from cmdb.framework.docapi.docapi_template.docapi_template import DocapiTemplate
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager import ManagerIterationError
