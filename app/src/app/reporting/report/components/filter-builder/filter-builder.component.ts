@@ -163,11 +163,6 @@ export class FilterBuilderComponent implements OnInit, OnChanges {
         };
 
         const hasEmptyFields = checkForEmptyFields(this.query.rules);
-        const isRulesEmpty = this.query.rules.length === 0;
-
-        // Combine conditions: true only if both are true, false only if both are false
-        const isValidationPassed = hasEmptyFields === isRulesEmpty;
-
-        this.filterBuilderValidation.emit(isValidationPassed);
+        this.filterBuilderValidation.emit(!hasEmptyFields);
     }
 }
