@@ -52,9 +52,9 @@ location_blueprint = APIBlueprint('locations', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @location_blueprint.route('/', methods=['POST'])
+@location_blueprint.parse_request_parameters()
 @insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
-@location_blueprint.parse_request_parameters()
 def create_location(params: dict, request_user: UserModel):
     """
     Creates a location in the database
@@ -113,9 +113,9 @@ def create_location(params: dict, request_user: UserModel):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @location_blueprint.route('/', methods=['GET', 'HEAD'])
+@location_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-@location_blueprint.parse_collection_parameters(view='native')
 def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
     Returns all locations based on the params
@@ -149,9 +149,9 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 
 
 @location_blueprint.route('/tree', methods=['GET', 'HEAD'])
+@location_blueprint.parse_collection_parameters()
 @insert_request_user
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
-@location_blueprint.parse_collection_parameters()
 def get_locations_tree(params: CollectionParameters, request_user: UserModel):
     """
     Returns all locations as a location tree
