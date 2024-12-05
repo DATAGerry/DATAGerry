@@ -85,9 +85,9 @@ def create_section_template(params: dict, request_user: UserModel):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @section_template_blueprint.route('/', methods=['GET', 'HEAD'])
+@section_template_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
-@section_template_blueprint.parse_collection_parameters(view='native')
 def get_all_section_templates(params: CollectionParameters, request_user: UserModel):
     """Returns all CmdbSectionTemplates based on the params
 
