@@ -24,6 +24,7 @@ import { Sort, SortDirection } from 'src/app/layout/table/table.types';
 import { ReplaySubject, takeUntil } from 'rxjs';
 import { CollectionParameters } from 'src/app/services/models/api-parameter';
 import { APIGetMultiResponse } from 'src/app/services/models/api-response';
+import { Location } from '@angular/common';
 
 @Component({
     selector: 'app-webhook-log-viewer',
@@ -49,7 +50,7 @@ export class WebhookLogViewerComponent implements OnInit {
 
     constructor(
         private webhookService: WebhookLogService,
-        private toast: ToastService, private modalService: NgbModal,) { }
+        private toast: ToastService, private modalService: NgbModal, private location: Location) { }
 
     ngOnInit(): void {
         this.columns = [
@@ -286,6 +287,13 @@ export class WebhookLogViewerComponent implements OnInit {
         }
 
         return query;
+    }
+
+    /**
+ * Navigates back to the previous page in the browser's history.
+ */
+    goBack(): void {
+        this.location.back()
     }
 
 }
