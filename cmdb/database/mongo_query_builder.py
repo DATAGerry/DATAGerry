@@ -21,6 +21,14 @@ from typing import Union
 from datetime import datetime
 
 from cmdb.models.type_model.type import TypeModel
+
+from cmdb.errors.mongo_query_builder import (
+    MongoQueryBuilderInitError,
+    MongoQueryBuilderInvalidOperatorError,
+    MongoQueryBuilderBuildRuleError,
+    MongoQueryBuilderBuildRulesetError,
+    MongoQueryBuilderBuildError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -50,7 +58,7 @@ class MongoDBQueryBuilder:
             self.mds_fields = self.report_type.get_all_mds_fields()
         except Exception as err:
             LOGGER.debug("[__init__] Exception: %s, Type: %s", err, type(err))
-            raise Exception(err) from err
+            raise MongoQueryBuilderInitError(err) from err
 
 
     def build(self):
@@ -60,90 +68,130 @@ class MongoDBQueryBuilder:
         try:
             if self.condition and self.rules:
                 return self.__build_ruleset(self.condition, self.rules)
-        except Exception as err:
-            LOGGER.debug("[build] Exception %s, Type: %s", err, type(err))
-        return {}
 
+            return {}
+        except Exception as err:
+            LOGGER.debug("[build] Exception: %s, Type: %s", err, type(err))
+            raise MongoQueryBuilderBuildError(str(err)) from err
 
     def __build_ruleset(self, condition: str, rules: list[dict]):
         """TODO. document"""
-        children = []
+        try:
+            children = []
 
-        for rule in rules:
-            if "condition" in rule:
-                children.append(self.__build_ruleset(rule["condition"], rule["rules"]))
-            else:
-                if "value" in rule:
-                    children.append(self.__build_rule(rule["field"], rule["operator"], rule["value"]))
+            for rule in rules:
+                if "condition" in rule:
+                    children.append(self.__build_ruleset(rule["condition"], rule["rules"]))
                 else:
-                    children.append(self.__build_rule(rule["field"], rule["operator"]))
+                    if "value" in rule:
+                        children.append(self.__build_rule(rule["field"], rule["operator"], rule["value"]))
+                    else:
+                        children.append(self.__build_rule(rule["field"], rule["operator"]))
 
-        possible_conditions = {
-            "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
-            "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
-        }
+            possible_conditions = {
+                "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
+                "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
+            }
 
-        return possible_conditions[condition]
-
+            return possible_conditions[condition]
+        except Exception as err:
+            raise MongoQueryBuilderBuildRulesetError(str(err)) from err
 
     def __build_rule(self, field_name: str, operator: str, value: Union[int, str, list[str]] = None):
         """TODO: document"""
-        target_field = 'fields'
-        target_value = value
-
-        if field_name in self.date_fields and value:
-            try:
-                target_value = datetime.strptime(value, '%Y-%m-%d')
-            except Exception as err:
-                LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
-
-        if (field_name in self.ref_fields or
-            field_name in self.ref_section_fields or
-            field_name in self.number_fields) and value:
-            try:
-                target_value = int(value)
-            except Exception as err:
-                LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
-
-        if field_name in self.mds_fields:
-            target_field = 'multi_data_sections.values.data'
-
         try:
-            return self.create_rule(target_field, operator, field_name, target_value)
-        except Exception as err:
-            raise Exception(err) from err
+            target_field = 'fields'
+            target_value = value
 
+            if field_name in self.date_fields and value:
+                target_value = datetime.strptime(value, '%Y-%m-%d')
+
+            if (field_name in self.ref_fields or
+                field_name in self.ref_section_fields or field_name in self.number_fields) and value:
+                target_value = int(value)
+
+            if field_name in self.mds_fields:
+                target_field = 'multi_data_sections.values.data'
+
+            return self.create_rule(target_field, operator, field_name, target_value)
+        except MongoQueryBuilderInvalidOperatorError as err:
+            raise MongoQueryBuilderInvalidOperatorError(operator) from err
+        except Exception as err:
+            LOGGER.debug("[__build_rule] Exception: %s, Type: %s", err, type(err))
+            raise MongoQueryBuilderBuildRuleError(str(err)) from err
 
 # ------------------------------------------------------ HELPERS ----------------------------------------------------- #
 
     def create_rule(self,
-                               target_field: str,
-                               operator: str,
-                               field_name: str,
-                               value: Union[int, str, list[int], list[str]] = None) -> dict:
-        """TODO:"""
-        return  {
-                    target_field: self.get_operator_fragment(operator, field_name, value)
-                }
+                    target_field: str,
+                    operator: str,
+                    field_name: str,
+                    value: Union[int, str, list[int], list[str]] = None) -> dict:
+        """
+        Transforms a rule to a MongoDB compatible query part
+        
+        Args:
+            target_field (str): defines where to search for the value (fields or MDS)
+            operator (str): operator of the rule
+            field_name (str): name of field
+            value (Union[int, str, list[int], list[str]], optional): value of the rule
 
+        Raises:
+            MongoQueryBuilderInvalidOperatorError: When an unsupported operator was provided
+
+        Returns:
+            dict: rule as MongoDB compatible query part
+        """
+        try:
+            return {target_field: self.get_operator_fragment(operator, field_name, value)}
+        except MongoQueryBuilderInvalidOperatorError as err:
+            raise MongoQueryBuilderInvalidOperatorError(operator) from err
 
     def get_operator_fragment(self,
                               operator: str,
                               field_name: str,
                               value: Union[int, str, list[int], list[str]] = None) -> dict:
-        """TODO: document"""
-        return {
-                    "$elemMatch": {
-                        "name": field_name,
-                        "value": self.get_value_fragment(operator, value)
-                    }
-               }
+        """
+        Creates the operator part of a condition for a MongoDB query
+
+        Args:
+            operator (str): operator of the condition like '<, =, !='
+            field_name (str): field name of the condition
+            value (Union[int, str, list[int], list[str]], optional): value of the condition
+
+        Raises:
+            MongoQueryBuilderInvalidOperatorError: When an unsupported operator was provided
+
+        Returns:
+            dict: operator part of the condition
+        """
+        try:
+            return {
+                "$elemMatch": {
+                    "name": field_name,
+                    "value": self.get_value_fragment(operator, value)
+                }
+            }
+        except MongoQueryBuilderInvalidOperatorError as err:
+            raise MongoQueryBuilderInvalidOperatorError(operator) from err
 
 
     def get_value_fragment(self,
                            operator: str,
                            value: Union[int, str, list[int], list[str]] = None) -> Union[dict, str]:
-        """TODO: document"""
+        """
+        Creates the value part of a condition for a MongoDB query
+
+        Args:
+            operator (str): operator of the condition like '<, =, !='
+            value (Union[int, str, list[int], list[str]], optional): value of the condition
+
+        Raises:
+            MongoQueryBuilderInvalidOperatorError: When an unsupported operator was provided
+
+        Returns:
+            Union[dict, str]: Value part of a condition
+        """
 
         allowed_operators = {
             "=": {"$eq": value},
@@ -163,4 +211,4 @@ class MongoDBQueryBuilder:
         if operator in allowed_operators:
             return allowed_operators[operator]
 
-        raise Exception("Invalid operator: %s !", operator)
+        raise MongoQueryBuilderInvalidOperatorError(operator)
