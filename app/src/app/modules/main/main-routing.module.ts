@@ -136,6 +136,9 @@ const routes: Routes = [
         path: 'webhooks',
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
+        data: {
+            right: 'base.framework.webhook.view'
+        },
         loadChildren: () =>
             import('../../webhook/webhook.module').then((m) => m.WebhookModule)
     }

@@ -8,33 +8,43 @@ import { WebhookFormComponent } from './components/webhook-form/webhook-form.com
 import { WebhookOverviewComponent } from './components/webhook-overview/webhook-overview.component';
 import { WebhookLogViewerComponent } from './components/webhook-log-viewer/webhook-log-viewer.component';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { UserSettingsResolver } from '../management/user-settings/resolvers/user-settings-resolver.service';
+import { AuthModule } from '../modules/auth/auth.module';
 
 const routes: Routes = [
     {
         path: '',
         data: {
-            breadcrumb: 'Webhooks'
+            breadcrumb: 'Webhooks',
+            right: 'base.framework.webhook.view'
+        },
+
+        resolve: {
+            userSetting: UserSettingsResolver
         },
         component: WebhookOverviewComponent
     },
     {
         path: 'create',
         data: {
-            breadcrumb: 'Create WebHook'
+            breadcrumb: 'Create WebHook',
+            right: 'base.framework.webhook.add',
         },
         component: WebhookFormComponent
     },
     {
         path: 'edit/:id',
         data: {
-            breadcrumb: 'Edit WebHook'
+            breadcrumb: 'Edit WebHook',
+            right: 'base.framework.webhook.edit',
         },
         component: WebhookFormComponent
     },
     {
         path: 'logs',
         data: {
-            breadcrumb: 'WebHook Logs'
+            breadcrumb: 'WebHook Logs',
+            right: 'base.framework.webhook.view',
         },
         component: WebhookLogViewerComponent
     },
@@ -52,7 +62,8 @@ const routes: Routes = [
         ReactiveFormsModule,
         RouterModule.forChild(routes),
         TableModule,
-        NgSelectModule
+        NgSelectModule,
+        AuthModule
     ],
     providers: [],
 })

@@ -20,5 +20,8 @@
 </cmdb-table>
  <!-- Actions Template -->
 <ng-template #actionsTemplate let-item="item">
-  <i class="far fa-trash-alt btn-delete" (click)="onDeleteLog(item)"></i>
+
+  <span *permissionLink="['base.framework.webhook.delete']">
+    <i class="far fa-trash-alt btn-delete" (click)="onDeleteLog(item)"></i>
+  </span>
 </ng-template>
