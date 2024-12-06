@@ -14,20 +14,17 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from typing import TypeVar, Dict, Set, Generic
+from typing import TypeVar, Set, Generic
 
+from cmdb.security.acl.access_control_section_dict import AccessControlSectionDict
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
 
 T = TypeVar('T')
 
 # -------------------------------------------------------------------------------------------------------------------- #
-class AccessControlSectionDict(Dict[T, Set[AccessControlPermission]]):
-    """TODO: document"""
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-#TODO: CLASS-FIX
+#                                           AccessControlListSection - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AccessControlListSection(Generic[T]):
     """`AccessControlListSection` are a config element inside the complete ac-dict."""
 
@@ -77,40 +74,3 @@ class AccessControlListSection(Generic[T]):
     def to_json(cls, section: "AccessControlListSection[T]") -> dict:
         """TODO: document"""
         raise NotImplementedError
-
-
-#TODO: CLASS-FIX
-class GroupACL(AccessControlListSection[int]):
-    """Wrapper class for the group section"""
-
-    def __init__(self, includes: AccessControlSectionDict[T]):
-        super().__init__(includes=includes)
-
-
-    @property
-    def includes(self) -> dict:
-        return self._includes
-
-
-    @includes.setter
-    def includes(self, value: AccessControlSectionDict):
-        if not isinstance(value, dict):
-            raise TypeError('`AccessControlListSection` only takes dict as include structure')
-
-        value = {int(k): v for k, v in value.items()}
-
-        self._includes = value
-
-
-    @classmethod
-    def from_data(cls, data: dict) -> "GroupACL":
-        """TODO: document"""
-        return cls(data.get('includes', set()))
-
-
-    @classmethod
-    def to_json(cls, section: "AccessControlListSection[T]") -> dict:
-        """TODO: document"""
-        return {
-            'includes': {str(k): v for k, v in section.includes.items()}
-        }
