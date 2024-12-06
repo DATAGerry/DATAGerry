@@ -24,7 +24,7 @@ from cmdb.models.type_model.type_summary import TypeSummary
 from cmdb.models.type_model.type_field_section import TypeFieldSection
 from cmdb.models.type_model.type_render_meta import TypeRenderMeta
 from cmdb.security.acl.control import AccessControlList
-from cmdb.security.acl.sections import GroupACL
+from cmdb.security.acl.group_acl import GroupACL
 from tests.utils.flask_test_client import RestAPITestSuite
 # -------------------------------------------------------------------------------------------------------------------- #
 

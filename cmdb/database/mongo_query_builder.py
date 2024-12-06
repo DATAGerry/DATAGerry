@@ -66,10 +66,7 @@ class MongoDBQueryBuilder:
         Builds the MongoDB query by using the self.conditions
         """
         try:
-            if self.condition and self.rules:
-                return self.__build_ruleset(self.condition, self.rules)
-
-            return {}
+            return self.__build_ruleset(self.condition, self.rules)
         except Exception as err:
             LOGGER.debug("[build] Exception: %s, Type: %s", err, type(err))
             raise MongoQueryBuilderBuildError(str(err)) from err
@@ -77,23 +74,26 @@ class MongoDBQueryBuilder:
     def __build_ruleset(self, condition: str, rules: list[dict]):
         """TODO. document"""
         try:
-            children = []
+            if self.condition and self.rules:
+                children = []
 
-            for rule in rules:
-                if "condition" in rule:
-                    children.append(self.__build_ruleset(rule["condition"], rule["rules"]))
-                else:
-                    if "value" in rule:
-                        children.append(self.__build_rule(rule["field"], rule["operator"], rule["value"]))
+                for rule in rules:
+                    if "condition" in rule:
+                        children.append(self.__build_ruleset(rule["condition"], rule["rules"]))
                     else:
-                        children.append(self.__build_rule(rule["field"], rule["operator"]))
+                        if "value" in rule:
+                            children.append(self.__build_rule(rule["field"], rule["operator"], rule["value"]))
+                        else:
+                            children.append(self.__build_rule(rule["field"], rule["operator"]))
 
-            possible_conditions = {
-                "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
-                "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
-            }
+                possible_conditions = {
+                    "and": {'$and': [{'$and': children}, {"type_id": self.report_type.public_id}]},
+                    "or": {'$and': [{'$or': children}, {"type_id": self.report_type.public_id}]},
+                }
 
-            return possible_conditions[condition]
+                return possible_conditions[condition]
+            else:
+                return {"type_id": self.report_type.public_id}
         except Exception as err:
             raise MongoQueryBuilderBuildRulesetError(str(err)) from err
 
