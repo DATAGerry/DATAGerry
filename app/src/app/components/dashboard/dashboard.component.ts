@@ -71,7 +71,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     public itemsObject: number[] = [];
     public colorsObject: any[] = [];
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    public totalObjects: number = 1000;
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         private objectService: ObjectService,
@@ -182,6 +183,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadLatestObjects();
 
         this.generateObjectChar();
+
     }
 
 
@@ -190,7 +192,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.unSubscribe.complete();
     }
 
-/* --------------------------------------------------- OBJECTS API -------------------------------------------------- */
+    /* --------------------------------------------------- OBJECTS API -------------------------------------------------- */
 
     /**
      * Returns the number of objects
@@ -305,7 +307,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             });
     }
 
-/* ----------------------------------------------- OBJECT API - HELPER ---------------------------------------------- */
+    /* ----------------------------------------------- OBJECT API - HELPER ---------------------------------------------- */
 
     public onNewestPageChange(event) {
         this.newestPage = event;
@@ -318,7 +320,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.loadLatestObjects();
     }
 
-/* ------------------------------------------------ CHARTS FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ CHARTS FUNCTIONS ------------------------------------------------ */
 
     private generateObjectChar() {
         this.objectService.groupObjectsByType('type_id').pipe(takeUntil(this.unSubscribe)).subscribe(values => {
