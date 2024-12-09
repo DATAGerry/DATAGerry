@@ -25,6 +25,9 @@ import { GroupService } from '../../../management/services/group.service';
 
 import { User } from '../../../management/models/user';
 import { Group } from '../../../management/models/group';
+import { ObjectService } from 'src/app/framework/services/object.service';
+import { switchMap } from 'rxjs';
+import { environment } from 'src/environments/environment';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 declare global {
@@ -43,19 +46,31 @@ export class NavigationComponent implements OnInit {
     public user: User;
     public group: Group;
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    public usedObjects = 0;
+    public totalObjects = 100;
+    public isCloudMode = environment.cloudMode;
+
+
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(
         public authService: AuthService,
         private userService: UserService,
-        private groupService: GroupService
+        private groupService: GroupService,
+        private objectService: ObjectService
     ) {
         this.user = this.userService.getCurrentUser();
     }
 
 
     public ngOnInit(): void {
-        if(this.user){
+        this.objectService.countObjects().pipe(
+            switchMap(() => this.objectService.getLastObjectCount())
+        ).subscribe(count => {
+            this.usedObjects = count;
+        });
+
+        if (this.user) {
             this.groupService.getGroup(this.user.group_id).subscribe(resp => {
                 this.group = resp;
             });
@@ -64,7 +79,7 @@ export class NavigationComponent implements OnInit {
         this.dropdownSubmenu();
     }
 
-/* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
+    /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     /**
      * Logout the user via the menu in top right corner
@@ -106,8 +121,8 @@ export class NavigationComponent implements OnInit {
             dataType: 'script'
         });
 
-        window.ATL_JQ_PAGE_PROPS =  {
-            "triggerFunction": function(showCollectorDialog) {
+        window.ATL_JQ_PAGE_PROPS = {
+            "triggerFunction": function (showCollectorDialog) {
                 showCollectorDialog();
             }
         };
@@ -117,7 +132,7 @@ export class NavigationComponent implements OnInit {
     /**
      * Open the DATAGERRY Assistant from the Toolbox
      */
-    public openIntroModal(){
+    public openIntroModal() {
         this.authService.showIntro(true);
     }
 }
