@@ -358,14 +358,16 @@ def create_new_admin_user(user_data: dict):
 
         if not admin_user_from_db:
             admin_user = UserModel(
-                public_id=1,
-                user_name=user_data['user_name'],
-                email=user_data['email'],
-                database=user_data['database'],
-                active=True,
-                group_id=1,
-                registration_time=datetime.now(timezone.utc),
-                password=scm.generate_hmac(user_data['password']),
+                public_id = 1,
+                user_name = user_data['user_name'],
+                email = user_data['email'],
+                database = user_data['database'],
+                active = user_data['active'] in ['True', 'true', True],
+                api_level = int(user_data['api_level']),
+                config_items_limit = int(user_data['config_items_limit']),
+                group_id = 1,
+                registration_time = datetime.now(timezone.utc),
+                password = scm.generate_hmac(user_data['password']),
             )
 
             users_manager.insert_user(admin_user)

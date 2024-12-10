@@ -34,6 +34,8 @@ class UserModel(CmdbDAO):
 
     DEFAULT_AUTHENTICATOR: str = 'LocalAuthenticationProvider'
     DEFAULT_GROUP: int = 2
+    DEFAULT_API_LEVEL = 0
+    DEFAULT_CONFIG_ITEMS_LIMIT = 1000
 
     SCHEMA: dict = {
         'public_id': {
@@ -100,11 +102,26 @@ class UserModel(CmdbDAO):
             'nullable': True,
             'empty': True,
             'required': False
+        },
+        'api_level': {
+            'type': 'integer',
+            'nullable': True,
+            'empty': True,
+            'default': DEFAULT_API_LEVEL,
+            'required': False
+        },
+        'config_items_limit': {
+            'type': 'integer',
+            'nullable': True,
+            'empty': True,
+            'default': DEFAULT_CONFIG_ITEMS_LIMIT,
+            'required': False
         }
     }
 
     __slots__ = 'public_id', 'user_name', 'active', 'group_id', 'registration_time', 'password', \
-                'image', 'first_name', 'last_name', 'database', 'email', 'authenticator'
+                'image', 'first_name', 'last_name', 'database', 'email', 'authenticator', 'api_level', \
+                'config_items_limit'
 
     def __init__(self,
                  public_id: int,
@@ -114,6 +131,8 @@ class UserModel(CmdbDAO):
                  registration_time: datetime = None,
                  password: str = None,
                  database: str = 'test',
+                 api_level: int = 0,
+                 config_items_limit: int = 1000,
                  image: str = None,
                  first_name: str = None,
                  last_name: str = None,
@@ -128,11 +147,13 @@ class UserModel(CmdbDAO):
         self.registration_time: datetime = registration_time or datetime.now(timezone.utc)
 
         self.database = database
-        self.email: str = email
-        self.password: str = password
-        self.image: str = image
-        self.first_name: str = first_name or None
-        self.last_name: str = last_name or None
+        self.api_level = api_level
+        self.config_items_limit = config_items_limit
+        self.email = email
+        self.password = password
+        self.image = image
+        self.first_name = first_name or None
+        self.last_name = last_name or None
 
         super().__init__(public_id=public_id)
 
@@ -168,18 +189,20 @@ class UserModel(CmdbDAO):
             reg_date = parser.parse(reg_date)
 
         return cls(
-            public_id=data.get('public_id'),
-            user_name=data.get('user_name'),
-            active=data.get('active'),
-            database=data.get('database'),
-            group_id=data.get('group_id', None),
-            registration_time=reg_date,
-            authenticator=data.get('authenticator', None),
-            email=data.get('email', None),
-            password=data.get('password', None),
-            image=data.get('image', None),
-            first_name=data.get('first_name', None),
-            last_name=data.get('last_name', None)
+            public_id = data.get('public_id'),
+            user_name = data.get('user_name'),
+            active = data.get('active'),
+            database = data.get('database', None),
+            api_level = data.get('api_level', 0),
+            config_items_limit = data.get('config_items_limit', 1000),
+            group_id = data.get('group_id', None),
+            registration_time = reg_date,
+            authenticator = data.get('authenticator', None),
+            email = data.get('email', None),
+            password = data.get('password', None),
+            image = data.get('image', None),
+            first_name = data.get('first_name', None),
+            last_name = data.get('last_name', None)
         )
 
 
@@ -200,6 +223,8 @@ class UserModel(CmdbDAO):
             'registration_time': instance.registration_time,
             'authenticator': instance.authenticator,
             'database': instance.database,
+            'api_level': instance.api_level,
+            'config_items_limit': instance.config_items_limit,
             'email': instance.email,
             'password': instance.password,
             'image': instance.image,
