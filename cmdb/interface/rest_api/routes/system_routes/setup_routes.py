@@ -47,7 +47,10 @@ def create_subscription():
         "user_name": Name of user,
         "password": Password of user,
         "email": Valid email of user,
-        "database": Name of database
+        "database": Name of database,
+        "active": True if User is activated else False,
+        "api_level": 0 or 1 or 2,
+        "config_items_limit": Max number of CIs for user
     }
     """
     if not request.args:
@@ -61,6 +64,9 @@ def create_subscription():
         password = setup_data['password']
         email = setup_data['email']
         database = setup_data['database']
+        active = setup_data['active'] in ['True', 'true', True]
+        api_level = int(setup_data['api_level'])
+        config_items_limit = int(setup_data['config_items_limit'])
     except KeyError:
         return abort(400, "A required field in data is missing!")
 
@@ -85,7 +91,10 @@ def create_subscription():
             "user_name": user_name,
             "password": password,
             "email": email,
-            "database": database
+            "database": database,
+            "active": active,
+            "api_level": api_level,
+            "config_items_limit": config_items_limit
         }
 
         with open('etc/test_users.json', 'w', encoding='utf-8') as cur_users_file:

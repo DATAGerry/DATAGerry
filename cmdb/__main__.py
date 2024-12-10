@@ -61,8 +61,9 @@ def main(args: Namespace):
         dbm = None
         LOGGER.info("DATAGERRY starting...")
 
-        _activate_debug(args)
+        __activate_debug_mode(args)
         __activate_cloud_mode(args)
+        __activate_local_mode(args)
         _init_config_reader(args.config_file)
 
         if args.start and not args.cloud:
@@ -218,6 +219,12 @@ def build_arg_parser() -> Namespace:
                          dest='cloud',
                          help="init cloud mode")
 
+    _parser.add_argument('--local',
+                         action='store_true',
+                         default=False,
+                         dest='local',
+                         help="init local mode")
+
     _parser.add_argument('-d',
                          '--debug',
                          action='store_true',
@@ -241,13 +248,22 @@ def build_arg_parser() -> Namespace:
     return _parser.parse_args()
 
 
-def _activate_debug(args: Namespace):
+def __activate_debug_mode(args: Namespace):
     """
     Activate the debug mode if set
     """
     if args.debug:
         cmdb.__MODE__ = 'DEBUG'
-        LOGGER.warning("DEBUG mode enabled")
+        LOGGER.warning("DEBUG MODE enabled")
+
+
+def __activate_local_mode(args: Namespace):
+    """
+    Activate the debug mode if set
+    """
+    if args.local:
+        cmdb.__LOCAL_MODE__ = True
+        LOGGER.warning("LOCAL MODE enabled")
 
 
 def __activate_cloud_mode(args: Namespace):

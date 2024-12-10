@@ -28,3 +28,4 @@ __copyright__ = 'Copyright 2024 becon GmbH'
 __runtime__ = time.time()
 __MODE__ = 'INFO'
 __CLOUD_MODE__ = False
+__LOCAL_MODE__ = False
