@@ -218,9 +218,9 @@ def get_object(public_id, request_user: UserModel):
 
 
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
+@objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
-@objects_blueprint.parse_collection_parameters(view='native')
 def get_objects(params: CollectionParameters, request_user: UserModel):
     """
     Retrieves multiple objects from db regarding the used params
