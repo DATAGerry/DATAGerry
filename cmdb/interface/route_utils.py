@@ -28,6 +28,8 @@ from cmdb.manager.groups_manager import GroupsManager
 from cmdb.manager.security_manager import SecurityManager
 from cmdb.manager.settings_reader_manager import SettingsReaderManager
 
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
+from cmdb.interface.rest_api.auth_method_enum import AuthMethod
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.validator import TokenValidator
 from cmdb.security.token.generator import TokenGenerator
@@ -128,13 +130,16 @@ def insert_request_user(func):
     def get_request_user(*args, **kwargs):
         with current_app.app_context():
             users_manager = UsersManager(current_app.database_manager)
-
-        token = parse_authorization_header(request.headers['Authorization'])
         try:
+            token = parse_authorization_header(request.headers['Authorization'])
+
             with current_app.app_context():
                 decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
         except TokenValidationError:
             #TODO: ERROR-FIX
+            return abort(401)
+        except Exception as err:
+            LOGGER.debug("[insert_request_user] Token Exception: %s, Type: %s", err, type(err))
             return abort(401)
 
         try:
@@ -143,18 +148,84 @@ def insert_request_user(func):
             if current_app.cloud_mode:
                 database = decrypted_token['DATAGERRY']['value']['user']['database']
                 users_manager = UsersManager(current_app.database_manager, database)
+
+            user = users_manager.get_user(user_id)
+            kwargs.update({'request_user': user})
         except ValueError:
             return abort(401)
         except Exception as err:
-            LOGGER.debug("[insert_request_user] Uncatched error type: %s", type(err))
+            LOGGER.debug("[insert_request_user] User Exception: %s, Type: %s", err, type(err))
             return abort(401)
-
-        user = users_manager.get_user(user_id)
-        kwargs.update({'request_user': user})
 
         return func(*args, **kwargs)
 
     return get_request_user
+
+
+def insert_auth_method(func):
+    """TODO: document"""
+
+    @functools.wraps(func)
+    def get_auth_method(*args, **kwargs):
+        """TODO: document"""
+        try:
+            auth_header = request.headers.get('Authorization')
+
+            if auth_header:
+                if auth_header.startswith('Basic '):
+                    kwargs.update({'auth_method': AuthMethod.BASIC})
+                elif auth_header.startswith('Bearer '):
+                    kwargs.update({'auth_method': AuthMethod.JWT})
+                else:
+                    return abort(400, "Invalid auth method!")
+            else:
+                return abort(400, "Invalid auth method!")
+
+        except Exception as err:
+            LOGGER.debug("[insert_auth_method] User Exception: %s, Type: %s", err, type(err))
+            return abort(400, "Invalid auth method!")
+
+        return func(*args, **kwargs)
+
+    return get_auth_method
+
+
+def insert_api_user(func):
+    """TODO: document"""
+
+    @functools.wraps(func)
+    def get_api_user(*args, **kwargs):
+        """TODO: document"""
+        try:
+            value = _wsgi_decoding_dance(request.headers['Authorization'])
+
+            try:
+                auth_type, auth_info = value.split(None, 1)
+                auth_type = auth_type.lower()
+            except ValueError:
+                auth_type = b"bearer"
+                auth_info = value
+
+            if auth_type in (b"basic","basic"):
+                email, password = base64.b64decode(auth_info).split(b":", 1)
+
+                with current_app.app_context():
+                    email = email.decode("utf-8")
+                    password = password.decode("utf-8")
+
+                    kwargs.update({'api_user_data': {'email': email,
+                                                     'password': password,
+                                                     'method': "basic"}})
+            else:
+                kwargs.update({'api_user_data': None})
+        except Exception as err:
+            LOGGER.debug("[insert_api_user] User Exception: %s, Type: %s", err, type(err))
+            kwargs.update({'api_user_data': None})
+
+        return func(*args, **kwargs)
+
+    return get_api_user
+
 
 #@deprecated
 def right_required(required_right: str):
@@ -362,7 +433,7 @@ def create_new_admin_user(user_data: dict):
                 user_name = user_data['user_name'],
                 email = user_data['email'],
                 database = user_data['database'],
-                active = user_data['active'] in ['True', 'true', True],
+                active = True,
                 api_level = int(user_data['api_level']),
                 config_items_limit = int(user_data['config_items_limit']),
                 group_id = 1,
@@ -404,3 +475,24 @@ def delete_database(db_name: str):
     except Exception as err:
         LOGGER.debug("[delete_database] Exception: %s, Type:%s", err, type(err))
         raise DatabaseNotExists(db_name) from err
+
+
+def validate_api_access(user_data: dict = None, required_api_level: ApiLevel = ApiLevel.NO_API) -> bool:
+    """TODO: document"""
+    # Only validate in cloud mode
+    if not current_app.cloud_mode:
+        return True
+
+    if not user_data:
+        return False
+
+    try:
+        user_instance = check_user_in_mysql_db(user_data['email'], user_data['password'])
+
+        if user_instance:
+            return user_instance['api_level'] >= required_api_level
+
+        return False
+    except Exception as err:
+        LOGGER.debug("[validate_api_access] Error: %s, Type: %s", err, type(err))
+        return False

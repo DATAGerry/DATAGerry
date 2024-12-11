@@ -32,13 +32,13 @@ from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.generator import TokenGenerator
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import check_user_in_mysql_db
 from cmdb.interface.route_utils import (
     insert_request_user,
     check_db_exists,
     init_db_routine,
     create_new_admin_user,
     retrive_user,
+    check_user_in_mysql_db,
 )
 from cmdb.interface.rest_api.responses import DefaultResponse, LoginResponse
 
