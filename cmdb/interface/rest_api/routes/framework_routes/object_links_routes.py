@@ -27,7 +27,8 @@ from cmdb.models.object_link_model.link import ObjectLinkModel
 from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import DeleteSingleResponse, InsertSingleResponse, GetMultiResponse
 
@@ -43,6 +44,7 @@ LOGGER = logging.getLogger(__name__)
 
 @links_blueprint.route('/', methods=['POST'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @links_blueprint.protect(auth=True, right='base.framework.object.add')
 def create_object_link(request_user: UserModel):
     """
@@ -94,6 +96,7 @@ def create_object_link(request_user: UserModel):
 
 @links_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @links_blueprint.protect(auth=True, right='base.framework.object.view')
 @links_blueprint.parse_collection_parameters()
 def get_links(params: CollectionParameters, request_user: UserModel):
@@ -133,6 +136,7 @@ def get_links(params: CollectionParameters, request_user: UserModel):
 
 @links_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @links_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_link(public_id: int, request_user: UserModel):
     """

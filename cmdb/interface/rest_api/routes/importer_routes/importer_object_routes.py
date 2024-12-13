@@ -44,10 +44,14 @@ from cmdb.framework.importer.helper.importer_helper import (
 )
 from cmdb.interface.rest_api.routes.importer_routes.import_routes import importer_blueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.interface.route_utils import insert_request_user,\
-                                       login_required,\
-                                       right_required
+from cmdb.interface.route_utils import (
+    insert_request_user,
+    login_required,
+    right_required,
+    verify_api_access,
+)
 from cmdb.interface.blueprints import NestedBlueprint
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.routes.importer_routes.importer_route_utils import (
     get_file_in_request,
     get_element_from_data_request,
@@ -70,6 +74,7 @@ importer_object_blueprint = NestedBlueprint(importer_blueprint, url_prefix='/obj
 @importer_object_blueprint.route('/importer/', methods=['GET'])
 @importer_object_blueprint.route('/importer', methods=['GET'])
 @login_required
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_importer():
     """TODO: document"""
     importer_response = []
@@ -88,6 +93,7 @@ def get_importer():
 @importer_object_blueprint.route('/importer/config/<string:importer_type>/', methods=['GET'])
 @importer_object_blueprint.route('/importer/config<string:importer_type>', methods=['GET'])
 @login_required
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_default_importer_config(importer_type):
     """TODO: document"""
     try:
@@ -102,6 +108,7 @@ def get_default_importer_config(importer_type):
 
 @importer_object_blueprint.route('/parser/', methods=['GET'])
 @importer_object_blueprint.route('/parser', methods=['GET'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @login_required
 def get_parser():
     """TODO: document"""
@@ -114,6 +121,7 @@ def get_parser():
 
 @importer_object_blueprint.route('/parser/default/<string:parser_type>', methods=['GET'])
 @importer_object_blueprint.route('/parser/default/<string:parser_type>/', methods=['GET'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @login_required
 def get_default_parser_config(parser_type: str):
     """TODO: document"""
@@ -129,6 +137,7 @@ def get_default_parser_config(parser_type: str):
 
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @importer_object_blueprint.route('/parse', methods=['POST'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @login_required
 def parse_objects():
     """TODO: document"""
@@ -166,6 +175,7 @@ def parse_objects():
 
 
 @importer_object_blueprint.route('/', methods=['POST'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @login_required
 @insert_request_user
 @right_required('base.import.object.*')

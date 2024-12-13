@@ -25,7 +25,8 @@ from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 from cmdb.manager.report_categories_manager import ReportCategoriesManager
 
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.models.user_model.user import UserModel
@@ -53,6 +54,7 @@ report_categories_blueprint = APIBlueprint('report_categories', __name__)
 @report_categories_blueprint.route('/', methods=['POST'])
 @report_categories_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def create_report_category(params: dict, request_user: UserModel):
     """
     Creates a CmdbReportCategory in the database
@@ -85,6 +87,7 @@ def create_report_category(params: dict, request_user: UserModel):
 
 @report_categories_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_report_category(public_id: int, request_user: UserModel):
     """
     Retrieves the CmdbReportCategory with the given public_id
@@ -111,8 +114,9 @@ def get_report_category(public_id: int, request_user: UserModel):
 
 
 @report_categories_blueprint.route('/', methods=['GET', 'HEAD'])
-@insert_request_user
 @report_categories_blueprint.parse_collection_parameters()
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_report_categories(params: CollectionParameters, request_user: UserModel):
     """
     Returns all CmdbReportCategories based on the params
@@ -149,6 +153,7 @@ def get_report_categories(params: CollectionParameters, request_user: UserModel)
 @report_categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @report_categories_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def update_report_category(params: dict, request_user: UserModel):
     """
     Updates a CmdbReportCategory
@@ -193,6 +198,7 @@ def update_report_category(params: dict, request_user: UserModel):
 
 @report_categories_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def delete_report_category(public_id: int, request_user: UserModel):
     """
     Deletes the CmdbReportCategory with the given public_id

@@ -22,6 +22,8 @@ from cmdb.framework.results import IterationResult
 from cmdb.models.right_model.base_right import BaseRight
 from cmdb.models.right_model.constants import NAME_TO_LEVEL
 from cmdb.models.right_model.all_rights import __all__ as right_tree
+from cmdb.interface.route_utils import verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleResponse
@@ -34,6 +36,7 @@ rights_blueprint = APIBlueprint('rights', __name__)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @rights_blueprint.route('/', methods=['GET', 'HEAD'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @rights_blueprint.protect(auth=False, right=None)
 @rights_blueprint.parse_collection_parameters(sort='name', view='list')
 def get_rights(params: CollectionParameters):
@@ -90,6 +93,7 @@ def get_rights(params: CollectionParameters):
 
 
 @rights_blueprint.route('/<string:name>', methods=['GET', 'HEAD'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @rights_blueprint.protect(auth=False, right='None')
 def get_right(name: str):
     """
@@ -121,6 +125,7 @@ def get_right(name: str):
 
 
 @rights_blueprint.route('/levels', methods=['GET', 'HEAD'])
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @rights_blueprint.protect(auth=False, right='None')
 def get_levels():
     """

@@ -28,7 +28,9 @@ from cmdb.interface.route_utils import (
     insert_request_user,
     login_required,
     right_required,
+    verify_api_access,
 )
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.routes.media_library_routes.media_file_route_utils import (
     get_element_from_data_request,
     get_file_in_request,
@@ -60,9 +62,10 @@ media_file_blueprint = APIBlueprint('media_file_blueprint', __name__, url_prefix
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @media_file_blueprint.route('/', methods=['GET', 'HEAD'])
+@media_file_blueprint.parse_collection_parameters()
 @insert_request_user
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
-@media_file_blueprint.parse_collection_parameters()
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_file_list(params: CollectionParameters, request_user: UserModel):
     """
     Get all objects in database
@@ -92,6 +95,7 @@ def get_file_list(params: CollectionParameters, request_user: UserModel):
 @media_file_blueprint.route('/', methods=['POST'])
 @login_required
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @right_required('base.framework.object.edit')
 def add_new_file(request_user: UserModel):
     """
@@ -162,6 +166,7 @@ def add_new_file(request_user: UserModel):
 @media_file_blueprint.route('/', methods=['PUT'])
 @login_required
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @right_required('base.framework.object.edit')
 def update_file(request_user: UserModel):
     """
@@ -227,6 +232,7 @@ def update_file(request_user: UserModel):
 @media_file_blueprint.route('/<string:filename>/', methods=['GET'])
 @media_file_blueprint.route('/<string:filename>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_file(filename: str, request_user: UserModel):
     """
@@ -263,6 +269,7 @@ def get_file(filename: str, request_user: UserModel):
 
 @media_file_blueprint.route('/download/<path:filename>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @media_file_blueprint.protect(auth=True, right='base.framework.object.view')
 def download_file(filename: str, request_user: UserModel):
     """

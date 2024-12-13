@@ -29,11 +29,10 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.framework.results import IterationResult
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
-from cmdb.interface.rest_api.responses import UpdateSingleResponse,\
-                                              GetMultiResponse,\
-                                              DefaultResponse
+from cmdb.interface.rest_api.responses import UpdateSingleResponse, GetMultiResponse, DefaultResponse
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerIterationError,\
@@ -53,6 +52,7 @@ section_template_blueprint = APIBlueprint('section_templates', __name__)
 @section_template_blueprint.route('/', methods=['POST'])
 @section_template_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.add')
 def create_section_template(params: dict, request_user: UserModel):
     """
@@ -68,14 +68,17 @@ def create_section_template(params: dict, request_user: UserModel):
 
     try:
         params['public_id'] = template_manager.get_next_public_id()
-        params['is_global'] = params['is_global'] in ('true', 'True')
-        params['predefined'] = params['predefined'] in ('true', 'True')
+        params['is_global'] = params['is_global'] in ['true', 'True', True]
+        params['predefined'] = params['predefined'] in ['true', 'True', True]
         params['fields'] = json.loads(params['fields'])
         params['type'] = 'section'
 
         created_section_template_id = template_manager.insert_section_template(params)
     except ManagerInsertError as err:
         LOGGER.debug("[create_section_template] ManagerInsertError: %s", err.message)
+        return abort(500, "Could not create the section template!")
+    except Exception as err:
+        LOGGER.debug("[create_section_template] Exception: %s", err)
         return abort(400, "Could not create the section template!")
 
     api_response = DefaultResponse(created_section_template_id)
@@ -87,6 +90,7 @@ def create_section_template(params: dict, request_user: UserModel):
 @section_template_blueprint.route('/', methods=['GET', 'HEAD'])
 @section_template_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 def get_all_section_templates(params: CollectionParameters, request_user: UserModel):
     """Returns all CmdbSectionTemplates based on the params
@@ -114,12 +118,16 @@ def get_all_section_templates(params: CollectionParameters, request_user: UserMo
         #TODO: ERROR-FIX
         LOGGER.debug("[get_all_section_templates] ManagerIterationError: %s", err.message)
         return abort(400, "Could not retrieve SectionTemplates!")
+    except Exception as err:
+        LOGGER.debug("[get_all_section_templates] Exception: %s", err)
+        return abort(400, "Could not retrive SectionTemplates!")
 
     return api_response.make_response()
 
 
 @section_template_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 def get_section_template(public_id: int, request_user: UserModel):
     """
@@ -148,6 +156,7 @@ def get_section_template(public_id: int, request_user: UserModel):
 
 @section_template_blueprint.route('/<int:public_id>/count', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.view')
 def get_global_section_template_count(public_id: int, request_user: UserModel):
     """
@@ -169,6 +178,9 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[get_section_template] ManagerGetError: %s", err.message)
         return abort(400, f"Could not retrieve SectionTemplate with public_id: {public_id}!")
+    except Exception as err:
+        LOGGER.debug("[get_section_template] Exception: %s", err)
+        return abort(400, "Could not retrive SectionTemplate!")
 
     api_response = DefaultResponse(counts)
 
@@ -179,6 +191,7 @@ def get_global_section_template_count(public_id: int, request_user: UserModel):
 @section_template_blueprint.route('/', methods=['PUT', 'PATCH'])
 @section_template_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.edit')
 def update_section_template(params: dict, request_user: UserModel):
     """
@@ -189,16 +202,16 @@ def update_section_template(params: dict, request_user: UserModel):
     Returns:
         _type_: _description_
     """
-    params['is_global'] = params['is_global'] in ('true', 'True')
-    params['predefined'] = params['predefined'] in ('true', 'True')
-    params['fields'] = json.loads(params['fields'])
-    params['public_id'] = int(params['public_id'])
-    params['type'] = 'section'
-
     template_manager: SectionTemplatesManager = ManagerProvider.get_manager(ManagerType.SECTION_TEMPLATES_MANAGER,
                                                                             request_user)
 
     try:
+        params['is_global'] = params['is_global'] in ('true', 'True')
+        params['predefined'] = params['predefined'] in ('true', 'True')
+        params['fields'] = json.loads(params['fields'])
+        params['public_id'] = int(params['public_id'])
+        params['type'] = 'section'
+
         current_template: CmdbSectionTemplate = template_manager.get_section_template(params['public_id'])
 
         if current_template:
@@ -221,7 +234,7 @@ def update_section_template(params: dict, request_user: UserModel):
         return abort(404, "Section template not found!")
     except Exception as err:
         LOGGER.debug("[update_section_template] Exception: %s, Type: %s", err, type(err))
-        return abort(404, "Unexcepted error occured during the update of the SectionTemplate!")
+        return abort(400, "Unexcepted error occured during the update of the SectionTemplate!")
 
     api_response = UpdateSingleResponse(result.acknowledged)
 
@@ -231,6 +244,7 @@ def update_section_template(params: dict, request_user: UserModel):
 
 @section_template_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @section_template_blueprint.protect(auth=True, right='base.framework.sectionTemplate.delete')
 def delete_section_template(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -258,6 +272,9 @@ def delete_section_template(public_id: int, request_user: UserModel):
     except ManagerDeleteError as err:
         LOGGER.debug("[delete_section_template] ManagerDeleteError: %s", err)
         return abort(400, f"Could not delete SectionTemplate with public_id: {public_id}!")
+    except Exception as err:
+        LOGGER.debug("[update_section_template] Exception: %s, Type: %s", err, type(err))
+        return abort(400, "Unexcepted error occured during the deletion of the SectionTemplate!")
 
     api_response = DefaultResponse(ack)
 

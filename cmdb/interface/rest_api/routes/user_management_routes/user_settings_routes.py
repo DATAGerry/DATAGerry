@@ -24,7 +24,8 @@ from cmdb.manager.users_settings_manager import UsersSettingsManager
 from cmdb.models.settings_model.user_setting import UserSettingModel
 from cmdb.models.user_model.user import UserModel
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import (
     GetListResponse,
     DeleteSingleResponse,
@@ -40,74 +41,11 @@ LOGGER = logging.getLogger(__name__)
 
 user_settings_blueprint = APIBlueprint('user_settings', __name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
-
-@user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
-@insert_request_user
-def get_user_settings(user_id: int, request_user: UserModel):
-    """
-    HTTP `GET`/`HEAD` route for getting a complete collection of resources.
-
-    Args:
-        user_id (int): PublicID of the current user.
-    Returns:
-        GetListResponse: Which includes all of the `UserSettingModel`.
-    Notes:
-        Calling the route over HTTP HEAD method will result in an empty body.
-    Raises:
-        ManagerGetError: If the collection/resources could not be found.
-    """
-    users_settings_manager: UsersSettingsManager = ManagerProvider.get_manager(ManagerType.USERS_SETTINGS_MANAGER,
-                                                                               request_user)
-
-    try:
-        settings: list[UserSettingModel] = users_settings_manager.get_user_settings(user_id=user_id)
-
-        raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
-
-        api_response = GetListResponse(results=raw_settings, body=request.method == 'HEAD')
-    except ManagerGetError:
-        #TODO: ERROR-FIX
-        return abort(404)
-
-    return api_response.make_response()
-
-
-@user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
-@insert_request_user
-def get_user_setting(user_id: int, resource: str, request_user: UserModel):
-    """
-    HTTP `GET`/`HEAD` route for a single user setting resource.
-
-    Args:
-        user_id (int): Public ID of the user.
-        resource (str): Identifier/Name of the user setting.
-
-    Raises:
-        ManagerGetError: When the selected user setting does not exists.
-
-    Notes:
-        Calling the route over HTTP HEAD method will result in an empty body.
-
-    Returns:
-        GetSingleResponse: Which includes the json data of a UserSettingModel.
-    """
-    users_settings_manager: UsersSettingsManager = ManagerProvider.get_manager(ManagerType.USERS_SETTINGS_MANAGER,
-                                                                               request_user)
-
-    try:
-        setting: UserSettingModel = users_settings_manager.get_user_setting(user_id, resource)
-
-        api_response = GetSingleResponse(UserSettingModel.to_dict(setting), body=request.method == 'HEAD')
-    except ManagerGetError:
-        #TODO: ERROR-FIX
-        return abort(404)
-
-    return api_response.make_response()
-
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @user_settings_blueprint.route('/', methods=['POST'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def insert_setting(user_id: int, data: dict, request_user: UserModel):
     """
@@ -142,9 +80,78 @@ def insert_setting(user_id: int, data: dict, request_user: UserModel):
 
     return api_response.make_response()
 
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+@user_settings_blueprint.route('/', methods=['GET', 'HEAD'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+def get_user_settings(user_id: int, request_user: UserModel):
+    """
+    HTTP `GET`/`HEAD` route for getting a complete collection of resources.
+
+    Args:
+        user_id (int): PublicID of the current user.
+    Returns:
+        GetListResponse: Which includes all of the `UserSettingModel`.
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+    Raises:
+        ManagerGetError: If the collection/resources could not be found.
+    """
+    users_settings_manager: UsersSettingsManager = ManagerProvider.get_manager(ManagerType.USERS_SETTINGS_MANAGER,
+                                                                               request_user)
+
+    try:
+        settings: list[UserSettingModel] = users_settings_manager.get_user_settings(user_id=user_id)
+
+        raw_settings = [UserSettingModel.to_dict(setting) for setting in settings]
+
+        api_response = GetListResponse(results=raw_settings, body=request.method == 'HEAD')
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
+
+    return api_response.make_response()
+
+
+@user_settings_blueprint.route('/<string:resource>', methods=['GET', 'HEAD'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+def get_user_setting(user_id: int, resource: str, request_user: UserModel):
+    """
+    HTTP `GET`/`HEAD` route for a single user setting resource.
+
+    Args:
+        user_id (int): Public ID of the user.
+        resource (str): Identifier/Name of the user setting.
+
+    Raises:
+        ManagerGetError: When the selected user setting does not exists.
+
+    Notes:
+        Calling the route over HTTP HEAD method will result in an empty body.
+
+    Returns:
+        GetSingleResponse: Which includes the json data of a UserSettingModel.
+    """
+    users_settings_manager: UsersSettingsManager = ManagerProvider.get_manager(ManagerType.USERS_SETTINGS_MANAGER,
+                                                                               request_user)
+
+    try:
+        setting: UserSettingModel = users_settings_manager.get_user_setting(user_id, resource)
+
+        api_response = GetSingleResponse(UserSettingModel.to_dict(setting), body=request.method == 'HEAD')
+    except ManagerGetError:
+        #TODO: ERROR-FIX
+        return abort(404)
+
+    return api_response.make_response()
+
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @user_settings_blueprint.route('/<string:resource>', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @user_settings_blueprint.validate(UserSettingModel.SCHEMA)
 def update_setting(user_id: int, resource: str, data: dict, request_user: UserModel):
     """
@@ -189,9 +196,11 @@ def update_setting(user_id: int, resource: str, data: dict, request_user: UserMo
 
     return api_response.make_response()
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @user_settings_blueprint.route('/<string:resource>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def delete_setting(user_id: int, resource: str, request_user: UserModel):
     """
     HTTP `DELETE` route for delete a single user setting resource.

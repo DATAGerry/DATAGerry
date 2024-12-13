@@ -27,14 +27,8 @@ from cmdb.manager.users_manager import UsersManager
 
 from cmdb.framework.results import IterationResult
 from cmdb.models.user_model.user import UserModel
-from cmdb.interface.route_utils import (
-    insert_request_user,
-    insert_api_user,
-    insert_auth_method,
-    validate_api_access,
-)
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
-from cmdb.interface.rest_api.auth_method_enum import AuthMethod
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import (
@@ -63,10 +57,10 @@ users_blueprint = APIBlueprint('users', __name__)
 
 @users_blueprint.route('/', methods=['POST'])
 @insert_request_user
-@insert_api_user
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.add')
 @users_blueprint.validate(UserModel.SCHEMA)
-def insert_user(data: dict, request_user: UserModel, api_user_data: dict):
+def insert_user(data: dict, request_user: UserModel):
     """
     HTTP `POST` route to insert a user into the database
 
@@ -78,9 +72,6 @@ def insert_user(data: dict, request_user: UserModel, api_user_data: dict):
     Returns:
         InsertSingleResponse: Insert response with the new user and the corresponding public_id
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
@@ -157,11 +148,10 @@ def insert_user(data: dict, request_user: UserModel, api_user_data: dict):
 
 @users_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
-@insert_api_user
-@insert_auth_method
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.view')
 @users_blueprint.parse_collection_parameters()
-def get_users(params: CollectionParameters, request_user: UserModel, api_user_data: dict, auth_method: AuthMethod):
+def get_users(params: CollectionParameters, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
 
@@ -175,10 +165,6 @@ def get_users(params: CollectionParameters, request_user: UserModel, api_user_da
         ManagerIterationError: If the collection could not be iterated.
         ManagerGetError: If the collection/resources could not be found.
     """
-    if auth_method == AuthMethod.BASIC:
-        if not validate_api_access(api_user_data, ApiLevel.ADMIN):
-            return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
@@ -204,10 +190,9 @@ def get_users(params: CollectionParameters, request_user: UserModel, api_user_da
 
 @users_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @insert_request_user
-@insert_api_user
-@insert_auth_method
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.view', excepted={'public_id': 'public_id'})
-def get_user(public_id: int, request_user: UserModel, api_user_data: dict, auth_method: AuthMethod):
+def get_user(public_id: int, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for a single user resource.
 
@@ -223,10 +208,6 @@ def get_user(public_id: int, request_user: UserModel, api_user_data: dict, auth_
     Returns:
         GetSingleResponse: Which includes the json data of a UserModel.
     """
-    if auth_method == AuthMethod.BASIC:
-        if not validate_api_access(api_user_data, ApiLevel.ADMIN):
-            return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:
@@ -243,10 +224,10 @@ def get_user(public_id: int, request_user: UserModel, api_user_data: dict, auth_
 
 @users_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
-@insert_api_user
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
 @users_blueprint.validate(UserModel.SCHEMA)
-def update_user(public_id: int, data: dict, request_user: UserModel, api_user_data: dict):
+def update_user(public_id: int, data: dict, request_user: UserModel):
     """
     HTTP `PUT`/`PATCH` route for update a single user resource.
 
@@ -259,9 +240,6 @@ def update_user(public_id: int, data: dict, request_user: UserModel, api_user_da
     Returns:
         UpdateSingleResponse: With update result of the new updated user.
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:
@@ -281,9 +259,9 @@ def update_user(public_id: int, data: dict, request_user: UserModel, api_user_da
 
 @users_blueprint.route('/<int:public_id>/password', methods=['PATCH'])
 @insert_request_user
-@insert_api_user
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.edit', excepted={'public_id': 'public_id'})
-def change_user_password(public_id: int, request_user: UserModel, api_user_data: dict):
+def change_user_password(public_id: int, request_user: UserModel):
     """
     HTTP `PATCH` route for updating a single user password.
 
@@ -295,9 +273,6 @@ def change_user_password(public_id: int, request_user: UserModel, api_user_data:
     Returns:
         UpdateSingleResponse: User with new password
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
     security_manager: SecurityManager = ManagerProvider.get_manager(ManagerType.SECURITY_MANAGER, request_user)
 
@@ -325,9 +300,9 @@ def change_user_password(public_id: int, request_user: UserModel, api_user_data:
 
 @users_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
-@insert_api_user
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
 @users_blueprint.protect(auth=True, right='base.user-management.user.delete')
-def delete_user(public_id: int, request_user: UserModel, api_user_data: dict):
+def delete_user(public_id: int, request_user: UserModel):
     """
     HTTP `DELETE` route for delete a single user resource.
 
@@ -339,9 +314,6 @@ def delete_user(public_id: int, request_user: UserModel, api_user_data: dict):
     Returns:
         DeleteSingleResponse: Delete result with the deleted user as data.
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     users_manager: UsersManager = ManagerProvider.get_manager(ManagerType.USERS_MANAGER, request_user)
 
     try:

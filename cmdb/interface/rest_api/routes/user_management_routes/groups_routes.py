@@ -30,7 +30,8 @@ from cmdb.models.group_model.group import UserGroupModel
 from cmdb.models.right_model.all_rights import flat_rights_tree, __all__ as rights
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.group_parameters import GroupDeletionParameters
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import DeleteSingleResponse,\
                                               UpdateSingleResponse,\
@@ -45,12 +46,50 @@ LOGGER = logging.getLogger(__name__)
 
 groups_blueprint = APIBlueprint('groups', __name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
+@groups_blueprint.route('/', methods=['POST'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+@groups_blueprint.protect(auth=True, right='base.user-management.group.add')
+@groups_blueprint.validate(UserGroupModel.SCHEMA)
+def insert_group(data: dict, request_user: UserModel):
+    """
+    HTTP `POST` route for insert a single group resource.
+
+    Args:
+        data (UserGroupModel.SCHEMA): Insert data of a new group.
+
+    Raises:
+        ManagerGetError: If the inserted group could not be found after inserting.
+        ManagerInsertError: If something went wrong during insertion.
+
+    Returns:
+        InsertSingleResponse: Insert response with the new group and its public_id.
+    """
+    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
+
+    try:
+        result_id = groups_manager.insert_group(data)
+        group = groups_manager.get_group(result_id)
+    except ManagerInsertError as err:
+        LOGGER.debug("[insert_group] ManagerInsertError: %s", err.message)
+        return abort(400, "The group could not be created !")
+    except ManagerGetError as err:
+        LOGGER.debug("[insert_group] ManagerGetError: %s", err.message)
+        return abort(404, "The created group could not be retrieved from database!")
+
+    api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group))
+
+    return api_response.make_response()
+
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @groups_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
 @groups_blueprint.protect(auth=True, right='base.user-management.group.view')
 @groups_blueprint.parse_collection_parameters()
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_groups(params: CollectionParameters, request_user: UserModel):
     """
     HTTP `GET`/`HEAD` route for getting a iterable collection of resources.
@@ -90,6 +129,7 @@ def get_groups(params: CollectionParameters, request_user: UserModel):
 
 @groups_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @groups_blueprint.protect(auth=True, right='base.user-management.group.view')
 def get_group(public_id: int, request_user: UserModel):
     """
@@ -119,44 +159,11 @@ def get_group(public_id: int, request_user: UserModel):
 
     return api_response.make_response()
 
-
-@groups_blueprint.route('/', methods=['POST'])
-@insert_request_user
-@groups_blueprint.protect(auth=True, right='base.user-management.group.add')
-@groups_blueprint.validate(UserGroupModel.SCHEMA)
-def insert_group(data: dict, request_user: UserModel):
-    """
-    HTTP `POST` route for insert a single group resource.
-
-    Args:
-        data (UserGroupModel.SCHEMA): Insert data of a new group.
-
-    Raises:
-        ManagerGetError: If the inserted group could not be found after inserting.
-        ManagerInsertError: If something went wrong during insertion.
-
-    Returns:
-        InsertSingleResponse: Insert response with the new group and its public_id.
-    """
-    groups_manager: GroupsManager = ManagerProvider.get_manager(ManagerType.GROUPS_MANAGER, request_user)
-
-    try:
-        result_id = groups_manager.insert_group(data)
-        group = groups_manager.get_group(result_id)
-    except ManagerInsertError as err:
-        LOGGER.debug("[insert_group] ManagerInsertError: %s", err.message)
-        return abort(400, "The group could not be created !")
-    except ManagerGetError as err:
-        LOGGER.debug("[insert_group] ManagerGetError: %s", err.message)
-        return abort(404, "The created group could not be retrieved from database!")
-
-    api_response = InsertSingleResponse(result_id=result_id, raw=UserGroupModel.to_dict(group))
-
-    return api_response.make_response()
-
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @groups_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @groups_blueprint.protect(auth=True, right='base.user-management.group.edit')
 @groups_blueprint.validate(UserGroupModel.SCHEMA)
 def update_group(public_id: int, data: dict, request_user: UserModel):
@@ -194,9 +201,11 @@ def update_group(public_id: int, data: dict, request_user: UserModel):
 
     return api_response.make_response()
 
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @groups_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @groups_blueprint.protect(auth=True, right='base.user-management.group.delete')
 @groups_blueprint.parse_parameters(GroupDeletionParameters)
 def delete_group(public_id: int, params: GroupDeletionParameters, request_user: UserModel):

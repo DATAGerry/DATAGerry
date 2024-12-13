@@ -31,6 +31,7 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.security.auth.auth_settings import AuthSettingsDAO
 from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.token.generator import TokenGenerator
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import (
     insert_request_user,
@@ -39,6 +40,7 @@ from cmdb.interface.route_utils import (
     create_new_admin_user,
     retrive_user,
     check_user_in_mysql_db,
+    verify_api_access,
 )
 from cmdb.interface.rest_api.responses import DefaultResponse, LoginResponse
 
@@ -53,6 +55,7 @@ auth_blueprint = APIBlueprint('auth', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @auth_blueprint.route('/login', methods=['POST'])
+# @verify_api_access(required_api_level=ApiLevel.LOCKED)
 def post_login():
     """TODO: document"""
     users_manager = UsersManager(current_app.database_manager)
@@ -135,6 +138,7 @@ def post_login():
 
 @auth_blueprint.route('/settings', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @auth_blueprint.protect(auth=True, right='base.system.view')
 def get_auth_settings(request_user: UserModel):
     """TODO: document"""
@@ -171,6 +175,7 @@ def get_installed_providers(request_user: UserModel):
 
 @auth_blueprint.route('/providers/<string:provider_class>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @auth_blueprint.protect(auth=True, right='base.system.view')
 def get_provider_config(provider_class: str, request_user: UserModel):
     """TODO: document"""
@@ -193,6 +198,7 @@ def get_provider_config(provider_class: str, request_user: UserModel):
 
 @auth_blueprint.route('/settings', methods=['POST', 'PUT'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @auth_blueprint.protect(auth=True, right='base.system.edit')
 def update_auth_settings(request_user: UserModel):
     """TODO: document"""

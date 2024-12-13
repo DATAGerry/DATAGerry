@@ -20,6 +20,8 @@ from flask import current_app, abort
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
 from cmdb import __title__, __version__
+from cmdb.interface.route_utils import verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.blueprints import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -34,6 +36,7 @@ with current_app.app_context():
 # -------------------------------------------------------------------------------------------------------------------- #
 
 @connection_routes.route('/', methods=['GET', 'HEAD'])
+# @verify_api_access(required_api_level=ApiLevel.LOCKED)
 def connection_response():
     """
     This route is called when {{url}}/rest/ is called

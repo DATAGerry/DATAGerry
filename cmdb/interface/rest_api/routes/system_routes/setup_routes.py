@@ -31,8 +31,7 @@ from cmdb.interface.route_utils import (
     init_db_routine,
     create_new_admin_user,
     delete_database,
-    insert_api_user,
-    validate_api_access,
+    verify_api_access,
 )
 
 from cmdb.errors.database.database_errors import DatabaseNotExists
@@ -45,8 +44,8 @@ setup_blueprint = APIBlueprint('setup', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @setup_blueprint.route('/subscriptions', methods=['POST'])
-@insert_api_user
-def create_subscription(api_user_data: dict):
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
+def create_subscription():
     """
     Creates a database and the given user
 
@@ -63,9 +62,6 @@ def create_subscription(api_user_data: dict):
     """
     if not request.args:
         return abort(400, 'No request arguments provided!')
-
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
 
     setup_data: dict = request.args.to_dict()
 
@@ -120,14 +116,11 @@ def create_subscription(api_user_data: dict):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @setup_blueprint.route('/subscriptions', methods=['GET'])
-@insert_api_user
-def get_all_subscriptions(api_user_data: dict):
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
+def get_all_subscriptions():
     """
     Retrieves all subscriptions
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     try:
         with open('etc/test_users.json', 'r', encoding='utf-8') as users_file:
             users_data = json.load(users_file)
@@ -142,8 +135,8 @@ def get_all_subscriptions(api_user_data: dict):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @setup_blueprint.route('/subscriptions', methods=['PATCH'])
-@insert_api_user
-def change_subscription_status(api_user_data: dict):
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
+def change_subscription_status():
     """
     Changes and the subscription user
 
@@ -157,9 +150,6 @@ def change_subscription_status(api_user_data: dict):
     """
     if not request.args:
         return abort(400, 'No request arguments provided!')
-
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
 
     updated_user_data: dict = request.args.to_dict()
 
@@ -203,14 +193,11 @@ def change_subscription_status(api_user_data: dict):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @setup_blueprint.route('/subscriptions', methods=['DELETE'])
-@insert_api_user
-def delete_subscription(api_user_data: dict):
+@verify_api_access(required_api_level=ApiLevel.SUPER_ADMIN)
+def delete_subscription():
     """
     Deletes a subscription
     """
-    if not validate_api_access(api_user_data, ApiLevel.SUPER_ADMIN):
-        return abort(403, "No permission for this action!")
-
     if not request.args:
         return abort(400, 'No request arguments provided!')
 
