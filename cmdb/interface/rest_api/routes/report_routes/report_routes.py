@@ -35,7 +35,8 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.reports_model.cmdb_report import CmdbReport
 from cmdb.models.reports_model.mds_mode_enum import MdsMode
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.framework.results import IterationResult
@@ -59,6 +60,7 @@ reports_blueprint = APIBlueprint('reports', __name__)
 @reports_blueprint.route('/', methods=['POST'])
 @reports_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def create_report(params: dict, request_user: UserModel):
     """
     Creates a CmdbReport in the database
@@ -102,6 +104,7 @@ def create_report(params: dict, request_user: UserModel):
 
 @reports_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_report(public_id: int, request_user: UserModel):
     """
     Retrieves the CmdbReport with the given public_id
@@ -127,6 +130,7 @@ def get_report(public_id: int, request_user: UserModel):
 @reports_blueprint.route('/', methods=['GET', 'HEAD'])
 @reports_blueprint.parse_collection_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_reports(params: CollectionParameters, request_user: UserModel):
     """
     Returns all CmdbReports based on the params
@@ -159,6 +163,7 @@ def get_reports(params: CollectionParameters, request_user: UserModel):
 
 @reports_blueprint.route('/<int:public_id>/run', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def run_report_query(public_id: int, request_user: UserModel):
     """
     Returns the result of the query of the report
@@ -206,6 +211,7 @@ def run_report_query(public_id: int, request_user: UserModel):
 @reports_blueprint.route('/<int:public_id>', methods=['PUT','PATCH'])
 @reports_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def update_report(params: dict, request_user: UserModel):
     """
     Updates a CmdbReport
@@ -261,6 +267,7 @@ def update_report(params: dict, request_user: UserModel):
 
 @reports_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def delete_report(public_id: int, request_user: UserModel):
     """
     Deletes the CmdbReport with the given public_id

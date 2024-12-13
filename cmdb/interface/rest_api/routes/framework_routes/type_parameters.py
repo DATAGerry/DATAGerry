@@ -20,7 +20,7 @@ from cmdb.interface.rest_api.responses.response_parameters.collection_parameters
 from cmdb.utils.helpers import str_to_bool
 
 # -------------------------------------------------------------------------------------------------------------------- #
-
+#TODO: CLASS-FIX (move this to cmdb.interface.rest_api.responses.response_parameters)
 class TypeIterationParameters(CollectionParameters):
     """TODO: document"""
     def __init__(self, query_string: str, active: bool = True, **kwargs):

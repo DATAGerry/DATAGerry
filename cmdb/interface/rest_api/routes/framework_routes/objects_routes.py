@@ -19,7 +19,7 @@ import copy
 import logging
 from datetime import datetime, timezone
 from bson import json_util
-from flask import abort, jsonify, request, current_app
+from flask import abort, jsonify, request
 
 from cmdb.database.utils import default, object_hook
 from cmdb.database.mongo_query_builder import MongoDBQueryBuilder
@@ -47,7 +47,8 @@ from cmdb.framework.results import IterationResult
 from cmdb.framework.rendering.cmdb_render import CmdbRender
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.importer.messages.response_failed_message import ResponseFailedMessage
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import (
     GetListResponse,
@@ -77,6 +78,7 @@ objects_blueprint = APIBlueprint('objects', __name__)
 
 @objects_blueprint.route('/', methods=['POST'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.add')
 def insert_object(request_user: UserModel):
     """TODO: document"""
@@ -123,7 +125,6 @@ def insert_object(request_user: UserModel):
         try:
             current_object = objects_manager.get_object(new_object_id)
 
-            #EVENT: CREATE-EVENT
             webhooks_manager.send_webhook_event(WebhookEventType.CREATE,
                                                 object_after=CmdbObject.to_json(current_object))
         except Exception as err:
@@ -174,6 +175,10 @@ def insert_object(request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.debug("[insert_object] InstanceRenderError: %s", err.message)
         return abort(500)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[insert_object] Exception: %s", err)
+        return abort(404, "Could not insert object!")
 
     api_response = DefaultResponse(new_object_id)
 
@@ -183,6 +188,7 @@ def insert_object(request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
@@ -211,6 +217,10 @@ def get_object(public_id, request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.error("[get_object] InstanceRenderError: %s", err.message)
         return abort(500)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_object] Exception: %s", err)
+        return abort(404, "Could not retrive object!")
 
     api_response = DefaultResponse(render_result)
 
@@ -220,6 +230,7 @@ def get_object(public_id, request_user: UserModel):
 @objects_blueprint.route('/', methods=['GET', 'HEAD'])
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_objects(params: CollectionParameters, request_user: UserModel):
     """
@@ -235,17 +246,16 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     view = params.optional.get('view', 'native')
-
-    if _fetch_only_active_objs():
-        if isinstance(params.filter, dict):
-            params.filter = [{'$match': params.filter}]
-            params.filter.append({'$match': {'active': {"$eq": True}}})
-        elif isinstance(params.filter, list):
-            params.filter.append({'$match': {'active': {"$eq": True}}})
-
-    builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
-
     try:
+        if _fetch_only_active_objs():
+            if isinstance(params.filter, dict):
+                params.filter = [{'$match': params.filter}]
+                params.filter.append({'$match': {'active': {"$eq": True}}})
+            elif isinstance(params.filter, list):
+                params.filter.append({'$match': {'active': {"$eq": True}}})
+
+        builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
         iteration_result: IterationResult[CmdbObject] = objects_manager.iterate(builder_params,
                                                                                 request_user,
                                                                                 AccessControlPermission.READ)
@@ -259,9 +269,6 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
                                             url=request.url,
                                             body=request.method == 'HEAD')
         elif view == 'render':
-            if current_app.cloud_mode:
-                current_app.database_manager.connector.set_database(request_user.database)
-
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
                                        ref_render=True,
@@ -280,12 +287,17 @@ def get_objects(params: CollectionParameters, request_user: UserModel):
         return abort(400)
     except ManagerGetError:
         return abort(404, "No objects found!")
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_objects] Exception: %s", err)
+        return abort(404, "Could not retrive objects!")
 
     return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/native', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_native_object(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -298,6 +310,10 @@ def get_native_object(public_id: int, request_user: UserModel):
     except AccessDeniedError:
         #TODO: ERROR-FIX
         return abort(403)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_objects] Exception: %s", err)
+        return abort(404, "Could not retrive object!")
 
     api_response = DefaultResponse(object_instance)
 
@@ -306,8 +322,9 @@ def get_native_object(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/group/<string:value>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
-def group_objects_by_type_id(value, request_user: UserModel):
+def group_objects_by_type_id(value: str, request_user: UserModel):
     """TODO: document"""
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
@@ -329,9 +346,10 @@ def group_objects_by_type_id(value, request_user: UserModel):
 
             if max_length == 5:
                 break
-    except Exception:
+    except Exception as err:
         #TODO: ERROR-FIX
-        return abort(400)
+        LOGGER.debug("[group_objects_by_type_id] Exception: %s", err)
+        return abort(404, "Could not retrive object!")
 
     api_response = DefaultResponse(result)
 
@@ -340,6 +358,7 @@ def group_objects_by_type_id(value, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>/mds_reference', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_reference(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -355,6 +374,10 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
     except ManagerGetError:
         #TODO: ERROR-FIX
         return abort(404)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_object_mds_reference] Exception: %s", err)
+        return abort(404, "Could not retrive mds references!")
 
     try:
         mds_reference = CmdbRender(referenced_object,
@@ -367,6 +390,10 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
         #TODO: ERROR-FIX
         LOGGER.error("[get_object_mds_reference] InstanceRenderError: %s", err.message)
         return abort(500)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_object_mds_reference] Exception: %s", err)
+        return abort(404, "Could not retrive mds references!")
 
     api_response = DefaultResponse(mds_reference)
 
@@ -375,6 +402,7 @@ def get_object_mds_reference(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>/mds_references', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_mds_references(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -422,6 +450,7 @@ def get_object_mds_references(public_id: int, request_user: UserModel):
 @objects_blueprint.route('/<int:public_id>/references', methods=['GET', 'HEAD'])
 @objects_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object_references(public_id: int, params: CollectionParameters, request_user: UserModel):
     """TODO: document"""
@@ -465,9 +494,6 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
             api_response = GetMultiResponse(object_list, total=iteration_result.total, params=params,
                                             url=request.url, body=request.method == 'HEAD')
         elif view == 'render':
-            if current_app.cloud_mode:
-                current_app.database_manager.connector.set_database(request_user.database)
-
             rendered_list = RenderList(object_list=iteration_result.results,
                                        request_user=request_user,
                                        ref_render=True,
@@ -480,12 +506,17 @@ def get_object_references(public_id: int, params: CollectionParameters, request_
     except ManagerIterationError:
         #TODO: ERROR-FIX
         return abort(400)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_object_references] Exception: %s", err)
+        return abort(404, "Could not retrive mds references!")
 
     return api_response.make_response()
 
 
 @objects_blueprint.route('/<int:public_id>/state', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 def get_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -493,17 +524,26 @@ def get_object_state(public_id: int, request_user: UserModel):
 
     try:
         found_object = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
+
+        if found_object:
+            api_response = DefaultResponse(found_object.active)
+
+            return api_response.make_response()
+        else:
+            abort(404, f"Object with ID:{public_id} not found!")
     except ObjectManagerGetError as err:
         LOGGER.debug("[get_object_state] ObjectManagerGetError: %s", err.message)
         return abort(404)
+    except Exception as err:
+        #TODO: ERROR-FIX
+        LOGGER.debug("[get_object_state] Exception: %s", err)
+        return abort(404, "Could not retrive object state!")
 
-    api_response = DefaultResponse(found_object.active)
-
-    return api_response.make_response()
 
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['GET', 'HEAD'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 def get_unstructured_objects(public_id: int, request_user: UserModel):
     """
@@ -550,6 +590,7 @@ def get_unstructured_objects(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.edit')
 @objects_blueprint.validate(CmdbObject.SCHEMA)
 def update_object(public_id: int, data: dict, request_user: UserModel):
@@ -690,6 +731,7 @@ def update_object(public_id: int, data: dict, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>/state', methods=['PUT'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.activation')
 def update_object_state(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -774,6 +816,7 @@ def update_object_state(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/clean/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @objects_blueprint.protect(auth=True, right='base.framework.type.clean')
 def update_unstructured_objects(public_id: int, request_user: UserModel):
     """
@@ -881,6 +924,7 @@ def update_unstructured_objects(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_object(public_id: int, request_user: UserModel):
     """
@@ -976,6 +1020,7 @@ def delete_object(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>/locations', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_object_with_child_locations(public_id: int, request_user: UserModel):
     """TODO: document"""
@@ -1032,6 +1077,7 @@ def delete_object_with_child_locations(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/<int:public_id>/children', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_object_with_child_objects(public_id: int, request_user: UserModel):
     """
@@ -1107,6 +1153,7 @@ def delete_object_with_child_objects(public_id: int, request_user: UserModel):
 
 @objects_blueprint.route('/delete/<string:public_ids>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @objects_blueprint.protect(auth=True, right='base.framework.object.delete')
 def delete_many_objects(public_ids, request_user: UserModel):
     """TODO: document"""

@@ -30,7 +30,8 @@ from cmdb.models.type_model.type import TypeModel
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.framework.results import IterationResult
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.routes.framework_routes.type_parameters import TypeIterationParameters
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
@@ -58,6 +59,7 @@ types_blueprint = APIBlueprint('types', __name__)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['POST'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.add')
 @types_blueprint.validate(TypeModel.SCHEMA)
@@ -105,6 +107,7 @@ def insert_type(data: dict, request_user: UserModel):
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @types_blueprint.route('/', methods=['GET', 'HEAD'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
 @types_blueprint.parse_parameters(TypeIterationParameters)
@@ -161,6 +164,7 @@ def get_types(params: TypeIterationParameters, request_user: UserModel):
 
 
 @types_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.view')
 def get_type(public_id: int, request_user: UserModel):
@@ -188,9 +192,10 @@ def get_type(public_id: int, request_user: UserModel):
 
 
 @types_blueprint.route('/<int:public_id>/count_objects', methods=['GET'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.read')
-def count_objects(public_id: int, request_user: UserModel):
+def count_objects_of_type(public_id: int, request_user: UserModel):
     """
     Return the number of objects in der database with the given public_id as type_id
     Args:
@@ -213,6 +218,7 @@ def count_objects(public_id: int, request_user: UserModel):
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @types_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.edit')
 @types_blueprint.validate(TypeModel.SCHEMA)
@@ -275,6 +281,7 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
 @types_blueprint.route('/<int:public_id>', methods=['DELETE'])
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @insert_request_user
 @types_blueprint.protect(auth=True, right='base.framework.type.delete')
 def delete_type(public_id: int, request_user: UserModel):
@@ -309,6 +316,7 @@ def delete_type(public_id: int, request_user: UserModel):
         return abort(404)
     except Exception as err:
         #TODO: ERROR-FIX
+        LOGGER.debug("[delete_type] Exception: %s", err)
         return abort(400)
 
     return api_response.make_response()

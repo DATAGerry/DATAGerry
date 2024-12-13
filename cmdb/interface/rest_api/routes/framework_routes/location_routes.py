@@ -29,7 +29,8 @@ from cmdb.models.location_model.location_node import LocationNode
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.framework.results import IterationResult
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
@@ -54,6 +55,7 @@ location_blueprint = APIBlueprint('locations', __name__)
 @location_blueprint.route('/', methods=['POST'])
 @location_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
 def create_location(params: dict, request_user: UserModel):
     """
@@ -115,6 +117,7 @@ def create_location(params: dict, request_user: UserModel):
 @location_blueprint.route('/', methods=['GET', 'HEAD'])
 @location_blueprint.parse_collection_parameters(view='native')
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_all_locations(params: CollectionParameters, request_user: UserModel):
     """
@@ -151,6 +154,7 @@ def get_all_locations(params: CollectionParameters, request_user: UserModel):
 @location_blueprint.route('/tree', methods=['GET', 'HEAD'])
 @location_blueprint.parse_collection_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_locations_tree(params: CollectionParameters, request_user: UserModel):
     """
@@ -206,6 +210,7 @@ def get_locations_tree(params: CollectionParameters, request_user: UserModel):
 
 @location_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_location(public_id: int, request_user: UserModel):
     """
@@ -230,6 +235,7 @@ def get_location(public_id: int, request_user: UserModel):
 
 @location_blueprint.route('/<int:object_id>/object', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_location_for_object(object_id: int, request_user: UserModel):
     """
@@ -254,6 +260,7 @@ def get_location_for_object(object_id: int, request_user: UserModel):
 
 @location_blueprint.route('/<int:object_id>/parent', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_parent(object_id: int, request_user: UserModel):
     """
@@ -284,6 +291,7 @@ def get_parent(object_id: int, request_user: UserModel):
 
 @location_blueprint.route('/<int:object_id>/children', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_children(object_id: int, request_user: UserModel):
     """
@@ -319,6 +327,7 @@ def get_children(object_id: int, request_user: UserModel):
 
 @location_blueprint.route('/update_location', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @location_blueprint.protect(auth=True, right='base.framework.object.edit')
 @location_blueprint.parse_request_parameters()
 def update_location_for_object(params: dict, request_user: UserModel):

@@ -28,7 +28,8 @@ from cmdb.manager.webhooks_manager import WebhooksManager
 from cmdb.models.user_model.user import UserModel
 from cmdb.models.webhook_model.cmdb_webhook_model import CmdbWebhook
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse, UpdateSingleResponse
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.framework.results import IterationResult
@@ -52,6 +53,7 @@ webhook_blueprint = APIBlueprint('webhooks', __name__)
 @webhook_blueprint.route('/', methods=['POST'])
 @webhook_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def create_webhook(params: dict, request_user: UserModel):
     """
     Creates a CmdbWebhook in the database
@@ -84,6 +86,7 @@ def create_webhook(params: dict, request_user: UserModel):
 
 @webhook_blueprint.route('/<int:public_id>', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_webhook(public_id: int, request_user: UserModel):
     """
     Retrieves the CmdbWebhook with the given public_id
@@ -109,6 +112,7 @@ def get_webhook(public_id: int, request_user: UserModel):
 @webhook_blueprint.route('/', methods=['GET', 'HEAD'])
 @webhook_blueprint.parse_collection_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_webhooks(params: CollectionParameters, request_user: UserModel):
     """
     Returns all CmdbWebhooks based on the params
@@ -143,6 +147,7 @@ def get_webhooks(params: CollectionParameters, request_user: UserModel):
 @webhook_blueprint.route('/<int:public_id>', methods=['PUT','PATCH'])
 @webhook_blueprint.parse_request_parameters()
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def update_webhook(params: dict, request_user: UserModel):
     """
     Updates a CmdbWebhook
@@ -190,6 +195,7 @@ def update_webhook(params: dict, request_user: UserModel):
 
 @webhook_blueprint.route('/<int:public_id>/', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def delete_webhook(public_id: int, request_user: UserModel):
     """
     Deletes the CmdbWebhook with the given public_id

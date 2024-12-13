@@ -25,7 +25,8 @@ from cmdb.manager.settings_writer_manager import SettingsWriterManager
 from cmdb.settings.date_settings import DateSettingsDAO
 from cmdb.models.user_model.user import UserModel
 from cmdb.interface.rest_api.responses import DefaultResponse
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.blueprints import APIBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -33,10 +34,11 @@ date_blueprint = APIBlueprint('date', __name__)
 
 LOGGER = logging.getLogger(__name__)
 
-# -------------------------------------------------------------------------------------------------------------------- #
+# ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
 @date_blueprint.route('/', methods=['GET'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 def get_date_settings(request_user: UserModel):
     """TODO: document"""
     settings_reader: SettingsReaderManager = ManagerProvider.get_manager(ManagerType.SETTINGS_READER_MANAGER,
@@ -55,9 +57,11 @@ def get_date_settings(request_user: UserModel):
         LOGGER.debug("[get_date_settings] Exception: %s, Type: %s", err, type(err))
         return abort(500)
 
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
 @date_blueprint.route('/', methods=['POST', 'PUT'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
 @date_blueprint.protect(auth=True, right='base.system.edit')
 def update_date_settings(request_user: UserModel):
     """TODO: document"""

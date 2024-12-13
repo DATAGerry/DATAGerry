@@ -28,7 +28,8 @@ from cmdb.models.category_model.category import CategoryModel
 from cmdb.models.category_model.category_tree import CategoryTree
 from cmdb.framework.results import IterationResult
 from cmdb.interface.blueprints import APIBlueprint
-from cmdb.interface.route_utils import insert_request_user
+from cmdb.interface.route_utils import insert_request_user, verify_api_access
+from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters.collection_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
     DeleteSingleResponse,
@@ -46,13 +47,16 @@ from cmdb.errors.manager import (
     ManagerIterationError,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
 categories_blueprint = APIBlueprint('categories', __name__)
+
 # ---------------------------------------------------- CRUD-CREATE --------------------------------------------------- #
 
 @categories_blueprint.route('/', methods=['POST'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @categories_blueprint.protect(auth=True, right='base.framework.category.add')
 @categories_blueprint.validate(CategoryModel.SCHEMA)
 def insert_category(data: dict, request_user: UserModel):
@@ -92,6 +96,7 @@ def insert_category(data: dict, request_user: UserModel):
 
 @categories_blueprint.route('/', methods=['GET', 'HEAD'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 @categories_blueprint.parse_collection_parameters(view='list')
 def get_categories(params: CollectionParameters, request_user: UserModel):
@@ -144,6 +149,7 @@ def get_categories(params: CollectionParameters, request_user: UserModel):
 
 @categories_blueprint.route('/<int:public_id>', methods=['GET', 'HEAD'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @categories_blueprint.protect(auth=True, right='base.framework.category.view')
 def get_category(public_id: int, request_user: UserModel):
     """
@@ -172,6 +178,7 @@ def get_category(public_id: int, request_user: UserModel):
 
 @categories_blueprint.route('/<int:public_id>', methods=['PUT', 'PATCH'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @categories_blueprint.protect(auth=True, right='base.framework.category.edit')
 @categories_blueprint.validate(CategoryModel.SCHEMA)
 def update_category(public_id: int, data: dict, request_user: UserModel):
@@ -204,6 +211,7 @@ def update_category(public_id: int, data: dict, request_user: UserModel):
 
 @categories_blueprint.route('/<int:public_id>', methods=['DELETE'])
 @insert_request_user
+@verify_api_access(required_api_level=ApiLevel.ADMIN)
 @categories_blueprint.protect(auth=True, right='base.framework.category.delete')
 def delete_category(public_id: int, request_user: UserModel):
     """
