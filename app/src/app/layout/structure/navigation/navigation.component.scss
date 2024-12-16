@@ -257,3 +257,43 @@ $navbar-dropdown-header-background: theme-color('primary');
 .hover-trigger:hover {
   color: #212529;
 }
+
+// Styles for the progress bar
+.progress-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+
+  .progress-label {
+      font-size: 0.9rem;
+      white-space: nowrap;
+      margin-bottom: 0;
+  }
+
+  .progress {
+      position: relative;
+      height: 15px;
+      width: 100%;
+      border-radius: 10px;
+      background-color: #e0e0e0; // Light gray background for unused area
+      overflow: visible;
+
+      .progress-bar {
+          background-color: orange; // Used area color
+          border-radius: 10px 0 0 10px;
+      }
+
+      .progress-percentage {
+          position: absolute;
+          width: 100%;
+          text-align: center;
+          font-size: 0.8rem;
+          font-weight: bold;
+          color: #000;
+          top: 50%;
+          transform: translateY(-50%);
+          text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+      }
+  }
+}

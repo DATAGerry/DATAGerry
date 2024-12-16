@@ -41,23 +41,30 @@
                 }">
                 <cmdb-search-bar></cmdb-search-bar>
             </div>
-            <div class="col-5 col-md-2 text-center mb-1"   *ngIf="isCloudMode">
-                <div>
-                    <div class="mb-1" style="font-size: 0.9rem; white-space: nowrap;">
-                        Objects {{usedObjects}} / {{totalObjects}}
+            <div 
+            *ngIf="isCloudMode"
+            class="col-5 col-md-2 d-flex align-items-center justify-content-center">
+            <div class="progress-container">
+                <div class="progress-label">
+                    Objects {{usedObjects}} / {{totalObjects}}
+                </div>
+                <div class="progress">
+                    <!-- Used Area -->
+                    <div
+                        class="progress-bar"
+                        role="progressbar"
+                        [style.width.%]="(usedObjects / totalObjects) * 100"
+                        [attr.aria-valuenow]="usedObjects"
+                        aria-valuemin="0"
+                        [attr.aria-valuemax]="totalObjects">
                     </div>
-                    <div class="progress" style="height: 15px;">
-                        <div
-                            class="progress-bar"
-                            role="progressbar"
-                            [style.width.%]="(usedObjects / totalObjects) * 100"
-                            [attr.aria-valuenow]="usedObjects"
-                            aria-valuemin="0"
-                            [attr.aria-valuemax]="totalObjects">
-                        </div>
-                    </div>
+                    <!-- Centered Percentage -->
+                    <span class="progress-percentage">
+                        {{ ((usedObjects / totalObjects) * 100) | number:'1.0-0' }}%
+                    </span>
                 </div>
             </div>
+        </div>
 
             
                 <div class="col-12 col-sm-5">
