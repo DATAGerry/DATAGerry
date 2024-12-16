@@ -32,6 +32,7 @@ import { ActivatedRoute, Data, Router } from '@angular/router';
 import { UserSetting } from '../user-settings/models/user-setting';
 import { convertResourceURL, UserSettingsService } from '../user-settings/services/user-settings.service';
 import { UserSettingsDBService } from '../user-settings/services/user-settings-db.service';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'cmdb-users',
@@ -39,6 +40,8 @@ import { UserSettingsDBService } from '../user-settings/services/user-settings-d
   styleUrls: ['./users.component.scss']
 })
 export class UsersComponent implements OnInit, OnDestroy {
+
+  isCloudMode = environment.cloudMode;
 
   /**
    * Id for the user Table
@@ -132,9 +135,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   constructor(private userService: UserService, private groupService: GroupService, private modalService: NgbModal,
-              private router: Router, private route: ActivatedRoute,
-              private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
-              private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
+    private router: Router, private route: ActivatedRoute,
+    private userSettingsService: UserSettingsService<UserSetting, TableStatePayload>,
+    private indexDB: UserSettingsDBService<UserSetting, TableStatePayload>) {
     this.route.data.pipe(takeUntil(this.subscriber)).subscribe((data: Data) => {
       if (data.userSetting) {
         const userSettingPayloads = (data.userSetting as UserSetting<TableStatePayload>).payloads

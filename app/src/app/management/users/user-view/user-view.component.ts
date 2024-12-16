@@ -29,6 +29,7 @@ import { UserFormComponent } from '../components/user-form/user-form.component';
 import { ToastService } from '../../../layout/toast/toast.service';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { UsersPasswdModalComponent } from '../modals/users-passwd-modal/users-passwd-modal.component';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'cmdb-user-view',
@@ -44,9 +45,10 @@ export class UserViewComponent implements OnInit, OnDestroy {
   public userID: number;
   public user: User;
   public group: Group;
+  isCloudMode = environment.cloudMode;
 
   constructor(private route: ActivatedRoute, public userService: UserService, public groupService: GroupService,
-              private toastService: ToastService, private modalService: NgbModal) {
+    private toastService: ToastService, private modalService: NgbModal) {
     this.user = this.route.snapshot.data.user as User;
     this.group = this.route.snapshot.data.group as Group;
   }
@@ -77,7 +79,7 @@ export class UserViewComponent implements OnInit, OnDestroy {
   public openPasswordModal() {
     this.modalRef = this.modalService.open(UsersPasswdModalComponent, { size: 'lg' });
     this.modalRef.componentInstance.user = this.user;
-    this.modalRef.result.then( result => {
+    this.modalRef.result.then(result => {
       if (typeof result === typeof this.user) {
         this.user = result;
       }
