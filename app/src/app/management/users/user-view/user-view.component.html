@@ -12,7 +12,7 @@
     </nav>
     <div class="tab-content">
       <div class="tab-pane fade show active" id="nav-profile" role="tabpanel">
-        <div id="user-view-form" class="mt-3" *ngIf="isCloudMode">
+        <div id="user-view-form" class="mt-3">
           <cmdb-user-form [user]="user" [cancel]="false" (submit)="save($event)"></cmdb-user-form>
         </div>
       </div>
