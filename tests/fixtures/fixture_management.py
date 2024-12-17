@@ -48,8 +48,10 @@ def fixture_none_access_group():
 def fixture_full_access_user(full_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
-    return UserModel(public_id=1, user_name='full-access-user',
-                     active=True, group_id=full_access_group.public_id,
+    return UserModel(public_id=1,
+                     user_name='full-access-user',
+                     active=True,
+                     group_id=full_access_group.public_id,
                      registration_time=registration_time)
 
 
@@ -57,6 +59,8 @@ def fixture_full_access_user(full_access_group: UserGroupModel):
 def fixture_none_access_user(none_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
-    return UserModel(public_id=2, user_name='none-access-user',
-                     active=True, group_id=none_access_group.public_id,
+    return UserModel(public_id=2,
+                     user_name='none-access-user',
+                     active=True,
+                     group_id=none_access_group.public_id,
                      registration_time=registration_time)
