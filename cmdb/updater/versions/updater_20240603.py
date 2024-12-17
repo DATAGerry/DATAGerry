@@ -17,7 +17,7 @@
 import logging
 
 from cmdb.updater.updater import Updater
-from cmdb.framework import CmdbObject
+from cmdb.models.object_model.cmdb_object import CmdbObject
 # -------------------------------------------------------------------------------------------------------------------- #
 LOGGER = logging.getLogger(__name__)
 
@@ -39,7 +39,7 @@ class Update20240603(Updater):
         collection = CmdbObject.COLLECTION
         all_objects: list[dict] = []
 
-        all_objects = self.database_manager.find_all(collection)
+        all_objects = self.dbm.find_all(collection)
 
         for cur_obj in all_objects:
             # Check if the object already has the property 'multi_data_sections', else create it
@@ -47,9 +47,9 @@ class Update20240603(Updater):
                 cur_public_id = cur_obj['public_id']
                 cur_obj['multi_data_sections'] = []
 
-                self.database_manager.update(collection=collection,
-                                             filter={'public_id':cur_public_id},
-                                             data=cur_obj)
+                self.dbm.update(collection=collection,
+                                criteria={'public_id':cur_public_id},
+                                data=cur_obj)
                 LOGGER.info("Updated 'multi_data_sections' for object ID: %s", cur_public_id)
 
         super().increase_updater_version(20240603)

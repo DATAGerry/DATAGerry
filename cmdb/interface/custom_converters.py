@@ -20,11 +20,11 @@ from werkzeug.routing import BaseConverter
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                RegexConverter - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class RegexConverter(BaseConverter):
     """TODO: document"""
 
-    def __init__(self, url_map, *items):
+    def __init__(self, url_map):
         super().__init__(url_map)
-        LOGGER.debug(url_map)
-        #self.regex = items[0]

@@ -15,7 +15,7 @@
 
 <hr />
 
-<button routerLink="{{prevRoute.getPreviousUrl()}}" class="back-button btn btn-outline-dark ml-3">Back to Type List</button>
+<button (click)="goBack()" class="back-button btn btn-outline-dark ml-3">Back to Type List</button>
 <button class="btn btn-danger" [class.disabled]="numberOfObjects > 0" (click)="open()">Delete</button>
 
 <div>

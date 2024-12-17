@@ -14,15 +14,21 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+from typing import TypeVar
+
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.security.acl.sections import GroupACL, T
+from cmdb.security.acl.group_acl import GroupACL
 # -------------------------------------------------------------------------------------------------------------------- #
 
+T = TypeVar('T')
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               AccessControlList - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class AccessControlList:
     """
     The actual implementation of the Access Control List (ACL).
     """
-
     def __init__(self, activated: bool, groups: GroupACL = None):
         self.activated = activated
         self.groups: GroupACL = groups
@@ -60,8 +66,3 @@ class AccessControlList:
             self.groups.grant_access(key, permission)
         else:
             raise ValueError(f'No ACL section with name: {section}')
-
-
-    def verify_access(self, key: T, permission: AccessControlPermission) -> bool:
-        """TODO: document"""
-        return self.groups.verify_access(key, permission)

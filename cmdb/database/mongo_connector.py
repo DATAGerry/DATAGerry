@@ -14,37 +14,52 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Database-Connection
-Real connection to database over a given connector
+Connection to database over a given connector
 """
 import logging
-
 from pymongo import MongoClient
 from pymongo.database import Database
-from pymongo.errors import ConnectionFailure
 
-from cmdb.errors.database import DatabaseConnectionError
+from cmdb.database.connection_status import ConnectionStatus
 
-from .connection_status import ConnectionStatus
+from cmdb.errors.database import DatabaseConnectionError, SetDatabaseError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                MongoConnector - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class MongoConnector:
     """
-    PyMongo (MongoDB) implementation from connector
+    PyMongo (MongoDB) implementation with connector
     """
-
     def __init__(self, host: str, port: int, database_name: str, client_options: dict = None):
         if client_options:
-            self.client: MongoClient = MongoClient(host=host, port=int(port), connect=False, **client_options)
+            self.client = MongoClient(host=host, port=int(port), connect=False, **client_options)
         else:
-            self.client: MongoClient = MongoClient(host=host, port=int(port), connect=False)
+            self.client = MongoClient(host=host, port=int(port), connect=False)
 
         self.database: Database = self.client.get_database(database_name)
         self.host: str = host
         self.port: int = port
+
+
+    def set_database(self, db_name: str):
+        """
+        Sets the database of the connector
+
+        Raises:
+            SetDatabaseError: Raised when not possible to set connector to database name
+
+        Args:
+            db_name (str): name of the database
+        """
+        try:
+            self.database = self.client.get_database(db_name)
+        except Exception as err:
+            LOGGER.debug("[set_database] Can't set connector to database: %s. Error: %s", db_name, err)
+            raise SetDatabaseError(err, db_name) from err
 
 
     def connect(self) -> ConnectionStatus:
@@ -54,8 +69,9 @@ class MongoConnector:
         """
         try:
             status = self.client.admin.command('ismaster')
+
             return ConnectionStatus(connected=True, message=str(status))
-        except ConnectionFailure as err:
+        except Exception as err:
             raise DatabaseConnectionError(err) from err
 
 
@@ -70,8 +86,9 @@ class MongoConnector:
 
     def is_connected(self) -> bool:
         """
-        check if client is connected successfully
-        Returns: True if connected / False if disconnected
+        Check if client is connected successfully
+
+        Returns (bool): True if connected / False if disconnected
         """
         return self.connect().get_status()
 

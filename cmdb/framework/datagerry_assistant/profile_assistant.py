@@ -19,9 +19,9 @@ This module contains the "ProfileAssistant" class
 import logging
 from datetime import datetime, timezone
 
-from flask import current_app
-
 from cmdb.manager.categories_manager import CategoriesManager
+
+from cmdb.errors.dg_assistant.dg_assistant_errors import ProfileCreationError
 
 from .profile_name import ProfileName
 from .profile_user_management import UserManagementProfile
@@ -39,6 +39,9 @@ class ProfileAssistant:
     """
     This class creates all types and categories selected in the DATAGERRY assistant
     """
+    def __init__(self, categories_manager: CategoriesManager):
+        self.categories_manager = categories_manager
+
 
     def create_profiles(self, profile_list):
         """
@@ -107,7 +110,8 @@ class ProfileAssistant:
             self.create_all_categories(created_type_ids)
 
         except Exception as err:
-            LOGGER.info("Assitant Error: %s",err)
+            LOGGER.debug("[create_profiles] Error: %s",err)
+            raise ProfileCreationError(str(err)) from err
 
         created_ids = []
 
@@ -127,10 +131,9 @@ class ProfileAssistant:
             all_type_ids (dict): All created type_ids from the assistant
         """
         all_categories: list[dict] = self.get_all_categories(all_type_ids)
-        category_manager = CategoriesManager(current_app.database_manager)
 
-        for i, category in enumerate(all_categories):
-            category_manager.insert(category)
+        for _, category in enumerate(all_categories):
+            self.categories_manager.insert_category(category)
 
 
     def get_all_categories(self, all_type_ids: dict) -> list[dict]:

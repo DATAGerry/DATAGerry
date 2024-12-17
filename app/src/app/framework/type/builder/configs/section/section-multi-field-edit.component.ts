@@ -18,7 +18,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { UntypedFormControl, Validators } from '@angular/forms';
 
-import { ReplaySubject } from 'rxjs';
+import { ReplaySubject, Subscription } from 'rxjs';
 
 import { ValidationService } from '../../../services/validation.service';
 
@@ -39,15 +39,17 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
 
     private initialValue: string;
     private identifierInitialValue: string;
-    isValid$ = true;
+    isValid$: boolean = false;
     public currentValue: string;
     public isIdentifierValid: boolean = true;
+    private activeIndex: number | null = null;
+    private activeIndexSubscription: Subscription;
 
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
 
-    public constructor(private validationService: ValidationService, private sectionIdentifierService: SectionIdentifierService) {
+    public constructor(private validationService: ValidationService, private sectionIdentifier: SectionIdentifierService) {
         super();
     }
 
@@ -64,24 +66,49 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
         this.identifierInitialValue = this.nameControl.value;
 
         this.currentValue = this.identifierInitialValue;
+
+        // Subscribe to value changes
+        this.nameControl.valueChanges.subscribe(value => this.onInputChange(value, 'name'));
+        this.labelControl.valueChanges.subscribe(value => this.onInputChange(value, 'label'));
+
+
+
+        // Initialize only once
+        if (!this.identifierInitialValue) {
+            this.identifierInitialValue = this.nameControl.value;
+        }
+
+        this.isValid$ = this.form.valid;
+
+        // Subscribe to form status changes and update isValid$ based on form validity
+        this.form.statusChanges.subscribe(() => {
+            this.isValid$ = this.form.valid;
+        });
     }
 
 
     public ngOnDestroy(): void {
+        //   When moving a field, if the identifier changes, delete the old one and add the new one.
+        if (this.identifierInitialValue != this.nameControl.value) {
+            this.validationService.updateFieldValidityOnDeletion(this.identifierInitialValue);
+        }
         this.subscriber.next();
         this.subscriber.complete();
+
+        if (this.activeIndexSubscription) {
+            this.activeIndexSubscription.unsubscribe();
+        }
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
-    public hasValidator(control: string): void {
-        if (this.form.controls[control].hasValidator(Validators.required)) {
-            let valid = this.form.controls[control].valid;
-            this.isValid$ = this.isValid$ && valid;
-        }
-    }
 
-
+    /**
+     * Handles input changes for the field and emits changes through fieldChanges$.
+     * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+     * @param event - The input event value.
+     * @param type - The type of the input field being changed.
+     */
     onInputChange(event: any, type: string) {
         this.fieldChanges$.next({
             "newValue": event,
@@ -95,24 +122,41 @@ export class SectionMultiFieldEditComponent extends ConfigEditBaseComponent impl
             this.initialValue = this.nameControl.value;
         }
 
-        for (let item in this.form.controls) {
-            this.hasValidator(item)
-        }
-
-        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
-        this.isValid$ = true;
-
+        setTimeout(() => {
+            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+            this.isValid$ = true;
+        });
         this.updateSectionValue(this.nameControl.value)
     }
 
 
+    /**
+     * Updates the section value based on the provided new value.
+     * Validates the section identifier and updates the identifier validity state.
+     * @param newValue - The new value for the section.
+     */
     updateSectionValue(newValue: string): void {
-        const isValid = this.sectionIdentifierService.updateSection(this.identifierInitialValue, newValue);
-        if (!isValid) {
-            this.isIdentifierValid = false
-        } else {
-            this.currentValue = newValue;
-            this.isIdentifierValid = true;
-        }
+
+        // Subscribe to getActiveIndex only once and store the latest index
+        this.activeIndexSubscription = this.sectionIdentifier.getActiveIndex().subscribe((index) => {
+            if (index !== null && index !== undefined) {
+                this.activeIndex = index;  // Update the latest active index
+            }
+        });
+
+        setTimeout(() => {
+            if (newValue === this.currentValue) {
+                return;
+            }
+
+            const isValid = this.sectionIdentifier.updateSection(this.activeIndex, newValue);
+
+            if (!isValid) {
+                this.isIdentifierValid = false;
+            } else {
+                this.currentValue = newValue;
+                this.isIdentifierValid = true;
+            }
+        }, 200);
     }
 }

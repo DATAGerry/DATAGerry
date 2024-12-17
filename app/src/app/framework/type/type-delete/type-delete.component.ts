@@ -26,6 +26,7 @@ import { PreviousRouteService } from '../../../services/previous-route.service';
 import { ToastService } from '../../../layout/toast/toast.service';
 
 import { CmdbType } from '../../models/cmdb-type';
+import { Location } from '@angular/common';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 //TODO: Extract this component in its own component folder
@@ -100,7 +101,7 @@ export class TypeDeleteConfirmModalComponent {
     public equalName(): ValidatorFn {
         return (control: AbstractControl): { [key: string]: boolean } | null => {
             if (control.value !== this.typeName) {
-                return {notequal: true};
+                return { notequal: true };
             } else {
                 return null;
             }
@@ -119,9 +120,9 @@ export class TypeDeleteComponent implements OnInit {
     public typeInstance: CmdbType;
     public numberOfObjects: number;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     constructor(
         private typeService: TypeService,
@@ -129,7 +130,8 @@ export class TypeDeleteComponent implements OnInit {
         private route: ActivatedRoute,
         public prevRoute: PreviousRouteService,
         private modalService: NgbModal,
-        private toast: ToastService
+        private toast: ToastService,
+        private location: Location
     ) {
         this.route.params.subscribe((id) => {
             this.typeID = id.publicID;
@@ -147,7 +149,7 @@ export class TypeDeleteComponent implements OnInit {
         });
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     public open(): void {
         const deleteModal = this.modalService.open(TypeDeleteConfirmModalComponent);
@@ -159,12 +161,20 @@ export class TypeDeleteComponent implements OnInit {
             if (result === 'delete') {
                 this.typeService.deleteType(this.typeID).subscribe(() => {
                     this.router.navigate(['/framework/type/']);
-                    this.toast.success(`Type was successfully Deleted: TypeID: ${ this.typeID }`);
+                    this.toast.success(`Type was successfully Deleted: TypeID: ${this.typeID}`);
                 });
             }
         },
-        (reason) => {
-            console.log(reason);
-        });
+            (reason) => {
+                console.log(reason);
+            });
+    }
+
+
+    /**
+     * Navigates back to the previous page in the browser's history.
+     */
+    goBack(): void {
+        this.location.back();
     }
 }

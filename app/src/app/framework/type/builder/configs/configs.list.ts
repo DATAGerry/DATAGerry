@@ -25,10 +25,12 @@ import { CheckFieldEditComponent } from './choice/check-field-edit.component';
 import { DateFieldEditComponent } from './date-time/date-field-edit.component';
 import { SectionRefFieldEditComponent } from './section/section-ref-field-edit.component';
 import { SectionMultiFieldEditComponent } from './section/section-multi-field-edit.component';
+import { NumberFieldEditComponent } from './number/number-field-edit.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 export const configComponents: { [type: string]: any } = {
     'text': TextFieldEditComponent,
+    'number': NumberFieldEditComponent,
     'password': TextFieldEditComponent,
     'section': SectionFieldEditComponent,
     'textarea': TextareaEditComponent,

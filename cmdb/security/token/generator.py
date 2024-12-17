@@ -16,20 +16,22 @@
 """TODO: document"""
 import logging
 from datetime import datetime, timedelta, timezone
-
 from authlib.jose import jwt
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
+
 from cmdb import __title__
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.security.auth import AuthModule
+from cmdb.security.auth.auth_module import AuthModule
 from cmdb.security.key.holder import KeyHolder
 from cmdb.security.token import DEFAULT_TOKEN_LIFETIME
-from cmdb.utils.system_reader import SystemSettingsReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                TokenGenerator - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
 class TokenGenerator:
     """TODO: document"""
     DEFAULT_CLAIMS = {
@@ -39,14 +41,20 @@ class TokenGenerator:
         }
     }
 
-    def __init__(self, database_manager: DatabaseManagerMongo = None):
-        self.key_holder = KeyHolder(database_manager)
+    def __init__(self, dbm: MongoDatabaseManager = None):
+        self.key_holder = KeyHolder(dbm)
         self.header = {
             'alg': 'RS512'
         }
-        self.database_manager = database_manager
-        self.auth_module = AuthModule(SystemSettingsReader(self.database_manager).get_all_values_from_section(
-            'auth', default=AuthModule.__DEFAULT_SETTINGS__))
+
+        #TODO: REFACTOR-FIX
+        settings_reader = SettingsReaderManager(dbm)
+        self.auth_module = AuthModule(
+                                settings_reader.get_all_values_from_section(
+                                                            'auth',
+                                                            AuthModule.__DEFAULT_SETTINGS__
+                                                          )
+                           )
 
 
     def get_expire_time(self) -> datetime:

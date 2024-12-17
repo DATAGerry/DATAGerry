@@ -15,11 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
 import logging
-from typing import List
 
-from cmdb.framework import CategoryModel, TypeModel
-from cmdb.framework.cmdb_errors import ObjectManagerInsertError
+from cmdb.models.category_model.category import CategoryModel
+from cmdb.models.type_model.type import TypeModel
 from cmdb.updater.updater import Updater
+
+from cmdb.errors.manager.object_manager import ObjectManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
@@ -41,19 +42,19 @@ class Update20200512(Updater):
     def start_update(self):
         """TODO: document"""
         collection = CategoryModel.COLLECTION
-        new_categories: List[CategoryModel] = []
-        raw_categories_old_structure: List[dict] = self.database_manager.find_all(collection=collection,
+        new_categories: list[CategoryModel] = []
+        raw_categories_old_structure: list[dict] = self.dbm.find_all(collection=collection,
                                                                                   filter={})
         for idx, old_raw_category in enumerate(raw_categories_old_structure):
             new_categories.append(self.__convert_category_to_new_structure(old_raw_category, index=idx))
 
-        self.database_manager.delete_collection(collection=CategoryModel.COLLECTION)
-        self.database_manager.create_collection(CategoryModel.COLLECTION)
-        self.database_manager.create_indexes(CategoryModel.COLLECTION, CategoryModel.get_index_keys())
+        self.dbm.delete_collection(collection=CategoryModel.COLLECTION)
+        self.dbm.create_collection(CategoryModel.COLLECTION)
+        self.dbm.create_indexes(CategoryModel.COLLECTION, CategoryModel.get_index_keys())
 
         for category in new_categories:
             try:
-                self.object_manager.insert_category(category)
+                self.categories_manager.insert_category(CategoryModel.to_json(category))
             except ObjectManagerInsertError:
                 continue
         self.__clear_up_types()
@@ -78,16 +79,16 @@ class Update20200512(Updater):
         return category
 
 
-    def __get_types_in_category(self, category_id: int) -> List[int]:
+    def __get_types_in_category(self, category_id: int) -> list[int]:
         """Get a list of type ids by calling the old structure and load the category_id field from types
         Notes:
             Do not use type_instance.category_id here - doesnt exists anymore
         """
         return [type.get('public_id') for type in
-                self.database_manager.find_all(collection=TypeModel.COLLECTION,
+                self.dbm.find_all(collection=TypeModel.COLLECTION,
                                                filter={'category_id': category_id})]
 
 
     def __clear_up_types(self):
         """Removes the category_id field from type collection"""
-        self.database_manager.unset_update_many(collection=TypeModel.COLLECTION, filter={}, data='category_id')
+        self.dbm.unset_update_many(collection=TypeModel.COLLECTION, criteria={}, data='category_id')

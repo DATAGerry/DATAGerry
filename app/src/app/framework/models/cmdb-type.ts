@@ -24,6 +24,7 @@ export interface CmdbTypeSection {
     name: string;
     label: string;
     fields?: Array<any>;
+    bg_color?: string;
     reference?: {
         type_id: number;
         section_name: string;
@@ -38,6 +39,7 @@ export interface CmdbMultiDataSection {
     label: string;
     fields?: Array<any>;
     hidden_fields?: Array<any>;
+    bg_color?: string;
     reference?: {
         type_id: number;
         section_name: string;

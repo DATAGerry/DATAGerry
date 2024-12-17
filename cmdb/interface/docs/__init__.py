@@ -31,12 +31,11 @@ def create_docs_server():
 
     if cmdb.__MODE__ == 'DEBUG':
         config = app_config['development']
-        config.APPLICATION_ROOT = '/docs/'
-        app.config.from_object(config)
     else:
         config = app_config['production']
-        config.APPLICATION_ROOT = '/docs/'
-        app.config.from_object(config)
+
+    config.APPLICATION_ROOT = '/docs/'
+    app.config.from_object(config)
 
     app.register_blueprint(doc_pages, url_prefix="/")
 

@@ -57,7 +57,6 @@ export class SectionTemplateService<T = CmdbSectionTemplate | RenderResult> impl
      * @returns Observable<any>
      */
     public postSectionTemplate(params: any): Observable<any> {
-
         let httpParams = new HttpParams();
     
         for (let key in params){

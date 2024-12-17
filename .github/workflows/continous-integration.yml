@@ -84,7 +84,7 @@ jobs:
         env:
           CONFIG_FILE: .flake8
       - name: Archive flake8 results
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: flake8-reports
           path: flake8-report_python-${{ matrix.python-version }}.txt

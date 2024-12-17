@@ -17,8 +17,8 @@
 """TODO: document"""
 from cmdb import __title__
 from cmdb.interface.cmdb_app import BaseCmdbApp
-from cmdb.interface.rest_api import create_rest_api
-
+from cmdb.interface.rest_api.init_rest_api import create_rest_api
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def test_start_routine():
     """TODO: document"""
@@ -30,6 +30,6 @@ class TestRestAPI:
 
     def test_rest_api_start(self, database_manager, rest_api):
         """TODO: document"""
-        api = create_rest_api(database_manager, None)
+        api = create_rest_api(database_manager)
         assert isinstance(api, BaseCmdbApp)
         assert rest_api.get('/').get_json()['title'] == __title__

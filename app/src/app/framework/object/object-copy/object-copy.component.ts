@@ -34,33 +34,33 @@ import { APIUpdateMultiResponse } from '../../../services/models/api-response';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
-  selector: 'cmdb-object-copy',
-  templateUrl: './object-copy.component.html',
-  styleUrls: ['./object-copy.component.scss']
+    selector: 'cmdb-object-copy',
+    templateUrl: './object-copy.component.html',
+    styleUrls: ['./object-copy.component.scss']
 })
 export class ObjectCopyComponent implements OnInit, OnDestroy {
 
-  public mode: CmdbMode = CmdbMode.Edit;
-  private objectID: number;
-  public typeInstance: CmdbType;
-  public renderResult: RenderResult;
-  public renderForm: UntypedFormGroup;
+    public mode: CmdbMode = CmdbMode.Edit;
+    private objectID: number;
+    public typeInstance: CmdbType;
+    public renderResult: RenderResult;
+    public renderForm: UntypedFormGroup;
 
-  private originalLocationData: RenderResult;
-  private newLocationParentID: number = 0;
+    private originalLocationData: RenderResult;
+    private newLocationParentID: number = 0;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
-    constructor(private objectService: ObjectService, 
-                private typeService: TypeService,
-                private route: ActivatedRoute, 
-                private router: Router, 
-                private userService: UserService,
-                private sidebarService: SidebarService, 
-                private toastService: ToastService,
-                private locationService: LocationService) {
+    constructor(private objectService: ObjectService,
+        private typeService: TypeService,
+        private route: ActivatedRoute,
+        private router: Router,
+        private userService: UserService,
+        private sidebarService: SidebarService,
+        private toastService: ToastService,
+        private locationService: LocationService) {
 
         this.route.params.subscribe((params) => {
             this.objectID = params.publicID;
@@ -74,30 +74,30 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
         this.objectService.getObject(this.objectID).subscribe((rr: RenderResult) => {
             this.renderResult = rr;
 
-            for (let field of this.renderResult.fields){
-                if (field['name'] == 'dg_location' && field['value'] > 0){
+            for (let field of this.renderResult.fields) {
+                if (field['name'] == 'dg_location' && field['value'] > 0) {
                     this.getOriginalObjectLocation();
                 }
             }
 
         },
-        error => {
-            console.error(error);
-        },
-        () => {
-            this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
-                this.typeInstance = value;
+            error => {
+                this.toastService.error(error?.error?.message)
+            },
+            () => {
+                this.typeService.getType(this.renderResult.type_information.type_id).subscribe((value: CmdbType) => {
+                    this.typeInstance = value;
+                });
             });
-        });
     }
 
 
     public ngOnDestroy(): void {
         this.locationService.locationTreeName = "";
     }
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                      API CALLS                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                      API CALLS                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     public copyObject(): void {
         this.renderForm.markAllAsTouched();
@@ -111,12 +111,12 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
             newObjectInstance.fields = [];
 
             Object.keys(this.renderForm.controls).forEach(field => {
-                if(field == 'dg_location' && this.renderForm.get(field).value > 0){
+                if (field == 'dg_location' && this.renderForm.get(field).value > 0) {
                     this.newLocationParentID = this.renderForm.get(field).value;
                 }
 
                 console.log("field", field);
-                if(field.startsWith("dg-mds-")){
+                if (field.startsWith("dg-mds-")) {
                     newObjectInstance.multi_data_sections.push(this.renderForm.get(field).value)
                 } else {
                     newObjectInstance.fields.push({
@@ -130,24 +130,24 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
             this.objectService.postObject(newObjectInstance).subscribe(newObjectID => {
                 ack = newObjectID;
 
-                if(this.newLocationParentID > 0){
+                if (this.newLocationParentID > 0) {
                     this.createNewObjectLocation(ack);
                 }
             },
-            (e) => {
-                console.error(e);
-            },
-            () => {
-                this.router.navigate(['/framework/object/view/' + ack]);
-                this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
-                this.toastService.success(`Object ${ this.objectID } was successfully copied into ${ ack }!`);
-            });
+                (e) => {
+                    this.toastService.error(e?.error?.message)
+                },
+                () => {
+                    this.router.navigate(['/framework/object/view/' + ack]);
+                    this.sidebarService.updateTypeCounter(this.renderResult.type_information.type_id);
+                    this.toastService.success(`Object ${this.objectID} was successfully copied into ${ack}!`);
+                });
         }
     }
 
 
-    private getOriginalObjectLocation(){
-            this.locationService.getLocationForObject(this.renderResult.object_information.object_id)
+    private getOriginalObjectLocation() {
+        this.locationService.getLocationForObject(this.renderResult.object_information.object_id)
             .subscribe((response: RenderResult) => {
                 this.originalLocationData = response;
 
@@ -157,24 +157,24 @@ export class ObjectCopyComponent implements OnInit, OnDestroy {
     }
 
 
-    private createNewObjectLocation(newObjectID: number){
+    private createNewObjectLocation(newObjectID: number) {
         let params = {
             "object_id": newObjectID,
             "parent": this.newLocationParentID,
             "name": this.locationService.locationTreeName,
-            "type_id": this.typeInstance.public_id 
+            "type_id": this.typeInstance.public_id
         }
 
         this.locationService.postLocation(params).subscribe((res: APIUpdateMultiResponse) => {
-                this.locationService.locationTreeName = "";
-            },
+            this.locationService.locationTreeName = "";
+        },
             error => {
-                this.toastService.error(error);
+                this.toastService.error(error?.error?.message);
             }
         );
     }
 
-/* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
 
     @HostListener('window:scroll')
     onWindowScroll() {

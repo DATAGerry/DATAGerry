@@ -23,6 +23,7 @@ import { ReplaySubject } from 'rxjs';
 import { ValidationService } from '../../../services/validation.service';
 
 import { ConfigEditBaseComponent } from '../config.edit';
+import { FieldIdentifierValidationService } from '../../../services/field-identifier-validation.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -47,12 +48,14 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     public options: Array<any> = [];
 
     private initialValue: string;
-    isValid$ = true;
+    isValid$: boolean = false;
     private identifierInitialValue: string;
+    private priorValue: string | boolean; // To store the value before the previous change
+    isDuplicate$: boolean = false
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private validationService: ValidationService) {
+    constructor(private validationService: ValidationService, private fieldIdentifierValidation: FieldIdentifierValidationService) {
         super();
     }
 
@@ -87,6 +90,28 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
         if (this.hiddenStatus) {
             this.hideFieldControl.setValue(true);
         }
+
+        // Initialize only once
+        if (!this.identifierInitialValue) {
+            this.identifierInitialValue = this.nameControl.value;
+        }
+
+        this.isValid$ = this.form.valid;
+
+        // Subscribe to form status changes and update isValid$ based on form validity
+        this.form.statusChanges.subscribe(() => {
+            this.isValid$ = this.form.valid;
+        });
+    }
+
+
+    public ngOnDestroy(): void {
+        //   When moving a field, if the identifier changes, delete the old one and add the new one.
+        if (this.identifierInitialValue != this.nameControl.value) {
+            this.validationService.updateFieldValidityOnDeletion(this.identifierInitialValue);
+        }
+        this.subscriber.next();
+        this.subscriber.complete();
     }
 
     /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
@@ -118,16 +143,89 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
     }
 
 
-    public hasValidator(control: string): void {
+    // /**
+    //  * Handles input changes for the field and emits changes through fieldChanges$.
+    //  * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+    //  * @param event - The input event value.
+    //  * @param type - The type of the input field being changed.
+    //  */
+    // onInputChange(event: any, type: string) {
+    //     console.log('choice', event)
+    //     this.fieldChanges$.next({
+    //         "newValue": event,
+    //         "inputName": type,
+    //         "fieldName": this.nameControl.value,
+    //         "previousName": this.initialValue,
+    //         "elementType": "choise"
+    //     });
 
-        if (this.form.controls[control].hasValidator(Validators.required)) {
-            let valid = this.form.controls[control].valid;
-            this.isValid$ = this.isValid$ && valid;
+    //     if (type == "name") {
+    //         this.initialValue = this.nameControl.value;
+    //     }
+
+    //     setTimeout(() => {
+    //         this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+    //         this.isValid$ = true;
+    //     });
+    // }
+
+    /**
+     * Handles input changes for the field and emits changes through fieldChanges$.
+     * Updates the initial value if the input type is 'name' and triggers validation after a delay.
+     * @param event - The input event value.
+     * @param type - The type of the input field being changed.
+     */
+    onInputChange(event: any, type: string) {
+        // Handle boolean event type
+        if (typeof event === 'boolean') {
+            this.handleFieldChange(event, type);
+            return;
         }
+
+        if (type === 'name') {
+            // Check for duplicates
+            this.isDuplicate$ = this.fieldIdentifierValidation.isDuplicate(event);
+
+            if (!this.isDuplicate$) {
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            }
+            else if (event === this.priorValue) {
+                this.isDuplicate$ = false
+                this.toggleFormControls(false);
+                this.handleFieldChange(event, type);
+            }
+            else {
+                this.priorValue = this.initialValue
+                this.toggleFormControls(true);
+                this.fieldChanges$.next({ "isDuplicate": true });
+            }
+        } else {
+            this.toggleFormControls(false);
+            this.handleFieldChange(event, type);
+        }
+
+        // Perform validation after a slight delay
+        setTimeout(() => {
+            this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
+            this.isValid$ = true;
+        });
     }
 
 
-    onInputChange(event: any, type: string) {
+    /**
+     * Handles changes to the form fields and notifies listeners of the change event.
+     * Updates the initial value if the field type is 'name' and triggers field change notifications.
+     * @param event - The new value of the field after change.
+     * @param type - The type of field being changed (e.g., 'name').
+     */
+    private handleFieldChange(event: any, type: string): void {
+        // Update previousPreviousValue before changing the initialValue
+        if (type === 'name' && this.initialValue !== event) {
+            this.priorValue = this.initialValue;
+        }
+
+        // Notify field changes
         this.fieldChanges$.next({
             "newValue": event,
             "inputName": type,
@@ -136,15 +234,36 @@ export class ChoiceFieldEditComponent extends ConfigEditBaseComponent implements
             "elementType": "choise"
         });
 
-        if (type == "name") {
+        // Update the initial value if the type is 'name'
+        if (type === 'name') {
             this.initialValue = this.nameControl.value;
         }
+    }
 
-        for (let item in this.form.controls) {
-            this.hasValidator(item);
+
+    /**
+     * Toggles the enabled or disabled state of the form controls based on the `disable` parameter.
+     * If `disable` is true, the form controls are disabled; otherwise, they are enabled.
+     * @param disable - A boolean value determining whether to disable or enable the form controls.
+     */
+    private toggleFormControls(disable: boolean) {
+        // Disable or enable form controls based on the value of `disable`
+        if (disable) {
+            this.labelControl.disable();
+            this.descriptionControl.disable();
+            this.valueControl.disable();
+            this.helperTextControl.disable();
+            this.hideFieldControl.disable();
+            this.requiredControl.disable();
+            this.optionsControl.disable();
+        } else {
+            this.labelControl.enable();
+            this.descriptionControl.enable();
+            this.valueControl.enable();
+            this.helperTextControl.enable();
+            this.hideFieldControl.enable();
+            this.requiredControl.enable();
+            this.optionsControl.enable();
         }
-
-        this.validationService.setIsValid(this.identifierInitialValue, this.isValid$);
-        this.isValid$ = true;
     }
 }

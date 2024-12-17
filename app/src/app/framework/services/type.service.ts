@@ -351,21 +351,48 @@ export class TypeService<T = CmdbType> implements ApiServicePrefix {
     public getTypeListByCategory(categoryID: number, aclRequirements?: AccessControlPermission | AccessControlPermission[]):
         Observable<Array<T>> {
 
+            // const pipeline = [
+            //     {
+            //         $lookup: {
+            //             from: 'framework.categories',
+            //             let: { type_id: { $toInt: '$public_id' } },
+            //             pipeline: [
+            //                 { $match: { public_id: categoryID } },
+            //                 { $match: { $expr: { $in: ['$$type_id', '$types'] } } }
+            //             ],
+            //             as: 'category'
+            //         }
+            //     },
+            //     {
+            //         $match: {
+            //             $and: [{ category: { $gt: { $size: 0 } } },
+            //                 this.getAclFilter(aclRequirements)
+            //             ]
+            //         }
+            //     },
+            //     {
+            //         $project: { category: 0 }
+            //     }
+            // ];
+
             const pipeline = [
                 {
                     $lookup: {
                         from: 'framework.categories',
-                        let: { type_id: { $toInt: '$public_id' } },
                         pipeline: [
                             { $match: { public_id: categoryID } },
-                            { $match: { $expr: { $in: ['$$type_id', '$types'] } } }
+                            { 
+                                $addFields: { type_id: { $toInt: '$$ROOT.public_id' } } 
+                            },
+                            { $match: { $expr: { $in: ['$type_id', '$types'] } } }
                         ],
                         as: 'category'
                     }
                 },
                 {
                     $match: {
-                        $and: [{ category: { $gt: { $size: 0 } } },
+                        $and: [
+                            { 'category.0': { $exists: true } },
                             this.getAclFilter(aclRequirements)
                         ]
                     }

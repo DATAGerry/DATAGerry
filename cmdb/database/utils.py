@@ -16,35 +16,39 @@
 """
 List of useful functions for the database
 """
+import re
+import uuid
+import logging
 import calendar
 import datetime
-
-from datetime import datetime
-
-import re
-import logging
-
-try:
-    import uuid
-
-    _USE_UUID = True
-except ImportError:
-    _USE_UUID = False
-
 from bson.dbref import DBRef
 from bson.max_key import MaxKey
 from bson.min_key import MinKey
 from bson.objectid import ObjectId
 from bson.timestamp import Timestamp
 from bson.tz_util import utc
+
+from cmdb.framework.docapi.docapi_template.docapi_template_base import TemplateManagementBase
+from cmdb.framework.rendering.render_result import RenderResult
+from cmdb.framework.media_library.base_media_file import BaseMediaFile
+from cmdb.models.cmdb_dao import CmdbDAO
+from cmdb.models.right_model.base_right import BaseRight
+from cmdb.security.auth.auth_settings import AuthSettingsDAO
+from cmdb.security.auth.base_provider_config import BaseAuthProviderConfig
+from cmdb.settings.date_settings import DateSettingsDAO
+from cmdb.framework.search.search_result import SearchResult
+from cmdb.framework.search.search_result_map import SearchResultMap
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
-_RE_TYPE = type(re.compile("foo"))
+LOGGER = logging.getLogger(__name__)
+
+RE_TYPE = type(re.compile("re.Pattern"))
 
 ASCENDING = 1
 DESCENDING = -1
 
-LOGGER = logging.getLogger(__name__)
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def object_hook(dct: dict):
     """Helper function for converting json to mongo bson
@@ -63,9 +67,9 @@ def object_hook(dct: dict):
     if "$date" in dct:
         try:
             # if timestamp
-            return datetime.fromtimestamp(float(dct["$date"]) / 1000.0, utc)
+            return datetime.datetime.fromtimestamp(float(dct["$date"]) / 1000.0, utc)
         except ValueError:
-            return datetime.fromisoformat(dct['$date'][:-1]).astimezone(utc)
+            return datetime.datetime.fromisoformat(dct['$date'][:-1]).astimezone(utc)
 
     if "$regex" in dct:
         flags = 0
@@ -81,11 +85,12 @@ def object_hook(dct: dict):
     if "$maxKey" in dct:
         return MaxKey()
 
-    if _USE_UUID and "$uuid" in dct:
+    if "$uuid" in dct:
         return uuid.UUID(dct["$uuid"])
+
     return dct
 
-
+#pylint: disable=too-many-return-statements, too-many-branches
 def default(obj):
     """Helper function for converting bson to json
     Args:
@@ -94,14 +99,21 @@ def default(obj):
     Returns:
         json format
     """
-    from cmdb.framework.cmdb_render import RenderResult
-
-    from cmdb.framework.cmdb_dao import CmdbDAO
-    if isinstance(obj, CmdbDAO):
+    if isinstance(obj, (CmdbDAO,
+                        RenderResult,
+                        TemplateManagementBase,
+                        AuthSettingsDAO,
+                        BaseMediaFile,
+                        BaseAuthProviderConfig,
+                        BaseRight,
+                        DateSettingsDAO)):
         return obj.__dict__
 
-    if isinstance(obj, RenderResult):
-        return obj.__dict__
+    if isinstance(obj, (SearchResult,SearchResultMap)):
+        return obj.to_json()
+
+    if isinstance(obj, bytes):
+        return obj.decode("utf-8")
 
     if isinstance(obj, ObjectId):
         return {"$oid": str(obj)}
@@ -109,23 +121,20 @@ def default(obj):
     if isinstance(obj, DBRef):
         return obj.as_doc()
 
-    if isinstance(obj, datetime):
+    if isinstance(obj, datetime.datetime):
         if obj.utcoffset() is not None:
             obj = obj - obj.utcoffset()
-        millis = int(calendar.timegm(obj.timetuple()) * 1000 +
-                     obj.microsecond / 1000)
+
+        millis = int(calendar.timegm(obj.timetuple()) * 1000 + obj.microsecond / 1000)
         return {"$date": millis}
 
-    if isinstance(obj, _RE_TYPE):
+    if isinstance(obj, RE_TYPE):
         flags = ""
         if obj.flags & re.IGNORECASE:
             flags += "i"
         if obj.flags & re.MULTILINE:
             flags += "m"
-        return {
-            "$regex": obj.pattern,
-            "$options": flags
-        }
+        return {"$regex": obj.pattern, "$options": flags}
 
     if isinstance(obj, MinKey):
         return {"$minKey": 1}
@@ -139,7 +148,10 @@ def default(obj):
     if isinstance(obj, Timestamp):
         return {"t": obj.time, "i": obj.inc}
 
-    if _USE_UUID and isinstance(obj, uuid.UUID):
+    if isinstance(obj, uuid.UUID):
         return {"$uuid": obj.hex}
 
-    raise TypeError(f"{obj} is not JSON serializable")
+    try:
+        return obj.__dict__
+    except Exception as err:
+        raise TypeError(f"{obj} not JSON serializable - Type: {type(obj)}. Error: {err}") from err

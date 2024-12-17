@@ -39,7 +39,7 @@
                     class="btn btn-primary next"
                     type="button"
                     awNextStep
-                    [disabled]="!contentValid || !(isValid$ | async)"
+                    [disabled]="!contentValid ||  isSectionHighlighted || isFieldHighlighted || disableFields || !isSectionWithoutFields"
                 >
                     Next Step
                     <i class="fas fa-angle-double-right"></i>
@@ -111,7 +111,7 @@
             type="button"
             class="btn btn-block btn-success mt-2"
             (click)="saveType()"
-            [disabled]="!basicValid || !contentValid || !metaValid || !accessValid || !isLabelValid || !isNameValid || !(isValid$ | async) || !(isSectionValid$ | async) || !isIdentifierValid"
+            [disabled]="isSaveButtonDisabled"
         >
             Save
         </button>

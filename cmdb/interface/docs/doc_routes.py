@@ -16,11 +16,12 @@
 """
 Blueprint for documentation routes
 """
-from cmdb.interface.blueprint import RootBlueprint
+from cmdb.interface.blueprints import RootBlueprint
 # -------------------------------------------------------------------------------------------------------------------- #
 
 doc_pages = RootBlueprint("doc_pages", __name__, static_folder="static", static_url_path="")
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 @doc_pages.route("/")
 def default_page():

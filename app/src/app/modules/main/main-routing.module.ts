@@ -124,13 +124,23 @@ const routes: Routes = [
         loadChildren: () => import('../../filemanager/filemanager.module').then(m => m.FilemanagerModule)
     },
     {
-        path: 'exportd',
+        path: 'reports',
         data: {
-            breadcrumb: 'Exportd'
+            breadcrumb: 'Reports'
         },
         canActivate: [AuthGuard],
         canActivateChild: [AuthGuard],
-        loadChildren: () => import('../../exportd/exportd.module').then(m => m.ExportdModule)
+        loadChildren: () => import('../../reporting/reporting.module').then(m => m.ReportingModule)
+    },
+    {
+        path: 'webhooks',
+        canActivate: [AuthGuard],
+        canActivateChild: [AuthGuard],
+        data: {
+            right: 'base.framework.webhook.view'
+        },
+        loadChildren: () =>
+            import('../../webhook/webhook.module').then((m) => m.WebhookModule)
     }
 ];
 
@@ -138,4 +148,4 @@ const routes: Routes = [
     imports: [RouterModule.forChild(routes)],
     exports: [RouterModule]
 })
-export class MainRoutingModule {}
+export class MainRoutingModule { }

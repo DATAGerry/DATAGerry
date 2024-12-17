@@ -13,42 +13,50 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""Contains DocAPI Error Classes"""
-from ..cmdb_error import CMDBError
+"""
+Contains DocAPI Error Classes
+"""
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class DocapiError(CMDBError):
+class DocapiError(Exception):
     """Base DocAPI Error"""
     def __init__(self, message: str):
+        self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
-
-class NoPublicIDError(DocapiError):
-    """Error if object has no public key and public key was'n removed over IGNORED_INIT_KEYS"""
-    def __init__(self):
-        super().__init__('The object has no general public id - look at the IGNORED_INIT_KEYS constant or the docs')
-
+# --------------------------------------------------- DOCAPI ERRORS -------------------------------------------------- #
 
 class DocapiGetError(DocapiError):
-    """Error raised when a GET-operation fails"""
+    """
+    Error raised when a GET-operation fails
+    """
     def __init__(self, err: str):
-        super().__init__(f'DocAPI-Error while GET: {err}')
+        self.message = f"DocAPI-Error while GET: {err}"
+        super().__init__(self.message)
 
 
 class DocapiInsertError(DocapiError):
-    """Error raised when an INSERT-operation fails"""
+    """
+    Error raised when an INSERT-operation fails
+    """
     def __init__(self, err: str):
-        super().__init__(f'DocAPI-Error while INSERT: {err}')
+        self.message = f"DocAPI-Error while INSERT: {err}"
+        super().__init__(self.message)
 
 
 class DocapiUpdateError(DocapiError):
-    """Error raised when an UPDATE-operation fails"""
+    """
+    Error raised when an UPDATE-operation fails
+    """
     def __init__(self, err: str):
-        super().__init__(f'DocAPI-Error while UPDATE: {err}')
+        self.message = f"DocAPI-Error while UPDATE: {err}"
+        super().__init__(self.message)
 
 
 class DocapiDeleteError(DocapiError):
-    """Error raised when a DELETE-operation fails"""
+    """
+    Error raised when a DELETE-operation fails
+    """
     def __init__(self, err: str):
-        super().__init__(f'DocAPI-Error while DELETE: {err}')
+        self.message = f"DocAPI-Error while DELETE: {err}"
+        super().__init__(self.message)

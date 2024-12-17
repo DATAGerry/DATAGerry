@@ -21,7 +21,7 @@ class Config:
     TESTING = False
     DEBUG = False
     ENV = 'production'
-    APPLICATION_ROOT = '/'
+    APPLICATION_ROOT = '/rest/'
 
 
 class DevelopmentConfig(Config):

@@ -13,52 +13,50 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the SectionTemplatesManager
-"""
+"""This module contains the implementation of the SectionTemplatesManager"""
 import logging
-from queue import Queue
-from typing import Union
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.types_manager import TypesManager
+from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
-from cmdb.framework import CategoryModel
-from cmdb.framework.models.category import CategoryTree
-from cmdb.framework.results.iteration import IterationResult
+from cmdb.models.category_model.category import CategoryModel
+from cmdb.models.category_model.category_tree import CategoryTree
+from cmdb.models.user_model.user import UserModel
+from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
 
 from cmdb.errors.manager import ManagerInsertError,\
                                 ManagerGetError,\
                                 ManagerIterationError,\
-                                ManagerUpdateError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from . query_builder.builder_parameters import BuilderParameters
+                                ManagerUpdateError,\
+                                ManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               CategoriesManager - CLASS                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
 class CategoriesManager(BaseManager):
     """
     The CategoriesManager handles the interaction between the Categories-API and the Database
     Extends: BaseManager
+    Depends: TypesManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
+            database_manager (MongoDatabaseManager): Active database managers instance.
         """
-        self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
-        self.type_manager = TypeManager(dbm)
+        if database:
+            dbm.connector.set_database(database)
+
+        self.types_manager = TypesManager(dbm)
         super().__init__(CategoryModel.COLLECTION, dbm)
 
 
@@ -71,7 +69,7 @@ class CategoriesManager(BaseManager):
             CategoryTree: Categories as tree structure.
         """
         # Find all types
-        types = self.type_manager.find({}).results
+        types = self.types_manager.find_types({}).results
         build_params = BuilderParameters({})
         categories = self.iterate(build_params).results
 
@@ -100,43 +98,89 @@ class CategoriesManager(BaseManager):
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
+    def get_category(self, public_id: int):
+        """TODO: document"""
+        try:
+            return self.get_one(public_id)
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerGetError(str(err)) from err
+
+
     def iterate(self,
                 builder_params: BuilderParameters,
                 user: UserModel = None,
                 permission: AccessControlPermission = None) -> IterationResult[CategoryModel]:
         """
-        Performs an aggregation on the database
-        Args:
-            builder_params (BuilderParameters): Contains input to identify the target of action
-            user (UserModel, optional): User requesting this action
-            permission (AccessControlPermission, optional): Permission which should be checked for the user
-        Raises:
-            ManagerIterationError: Raised when something goes wrong during the aggregate part
-            ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
-        Returns:
-            IterationResult[CategoryModel]: Result which matches the Builderparameters
+        TODO: document
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
 
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
-
-        try:
             iteration_result: IterationResult[CategoryModel] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CategoryModel)
         except Exception as err:
             raise ManagerIterationError(err) from err
 
         return iteration_result
+
+
+    def get_categories_by(self, sort='public_id', **requirements: dict) -> list[CategoryModel]:
+        """Get a list of categories by special requirements"""
+        try:
+            raw_categories = self.get_many_from_other_collection(collection=CategoryModel.COLLECTION,
+                                                                 sort=sort,
+                                                                 **requirements)
+        except Exception as error:
+            #TODO: ERROR-FIX (need category get error)
+            raise ManagerGetError(error) from error
+        try:
+            return [CategoryModel.from_data(category) for category in raw_categories]
+        except Exception as error:
+            #TODO: ERROR-FIX (need category init error)
+            raise ManagerGetError(error) from error
+
+
+    def count_categories(self):
+        """
+        Returns the number of categories
+
+        Args:
+            criteria (dict): Filter for counting documents like {'type_id: 1} 
+
+        Raises:
+            ObjectManagerGetError: When an error occures during counting objects
+
+        Returns:
+            (int): Returns the number of documents with the given criteria
+        """
+        try:
+            categories_count = self.count_documents(self.collection)
+        except Exception as err:
+            #TODO: ERROR-FIX (CategoriesManagerGetError)
+            raise ManagerGetError(err) from err
+
+        return categories_count
+
+# --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
+
+    def update_category(self, public_id:int, data: dict):
+        """TODO: document"""
+        try:
+            self.update({'public_id':public_id}, CategoryModel.to_json(data))
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerUpdateError(str(err)) from err
+
+# --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
+
+    def delete_category(self, public_id: int):
+        """TODO: document"""
+        try:
+            return self.delete({'public_id':public_id})
+        except Exception as err:
+            #TODO: ERROR-FIX
+            raise ManagerDeleteError(str(err)) from err
 
 # ------------------------------------------------- HELPER FUNCTIONS ------------------------------------------------- #
 
@@ -159,4 +203,5 @@ class CategoriesManager(BaseManager):
         except ManagerGetError as err:
             raise ManagerGetError(err) from err
         except ManagerUpdateError as err:
+            LOGGER.debug("[reset_children_categories] ManagerUpdateError: %s", err.message)
             raise ManagerUpdateError(err) from err

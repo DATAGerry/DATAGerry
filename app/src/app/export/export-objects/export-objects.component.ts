@@ -16,16 +16,17 @@
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormControl, UntypedFormGroup, Validators} from '@angular/forms';
+import { UntypedFormControl, UntypedFormGroup, Validators } from '@angular/forms';
 import { DatePipe } from '@angular/common';
 
 import { TypeService } from '../../framework/services/type.service';
 import { FileSaverService } from 'ngx-filesaver';
 import { FileService } from '../export.service';
 
-import { CmdbType} from '../../framework/models/cmdb-type';
+import { CmdbType } from '../../framework/models/cmdb-type';
 import { SupportedExporterExtension } from './model/supported-exporter-extension';
 import { CollectionParameters } from '../../services/models/api-parameter';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 @Component({
     selector: 'cmdb-export-objects',
@@ -38,17 +39,18 @@ export class ExportObjectsComponent implements OnInit {
     public formExport: UntypedFormGroup;
     public isVisible: boolean;
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                     LIFE CYCLE                                                     */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                     LIFE CYCLE                                                     */
+    /* ------------------------------------------------------------------------------------------------------------------ */
     constructor(
         private exportService: FileService,
         private datePipe: DatePipe,
         private typeService: TypeService,
-        private fileSaverService: FileSaverService
+        private fileSaverService: FileSaverService,
+        private toastService: ToastService
     ) {
         this.formExport = new UntypedFormGroup({
-            type: new UntypedFormControl( null, Validators.required),
+            type: new UntypedFormControl(null, Validators.required),
             format: new UntypedFormControl(null, Validators.required)
         });
     }
@@ -59,12 +61,12 @@ export class ExportObjectsComponent implements OnInit {
             this.typeList = data;
         });
 
-        this.exportService.callFileFormatRoute().subscribe( data => {
+        this.exportService.callFileFormatRoute().subscribe(data => {
             this.formatList = data;
         });
     }
 
-/* ------------------------------------------------- GETTER / SETTER ------------------------------------------------ */
+    /* ------------------------------------------------- GETTER / SETTER ------------------------------------------------ */
 
     get type() {
         return this.formExport.get('type');
@@ -75,7 +77,7 @@ export class ExportObjectsComponent implements OnInit {
         return this.formExport.get('format');
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     private resetForm() {
         this.formExport.reset();
@@ -99,12 +101,15 @@ export class ExportObjectsComponent implements OnInit {
         if (fileExtension != null && typeID != null) {
             const filter = { type_id: typeID };
             const optional = { classname: fileExtension, zip: false };
-            const exportAPI: CollectionParameters = { filter, optional, order: 1, sort: 'public_id'};
+            const exportAPI: CollectionParameters = { filter, optional, order: 1, sort: 'public_id' };
 
             this.exportService.callExportRoute(exportAPI)
-                .subscribe(
-                    res => this.downLoadFile(res, fileExtension)
-                );
+                .subscribe({
+                    next: res => this.downLoadFile(res, fileExtension),
+                    error: e => {
+                        this.toastService.error(e?.error?.message);
+                    }
+                })
         }
     }
 

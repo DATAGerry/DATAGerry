@@ -40,9 +40,14 @@
                 class="form-control"
                 name-guideline placeholder="Field name"
                 [ngClass]="{ 'is-valid': nameControl.valid && (nameControl.dirty || nameControl.touched),
-                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched)}"
+                 'is-invalid': nameControl.invalid && (nameControl.dirty || nameControl.touched) || isDuplicate$}"
                 (ngModelChange)="onInputChange($event, 'name')"
             />
+            <div *ngIf="isDuplicate$" class="invalid-feedback">
+                <div class="float-right">
+                    Field name must be unique
+                </div>
+            </div>
         </div>
         <small class="form-text text-muted float-left">Use a unique field identifier</small>
         <div *ngIf="nameControl.invalid && (nameControl.dirty || nameControl.touched)" class="invalid-feedback">
@@ -98,7 +103,7 @@
     </div>
     <div class="form-group col-md-12">
         <label>Options:</label>
-        <table class="table table-bordered">
+        <table class="table table-bordered" >
             <thead>
                 <tr>
                     <th scope="col">#</th>
@@ -116,6 +121,7 @@
                             type="text"
                             class="form-control"
                             value="{{data.options[i].label}}"
+                            [disabled]="isDuplicate$"
                         >
                     </td>
                     <td>
@@ -125,6 +131,7 @@
                             type="text"
                             class="form-control"
                             value="{{data.options[i].name}}"
+                            [disabled]="isDuplicate$"
                         >
                     </td>
                     <td>
@@ -133,6 +140,7 @@
                             class="btn btn-outline-primary"
                             [disabled]="options.length == 1"
                             (click)="delOption(data.options[i])"
+                            [disabled]="isDuplicate$"
                         >
                             <fa-icon [icon]="['far', 'trash-alt']"></fa-icon>
                         </button>
@@ -140,7 +148,9 @@
                 </tr>
                 <tr>
                     <td colspan="4">
-                        <button type="button" class="btn btn-outline-secondary" (click)="addOption()">
+                        <button type="button" class="btn btn-outline-secondary" (click)="addOption()"
+                        [disabled]="isDuplicate$"
+                        >
                             + Add option
                         </button>
                     </td>

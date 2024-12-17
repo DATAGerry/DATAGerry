@@ -14,25 +14,28 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime
-
 import pytest
 
-from cmdb.user_management import UserGroupModel, RightManager, UserModel
+from cmdb.manager.rights_manager import RightsManager
 
-from cmdb.user_management import rights
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.group_model.group import UserGroupModel
+from cmdb.models.right_model.all_rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
+LOGGER = logging.getLogger(__name__)
 
-@pytest.fixture(scope="session", name="right_manager")
-def fixture_right_manager():
+@pytest.fixture(scope="session", name="rights_manager")
+def fixture_rights_manager():
     """TODO: document"""
-    return RightManager(rights)
+    return RightsManager(rights)
 
 
 @pytest.fixture(scope="session", name="full_access_group")
-def fixture_full_access_group(right_manager: RightManager):
+def fixture_full_access_group(rights_manager: RightsManager):
     "TODO: document"
-    return UserGroupModel(public_id=1, name='full', label='Full', rights=[right_manager.get('base.*')])
+    return UserGroupModel(public_id=1, name='full', label='Full', rights=[rights_manager.get_right('base.*')])
 
 
 @pytest.fixture(scope="session", name="none_access_group")
@@ -41,19 +44,23 @@ def fixture_none_access_group():
     return UserGroupModel(public_id=2, name='none', label='None')
 
 
-@pytest.fixture(scope="session")
-def full_access_user(full_access_group: UserGroupModel):
+@pytest.fixture(scope="session", name="full_access_user")
+def fixture_full_access_user(full_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
-    return UserModel(public_id=1, user_name='full-access-user',
-                     active=True, group_id=full_access_group.public_id,
+    return UserModel(public_id=1,
+                     user_name='full-access-user',
+                     active=True,
+                     group_id=full_access_group.public_id,
                      registration_time=registration_time)
 
 
-@pytest.fixture(scope="session")
-def none_access_user(none_access_group: UserGroupModel):
+@pytest.fixture(scope="session", name="none_access_user")
+def fixture_none_access_user(none_access_group: UserGroupModel):
     "TODO: document"
     registration_time = datetime.now()
-    return UserModel(public_id=2, user_name='none-access-user',
-                     active=True, group_id=none_access_group.public_id,
+    return UserModel(public_id=2,
+                     user_name='none-access-user',
+                     active=True,
+                     group_id=none_access_group.public_id,
                      registration_time=registration_time)

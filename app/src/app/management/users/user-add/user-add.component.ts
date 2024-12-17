@@ -74,9 +74,15 @@ export class UserAddComponent implements AfterViewInit, OnDestroy {
 /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
 
     public save(user: User): void {
-        this.userService.postUser(user).pipe(takeUntil(this.subscriber)).subscribe((apiUser: User) => {
-            this.toastService.success(`User ${apiUser.user_name} was added`);
-            this.router.navigate(['/', 'management', 'users']);
+        this.userService.postUser(user).pipe(takeUntil(this.subscriber)).subscribe({
+            next: (apiUser: User) => {
+                this.toastService.success(`User ${apiUser.user_name} was added`);
+                this.router.navigate(['/', 'management', 'users']);
+            },
+            error: (err) => {
+                console.log(`An error occured creating a user: ${err.error}`)
+                this.toastService.error(`User could not be created. Error: ${err.error}`);
+            }
         });
     }
 }

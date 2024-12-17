@@ -20,7 +20,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { UntypedFormControl } from '@angular/forms';
 
-import { Observable, Subject, timer } from 'rxjs';
+import { BehaviorSubject, Observable, Subject, timer } from 'rxjs';
 import { catchError, map, switchMap, finalize } from 'rxjs/operators';
 
 import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../../services/api-call.service';
@@ -71,28 +71,31 @@ export const PARAMETER = 'params';
 export const COOCKIENAME = 'onlyActiveObjCookie';
 
 @Injectable({
-  providedIn: 'root'
+    providedIn: 'root'
 })
 export class ObjectService<T = CmdbObject | RenderResult> implements ApiServicePrefix {
     public objectActionSource = new Subject();
     public servicePrefix: string = 'objects';
 
+    // A private property to store the last fetched count
+    private lastObjectCountSubject = new BehaviorSubject<number>(0);
+
     public readonly options = {
         headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+            'Content-Type': 'application/json'
         }),
         params: {},
         observe: resp
-};
+    };
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(private api: ApiCallService, private modalService: NgbModal) {
 
     }
 
 
-/* -------------------------------------------------- CRUD - CREATE ------------------------------------------------- */
+    /* -------------------------------------------------- CRUD - CREATE ------------------------------------------------- */
 
     public postObject(objectInstance: CmdbObject): Observable<any> {
         const options = this.options;
@@ -105,18 +108,18 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-/* --------------------------------------------------- CRUD - READ -------------------------------------------------- */
+    /* --------------------------------------------------- CRUD - READ -------------------------------------------------- */
 
     public getObjects(
-            params: CollectionParameters = {
+        params: CollectionParameters = {
             filter: undefined,
             limit: 10,
             sort: 'public_id',
             order: 1,
             page: 1,
             projection: undefined
-            },
-            view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+        },
+        view: string = 'render'): Observable<APIGetMultiResponse<T>> {
         const options = this.options;
         let httpParams: HttpParams = new HttpParams();
 
@@ -173,14 +176,14 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         const options = this.options;
         options.params = new HttpParams();
         if (native === true) {
-            return this.api.callGet<CmdbObject[]>(`${ this.servicePrefix }/${ publicID }/native`, options).pipe(
+            return this.api.callGet<CmdbObject[]>(`${this.servicePrefix}/${publicID}/native`, options).pipe(
                 map((apiResponse) => {
                     return apiResponse.body;
                 })
             );
         }
 
-        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }`, options).pipe(
+        return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             })
@@ -188,11 +191,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     }
 
 
-    public getObjectMdsReference<R>(publicID:number): Observable<R> {
+    public getObjectMdsReference<R>(publicID: number): Observable<R> {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/mds_reference`, options).pipe(
+        return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/mds_reference`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             })
@@ -207,7 +210,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         httpParams = httpParams.set('objectIDs', objectIDs);
         options.params = httpParams;
 
-        return this.api.callGet<R[]>(`${ this.servicePrefix }/${ publicID }/mds_references`, options).pipe(
+        return this.api.callGet<R[]>(`${this.servicePrefix}/${publicID}/mds_references`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             })
@@ -248,7 +251,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     public changeState(publicID: number, status: boolean) {
         const options = this.options;
         options.params = new HttpParams();
-        return this.api.callPut<boolean>(`${ this.servicePrefix }/${ publicID }/state`, status, options).pipe(
+        return this.api.callPut<boolean>(`${this.servicePrefix}/${publicID}/state`, status, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             }),
@@ -257,15 +260,31 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     }
 
 
-    public countObjects(): Observable<number> {
+    /**
+     * Fetches the total count of objects from the server using a HEAD request.
+     * @returns An observable that emits the total object count.
+     */
+    public countObjects<T>(): Observable<number> {
         const options = this.options;
         options.params = new HttpParams();
 
         return this.api.callHead<T[]>(this.servicePrefix + '/', options).pipe(
             map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
-                return +apiResponse.headers.get('X-Total-Count');
+                const count = +apiResponse.headers.get('X-Total-Count');
+                // Store the fetched count
+                this.lastObjectCountSubject.next(count);
+                return count;
             })
         );
+    }
+
+
+    /**
+     * Returns an observable for the last fetched object count.
+     * Components can subscribe to this and react to updates without another backend call.
+     */
+    public getLastObjectCount(): Observable<number> {
+        return this.lastObjectCountSubject.asObservable();
     }
 
 
@@ -312,14 +331,14 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
      * @param view
      */
     public getObjectReferences<R = T>(publicID: number,
-                                        params: CollectionParameters = {
-                                        filter: undefined,
-                                        limit: 10,
-                                        sort: 'public_id',
-                                        order: 1,
-                                        page: 1
-                                        },
-                                        view: string = 'render'): Observable<APIGetMultiResponse<T>> {
+        params: CollectionParameters = {
+            filter: undefined,
+            limit: 10,
+            sort: 'public_id',
+            order: 1,
+            page: 1
+        },
+        view: string = 'render'): Observable<APIGetMultiResponse<T>> {
         const options = this.options;
         let httpParams: HttpParams = new HttpParams();
 
@@ -336,17 +355,17 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         httpParams = httpParams.set('view', view);
         options.params = httpParams;
 
-        return this.api.callGet<Array<R>>(`${ this.servicePrefix }/${ publicID }/references`, options).pipe(
+        return this.api.callGet<Array<R>>(`${this.servicePrefix}/${publicID}/references`, options).pipe(
             map((apiResponse: HttpResponse<APIGetMultiResponse<T>>) => {
                 return apiResponse.body;
             })
         );
     }
 
-/* -------------------------------------------------- CRUD - UPDATE ------------------------------------------------- */
+    /* -------------------------------------------------- CRUD - UPDATE ------------------------------------------------- */
 
     public putObject(publicID: number, objectInstance: CmdbObject, httpOptions = httpObserveOptions): Observable<any> {
-        return this.api.callPut<T>(`${ this.servicePrefix }/${ publicID }`, objectInstance, httpOptions).pipe(
+        return this.api.callPut<T>(`${this.servicePrefix}/${publicID}`, objectInstance, httpOptions).pipe(
             map((apiResponse: HttpResponse<APIUpdateMultiResponse<T>>) => {
                 return apiResponse.body;
             }),
@@ -354,13 +373,13 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-/* -------------------------------------------------- CRUD - DELETE ------------------------------------------------- */
+    /* -------------------------------------------------- CRUD - DELETE ------------------------------------------------- */
 
     public deleteManyObjects(publicID: any) {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callDeleteManyRoute(`${ this.servicePrefix }/delete/${ publicID }`, options).pipe(
+        return this.api.callDeleteManyRoute(`${this.servicePrefix}/delete/${publicID}`, options).pipe(
             map((apiResponse) => {
                 if (apiResponse.status === 204) {
                     return [];
@@ -381,7 +400,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callDelete(`${ this.servicePrefix }/${ publicID }`, options).pipe(
+        return this.api.callDelete(`${this.servicePrefix}/${publicID}`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             }),
@@ -390,11 +409,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     }
 
 
-    public deleteObjectWithLocations(publicID: any): Observable<any>{
+    public deleteObjectWithLocations(publicID: any): Observable<any> {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/locations`, options).pipe(
+        return this.api.callDelete(`${this.servicePrefix}/${publicID}/locations`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             }),
@@ -403,11 +422,11 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
     }
 
 
-    public deleteObjectWithChildren(publicID: any): Observable<any>{
+    public deleteObjectWithChildren(publicID: any): Observable<any> {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callDelete(`${ this.servicePrefix }/${ publicID }/children`, options).pipe(
+        return this.api.callDelete(`${this.servicePrefix}/${publicID}/children`, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             }),
@@ -415,13 +434,13 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         );
     }
 
-/* ------------------------------------------------- UNCLEAN OBJECTS ------------------------------------------------ */
+    /* ------------------------------------------------- UNCLEAN OBJECTS ------------------------------------------------ */
 
     public countUncleanObjects(typeID: number): Observable<number> {
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
+        return this.api.callHead<CmdbType>(`${this.servicePrefix}/clean/${typeID}`, options).pipe(
             map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
                 return +apiResponse.headers.get('X-Total-Count');
             })
@@ -433,7 +452,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callGet<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
+        return this.api.callGet<CmdbType>(`${this.servicePrefix}/clean/${typeID}`, options).pipe(
             map((apiResponse: HttpResponse<APIGetListResponse<CmdbObject>>) => {
                 return apiResponse.body.results as Array<CmdbObject>;
             })
@@ -445,7 +464,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callHead<CmdbType>(`${ this.servicePrefix }/clean/${ typeID }`, options).pipe(
+        return this.api.callHead<CmdbType>(`${this.servicePrefix}/clean/${typeID}`, options).pipe(
             map((apiResponse) => {
                 return +apiResponse.headers.get('X-Total-Count') === 0;
             })
@@ -457,21 +476,21 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         const options = this.options;
         options.params = new HttpParams();
 
-        return this.api.callPatch(`${ this.servicePrefix }/clean/${ typeID }`, null, options).pipe(
+        return this.api.callPatch(`${this.servicePrefix}/clean/${typeID}`, null, options).pipe(
             map((apiResponse) => {
                 return apiResponse.body;
             })
         );
     }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                    MODAL SECTION                                                   */
-/* ------------------------------------------------------------------------------------------------------------------ */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                    MODAL SECTION                                                   */
+    /* ------------------------------------------------------------------------------------------------------------------ */
 
     public openModalComponent(title: string,
-                                modalMessage: string,
-                                buttonDeny: string,
-                                buttonAccept: string) {
+        modalMessage: string,
+        buttonDeny: string,
+        buttonAccept: string) {
 
         const modalComponent = this.modalService.open(GeneralModalComponent);
         modalComponent.componentInstance.title = title;
@@ -489,20 +508,25 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
      * 
      * @returns 
      */
-    public openLocationModalComponent(){
+    public openLocationModalComponent() {
         return this.modalService.open(LocationsModalComponent);
     }
 
-/* ------------------------------------------------------------------------------------------------------------------ */
-/*                                                   HELPER SECTION                                                   */
-/* ------------------------------------------------------------------------------------------------------------------ */
-  
+    /* ------------------------------------------------------------------------------------------------------------------ */
+    /*                                                   HELPER SECTION                                                   */
+    /* ------------------------------------------------------------------------------------------------------------------ */
+
     /**
      * Notifies subscribers that an operation was executed by the ObjectService
      * 
      * @param action (string): Which operation was executed (create, update, delete)
      */
-    executedAction(action: string){
+    executedAction(action: string) {
         this.objectActionSource.next(action);
+
+        // After create or delete, fetch the updated count
+        if (action === 'create' || action === 'delete') {
+            this.countObjects().subscribe();
+        }
     }
 }

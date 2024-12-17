@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2024 becon GmbH
 #
@@ -14,34 +13,3 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module represents the core system of the CMDB.
-All initializations and specifications for creating objects,
-object types and their fields are controlled here.
-Except for the managers, this module can be used completely modular.
-The respective DAO is used to apply the attributes and to convert
-the elements for the database.
-"""
-from cmdb.framework.cmdb_dao import CmdbDAO
-from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.cmdb_location import CmdbLocation
-from cmdb.framework.cmdb_section_template import CmdbSectionTemplate
-
-from cmdb.framework.models import TypeModel
-from cmdb.framework.models import CategoryModel
-from cmdb.framework.models import ObjectLinkModel
-from cmdb.framework.models.log import CmdbLog, CmdbObjectLog, CmdbMetaLog
-# -------------------------------------------------------------------------------------------------------------------- #
-
-CmdbLog.register_log_type(CmdbObjectLog.__name__, CmdbObjectLog)
-
-# List of init collections
-__COLLECTIONS__ = [
-    CmdbObject,
-    TypeModel,
-    CategoryModel,
-    CmdbMetaLog,
-    ObjectLinkModel,
-    CmdbLocation,
-    CmdbSectionTemplate
-]

@@ -16,6 +16,8 @@
                                     [dndType]="'sections'"
                                     [dndDraggable]="globalSectionTemplate"
                                     class="list-group-item list-group-item-action"
+                                    [ngClass]="getDraggableItemClass()"
+                                    [dndDisableIf]="isAnySectionHighlighted() || disableFields"
                                 >
                                     <span>
                                         #{{ globalSectionTemplate.public_id }} - <b>{{ globalSectionTemplate.label }}</b>
@@ -40,7 +42,8 @@
                                     [dndType]="'sections'"
                                     [dndDraggable]="sectionTemplate"
                                     class="list-group-item list-group-item-action"
-                                >
+                                    [ngClass]="getDraggableItemClass()"
+                                    [dndDisableIf]="isAnySectionHighlighted() || disableFields"                             >
                                     <span>
                                         #{{ sectionTemplate.public_id }} - <b>{{ sectionTemplate.label }}</b>
                                     </span>
@@ -64,7 +67,9 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
-                                >
+                                    [ngClass]="getDraggableItemClass()"
+                                    [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
+                                    >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
                                     </span>
@@ -88,6 +93,8 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
+                                    [ngClass]="getDraggableItemClass()"
+                                    [dndDisableIf]="isAnySectionHighlighted() || disableFields"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
@@ -112,6 +119,8 @@
                                     [dndType]="control.typeController.dndType"
                                     [dndDraggable]="control.typeController.content()"
                                     class="list-group-item list-group-item-action"
+                                    [ngClass]="getDraggableItemClass()"
+                                    [attr.draggable]="(isAnySectionHighlighted() || disableFields) ? 'false' : 'true'"
                                 >
                                     <span>
                                         <i class="{{control.typeController.icon}}"></i> {{ control.typeController.label }}
@@ -160,11 +169,10 @@
                 dndType="sections"
                 [dndDraggable]="section"
                 [dragData]="{ section, index: x }"
-                (dndStart)="onDragStart($event, x)"
-                (dndMoved)="onDragged(section, sections, 'move', x)"
-            >
-                <div class="card">
-                    <div class="card-header" [ngClass]="{'global-section-item': isGlobalSection(section)}">
+                (dndStart)="onDragStart(x)"
+                (dndMoved)="onSectionDragged(section, sections, 'move', x)">
+                <div class="card" [ngStyle]="{'background-color': section.bg_color || '#ffffff'}">
+                    <div class="card-header" [ngClass]="getSectionHeaderClass(section)">
                         <fa-icon [icon]="['far', 'object-group']"></fa-icon>
                             {{section.label}}
                         <span class="float-right">
@@ -176,19 +184,34 @@
                             >
                                 <fa-icon [icon]="getSectionCollapseIcon(section)"></fa-icon>
                             </button>
-                            <!-- <button class="btn btn-link mr-1" type="button">
+
+                            <button class="btn btn-link mr-1" type="button" (click)="toggleColorPicker(section)">
                                 <fa-icon [icon]="['fas', 'paint-brush']"></fa-icon>
-                            </button> -->
-                            <button class="btn btn-link mr-1" type="button" dndHandle>
+                            </button>
+                    
+                            <div class="color-picker-wrapper" *ngIf="showColorPickerForSection === section.name">
+                                <color-chrome
+                                    [color]="section.bg_color || '#ffffff'" 
+                                    (onChangeComplete)="updateSectionColor(section, $event.color.hex)">
+                                </color-chrome>
+                            </div>
+                            
+                            <button class="btn btn-link mr-1" type="button" dndHandle 
+                            (dragstart)="preventDragForAllSections($event)"
+                            [class.disabled]="disableFields">
                                 <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                             </button>
-                            <button class="btn btn-link" type="button" (click)="removeSection(section, x)">
+                            <button class="btn btn-link" type="button"
+                             (click)="removeSection(section, x)"
+                             [class.disabled]="disableFields">
                                 <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                             </button>
                         </span>
                     </div>
                     <div class="collapse show" id="section-{{x}}{{section.name}}">
-                        <div class="card-body">
+                        <div class="card-body"  
+                        (focusin)="setActiveIndex(x)" 
+                        tabindex="0" >
                             <cmdb-config-edit 
                                 [types]="types"
                                 [mode]="getSectionMode(section, mode)"
@@ -223,6 +246,7 @@
                                                 <div 
                                                     class="card-header d-flex justify-content-between align-items-center"
                                                     [ngClass]="{'global-section-item': isGlobalField(field.name)}"
+                                                    [ngClass]="{'highlight-field-header': isFieldHighlighted(field, section.fields)}"
                                                 >
                                                     <span>
                                                         <fa-icon [icon]="['fas', matchedType(field.type)]"></fa-icon> {{field.label}}
@@ -233,10 +257,14 @@
                                                             type="button"
                                                             data-toggle="collapse"
                                                             [attr.data-target]="'#field-'+ x + y + field.name"
-                                                        >
+                                                            [class.disabled]="isLocked() || disableFields"
+                                                            >
                                                             <fa-icon [icon]="['far', 'edit']"></fa-icon>
                                                         </button>
-                                                        <button class="btn btn-link mr-1" type="button" dndHandle>
+                                                        <button class="btn btn-link mr-1" type="button" dndHandle
+                                                        (dragstart)="preventDragForAllFields($event, section)"
+                                                        [class.disabled]="isLocked() || disableFields"
+                                                         >    
                                                             <fa-icon [icon]="['fas', 'arrows-alt']"></fa-icon>
                                                         </button>
                                                         <button 
@@ -247,6 +275,7 @@
                                                             [ngbTooltip]="tipContent"
                                                             [disableTooltip]="!externalLink.links.length"
                                                             (click)="removeField(field, section)"
+                                                            [class.disabled]="disableFields"
                                                         >
                                                             <fa-icon [icon]="['far', 'window-close']"></fa-icon>
                                                             <ng-template #tipContent>
@@ -279,7 +308,8 @@
                                                         [data]="field"
                                                         [fieldSectionType]="section.type"
                                                         [hiddenStatus]="getFieldHiddenState(section, field)"
-                                                        (valuesChanged)="onFieldChange($event)"
+                                                        (valuesChanged)="onFieldChange($event, x, y)"
+                                                        [isDisabled]="isEmptyFielsExist(x, y) || isConfigEditDisabled(x, y)"
                                                     />
                                                 </div>
                                             </div>

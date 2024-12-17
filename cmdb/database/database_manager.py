@@ -13,35 +13,55 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""The module implements the base for database managers"""
+"""The module implements the base class for database managers"""
 import logging
-from typing import Union, Any, List
-
+from typing import Union, Any
+from collections.abc import MutableMapping
 from pymongo.database import Database
 from pymongo.errors import CollectionInvalid
 from pymongo import IndexModel
 from pymongo.collection import Collection
 
 from cmdb.database.mongo_connector import MongoConnector
-from cmdb.errors.database import DatabaseAlreadyExists, DatabaseNotExists, CollectionAlreadyExists
+
+from cmdb.errors.database import (
+    DatabaseAlreadyExists,
+    DatabaseNotExists,
+    CollectionAlreadyExists,
+    GetCollectionError,
+    DeleteCollectionError,
+    CreateIndexesError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    DatabaseManager                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class DatabaseManager:
     """
     Base class for database managers
     """
-
     def __init__(self, connector: MongoConnector):
-        """Constructor of `DatabaseManager`
-        Args:
-            connector (MongoConnector): Database Connector for subclass implementation
-        """
         self.connector: MongoConnector = connector
 
 # -------------------------------------------- GENERAL DATABASE OPERATIONS ------------------------------------------- #
+
+    def check_database_exists(self, name:str) -> bool:
+        """Checks if a database with the given name exists
+
+        Args:
+            name (str): Name of the database which should be checked
+
+        Returns:
+            (bool): True if database with given name exists, else False
+        """
+        database_names = self.connector.client.list_database_names()
+
+        return name in database_names
+
 
     def create_database(self, name: str) -> Database:
         """Create a new empty database
@@ -50,10 +70,10 @@ class DatabaseManager:
             name (str): Name of the new database.
 
         Raises:
-            DatabaseAlreadyExists: If a database with this name already exists.
+            DatabaseAlreadyExists: If a database with this name already exists
 
         Returns:
-            Database: Instance of the new create database.
+            Database: Instance of the new create database
         """
         if name in self.connector.client.list_database_names():
             raise DatabaseAlreadyExists(name)
@@ -62,7 +82,7 @@ class DatabaseManager:
 
 
     def drop_database(self, database: Union[str, Database]):
-        """Delete a existing database.
+        """Delete a existing database
 
         Args:
             database: name or instance of the database
@@ -82,11 +102,12 @@ class DatabaseManager:
     def create_collection(self, collection_name: str) -> str:
         """
         Creation empty MongoDB collection
+
         Args:
-            collection_name: name of collection
+            collection_name (str): name of collection
 
         Returns:
-            collection name
+            (str): Collection name
         """
         try:
             all_collections = self.connector.database.list_collection_names()
@@ -99,38 +120,85 @@ class DatabaseManager:
         return collection_name
 
 
-    def get_collection(self, name) -> Collection:
+    def get_collection(self, name: str) -> Collection:
         """
-        Get a collection inside database
+        Get a collection from the database
 
         Args:
-            name: Collection name
+            name (str): Collection name
+
+        Raises:
+            GetCollectionError: When the collection could not be retrieved
+        Returns:
+            (Collection): The requested collection
         """
-        return self.connector.database[name]
+        try:
+            return self.connector.database[name]
+        except Exception as err:
+            LOGGER.debug("[get_collection] Can't retrive collection: %s. Error: %s", name, err)
+            raise GetCollectionError(name, str(err)) from err
 
 
     def delete_collection(self, collection: str) -> dict[str, Any]:
         """
         Delete MongoDB collection
+
         Args:
             collection (str): collection name
+
+        Raises:
+            DeleteCollectionError: When collection can't be deleted
 
         Returns:
             delete ack
         """
-        return self.connector.database.drop_collection(collection)
+        try:
+            return self.connector.database.drop_collection(collection)
+        except Exception as err:
+            LOGGER.debug("[delete_collection] Can't delete collection: %s. Error: %s", collection, err)
+            raise DeleteCollectionError(collection, str(err)) from err
 
 
-    def create_indexes(self, collection: str, indexes: List[IndexModel]) -> List[str]:
-        """Creates indexes for collection"""
-        return self.get_collection(collection).create_indexes(indexes)
+    def create_indexes(self, collection: str, indexes: list[IndexModel]) -> list[str]:
+        """
+        Creates indexes for collection
+
+        Args:
+            collection (str): name of collection
+            indexes (list[IndexModel]): list of IndexModels which should be created
+
+        Raises:
+            CreateIndexesError: When indexes can't be created
+
+        Returns:
+            list[str]: List of created indexes
+        """
+        try:
+            return self.get_collection(collection).create_indexes(indexes)
+        except Exception as err:
+            LOGGER.debug("[create_indexes] Can't create indexes in: %s. Error: %s", collection, err)
+            raise CreateIndexesError(str(err)) from err
 
 
-    def get_index_info(self, collection: str):
-        """get the max index value"""
-        return self.get_collection(collection).index_information()
+    def get_index_info(self, collection: str) -> MutableMapping[str, Any]:
+        """
+        Retrives index information for a collection
+
+        Args:
+            collection (str): name of collection
+
+        Raises:
+            GetCollectionError: When the collection could not be retrieved
+
+        Returns:
+            MutableMapping[str, Any]: index information of the collection
+        """
+        try:
+            return self.get_collection(collection).index_information()
+        except GetCollectionError as err:
+            raise GetCollectionError(collection, err) from err
 
 
     def status(self):
-        """Check if connector has connection."""
+        """Check if connector has connection to MongoDB"""
         return self.connector.is_connected()

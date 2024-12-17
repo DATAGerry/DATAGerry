@@ -17,12 +17,16 @@
 Collection of different helper classes and functions
 """
 import re
-import os
 import sys
 import importlib
 import pprint
+import inspect
+import logging
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 def debug_print(self):
     """
     pretty formatting of error/debug output
@@ -35,42 +39,33 @@ def debug_print(self):
     return f'Class: {self.__class__.__name__} \nDict:\n{pprint.pformat(self.__dict__)}'
 
 
-def get_config_dir():
-    """
-    get configuration directory
-    Returns:
-        (str): path to the configuration files
-    """
-    return os.path.join(os.path.dirname(__file__), '../../etc/')
-
-
 def load_class(classname):
     """ load and return the class with the given classname """
     # extract class from module
     #TODO: check if this regex is correct
     pattern = re.compile("(.*)\.(.*)")
     match = pattern.fullmatch(classname)
+
     if match is None:
         raise Exception(f"Could not load class {classname}")
+
     module_name = match.group(1)
     class_name = match.group(2)
     loaded_module = importlib.import_module(module_name)
     loaded_class = getattr(loaded_module, class_name)
+
     return loaded_class
 
 
 def get_module_classes(module_name):
-    """
-        Get all class of an module and return list of classes
-
-    """
-    import inspect
-
+    """Get all class of an module and return list of classes"""
     class_list = []
     loaded_module = importlib.import_module(module_name)
+
     for key, data in inspect.getmembers(loaded_module, inspect.isclass):
         if module_name in str(data):
             class_list.append(key)
+
     return class_list
 
 
@@ -105,11 +100,6 @@ def process_bar(name, total, progress):
     if progress >= 1.:
         progress, status = 1, "\r\n"
     block = int(round(bar_length * progress))
-    text = '\r{}:[{}] {:.0f}% {} {} \n'.format(
-        name,
-        "#" * block + "-" * (bar_length - block),
-        round(progress * 100, 0),
-        through_of,
-        status)
+    text = f'\r{name}:[{"#" * block + "-" * (bar_length - block)}] {progress * 100:.0f}% {through_of} {status} \n'
     sys.stdout.write(text)
     sys.stdout.flush()

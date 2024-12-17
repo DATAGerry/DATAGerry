@@ -23,6 +23,7 @@ import { Group } from '../../../models/group';
 import { takeUntil } from 'rxjs/operators';
 import { ReplaySubject } from 'rxjs';
 import { Right } from '../../../models/right';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'cmdb-user-form',
@@ -30,6 +31,8 @@ import { Right } from '../../../models/right';
   styleUrls: ['./user-form.component.scss']
 })
 export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
+
+  public isCloudMode: boolean;
 
   /**
    * Component un-subscriber.
@@ -71,6 +74,10 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   public preview: any = undefined;
 
   constructor() {
+
+    this.isCloudMode = environment.cloudMode;
+
+
     this.form = new UntypedFormGroup({
       user_name: new UntypedFormControl('', [Validators.required]),
       email: new UntypedFormControl('', [Validators.email]),
@@ -84,6 +91,11 @@ export class UserFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public ngOnInit(): void {
+
+    if (this.isCloudMode) {
+      this.form.disable(); // Ensure the form is disabled
+    }
+
     this.form.statusChanges.pipe(takeUntil(this.subscriber)).subscribe(status => {
       this.validation.emit(status);
     });

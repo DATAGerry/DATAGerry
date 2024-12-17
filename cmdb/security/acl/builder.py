@@ -14,20 +14,19 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.framework.utils import PublicID
-from cmdb.search import Pipeline
-from cmdb.search.query.pipe_builder import PipelineBuilder
+from cmdb.manager.query_builder.pipeline_builder import PipelineBuilder
 from cmdb.security.acl.permission import AccessControlPermission
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class LookedAccessControlQueryBuilder(PipelineBuilder):
     """Query builder for looked objects in aggregation calls."""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> list[dict]:
+        """TODO: document"""
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -36,19 +35,14 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        return self.lookup_sub_(
-            from_='framework.types',
-            let_={'type_id': '$object.type_id'},
-            pipeline_=[
-                self.match_(query=self.expr_(expression={
-                    '$eq': [
-                        '$$type_id',
-                        '$public_id'
-                    ]
-                }))
-            ],
-            as_='type'
-        )
+        return {
+            '$lookup': {
+                'from': 'framework.types',
+                'localField': 'object.type_id',  # Field in the current collection
+                'foreignField': 'public_id',     # Field in the 'framework.types' collection
+                'as': 'type'
+            }
+        }
 
 
     def _unwind_types(self) -> dict:
@@ -56,7 +50,7 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         return unwind
 
 
-    def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
+    def _match_acl(self, group_id: int, permission: AccessControlPermission) -> dict:
         return self.match_(
             self.or_([
                 self.exists_('type.acl', False),
@@ -69,14 +63,15 @@ class LookedAccessControlQueryBuilder(PipelineBuilder):
         )
 
 
+#TODO: CLASS-FIX
 class AccessControlQueryBuilder(PipelineBuilder):
     """Query builder for restrict objects in aggregation calls."""
 
-    def __init__(self, pipeline: Pipeline = None):
+    def __init__(self, pipeline: list[dict] = None):
         super().__init__(pipeline=pipeline)
 
 
-    def build(self, group_id: PublicID, permission: AccessControlPermission, *args, **kwargs) -> Pipeline:
+    def build(self, group_id: int, permission: AccessControlPermission, *args, **kwargs) -> list[dict]:
         self.clear()
         self.add_pipe(self._lookup_types())
         self.add_pipe(self._unwind_types())
@@ -85,19 +80,15 @@ class AccessControlQueryBuilder(PipelineBuilder):
 
 
     def _lookup_types(self) -> dict:
-        return self.lookup_sub_(
-            from_='framework.types',
-            let_={'type_id': '$type_id'},
-            pipeline_=[
-                self.match_(query=self.expr_(expression={
-                    '$eq': [
-                        '$$type_id',
-                        '$public_id'
-                    ]
-                }))
-            ],
-            as_='type'
-        )
+        """TODO: document"""
+        return {
+            '$lookup': {
+                'from': 'framework.types',
+                'localField': 'type_id',    # Field from the current collection
+                'foreignField': 'public_id', # Field from the 'framework.types' collection
+                'as': 'type'
+            }
+        }
 
 
     def _unwind_types(self) -> dict:
@@ -105,7 +96,7 @@ class AccessControlQueryBuilder(PipelineBuilder):
         return unwind
 
 
-    def _match_acl(self, group_id: PublicID, permission: AccessControlPermission) -> dict:
+    def _match_acl(self, group_id: int, permission: AccessControlPermission) -> dict:
         return self.match_(
             self.or_([
                 self.exists_('type.acl', False),

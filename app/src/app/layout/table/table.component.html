@@ -97,8 +97,7 @@
                 *ngFor="let item of items; let rowIndex = index"
                 [item]="item"
                 [rowIndex]="rowIndex"
-                [ngClass]="rowClasses"
-            >
+                [ngClass]="rowClasses">
                 <td
                     *ngIf="selectEnabled"
                     [ngStyle]="{'width': '2rem'}"
@@ -122,8 +121,9 @@
                     [hidden]="column.hidden"
                     [rowIndex]="rowIndex"
                     [ngStyle]="column.style"
-                    [isViewAndEditRequired]="isViewAndEditRequired"
-                ></td>
+                    [ngClass]="{ 'row-hover-pointer': enableObjectReferenceLinks && column.name !== 'type_id' }" 
+                    (click)="column.name !== 'type_id' && enableObjectReferenceLinks ? navigateToItem(item) : null">
+                    ></td>
             </tr>
             <tr *ngIf="items?.length === 0">
                 <td class="text-center" [colSpan]="(columns.length) + (selectEnabled ? 1: 0)">

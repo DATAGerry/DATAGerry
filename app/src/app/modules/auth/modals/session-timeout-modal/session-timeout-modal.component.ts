@@ -23,6 +23,7 @@ import { Observable, ReplaySubject, takeUntil } from 'rxjs';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { AuthService } from '../../services/auth.service';
+import { environment } from 'src/environments/environment';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @Component({
@@ -41,13 +42,14 @@ export class SessionTimeoutModalComponent implements OnInit, OnDestroy {
     // Dateformat of the remaining token lifetime
     public remainingTime: string = '';
 
-   // Renew session password form group
+    // Renew session password form group
     public form: UntypedFormGroup;
 
     public error: string;
 
+    private isCloudMode: boolean;
 
-/* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
+    /* -------------------------------------------------- GETTER/SETTER ------------------------------------------------- */
 
     /**
      * Entered password from the form
@@ -56,7 +58,7 @@ export class SessionTimeoutModalComponent implements OnInit, OnDestroy {
         return this.form.get('password').value;
     }
 
-/* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
+    /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     constructor(public activeModal: NgbActiveModal, private authService: AuthService) {
         this.form = new UntypedFormGroup({
@@ -66,6 +68,7 @@ export class SessionTimeoutModalComponent implements OnInit, OnDestroy {
 
 
     public ngOnInit(): void {
+        this.isCloudMode = environment.cloudMode;
         this.remainingTime$.pipe(takeUntil(this.subscriber)).subscribe((timeout: string) => this.remainingTime = timeout);
     }
 
@@ -75,24 +78,24 @@ export class SessionTimeoutModalComponent implements OnInit, OnDestroy {
         this.subscriber.complete();
     }
 
-/* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
+    /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
     /**
      * On password pass
      */
     public onRenew(): void {
         if (this.form.valid) {
-            const username = this.authService.currentUserValue.user_name;
+            const username = this.isCloudMode ? this.authService.currentUserValue.email : this.authService.currentUserValue.user_name
 
             this.authService.login(username, this.password).pipe(takeUntil(this.subscriber))
-            .subscribe({
-                next: () => {
-                        this.activeModal.close({renewed: true});
-                },
-                error: () => {
+                .subscribe({
+                    next: () => {
+                        this.activeModal.close({ renewed: true });
+                    },
+                    error: () => {
                         this.error = 'Could not authenticate, given password was wrong.';
-                }
-            });
+                    }
+                });
         }
     }
 }

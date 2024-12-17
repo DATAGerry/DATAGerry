@@ -16,8 +16,11 @@
 """
 Blueprint for datagerry-app routes
 """
+import logging
 from flask import Blueprint
 # -------------------------------------------------------------------------------------------------------------------- #
+
+LOGGER = logging.getLogger(__name__)
 
 app_pages = Blueprint("app_pages", __name__, static_folder="datagerry-app", static_url_path="")
 
@@ -31,4 +34,5 @@ def default_page():
 @app_pages.errorhandler(404)
 def redirect_index(error):
     """TODO: document"""
+    LOGGER.debug("[redirect_index] Error: %s", error)
     return app_pages.send_static_file("index.html")

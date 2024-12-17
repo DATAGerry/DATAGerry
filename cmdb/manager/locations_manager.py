@@ -18,26 +18,21 @@ This module contains the implementation of the LocationsManager
 """
 import logging
 
-from queue import Queue
-from typing import Union
-
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.framework.managers.type_manager import TypeManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
-from cmdb.framework import CmdbLocation
-from cmdb.framework.results.iteration import IterationResult
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
 
 from cmdb.errors.manager import ManagerInsertError, ManagerGetError, ManagerIterationError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 class LocationsManager(BaseManager):
     """
@@ -45,17 +40,16 @@ class LocationsManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance
-            event_queue (Queue, Event): The queue for sending events or the created event to send
+            database_manager (MongoDatabaseManager): Active database managers instance
         """
-        self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
-        self.type_manager = TypeManager(dbm)
+        if database:
+            dbm.connector.set_database(database)
+
         super().__init__(CmdbLocation.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
@@ -82,32 +76,11 @@ class LocationsManager(BaseManager):
                 user: UserModel = None,
                 permission: AccessControlPermission = None) -> IterationResult[CmdbLocation]:
         """
-        Performs an aggregation on the database
-        Args:
-            builder_params (BuilderParameters): Contains input to identify the target of action
-            user (UserModel, optional): User requesting this action
-            permission (AccessControlPermission, optional): Permission which should be checked for the user
-        Raises:
-            ManagerIterationError: Raised when something goes wrong during the aggregate part
-            ManagerIterationError: Raised when something goes wrong during the building of the IterationResult
-        Returns:
-            IterationResult[CmdbLocation]: Result which matches the Builderparameters
+        TODO: document
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
 
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-
-        except ManagerGetError as err:
-            raise ManagerIterationError(err) from err
-
-        try:
             iteration_result: IterationResult[CmdbLocation] = IterationResult(aggregation_result, total)
             iteration_result.convert_to(CmdbLocation)
         except Exception as err:
@@ -128,9 +101,11 @@ class LocationsManager(BaseManager):
         try:
             resource = []
             location = self.get_one(public_id)
+
             if location:
                 resource = CmdbLocation(**location)
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return resource
@@ -151,10 +126,11 @@ class LocationsManager(BaseManager):
         """
         try:
             location = self.get_one_by({'object_id':object_id})
+
             if location:
                 location = CmdbLocation(**location)
-
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         if not location:
@@ -170,13 +146,14 @@ class LocationsManager(BaseManager):
             list: All locations matching the requirements
         """
         locations_list = []
+
         try:
             locations = self.get_many(**requirements)
 
             for location in locations:
                 locations_list.append(CmdbLocation(**location))
-
         except Exception as err:
+            #TODO: ERROR-FIX
             raise ManagerGetError(str(err)) from err
 
         return locations_list

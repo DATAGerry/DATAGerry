@@ -152,21 +152,75 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     }
 
 
+    // public onChange() {
+    //     const { ref_types } = this.data;
+    //     this.data.ref_types = this.form.controls.ref_types.value;
+
+    //     this.onInputChange();
+
+    //     if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
+    //         this.objectList = [];
+    //         this.filteredTypeList = [];
+    //         this.data.value = '';
+    //     } else {
+    //         this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+    //             this.objectList = res;
+    //             this.prepareSummaries();
+    //         });
+    //     }
+
+    //     this.filterSummaries();
+    // }
+
+
+    /**
+     * Handles changes to the reference types in the form.
+     * Updates the reference types, fetches objects based on the selected types,
+     * and resets or updates lists accordingly. Preserves the current default value if valid.
+     */
     public onChange() {
-        const { ref_types } = this.data;
-        this.data.ref_types = this.form.controls.ref_types.value;
+        const selectedRefTypes = this.form.controls.ref_types.value;
 
-        this.onInputChange();
+        // Only reset lists if types have changed
+        if (JSON.stringify(this.data.ref_types) !== JSON.stringify(selectedRefTypes)) {
+            const currentDefaultValue = this.data.value;
 
-        if (Array.isArray(this.data.ref_types) && ref_types && ref_types.length === 0) {
-            this.objectList = [];
-            this.filteredTypeList = [];
-            this.data.value = '';
-        } else {
-            this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
-                this.objectList = res;
-                this.prepareSummaries();
-            });
+            // Update the reference types
+            this.data.ref_types = selectedRefTypes;
+
+            if (this.data.ref_types.length > 0) {
+                // Fetch objects and update lists
+                this.objectService.getObjectsByType(this.data.ref_types).subscribe((res: RenderResult[]) => {
+                    this.objectList = res;
+
+                    // Preserve default if valid
+                    this.data.value = this.objectList.some(obj => obj.object_information.object_id === currentDefaultValue)
+                        ? currentDefaultValue
+                        : '';
+
+                    this.prepareSummaries();
+                    this.filterSummaries()
+                    this.cd.detectChanges();
+                });
+            } else {
+                // Clear data if no types selected
+                this.summaries = [];
+                this.data.value = '';
+                this.objectList = [];
+            }
+        }
+    }
+
+
+    /**
+     * Filters the summaries based on the reference types available in the data.
+     * Only includes summaries where the type_id exists in the ref_types.
+    */
+    private filterSummaries() {
+        if (this.data.ref_types) {
+            this.summaries = this.summaries.filter(summary =>
+                this.data.ref_types.includes(summary.type_id)
+            );
         }
     }
 
@@ -264,6 +318,7 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
                 this.summaries.splice(index, 1);
             }
         }
+        this.cd.detectChanges()
     }
 
 
@@ -274,11 +329,28 @@ export class RefFieldEditComponent extends ConfigEditBaseComponent implements On
     }
 
 
-    public changeSummaryOption(type: CmdbType) {
+    /**
+     * Handles the change event for the ng-select component.
+     * Updates the corresponding summary item with the selected type's label and icon.
+     * @param type - The selected type object containing the public_id, label, and render_meta.icon.
+    */
+    public changeSummaryOption(type: CmdbType, summary: any) {
+
+        if (!type) {
+            summary.label = '';
+            summary.line = '';
+            summary.fields = [];
+            return;
+        }
         const nestedSummary = this.summaries.find(s => s.type_id === type.public_id);
-        nestedSummary.label = type.label;
-        nestedSummary.icon = type.render_meta.icon;
+        if (nestedSummary) {
+            nestedSummary.label = type.label;
+            nestedSummary.icon = type.render_meta.icon;
+        } else {
+            console.warn('No matching summary found for type_id:', type.public_id);
+        }
     }
+
 
     /* ------------------------------------------------- HELPER SECTION ------------------------------------------------- */
 

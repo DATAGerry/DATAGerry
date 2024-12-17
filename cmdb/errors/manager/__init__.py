@@ -13,7 +13,9 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This package contains all errors for the managers of DATAGERRY"""
+"""
+This package contains general errors for the managers of DATAGERRY
+"""
 from .manager_errors import ManagerError,\
                             ManagerGetError,\
                             ManagerInsertError,\

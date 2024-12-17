@@ -13,54 +13,52 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""
-This module contains the implementation of the LogsManager
-"""
+"""This module contains the implementation of the LogsManager"""
 import logging
 from datetime import datetime, timezone
 
-from queue import Queue
-from typing import Union
-
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
-from cmdb.framework import CmdbMetaLog, CmdbLog
-from cmdb.framework.models.log import CmdbObjectLog, LogAction
-from cmdb.framework.results.iteration import IterationResult
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
+from cmdb.models.log_model.log_action_enum import LogAction
+from cmdb.models.log_model.cmdb_log import CmdbLog
+from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
+from cmdb.framework.results import IterationResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
 
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  LogsManager - CLASS                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
 class LogsManager(BaseManager):
     """
     The LogsManager handles the interaction between the Logs-API and the Database
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance
-            event_queue (Queue, Event): The queue for sending events or the created event to send
+            database_manager (MongoDatabaseManager): Active database managers instance
         """
-        self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
+        if database:
+            dbm.connector.set_database(database)
+
         super().__init__(CmdbMetaLog.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-    def insert_log(self, action: LogAction, log_type: str, *args, **kwargs) -> int:
+    def insert_log(self, action: LogAction, log_type: str, **kwargs) -> int:
         """
         Creates a new log in the database
 
@@ -108,16 +106,7 @@ class LogsManager(BaseManager):
             IterationResult[CmdbMetaLog]: Result which matches the Builderparameters
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 

@@ -25,27 +25,31 @@ from argparse import ArgumentParser, Namespace
 import os
 import sys
 
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+
 import cmdb
 from cmdb import __title__
-from cmdb.__check__ import CheckRoutine
-from cmdb.__update__ import UpdateRoutine
-from cmdb.__setup__ import SetupRoutine
+from cmdb.startup_routines.check_routine import CheckRoutine
+from cmdb.startup_routines.update_routine import UpdateRoutine
+from cmdb.startup_routines.setup_routine import SetupRoutine
+from cmdb.startup_routines.setup_status_enum import SetupStatus
+from cmdb.startup_routines.check_status_enum import CheckStatus
+from cmdb.startup_routines.update_status_enum import UpateStatus
 from cmdb.utils.logger import get_logging_conf
-from cmdb.utils.system_config import SystemConfigReader
-
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
-from cmdb.errors.cmdb_error import CMDBError
-
+from cmdb.utils.system_config_reader import SystemConfigReader
 import cmdb.process_management.process_manager
+
+from cmdb.errors.database import ServerTimeoutError, DatabaseConnectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # setup logging for startup
 logging.config.dictConfig(get_logging_conf())
+
 LOGGER = logging.getLogger(__name__)
 
 app_manager = cmdb.process_management.process_manager.ProcessManager()
 
+# -------------------------------------------------------------------------------------------------------------------- #
 
 def main(args: Namespace):
     """
@@ -57,41 +61,44 @@ def main(args: Namespace):
         dbm = None
         LOGGER.info("DATAGERRY starting...")
 
-        _activate_debug(args)
+        __activate_debug_mode(args)
+        __activate_cloud_mode(args)
+        __activate_local_mode(args)
         _init_config_reader(args.config_file)
 
-        if args.start:
+        if args.start and not args.cloud:
             try:
-                dbm: DatabaseManagerMongo = _check_database()
+                dbm: MongoDatabaseManager = _check_database()
+
                 if not dbm:
                     raise DatabaseConnectionError('Could not establish connection to db')
 
                 LOGGER.info("Database connection established.")
 
-            except DatabaseConnectionError as error:
-                LOGGER.critical("%s: %s",type(error).__name__, error)
+            except DatabaseConnectionError as err:
+                LOGGER.critical("%s: %s",type(err), err)
                 sys.exit(1)
 
         # check db-settings and run update if needed
-        if args.start:
+        if args.start and not args.cloud:
             _start_check_routines(dbm)
 
-        if args.keys:
+        if args.keys and not args.cloud:
             _start_key_routine(dbm)
 
         if args.start:
             _start_app()
             LOGGER.info("DATAGERRY successfully started")
-    except Exception as error:
-        raise CMDBError(error) from error
+    except Exception as err:
+        raise RuntimeError(err) from err
 
 # ----------------------------------------------- ROUTINES AND CHECKERS ---------------------------------------------- #
 
-def _start_key_routine(dbm: DatabaseManagerMongo):
+def _start_key_routine(dbm: MongoDatabaseManager):
     """
     Starts key generation routine
     Args:
-        dbm (DatabaseManagerMongo): Database Connector
+        dbm (MongoDatabaseManager): Database Connector
     """
     setup_routine = SetupRoutine(dbm)
     setup_status = None
@@ -103,30 +110,30 @@ def _start_key_routine(dbm: DatabaseManagerMongo):
         setup_status = setup_routine.get_setup_status()
         LOGGER.warning('The key generation did not go through as expected - Status %s', setup_status)
 
-    if setup_status == SetupRoutine.SetupStatus.FINISHED:
+    if setup_status == SetupStatus.FINISHED:
         sys.exit(0)
     else:
         sys.exit(1)
 
 
-def _start_check_routines(dbm: DatabaseManagerMongo):
+def _start_check_routines(dbm: MongoDatabaseManager):
     """
     Starts validation of database structure
     Args:
-        dbm (DatabaseManagerMongo): Database Connector
+        dbm (MongoDatabaseManager): Database Connector
     """
     check_routine = CheckRoutine(dbm)
         # check db-settings
     try:
         check_status = check_routine.checker()
-    except Exception as error:
-        LOGGER.error(error)
-        check_status = check_routine.get_check_status()
+    except RuntimeError as error:
+        LOGGER.debug("[_start_check_routines] Error: %s", error)
         LOGGER.error('The check did not go through as expected. Please run an update. \n Error: %s', error)
+        check_status = check_routine.get_check_status()
 
-    if check_status == CheckRoutine.CheckStatus.HAS_UPDATES:
+    if check_status == CheckStatus.HAS_UPDATES:
         # run update
-        update_routine = UpdateRoutine()
+        update_routine = UpdateRoutine(dbm)
 
         try:
             update_status = update_routine.start_update()
@@ -135,12 +142,12 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
             update_status = update_routine.get_updater_status()
             LOGGER.warning('The update did not go through as expected - Status %s', update_status)
 
-        if update_status == UpdateRoutine.UpateStatus.FINISHED:
-            check_status = CheckRoutine.CheckStatus.FINISHED
+        if update_status == UpateStatus.FINISHED:
+            check_status = CheckStatus.FINISHED
         else:
             sys.exit(1)
 
-    if check_status == CheckRoutine.CheckStatus.FINISHED:
+    if check_status == CheckStatus.FINISHED:
         # run setup if needed
         setup_routine = SetupRoutine(dbm)
 
@@ -151,7 +158,7 @@ def _start_check_routines(dbm: DatabaseManagerMongo):
             setup_status = setup_routine.get_setup_status()
             LOGGER.warning('The setup did not go through as expected - Status %s', setup_status)
 
-        if setup_status == SetupRoutine.SetupStatus.FINISHED:
+        if setup_status == SetupStatus.FINISHED:
             pass
         else:
             sys.exit(1)
@@ -165,7 +172,7 @@ def _check_database():
     ssc = SystemConfigReader()
     LOGGER.info('Checking database connection with %s data',ssc.config_name)
     database_options = ssc.get_all_values_from_section('Database')
-    dbm = DatabaseManagerMongo(**database_options)
+    dbm = MongoDatabaseManager(**database_options)
 
     try:
         connection_test = dbm.connector.is_connected()
@@ -206,6 +213,18 @@ def build_arg_parser() -> Namespace:
                          dest='keys',
                          help="init keys")
 
+    _parser.add_argument('--cloud',
+                         action='store_true',
+                         default=False,
+                         dest='cloud',
+                         help="init cloud mode")
+
+    _parser.add_argument('--local',
+                         action='store_true',
+                         default=False,
+                         dest='local',
+                         help="init local mode")
+
     _parser.add_argument('-d',
                          '--debug',
                          action='store_true',
@@ -229,13 +248,29 @@ def build_arg_parser() -> Namespace:
     return _parser.parse_args()
 
 
-def _activate_debug(args: Namespace):
+def __activate_debug_mode(args: Namespace):
     """
     Activate the debug mode if set
     """
     if args.debug:
         cmdb.__MODE__ = 'DEBUG'
-        LOGGER.warning("DEBUG mode enabled")
+        LOGGER.warning("DEBUG MODE enabled")
+
+
+def __activate_local_mode(args: Namespace):
+    """
+    Activate the debug mode if set
+    """
+    if args.local:
+        cmdb.__LOCAL_MODE__ = True
+        LOGGER.warning("LOCAL MODE enabled")
+
+
+def __activate_cloud_mode(args: Namespace):
+    """ Activates cloud mode if set"""
+    if args.cloud:
+        cmdb.__CLOUD_MODE__ = True
+        LOGGER.info("CLOUD MODE enabled")
 
 
 def _init_config_reader(config_file: str):
@@ -246,8 +281,10 @@ def _init_config_reader(config_file: str):
     """
     path, filename = os.path.split(config_file)
 
-    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME or path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
+    if filename is not SystemConfigReader.DEFAULT_CONFIG_NAME:
         SystemConfigReader.RUNNING_CONFIG_NAME = filename
+
+    if path is not SystemConfigReader.DEFAULT_CONFIG_LOCATION:
         SystemConfigReader.RUNNING_CONFIG_LOCATION = path + '/'
 
     SystemConfigReader(SystemConfigReader.RUNNING_CONFIG_NAME, SystemConfigReader.RUNNING_CONFIG_LOCATION)
@@ -303,7 +340,7 @@ if __name__ == "__main__":
         print(WELCOME_STRING.format(options.__dict__))
         print(LICENSE_STRING)
         main(options)
-    except CMDBError as err:
+    except RuntimeError as err:
         if cmdb.__MODE__ == 'DEBUG':
             traceback.print_exc()
 

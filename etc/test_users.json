@@ -1,0 +1,29 @@
+{
+    "admin@testgmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@testgmbh.de",
+        "database": "testdb1",
+        "active": true,
+        "api_level": 2,
+        "config_items_limit": 1000
+    },
+    "admin@wurstgmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@wurstgmbh.de",
+        "database": "testdb2",
+        "active": true,
+        "api_level": 2,
+        "config_items_limit": 1000
+    },
+    "admin@mustergmbh.de": {
+        "user_name": "admin",
+        "password": "admin",
+        "email": "admin@mustergmbh.de",
+        "database": "testdb3",
+        "active": true,
+        "api_level": 2,
+        "config_items_limit": 1000
+    }
+}

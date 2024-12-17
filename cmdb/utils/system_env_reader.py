@@ -29,18 +29,19 @@ class SystemEnvironmentReader(SystemReader):
         # get all environment variables and store them in config dict
         self.__config = {}
         pattern = re.compile("DATAGERRY_(.*)_(.*)")
-        for key in os.environ.keys():
+
+        for key, value in os.environ.items():
             match = pattern.fullmatch(key)
 
             if match:
                 section = match.group(1)
                 name = match.group(2)
-                value = os.environ[key]
 
                 # save value in config dict
                 if section not in self.__config:
                     self.__config[section] = {}
-                    self.__config[section][name] = value
+                self.__config[section][name] = value
+
         super().__init__()
 
 

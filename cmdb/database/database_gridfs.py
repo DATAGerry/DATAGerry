@@ -22,7 +22,6 @@ class DatabaseGridFS(GridFS):
     """
     Creation a GridFSBucket instance to use
     """
-
     def __init__(self, database: Database, collection_name: str):
         super().__init__(database, collection_name)
         self.message = f"Collection {collection_name} already exists"

@@ -17,54 +17,49 @@
 This module contains the implementation of the SectionTemplatesManager
 """
 import logging
-from queue import Queue
-from typing import Union
 from deepdiff import DeepDiff
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.framework.managers.type_manager import TypeManager
-from cmdb.framework.cmdb_object_manager import CmdbObjectManager
-from cmdb.framework.managers.object_manager import ObjectManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
+from cmdb.manager.types_manager import TypesManager
+from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.base_manager import BaseManager
 
-from cmdb.event_management.event import Event
-from cmdb.framework import TypeModel
-from cmdb.framework.models.type_model import TypeFieldSection
-from cmdb.framework import CmdbSectionTemplate
-from cmdb.framework.cmdb_object import CmdbObject
-from cmdb.framework.results import IterationResult
-from cmdb.framework.results.list import ListResult
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.type_model.type import TypeModel
+from cmdb.models.type_model.type_field_section import TypeFieldSection
+from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
+from cmdb.models.object_model.cmdb_object import CmdbObject
+from cmdb.framework.results import IterationResult, ListResult
 from cmdb.security.acl.permission import AccessControlPermission
-from cmdb.user_management import UserModel
 
 from cmdb.errors.manager import ManagerGetError, ManagerIterationError, ManagerInsertError
-
-from .base_manager import BaseManager
-from .query_builder.base_query_builder import BaseQueryBuilder
-from .query_builder.builder_parameters import BuilderParameters
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            SectionTemplatesManager - CLASS                                           #
+# -------------------------------------------------------------------------------------------------------------------- #
 class SectionTemplatesManager(BaseManager):
     """
     The SectionTemplatesManager handles the interaction between the SectionTemplates-API and the Database
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, event_queue: Union[Queue, Event] = None):
+    def __init__(self, dbm: MongoDatabaseManager, database:str = None):
         """
         Set the database connection and the queue for sending events
 
         Args:
-            database_manager (DatabaseManagerMongo): Active database managers instance.
-            event_queue (Queue, Event): The queue for sending events or the created event to send
+            dbm (MongoDatabaseManager): Database connection
         """
-        self.event_queue = event_queue
-        self.query_builder = BaseQueryBuilder()
-        self.type_manager = TypeManager(dbm)
-        self.cmdb_object_manager = CmdbObjectManager(dbm)
-        self.object_manager = ObjectManager(dbm, event_queue)
+        if database:
+            dbm.connector.set_database(database)
+
+        self.types_manager = TypesManager(dbm)
+        self.objects_manager = ObjectsManager(dbm)
+
         super().__init__(CmdbSectionTemplate.COLLECTION, dbm)
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
@@ -84,17 +79,19 @@ class SectionTemplatesManager(BaseManager):
         """
         try:
             new_section_template = CmdbSectionTemplate(**data)
-        except Exception as error:
-            LOGGER.debug('Error while inserting section template - error: %s', error)
-            raise ManagerInsertError(error) from error
+        except Exception as err:
+            #TODO: ERROR-FIX
+            LOGGER.debug('[insert_section_template] Error while creating object - error: %s', err)
+            raise ManagerInsertError(err) from err
 
         try:
             ack = self.insert(new_section_template.__dict__)
-        except Exception as error:
-            raise ManagerInsertError(error) from error
+            #TODO: ERROR-FIX
+        except Exception as err:
+            LOGGER.debug('[insert_section_template] Error while inserting section template - error: %s', err)
+            raise ManagerInsertError(err) from err
 
         return ack
-
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -104,6 +101,7 @@ class SectionTemplatesManager(BaseManager):
                 permission: AccessControlPermission = None) -> IterationResult[CmdbSectionTemplate]:
         """
         Performs an aggregation on the database
+
         Args:
             builder_params (BuilderParameters): Contains input to identify the target of action
             user (UserModel, optional): User requesting this action
@@ -115,16 +113,7 @@ class SectionTemplatesManager(BaseManager):
             IterationResult[CmdbSectionTemplate]: Result which matches the Builderparameters
         """
         try:
-            query: list[dict] = self.query_builder.build(builder_params,user, permission)
-            count_query: list[dict] = self.query_builder.count(builder_params.get_criteria())
-
-            aggregation_result = list(self.aggregate(query))
-            total_cursor = self.aggregate(count_query)
-
-            total = 0
-            while total_cursor.alive:
-                total = next(total_cursor)['total']
-
+            aggregation_result, total = self.iterate_query(builder_params, user, permission)
         except ManagerGetError as err:
             raise ManagerIterationError(err) from err
 
@@ -182,18 +171,17 @@ class SectionTemplatesManager(BaseManager):
             "global_template_ids":template_name
         }
 
-        found_types: ListResult = self.type_manager.find(type_filter)
+        found_types: ListResult = self.types_manager.find_types(type_filter)
 
         if len(found_types.results) == 0:
             return counts
 
         counts['types'] = len(found_types.results)
-
         objects_count: int = 0
 
         a_type: TypeModel
         for a_type in found_types.results:
-            objects: list = self.cmdb_object_manager.get_objects_by_type(a_type.public_id)
+            objects: list = self.objects_manager.get_objects_by(type_id=a_type.public_id)
             objects_count += len(objects)
 
         counts['objects'] = objects_count
@@ -268,7 +256,7 @@ class SectionTemplatesManager(BaseManager):
             self.set_new_global_template_fields(a_type.public_id, new_field_names)
 
             #Update the type changes for the type
-            self.type_manager.update(a_type.public_id, a_type)
+            self.types_manager.update_type(a_type.public_id, a_type)
 
 
     def get_section_label_diff(self, new_params: dict, current_params: dict) -> str:
@@ -367,7 +355,7 @@ class SectionTemplatesManager(BaseManager):
             "global_template_ids":template_name
         }
 
-        found_types: ListResult = self.type_manager.find(type_filter)
+        found_types: ListResult = self.types_manager.find_types(type_filter)
 
         return found_types.results
 
@@ -378,16 +366,16 @@ class SectionTemplatesManager(BaseManager):
 
         Args:
             type_id (int): ID of the type for which the objects should be cleaned
-            section_field_names (list[str]): List of all fields which should be deleted 
+            section_field_names (list[str]): list of all fields which should be deleted 
         """
-        section_objects: list = self.cmdb_object_manager.get_objects_by_type(type_id)
+        section_objects: list = self.objects_manager.get_objects_by(type_id=type_id)
 
         # remove section fields and update the objects
         an_object: CmdbObject
         for an_object in section_objects:
             an_object.fields = [field for field in an_object.fields if field['name'] not in section_field_names]
 
-            self.object_manager.update(an_object.public_id, an_object)
+            self.objects_manager.update_object(an_object.public_id, an_object)
 
 
     def set_new_global_template_fields(self, type_id: int, new_field_names: list[str]) -> None:
@@ -398,7 +386,7 @@ class SectionTemplatesManager(BaseManager):
             type_id (int): ID of the TypeModel
             new_field_names (list[str]): List of names of new fields
         """
-        section_objects: list = self.cmdb_object_manager.get_objects_by_type(type_id)
+        section_objects: list = self.objects_manager.get_objects_by(type_id=type_id)
 
         an_object: CmdbObject
         for an_object in section_objects:
@@ -409,7 +397,7 @@ class SectionTemplatesManager(BaseManager):
                     'value': None
                 })
 
-            self.object_manager.update(an_object.public_id, an_object)
+            self.objects_manager.update_object(an_object.public_id, an_object)
 
 
     def cleanup_global_section_templates(self, template_name: str) -> None:
@@ -445,4 +433,4 @@ class SectionTemplatesManager(BaseManager):
             self.cleanup_global_section_objects(a_type.public_id, template_section_field_names)
 
             #Update the type changes for the type
-            self.type_manager.update(a_type.public_id, a_type)
+            self.types_manager.update_type(a_type.public_id, a_type)

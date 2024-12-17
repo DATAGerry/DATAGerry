@@ -24,6 +24,9 @@
             <div *ngIf="name.errors.typeExists">
               A type with this name already exists
             </div>
+            <div *ngIf="name.errors.invalidCharacters">
+              Name can only contain letters, numbers, and hyphens
+            </div>
           </div>
         </div>
 

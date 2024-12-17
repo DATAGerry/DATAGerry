@@ -16,11 +16,7 @@
 """
 Collection of system readers which loads configuration files and settings
 """
-from typing import Any, Union, List
-
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.errors.database import NoDocumentFound
-from cmdb.errors.system_config import SectionError
+from typing import Any
 # -------------------------------------------------------------------------------------------------------------------- #
 
 class SystemReader:
@@ -28,20 +24,19 @@ class SystemReader:
     Reader super class
     """
 
-    def get_value(self, name: str, section: str, default: Any = None) -> Any:
+    def get_value(self, name: str, section: str) -> Any:
         """
         get specific value from a section
         Args:
             name: key name of value
             section: section identifier
-            default: if value not found return default
         Returns:
             value
         """
         raise NotImplementedError
 
 
-    def get_sections(self) -> List[str]:
+    def get_sections(self) -> list[str]:
         """
         get all sections from config
         Returns:
@@ -59,81 +54,3 @@ class SystemReader:
             key/value list of all values inside a section
         """
         raise NotImplementedError
-
-
-
-class SystemSettingsReader(SystemReader):
-    """
-    Settings reader loads settings from database
-    """
-    COLLECTION = 'settings.conf'
-
-    def __init__(self, database_manager: DatabaseManagerMongo):
-        """
-        init system settings reader
-        Args:
-            database_manager: database managers
-        """
-        self.dbm: DatabaseManagerMongo = database_manager
-        super().__init__()
-
-
-    def get_value(self, name, section) -> Union[dict, list]:
-        """
-        get a value from a given section
-        Args:
-            name: key of value
-            section: section of the value
-
-        Returns:
-            value
-        """
-        return self.dbm.find_one_by(
-                        collection=SystemSettingsReader.COLLECTION,
-                        filter={'_id': section})[name]
-
-
-    def get_section(self, section_name: str) -> dict:
-        """TODO: document"""
-        query_filter = {'_id': section_name}
-        return self.dbm.find_one_by(collection=SystemSettingsReader.COLLECTION, filter=query_filter)
-
-
-    def get_sections(self):
-        """
-        get all sections from config
-        Returns:
-            list of sections inside a config
-        """
-        return self.dbm.find_all(
-            collection=SystemSettingsReader.COLLECTION,
-            projection={'_id': 1}
-        )
-
-
-    def get_all_values_from_section(self, section, default=None) -> dict:
-        """
-        get all values from a section
-        Args:
-            section: section name
-            default: if no document was found
-
-        Returns:
-            key value dict of all elements inside section
-        """
-        try:
-            section_values = self.dbm.find_one_by(
-                collection=SystemSettingsReader.COLLECTION,
-                filter={'_id': section}
-            )
-        except NoDocumentFound as err:
-            if default:
-                return default
-            raise SectionError(section) from err
-
-        return section_values
-
-
-    def get_all(self) -> list:
-        """TODO: document"""
-        return self.dbm.find_all(collection=SystemSettingsReader.COLLECTION)

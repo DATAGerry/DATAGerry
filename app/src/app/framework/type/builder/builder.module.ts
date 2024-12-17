@@ -33,6 +33,7 @@ import { TextFieldEditComponent } from './configs/text/text-field-edit.component
 import { SectionFieldEditComponent } from './configs/section/section-field-edit.component';
 import { SectionMultiFieldEditComponent } from './configs/section/section-multi-field-edit.component';
 import { TextareaEditComponent } from './configs/text/textarea-edit.component';
+import { NumberFieldEditComponent } from './configs/number/number-field-edit.component';
 import { RefFieldEditComponent } from './configs/special/ref-field-edit.component';
 import { LocationFieldEditComponent } from './configs/special/location-field-edit.component';
 import { ChoiceFieldEditComponent } from './configs/choice/choice-field-edit.component';
@@ -42,6 +43,7 @@ import { SectionRefFieldEditComponent } from './configs/section/section-ref-fiel
 import { ConfigEditComponent } from './configs/config-edit.component';
 import { PreviewModalComponent } from './modals/preview-modal/preview-modal.component';
 import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-modal.component';
+import { ColorChromeModule } from 'ngx-color/chrome';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 @NgModule({
@@ -57,12 +59,14 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
         NgbDatepickerModule,
         CategoryModule,
         NgbTooltipModule,
-        LayoutModule
+        LayoutModule,
+        ColorChromeModule
     ],
     declarations: [
         ConfigEditComponent,
         BuilderComponent,
         TextFieldEditComponent,
+        NumberFieldEditComponent,
         SectionFieldEditComponent,
         SectionMultiFieldEditComponent,
         TextareaEditComponent,
@@ -81,4 +85,4 @@ import { DiagnosticModalComponent } from './modals/diagnostic-modal/diagnostic-m
         ConfigEditComponent
     ]
 })
-export class BuilderModule {}
+export class BuilderModule { }

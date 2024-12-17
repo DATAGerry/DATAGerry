@@ -45,6 +45,8 @@ import { SectionIdentifierService } from '../services/SectionIdentifierService.s
 export class TypeBuilderComponent implements OnInit, OnDestroy {
 
     private subscriber: ReplaySubject<void> = new ReplaySubject<void>();
+    private subscriptions = new Subscription();
+    isHighlighted: boolean = false;
 
     @Input() public typeInstance: CmdbType;
 
@@ -81,6 +83,10 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     public isIdentifierValid: boolean;
     private subscription: Subscription;
 
+    isSectionHighlighted: boolean = false;
+    isFieldHighlighted: boolean = false;
+    disableFields: boolean = false
+    isSectionWithoutFields: boolean = false
     /* ------------------------------------------------------------------------------------------------------------------ */
     /*                                                     LIFE CYCLE                                                     */
     /* ------------------------------------------------------------------------------------------------------------------ */
@@ -100,14 +106,50 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
     }
 
 
+
+
     public ngOnInit(): void {
+
+        const sectionHighlightSubscription = this.validationService.isSectionHighlighted$.subscribe((highlighted) => {
+
+            setTimeout(() => {
+                this.isSectionHighlighted = highlighted;
+            });
+        });
+
+        // Subscribe to the field highlight state
+        const fieldHighlightSubscription = this.validationService.isFieldHighlighted$.subscribe((highlighted) => {
+
+            setTimeout(() => {
+                this.isFieldHighlighted = highlighted;
+            });
+        });
+
+        const disableFieldsSubscription = this.validationService.disableFields$.subscribe((disableFields) => {
+
+            setTimeout(() => {
+                this.disableFields = disableFields;
+            });
+        });
+
+        const sectionWithoutFieldSubscription = this.validationService.isSectionWithoutField$.subscribe((disabledSection) => {
+            setTimeout(() => {
+                this.isSectionWithoutFields = disabledSection
+            });
+        });
+
+        this.subscriptions.add(sectionHighlightSubscription);
+        this.subscriptions.add(fieldHighlightSubscription);
+        this.subscriptions.add(disableFieldsSubscription)
+        this.subscriptions.add(sectionWithoutFieldSubscription)
+
         this.isValid$ = this.validationService.getIsValid();
         this.isSectionValid$ = this.validationService.overallSectionValidity();
 
-        this.subscription = this.sectionIdentifierService.getIsIdentifierValid().subscribe(isValid => {
-            this.isIdentifierValid = isValid;
+        // this.subscription = this.sectionIdentifierService.getIsIdentifierValid().subscribe(isValid => {
+        //     this.isIdentifierValid = isValid;
 
-        });
+        // });
 
         if (this.mode === CmdbMode.Create) {
             this.typeInstance = new CmdbType();
@@ -139,8 +181,8 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                 next: (response: APIGetMultiResponse) => {
                     this.groups = [...response.results as Array<Group>];
                 },
-                error: (error) => {
-                    console.log(error)
+                error: (e) => {
+                    this.toast.error(e?.error?.message)
                 },
                 complete: () => {
                     this.checkAclGroupExist();
@@ -158,6 +200,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
         this.typeService.getTypes(typesCallParameters).pipe(takeUntil(this.subscriber))
             .subscribe((response: APIGetMultiResponse) => {
                 this.types = response.results as Array<CmdbType>;
+                this.changeDetector.detectChanges();
             });
 
         this.changeDetector.detectChanges();
@@ -171,6 +214,14 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             this.subscription.unsubscribe();
         }
     }
+
+    /* ----------------------------------------------- CSS CLASS HANDLERS ------------------------------------------------ */
+
+
+    get isSaveButtonDisabled(): boolean {
+        return !this.basicValid || !this.contentValid || !this.metaValid || !this.accessValid || !this.isLabelValid || !this.isNameValid || this.isSectionHighlighted || this.isFieldHighlighted || this.disableFields || !this.isSectionWithoutFields;
+    }
+
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
 
@@ -221,10 +272,11 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                 next: (typeIDResp: CmdbType) => {
                     newTypeID = +typeIDResp.public_id;
                     this.router.navigate(['/framework/type/'], { queryParams: { typeAddSuccess: newTypeID } });
+                    this.sidebarService.loadCategoryTree();
                     this.toast.success(`Type was successfully created: TypeID: ${newTypeID}`);
                 },
-                error: (error) => {
-                    this.toast.error(`${error}`);
+                error: (e) => {
+                    this.toast.error(e?.error?.message);
                 }
             });
         } else if (this.mode === CmdbMode.Edit) {
@@ -232,6 +284,7 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
             this.typeService.putType(saveTypeInstance).subscribe({
                 next: (updateResp: CmdbType) => {
                     this.toast.success(`Type was successfully edited: TypeID: ${updateResp.public_id}`);
+                    this.sidebarService.loadCategoryTree();
                     this.router.navigate(['/framework/type/'],
                         { queryParams: { typeEditSuccess: updateResp.public_id } });
                 },
@@ -240,7 +293,5 @@ export class TypeBuilderComponent implements OnInit, OnDestroy {
                 }
             });
         }
-
-        this.sidebarService.loadCategoryTree();
     }
 }

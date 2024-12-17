@@ -14,36 +14,42 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
-from cmdb.utils.error import CMDBError
-from cmdb.utils.system_reader import SystemSettingsReader
+import logging
+from flask import current_app
+
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
+from cmdb.manager.settings_reader_manager import SettingsReaderManager
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   KeyHolder - CLASS                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
 class KeyHolder:
     """TODO: document"""
 
-    def __init__(self, database_manager: DatabaseManagerMongo):
+    def __init__(self, dbm: MongoDatabaseManager):
         """
         Args:
             key_directory: key based directory
         """
-        self.ssr = SystemSettingsReader(database_manager)
+        self.settings_reader = SettingsReaderManager(dbm)
         self.rsa_public = self.get_public_key()
         self.rsa_private = self.get_private_key()
 
 
     def get_public_key(self):
         """TODO: document"""
-        return self.ssr.get_value('asymmetric_key', 'security')['public']
+        if current_app.cloud_mode:
+            return current_app.asymmetric_key['public']
+
+        return self.settings_reader.get_value('asymmetric_key', 'security')['public']
 
 
     def get_private_key(self):
         """TODO: document"""
-        return self.ssr.get_value('asymmetric_key', 'security')['private']
+        if current_app.cloud_mode:
+            return current_app.asymmetric_key['private']
 
-
-class RSAKeyNotExists(CMDBError):
-    """TODO: document"""
-    def __init__(self):
-        self.message = 'RSA key-pair not exists'
-        super().__init__()
+        return self.settings_reader.get_value('asymmetric_key', 'security')['private']

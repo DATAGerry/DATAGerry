@@ -18,6 +18,7 @@
 
 import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { User } from '../../../models/user';
+import { environment } from 'src/environments/environment';
 
 @Component({
   selector: 'cmdb-user-table-actions',
@@ -25,6 +26,7 @@ import { User } from '../../../models/user';
   styleUrls: ['./user-table-actions.component.scss']
 })
 export class UserTableActionsComponent {
+  isCloudMode = environment.cloudMode;
 
   @Input() public user: User;
   @Output() public passWordAction: EventEmitter<User> = new EventEmitter<User>();

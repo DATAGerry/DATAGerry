@@ -13,9 +13,10 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
-"""This package contains all errors for the docapi of DATAGERRY"""
+"""
+This module provides all errors for Docapi
+"""
 from .docapi_errors import DocapiError,\
-                           NoPublicIDError,\
                            DocapiGetError,\
                            DocapiUpdateError,\
                            DocapiInsertError,\
@@ -24,7 +25,6 @@ from .docapi_errors import DocapiError,\
 
 __all__ = [
     'DocapiError',
-    'NoPublicIDError',
     'DocapiGetError',
     'DocapiUpdateError',
     'DocapiInsertError',

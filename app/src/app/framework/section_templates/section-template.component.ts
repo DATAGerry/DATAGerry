@@ -175,12 +175,15 @@ export class SectionTemplateComponent implements OnInit, OnDestroy {
 
                 params.name = this.generateSectionTemplateName(values.isGlobal);
 
-                this.sectionTemplateService.postSectionTemplate(params).subscribe((res: APIInsertSingleResponse) => {
-                    this.toastService.success("Section Template cloned!");
-                    this.getAllSectionTemplates();
-                }, error => {
-                    console.log("error in clone section template response");
-                    this.toastService.error(error);
+                this.sectionTemplateService.postSectionTemplate(params).subscribe({
+                    next: (res: any) => {
+                        this.toastService.success("Section Template cloned!");
+                        this.getAllSectionTemplates();
+                    },
+                    error: error => {
+                        console.log("error in clone section template response");
+                        this.toastService.error(error);
+                    }
                 });
             }
         });

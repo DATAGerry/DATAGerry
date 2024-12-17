@@ -14,48 +14,53 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """Contains Manager Error Classes"""
-from ..cmdb_error import CMDBError
 # -------------------------------------------------------------------------------------------------------------------- #
 
-class ManagerError(CMDBError):
+class ManagerError(Exception):
     """Base Manager Error"""
     def __init__(self, message: str):
+        self.message = message
         super().__init__(message)
 
-# --------------------------------------------- SPECIFIC DATABASE ERRORS --------------------------------------------- #
-
+# -------------------------------------------------- MANAGER ERRORS -------------------------------------------------- #
 
 class ManagerGetError(ManagerError):
     """Manager exception for get operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while GET: {err}')
+        self.message = f'Error while GET: {err}'
+        super().__init__(self.message)
 
 
 class ManagerIterationError(ManagerError):
     """Manager exception for iteration operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while ITERATION: {err}')
+        self.message = f'Error while ITERATION: {err}'
+        super().__init__(self.message)
 
 
 class ManagerInsertError(ManagerError):
     """Manager exception for insert operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while INSERT: {err}')
+        self.message = f'Error while INSERT: {err}'
+        super().__init__(self.message)
 
 
 class ManagerUpdateError(ManagerError):
     """Manager exception for update operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while UPDATE: {err}')
+        self.message = f'Error while UPDATE: {err}'
+        super().__init__(self.message)
 
 
 class ManagerDeleteError(ManagerError):
     """Manager exception for delete operations"""
     def __init__(self, err: str):
-        super().__init__(f'Error while DELETE: {err}')
+        self.message = f'Error while DELETE: {err}'
+        super().__init__(self.message)
 
 
 class DisallowedActionError(ManagerError):
     """Manager exception when an illegal action is initiated"""
     def __init__(self, err: str):
-        super().__init__(f'Disallowed Action: {err}')
+        self.message = f'Disallowed Action: {err}'
+        super().__init__(self.message)

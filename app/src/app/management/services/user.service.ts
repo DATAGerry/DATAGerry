@@ -65,7 +65,7 @@ export class UserService<T = User> implements ApiServicePrefix {
 
     public readonly options = {
         headers: new HttpHeaders({
-        'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         }),
         params: {},
         observe: resp

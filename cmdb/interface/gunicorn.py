@@ -19,28 +19,28 @@ Server module for web-based services
 import logging
 import multiprocessing
 
-from gunicorn.app.base import BaseApplication
+from cmdb.database.mongo_database_manager import MongoDatabaseManager
 
-from cmdb import __MODE__
-import cmdb.process_management.service
-from cmdb.database.database_manager_mongo import DatabaseManagerMongo
+from cmdb.process_management.service import AbstractCmdbService
 from cmdb.interface.net_app import create_app
 from cmdb.interface.docs import create_docs_server
-from cmdb.interface.rest_api import create_rest_api
-from cmdb.utils.system_config import SystemConfigReader
-from cmdb.utils.logger import get_logging_conf
+from cmdb.interface.dispatcher_middleware import DispatcherMiddleware
+from cmdb.interface.http_server import HTTPServer
+from cmdb.interface.rest_api.init_rest_api import create_rest_api
+from cmdb.utils.system_config_reader import SystemConfigReader
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER = logging.getLogger(__name__)
 
-
-class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                WebCmdbService - CLASS                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+class WebCmdbService(AbstractCmdbService):
     """CmdbService: Webapp"""
 
     def __init__(self):
         super().__init__()
         self._name = "webapp"
-        self._eventtypes = ["cmdb.webapp.#"]
         self._threaded_service = False
         self._multiprocessing = True
         self.__webserver_proc = None
@@ -48,8 +48,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
 
     def _run(self):
         # get queue for sending events
-        event_queue = self._event_manager.get_send_queue()
-        database_manager = DatabaseManagerMongo(
+        dbm = MongoDatabaseManager(
             **SystemConfigReader().get_all_values_from_section('Database')
         )
 
@@ -59,7 +58,7 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
             app=create_app(),
             mounts={
                 '/docs': create_docs_server(),
-                '/rest': create_rest_api(database_manager, event_queue)
+                '/rest': create_rest_api(dbm)
             }
         )
 
@@ -80,68 +79,3 @@ class WebCmdbService(cmdb.process_management.service.AbstractCmdbService):
 
     def _handle_event(self, event):
         """ignore incomming events"""
-
-
-class HTTPServer(BaseApplication):
-    """Basic server main_application"""
-
-    def __init__(self, app, options=None):
-        self.options = options or {}
-        if 'host' in self.options and 'port' in self.options:
-            self.options['bind'] = '%s:%s' % (self.options['host'], self.options['port'])
-        if 'workers' not in self.options:
-            self.options['workers'] = HTTPServer.number_of_workers()
-        self.options['worker_class'] = 'sync'
-        self.options['disable_existing_loggers'] = False
-        self.options['logconfig_dict'] = get_logging_conf()
-        self.options['timeout'] = 120
-        self.options['daemon'] = True
-        if __MODE__ in ('DEBUG','TESTING'):
-            self.options['reload'] = True
-            self.options['check_config'] = True
-            LOGGER.debug("Gunicorn starting with auto reload option")
-        LOGGER.info("Interfaces started @ http://%s:%s",self.options['host'], self.options['port'])
-        self.application = app
-        super().__init__()
-
-
-    def load_config(self):
-        config = dict([(key, value) for key, value in self.options.items()
-                       if key in self.cfg.settings and value is not None])
-        for key, value in config.items():
-            self.cfg.set(key.lower(), value)
-
-
-    def load(self):
-        return self.application
-
-
-    @staticmethod
-    def number_of_workers() -> int:
-        """TODO: document"""
-        return (multiprocessing.cpu_count() * 2) + 1
-
-
-class DispatcherMiddleware:
-    """TODO: document"""
-
-    def __init__(self, app, mounts=None):
-        self.app = app
-        self.mounts = mounts or {}
-
-
-    def __call__(self, environ, start_response):
-        script = environ.get('PATH_INFO', '')
-        path_info = ''
-        while '/' in script:
-            if script in self.mounts:
-                app = self.mounts[script]
-                break
-            script, last_item = script.rsplit('/', 1)
-            path_info = f'/{last_item}{path_info}'
-        else:
-            app = self.mounts.get(script, self.app)
-        original_script_name = environ.get('SCRIPT_NAME', '')
-        environ['SCRIPT_NAME'] = original_script_name + script
-        environ['PATH_INFO'] = path_info
-        return app(environ, start_response)
