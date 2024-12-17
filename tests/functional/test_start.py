@@ -15,11 +15,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
+
 from cmdb import __title__
 from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.rest_api.init_rest_api import create_rest_api
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 def test_start_routine():
     """TODO: document"""
     assert __title__ == 'DATAGERRY'

@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from datetime import datetime
 import pytest
 
@@ -30,8 +31,11 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.errors.database import DatabaseNotExists
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 def pytest_addoption(parser):
-    """TODO: document"""
+    """Adds command line options"""
     parser.addoption(
         '--mongodb-host',
         action='store',

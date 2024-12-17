@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 import pytest
 from cmdb.interface.cmdb_app import BaseCmdbApp
 
@@ -21,6 +22,9 @@ from cmdb.interface.rest_api.init_rest_api import create_rest_api
 from tests.utils.flask_test_client import RestAPITestClient
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 @pytest.fixture(scope="session")
 def rest_api(database_manager, full_access_user):
     """TODO: document"""
