@@ -60,13 +60,12 @@ pytest_plugins = [
 
 
 @pytest.fixture(scope="session", autouse=True)
-def preset_database(database_manager: MongoDatabaseManager, database_name):
+def preset_database(database_manager: MongoDatabaseManager, database_name: str):
     """TODO: document"""
     try:
         database_manager.drop_database(database_name)
     except DatabaseNotExists:
         pass
-
 
     kg = KeyGenerator(database_manager)
     kg.generate_rsa_keypair()
@@ -86,6 +85,7 @@ def preset_database(database_manager: MongoDatabaseManager, database_name):
         public_id=1,
         user_name=admin_name,
         active=True,
+        api_level = 2,
         group_id=__FIXED_GROUPS__[0].public_id,
         registration_time=datetime.now(),
         password=security_manager.generate_hmac(admin_pass),

@@ -82,14 +82,15 @@ def setup(request, collection, example_type):
                              "name": "test-field",
                              "label": "simple reference field",
                              "ref_types": [1],
-                             "summaries": [{
-                                 "type_id": 1,
-                                 "line": "ReferenceTO: {}",
-                                 "label": "ReferenceTO",
-                                 "fields": ["test-dummy-field"],
-                                 "icon": "fa fa-cube",
-                                 "prefix": False
-                             }
+                             "summaries": [
+                                 {
+                                    "type_id": 1,
+                                    "line": "ReferenceTO: {}",
+                                    "label": "ReferenceTO",
+                                    "fields": ["test-dummy-field"],
+                                    "icon": "fa fa-cube",
+                                    "prefix": False
+                                 }
                              ],
                              "value": ""})
     collection.insert_one(document=TypeModel.to_json(dummy_type))
