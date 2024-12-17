@@ -14,11 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """TODO: document"""
+import logging
 from flask.testing import FlaskClient
 
 from cmdb.security.token.generator import TokenGenerator
 # -------------------------------------------------------------------------------------------------------------------- #
 
+LOGGER = logging.getLogger(__name__)
+
+# -------------------------------------------------------------------------------------------------------------------- #
 class RestAPITestSuite:
     """TODO: document"""
     COLLECTION: str = NotImplemented

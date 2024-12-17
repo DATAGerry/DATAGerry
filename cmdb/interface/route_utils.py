@@ -175,12 +175,11 @@ def verify_api_access(*, required_api_level: ApiLevel = None):
                 if auth_method == AuthMethod.BASIC:
                     if not __validate_api_access(api_user_dict, required_api_level):
                         return abort(403, "No permission for this action!")
-
-                return func(*args, **kwargs)
             except Exception as err:
-                LOGGER.debug("[verify_api_access] Exception: %s", err)
+                LOGGER.warning("[verify_api_access] Exception: %s", err)
                 return abort(400, "Invalid request!")
 
+            return func(*args, **kwargs)
         return wrapper
 
     return decorator

@@ -96,7 +96,8 @@ def insert_object(request_user: UserModel):
         else:
             try:
                 objects_manager.get_object(public_id=new_object_data['public_id'])
-            except ObjectManagerGetError:
+            except ObjectManagerGetError as err:
+                LOGGER.warning("[insert_object] ObjectManagerGetError: %s , Type: %s", err, type(err))
                 pass
             else:
                 return abort(400, f'Type with PublicID {new_object_data["public_id"]} already exists.')
@@ -112,14 +113,14 @@ def insert_object(request_user: UserModel):
             new_object_id = objects_manager.insert_object(new_object_data, request_user, AccessControlPermission.CREATE)
         except Exception as err:
             #TODO: ERROR-FIX
-            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            LOGGER.warning("[DEBUG] Error: %s , Type: %s", err, type(err))
             return abort(500)
 
         try:
             current_type_instance = objects_manager.get_object_type(new_object_data['type_id'])
         except Exception as err:
             #TODO: ERROR-FIX
-            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            LOGGER.warning("[DEBUG] Error: %s , Type: %s", err, type(err))
             return abort(500)
 
         try:
@@ -129,7 +130,7 @@ def insert_object(request_user: UserModel):
                                                 object_after=CmdbObject.to_json(current_object))
         except Exception as err:
             #TODO: ERROR-FIX
-            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            LOGGER.warning("[DEBUG] Error: %s , Type: %s", err, type(err))
             return abort(500)
 
         try:
@@ -142,7 +143,7 @@ def insert_object(request_user: UserModel):
                                             ).result()
         except Exception as err:
             #TODO: ERROR-FIX
-            LOGGER.debug("[DEBUG] Error: %s , Type: %s", err, type(err))
+            LOGGER.warning("[DEBUG] Error: %s , Type: %s", err, type(err))
             return abort(500)
 
         # Generate new insert log
@@ -159,26 +160,27 @@ def insert_object(request_user: UserModel):
 
             logs_manager.insert_log(action=LogAction.CREATE, log_type=CmdbObjectLog.__name__, **log_params)
         except ManagerInsertError as err:
-            LOGGER.debug("[insert_object] ManagerInsertError: %s", err.message)
+            LOGGER.warning("[insert_object] ManagerInsertError: %s", err.message)
 
     except (TypeError, ObjectManagerInsertError) as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[insert_object] TypeError, ObjectManagerInsertError: %s", err.message)
+        LOGGER.warning("[insert_object] TypeError, ObjectManagerInsertError: %s", err.message)
         return abort(400, str(err))
     except (ManagerGetError, ObjectManagerGetError) as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[insert_object] ObjectManagerGetError: %s", err.message)
-        return abort(404)
+        LOGGER.warning("[insert_object] ObjectManagerGetError: %s", err.message)
+        return abort(400)
     except AccessDeniedError as err:
+        LOGGER.warning("[insert_object] Exception: %s", err.message)
         return abort(403, "No permission to insert the object !")
     except InstanceRenderError as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[insert_object] InstanceRenderError: %s", err.message)
+        LOGGER.warning("[insert_object] InstanceRenderError: %s", err.message)
         return abort(500)
     except Exception as err:
         #TODO: ERROR-FIX
-        LOGGER.debug("[insert_object] Exception: %s", err)
-        return abort(404, "Could not insert object!")
+        LOGGER.warning("[insert_object] Exception: %s", err)
+        return abort(400, "Could not insert object!")
 
     api_response = DefaultResponse(new_object_id)
 
@@ -192,6 +194,9 @@ def insert_object(request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
+    LOGGER.warning("[get_object] called")
+    LOGGER.warning(f"public_id: {public_id}")
+    LOGGER.warning(f"request_user: {request_user}")
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:

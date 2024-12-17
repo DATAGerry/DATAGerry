@@ -87,7 +87,7 @@ def setup(request, collection, example_type):
                                     "type_id": 1,
                                     "line": "ReferenceTO: {}",
                                     "label": "ReferenceTO",
-                                    "fields": ["test-dummy-field"],
+                                    "fields": ["test-field"],
                                     "icon": "fa fa-cube",
                                     "prefix": False
                                  }

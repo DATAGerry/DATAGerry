@@ -24,8 +24,10 @@ from cmdb.models.user_model.user import UserModel
 from cmdb.models.group_model.group import UserGroupModel
 from cmdb.models.right_model.all_rights import __all__ as rights
 # -------------------------------------------------------------------------------------------------------------------- #
+
 LOGGER = logging.getLogger(__name__)
 
+# -------------------------------------------------------------------------------------------------------------------- #
 @pytest.fixture(scope="session", name="rights_manager")
 def fixture_rights_manager():
     """TODO: document"""
