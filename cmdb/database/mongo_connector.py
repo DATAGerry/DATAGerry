@@ -16,6 +16,7 @@
 """
 Connection to database over a given connector
 """
+import os
 import logging
 from pymongo import MongoClient
 from pymongo.database import Database
@@ -35,10 +36,15 @@ class MongoConnector:
     PyMongo (MongoDB) implementation with connector
     """
     def __init__(self, host: str, port: int, database_name: str, client_options: dict = None):
-        if client_options:
-            self.client = MongoClient(host=host, port=int(port), connect=False, **client_options)
+        connection_string = os.getenv('CONNECTION_STRING')
+
+        if connection_string:
+            self.client = MongoClient(connection_string)
         else:
-            self.client = MongoClient(host=host, port=int(port), connect=False)
+            if client_options:
+                self.client = MongoClient(host=host, port=int(port), connect=False, **client_options)
+            else:
+                self.client = MongoClient(host=host, port=int(port), connect=False)
 
         self.database: Database = self.client.get_database(database_name)
         self.host: str = host
