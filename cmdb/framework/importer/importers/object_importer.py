@@ -16,9 +16,14 @@
 """Module of basic importers"""
 from datetime import datetime, timezone
 import logging
+from flask import current_app
 
 from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
+from cmdb.models.user_model.user import UserModel
+from cmdb.models.object_model.cmdb_object import CmdbObject
+from cmdb.framework.results import IterationResult
 from cmdb.framework.importer.importers.base_importer import BaseImporter
 from cmdb.framework.importer.configs.object_importer_config import ObjectImporterConfig
 from cmdb.framework.importer.responses.importer_object_response import ImporterObjectResponse
@@ -26,7 +31,6 @@ from cmdb.framework.importer.messages.import_failed_message import ImportFailedM
 from cmdb.framework.importer.messages.import_success_message import ImportSuccessMessage
 from cmdb.framework.importer.parser.base_object_parser import BaseObjectParser
 from cmdb.framework.importer.responses.object_parser_response import ObjectParserResponse
-from cmdb.models.user_model.user import UserModel
 
 from cmdb.errors.manager.object_manager import ObjectManagerDeleteError,\
                                                ObjectManagerInsertError,\
@@ -87,6 +91,8 @@ class ObjectImporter(BaseImporter):
         Args:
             import_objects: list of all objects for import - or output of _generate_objects()
         """
+
+
         run_config = self.get_config()
 
         success_imports: list[ImportSuccessMessage] = []
@@ -123,6 +129,10 @@ class ObjectImporter(BaseImporter):
                 current_import_object['last_edit_time'] = datetime.now(timezone.utc)
             except ObjectManagerGetError:
                 try:
+                    if current_app.cloud_mode:
+                        if self.check_config_item_limit_reached(self.request_user, self.objects_manager):
+                            raise ObjectManagerInsertError("Config item limit reached!")
+
                     self.objects_manager.insert_object(current_import_object)
                 except ObjectManagerInsertError as err:
                     failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
@@ -139,6 +149,10 @@ class ObjectImporter(BaseImporter):
                     continue
                 else:
                     try:
+                        if current_app.cloud_mode:
+                            if self.check_config_item_limit_reached(self.request_user, self.objects_manager):
+                                raise ObjectManagerInsertError("Config item limit reached")
+
                         self.objects_manager.insert_object(current_import_object)
                     except ObjectManagerInsertError as err:
                         failed_imports.append(ImportFailedMessage(error_message=err.message, obj=current_import_object))
@@ -164,3 +178,14 @@ class ObjectImporter(BaseImporter):
         """Starting the import process.
         Should call the _import method"""
         raise NotImplementedError
+
+
+    def check_config_item_limit_reached(self, request_user: UserModel, objects_manager: ObjectsManager) -> bool:
+        """TODO: document"""
+
+        builder_params = BuilderParameters({})
+        iteration_result: IterationResult[CmdbObject] = objects_manager.iterate(builder_params)
+
+        objects_count = iteration_result.total
+
+        return objects_count >= request_user.config_items_limit
