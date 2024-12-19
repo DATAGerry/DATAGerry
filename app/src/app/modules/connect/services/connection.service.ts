@@ -15,17 +15,20 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Injectable } from '@angular/core';
-import { HttpBackend, HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, lastValueFrom, of } from 'rxjs';
-import { environment } from 'src/environments/environment';
-import { ToastService } from 'src/app/layout/toast/toast.service';
+
+
+import { Injectable } from "@angular/core";
+import { HttpBackend, HttpClient } from "@angular/common/http";
+
+import { BehaviorSubject, Observable, lastValueFrom } from "rxjs";
+import { environment } from "../../../../environments/environment";
+/* ------------------------------------------------------------------------------------------------------------------ */
+
 @Injectable({
-    providedIn: 'root'
+    providedIn: "root",
 })
 export class ConnectionService {
 
-    private readonly apiUrl: string;
     private connectionSubject: BehaviorSubject<string>;
     public connection: Observable<string>;
     private connectionStatus: boolean = false;
@@ -37,119 +40,110 @@ export class ConnectionService {
         return this.connectionStatus;
     }
 
-    public get currentConnection(): string | null {
+    public get currentConnection(): any {
         return this.connectionSubject.value;
     }
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    public constructor(private backend: HttpBackend, private toast: ToastService) {
+    public constructor(private backend: HttpBackend) {
         this.http = new HttpClient(backend);
-        this.apiUrl = environment.apiUrl;
-
-        // Initialize connectionSubject with null to trigger setDefaultConnection
-        this.connectionSubject = new BehaviorSubject<string | null>(null);
+        this.connectionSubject = new BehaviorSubject<string>(
+            JSON.parse(localStorage.getItem("connection"))
+        );
         this.connection = this.connectionSubject.asObservable();
 
-        // Set default connection from environment
-        this.setDefaultConnection();
+        if (this.currentConnection === null) {
+            this.setDefaultConnection();
+        }
 
-        // Attempt to connect using the default API URL
-        this.connect().then(status => {
-            this.connectionStatus = status;
+        try {
+            const connectionStatusPromise = this.connect();
+            connectionStatusPromise.then((status) => {
+                this.connectionStatus = status;
 
-            if (!this.connectionStatus) {
-                this.connectionSubject.next(null);
-                this.toast.error('Initial connection failed. API URL has been reset to null.')
-            }
-        }).catch((error) => {
+                if (this.connectionStatus === false) {
+                    localStorage.removeItem("connection");
+                    this.connectionSubject.next(null);
+                }
+            });
+        } catch (e) {
             this.connectionStatus = false;
+            localStorage.removeItem("connection");
             this.connectionSubject.next(null);
-            console.error(error);
-            this.toast.error(error?.error?.message)
-
-        });
+        }
     }
 
     /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
     /**
-     * Sets the default connection URL from the environment configuration.
+     * Sets the default connection URL using environment variables for protocol, host, and port.
      */
-    private setDefaultConnection(): void {
-        try {
-            this.connectionSubject.next(this.apiUrl);
-            console.log(`Default API URL set to: ${this.apiUrl}`);
-        } catch (error) {
-            this.toast.error(error?.error?.message)
-        }
+    private setDefaultConnection() {
+        this.setConnectionURL(environment.protocol, environment.apiUrl, environment.apiPort);
     }
 
+
     /**
-     * Attempts to connect to the API endpoint.
-     * @returns Promise<boolean> indicating connection success.
+     * Tests the current connection by attempting to connect to the backend.
+     * @returns A promise resolving to `true` if the connection is successful, otherwise `false`.
      */
-    public async testConnection(): Promise<boolean> {
+    public async testConnection() {
         try {
             await this.connect();
-            console.log('Test connection successful.');
             return true;
-        } catch (error) {
-            this.toast.error(error?.error?.message)
+        } catch (e) {
             return false;
         }
     }
 
-    /**
-     * Connects to the API endpoint to verify its availability.
-     * @returns Promise<boolean> indicating connection success.
-     */
-    private async connect(): Promise<boolean> {
-        if (!this.currentConnection) {
-            this.toast.error('No API URL is set. Cannot attempt connection.')
-            return false;
-        }
 
-        console.log(`### CONNECTION TRY with URL: ${this.currentConnection}/rest/ ###`);
-        try {
-            await lastValueFrom(this.http.get<any>(`${this.currentConnection}/rest/`));
-            console.log('Connection successful.');
-            return true;
-        } catch (error) {
-            console.error(`Connection attempt to ${this.currentConnection}/rest/ failed:`, error);
-            this.toast.error(error?.error?.message)
-            return false;
-        }
+    /**
+     * Attempts to connect to the backend using the current connection URL.
+     * Logs the connection attempt and resolves the HTTP response.
+     * @returns A promise resolving to the backend's connection response.
+     */
+    private async connect() {
+        // console.log(
+        //     `### CONNECTION TRY with URL: ${this.currentConnection}/rest/ ###`
+        // );
+        const conn_result$ = this.http.get<any>(
+            `${this.currentConnection}/rest/`
+        );
+
+        return await lastValueFrom(conn_result$);
     }
 
+
     /**
-     * Tests a custom API URL provided by the user.
-     * @param protocol The protocol to use (e.g., 'http', 'https').
-     * @param host The host address.
-     * @param port The port number.
-     * @returns Promise<boolean> indicating if the custom URL is reachable.
+     * Tests a custom backend URL by constructing it from the provided protocol, host, and port.
+     * Logs the connection attempt and resolves the HTTP response.
+     * @param protocol - The protocol to use (e.g., 'http', 'https').
+     * @param host - The host address of the backend.
+     * @param port - The port number of the backend.
+     * @returns A promise resolving to the backend's connection response.
      */
-    public async testCustomURL(protocol: string, host: string, port: number): Promise<boolean> {
+    public async testCustomURL(protocol: string, host: string, port: number) {
         const customURL = `${protocol}://${host}:${port}/rest/`;
-        console.log(`Trying to connect to backend @ ${customURL}`);
-        try {
-            await lastValueFrom(this.http.get<any>(customURL));
-            console.log(`Custom URL connection successful: ${customURL}`);
-            return true;
-        } catch (error) {
-            console.error(`Custom URL test failed for ${customURL}:`, error);
-            return false;
-        }
+        // console.log(`Trying to connect to backend @ ${customURL}`);
+        const conn_test_result$ = this.http.get<any>(customURL);
+
+        return await lastValueFrom(conn_test_result$);
     }
 
+
     /**
-     * Sets a new connection URL based on provided protocol, host, and port.
-     * @param protocol The protocol to use (e.g., 'http', 'https').
-     * @param host The host address.
-     * @param port The port number.
+     * Sets the connection URL based on the provided protocol, host, and port.
+     * Updates the local storage and notifies subscribers of the new connection URL.
+     * @param protocol - The protocol to use (e.g., 'http', 'https').
+     * @param host - The host address of the backend.
+     * @param port - The port number of the backend.
      */
-    public setConnectionURL(protocol: string, host: string, port: number): void {
-        let href = '';
+    public setConnectionURL(protocol: string, host: string, port: number) {
+
+        // Remove any existing protocol from the host
+        host = host.replace(/^https?:\/\//, '');
+        let href = "";
 
         if (port === 0) {
             href = `${protocol}://${host}`;
@@ -157,11 +151,7 @@ export class ConnectionService {
             href = `${protocol}://${host}:${port}`;
         }
 
-        try {
-            this.connectionSubject.next(href);
-            console.log(`Connection URL updated to: ${href}`);
-        } catch (error) {
-            this.toast.error(error?.error?.message)
-        }
+        localStorage.setItem("connection", JSON.stringify(href));
+        this.connectionSubject.next(href);
     }
 }

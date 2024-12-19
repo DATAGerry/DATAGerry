@@ -1,5 +1,7 @@
 export const environment = {
     production: false,
     cloudMode: true,
-    apiUrl: '' //your API URL
+    protocol: 'http',
+    apiUrl: '', // API URL
+    apiPort: 4000 // Typically HTTPS
 };
