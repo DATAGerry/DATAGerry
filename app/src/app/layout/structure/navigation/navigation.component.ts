@@ -64,13 +64,14 @@ export class NavigationComponent implements OnInit {
 
 
     public ngOnInit(): void {
-        this.objectService.countObjects().pipe(
-            switchMap(() => this.objectService.getLastObjectCount())
-        ).subscribe(count => {
-            this.usedObjects = count;
-        });
-
         if (this.user) {
+
+            this.objectService.countObjects().pipe(
+                switchMap(() => this.objectService.getLastObjectCount())
+            ).subscribe(count => {
+                this.usedObjects = count;
+            });
+
             this.groupService.getGroup(this.user.group_id).subscribe(resp => {
                 this.group = resp;
             });
