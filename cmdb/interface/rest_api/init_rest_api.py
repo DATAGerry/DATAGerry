@@ -131,7 +131,7 @@ def register_blueprints(app: BaseCmdbApp):
         app.register_blueprint(debug_blueprint)
 
 
-def register_error_pages(app):
+def register_error_pages(app: BaseCmdbApp):
     """
     Registers error handlers for the app
 

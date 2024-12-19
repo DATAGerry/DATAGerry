@@ -19,7 +19,7 @@ import copy
 import logging
 from datetime import datetime, timezone
 from bson import json_util
-from flask import abort, jsonify, request
+from flask import abort, current_app, jsonify, request
 
 from cmdb.database.utils import default, object_hook
 from cmdb.database.mongo_query_builder import MongoDBQueryBuilder
@@ -88,6 +88,10 @@ def insert_object(request_user: UserModel):
     logs_manager: LogsManager = ManagerProvider.get_manager(ManagerType.LOGS_MANAGER, request_user)
     webhooks_manager: WebhooksManager = ManagerProvider.get_manager(ManagerType.WEBHOOKS_MANAGER, request_user)
 
+    if current_app.cloud_mode:
+        if check_config_item_limit_reached(request_user):
+            return abort(405, "The maximum amout of objects is reached!")
+
     try:
         new_object_data = json.loads(add_data_dump, object_hook=json_util.object_hook)
 
@@ -98,7 +102,6 @@ def insert_object(request_user: UserModel):
                 objects_manager.get_object(public_id=new_object_data['public_id'])
             except ObjectManagerGetError as err:
                 LOGGER.warning("[insert_object] ObjectManagerGetError: %s , Type: %s", err, type(err))
-                pass
             else:
                 return abort(400, f'Type with PublicID {new_object_data["public_id"]} already exists.')
 
@@ -194,9 +197,6 @@ def insert_object(request_user: UserModel):
 @objects_blueprint.protect(auth=True, right='base.framework.object.view')
 def get_object(public_id, request_user: UserModel):
     """TODO: document"""
-    LOGGER.warning("[get_object] called")
-    LOGGER.warning(f"public_id: {public_id}")
-    LOGGER.warning(f"request_user: {request_user}")
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
 
     try:
@@ -1290,3 +1290,18 @@ def delete_object_links(public_id: int, request_user: UserModel) -> None:
 
     for link in links:
         object_links_manager.delete({'public_id':link.public_id})
+
+
+def check_config_item_limit_reached(request_user: UserModel) -> bool:
+    """TODO: document"""
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS_MANAGER, request_user)
+
+    builder_params = BuilderParameters({})
+    iteration_result: IterationResult[CmdbObject] = objects_manager.iterate(builder_params,
+                                                                            request_user,
+                                                                            AccessControlPermission.READ)
+
+    objects_count = iteration_result.total
+    LOGGER.debug(f"[check_config_item_limit_reached] objects_count: {objects_count}")
+
+    return objects_count >= request_user.config_items_limit

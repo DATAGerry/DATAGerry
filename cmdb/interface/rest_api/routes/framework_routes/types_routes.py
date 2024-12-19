@@ -243,38 +243,48 @@ def update_type(public_id: int, data: dict, request_user: UserModel):
 
     try:
         unchanged_type = types_manager.get_type(public_id)
-
         data.setdefault('last_edit_time', datetime.now(timezone.utc))
         type_ = TypeModel.from_data(data=data)
         types_manager.update_type(public_id, TypeModel.to_json(type_))
         api_response = UpdateSingleResponse(result=data)
-    except ManagerGetError:
+    except ManagerGetError as err:
+        LOGGER.warning("[update_type] ManagerGetError: %s", err.message)
         #TODO: ERROR-FIX
         return abort(404)
     except ManagerUpdateError as err:
-        LOGGER.debug("[update_type] ManagerUpdateError: %s", err.message)
+        LOGGER.warning("[update_type] ManagerUpdateError: %s", err.message)
+        return abort(400, f"Type with public_id: {public_id} could not be updated!")
+    except Exception as err:
+        LOGGER.warning("[update_type] Update Type Exception: %s", err)
         return abort(400, f"Type with public_id: {public_id} could not be updated!")
 
     # when types are updated, update all locations with relevant data from this type
     updated_type = types_manager.get_type(public_id)
-    locations_with_type = locations_manager.get_locations_by(type_id=public_id)
 
-    loc_data = {
-        'type_label': updated_type.label,
-        'type_icon': updated_type.render_meta.icon,
-        'type_selectable': updated_type.selectable_as_parent
-    }
+    try:
+        locations_with_type = locations_manager.get_locations_by(type_id=public_id)
 
-    location: CmdbLocation
-    for location in locations_with_type:
-        locations_manager.update({'public_id':location.public_id}, loc_data)
+        loc_data = {
+            'type_label': updated_type.label,
+            'type_icon': updated_type.render_meta.icon,
+            'type_selectable': updated_type.selectable_as_parent
+        }
 
-    # check and update all multi data sections for the type if required
-    updated_objects = types_manager.handle_mutli_data_sections(unchanged_type, data)
+        location: CmdbLocation
+        for location in locations_with_type:
+            locations_manager.update({'public_id':location.public_id}, loc_data)
 
-    an_object: CmdbObject
-    for an_object in updated_objects:
-        objects_manager.update_object(an_object.public_id, CmdbObject.to_json(an_object))
+        # check and update all multi data sections for the type if required
+        updated_objects = types_manager.handle_mutli_data_sections(unchanged_type, data)
+    except Exception as err:
+        LOGGER.warning("[update_type] Handle locations Exception: %s", err)
+
+    try:
+        an_object: CmdbObject
+        for an_object in updated_objects:
+            objects_manager.update_object(an_object.public_id, CmdbObject.to_json(an_object))
+    except Exception as err:
+        LOGGER.warning("[update_type] Update objects Exception: %s", err)
 
     return api_response.make_response()
 

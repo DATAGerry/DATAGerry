@@ -168,6 +168,9 @@ def verify_api_access(*, required_api_level: ApiLevel = None):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
             """TODO: document"""
+            if not current_app.cloud_mode:
+                return func(*args, **kwargs)
+
             try:
                 auth_method = __get_request_auth_method()
                 api_user_dict = __get_request_api_user()
