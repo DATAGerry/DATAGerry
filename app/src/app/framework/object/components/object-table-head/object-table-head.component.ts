@@ -23,7 +23,7 @@ import { RenderResult } from '../../../models/cmdb-render';
 import { Router } from '@angular/router';
 import { environment } from 'src/environments/environment';
 import { ObjectService } from 'src/app/framework/services/object.service';
-import { catchError, debounceTime, interval, Observable, of, Subject, takeUntil } from 'rxjs';
+import { catchError, debounceTime, interval, Observable, of, Subject, Subscription, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'cmdb-object-table-head',
@@ -48,12 +48,20 @@ export class ObjectTableHeadComponent implements OnInit, OnDestroy, OnChanges {
 
   private fetchTrigger$ = new Subject<void>();
   private destroy$ = new Subject<void>();
+  private subscription: Subscription;
 
   isCloudModeEnabled = environment.cloudMode;
 
   public constructor(private router: Router, private objectService: ObjectService) { }
 
   ngOnInit(): void {
+
+    this.subscription = this.objectService.getConfigItemsLimit().subscribe({
+      next: (limit) => {
+        this.totalObjects = limit;
+      }
+    });
+
     this.fetchTrigger$.pipe(
       debounceTime(300),
       takeUntil(this.destroy$)
@@ -80,8 +88,11 @@ export class ObjectTableHeadComponent implements OnInit, OnDestroy, OnChanges {
     this.destroy$.next();
     this.destroy$.complete();
     this.fetchTrigger$.complete();
-  }
 
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
 
 
   /**
@@ -107,19 +118,36 @@ export class ObjectTableHeadComponent implements OnInit, OnDestroy, OnChanges {
    */
   getButtonClass(): string {
     if (!this.isCloudModeEnabled) {
-      return '';
+      return 'btn btn-primary'; // Default Bootstrap button class
     }
 
-    // Prevent division by zero
-    const percentage = this.totalObjects > 0 ? (this.usedObjects / this.totalObjects) * 100 : 0;
+    const percentage = this.calculatePercentage();
 
-    if (percentage <= 50) {
-      return 'btn-success';
-    } else if (percentage <= 85) {
-      return 'btn-warning';
-    } else {
-      return 'btn-danger';
+    if (percentage === 100) {
+      return 'btn btn-secondary disabled-look';
     }
+  }
+
+
+  /**
+   * Gets the tooltip text for the button based on usage percentage.
+   */
+  getButtonTooltip(): string {
+    const percentage = this.calculatePercentage();
+
+    if (percentage === 100) {
+      return 'Maximum number of objects has been reached';
+    }
+
+    return 'Add a new object'; // Default tooltip
+  }
+
+
+  /**
+   * Calculates the percentage of used objects.
+   */
+  private calculatePercentage(): number {
+    return this.totalObjects > 0 ? (this.usedObjects / this.totalObjects) * 100 : 0;
   }
 
 
