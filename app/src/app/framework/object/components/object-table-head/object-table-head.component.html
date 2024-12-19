@@ -6,6 +6,7 @@
                 *permissionLink="['base.framework.object.add'];acl:type.acl;requirements:'CREATE'"
                 class="btn btn-success btn-sm mr-1"
                 [ngClass]="getButtonClass()"
+                [ngbTooltip]="getButtonTooltip()"
                 [routerLink]="['/framework/object/add/', type?.public_id ]">
           <i class="fas fa-plus"></i> Add
         </button>
