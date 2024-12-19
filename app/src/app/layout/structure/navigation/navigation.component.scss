@@ -258,6 +258,7 @@ $navbar-dropdown-header-background: theme-color('primary');
   color: #212529;
 }
 
+
 // Styles for the progress bar
 .progress-container {
   display: flex;
@@ -275,20 +276,19 @@ $navbar-dropdown-header-background: theme-color('primary');
       position: relative;
       height: 15px;
       width: 100%;
-      border-radius: 10px;
+      border-radius: 0px;
       background-color: #e0e0e0; // Light gray background for unused area
       overflow: visible;
 
       .progress-bar {
-          background-color: orange; // Used area color
-          border-radius: 10px 0 0 10px;
+          border-radius: 0px;
       }
 
       .progress-percentage {
           position: absolute;
           width: 100%;
           text-align: center;
-          font-size: 0.8rem;
+          font-size: 0.6rem;
           font-weight: bold;
           color: #000;
           top: 50%;

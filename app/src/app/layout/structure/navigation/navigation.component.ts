@@ -26,8 +26,9 @@ import { GroupService } from '../../../management/services/group.service';
 import { User } from '../../../management/models/user';
 import { Group } from '../../../management/models/group';
 import { ObjectService } from 'src/app/framework/services/object.service';
-import { switchMap } from 'rxjs';
+import { Subscription, switchMap } from 'rxjs';
 import { environment } from 'src/environments/environment';
+import { ToastService } from '../../toast/toast.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 declare global {
@@ -46,9 +47,11 @@ export class NavigationComponent implements OnInit {
     public user: User;
     public group: Group;
 
-    public usedObjects = 0;
-    public totalObjects = 100;
+    public usedObjects: number = 0;
+    public totalObjects: number = 0;
     public isCloudMode = environment.cloudMode;
+    configItemsLimit: number;
+    private subscription: Subscription;
 
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
@@ -57,7 +60,8 @@ export class NavigationComponent implements OnInit {
         public authService: AuthService,
         private userService: UserService,
         private groupService: GroupService,
-        private objectService: ObjectService
+        private objectService: ObjectService,
+        private toast: ToastService
     ) {
         this.user = this.userService.getCurrentUser();
     }
@@ -75,9 +79,23 @@ export class NavigationComponent implements OnInit {
             this.groupService.getGroup(this.user.group_id).subscribe(resp => {
                 this.group = resp;
             });
+
+            this.subscription = this.objectService.getConfigItemsLimit().subscribe({
+                next: (limit) => {
+                    this.totalObjects = limit;
+                }
+            });
+
         }
 
         this.dropdownSubmenu();
+    }
+
+
+    ngOnDestroy(): void {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
     }
 
     /* ------------------------------------------------ HELPER FUNCTIONS ------------------------------------------------ */
@@ -135,5 +153,38 @@ export class NavigationComponent implements OnInit {
      */
     public openIntroModal() {
         this.authService.showIntro(true);
+    }
+
+
+    /**
+     * Calculates the percentage of used objects relative to the total objects.
+     * @returns A number representing the usage percentage.
+     */
+    get percentage(): number {
+        return (this.usedObjects / this.totalObjects) * 100;
+    }
+
+
+    /**
+     * Determines the color of the progress bar based on the usage percentage.
+     * @returns A string representing the color of the progress bar.
+     */
+    getProgressBarColor(): string {
+        if (this.percentage <= 50) {
+            return 'green';
+        } else if (this.percentage <= 85) {
+            return 'rgb(255, 193, 7)';
+        } else {
+            return 'red';
+        }
+    }
+
+
+    /**
+     * Determines the text color for the percentage display based on the usage percentage.
+     * @returns A string representing the text color in HEX format.
+     */
+    getTextColor(): string {
+        return this.percentage > 85 ? '#fff' : '#000'; // Use white text on high usage (red background)
     }
 }

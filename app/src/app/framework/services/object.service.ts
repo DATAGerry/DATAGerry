@@ -20,8 +20,8 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 import { UntypedFormControl } from '@angular/forms';
 
-import { BehaviorSubject, Observable, Subject, timer } from 'rxjs';
-import { catchError, map, switchMap, finalize } from 'rxjs/operators';
+import { BehaviorSubject, Observable, Subject, throwError, timer } from 'rxjs';
+import { catchError, map, switchMap, finalize, shareReplay } from 'rxjs/operators';
 
 import { ApiCallService, ApiServicePrefix, httpObserveOptions, resp } from '../../services/api-call.service';
 
@@ -32,6 +32,8 @@ import { CollectionParameters } from '../../services/models/api-parameter';
 import { APIGetListResponse, APIGetMultiResponse, APIUpdateMultiResponse } from '../../services/models/api-response';
 import { CmdbType } from '../models/cmdb-type';
 import { LocationsModalComponent } from 'src/app/layout/helpers/modals/locations-modal/locations-modal.component';
+import { UserService } from 'src/app/management/services/user.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 /* -------------------------------------------------------------------------- */
 
 export const checkObjectExistsValidator = (objectService: ObjectService, time: number = 500) => {
@@ -76,6 +78,8 @@ export const COOCKIENAME = 'onlyActiveObjCookie';
 export class ObjectService<T = CmdbObject | RenderResult> implements ApiServicePrefix {
     public objectActionSource = new Subject();
     public servicePrefix: string = 'objects';
+    private configItemsLimit$: Observable<number>;
+
 
     // A private property to store the last fetched count
     private lastObjectCountSubject = new BehaviorSubject<number>(0);
@@ -90,7 +94,7 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
 
     /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
-    constructor(private api: ApiCallService, private modalService: NgbModal) {
+    constructor(private api: ApiCallService, private modalService: NgbModal, private userService: UserService, private toast: ToastService) {
 
     }
 
@@ -528,5 +532,31 @@ export class ObjectService<T = CmdbObject | RenderResult> implements ApiServiceP
         if (action === 'create' || action === 'delete') {
             this.countObjects().subscribe();
         }
+    }
+
+
+    /**
+     * Get the config_items_limit value.
+     * Fetches the value once and caches it for future use.
+     */
+    public getConfigItemsLimit(): Observable<number> {
+        if (!this.configItemsLimit$) {
+            this.configItemsLimit$ = this.userService.getUser(this.userService.getCurrentUser().public_id).pipe(
+                map(user => {
+                    if (user && user.config_items_limit !== undefined) {
+                        return user.config_items_limit;
+                    } else {
+                        throw new Error('config_items_limit not found');
+                    }
+                }),
+                // Cache the latest emitted value and share with all subscribers
+                shareReplay(1),
+                catchError(error => {
+                    this.toast.error(error?.error?.message)
+                    return throwError(() => error);
+                })
+            );
+        }
+        return this.configItemsLimit$;
     }
 }

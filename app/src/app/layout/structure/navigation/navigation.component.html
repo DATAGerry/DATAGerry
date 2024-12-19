@@ -49,23 +49,25 @@
                     Objects {{usedObjects}} / {{totalObjects}}
                 </div>
                 <div class="progress">
-                    <!-- Used Area -->
+                    <!-- Used Area with Dynamic Color -->
                     <div
                         class="progress-bar"
                         role="progressbar"
-                        [style.width.%]="(usedObjects / totalObjects) * 100"
+                        [style.width.%]="percentage"
+                        [style.backgroundColor]="getProgressBarColor()"
                         [attr.aria-valuenow]="usedObjects"
                         aria-valuemin="0"
                         [attr.aria-valuemax]="totalObjects">
                     </div>
-                    <!-- Centered Percentage -->
-                    <span class="progress-percentage">
-                        {{ ((usedObjects / totalObjects) * 100) | number:'1.0-0' }}%
+                    <!-- Centered Percentage with Dynamic Text Color -->
+                    <span 
+                        class="progress-percentage"
+                        [style.color]="getTextColor()">
+                        {{ percentage | number:'1.0-0' }}%
                     </span>
                 </div>
             </div>
         </div>
-
             
                 <div class="col-12 col-sm-5">
                     <ul class="nav navbar-nav navbar-right-menu list-inline text-center d-flex justify-content-end align-items-center">
