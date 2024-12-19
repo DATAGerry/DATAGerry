@@ -5,7 +5,9 @@
 export const environment = {
   production: false,
   cloudMode: false,
-  apiUrl: 'http://localhost:4000' // Your development API URL
+  protocol: 'http',
+  apiUrl: 'localhost',
+  apiPort: 4000
 };
 /*
  * For easier debugging in development mode, you can import the following file
