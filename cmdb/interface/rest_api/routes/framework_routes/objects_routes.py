@@ -1302,6 +1302,5 @@ def check_config_item_limit_reached(request_user: UserModel) -> bool:
                                                                             AccessControlPermission.READ)
 
     objects_count = iteration_result.total
-    LOGGER.debug(f"[check_config_item_limit_reached] objects_count: {objects_count}")
 
     return objects_count >= request_user.config_items_limit

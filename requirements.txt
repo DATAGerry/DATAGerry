@@ -33,7 +33,6 @@ packaging==24.1
 Pillow==10.3.0
 pluggy==1.5.0
 pyasn1==0.6.0
-pycairo==1.26.1
 pycodestyle==2.12.0
 pycparser==2.22
 pycryptodome==3.20.0
