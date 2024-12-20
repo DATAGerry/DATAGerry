@@ -587,12 +587,12 @@ export class RunReportComponent implements OnInit {
                                 let flattenedData = [];
                                 jsonData.forEach(item => {
                                     const baseData = {
-                                        public_id: String(item.object_id), // Convert ID to string
-                                        active: String(item.active), // Convert boolean to string
+                                        public_id: String(item.object_id),
+                                        active: String(item.active),
                                         type_label: item.type_label
                                     };
 
-                                    // Filter and add selected fields
+                                    // Process normal fields
                                     item.fields
                                         .filter(field => this.selectedFields.includes(field.name))
                                         .forEach(field => {
@@ -603,15 +603,15 @@ export class RunReportComponent implements OnInit {
                                                 value = new Date(value.$date).toLocaleDateString();
                                             }
 
-                                            // Convert numeric values to strings with padding
+                                            // Convert numeric values to strings with a preceding quote
                                             if (typeof value === 'number') {
-                                                value = `'${String(value)}`; // Add single quote to treat as string in Excel
+                                                value = `'${String(value)}`;
                                             }
 
-                                            // Center-align password field values
+                                            // Center-align password field values if needed
                                             if (field.name.startsWith('password') && value) {
                                                 const strValue = String(value);
-                                                const padding = (20 - strValue.length) / 2; // Adjust 20 as needed
+                                                const padding = (20 - strValue.length) / 2;
                                                 value =
                                                     ' '.repeat(Math.floor(padding)) +
                                                     strValue +
@@ -622,117 +622,110 @@ export class RunReportComponent implements OnInit {
                                         });
 
                                     if (this.mdsMode === 'ROWS') {
-                                        // Compute Cartesian product for MDS in ROWS mode
+                                        // Handle ROWS mode
                                         const mdsValuesPerSection: any[][] = [];
+                                        const mdsSections = item.multi_data_sections && Array.isArray(item.multi_data_sections)
+                                            ? item.multi_data_sections
+                                            : [];
 
-                                        item.multi_data_sections.forEach(section => {
-                                            const sectionValues = [];
-                                            section.values.forEach(value => {
-                                                const mdsFields: { [key: string]: any } = {};
-                                                value.data
-                                                    .filter(dataItem =>
-                                                        this.selectedFields.includes(dataItem.name)
-                                                    )
-                                                    .forEach(dataItem => {
-                                                        let fieldValue = dataItem.value;
+                                        if (mdsSections.length > 0) {
+                                            mdsSections.forEach(section => {
+                                                const sectionValues = [];
+                                                (section.values || []).forEach(mdsValue => {
+                                                    const mdsFields: { [key: string]: any } = {};
+                                                    (mdsValue.data || [])
+                                                        .filter(dataItem =>
+                                                            this.selectedFields.includes(dataItem.name)
+                                                        )
+                                                        .forEach(dataItem => {
+                                                            let fieldValue = dataItem.value;
 
-                                                        // Parse date fields
-                                                        if (
-                                                            fieldValue &&
-                                                            typeof fieldValue === 'object' &&
-                                                            '$date' in fieldValue
-                                                        ) {
-                                                            fieldValue = new Date(
-                                                                fieldValue.$date
-                                                            ).toLocaleDateString();
-                                                        }
+                                                            // Parse date fields
+                                                            if (fieldValue && typeof fieldValue === 'object' && '$date' in fieldValue) {
+                                                                fieldValue = new Date(fieldValue.$date).toLocaleDateString();
+                                                            }
 
-                                                        // Convert numeric values to strings
-                                                        if (typeof fieldValue === 'number') {
-                                                            fieldValue = `'${String(fieldValue)}`;
-                                                        }
+                                                            // Convert numeric values to string without quote
+                                                            if (typeof fieldValue === 'number') {
+                                                                fieldValue = String(fieldValue);
+                                                            }
 
-                                                        // Center-align password field values
-                                                        if (
-                                                            dataItem.name.startsWith('password') &&
-                                                            fieldValue
-                                                        ) {
-                                                            const strValue = String(fieldValue);
-                                                            const padding =
-                                                                (20 - strValue.length) / 2; // Adjust 20 as needed
-                                                            fieldValue =
-                                                                ' '.repeat(Math.floor(padding)) +
-                                                                strValue +
-                                                                ' '.repeat(Math.ceil(padding));
-                                                        }
+                                                            // Center-align password field values
+                                                            if (dataItem.name.startsWith('password') && fieldValue) {
+                                                                const strValue = String(fieldValue);
+                                                                const padding = (20 - strValue.length) / 2;
+                                                                fieldValue =
+                                                                    ' '.repeat(Math.floor(padding)) +
+                                                                    strValue +
+                                                                    ' '.repeat(Math.ceil(padding));
+                                                            }
 
-                                                        mdsFields[dataItem.name] = fieldValue ?? '';
-                                                    });
-                                                sectionValues.push(mdsFields);
+                                                            mdsFields[dataItem.name] = fieldValue ?? '';
+                                                        });
+                                                    sectionValues.push(mdsFields);
+                                                });
+                                                mdsValuesPerSection.push(sectionValues);
                                             });
-                                            mdsValuesPerSection.push(sectionValues);
-                                        });
 
-                                        // Compute Cartesian product
-                                        const cartesianProduct = this.computeCartesianProduct(
-                                            mdsValuesPerSection
-                                        );
+                                            // Compute Cartesian product
+                                            const cartesianProduct = this.computeCartesianProduct(mdsValuesPerSection);
 
-                                        // For each combination, create an item
-                                        cartesianProduct.forEach(combination => {
-                                            const row = { ...baseData };
-                                            combination.forEach(mdsFields => {
-                                                Object.entries(mdsFields).forEach(([key, value]) => {
-                                                    row[key] = value;
+                                            if (cartesianProduct.length > 0) {
+                                                cartesianProduct.forEach(combination => {
+                                                    const row = { ...baseData };
+                                                    combination.forEach(mdsFields => {
+                                                        Object.entries(mdsFields).forEach(([key, value]) => {
+                                                            row[key] = value;
+                                                        });
+                                                    });
+                                                    flattenedData.push(row);
+                                                });
+                                            } else {
+                                                // If no combinations, just push the baseData
+                                                flattenedData.push({ ...baseData });
+                                            }
+                                        } else {
+                                            // No multi_data_sections at all
+                                            flattenedData.push({ ...baseData });
+                                        }
+
+                                    } else {
+                                        // COLUMNS mode or default
+                                        const row = { ...baseData };
+                                        const mdsFieldValues = new Map<string, any[]>();
+
+                                        const mdsSections = item.multi_data_sections && Array.isArray(item.multi_data_sections)
+                                            ? item.multi_data_sections
+                                            : [];
+
+                                        if (mdsSections.length > 0) {
+                                            mdsSections.forEach(section => {
+                                                (section.values || []).forEach(mdsValue => {
+                                                    (mdsValue.data || [])
+                                                        .filter(dataItem => this.selectedFields.includes(dataItem.name))
+                                                        .forEach(dataItem => {
+                                                            let fieldValue = dataItem.value;
+
+                                                            // Parse date fields
+                                                            if (fieldValue && typeof fieldValue === 'object' && '$date' in fieldValue) {
+                                                                fieldValue = new Date(fieldValue.$date).toLocaleDateString();
+                                                            }
+
+                                                            // Convert numeric values to strings
+                                                            if (typeof fieldValue === 'number') {
+                                                                fieldValue = `${String(fieldValue)}`;
+                                                            }
+
+                                                            if (!mdsFieldValues.has(dataItem.name)) {
+                                                                mdsFieldValues.set(dataItem.name, []);
+                                                            }
+                                                            mdsFieldValues.get(dataItem.name).push(fieldValue ?? '');
+                                                        });
                                                 });
                                             });
-                                            flattenedData.push(row);
-                                        });
-                                    }
+                                        }
 
-
-                                    else {
-                                        // Default COLUMNS mode
-                                        const row = { ...baseData };
-
-                                        // Add MDS fields in COLUMNS mode
-                                        const mdsFieldValues = new Map<string, any[]>();
-                                        item.multi_data_sections.forEach(section => {
-                                            section.values.forEach(value => {
-                                                value.data
-                                                    .filter(dataItem =>
-                                                        this.selectedFields.includes(dataItem.name)
-                                                    )
-                                                    .forEach(dataItem => {
-                                                        let fieldValue = dataItem.value;
-
-                                                        // Parse date fields
-                                                        if (
-                                                            fieldValue &&
-                                                            typeof fieldValue === 'object' &&
-                                                            '$date' in fieldValue
-                                                        ) {
-                                                            fieldValue = new Date(
-                                                                fieldValue.$date
-                                                            ).toLocaleDateString();
-                                                        }
-
-                                                        // Convert numeric values to strings
-                                                        if (typeof fieldValue === 'number') {
-                                                            fieldValue = `'${String(fieldValue)}`;
-                                                        }
-
-                                                        if (!mdsFieldValues.has(dataItem.name)) {
-                                                            mdsFieldValues.set(dataItem.name, []);
-                                                        }
-                                                        mdsFieldValues
-                                                            .get(dataItem.name)
-                                                            .push(fieldValue ?? '');
-                                                    });
-                                            });
-                                        });
-
-                                        // Combine MDS field values with newline separator
+                                        // Combine MDS field values
                                         mdsFieldValues.forEach((values, key) => {
                                             row[key] = values.join('\n');
                                         });
