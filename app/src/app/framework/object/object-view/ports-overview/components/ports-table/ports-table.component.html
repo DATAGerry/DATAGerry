@@ -1,0 +1,85 @@
+<cmdb-table
+  class="ports-table"
+  [id]="'object-ports-table'"
+  [items]="rows"
+  [columns]="columns"
+  [initialVisibleColumns]="visibleColumns"
+  [totalItems]="totalRows"
+  [page]="page"
+  [pageSize]="pageSize"
+  [sort]="sort"
+  [loading]="loading"
+  [selectEnabled]="false"
+  [toggleable]="false"
+  [searchEnabled]="false"
+  [paginationEnabled]="true"
+  [pageSizeEnabled]="true"
+  [emptyMessage]="'No ports to display.'"
+  (pageChange)="onPageChange($event)"
+  (pageSizeChange)="onPageSizeChange($event)"
+  (sortChange)="onSortChange($event)">
+</cmdb-table>
+
+<ng-template #nameTemplate let-data="data">
+  @if (data) {
+    <span class="ports-name">{{ data }}</span>
+  } @else {
+    <span class="ports-muted" aria-hidden="true">&ndash;</span>
+  }
+</ng-template>
+
+<ng-template #sideTemplate let-data="data">
+  @if (data) {
+    <span class="ports-badge">{{ data }}</span>
+  } @else {
+    <span class="ports-muted" aria-hidden="true">&ndash;</span>
+  }
+</ng-template>
+
+<ng-template #statusTemplate let-data="data">
+  @if (data) {
+    <span class="ports-badge ports-badge--status">{{ data }}</span>
+  } @else {
+    <span class="ports-muted" aria-hidden="true">&ndash;</span>
+  }
+</ng-template>
+
+<ng-template #connectedTemplate let-data="data">
+  <span class="ports-state" [class.ports-state--connected]="data === true">
+    <span class="ports-state__dot" aria-hidden="true"></span>
+    {{ data === true ? 'Connected' : 'Free' }}
+  </span>
+</ng-template>
+
+<ng-template #valueTemplate let-data="data">
+  @if (data !== null && data !== undefined && data !== '') {
+    <span>{{ data }}</span>
+  } @else {
+    <span class="ports-muted" aria-hidden="true">&ndash;</span>
+  }
+</ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <div class="ports-row-actions">
+    @if (canEdit) {
+      <app-button
+        label=""
+        icon="fas fa-edit"
+        bootstrapClass="btn-sm btn-link"
+        title="Edit port"
+        ariaLabel="Edit port {{ item.name }}"
+        (clicked)="onEditPort(item)">
+      </app-button>
+    }
+    @if (canDelete) {
+      <app-button
+        label=""
+        icon="fas fa-trash-alt"
+        bootstrapClass="btn-sm btn-link text-danger"
+        title="Delete port"
+        ariaLabel="Delete port {{ item.name }}"
+        (clicked)="onDeletePort(item)">
+      </app-button>
+    }
+  </div>
+</ng-template>

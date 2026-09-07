@@ -51,6 +51,9 @@ import { IpamTypeDistributionComponent } from './object-view/ipam-overview/compo
 import { IpamSupernetSubnetTableComponent } from './object-view/ipam-overview/components/ipam-supernet-subnet-table/ipam-supernet-subnet-table.component';
 import { IpamUnassignIpModalComponent } from './object-view/ipam-overview/components/ipam-unassign-ip-modal/ipam-unassign-ip-modal.component';
 import { IpamAssignIpModalComponent } from './object-view/ipam-overview/components/ipam-assign-ip-modal/ipam-assign-ip-modal.component';
+import { PortsOverviewComponent } from './object-view/ports-overview/ports-overview.component';
+import { PortsTableComponent } from './object-view/ports-overview/components/ports-table/ports-table.component';
+import { PortFormModalComponent } from './object-view/ports-overview/components/port-form-modal/port-form-modal.component';
 import { RackOverviewComponent } from './object-view/rack-overview/rack-overview.component';
 import { RackElevationComponent } from './object-view/rack-overview/components/rack-elevation/rack-elevation.component';
 import { RackInspectorComponent } from './object-view/rack-overview/components/rack-inspector/rack-inspector.component';
@@ -118,6 +121,9 @@ import { ConnectionDetailsModalComponent } from './object-view/graph-editor/moda
         IpamSupernetSubnetTableComponent,
         IpamUnassignIpModalComponent,
         IpamAssignIpModalComponent,
+        PortsOverviewComponent,
+        PortsTableComponent,
+        PortFormModalComponent,
         RackOverviewComponent,
         RackElevationComponent,
         RackInspectorComponent,

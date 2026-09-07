@@ -31,6 +31,7 @@ import { RenderResult } from '../../models/cmdb-render';
 import { CmdbType } from '../../models/cmdb-type';
 import { Column } from 'src/app/layout/table/table.types';
 import { LoaderService } from 'src/app/core/services/loader.service';
+import { PORT_VIEW_RIGHT } from '../object-view/ports-overview/models/ports-overview.types';
 import { finalize } from 'rxjs';
 import { buildObjectPatchPayload } from './object-patch.util';
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -57,6 +58,7 @@ export class ObjectEditComponent implements OnInit {
     public selectedLocation: number = -1;
     public locationTreeName: string;
     public isLoading$ = this.loaderService.isLoading$;
+    public readonly portViewRight = PORT_VIEW_RIGHT;
 
     // Table Template: Type actions column
     @ViewChild('actionsTemplate', { static: true }) actionsTemplate: TemplateRef<any>;
@@ -113,6 +115,18 @@ export class ObjectEditComponent implements OnInit {
                 });
             }
         });
+    }
+
+    /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /** Ports live outside the type's sections, so the ports panel is appended on its own. */
+    public get portsAvailable(): boolean {
+        return this.renderResult?.type_information?.uses_ports === true;
+    }
+
+
+    public get portsObjectId(): number | null {
+        return this.renderResult?.object_information?.object_id ?? null;
     }
 
     /* ------------------------------------------------- HELPER METHODS ------------------------------------------------- */
