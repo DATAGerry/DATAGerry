@@ -58,6 +58,7 @@ OBJECT_ID_FOR_GET: int = 9412
 OBJECT_ID_FOR_UPDATE: int = 9413
 OBJECT_ID_FOR_DELETE: int = 9414
 OBJECT_ID_FOR_PATCH: int = 9415
+OBJECT_ID_FOR_VALUES: int = 9416
 BULK_OBJECT_IDS: list[int] = [9421, 9422, 9423]
 MISSING_OBJECT_ID: int = 9499
 
@@ -67,11 +68,16 @@ ALL_OBJECT_IDS: list[int] = [
     OBJECT_ID_FOR_UPDATE,
     OBJECT_ID_FOR_DELETE,
     OBJECT_ID_FOR_PATCH,
+    OBJECT_ID_FOR_VALUES,
 ] + BULK_OBJECT_IDS
 
 ORIGINAL_VALUE: str = 'original'
 UPDATED_VALUE: str = 'updated'
 BULK_UPDATED_VALUE: str = 'bulk-updated'
+
+MDS_SECTION_NAME: str = 'mds-values-section'
+MDS_ROW_FIELD: str = 'mds-row-field'
+MDS_ROW_VALUES: list[str] = ['row-one', 'row-two']
 
 SEED_VERSION: str = '1.0.0'
 UPDATE_VERSION: str = '1.0.1'
@@ -221,6 +227,192 @@ class TestGetObject:
         body = response.get_json()
         assert 'results' in body
         assert len(body['results']) == int(response.headers['X-Total-Count'])
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              READ - RENDERED TYPE INFO                                               #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestRenderedTypeInformation:
+    """The rendered object view carries the Type's capability flags."""
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """Inserts one object directly via the DB before each test and removes it after."""
+        _insert_object_doc(database_manager, database_name, OBJECT_ID_FOR_GET, ORIGINAL_VALUE)
+        yield
+        _drop_object(database_manager, database_name, OBJECT_ID_FOR_GET)
+
+    def test_type_information_carries_uses_ports_and_selectable_as_parent(self, rest_api) -> None:
+        """
+        Both flags reach the client through the render result
+
+        Without them a client rendering an object has to fetch the CmdbType separately to learn
+        whether to show the ports panel - on a view whose payload was built from that very type.
+        The seeded type sets neither flag, so this also pins the default a type document without
+        them renders as.
+        """
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_GET}')
+
+        assert response.status_code == HTTPStatus.OK
+        type_information = response.get_json()['type_information']
+        assert type_information['uses_ports'] is False
+        assert type_information['selectable_as_parent'] is True
+
+    def test_uses_ports_follows_the_stored_type(
+        self,
+        rest_api,
+        database_manager: MongoDatabaseManager,
+        database_name: str,
+    ) -> None:
+        """Enabling the flag on the Type changes what the rendered object reports"""
+        types = database_manager.get_collection(CmdbType.COLLECTION, database_name)
+        types.update_one({'public_id': TYPE_ID}, {'$set': {'uses_ports': True}})
+        try:
+            response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_GET}')
+
+            assert response.get_json()['type_information']['uses_ports'] is True
+        finally:
+            types.update_one({'public_id': TYPE_ID}, {'$set': {'uses_ports': False}})
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  READ - VALUE VIEW                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+def _object_doc_with_mds(public_id: int, value: str) -> dict[str, Any]:
+    """Builds a CmdbObject doc carrying one MDS section with two rows, for the value-view tests."""
+    document = _object_doc(public_id, value)
+    document['multi_data_sections'] = [{
+        'section_id': MDS_SECTION_NAME,
+        'highest_id': len(MDS_ROW_VALUES),
+        'values': [
+            {
+                'multi_data_id': index + 1,
+                'data': [{'name': MDS_ROW_FIELD, 'value': row_value, 'type': 'text'}],
+            }
+            for index, row_value in enumerate(MDS_ROW_VALUES)
+        ],
+    }]
+    return document
+
+
+class TestGetObjectValueView:
+    """``?view=values`` reshapes fields and multi_data_sections into name-keyed maps."""
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """Inserts one object with an MDS section before each test and removes it after."""
+        database_manager.get_collection(CmdbObject.COLLECTION, database_name).insert_one(
+            _object_doc_with_mds(OBJECT_ID_FOR_VALUES, ORIGINAL_VALUE),
+        )
+        yield
+        _drop_object(database_manager, database_name, OBJECT_ID_FOR_VALUES)
+
+    def test_single_returns_name_keyed_fields(self, rest_api) -> None:
+        """The single route answers 200 with fields as a name to value map."""
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=values')
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.get_json()['fields'] == {NAME_FIELD: ORIGINAL_VALUE}
+
+    def test_single_returns_name_keyed_mds_rows(self, rest_api) -> None:
+        """Each MDS section becomes one key holding its rows as name to value maps, in stored order."""
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=values')
+
+        assert response.get_json()['multi_data_sections'] == {
+            MDS_SECTION_NAME: [{MDS_ROW_FIELD: row_value} for row_value in MDS_ROW_VALUES],
+        }
+
+    def test_single_keeps_the_other_top_level_keys(self, rest_api) -> None:
+        """Only the two field-carrying keys change shape; the identity keys are passed through."""
+        body = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=values').get_json()
+
+        assert body['public_id'] == OBJECT_ID_FOR_VALUES
+        assert body['type_id'] == TYPE_ID
+        assert body['active'] is True
+
+    def test_single_drops_type_and_row_identity(self, rest_api) -> None:
+        """
+        The view is read-only, and this is what makes it so
+
+        A field entry loses its 'type' and an MDS row loses its 'multi_data_id', so the payload can
+        not be written back - which is the documented contract of the mode.
+        """
+        body = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=values').get_json()
+
+        assert body['fields'] == {NAME_FIELD: ORIGINAL_VALUE}
+        for row in body['multi_data_sections'][MDS_SECTION_NAME]:
+            assert list(row) == [MDS_ROW_FIELD]
+
+    def test_single_default_is_still_the_render_view(self, rest_api) -> None:
+        """
+        Omitting the parameter must not change the historical response
+
+        The frontend reads this route without a view parameter, so the rendered envelope has to stay.
+        """
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}')
+
+        assert response.status_code == HTTPStatus.OK
+        body = response.get_json()
+        assert 'object_information' in body
+        assert isinstance(body['fields'], list)
+
+    def test_single_render_is_accepted_explicitly(self, rest_api) -> None:
+        """An explicit ``view=render`` is the same as omitting it."""
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=render')
+
+        assert response.status_code == HTTPStatus.OK
+        assert isinstance(response.get_json()['fields'], list)
+
+    def test_single_native_is_refused_with_400(self, rest_api) -> None:
+        """
+        ``native`` has its own route, so this one refuses it rather than serving a second address
+
+        Refused loudly instead of silently rendering, so a caller can not believe it got the stored
+        document when it did not.
+        """
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=native')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_single_unknown_view_is_refused_with_400(self, rest_api) -> None:
+        """An unknown view value is a 400, not a silently rendered response."""
+        response = rest_api.get(f'{ROUTE_URL}/{OBJECT_ID_FOR_VALUES}?view=nonsense')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_single_missing_object_still_returns_404(self, rest_api) -> None:
+        """The view parameter does not change what a missing id answers."""
+        response = rest_api.get(f'{ROUTE_URL}/{MISSING_OBJECT_ID}?view=values')
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
+    def test_list_returns_name_keyed_results(self, rest_api) -> None:
+        """The list route serves the same shape inside its usual results envelope."""
+        response = rest_api.get(f'{ROUTE_URL}/?view=values')
+
+        assert response.status_code == HTTPStatus.OK
+        seeded = next(entry for entry in response.get_json()['results']
+                      if entry['public_id'] == OBJECT_ID_FOR_VALUES)
+        assert seeded['fields'] == {NAME_FIELD: ORIGINAL_VALUE}
+        assert seeded['multi_data_sections'] == {
+            MDS_SECTION_NAME: [{MDS_ROW_FIELD: row_value} for row_value in MDS_ROW_VALUES],
+        }
+
+    def test_list_unknown_view_is_refused_with_400(self, rest_api) -> None:
+        """The list route keeps its own 400 on an unknown view."""
+        response = rest_api.get(f'{ROUTE_URL}/?view=nonsense')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_list_native_still_returns_the_stored_arrays(self, rest_api) -> None:
+        """``view=native`` is untouched by the new mode: fields stay a list of triples."""
+        response = rest_api.get(f'{ROUTE_URL}/?view=native')
+
+        assert response.status_code == HTTPStatus.OK
+        seeded = next(entry for entry in response.get_json()['results']
+                      if entry['public_id'] == OBJECT_ID_FOR_VALUES)
+        assert isinstance(seeded['fields'], list)
+        assert seeded['fields'][0]['name'] == NAME_FIELD
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

@@ -81,6 +81,7 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper
     handle_delete_object_location,
     handle_rack_object_deleted,
     render_or_native,
+    build_object_value_view,
     apply_object_update,
     validate_object_patch_payload,
     build_patched_object_data,
@@ -90,6 +91,8 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper
 )
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_constants import (
     MAX_DASHBOARD_GROUPS,
+    SINGLE_OBJECT_VIEW_MODES,
+    SINGLE_OBJECT_VIEW_INVALID_MESSAGE,
     ObjectViewMode,
     ObjectQueryParam,
     ObjectGroupKey,
@@ -181,15 +184,36 @@ def get_cmdb_object(public_id: int, request_user: CmdbUser) -> Response:
     """
     HTTP `GET` route to retrieve a single CmdbObject with render information
 
+    Answers the rendered representation by default, which is what the frontend reads. The optional
+    ``view`` query parameter selects ``ObjectViewMode.VALUES`` instead: the stored document with its
+    ``fields`` and ``multi_data_sections`` reshaped into name-keyed maps, for external consumers that
+    only want the values. That serialisation is READ-ONLY and can not be written back.
+
+    ``native`` is deliberately NOT accepted here - the stored document has its own route
+    (``/objects/native/<public_id>``) - so an unknown or unsupported value is a 400 rather than a
+    silently rendered response
+
     Args:
         public_id (int): public_id of the CmdbObject
         request_user (CmdbUser): User requesting this data
 
+    Raises:
+        HTTPException: 400 when the 'view' parameter is not supported by this route, 403 when the ACL
+                       denies the read, 404 when the CmdbObject does not exist, 500 when it could not
+                       be rendered or on an unexpected error
+
     Returns:
-        DefaultResponse: The requested CmdbObject with render information
+        DefaultResponse: The requested CmdbObject, rendered or as its value view
     """
     try:
         objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+
+        view: str = request.args.get(ObjectQueryParam.VIEW.value, ObjectViewMode.RENDER.value)
+
+        if view not in SINGLE_OBJECT_VIEW_MODES:
+            abort(400, SINGLE_OBJECT_VIEW_INVALID_MESSAGE.format(
+                view=view, allowed=', '.join(SINGLE_OBJECT_VIEW_MODES),
+            ))
 
         requested_object = objects_manager.get_object(public_id, request_user, AccessControlPermission.READ)
 
@@ -197,6 +221,12 @@ def get_cmdb_object(public_id: int, request_user: CmdbUser) -> Response:
             abort(404, f"Object with ID: {public_id} not found!")
 
         requested_object = CmdbObject.from_data(requested_object)
+
+        # Before the type read: the value view is the object's own stored values, so it needs neither
+        # the CmdbType nor the renderer - which is the whole point of the mode
+        if view == ObjectViewMode.VALUES:
+            return DefaultResponse(build_object_value_view(requested_object.__dict__)).make_response()
+
         type_instance = objects_manager.get_object_type(requested_object.get_type_id())
 
         if not type_instance:

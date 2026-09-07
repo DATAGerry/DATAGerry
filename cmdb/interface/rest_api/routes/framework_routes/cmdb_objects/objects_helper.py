@@ -186,6 +186,127 @@ def guard_object_delete_license(
         abort_if_feature_locked(LicenseFeature.IPAM, request_user)
 
 
+def build_field_value_map(fields: Any) -> dict[str, Any]:
+    """
+    Reshapes a stored ``fields`` list into a name-keyed value map
+
+    The read-optimised half of ``ObjectViewMode.VALUES``: a consumer asking "what is 'hostname' worth"
+    does a dict lookup instead of scanning the array. Only the value survives - each entry's ``type``
+    is dropped, which is what makes the result unusable for a write (a stored entry must always be a
+    complete {name, value, type} triple).
+
+    Shared with the MDS reshaping, because an MDS row's ``data`` list stores the very same entry shape
+    as the top-level ``fields`` list.
+
+    Anything that is not a usable entry is skipped rather than raising: this runs on the read path, so
+    a single malformed row must not cost the caller the whole response. A name that repeats resolves to
+    the LAST entry, which cannot happen on a well-formed object (a field name is unique within its
+    CmdbType) and is only reachable on corrupted data
+
+    Args:
+        fields (Any): The stored ``fields`` list, or an MDS row's ``data`` list
+
+    Returns:
+        dict[str, Any]: Field name mapped to its stored value, empty when there is nothing usable
+    """
+    value_map: dict[str, Any] = {}
+
+    if not isinstance(fields, list):
+        return value_map
+
+    for field in fields:
+        if not isinstance(field, dict):
+            continue
+
+        name: Any = field.get(CmdbObjectFieldKey.NAME.value)
+
+        # A non-string name cannot be a JSON key; an empty one is kept deliberately, so the map stays a
+        # faithful picture of what is stored rather than silently losing a field (backlog #199)
+        if not isinstance(name, str):
+            continue
+
+        value_map[name] = field.get(CmdbObjectFieldKey.VALUE.value)
+
+    return value_map
+
+
+def build_mds_value_map(multi_data_sections: Any) -> dict[str, list[dict[str, Any]]]:
+    """
+    Reshapes a stored ``multi_data_sections`` list into a section-keyed map of row value maps
+
+    Each section becomes one key - its ``section_id``, which is the section's name - holding its rows
+    in stored order, and each row becomes a name-keyed value map built by ``build_field_value_map``.
+
+    Two things are deliberately dropped, and both are why the result is read-only: the section's
+    ``highest_id`` (the row-id counter) and every row's ``multi_data_id``. A row's identity IS its
+    multi_data_id and never its position in the list, so the array index of a row in this map must not
+    be mistaken for one.
+
+    A section with no rows is kept as an empty list rather than omitted, so a consumer can tell "this
+    section exists and is empty" from "this object has no such section"
+
+    Args:
+        multi_data_sections (Any): The stored ``multi_data_sections`` list
+
+    Returns:
+        dict[str, list[dict[str, Any]]]: Section name mapped to its rows as name-keyed value maps
+    """
+    value_map: dict[str, list[dict[str, Any]]] = {}
+
+    if not isinstance(multi_data_sections, list):
+        return value_map
+
+    for section in multi_data_sections:
+        if not isinstance(section, dict):
+            continue
+
+        section_id: Any = section.get(CmdbObjectMdsKey.SECTION_ID.value)
+
+        if not isinstance(section_id, str):
+            continue
+
+        rows: Any = section.get(CmdbObjectMdsKey.VALUES.value)
+        rows = rows if isinstance(rows, list) else []
+
+        value_map[section_id] = [
+            build_field_value_map(row.get(CmdbObjectMdsRowKey.DATA.value))
+            for row in rows if isinstance(row, dict)
+        ]
+
+    return value_map
+
+
+def build_object_value_view(object_data: dict[str, Any]) -> dict[str, Any]:
+    """
+    Serialises one stored CmdbObject document for ``ObjectViewMode.VALUES``
+
+    Only ``fields`` and ``multi_data_sections`` change shape - both become name-keyed maps. Every other
+    top-level key (``public_id``, ``type_id``, ``active``, the audit fields, ...) is passed through
+    exactly as the native view returns it, so the two views differ in those two keys and nowhere else.
+
+    The copy is SHALLOW on purpose: the two reshaped keys are replaced with freshly built objects, so
+    nothing the caller receives aliases the stored document's field arrays, and the untouched values
+    are shared rather than duplicated - this runs once per object on a list page, where a deep copy of
+    every document would be the most expensive thing on the path
+
+    Args:
+        object_data (dict[str, Any]): The stored CmdbObject document
+
+    Returns:
+        dict[str, Any]: The document with its two field-carrying keys reshaped into name-keyed maps
+    """
+    value_view: dict[str, Any] = dict(object_data)
+
+    value_view[CmdbObjectKey.FIELDS.value] = build_field_value_map(
+        object_data.get(CmdbObjectKey.FIELDS.value),
+    )
+    value_view[CmdbObjectKey.MULTI_DATA_SECTIONS.value] = build_mds_value_map(
+        object_data.get(CmdbObjectKey.MULTI_DATA_SECTIONS.value),
+    )
+
+    return value_view
+
+
 def render_or_native(
         view: str,
         results: list[CmdbObject],
@@ -195,11 +316,12 @@ def render_or_native(
     Serialises a list of CmdbObjects according to the requested ``view`` mode
 
     Shared by the object list and the object reference routes so both apply the same
-    native / render dispatch and the same 400 on an unknown view
+    native / values / render dispatch and the same 400 on an unknown view
 
     Args:
         view (str): The requested view mode (see ObjectViewMode); 'native' returns the stored
-            documents, 'render' returns their rendered representation
+            documents, 'render' returns their rendered representation, 'values' returns the
+            stored documents with their fields and multi_data_sections as name-keyed maps
         results (list[CmdbObject]): The CmdbObjects to serialise
         request_user (CmdbUser): The CmdbUser making the request (used by the renderer)
 
@@ -211,6 +333,11 @@ def render_or_native(
     """
     if view == ObjectViewMode.NATIVE:
         return [object_.__dict__ for object_ in results]
+
+    if view == ObjectViewMode.VALUES:
+        # Built from the native document, never from a render: the renderer's field entries are
+        # whole type-field definitions, and this view wants the values alone (backlog #200)
+        return [build_object_value_view(object_.__dict__) for object_ in results]
 
     if view == ObjectViewMode.RENDER:
         return RenderList(results, request_user, True).render_result_list(raw=True)
