@@ -58,3 +58,28 @@
     <span class="ports-muted" aria-hidden="true">&ndash;</span>
   }
 </ng-template>
+
+<ng-template #actionsTemplate let-item="item">
+  <div class="ports-row-actions">
+    @if (canEdit) {
+      <app-button
+        label=""
+        icon="fas fa-edit"
+        bootstrapClass="btn-sm btn-link"
+        title="Edit port"
+        ariaLabel="Edit port {{ item.name }}"
+        (clicked)="onEditPort(item)">
+      </app-button>
+    }
+    @if (canDelete) {
+      <app-button
+        label=""
+        icon="fas fa-trash-alt"
+        bootstrapClass="btn-sm btn-link text-danger"
+        title="Delete port"
+        ariaLabel="Delete port {{ item.name }}"
+        (clicked)="onDeletePort(item)">
+      </app-button>
+    }
+  </div>
+</ng-template>

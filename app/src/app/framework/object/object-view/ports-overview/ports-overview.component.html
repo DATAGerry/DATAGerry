@@ -28,10 +28,14 @@
     [sort]="sort"
     [showSideColumn]="showSideColumn"
     [showConnectionColumn]="showConnectionColumn"
+    [canEdit]="canEdit"
+    [canDelete]="canDelete"
     [loading]="(isLoading$ | async) === true"
     (pageChange)="onPageChange($event)"
     (pageSizeChange)="onPageSizeChange($event)"
-    (sortChange)="onSortChange($event)">
+    (sortChange)="onSortChange($event)"
+    (editPort)="onEditPort($event)"
+    (deletePort)="onDeletePort($event)">
   </cmdb-ports-table>
 </fieldset>
 

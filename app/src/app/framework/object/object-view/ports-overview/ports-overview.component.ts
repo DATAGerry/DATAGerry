@@ -30,12 +30,22 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subject, forkJoin, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 
+import { DeleteModalService } from 'src/app/core/services/delete-modal.service';
 import { ExtendableOptionCatalogService } from 'src/app/core/services/extendable-option-catalog.service';
+import { FullscreenModalService } from 'src/app/core/services/fullscreen-modal.service';
 import { LoaderService } from 'src/app/core/services/loader.service';
+import { PermissionService } from 'src/app/modules/auth/services/permission.service';
+import { ToastService } from 'src/app/layout/toast/toast.service';
 import { PortOptionType } from 'src/app/framework/models/port-option-type';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
-import { PortAddModalComponent } from './components/port-add-modal/port-add-modal.component';
-import { CmdbPort, PORT_ADD_RIGHT, PortRow } from './models/ports-overview.types';
+import { PortFormModalComponent } from './components/port-form-modal/port-form-modal.component';
+import {
+    CmdbPort,
+    PORT_ADD_RIGHT,
+    PORT_DELETE_RIGHT,
+    PORT_EDIT_RIGHT,
+    PortRow
+} from './models/ports-overview.types';
 import { PortService } from './services/port.service';
 import {
     clampPage,
@@ -79,6 +89,10 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     private readonly optionCatalog = inject(ExtendableOptionCatalogService);
     private readonly loaderService = inject(LoaderService);
     private readonly modalService = inject(NgbModal);
+    private readonly fullscreenModal = inject(FullscreenModalService);
+    private readonly deleteModal = inject(DeleteModalService);
+    private readonly permission = inject(PermissionService);
+    private readonly toastService = inject(ToastService);
     private readonly changesRef = inject(ChangeDetectorRef);
 
     @Input() public objectId: number | null = null;
@@ -105,6 +119,9 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     public readonly portAddRight = PORT_ADD_RIGHT;
 
     private allRows: PortRow[] = [];
+
+    /** The loaded ports by public_id, so an edit starts from the stored port and not from its row. */
+    private portsById = new Map<number, CmdbPort>();
 
     private readonly destroy$ = new Subject<void>();
     private readonly load$ = new Subject<number>();
@@ -153,23 +170,71 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
 
 
     public onAddPort(): void {
+        this.openForm(null);
+    }
+
+
+    public onEditPort(row: PortRow): void {
+        const port = this.portsById.get(row.publicId);
+
+        if (!port) {
+            return;
+        }
+
+        this.openForm(port);
+    }
+
+
+    public onDeletePort(row: PortRow): void {
+        this.deleteModal.confirmDelete({
+            title: 'Delete port',
+            itemType: 'Port',
+            itemName: row.name,
+            warningMessage: 'Any connection and interface link of this port is removed with it.',
+            onConfirm: () => this.deletePort(row.publicId)
+        });
+    }
+
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /** Both gate one action of the table and, together, its whole actions column. */
+    public get canEdit(): boolean {
+        return this.manageable && this.hasRight(PORT_EDIT_RIGHT);
+    }
+
+
+    public get canDelete(): boolean {
+        return this.manageable && this.hasRight(PORT_DELETE_RIGHT);
+    }
+
+/* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
+
+    private hasRight(right: string): boolean {
+        return this.permission.hasRight(right) || this.permission.hasExtendedRight(right);
+    }
+
+
+    /** One modal for both writes; it reports `true` once the port is stored. */
+    private openForm(port: CmdbPort | null): void {
         if (this.objectId == null) {
             return;
         }
 
-        const modal = this.modalService.open(PortAddModalComponent, {
+        // Hosted inside the fullscreen element while one is open; a body-level modal is not painted there.
+        const modal = this.modalService.open(PortFormModalComponent, this.fullscreenModal.withFullscreenContainer({
             size: 'lg',
             windowClass: 'dg-modal-window',
             backdropClass: 'dg-modal-window-backdrop'
-        });
+        }));
 
         modal.componentInstance.objectId = this.objectId;
         modal.componentInstance.objectLabel = this.objectLabel;
+        modal.componentInstance.port = port;
 
         // Dismissing rejects the promise; cancelling is not an error.
         modal.result.then(
-            (created: boolean) => {
-                if (created) {
+            (stored: boolean) => {
+                if (stored) {
                     this.load();
                 }
             },
@@ -177,7 +242,24 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
         );
     }
 
-/* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
+
+    private deletePort(publicId: number): void {
+        this.loaderService.show();
+
+        this.portService.deletePort(publicId)
+            .pipe(
+                takeUntil(this.destroy$),
+                finalize(() => this.loaderService.hide())
+            )
+            .subscribe({
+                next: () => {
+                    this.toastService.success('Port was successfully deleted!');
+                    this.load();
+                },
+                error: (err) => this.toastService.error(err?.error?.message)
+            });
+    }
+
 
     private load(): void {
         if (this.objectId == null) {
@@ -216,6 +298,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
 
     private applyPorts({ ports, labels }: LoadedPorts): void {
         this.allRows = toPortRows(ports, labels);
+        this.portsById = new Map(ports.map((port) => [port.public_id, port]));
         this.showSideColumn = hasPanelSides(this.allRows);
         this.showConnectionColumn = hasConnectionState(ports);
         this.page = 1;
@@ -236,6 +319,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
 
     private reset(): void {
         this.allRows = [];
+        this.portsById = new Map();
         this.rows = [];
         this.totalRows = 0;
         this.showSideColumn = false;

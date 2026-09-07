@@ -22,13 +22,19 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
-import { CmdbPort, PortCreatePayload } from '../models/ports-overview.types';
+import { CmdbPort, PortPayload } from '../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** Shape every insert route answers with: the new public_id plus the stored document. */
 interface InsertSingleResponse<T> {
     result_id: number;
     raw: T;
+}
+
+
+/** Shape every update route answers with. */
+interface UpdateSingleResponse<T> {
+    result: T;
 }
 
 
@@ -64,11 +70,37 @@ export class PortService {
      * The owner rides in the payload: a port is created against an object, not under it. A name
      * already taken on that face of the object comes back as a readable 400.
      */
-    public createPort(payload: PortCreatePayload): Observable<CmdbPort> {
+    public createPort(payload: PortPayload): Observable<CmdbPort> {
         const options = { headers: this.jsonHeaders, observe: resp };
 
         return this.api.callPost<InsertSingleResponse<CmdbPort>>(`${ this.servicePrefix }/`, payload, options).pipe(
             map((response: HttpResponse<InsertSingleResponse<CmdbPort>>) => response?.body?.raw)
+        );
+    }
+
+
+    /**
+     * Replaces one port with the payload and answers with its new data.
+     *
+     * The route takes the whole port, so every field has to be sent - an omitted one is stored as
+     * null. Owner and side are immutable: naming a different one is refused, not ignored.
+     */
+    public updatePort(publicId: number, payload: PortPayload): Observable<CmdbPort> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+        const route = `${ this.servicePrefix }/${ publicId }`;
+
+        return this.api.callPut<UpdateSingleResponse<CmdbPort>>(route, payload, options).pipe(
+            map((response: HttpResponse<UpdateSingleResponse<CmdbPort>>) => response?.body?.result)
+        );
+    }
+
+
+    /** Deletes one port. Its connections and interface links go with it, server-side. */
+    public deletePort(publicId: number): Observable<void> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+
+        return this.api.callDelete<void>(`${ this.servicePrefix }/${ publicId }`, options).pipe(
+            map(() => undefined)
         );
     }
 }

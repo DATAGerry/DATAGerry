@@ -1,11 +1,11 @@
 <dg-modal
   icon="fas fa-ethernet"
   eyebrow="Ports"
-  title="Add port"
+  [title]="title"
   [subtitle]="objectLabel"
   (dismiss)="activeModal.dismiss()">
 
-  <form class="port-add-modal__form" [formGroup]="form" novalidate autocomplete="off" (ngSubmit)="onSubmit()">
+  <form class="port-form-modal__form" [formGroup]="form" novalidate autocomplete="off" (ngSubmit)="onSubmit()">
     <div class="row">
       <div class="col-md-8">
         <app-form-input
@@ -77,8 +77,8 @@
 
   <app-button
     dgModalFooter
-    label="Create port"
-    icon="fas fa-plus"
+    [label]="submitLabel"
+    [icon]="isEdit ? 'fas fa-save' : 'fas fa-plus'"
     bootstrapClass="btn-success"
     (clicked)="onSubmit()">
   </app-button>

@@ -33,7 +33,7 @@ import { PortRow } from '../../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** Inputs that decide whether an optional column is part of the table. */
-const OPTIONAL_COLUMN_INPUTS = ['showSideColumn', 'showConnectionColumn'] as const;
+const OPTIONAL_COLUMN_INPUTS = ['showSideColumn', 'showConnectionColumn', 'canEdit', 'canDelete'] as const;
 
 
 /** Presentational port list. Owns the column definition only; every state change is handed upwards. */
@@ -59,15 +59,22 @@ export class PortsTableComponent implements OnInit, OnChanges {
     /** Only shown once the backend reports a connection state; see `hasConnectionState`. */
     @Input() public showConnectionColumn = false;
 
+    /** Both gate their own action AND, together, the whole actions column. */
+    @Input() public canEdit = false;
+    @Input() public canDelete = false;
+
     @Output() public readonly pageChange = new EventEmitter<number>();
     @Output() public readonly pageSizeChange = new EventEmitter<number>();
     @Output() public readonly sortChange = new EventEmitter<Sort>();
+    @Output() public readonly editPort = new EventEmitter<PortRow>();
+    @Output() public readonly deletePort = new EventEmitter<PortRow>();
 
     @ViewChild('nameTemplate', { static: true }) public nameTemplate: TemplateRef<unknown>;
     @ViewChild('sideTemplate', { static: true }) public sideTemplate: TemplateRef<unknown>;
     @ViewChild('statusTemplate', { static: true }) public statusTemplate: TemplateRef<unknown>;
     @ViewChild('connectedTemplate', { static: true }) public connectedTemplate: TemplateRef<unknown>;
     @ViewChild('valueTemplate', { static: true }) public valueTemplate: TemplateRef<unknown>;
+    @ViewChild('actionsTemplate', { static: true }) public actionsTemplate: TemplateRef<unknown>;
 
     public columns: Column[] = [];
     public visibleColumns: string[] = [];
@@ -99,6 +106,14 @@ export class PortsTableComponent implements OnInit, OnChanges {
 
     public onSortChange(sort: Sort): void {
         this.sortChange.emit(sort);
+    }
+
+    public onEditPort(row: PortRow): void {
+        this.editPort.emit(row);
+    }
+
+    public onDeletePort(row: PortRow): void {
+        this.deletePort.emit(row);
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
@@ -187,6 +202,16 @@ export class PortsTableComponent implements OnInit, OnChanges {
                 searchable: false,
                 template: this.valueTemplate,
                 style: { 'min-width': '200px' }
+            },
+            {
+                display: 'Actions',
+                name: 'actions',
+                data: 'publicId',
+                sortable: false,
+                searchable: false,
+                fixed: true,
+                template: this.actionsTemplate,
+                style: { 'width': '90px', 'text-align': 'center' }
             }
         ];
 
@@ -201,6 +226,10 @@ export class PortsTableComponent implements OnInit, OnChanges {
 
         if (name === 'connected') {
             return this.showConnectionColumn;
+        }
+
+        if (name === 'actions') {
+            return this.canEdit || this.canDelete;
         }
 
         return true;

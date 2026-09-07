@@ -27,7 +27,7 @@ import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 import { PortOptionType } from 'src/app/framework/models/port-option-type';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 
-import { PortCreatePayload } from '../../models/ports-overview.types';
+import { CmdbPort, PortPayload } from '../../models/ports-overview.types';
 import { PortService } from '../../services/port.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -41,14 +41,14 @@ function nonBlank(control: AbstractControl): ValidationErrors | null {
 }
 
 
-/** Creates a single port on an object. Closes with `true` once it is stored. */
+/** Creates or edits a single port. Closes with `true` once it is stored. */
 @Component({
-    selector: 'cmdb-port-add-modal',
-    templateUrl: './port-add-modal.component.html',
-    styleUrls: ['./port-add-modal.component.scss'],
+    selector: 'cmdb-port-form-modal',
+    templateUrl: './port-form-modal.component.html',
+    styleUrls: ['./port-form-modal.component.scss'],
     standalone: false
 })
-export class PortAddModalComponent implements OnInit, OnDestroy {
+export class PortFormModalComponent implements OnInit, OnDestroy {
 
     public readonly activeModal = inject(NgbActiveModal);
     private readonly portService = inject(PortService);
@@ -59,8 +59,11 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
 
     @Input() public objectId: number | null = null;
 
-    /** The object the port is added to, shown as the subtitle. */
+    /** The object the port belongs to, shown as the subtitle. */
     @Input() public objectLabel = '';
+
+    /** The port being edited, or null to create a new one. */
+    @Input() public port: CmdbPort | null = null;
 
     public readonly form = new FormGroup({
         name: new FormControl<string>('', [nonBlank, Validators.maxLength(255)]),
@@ -82,6 +85,7 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
     public ngOnInit(): void {
+        this.prefillFromPort();
         this.loadOptions();
     }
 
@@ -103,10 +107,25 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
             return;
         }
 
-        this.createPort(this.buildPayload(this.objectId));
+        this.save(this.buildPayload(this.objectId));
     }
 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    public get isEdit(): boolean {
+        return this.port != null;
+    }
+
+
+    public get title(): string {
+        return this.isEdit ? 'Edit port' : 'Add port';
+    }
+
+
+    public get submitLabel(): string {
+        return this.isEdit ? 'Save changes' : 'Create port';
+    }
+
 
     /** A message is only worth showing once the user has left the field. */
     public errorOf(controlName: 'name' | 'portNumber' | 'description'): string {
@@ -128,6 +147,23 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
+
+    /** The form holds every value as a string, which is also what the selects bind to. */
+    private prefillFromPort(): void {
+        if (!this.port) {
+            return;
+        }
+
+        this.form.patchValue({
+            name: this.port.name ?? '',
+            portNumber: this.port.port_number == null ? '' : String(this.port.port_number),
+            status: this.asOptionValue(this.port.status),
+            portType: this.asOptionValue(this.port.port_type),
+            speed: this.asOptionValue(this.port.speed),
+            description: this.port.description ?? ''
+        });
+    }
+
 
     /** One request for all three lists, then cached by the catalog. */
     private loadOptions(): void {
@@ -152,17 +188,22 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
     }
 
 
-    private createPort(payload: PortCreatePayload): void {
+    private save(payload: PortPayload): void {
+        const request = this.port
+            ? this.portService.updatePort(this.port.public_id, payload)
+            : this.portService.createPort(payload);
+        const message = this.port ? 'Port was successfully updated!' : 'Port was successfully created!';
+
         this.loaderService.show();
 
-        this.portService.createPort(payload)
+        request
             .pipe(
                 takeUntil(this.destroy$),
                 finalize(() => this.loaderService.hide())
             )
             .subscribe({
                 next: () => {
-                    this.toastService.success('Port was successfully created!');
+                    this.toastService.success(message);
                     this.activeModal.close(true);
                 },
                 error: (err) => this.toastService.error(err?.error?.message)
@@ -171,7 +212,7 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
 
 
     /** An untouched select and an empty number have to reach the route as null, not as ''. */
-    private buildPayload(objectId: number): PortCreatePayload {
+    private buildPayload(objectId: number): PortPayload {
         return {
             object_id: objectId,
             name: this.trimmed('name'),
@@ -191,5 +232,10 @@ export class PortAddModalComponent implements OnInit, OnDestroy {
 
     private asNumber(value: string | null): number | null {
         return value === null || value === '' ? null : Number(value);
+    }
+
+
+    private asOptionValue(optionId: number | null): string | null {
+        return optionId == null ? null : String(optionId);
     }
 }
