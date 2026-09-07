@@ -28,12 +28,6 @@ NOT express, because a per-field schema cannot:
   - that an INTERNAL connection carries no cable info - the per-type field rule, also the validator's
 """
 from typing import Any
-
-from cmdb.models.port_connection_model.port_connection_constants import (
-    ConnectionType,
-    PortConnectionKey,
-    ENDPOINT_COUNT,
-)
 # -------------------------------------------------------------------------------------------------------------------- #
 # pylint: disable=R0801
 def get_cmdb_port_connection_schema() -> dict[str, Any]:
@@ -43,6 +37,16 @@ def get_cmdb_port_connection_schema() -> dict[str, Any]:
     Returns:
         dict: Field name to Cerberus rule mapping, consumed as CmdbPortConnection.SCHEMA
     """
+    # pylint: disable=import-outside-toplevel
+    # Resolved at call time, not at module import time: the model imports this builder while its own
+    # package __init__ is still running, so a module-level import back into cmdb.models would close that
+    # cycle and leave every class_schema module unimportable on its own (see class_schema/__init__.py)
+    from cmdb.models.port_connection_model.port_connection_constants import (
+        ConnectionType,
+        PortConnectionKey,
+        ENDPOINT_COUNT,
+    )
+
     return {
         PortConnectionKey.PUBLIC_ID.value: {  # public_id of the CmdbPortConnection
             'type': 'integer',

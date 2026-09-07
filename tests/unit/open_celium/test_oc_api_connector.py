@@ -17,10 +17,16 @@
 Unit tests for cmdb.open_celium.oc_api_connector
 
 The connector is the HTTP transport towards OpenCelium. Every test builds it through the local
-(config-reader) path and patches `requests.request` / `SettingsManager` / `SystemConfigReader` /
-`current_app` / `os.getenv` at the module path - no real HTTP, no Mongo. Covers config resolution
-(cloud env + on-prem config), header/token handling, url building, the request verbs, the 403
-token-refresh retry, and authenticate (success / no-token / failure).
+(config-reader) path and patches `requests.request` / `current_app` / `os.getenv` at the module path -
+no real HTTP, no Mongo. Covers config resolution (cloud env + on-prem config), header/token handling,
+url building, the request verbs, the 403 token-refresh retry, and authenticate (success / no-token /
+failure).
+
+`SettingsManager` and `SystemConfigReader` are patched at their OWN modules, not at the connector's:
+the connector imports both inside the methods that use them, because importing any `cmdb.manager`
+module at module level runs `cmdb/manager/__init__.py`, which imports `CachedOcIdType` back from
+`cmdb.open_celium` and closes a cycle. A `from x import Y` executed at call time reads `Y` off the
+patched module, so patching the source is what a deferred import responds to.
 """
 # pylint: disable=protected-access,no-member  # no-member: settings_manager is a MagicMock in tests
 from http import HTTPStatus
@@ -35,6 +41,10 @@ from cmdb.errors.open_celium import AuthError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 MODULE: str = 'cmdb.open_celium.oc_api_connector'
+
+# The connector imports these inside its methods, so the patch has to sit on the defining module
+SETTINGS_MANAGER: str = 'cmdb.manager.system_manager.settings_manager.SettingsManager'
+SYSTEM_CONFIG_READER: str = 'cmdb.manager.system_manager.system_config_reader.SystemConfigReader'
 
 _LOCAL_CONFIG: dict[str, str] = {
     'host': 'oc.local', 'port': '9090', 'protocol': 'http',
@@ -51,8 +61,8 @@ def _make_connector(token: str | None = 'jwt') -> OcApiConnector:
     settings_manager.get_all_values_from_section.return_value = {'token': token}
 
     with patch(f'{MODULE}.current_app', current), \
-         patch(f'{MODULE}.SystemConfigReader', return_value=scr), \
-         patch(f'{MODULE}.SettingsManager', return_value=settings_manager):
+         patch(SYSTEM_CONFIG_READER, return_value=scr), \
+         patch(SETTINGS_MANAGER, return_value=settings_manager):
         return OcApiConnector(MagicMock(), 'db')
 
 
@@ -87,7 +97,7 @@ class TestConfigResolution:
 
         with patch(f'{MODULE}.current_app', current), \
              patch(f'{MODULE}.os.getenv', side_effect=env.get), \
-             patch(f'{MODULE}.SettingsManager', return_value=MagicMock()):
+             patch(SETTINGS_MANAGER, return_value=MagicMock()):
             connector = OcApiConnector(MagicMock(), 'db')
 
         assert connector.base_url == 'https://oc.host:443'
@@ -102,7 +112,7 @@ class TestConfigResolution:
 
         with patch(f'{MODULE}.current_app', current), \
              patch(f'{MODULE}.os.getenv', side_effect=env.get), \
-             patch(f'{MODULE}.SettingsManager', return_value=MagicMock()):
+             patch(SETTINGS_MANAGER, return_value=MagicMock()):
             with pytest.raises(ValueError):
                 OcApiConnector(MagicMock(), 'db')
 

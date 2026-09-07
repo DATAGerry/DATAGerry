@@ -15,6 +15,13 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Implementation of OcApiConnector
+
+The two manager imports are resolved at CALL time, not at module import time - see the comments on them.
+The connector needs the config reader and the settings manager, but ``cmdb/manager/__init__.py`` imports
+every manager, and one of them (``cached_user_manager``) imports ``CachedOcIdType`` back from this
+package. At module level that closed the cycle and made every ``cmdb.open_celium`` module unimportable
+as the first cmdb module of a process. The deferral cuts the upward edge - this package is below the
+manager layer, which is the direction ``cmdb/manager/open_celium_managers`` depends in
 """
 import os
 from http import HTTPStatus
@@ -26,8 +33,6 @@ from requests.exceptions import Timeout, RequestException
 from flask import current_app
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
-from cmdb.manager.system_manager.system_config_reader import SystemConfigReader
-from cmdb.manager.system_manager.settings_manager import SettingsManager
 
 from cmdb.open_celium.oc_constants import (
     OC_REQUEST_TIMEOUT,
@@ -71,6 +76,12 @@ class OcApiConnector:
         Raises:
             ValueError: If cloud mode is active but the OpenCelium connection env variables are incomplete
         """
+        # pylint: disable=import-outside-toplevel
+        # Resolved at call time: importing any cmdb.manager module runs cmdb/manager/__init__.py, which
+        # imports cached_user_manager, which imports CachedOcIdType back from this package - so at module
+        # level this closes a cycle and no cmdb.open_celium module can be imported first (module docstring)
+        from cmdb.manager.system_manager.settings_manager import SettingsManager
+
         config: dict[str, Any] = (
             self._load_cloud_config() if current_app.cloud_mode and not current_app.local_mode
             else self._load_local_config()
@@ -130,6 +141,10 @@ class OcApiConnector:
         Returns:
             dict[str, Any]: The connection config (host, port, protocol, email, user, password, base_url)
         """
+        # pylint: disable=import-outside-toplevel
+        # Deferred for the same reason as the SettingsManager import in __init__ (module docstring)
+        from cmdb.manager.system_manager.system_config_reader import SystemConfigReader
+
         scr = SystemConfigReader()
         host = scr.get_value(OcConfigKey.HOST, OC_CONFIG_SECTION)
         port = int(scr.get_value(OcConfigKey.PORT, OC_CONFIG_SECTION))

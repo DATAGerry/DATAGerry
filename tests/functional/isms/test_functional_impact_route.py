@@ -107,6 +107,52 @@ def _insert_risk_assessment_using_impact(database_manager: MongoDatabaseManager,
     })
 
 
+class TestImpactWithoutADescriptionCanBeSaved:
+    """
+    An impact created without a description must survive a round trip
+
+    ``description`` is optional, so a POST that omits it stores nothing; the list route answers
+    ``to_json``, which emits every declared key, so the frontend receives ``description: null`` and its
+    edit modal patches that straight into the form it later saves. The schema used to refuse the null
+    with 'null value not allowed', so such an impact could not be edited at all.
+    """
+
+    def test_the_list_answers_null_and_accepts_it_back(self, rest_api) -> None:
+        """The exact chain, end to end: created without one, answered as null, saved unchanged."""
+        assert rest_api.post(f'{ROUTE_URL}/', json=_impact_payload(IMPACT_ID_FOR_GET))\
+            .status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+        listed = rest_api.get(f'{ROUTE_URL}/?limit=0')
+
+        assert listed.status_code == HTTPStatus.OK
+        answered = next(impact for impact in listed.get_json()['results']
+                        if impact['public_id'] == IMPACT_ID_FOR_GET)
+        assert answered['description'] is None
+
+        # What the frontend sends back is what it was given
+        response = rest_api.put(f'{ROUTE_URL}/{IMPACT_ID_FOR_GET}', json=answered)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+    def test_an_explicit_null_description_is_accepted_on_create(self, rest_api) -> None:
+        """The write half of the same rule."""
+        payload = _impact_payload(IMPACT_ID_FOR_GET)
+        payload['description'] = None
+
+        assert rest_api.post(f'{ROUTE_URL}/', json=payload)\
+            .status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+
+class TestZeroWeightIsRefused:
+    """The B4 fix: this scale accepted a zero weight while its twin axis refused one."""
+
+    def test_a_zero_calculation_basis_returns_400(self, rest_api) -> None:
+        """Aligned with the likelihood scale and with both frontend forms' nonZeroValidator."""
+        payload = _impact_payload(IMPACT_ID_FOR_GET, basis=0.0)
+
+        assert rest_api.post(f'{ROUTE_URL}/', json=payload).status_code == HTTPStatus.BAD_REQUEST
+
+
 class TestPostImpact:
     """POST /isms/impacts/ creates an IsmsImpact with its business-rule guards."""
 

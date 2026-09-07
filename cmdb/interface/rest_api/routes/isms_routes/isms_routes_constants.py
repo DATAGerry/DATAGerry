@@ -16,6 +16,7 @@
 """
 Shared constants for the ISMS REST routes
 """
+from cmdb.models.isms_model.isms_risk_assessment_constants import RiskAssessmentKey
 # -------------------------------------------------------------------------------------------------------------------- #
 
 # Maximum number of entries allowed for the bounded ISMS scale entities (IsmsImpact, IsmsLikelihood);
@@ -49,9 +50,9 @@ RISK_BULK_DELETED_CMA_KEY: str = 'deleted_control_measure_assignments'
 # nullable there, which is why the rule is enforced in one explicit place instead of relying on the
 # schema's per-field flags
 REQUIRED_RISK_ASSESSMENT_FIELDS: tuple[str, ...] = (
-    'risk_id',
-    'object_id_ref_type',
-    'object_id',
-    'risk_owner_id',
-    'risk_assessment_date',
+    RiskAssessmentKey.RISK_ID.value,
+    RiskAssessmentKey.OBJECT_ID_REF_TYPE.value,
+    RiskAssessmentKey.OBJECT_ID.value,
+    RiskAssessmentKey.RISK_OWNER_ID.value,
+    RiskAssessmentKey.RISK_ASSESSMENT_DATE.value,
 )

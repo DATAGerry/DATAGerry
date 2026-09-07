@@ -52,6 +52,7 @@ RA_SEEDED_COUNT: int = 5
 
 # SOA-specific fixtures: a control measure whose source / implementation_state ids get resolved to labels
 SOA_CM_ID: int = 99401
+SOA_LEGACY_NULL_CM_ID: int = 99404
 SOA_SOURCE_OPTION_ID: int = 99402
 SOA_STATE_OPTION_ID: int = 99403
 SOA_SOURCE_VALUE: str = 'ImportTest ISO Source'
@@ -295,6 +296,28 @@ class TestIsmsReports:
         finally:
             options.delete_many({'public_id': {'$in': [SOA_SOURCE_OPTION_ID, SOA_STATE_OPTION_ID]}})
             measures.delete_one({'public_id': SOA_CM_ID})
+
+    def test_soa_reports_a_legacy_null_is_applicable_as_false(
+            self, rest_api, database_manager: MongoDatabaseManager, database_name: str) -> None:
+        """
+        The SOA rows are raw documents, not model instances
+
+        ``IsmsControlMeasure.from_data`` never runs over them, so the route normalises the answer
+        itself - otherwise a document written before the insert route started normalising renders as an
+        empty cell in the report while a stored False renders as "No".
+        """
+        measures = database_manager.get_collection(IsmsControlMeasure.COLLECTION, database_name)
+        measures.insert_one({'public_id': SOA_LEGACY_NULL_CM_ID, 'title': 'SOA legacy CM',
+                             'control_measure_type': 'CONTROL', 'is_applicable': None})
+        try:
+            response = rest_api.get(f'{ROUTE_URL}/soa?limit=0')
+
+            assert response.status_code == HTTPStatus.OK
+            entry = next(cm for cm in response.get_json()['results']
+                         if cm['public_id'] == SOA_LEGACY_NULL_CM_ID)
+            assert entry['is_applicable'] is False
+        finally:
+            measures.delete_one({'public_id': SOA_LEGACY_NULL_CM_ID})
 
     @pytest.mark.parametrize('report, title_field', [
         ('risk_treatment_plan', 'risk_name'),

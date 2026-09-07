@@ -83,7 +83,9 @@ def insert_isms_control_measure(data: dict[str, Any], request_user: CmdbUser) ->
         control_measure_manager: ControlMeasureManager = ManagerProvider.get_manager(ManagerType.CONTROL_MEASURE,
                                                                                        request_user)
 
-        result_id: int = control_measure_manager.insert_item(data)
+        # The validated payload is written straight to the collection, so the SoA answer is normalised
+        # here: the schema accepts null and a null is an empty cell in the report, not a third state
+        result_id: int = control_measure_manager.insert_item(IsmsControlMeasure.normalize_is_applicable(data))
 
         created_control_measure: dict = control_measure_manager.get_item(result_id, as_dict=True)
 

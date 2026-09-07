@@ -84,10 +84,8 @@ def insert_isms_risk(data: dict[str, Any], request_user: CmdbUser) -> Response:
     try:
         risk_manager: RiskManager = ManagerProvider.get_manager(ManagerType.RISK, request_user)
 
-        # Validate the RiskType
-        if not RiskType.is_valid(data.get('risk_type')):
-            abort(400, f"Invalid RiskType provided: {data.get('risk_type')} !")
-
+        # risk_type is refused by IsmsRisk.SCHEMA itself (an 'allowed' list built from RiskType), so
+        # only the cross-field rule a per-field schema cannot express is left to check here
         if not is_risk_data_valid(data):
             abort(400, "Incomplete Risk data, no creation possible!")
 
@@ -210,10 +208,7 @@ def update_isms_risk(public_id: int, data: dict[str, Any], request_user: CmdbUse
         get_item_or_404(risk_manager, public_id,
                         f"The Risk with ID:{public_id} was not found!", as_dict=False)
 
-        # Validate the RiskType
-        if not RiskType.is_valid(data.get('risk_type')):
-            abort(400, f"Invalid RiskType provided: {data.get('risk_type')} !")
-
+        # See the insert route: the schema owns risk_type, this owns the cross-field rule
         if not is_risk_data_valid(data):
             abort(400, "Incomplete Risk data, no update possible!")
 

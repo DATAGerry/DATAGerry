@@ -35,8 +35,10 @@ Two things to know before changing this file:
   unreachable database leaves here as a **500**, not as ``connected: false``. That is discussion-backlog
   **#141**; this route is where it is externally visible, and fixing it at the connector changes this
   route's contract.
-* **The database manager is bound at IMPORT time**, at module level, rather than resolved per request
-  like every other route module. It is a filed decision, not a pattern to copy.
+* **The database manager is resolved per request**, inside the view, like every other route module.
+  It used to be bound at module level inside ``with current_app.app_context()``, which meant importing
+  this module needed a live app, the captured manager outlived the app it came from, and a test had to
+  patch module state to reach it. Do not reintroduce that.
 """
 from logging import Logger, getLogger
 from typing import Any
@@ -56,13 +58,6 @@ from cmdb.interface.rest_api.routes.connection_helper import load_frontend_confi
 LOGGER: Logger = getLogger(__name__)
 
 connection_routes = APIBlueprint('connection_routes', __name__)
-
-# Bound ONCE when the blueprint module is first imported, which is why this needs a live app context
-# here and why the manager is shared by every request. Every other route module resolves its managers
-# per request through ManagerProvider; this deviation is filed as a decision, so a test that has to
-# reach the manager patches this module attribute rather than a request-scoped object
-with current_app.app_context():
-    dbm: MongoDatabaseManager = current_app.database_manager
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -85,6 +80,10 @@ def connection_test_frontend() -> Response:
         DefaultResponse: Dict with infos about DataGerry (title, version and database status)
     """
     try:
+        # Read from the app handling THIS request, not captured at import: the probe must report the
+        # state of the database the running app is configured against
+        dbm: MongoDatabaseManager = current_app.database_manager
+
         infos: dict[str, Any] = {
             ConnectionInfoKey.TITLE.value: __title__,
             ConnectionInfoKey.VERSION.value: __version__,

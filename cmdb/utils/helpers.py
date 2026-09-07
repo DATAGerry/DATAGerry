@@ -34,13 +34,17 @@ Provides:
     * `random_hex_color` — random '#RRGGBB' color, used wherever a CI-Explorer color is defaulted
     * `is_hex_color` — the '#RRGGBB' predicate applied to a user-supplied color
     * `coerce_datetime` — parses a stored or request-supplied timestamp into a datetime
+    * `coerce_mongo_datetime` — the same, plus the Mongo extended-JSON `{'$date': ...}` wrapper the
+      REST API emits and the frontend sends back
+    * `coerce_document_dates` — normalises a document's date fields in place and names the ones that
+      could not be read, shared by the model layer and the generic manager
     * `process_bar` — stdout progress bar driven by the database updater
 """
 import re
 import sys
 import random
 import importlib
-from datetime import datetime
+from datetime import datetime, timezone
 from logging import Logger, getLogger
 from typing import Any, Iterable
 
@@ -54,6 +58,17 @@ LOGGER: Logger = getLogger(__name__)
 # Accepted string spellings for a boolean import value (compared case-insensitively, stripped)
 _TRUTHY_IMPORT_VALUES: frozenset[str] = frozenset({'true', 'yes', '1'})
 _FALSY_IMPORT_VALUES: frozenset[str] = frozenset({'false', 'no', '0'})
+
+# Mongo extended-JSON wrapper key carrying a timestamp, e.g. {'$date': 1700000000000}
+MONGO_DATE_KEY: str = '$date'
+
+# A '$date' wrapper holding a number counts milliseconds since the epoch, matching what
+# `cmdb.database.database_utils.default` writes when it serialises a datetime for a response
+_MILLISECONDS_PER_SECOND: int = 1000
+
+# Values that mean 'no date' when they arrive in a date field: an empty request field, an empty
+# date widget payload or an absent value are all normalised to None rather than refused
+_EMPTY_DATE_VALUES: tuple[Any, ...] = (None, '', {}, [])
 
 # Bounds of a random '#RRGGBB' CI-Explorer color: a value in [0, MAX] rendered as zero-padded hex
 _HEX_COLOR_MAX: int = 0xFFFFFF
@@ -285,6 +300,90 @@ def coerce_datetime(value: Any) -> datetime | None:
             return None
 
     return None
+
+
+def coerce_mongo_datetime(value: Any) -> datetime | None:
+    """
+    Coerces a timestamp into a datetime, accepting the Mongo extended-JSON wrapper as well
+
+    Extends `coerce_datetime` with the `{'$date': ...}` shape, which is not an exotic input but the
+    only shape a datetime has on the wire: `cmdb.database.database_utils.default` serialises every
+    datetime in a REST response as `{'$date': <epoch millis>}`, so that is what the frontend sends
+    back. The wrapper carries either a number of milliseconds or a timestamp string.
+
+    Booleans inside the wrapper are refused on purpose - bool is an int subclass in Python, so
+    `{'$date': True}` would otherwise read as one millisecond past 1970-01-01
+
+    Args:
+        value (Any): The value to coerce - a datetime, a `{'$date': ...}` wrapper, or a
+            timestamp string
+
+    Returns:
+        datetime | None: The value as a datetime, or None when it is not a usable timestamp
+    """
+    if isinstance(value, dict):
+        if MONGO_DATE_KEY not in value:
+            return None
+
+        wrapped: Any = value[MONGO_DATE_KEY]
+
+        if isinstance(wrapped, bool):
+            return None
+
+        if isinstance(wrapped, (int, float)):
+            try:
+                return datetime.fromtimestamp(wrapped / _MILLISECONDS_PER_SECOND, tz=timezone.utc)
+            except (OverflowError, OSError, ValueError):
+                return None
+
+        return coerce_datetime(wrapped)
+
+    return coerce_datetime(value)
+
+
+def coerce_document_dates(document: dict[str, Any], keys: Iterable[str]) -> list[str]:
+    """
+    Normalises a document's date fields into datetimes in place, naming the ones that failed
+
+    The single place that decides what a stored date *is*. A date field reaches a document as a
+    `{'$date': ...}` wrapper (from the frontend), as a real datetime (read back from MongoDB) or as a
+    timestamp string (an API client), and MongoDB can only compare, sort and range-filter it as a real
+    date - so the shape is normalised once, at every boundary that writes or loads a document.
+
+    Absent keys are left absent, and a key present but empty (None, '', {}, []) becomes None: an
+    emptied date widget means "no date", not "a broken date". Anything else that cannot be read is
+    left untouched and its key returned, so the caller decides whether that is a 400 or a raise -
+    guessing a date is worse than refusing one, because nothing about the wrong answer looks wrong
+
+    Args:
+        document (dict[str, Any]): The document to normalise in place
+        keys (Iterable[str]): The document's date field names (a model's `DATE_FIELDS`)
+
+    Returns:
+        list[str]: The names of the present, non-empty fields that could not be read as a date,
+            in the order given by `keys` (empty when every date was usable)
+    """
+    unusable: list[str] = []
+
+    for key in keys:
+        if key not in document:
+            continue
+
+        raw: Any = document[key]
+
+        if any(raw == empty_value for empty_value in _EMPTY_DATE_VALUES):
+            document[key] = None
+            continue
+
+        coerced: datetime | None = coerce_mongo_datetime(raw)
+
+        if coerced is None:
+            unusable.append(key)
+            continue
+
+        document[key] = coerced
+
+    return unusable
 
 
 def is_non_blank_string(value: Any) -> bool:

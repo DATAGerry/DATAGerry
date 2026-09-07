@@ -30,7 +30,10 @@ and decorator plumbing that callers import by module path
 from .base_str_enum import BaseStrEnum
 from .cast import auto_cast
 from .helpers import (
+    MONGO_DATE_KEY,
     coerce_datetime,
+    coerce_document_dates,
+    coerce_mongo_datetime,
     coerce_whole_number,
     duplicate_names,
     is_hex_color,
@@ -48,10 +51,13 @@ from .validation_error import ValidationErrorKey, build_error
 
 __all__: list[str] = [
     'BaseStrEnum',
+    'MONGO_DATE_KEY',
     'ValidationErrorKey',
     'auto_cast',
     'build_error',
     'coerce_datetime',
+    'coerce_document_dates',
+    'coerce_mongo_datetime',
     'coerce_whole_number',
     'duplicate_names',
     'is_hex_color',

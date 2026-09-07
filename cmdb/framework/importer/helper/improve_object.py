@@ -23,16 +23,14 @@ import datetime
 from logging import Logger, getLogger
 from typing import Any
 
+from cmdb.utils import MONGO_DATE_KEY, coerce_mongo_datetime
+
 from cmdb.framework.importer.mapper.map_entry import MapEntry
 from cmdb.models.type_model.field_key_enum import FieldKey
 from cmdb.models.type_model.field_type_enum import FieldType
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
-
-# Mongo extended-JSON key carrying an epoch timestamp in milliseconds (e.g. {'$date': 1700000000000})
-MONGO_DATE_KEY: str = '$date'
-MILLISECONDS_PER_SECOND: int = 1000
 
 # Date/datetime string formats attempted (in order) when coercing a date-typed field value
 DATE_FORMATS: tuple[str, ...] = (
@@ -120,16 +118,14 @@ class ImproveObject:
             datetime.datetime | Any: The parsed datetime if successful, otherwise the original value
         """
         if isinstance(value, dict):
-            timestamp = value.get(MONGO_DATE_KEY)
+            # The wrapper is read by the shared caster, so an imported date and a date sent by the
+            # frontend are interpreted identically
+            coerced: datetime.datetime | None = coerce_mongo_datetime(value)
 
-            if timestamp is not None:
-                try:
-                    return datetime.datetime.fromtimestamp(
-                        timestamp / MILLISECONDS_PER_SECOND,
-                        tz=datetime.timezone.utc,
-                    )
-                except (TypeError, ValueError, OSError) as err:
-                    LOGGER.debug("[improve_date] Could not convert %s value %s: %s", MONGO_DATE_KEY, value, err)
+            if coerced is not None:
+                return coerced
+
+            LOGGER.debug("[improve_date] Could not convert %s value %s", MONGO_DATE_KEY, value)
 
         if isinstance(value, str):
             for fmt in DATE_FORMATS:

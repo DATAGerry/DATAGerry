@@ -107,6 +107,43 @@ def _insert_risk_assessment_using_likelihood(database_manager: MongoDatabaseMana
     })
 
 
+class TestLikelihoodWithoutADescriptionCanBeSaved:
+    """
+    A likelihood created without a description must survive a round trip
+
+    ``description`` is optional, so a POST that omits it stores nothing; the list route answers
+    ``to_json``, which emits every declared key, so the frontend receives ``description: null`` and its
+    edit modal patches that straight into the form it later saves. The schema used to refuse the null
+    with 'null value not allowed', so such a level could not be edited at all.
+    """
+
+    def test_the_list_answers_null_and_accepts_it_back(self, rest_api) -> None:
+        """The exact chain: created without one, answered as null, saved unchanged."""
+        assert rest_api.post(f'{ROUTE_URL}/', json=_likelihood_payload(LIKELIHOOD_ID_FOR_GET))\
+            .status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+        listed = rest_api.get(f'{ROUTE_URL}/?limit=0')
+
+        assert listed.status_code == HTTPStatus.OK
+        answered = next(level for level in listed.get_json()['results']
+                        if level['public_id'] == LIKELIHOOD_ID_FOR_GET)
+        assert answered['description'] is None
+
+        response = rest_api.put(f'{ROUTE_URL}/{LIKELIHOOD_ID_FOR_GET}', json=answered)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+
+class TestZeroWeightIsRefused:
+    """A zero-weight level would flatten every risk that uses it - on either axis of the matrix."""
+
+    def test_a_zero_calculation_basis_returns_400(self, rest_api) -> None:
+        """The likelihood scale has always refused it; the impact scale did not until 2026-09-07."""
+        payload = _likelihood_payload(LIKELIHOOD_ID_FOR_GET, basis=0.0)
+
+        assert rest_api.post(f'{ROUTE_URL}/', json=payload).status_code == HTTPStatus.BAD_REQUEST
+
+
 class TestPostLikelihood:
     """POST /isms/likelihoods/ creates an IsmsLikelihood with its business-rule guards."""
 

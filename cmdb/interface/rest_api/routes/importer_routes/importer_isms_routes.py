@@ -56,6 +56,11 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.isms_model import IsmsImportType, ControlMeasureType, RiskType
+from cmdb.models.isms_model.isms_control_measure_constants import (
+    CONTROL_MEASURE_IMPORT_KEYS,
+    ControlMeasureKey,
+)
+from cmdb.models.isms_model.isms_risk_constants import RISK_IMPORT_KEYS, RiskKey
 from cmdb.models.extendable_option_model import OptionType, ExtendableOptionKey
 from cmdb.utils import parse_import_bool
 
@@ -80,27 +85,13 @@ CSV_ENCODING: str = 'utf-8-sig'
 # Header sets each target requires; also the contract with the CSV templates offered in the frontend
 THREAT_HEADERS: set[str] = {"name", "source", "identifier", "description"}
 VULNERABILITY_HEADERS: set[str] = {"name", "source", "identifier", "description"}
-RISK_HEADERS: set[str] = {
-    "name",
-    "risk_type",
-    "protection_goals",
-    "threats",
-    "vulnerabilities",
-    "identifier",
-    "consequences",
-    "description",
-}
-CONTROL_MEASURE_HEADERS: set[str] = {
-    "title",
-    "control_measure_type",
-    "source",
-    "implementation_state",
-    "identifier",
-    "chapter",
-    "description",
-    "is_applicable",
-    "reason",
-}
+# Derived from the document keys rather than repeated: a risk CSV carries every key except the
+# server-owned public_id and category_id, which the import does not accept (RISK_IMPORT_KEYS)
+RISK_HEADERS: set[str] = set(RISK_IMPORT_KEYS)
+# Derived from the document keys rather than repeated: a control-measure CSV carries every key except
+# the server-owned public_id (CONTROL_MEASURE_IMPORT_KEYS), so the header contract cannot drift from
+# the collection
+CONTROL_MEASURE_HEADERS: set[str] = set(CONTROL_MEASURE_IMPORT_KEYS)
 
 # Keys of the per-target result dict
 RESULT_TOTAL_ROWS: str = 'total_rows'
@@ -339,17 +330,17 @@ def read_risk_rows(csv_file: FileStorage) -> tuple[int, list[dict], list[dict]]:
         protection_goals = parse_list_of_strings("protection_goals", row)
 
         candidate = {
-            "name": stripped_cell(row, "name"),
-            "risk_type": risk_type,
-            "identifier": stripped_cell(row, "identifier"),
-            "protection_goals": protection_goals,
-            "threats": threats,
-            "vulnerabilities": vulnerabilities,
-            "consequences": consequences,
-            "description": description,
+            RiskKey.NAME.value: stripped_cell(row, RiskKey.NAME.value),
+            RiskKey.RISK_TYPE.value: risk_type,
+            RiskKey.IDENTIFIER.value: stripped_cell(row, RiskKey.IDENTIFIER.value),
+            RiskKey.PROTECTION_GOALS.value: protection_goals,
+            RiskKey.THREATS.value: threats,
+            RiskKey.VULNERABILITIES.value: vulnerabilities,
+            RiskKey.CONSEQUENCES.value: consequences,
+            RiskKey.DESCRIPTION.value: description,
         }
 
-        if not candidate["name"] or not risk_row_is_valid(
+        if not candidate[RiskKey.NAME.value] or not risk_row_is_valid(
             risk_type, consequences, description, threats, vulnerabilities,
         ):
             # Reported with the raw names, so the caller sees what the row actually said
@@ -419,6 +410,12 @@ def handle_risks_import(csv_file: FileStorage, request_user: CmdbUser) -> dict:
 
     resolve_risk_references(accepted_rows, request_user)
 
+    # The CSV has no category column, but the document has the key: an imported risk carries a null
+    # category until it is given one in the UI, which is also what IsmsRisk.SCHEMA describes. Filled
+    # only for the rows about to be inserted, so a rejected row is still reported as the CSV said it
+    for accepted_row in accepted_rows:
+        accepted_row.setdefault(RiskKey.CATEGORY_ID.value, None)
+
     risk_manager: RiskManager = ManagerProvider.get_manager(ManagerType.RISK, request_user)
     created, existing = insert_new_items(accepted_rows, risk_manager, "name")
 
@@ -447,24 +444,25 @@ def read_control_measure_rows(csv_file: FileStorage) -> tuple[int, list[dict], l
 
     for row in reader:
         total_rows += 1
-        control_measure_type = (stripped_cell(row, "control_measure_type") or '').upper()
-        raw_is_applicable = stripped_cell(row, "is_applicable")
+        control_measure_type = (stripped_cell(row, ControlMeasureKey.CONTROL_MEASURE_TYPE.value) or '').upper()
+        raw_is_applicable = stripped_cell(row, ControlMeasureKey.IS_APPLICABLE.value)
         # An empty cell keeps the historical default (False); a value that means nothing is a reject
         is_applicable = False if raw_is_applicable is None else parse_import_bool(raw_is_applicable)
 
         candidate = {
-            "title": stripped_cell(row, "title"),
-            "control_measure_type": control_measure_type,
-            "source": stripped_cell(row, "source"),
-            "implementation_state": stripped_cell(row, "implementation_state"),
-            "identifier": stripped_cell(row, "identifier"),
-            "chapter": stripped_cell(row, "chapter"),
-            "description": stripped_cell(row, "description"),
-            "is_applicable": is_applicable,
-            "reason": stripped_cell(row, "reason"),
+            ControlMeasureKey.TITLE.value: stripped_cell(row, ControlMeasureKey.TITLE.value),
+            ControlMeasureKey.CONTROL_MEASURE_TYPE.value: control_measure_type,
+            ControlMeasureKey.SOURCE.value: stripped_cell(row, ControlMeasureKey.SOURCE.value),
+            ControlMeasureKey.IMPLEMENTATION_STATE.value: stripped_cell(
+                row, ControlMeasureKey.IMPLEMENTATION_STATE.value),
+            ControlMeasureKey.IDENTIFIER.value: stripped_cell(row, ControlMeasureKey.IDENTIFIER.value),
+            ControlMeasureKey.CHAPTER.value: stripped_cell(row, ControlMeasureKey.CHAPTER.value),
+            ControlMeasureKey.DESCRIPTION.value: stripped_cell(row, ControlMeasureKey.DESCRIPTION.value),
+            ControlMeasureKey.IS_APPLICABLE.value: is_applicable,
+            ControlMeasureKey.REASON.value: stripped_cell(row, ControlMeasureKey.REASON.value),
         }
 
-        if (not candidate["title"]
+        if (not candidate[ControlMeasureKey.TITLE.value]
                 or not ControlMeasureType.is_valid(control_measure_type)
                 or is_applicable is None):
             invalid_rows.append(candidate)
