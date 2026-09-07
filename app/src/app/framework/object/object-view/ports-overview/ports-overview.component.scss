@@ -1,3 +1,9 @@
 :host {
     display: block;
 }
+
+// Sits where a multi-data section puts its own Add button, above the table.
+.ports-add-button {
+    display: inline-block;
+    margin: 0 0 5px 5px;
+}

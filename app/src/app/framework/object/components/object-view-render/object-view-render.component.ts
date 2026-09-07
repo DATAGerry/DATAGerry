@@ -55,4 +55,12 @@ export class ObjectViewRenderComponent {
     public get portsAvailable(): boolean {
         return this.renderResult?.type_information?.uses_ports === true;
     }
+
+
+    /** Subtitle of the add-port modal. */
+    public get objectLabel(): string {
+        const label = this.renderResult?.type_information?.type_label ?? '';
+
+        return this.objectId == null ? label : `${ label } #${ this.objectId }`;
+    }
 }

@@ -1,6 +1,18 @@
 <fieldset class="ports-section">
   <legend>Ports</legend>
 
+  @if (manageable) {
+    <app-button
+      *permissionLink="[portAddRight]"
+      class="ports-add-button"
+      label="Add"
+      icon="fas fa-plus"
+      bootstrapClass="btn-success btn-sm"
+      title="Add a port to this object"
+      (clicked)="onAddPort()">
+    </app-button>
+  }
+
   @if (hasError) {
     <app-warning-alert
       title="Ports could not be loaded:"

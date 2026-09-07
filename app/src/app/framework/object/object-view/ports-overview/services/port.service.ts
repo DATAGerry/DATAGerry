@@ -22,8 +22,15 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
-import { CmdbPort } from '../models/ports-overview.types';
+import { CmdbPort, PortCreatePayload } from '../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
+
+/** Shape every insert route answers with: the new public_id plus the stored document. */
+interface InsertSingleResponse<T> {
+    result_id: number;
+    raw: T;
+}
+
 
 /** REST access to the ports of the CmdbObject collection `framework.ports`. */
 @Injectable({ providedIn: 'root' })
@@ -47,6 +54,21 @@ export class PortService {
 
         return this.api.callGet<CmdbPort[]>(`${ this.servicePrefix }/object/${ objectId }`, options).pipe(
             map((response: HttpResponse<CmdbPort[]>) => response?.body ?? [])
+        );
+    }
+
+
+    /**
+     * Creates one port and answers with the stored port.
+     *
+     * The owner rides in the payload: a port is created against an object, not under it. A name
+     * already taken on that face of the object comes back as a readable 400.
+     */
+    public createPort(payload: PortCreatePayload): Observable<CmdbPort> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+
+        return this.api.callPost<InsertSingleResponse<CmdbPort>>(`${ this.servicePrefix }/`, payload, options).pipe(
+            map((response: HttpResponse<InsertSingleResponse<CmdbPort>>) => response?.body?.raw)
         );
     }
 }

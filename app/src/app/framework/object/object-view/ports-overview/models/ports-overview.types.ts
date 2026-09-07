@@ -20,6 +20,9 @@
 /** ACL right guarding the port REST routes. */
 export const PORT_VIEW_RIGHT = 'base.framework.port.view';
 
+/** ACL right the create route is protected with. */
+export const PORT_ADD_RIGHT = 'base.framework.port.add';
+
 /**
  * Which face of its owner object a port sits on.
  *
@@ -69,4 +72,21 @@ export interface PortRow {
     speed: string | null;
     description: string | null;
     connected: boolean;
+}
+
+
+/**
+ * Body of `POST /ports/`. The option fields take an option's `public_id` or null, never a string.
+ *
+ * `side` is left out on purpose: front/rear is what the panel creation assistant sets, and the
+ * route defaults a port to SINGLE.
+ */
+export interface PortCreatePayload {
+    object_id: number;
+    name: string;
+    port_number: number | null;
+    status: number | null;
+    port_type: number | null;
+    speed: number | null;
+    description: string | null;
 }

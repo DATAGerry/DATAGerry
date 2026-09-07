@@ -26,6 +26,7 @@ import {
     inject
 } from '@angular/core';
 
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subject, forkJoin, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 
@@ -33,7 +34,8 @@ import { ExtendableOptionCatalogService } from 'src/app/core/services/extendable
 import { LoaderService } from 'src/app/core/services/loader.service';
 import { PortOptionType } from 'src/app/framework/models/port-option-type';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
-import { CmdbPort, PortRow } from './models/ports-overview.types';
+import { PortAddModalComponent } from './components/port-add-modal/port-add-modal.component';
+import { CmdbPort, PORT_ADD_RIGHT, PortRow } from './models/ports-overview.types';
 import { PortService } from './services/port.service';
 import {
     clampPage,
@@ -76,9 +78,16 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     private readonly portService = inject(PortService);
     private readonly optionCatalog = inject(ExtendableOptionCatalogService);
     private readonly loaderService = inject(LoaderService);
+    private readonly modalService = inject(NgbModal);
     private readonly changesRef = inject(ChangeDetectorRef);
 
     @Input() public objectId: number | null = null;
+
+    /** Ports are created from the object view; the edit form only lists them. */
+    @Input() public manageable = false;
+
+    /** Passed on as the modal's subtitle. */
+    @Input() public objectLabel = '';
 
     /** The rows of the current page. */
     public rows: PortRow[] = [];
@@ -93,6 +102,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     public showConnectionColumn = false;
     public hasError = false;
     public readonly isLoading$ = this.loaderService.isLoading$;
+    public readonly portAddRight = PORT_ADD_RIGHT;
 
     private allRows: PortRow[] = [];
 
@@ -139,6 +149,32 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
         this.sort = sort;
         this.page = 1;
         this.applyQuery();
+    }
+
+
+    public onAddPort(): void {
+        if (this.objectId == null) {
+            return;
+        }
+
+        const modal = this.modalService.open(PortAddModalComponent, {
+            size: 'lg',
+            windowClass: 'dg-modal-window',
+            backdropClass: 'dg-modal-window-backdrop'
+        });
+
+        modal.componentInstance.objectId = this.objectId;
+        modal.componentInstance.objectLabel = this.objectLabel;
+
+        // Dismissing rejects the promise; cancelling is not an error.
+        modal.result.then(
+            (created: boolean) => {
+                if (created) {
+                    this.load();
+                }
+            },
+            () => undefined
+        );
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
