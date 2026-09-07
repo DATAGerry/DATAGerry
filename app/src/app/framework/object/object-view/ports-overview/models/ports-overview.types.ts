@@ -15,7 +15,11 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
+import { PortOptionType } from 'src/app/framework/models/port-option-type';
 /* ------------------------------------------------------------------------------------------------------------------ */
+
+/** The option lists the three select fields of a port draw their values from. */
+export const PORT_OPTION_TYPES: readonly string[] = Object.values(PortOptionType);
 
 /** ACL right guarding the port REST routes. */
 export const PORT_VIEW_RIGHT = 'base.framework.port.view';
@@ -81,8 +85,8 @@ export interface PortRow {
  * Body of `POST /ports/` and of `PUT /ports/<id>`, which take the whole port. The option fields
  * take an option's `public_id` or null, never a string.
  *
- * `side` is left out on purpose: front/rear is what the panel creation assistant sets, the route
- * defaults a new port to SINGLE, and an update refuses to move a port to another face anyway.
+ *  `side` is left out on purpose: the route defaults a new port to SINGLE, and an update refuses
+ * to move a port to another face - so neither write needs it.
  */
 export interface PortPayload {
     object_id: number;

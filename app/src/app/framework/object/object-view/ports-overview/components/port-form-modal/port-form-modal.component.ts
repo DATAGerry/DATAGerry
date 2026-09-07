@@ -27,13 +27,9 @@ import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 import { PortOptionType } from 'src/app/framework/models/port-option-type';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 
-import { CmdbPort, PortPayload } from '../../models/ports-overview.types';
+import { CmdbPort, PORT_OPTION_TYPES, PortPayload } from '../../models/ports-overview.types';
 import { PortService } from '../../services/port.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
-
-/** Every option list the three select fields of a port draw from, read in one request. */
-const PORT_OPTION_TYPES: readonly string[] = Object.values(PortOptionType);
-
 
 /** The backend refuses a blank name, so spaces alone do not count as one. */
 function nonBlank(control: AbstractControl): ValidationErrors | null {

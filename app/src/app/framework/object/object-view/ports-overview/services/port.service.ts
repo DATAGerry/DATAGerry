@@ -22,21 +22,9 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
+import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
 import { CmdbPort, PortPayload } from '../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
-
-/** Shape every insert route answers with: the new public_id plus the stored document. */
-interface InsertSingleResponse<T> {
-    result_id: number;
-    raw: T;
-}
-
-
-/** Shape every update route answers with. */
-interface UpdateSingleResponse<T> {
-    result: T;
-}
-
 
 /** REST access to the ports of the CmdbObject collection `framework.ports`. */
 @Injectable({ providedIn: 'root' })
@@ -73,8 +61,8 @@ export class PortService {
     public createPort(payload: PortPayload): Observable<CmdbPort> {
         const options = { headers: this.jsonHeaders, observe: resp };
 
-        return this.api.callPost<InsertSingleResponse<CmdbPort>>(`${ this.servicePrefix }/`, payload, options).pipe(
-            map((response: HttpResponse<InsertSingleResponse<CmdbPort>>) => response?.body?.raw)
+        return this.api.callPost<APIInsertSingleResponse<CmdbPort>>(`${ this.servicePrefix }/`, payload, options).pipe(
+            map((response: HttpResponse<APIInsertSingleResponse<CmdbPort>>) => response?.body?.raw)
         );
     }
 
@@ -89,8 +77,8 @@ export class PortService {
         const options = { headers: this.jsonHeaders, observe: resp };
         const route = `${ this.servicePrefix }/${ publicId }`;
 
-        return this.api.callPut<UpdateSingleResponse<CmdbPort>>(route, payload, options).pipe(
-            map((response: HttpResponse<UpdateSingleResponse<CmdbPort>>) => response?.body?.result)
+        return this.api.callPut<APIUpdateSingleResponse<CmdbPort>>(route, payload, options).pipe(
+            map((response: HttpResponse<APIUpdateSingleResponse<CmdbPort>>) => response?.body?.result)
         );
     }
 

@@ -36,7 +36,6 @@ import { FullscreenModalService } from 'src/app/core/services/fullscreen-modal.s
 import { LoaderService } from 'src/app/core/services/loader.service';
 import { PermissionService } from 'src/app/modules/auth/services/permission.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
-import { PortOptionType } from 'src/app/framework/models/port-option-type';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
 import { PortFormModalComponent } from './components/port-form-modal/port-form-modal.component';
 import {
@@ -44,6 +43,7 @@ import {
     PORT_ADD_RIGHT,
     PORT_DELETE_RIGHT,
     PORT_EDIT_RIGHT,
+    PORT_OPTION_TYPES,
     PortRow
 } from './models/ports-overview.types';
 import { PortService } from './services/port.service';
@@ -65,9 +65,6 @@ interface LoadedPorts {
     ports: CmdbPort[];
     labels: Map<string, string>;
 }
-
-/** The option lists the three select fields of a port draw their labels from. */
-const PORT_OPTION_TYPES: readonly string[] = Object.values(PortOptionType);
 
 
 /**
@@ -140,6 +137,8 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
 
     public ngOnChanges(changes: SimpleChanges): void {
         if (changes['objectId']) {
+            // A different object starts at the front; a reload after a write keeps the page.
+            this.page = 1;
             this.load();
         }
     }
@@ -301,7 +300,6 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
         this.portsById = new Map(ports.map((port) => [port.public_id, port]));
         this.showSideColumn = hasPanelSides(this.allRows);
         this.showConnectionColumn = hasConnectionState(ports);
-        this.page = 1;
         this.applyQuery();
     }
 

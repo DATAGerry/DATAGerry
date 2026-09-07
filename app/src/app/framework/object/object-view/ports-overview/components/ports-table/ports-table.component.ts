@@ -85,7 +85,7 @@ export class PortsTableComponent implements OnInit, OnChanges {
         this.applyColumns();
     }
 
-    /** Both optional columns appear only once the loaded ports show that they carry anything. */
+    /** An optional column appears only once its input says the data or the user's rights allow it. */
     public ngOnChanges(changes: SimpleChanges): void {
         const toggled = OPTIONAL_COLUMN_INPUTS.some((input) => changes[input] && !changes[input].firstChange);
 
