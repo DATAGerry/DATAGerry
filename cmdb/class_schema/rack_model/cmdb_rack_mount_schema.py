@@ -27,8 +27,6 @@ cmdb.framework.rack.mount_validator - a per-field schema cannot express a cross-
 cross-document rule
 """
 from typing import Any
-
-from cmdb.models.rack_model.rack_mount_constants import RackArea, RackMountKind
 # -------------------------------------------------------------------------------------------------------------------- #
 # pylint: disable=R0801
 def get_cmdb_rack_mount_schema() -> dict[str, Any]:
@@ -38,6 +36,12 @@ def get_cmdb_rack_mount_schema() -> dict[str, Any]:
     Returns:
         dict: Field name to Cerberus rule mapping, consumed as CmdbRackMount.SCHEMA
     """
+    # pylint: disable=import-outside-toplevel
+    # Resolved at call time, not at module import time: the model imports this builder while its own
+    # package __init__ is still running, so a module-level import back into cmdb.models would close that
+    # cycle and leave every class_schema module unimportable on its own (see class_schema/__init__.py)
+    from cmdb.models.rack_model.rack_mount_constants import RackArea, RackMountKind
+
     return {
         'public_id': {  # public_id of the CmdbRackMount
             'type': 'integer',

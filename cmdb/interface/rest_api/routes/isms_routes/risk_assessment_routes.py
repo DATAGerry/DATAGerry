@@ -36,6 +36,7 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.isms_model import IsmsRiskAssessment, IsmsControlMeasureAssignment
+from cmdb.models.isms_model.isms_risk_assessment_constants import CONTROL_MEASURE_ASSIGNMENTS_KEY
 from cmdb.models.object_group_model import ObjectGroupMode
 from cmdb.models.object_group_model.object_reference_type_enum import ObjectReferenceType
 from cmdb.models.person_group_model.person_reference_type_enum import PersonReferenceType
@@ -189,7 +190,7 @@ def insert_isms_risk_assessment(data: dict[str, Any], request_user: CmdbUser) ->
 
         _coerce_costs_for_implementation(data)
 
-        cm_assignments = data.pop('control_measure_assignments', []) or []
+        cm_assignments = data.pop(CONTROL_MEASURE_ASSIGNMENTS_KEY, []) or []
 
         # Reject unknown ControlMeasure references before writing anything (no orphaned RiskAssessment)
         missing_control_measures = cm_assignment_manager.get_missing_control_measure_ids(cm_assignments)
@@ -271,6 +272,12 @@ def duplicate_isms_risk_assessment(
         # The source payload becomes every duplicate, so it has to satisfy the same required fields
         guard_required_risk_assessment_fields(data)
 
+        # The assignments are copied from the SOURCE assessment's own collection below, so the copy
+        # travelling in the payload is redundant - and storing it would put a key outside
+        # RiskAssessmentKey into the document, where every response built through the model would hide
+        # it while it still occupied the assessment
+        data.pop(CONTROL_MEASURE_ASSIGNMENTS_KEY, None)
+
         # Extract the public_id
         initial_risk_assessment_id = data.pop('public_id', None)
 
@@ -326,7 +333,7 @@ def duplicate_isms_risk_assessment(
                     new_assignment['risk_assessment_id'] = new_risk_assessment_id
                     new_assignments.append(new_assignment)
 
-                cma_manager.insert_many(new_assignments)
+                cma_manager.insert_many_items(new_assignments)
 
         return DefaultResponse(created_risk_assessment_ids).make_response()
     except HTTPException as http_err:
@@ -593,7 +600,7 @@ def update_isms_risk_assessment(public_id: int, data: dict[str, Any], request_us
         _coerce_costs_for_implementation(data)
 
         # Handle ControlMeasureAssignments (a dict of created / updated / deleted entries)
-        cm_assignments: dict = data.pop('control_measure_assignments', {}) or {}
+        cm_assignments: dict = data.pop(CONTROL_MEASURE_ASSIGNMENTS_KEY, {}) or {}
 
         # Reject unknown ControlMeasure references (created + updated) before applying any change
         referenced_assignments = cm_assignments.get('created', []) + cm_assignments.get('updated', [])

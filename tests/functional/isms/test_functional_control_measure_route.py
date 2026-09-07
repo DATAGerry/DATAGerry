@@ -19,6 +19,11 @@ Functional smoke for the ``/isms/control_measures`` REST routes
 Covers CRUD, the control_measure_type enum validation (invalid type -> 400 on insert and update),
 the manager-error -> 400 mapping, and the 400 when deleting a ControlMeasure still referenced by a
 ControlMeasureAssignment. The routes are ISMS-license gated, so the check is stubbed.
+
+``is_applicable`` gets its own class: the schema accepts a null, but the Statement of Applicability has
+two answers, so neither write path may store one. Insert normalises the validated payload before it is
+written and update goes through ``IsmsControlMeasure.from_data``, which normalises too - these tests
+read the stored document back out of the collection rather than trusting the response.
 """
 from http import HTTPStatus
 from typing import Any
@@ -47,6 +52,10 @@ CM_ID_FOR_DELETE: int = 98303
 CM_ID_FOR_BLOCKED_DELETE: int = 98304
 MISSING_CM_ID: int = 98399
 
+# is_applicable normalisation: one control measure per write path
+CM_ID_FOR_NULL_INSERT: int = 98321
+CM_ID_FOR_NULL_UPDATE: int = 98322
+
 # bulk-delete fixtures: two unused controls, one still referenced by an assignment
 CM_BULK_UNUSED_A: int = 98311
 CM_BULK_UNUSED_B: int = 98312
@@ -58,6 +67,7 @@ BULK_ASSIGNMENT_ID: int = 98351
 ALL_CM_IDS: list[int] = [
     CM_ID_FOR_GET, CM_ID_FOR_UPDATE, CM_ID_FOR_DELETE, CM_ID_FOR_BLOCKED_DELETE,
     CM_BULK_UNUSED_A, CM_BULK_UNUSED_B, CM_BULK_USED,
+    CM_ID_FOR_NULL_INSERT, CM_ID_FOR_NULL_UPDATE,
 ]
 ALL_CONTROL_ASSIGNMENT_IDS: list[int] = [CONTROL_ASSIGNMENT_ID, BULK_ASSIGNMENT_ID]
 
@@ -273,6 +283,57 @@ def _raiser(exc: Exception):
     def _fail(*_args, **_kwargs):
         raise exc
     return _fail
+
+
+class TestIsApplicableIsNeverStoredAsNull:
+    """The schema accepts a null; the write paths must not persist one (see the module docstring)."""
+
+    def _stored(self, database_manager: MongoDatabaseManager, database_name: str,
+                public_id: int) -> dict[str, Any]:
+        """Reads a control measure straight out of the collection."""
+        return database_manager.get_collection(IsmsControlMeasure.COLLECTION, database_name)\
+            .find_one({'public_id': public_id}, {'_id': 0})
+
+    def test_insert_with_null_stores_false(self, rest_api, database_manager: MongoDatabaseManager,
+                                           database_name: str) -> None:
+        """The insert route writes the validated payload, so it normalises before handing it over."""
+        payload = _control_measure_payload(CM_ID_FOR_NULL_INSERT)
+        payload['is_applicable'] = None
+
+        response = rest_api.post(f'{ROUTE_URL}/', json=payload)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+        created_id = response.get_json()['raw']['public_id']
+        assert self._stored(database_manager, database_name, created_id)['is_applicable'] is False
+
+    def test_update_with_null_stores_false(self, rest_api, database_manager: MongoDatabaseManager,
+                                           database_name: str) -> None:
+        """The update route goes through from_data, which normalises on the way in."""
+        _insert_control_measure(database_manager, database_name, CM_ID_FOR_NULL_UPDATE)
+        payload = _control_measure_payload(CM_ID_FOR_NULL_UPDATE)
+        payload['is_applicable'] = None
+
+        response = rest_api.put(f'{ROUTE_URL}/{CM_ID_FOR_NULL_UPDATE}', json=payload)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+        assert self._stored(database_manager, database_name,
+                            CM_ID_FOR_NULL_UPDATE)['is_applicable'] is False
+        # from_data normalises in place, so the echoed payload reports what was stored
+        assert response.get_json()['result']['is_applicable'] is False
+
+    def test_list_reports_a_legacy_null_as_false(self, rest_api, database_manager: MongoDatabaseManager,
+                                                 database_name: str) -> None:
+        """A document that predates the normalisation is answered as False, not null."""
+        legacy = _control_measure_payload(CM_ID_FOR_NULL_INSERT)
+        legacy['is_applicable'] = None
+        database_manager.get_collection(IsmsControlMeasure.COLLECTION, database_name).insert_one(legacy)
+
+        response = rest_api.get(f'{ROUTE_URL}/?limit=0')
+
+        assert response.status_code == HTTPStatus.OK
+        entry = next(cm for cm in response.get_json()['results']
+                     if cm['public_id'] == CM_ID_FOR_NULL_INSERT)
+        assert entry['is_applicable'] is False
 
 
 class TestErrorMapping:

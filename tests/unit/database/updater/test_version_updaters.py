@@ -53,6 +53,7 @@ from cmdb.database.updater.versions.updater_20260804 import Update20260804
 from cmdb.database.updater.versions.updater_20260824 import Update20260824
 from cmdb.database.updater.versions.updater_20260901 import Update20260901
 from cmdb.database.updater.versions.updater_20260902 import Update20260902
+from cmdb.database.updater.versions.updater_20260907 import Update20260907
 # -------------------------------------------------------------------------------------------------------------------- #
 
 
@@ -120,6 +121,7 @@ def test_every_registered_updater_has_a_pyinstaller_hidden_import() -> None:
     (Update20260824, 20260824),
     (Update20260901, 20260901),
     (Update20260902, 20260902),
+    (Update20260907, 20260907),
 ], ids=str)
 def test_creation_date_and_description(updater_cls: type[BaseDatabaseUpdate], expected_date: int) -> None:
     """Each updater reports the date encoded in its name and a non-empty description"""

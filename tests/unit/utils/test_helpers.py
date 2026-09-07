@@ -21,9 +21,12 @@ from typing import Any
 
 import pytest
 
+from cmdb.database.database_utils import default
 from cmdb.errors.utils import ClassLoadError
 from cmdb.utils import (
     coerce_datetime,
+    coerce_document_dates,
+    coerce_mongo_datetime,
     coerce_whole_number,
     duplicate_names,
     is_hex_color,
@@ -182,6 +185,148 @@ class TestCoerceDatetime:
         readable message instead of a stack trace.
         """
         assert coerce_datetime(value) is None
+
+
+class TestCoerceMongoDatetime:
+    """coerce_mongo_datetime reads a timestamp in every shape the API round-trip produces."""
+
+    def test_reads_the_epoch_millis_wrapper(self) -> None:
+        """The shape the frontend sends back, because it is the shape a response carries."""
+        assert coerce_mongo_datetime({'$date': 1600000000000}) == datetime(
+            2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc
+        )
+
+    def test_reads_a_float_millis_wrapper(self) -> None:
+        """A JSON client may send the millis as a float."""
+        assert coerce_mongo_datetime({'$date': 1600000000000.0}) == datetime(
+            2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc
+        )
+
+    def test_reads_a_string_payload_in_the_wrapper(self) -> None:
+        """The wrapper also occurs with a timestamp string inside it."""
+        assert coerce_mongo_datetime({'$date': '2020-09-13T12:26:40Z'}) == datetime(
+            2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc
+        )
+
+    def test_round_trips_what_the_response_encoder_writes(self) -> None:
+        """
+        The caster and the response encoder are two halves of one contract.
+
+        `database_utils.default` turns a datetime into the wrapper; reading that wrapper back has to
+        return the same instant, or a stored date would drift by a round-trip through the API.
+        """
+        stamp = datetime(2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc)
+
+        assert coerce_mongo_datetime(default(stamp)) == stamp
+
+    def test_passes_a_datetime_through(self) -> None:
+        """A document read out of MongoDB already carries a real date."""
+        stamp = datetime(2026, 9, 1, tzinfo=timezone.utc)
+
+        assert coerce_mongo_datetime(stamp) is stamp
+
+    def test_reads_a_bare_timestamp_string(self) -> None:
+        """An API client may send a plain timestamp instead of the wrapper."""
+        assert isinstance(coerce_mongo_datetime('2026-09-01T12:30:00Z'), datetime)
+
+    def test_refuses_a_boolean_payload(self) -> None:
+        """
+        bool is an int subclass in Python.
+
+        Without the guard `{'$date': True}` reads as one millisecond past the epoch - a date nothing
+        about the value suggests.
+        """
+        assert coerce_mongo_datetime({'$date': True}) is None
+
+    @pytest.mark.parametrize('value', [{}, {'other': 1}, {'$date': 'not-a-timestamp'}, {'$date': None}])
+    def test_reports_an_unreadable_wrapper_as_none(self, value: dict[str, Any]) -> None:
+        """A sub-document that is not a readable wrapper is not a date."""
+        assert coerce_mongo_datetime(value) is None
+
+    def test_reports_an_out_of_range_payload_as_none(self) -> None:
+        """A millisecond value outside the platform's date range is refused, not raised on."""
+        assert coerce_mongo_datetime({'$date': 10 ** 20}) is None
+
+    @pytest.mark.parametrize('value', [None, '', 'not-a-date', 42, [], True])
+    def test_reports_anything_else_as_none(self, value: Any) -> None:
+        """Never raises: the caller decides whether an unreadable value is a 400 or a refusal."""
+        assert coerce_mongo_datetime(value) is None
+
+
+class TestCoerceDocumentDates:
+    """coerce_document_dates normalises a document's date fields in place and names the failures."""
+
+    def test_converts_the_declared_keys(self) -> None:
+        """Every declared date becomes a real date, which is the only form MongoDB can sort."""
+        document: dict[str, Any] = {'from': {'$date': 1600000000000}, 'to': '2026-09-01T00:00:00Z'}
+
+        assert coerce_document_dates(document, ('from', 'to')) == []
+        assert isinstance(document['from'], datetime)
+        assert isinstance(document['to'], datetime)
+
+    def test_leaves_an_absent_key_absent(self) -> None:
+        """
+        A partial document must not grow keys.
+
+        The same function runs on a stored document and on a request payload, so inventing a null
+        would write one into the database.
+        """
+        document: dict[str, Any] = {'from': {'$date': 1600000000000}}
+
+        assert coerce_document_dates(document, ('from', 'to')) == []
+        assert 'to' not in document
+
+    @pytest.mark.parametrize('empty_value', [None, '', {}, []])
+    def test_normalises_an_empty_value_to_none(self, empty_value: Any) -> None:
+        """An emptied date widget means 'no date', not 'a broken date'."""
+        document: dict[str, Any] = {'from': empty_value}
+
+        assert coerce_document_dates(document, ('from',)) == []
+        assert document['from'] is None
+
+    def test_names_every_unreadable_key_in_the_given_order(self) -> None:
+        """One response can then name them all, and the report is stable."""
+        document: dict[str, Any] = {
+            'from': 'not-a-date',
+            'middle': {'$date': 1600000000000},
+            'to': {'$date': 'nonsense'},
+        }
+
+        assert coerce_document_dates(document, ('from', 'middle', 'to')) == ['from', 'to']
+
+    def test_leaves_an_unreadable_value_untouched(self) -> None:
+        """
+        The caller decides what happens to it.
+
+        Overwriting it with None here would destroy the only evidence of what was actually stored.
+        """
+        document: dict[str, Any] = {'from': 'not-a-date'}
+
+        coerce_document_dates(document, ('from',))
+
+        assert document['from'] == 'not-a-date'
+
+    def test_is_idempotent(self) -> None:
+        """
+        Re-normalising an already normalised document changes nothing.
+
+        Both the model layer and the generic manager run it on the same write, so it happens twice
+        on every update.
+        """
+        document: dict[str, Any] = {'from': {'$date': 1600000000000}}
+
+        coerce_document_dates(document, ('from',))
+        first = document['from']
+        coerce_document_dates(document, ('from',))
+
+        assert document['from'] is first
+
+    def test_does_nothing_without_keys(self) -> None:
+        """A model declaring no date fields leaves its documents alone."""
+        document: dict[str, Any] = {'from': {'$date': 1600000000000}}
+
+        assert coerce_document_dates(document, ()) == []
+        assert document['from'] == {'$date': 1600000000000}
 
 
 class TestLoadClass:

@@ -22,6 +22,7 @@ delete) are stubbed and only the method's own branching + exception mapping is e
 real _StubModel stands in for the CmdbDAO model so the isinstance(...) serialisation branches and
 the to_json / from_data calls behave like the real thing
 """
+from datetime import datetime, timezone
 from typing import Any
 from unittest.mock import MagicMock, patch
 
@@ -40,6 +41,7 @@ SERIALIZED_DOC: dict[str, Any] = {**RAW_DOC, 'serialized': True}
 class _StubModel:
     """Minimal real model stand-in (a real class so isinstance(...) and the classmethods work)."""
     COLLECTION = 'stub.collection'
+    DATE_FIELDS: tuple[str, ...] = ()
 
     def __init__(self, data: dict[str, Any]) -> None:
         self.data = data
@@ -74,6 +76,10 @@ class _UpdateErr(Exception):
 
 class _DeleteErr(Exception):
     """Stub 'delete' exception."""
+
+
+class _InitErr(Exception):
+    """Stub 'init' exception."""
 
 
 EXCEPTIONS: dict[str, type[Exception]] = {
@@ -244,3 +250,169 @@ def test_delete_item_wraps_failure_in_delete_exception() -> None:
 
     with pytest.raises(_DeleteErr):
         GenericManager.delete_item(mgr, PUBLIC_ID)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  _normalize_dates                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
+class _DatedModel(_StubModel):
+    """A model that opts its collection into date normalisation."""
+    COLLECTION = 'stub.dated'
+    DATE_FIELDS: tuple[str, ...] = ('from', 'to')
+
+
+STAMP_MILLIS: int = 1600000000000
+STAMP: datetime = datetime(2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc)
+
+
+def _dated_manager() -> MagicMock:
+    """A MagicMock standing in for a GenericManager over the dated stub model."""
+    mgr = MagicMock()
+    mgr.model = _DatedModel
+    mgr.exceptions = EXCEPTIONS
+    mgr._normalize_dates = lambda document: GenericManager._normalize_dates(mgr, document)
+
+    return mgr
+
+
+class _ModelWithoutDateFields:
+    """A model that does not extend CmdbDAO at all, the way CmdbUserSetting does not."""
+    COLLECTION = 'stub.no_dao'
+
+    @classmethod
+    def to_json(cls, instance: Any) -> dict[str, Any]:
+        """Never reached by these tests; present so the class is a usable model."""
+        return dict(instance)
+
+
+def test_normalize_dates_tolerates_a_model_that_is_not_a_cmdb_dao() -> None:
+    """
+    Not every model this manager is built with extends CmdbDAO, so DATE_FIELDS may be absent.
+
+    CmdbUserSetting is one: reading the attribute directly turned every user-settings write into a
+    manager insert error.
+    """
+    mgr = MagicMock()
+    mgr.model = _ModelWithoutDateFields
+    mgr.exceptions = EXCEPTIONS
+    document: dict[str, Any] = {'from': {'$date': STAMP_MILLIS}}
+
+    GenericManager._normalize_dates(mgr, document)
+
+    assert document == {'from': {'$date': STAMP_MILLIS}}
+
+
+def test_normalize_dates_is_a_no_op_without_declared_date_fields() -> None:
+    """
+    Every collection that declares no dates is left exactly as it was.
+
+    This is what keeps the mechanism opt-in: the default DATE_FIELDS on CmdbDAO is empty, so nothing
+    outside the two ISMS collections is touched.
+    """
+    mgr = _mock_manager()
+    document: dict[str, Any] = {'from': {'$date': STAMP_MILLIS}}
+
+    GenericManager._normalize_dates(mgr, document)
+
+    assert document == {'from': {'$date': STAMP_MILLIS}}
+
+
+def test_normalize_dates_converts_the_declared_fields() -> None:
+    """A raw document reaches the database with real dates, not the wrapper the frontend sends"""
+    mgr = _dated_manager()
+    document: dict[str, Any] = {'from': {'$date': STAMP_MILLIS}, 'to': '2020-09-13T12:26:40Z'}
+
+    GenericManager._normalize_dates(mgr, document)
+
+    assert document == {'from': STAMP, 'to': STAMP}
+
+
+def test_normalize_dates_raises_on_an_unreadable_date() -> None:
+    """Refusing beats guessing: a wrong date is stored as confidently as a correct one"""
+    mgr = _dated_manager()
+
+    with pytest.raises(ValueError, match='from'):
+        GenericManager._normalize_dates(mgr, {'from': 'planned for Q3'})
+
+
+def test_insert_item_normalizes_a_raw_document_s_dates() -> None:
+    """
+    The write path that takes a dict is the one that used to store the wrapper.
+
+    Both ISMS insert routes hand the validated payload straight to insert_item, so this is where the
+    shape has to be settled.
+    """
+    mgr = _dated_manager()
+    mgr.insert.return_value = PUBLIC_ID
+
+    GenericManager.insert_item(mgr, {'public_id': PUBLIC_ID, 'from': {'$date': STAMP_MILLIS}})
+
+    mgr.insert.assert_called_once_with({'public_id': PUBLIC_ID, 'from': STAMP})
+
+
+def test_insert_item_does_not_normalize_a_model_instance() -> None:
+    """A model instance has already normalised its own dates in from_data"""
+    mgr = _dated_manager()
+    mgr.insert.return_value = PUBLIC_ID
+
+    GenericManager.insert_item(mgr, _DatedModel({'public_id': PUBLIC_ID}))
+
+    mgr.insert.assert_called_once_with({'public_id': PUBLIC_ID, 'serialized': True})
+
+
+def test_insert_item_wraps_an_unreadable_date_in_the_insert_exception() -> None:
+    """The route maps that exception to a 400, so nothing is written"""
+    mgr = _dated_manager()
+
+    with pytest.raises(_InsertErr):
+        GenericManager.insert_item(mgr, {'from': 'planned for Q3'})
+
+    mgr.insert.assert_not_called()
+
+
+def test_insert_many_items_normalizes_every_document() -> None:
+    """A bulk create cannot bypass what the single-document path enforces"""
+    mgr = _dated_manager()
+    mgr.insert_many.return_value = [1, 2]
+    documents = [{'from': {'$date': STAMP_MILLIS}}, {'from': '2020-09-13T12:26:40Z'}]
+
+    result = GenericManager.insert_many_items(mgr, documents)
+
+    mgr.insert_many.assert_called_once_with([{'from': STAMP}, {'from': STAMP}])
+    assert result == [1, 2]
+
+
+def test_insert_many_items_wraps_failure_in_insert_exception() -> None:
+    """One unreadable date refuses the whole batch rather than storing part of it"""
+    mgr = _dated_manager()
+
+    with pytest.raises(_InsertErr):
+        GenericManager.insert_many_items(mgr, [{'from': {'$date': STAMP_MILLIS}}, {'from': 'nonsense'}])
+
+    mgr.insert_many.assert_not_called()
+
+
+def test_update_item_normalizes_a_raw_update_s_dates() -> None:
+    """A dict update reaches $set with real dates too"""
+    mgr = _dated_manager()
+
+    GenericManager.update_item(mgr, PUBLIC_ID, {'from': {'$date': STAMP_MILLIS}})
+
+    mgr.update.assert_called_once_with({'public_id': PUBLIC_ID}, {'from': STAMP})
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                     __init__                                                         #
+# -------------------------------------------------------------------------------------------------------------------- #
+def test_init_wraps_a_failing_setup_in_the_init_exception() -> None:
+    """
+    A manager that cannot be built reports it as its own domain error.
+
+    The routes resolve managers through ManagerProvider, so a bare exception here would surface with
+    no indication of which manager failed. BaseManager reads the default database name off the
+    manager, which is what fails when there is none.
+    """
+    exceptions: dict[str, type[Exception]] = {**EXCEPTIONS, 'init': _InitErr}
+
+    with pytest.raises(_InitErr):
+        GenericManager(None, _StubModel, exceptions)

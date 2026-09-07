@@ -24,10 +24,11 @@ missing or malformed. The config directory is pointed at a temporary path so the
 fully controlled by each test.
 
 ``GET /`` is the reachability probe, added here on 2026-08-27: the whole route was untested, including
-the 500 it answers when the database status probe fails. Note what its tests have to patch - the route
-module binds its database manager at IMPORT time, so the manager is module state rather than a
-request-scoped object. Both routes are unauthenticated by design, which is what makes them reachable in
-these tests without a token.
+the 500 it answers when the database status probe fails. Its database manager is resolved per request
+from the app (it used to be captured at module import, which is why these tests had to import the
+module lazily and patch module state - both worked around on 2026-09-07), so a broken manager is
+injected by patching the app the test client is bound to. Both routes are unauthenticated by design,
+which is what makes them reachable in these tests without a token.
 """
 from http import HTTPStatus
 from pathlib import Path
@@ -37,6 +38,7 @@ import logging
 from cmdb import __title__, __version__
 from cmdb.errors.database import DatabaseConnectionError
 from cmdb.manager.system_manager.system_config_reader import SystemConfigReader
+from cmdb.interface.rest_api.routes import connection
 from cmdb.interface.rest_api.routes.connection_constants import ConnectionInfoKey
 from cmdb.interface.rest_api.routes.connection_helper import FRONTEND_CONFIG_FILENAME
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -56,19 +58,15 @@ def _point_config_dir_at(monkeypatch, directory: Path) -> None:
     monkeypatch.setattr(SystemConfigReader, 'RUNNING_CONFIG_LOCATION', str(directory))
 
 
-def _connection_module():
+def _break_the_database_manager(rest_api, monkeypatch) -> None:
     """
-    Imports the connection route module lazily and returns it
+    Points the app's database manager at one whose status probe raises
 
-    It CANNOT be imported at collection time: the module binds its database manager at import inside
-    ``with current_app.app_context()``, so importing it without a live app raises. By the time a test
-    body runs, the app fixture has built the REST app and the module is already in sys.modules, so this
-    import is a lookup. The awkwardness is the cost of that import-time binding, which is filed as a
-    decision rather than fixed.
+    The route reads ``current_app.database_manager`` per request, so the app the test client is bound
+    to is the thing to patch - a plain module attribute would not be consulted.
     """
-    from cmdb.interface.rest_api.routes import connection  # pylint: disable=import-outside-toplevel
-
-    return connection
+    broken_manager = SimpleNamespace(status=_raise(DatabaseConnectionError('unreachable')))
+    monkeypatch.setattr(rest_api.application, 'database_manager', broken_manager)
 
 
 def _raise(exc: Exception):
@@ -157,15 +155,26 @@ class TestConnectionCheckRoute:
         """
         A failing status probe is the route's negative answer, and it is a 500
 
-        Patches the MODULE attribute rather than a request-scoped manager, because the route binds its
-        database manager once at import time.
+        Patches the app's manager, which is what the route reads per request.
         """
-        broken_manager = SimpleNamespace(status=_raise(DatabaseConnectionError('unreachable')))
-        monkeypatch.setattr(_connection_module(), 'dbm', broken_manager)
+        _break_the_database_manager(rest_api, monkeypatch)
 
         response = rest_api.get(CONNECTION_URL)
 
         assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_the_manager_is_read_per_request(self, rest_api, monkeypatch) -> None:
+        """
+        A manager swapped between two requests is picked up by the second one
+
+        This is what the import-time binding could not do: the manager was captured once, so it
+        outlived the app it came from and every request answered from that one object.
+        """
+        assert rest_api.get(CONNECTION_URL).status_code == HTTPStatus.OK
+
+        _break_the_database_manager(rest_api, monkeypatch)
+
+        assert rest_api.get(CONNECTION_URL).status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     def test_the_failure_is_logged_at_error_level(self, rest_api, monkeypatch, caplog) -> None:
         """
@@ -174,9 +183,7 @@ class TestConnectionCheckRoute:
         It used to be LOGGER.debug, so a production instance whose database was unreachable answered
         500 and left no trace at the default log level.
         """
-        connection = _connection_module()
-        broken_manager = SimpleNamespace(status=_raise(DatabaseConnectionError('unreachable')))
-        monkeypatch.setattr(connection, 'dbm', broken_manager)
+        _break_the_database_manager(rest_api, monkeypatch)
 
         with caplog.at_level(logging.ERROR, logger=connection.LOGGER.name):
             rest_api.get(CONNECTION_URL)
@@ -194,8 +201,7 @@ class TestFrontendInitDefenceInDepth:
         It is kept so a future change to the helper's error handling cannot turn this route into a 500,
         and it is covered by making the helper raise, which is the only way to reach it.
         """
-        monkeypatch.setattr(_connection_module(), 'load_frontend_config',
-                            _raise(RuntimeError('helper changed')))
+        monkeypatch.setattr(connection, 'load_frontend_config', _raise(RuntimeError('helper changed')))
 
         response = rest_api.get(FRONTEND_INIT_URL)
 

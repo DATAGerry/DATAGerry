@@ -16,7 +16,8 @@
 """
 Functional smoke for the ``/isms/risks`` REST routes
 
-Covers CRUD, the risk_type / required-field validation (invalid type and incomplete data -> 400),
+Covers CRUD, the risk_type / required-field validation (invalid type and incomplete data -> 400 -
+the type is now refused by IsmsRisk.SCHEMA itself rather than by a re-check inside the routes),
 the manager-error -> 400 mapping, and the DELETE cascade that removes the Risk's RiskAssessments and
 their ControlMeasureAssignments. The routes are ISMS-license gated, so the check is stubbed.
 """
@@ -111,6 +112,51 @@ def _insert_risk(database_manager: MongoDatabaseManager, database_name: str, pub
     """Inserts a minimal IsmsRisk doc directly via the collection."""
     database_manager.get_collection(IsmsRisk.COLLECTION, database_name)\
         .insert_one({'public_id': public_id, 'name': 'Risk', 'risk_type': RiskType.THREAT, 'threats': [1]})
+
+
+class TestRiskWithUnsetTextFieldsCanBeSaved:
+    """
+    A risk whose identifier / consequences / description were never set must survive a round trip
+
+    The ISMS CSV importer stores None for a blank cell, ``to_json`` emits that null, and the frontend
+    patches it straight back into the form it later saves - which the schema used to answer with
+    'null value not allowed', so an imported risk could not be edited at all.
+    """
+
+    def test_a_stored_null_is_answered_as_null_and_accepted_back(
+            self, rest_api, database_manager: MongoDatabaseManager, database_name: str) -> None:
+        """The exact chain: null in the collection, null in the response, and a 200 on the way back."""
+        database_manager.get_collection(IsmsRisk.COLLECTION, database_name).insert_one({
+            'public_id': RISK_ID_FOR_UPDATE, 'name': 'Imported risk', 'risk_type': RiskType.EVENT,
+            'protection_goals': [], 'threats': [], 'vulnerabilities': [], 'category_id': None,
+            'identifier': None, 'consequences': 'A consequence', 'description': 'A description',
+        })
+
+        listed = rest_api.get(f'{ROUTE_URL}/?limit=0')
+
+        assert listed.status_code == HTTPStatus.OK
+        answered = next(risk for risk in listed.get_json()['results']
+                        if risk['public_id'] == RISK_ID_FOR_UPDATE)
+        assert answered['identifier'] is None
+
+        # What the frontend sends back is what it was given
+        response = rest_api.put(f'{ROUTE_URL}/{RISK_ID_FOR_UPDATE}', json=answered)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+    def test_a_risk_created_without_the_text_fields_lists_them_as_null(self, rest_api) -> None:
+        """The list route answers to_json, which emits every declared key whether stored or not."""
+        payload = _risk_payload(RISK_ID_FOR_GET, risk_type=RiskType.EVENT)
+        payload.pop('identifier', None)
+
+        assert rest_api.post(f'{ROUTE_URL}/', json=payload).status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+        listed = rest_api.get(f'{ROUTE_URL}/?limit=0')
+        answered = next(risk for risk in listed.get_json()['results']
+                        if risk['public_id'] == RISK_ID_FOR_GET)
+
+        assert answered['identifier'] is None
+        assert answered['protection_goals'] == []
 
 
 class TestPostRisk:

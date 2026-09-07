@@ -16,7 +16,6 @@
 """
 This module contains helper methods for CmdbLocations
 """
-from cmdb.database.predefined_data.cmdb_data import get_root_location_data
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def validate_root_location(tested_location: dict) -> bool:
@@ -29,6 +28,15 @@ def validate_root_location(tested_location: dict) -> bool:
     Returns:
         (bool): Returns boolean if the given dict has valid root location data
     """
+    # pylint: disable=import-outside-toplevel
+    # Resolved at call time, not at module import time: this is the model layer reaching UP into the
+    # database layer, and the predefined root document is built from this package's own constants, so a
+    # module-level import closes the cycle cmdb.models.location_model (package __init__) ->
+    # predefined_data.cmdb_data -> back into location_constants while this package is still
+    # half-initialised - which is what made collection_validator, database_updater, route_utils,
+    # init_rest_api and gunicorn unimportable as the first cmdb module of a process
+    from cmdb.database.predefined_data.cmdb_data import get_root_location_data
+
     root_location = get_root_location_data()
 
     for root_key, root_value in root_location.items():

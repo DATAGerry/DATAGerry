@@ -26,8 +26,6 @@ matching CmdbExtendableOption list actually offers is a cross-collection rule ne
 index can express
 """
 from typing import Any
-
-from cmdb.models.port_model.port_constants import PortKey, PortSide
 # -------------------------------------------------------------------------------------------------------------------- #
 # pylint: disable=R0801
 def get_cmdb_port_schema() -> dict[str, Any]:
@@ -37,6 +35,12 @@ def get_cmdb_port_schema() -> dict[str, Any]:
     Returns:
         dict: Field name to Cerberus rule mapping, consumed as CmdbPort.SCHEMA
     """
+    # pylint: disable=import-outside-toplevel
+    # Resolved at call time, not at module import time: the model imports this builder while its own
+    # package __init__ is still running, so a module-level import back into cmdb.models would close that
+    # cycle and leave every class_schema module unimportable on its own (see class_schema/__init__.py)
+    from cmdb.models.port_model.port_constants import PortKey, PortSide
+
     return {
         PortKey.PUBLIC_ID.value: {  # public_id of the CmdbPort - the id every other collection uses
             'type': 'integer',

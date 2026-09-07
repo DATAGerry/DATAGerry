@@ -30,7 +30,8 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.models.user_model import CmdbUser
-from cmdb.models.isms_model import IsmsReportBuilder
+from cmdb.models.isms_model import IsmsControlMeasure, IsmsReportBuilder
+from cmdb.models.isms_model.isms_control_measure_constants import ControlMeasureKey
 from cmdb.models.extendable_option_model import OptionType, CmdbExtendableOption
 from cmdb.models.object_group_model.object_reference_type_enum import ObjectReferenceType
 
@@ -57,6 +58,9 @@ LOGGER: Logger = getLogger(__name__)
 # These neutral values are echoed back in the response metadata instead of a client's ignored request.
 SOA_FIXED_ORDER_SORT: str = 'public_id'
 SOA_FIXED_ORDER_DIRECTION: int = 1
+
+# The source whose controls the SOA lists first, matched against the RESOLVED source label
+SOA_PRIMARY_SOURCE: str = 'ISO 27001:2022'
 
 isms_report_blueprint = APIBlueprint('isms_report', __name__)
 
@@ -397,15 +401,21 @@ def get_isms_soa_report(params: CollectionParameters, request_user: CmdbUser) ->
 
         all_control_measures = control_measure_manager.get_many()
 
-        # Single pass: replace the implementation_state and source public_ids with their values
+        # Single pass over the raw documents: replace the implementation_state and source public_ids
+        # with their values, and normalise the SoA answer. The rows are read documents, not model
+        # instances, so IsmsControlMeasure.from_data does not run over them - and a null is rendered as
+        # an empty cell here rather than as the "No" a False gets, which is what a document written
+        # before the insert route started normalising still holds
         for cm in all_control_measures:
-            state_id = cm.get('implementation_state')
+            state_id = cm.get(ControlMeasureKey.IMPLEMENTATION_STATE.value)
             if state_id in implementation_state_lookup:
-                cm['implementation_state'] = implementation_state_lookup[state_id]
+                cm[ControlMeasureKey.IMPLEMENTATION_STATE.value] = implementation_state_lookup[state_id]
 
-            source_id = cm.get('source')
+            source_id = cm.get(ControlMeasureKey.SOURCE.value)
             if source_id in source_lookup:
-                cm['source'] = source_lookup[source_id]
+                cm[ControlMeasureKey.SOURCE.value] = source_lookup[source_id]
+
+            IsmsControlMeasure.normalize_is_applicable(cm)
 
         # Order all control measures by the SOA business rules, then slice the requested page. The
         # sort keys off the resolved source label, so it must run over the full set before paging
@@ -1018,10 +1028,10 @@ def sort_key(cm: dict) -> tuple:
             (priority_for_source, priority_for_empty_identifier, sorted_identifier)
     """
     # 1. Put ISO 27001:2022 first
-    source_priority: int = 0 if cm.get('source') == 'ISO 27001:2022' else 1
+    source_priority: int = 0 if cm.get(ControlMeasureKey.SOURCE.value) == SOA_PRIMARY_SOURCE else 1
 
     # 2. Identifiers that are empty or missing should come last
-    identifier = cm.get('identifier')
+    identifier = cm.get(ControlMeasureKey.IDENTIFIER.value)
     identifier_is_empty = not identifier or not identifier.strip()
 
     # This ensures that empty identifiers get a higher "penalty"
