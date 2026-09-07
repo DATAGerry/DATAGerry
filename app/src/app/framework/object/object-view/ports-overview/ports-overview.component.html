@@ -1,0 +1,29 @@
+<fieldset class="ports-section">
+  <legend>Ports</legend>
+
+  @if (hasError) {
+    <app-warning-alert
+      title="Ports could not be loaded:"
+      message="Please reload the page. If the problem persists, contact your administrator.">
+    </app-warning-alert>
+  }
+
+  <cmdb-ports-table
+    [rows]="rows"
+    [totalRows]="totalRows"
+    [page]="page"
+    [pageSize]="pageSize"
+    [sort]="sort"
+    [showSideColumn]="showSideColumn"
+    [showConnectionColumn]="showConnectionColumn"
+    [loading]="(isLoading$ | async) === true"
+    (pageChange)="onPageChange($event)"
+    (pageSizeChange)="onPageSizeChange($event)"
+    (sortChange)="onSortChange($event)">
+  </cmdb-ports-table>
+</fieldset>
+
+<app-loading-popup
+  [isVisible]="isLoading$ | async"
+  message="We're Processing the Data..."
+></app-loading-popup>

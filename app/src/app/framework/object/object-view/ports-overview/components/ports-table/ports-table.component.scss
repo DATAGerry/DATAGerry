@@ -1,0 +1,65 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.ports-table {
+    display: block;
+    width: 100%;
+}
+
+/* Keep the wide port list inside the attributes card instead of pushing the layout sideways. */
+.ports-table ::ng-deep .table-container {
+    overflow-x: auto;
+}
+
+.ports-name {
+    font-weight: 500;
+    color: #1f2937;
+}
+
+.ports-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    line-height: 1.4;
+    background-color: #eef2ff;
+    color: #3730a3;
+    border: 1px solid #e0e7ff;
+}
+
+.ports-badge--status {
+    background-color: #f1f5f9;
+    color: #334155;
+    border-color: #e2e8f0;
+}
+
+.ports-state {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.ports-state__dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+    background-color: #adb5bd;
+}
+
+.ports-state--connected {
+    color: #1f2937;
+
+    .ports-state__dot {
+        background-color: #198754;
+    }
+}
+
+.ports-muted {
+    color: #9ca3af;
+}
