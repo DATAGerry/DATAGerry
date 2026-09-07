@@ -43,7 +43,7 @@ from cmdb.models.type_model import (
     DG_LOCATION_FIELD_NAME,
 )
 from cmdb.models.special_type_model.special_type_enum import SpecialType
-from cmdb.utils import duplicate_names, parse_import_bool, is_non_blank_string
+from cmdb.utils import coerce_whole_number, duplicate_names, parse_import_bool, is_non_blank_string
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_types.types_helper import (
     location_field_removal_blocker,
     selectable_as_parent_change_blocker,
@@ -790,19 +790,19 @@ def as_public_id(value: Any) -> int | None:
     comparing the raw value against a stored public_id has to coerce the same way or it silently
     never matches
 
+    Delegates to the project-wide `coerce_whole_number`, which is the same question asked everywhere
+    else ("is this a whole number?") and already handles the two traps: a boolean is refused, because
+    bool is an int subclass in Python and `True` would otherwise pass as the id 1, and a fractional
+    float is refused rather than silently truncated into a different object's id. This wrapper stays
+    because `as_public_id` says WHY the coercion is happening at each of its call sites
+
     Args:
         value (Any): The raw `public_id` value of an uploaded entry
 
     Returns:
         int | None: The id as a number, or None when the value is not one
     """
-    if isinstance(value, bool):
-        return None
-
-    try:
-        return int(value)
-    except (TypeError, ValueError):
-        return None
+    return coerce_whole_number(value)
 
 
 def type_name_conflict_error(

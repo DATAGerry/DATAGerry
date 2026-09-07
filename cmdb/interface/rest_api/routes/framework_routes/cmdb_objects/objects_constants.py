@@ -26,6 +26,8 @@ from cmdb.utils import BaseStrEnum
 
 __all__: list[str] = [
     'MAX_DASHBOARD_GROUPS',
+    'SINGLE_OBJECT_VIEW_MODES',
+    'SINGLE_OBJECT_VIEW_INVALID_MESSAGE',
     'ObjectViewMode',
     'ObjectPatchKey',
     'ObjectQueryParam',
@@ -44,13 +46,22 @@ REQUIRED_FIELD_ERROR_SEPARATOR: str = ' | '
 
 class ObjectViewMode(BaseStrEnum):
     """
-    Accepted values of the ``view`` query parameter on the object list / reference routes
+    Accepted values of the ``view`` query parameter on the object list / reference / single routes
 
     Selects how each CmdbObject is serialised in the response: ``NATIVE`` returns the stored
-    document as-is, ``RENDER`` returns the rendered (display) representation
+    document as-is, ``RENDER`` returns the rendered (display) representation and ``VALUES``
+    returns the stored document with its ``fields`` and ``multi_data_sections`` reshaped into
+    name-keyed maps.
+
+    ``VALUES`` is a **read-only** serialisation built for external consumers: it answers "what is
+    this field worth" with a dict lookup instead of a scan over the stored arrays. It deliberately
+    drops each field entry's ``type`` and every MDS row's ``multi_data_id``, so a payload read this
+    way can NOT be written back - see ``build_object_value_view``. Every other top-level key of the
+    document is passed through untouched
     """
     NATIVE = 'native'
     RENDER = 'render'
+    VALUES = 'values'
 
 
 class ObjectPatchKey(BaseStrEnum):
@@ -79,9 +90,14 @@ class ObjectQueryParam(BaseStrEnum):
     ``OBJECT_IDS`` is accepted in two encodings, one per route, because that is what the frontend
     sends: the bulk update reads REPEATED parameters (`objectIDs=1&objectIDs=2`, what Angular produces
     from an array of params) while the MDS-references route reads ONE comma-joined value
-    (`objectIDs=1,2`, what `HttpParams.set` produces). Unifying them is a frontend-visible change
+    (`objectIDs=1,2`, what `HttpParams.set` produces). Unifying them is a frontend-visible change.
+
+    ``VIEW`` is read off the request by the SINGLE object route only. The list and reference routes
+    receive the same parameter through ``parse_collection_parameters``, which puts it into
+    ``params.optional`` instead - so those two read it from there, not here
     """
     OBJECT_IDS = 'objectIDs'
+    VIEW = 'view'
 
 
 class ObjectGroupKey(BaseStrEnum):
@@ -99,3 +115,20 @@ class ObjectGroupKey(BaseStrEnum):
 class BulkDeleteKey(BaseStrEnum):
     """Keys of the bulk-delete response body"""
     SUCCESSFULLY = 'successfully'
+
+
+# Refusal (HTTP 400) when the single object route is asked for a view mode it does not serve. Names
+# what was sent and what is allowed, because the omission of 'native' is otherwise surprising
+SINGLE_OBJECT_VIEW_INVALID_MESSAGE: str = (
+    "'{view}' is not a supported view for a single Object. Allowed: {allowed}. Use "
+    "'/objects/native/<public_id>' for the stored document!"
+)
+
+# The view modes the SINGLE object route serves. RENDER is its default and keeps the route's
+# historical behaviour; VALUES is the read-optimised map form. NATIVE is absent on purpose - the
+# stored document has its own route (/objects/native/<public_id>), so accepting it here would give
+# one shape two addresses. Declared below the enum because it is built from its members
+SINGLE_OBJECT_VIEW_MODES: tuple[str, ...] = (
+    ObjectViewMode.RENDER.value,
+    ObjectViewMode.VALUES.value,
+)

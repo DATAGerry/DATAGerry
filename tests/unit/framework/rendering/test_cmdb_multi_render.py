@@ -30,7 +30,7 @@ import pytest
 from cmdb.manager.manager_provider_model import ManagerType
 from cmdb.framework.rendering import cmdb_multi_render as mr_module
 from cmdb.framework.rendering.cmdb_multi_render import CmdbMultiRender
-from cmdb.framework.rendering.render_constants import ANONYMOUS_NAME
+from cmdb.framework.rendering.render_constants import ANONYMOUS_NAME, RenderTypeInfoKey
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.models.type_model import CmdbType
 from cmdb.models.type_model.field_type_enum import FieldType
@@ -222,6 +222,71 @@ class TestObjectAndTypeInformation:
         info = render._CmdbMultiRender__generate_type_information(main_type)
 
         assert info['icon'] == ''
+
+    def test_type_information_carries_the_capability_flags(self, managers) -> None:
+        """
+        The two TYPE-level capability flags are forwarded to the render result
+
+        `uses_ports` is what decides whether a client renders the ports panel for an object, and
+        `selectable_as_parent` whether the object may be offered as a location parent. Both were
+        absent from the block until 2026-09-04, which forced a client to fetch the CmdbType
+        separately for one boolean on a view that already has the type server-side.
+        """
+        main_type = _main_type()
+        main_type.uses_ports = True
+        main_type.selectable_as_parent = False
+        render = _render(managers, [], types_cache={MAIN_TYPE_ID: main_type})
+
+        info = render._CmdbMultiRender__generate_type_information(main_type)
+
+        assert info[RenderTypeInfoKey.USES_PORTS.value] is True
+        assert info[RenderTypeInfoKey.SELECTABLE_AS_PARENT.value] is False
+
+    @pytest.mark.parametrize('flag', [RenderTypeInfoKey.USES_PORTS, RenderTypeInfoKey.SELECTABLE_AS_PARENT])
+    def test_a_type_predating_a_flag_still_renders(self, managers, flag: RenderTypeInfoKey) -> None:
+        """
+        A CmdbType whose document never carried the flag renders as False instead of raising
+
+        `uses_ports` was added to the model long after most installations had types, and
+        `updater_20260901` backfills it - but the renderer must not depend on that migration having
+        run, because a render is a read and a read must not fail on older data.
+        """
+        main_type = _main_type()
+        del main_type.__dict__[flag.value]
+        render = _render(managers, [], types_cache={MAIN_TYPE_ID: main_type})
+
+        info = render._CmdbMultiRender__generate_type_information(main_type)
+
+        assert info[flag.value] is False
+
+    def test_type_information_flags_are_real_booleans(self, managers) -> None:
+        """
+        A truthy stored value is normalised, so a client can compare with ===
+
+        Older documents can carry the flag as a string, and the frontend model declares it as a
+        boolean.
+        """
+        main_type = _main_type()
+        main_type.uses_ports = 'true'
+        render = _render(managers, [], types_cache={MAIN_TYPE_ID: main_type})
+
+        info = render._CmdbMultiRender__generate_type_information(main_type)
+
+        assert info[RenderTypeInfoKey.USES_PORTS.value] is True
+
+    def test_type_information_key_set_is_exactly_the_enum(self, managers) -> None:
+        """
+        The block is a curated selection, and this is what says so
+
+        A key added to the dict without a `RenderTypeInfoKey` member (or the reverse) fails here -
+        which is the check that was missing when `uses_ports` was added to CmdbType and silently did
+        not reach the render result.
+        """
+        render = _render(managers, [], types_cache={MAIN_TYPE_ID: _main_type()})
+
+        info = render._CmdbMultiRender__generate_type_information(_main_type())
+
+        assert set(info) == {member.value for member in RenderTypeInfoKey}
 
 
 class TestTypeSections:

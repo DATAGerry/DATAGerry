@@ -63,8 +63,13 @@ from cmdb.models.type_model import (
     TypeMultiDataSection,
 )
 from cmdb.models.type_model.field_type_enum import FieldType
+from cmdb.models.type_model.type_schema_key_enum import TypeSchemaKey
 from cmdb.models.user_model import CmdbUser
-from cmdb.framework.rendering.render_constants import ANONYMOUS_NAME, RenderObjectInfoKey
+from cmdb.framework.rendering.render_constants import (
+    ANONYMOUS_NAME,
+    RenderObjectInfoKey,
+    RenderTypeInfoKey,
+)
 from cmdb.framework.rendering.render_result import RenderResult
 
 from cmdb.errors.models.cmdb_type import CmdbTypeFieldNotFoundError
@@ -206,6 +211,9 @@ class CmdbMultiRender:
         """
         Generate type-specific information for rendering using cached types and users.
 
+        The keys are named by `RenderTypeInfoKey`, which also documents what the block deliberately
+        does and does not carry
+
         Args:
             type_instance (CmdbType): The CmdbType of the rendered object
 
@@ -219,17 +227,29 @@ class CmdbMultiRender:
             icon = ""
 
         # --- Build type information dictionary ---
+        # A CURATED selection, not a dump of the CmdbType: a flag added to the model does not appear
+        # here on its own, which is why `uses_ports` was absent until it was added deliberately
         type_info: dict[str, Any] = {
-            "type_id": type_instance.public_id,
-            "type_name": type_instance.name,
-            "type_label": type_instance.label,
-            "creation_time": type_instance.creation_time,
-            "author_id": type_instance.author_id,
-            "author_name": self.get_user_name(type_instance.author_id),
-            "icon": icon,
-            "active": type_instance.active,
-            "version": type_instance.version,
-            "acl": type_instance.acl.to_json(type_instance.acl)
+            RenderTypeInfoKey.TYPE_ID.value: type_instance.public_id,
+            RenderTypeInfoKey.TYPE_NAME.value: type_instance.name,
+            RenderTypeInfoKey.TYPE_LABEL.value: type_instance.label,
+            RenderTypeInfoKey.CREATION_TIME.value: type_instance.creation_time,
+            RenderTypeInfoKey.AUTHOR_ID.value: type_instance.author_id,
+            RenderTypeInfoKey.AUTHOR_NAME.value: self.get_user_name(type_instance.author_id),
+            RenderTypeInfoKey.ICON.value: icon,
+            RenderTypeInfoKey.ACTIVE.value: type_instance.active,
+            RenderTypeInfoKey.VERSION.value: type_instance.version,
+            RenderTypeInfoKey.ACL.value: type_instance.acl.to_json(type_instance.acl),
+            # Both are TYPE-level capability flags a client needs while rendering an object: whether
+            # the object may be picked as a location parent, and whether it may carry ports (which is
+            # what decides if the ports panel renders at all). Read with getattr-style defaults so a
+            # CmdbType built from a document predating either flag renders instead of raising
+            RenderTypeInfoKey.SELECTABLE_AS_PARENT.value: bool(
+                getattr(type_instance, TypeSchemaKey.SELECTABLE_AS_PARENT.value, False),
+            ),
+            RenderTypeInfoKey.USES_PORTS.value: bool(
+                getattr(type_instance, TypeSchemaKey.USES_PORTS.value, False),
+            ),
         }
 
         return type_info

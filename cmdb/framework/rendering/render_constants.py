@@ -75,3 +75,46 @@ class RenderObjectInfoKey(BaseStrEnum):
     ACTIVE = 'active'
     VERSION = 'version'
     SPECIAL_TYPE = 'special_type'
+
+
+class RenderTypeInfoKey(BaseStrEnum):
+    """
+    Enumeration of the keys inside a `RenderResult.type_information` block
+
+    `CmdbMultiRender` copies these off the rendered object's CmdbType (plus the resolved author
+    name) into the render output. The block is a CURATED selection, not a dump of the type: a
+    CmdbType carries far more than this, and only what a client rendering an object needs is
+    forwarded - which is why a flag added to `CmdbType` does not appear here on its own and has to
+    be added deliberately.
+
+    They mirror `TypeSchemaKey` members but live on the RENDER result, not on the stored document -
+    `TYPE_ID`, `TYPE_NAME` and `TYPE_LABEL` in particular are the type's `public_id` / `name` /
+    `label` under different names - so reading them through this enum keeps a consumer from reaching
+    for `TypeSchemaKey` and quietly getting the wrong key
+
+    Attributes:
+        TYPE_ID: public_id of the object's CmdbType
+        TYPE_NAME: The type's unique name
+        TYPE_LABEL: The type's display label
+        CREATION_TIME: When the type was created
+        AUTHOR_ID: public_id of the user who created the type
+        AUTHOR_NAME: Display name resolved for AUTHOR_ID
+        ICON: The type's render_meta icon, or an empty string when it has none
+        ACTIVE: The type's active flag
+        VERSION: The type's version string
+        ACL: The type's serialised AccessControlList
+        SELECTABLE_AS_PARENT: Whether objects of this type may be a CmdbLocation parent
+        USES_PORTS: Whether objects of this type may carry physical ports (Port Connectivity)
+    """
+    TYPE_ID = 'type_id'
+    TYPE_NAME = 'type_name'
+    TYPE_LABEL = 'type_label'
+    CREATION_TIME = 'creation_time'
+    AUTHOR_ID = 'author_id'
+    AUTHOR_NAME = 'author_name'
+    ICON = 'icon'
+    ACTIVE = 'active'
+    VERSION = 'version'
+    ACL = 'acl'
+    SELECTABLE_AS_PARENT = 'selectable_as_parent'
+    USES_PORTS = 'uses_ports'

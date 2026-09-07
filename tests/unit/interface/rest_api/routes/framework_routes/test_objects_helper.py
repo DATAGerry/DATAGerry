@@ -31,6 +31,9 @@ from werkzeug.exceptions import BadRequest, HTTPException
 
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper import (
     render_or_native,
+    build_field_value_map,
+    build_mds_value_map,
+    build_object_value_view,
     is_special_type_changed,
     validate_and_fill_object_fields,
     validate_required_object_fields,
@@ -134,6 +137,30 @@ class TestRenderOrNative:
 
         assert result == ['rendered']
         render_list_ctor.return_value.render_result_list.assert_called_once_with(raw=True)
+
+    def test_values_returns_name_keyed_maps(self) -> None:
+        """The values view reshapes each object's fields into a name-keyed map."""
+        objects = [SimpleNamespace(public_id=1,
+                                   fields=[{'name': 'hostname', 'value': 'srv-01', 'type': 'text'}],
+                                   multi_data_sections=[])]
+
+        result = render_or_native(ObjectViewMode.VALUES, objects, MagicMock())
+
+        assert result == [{'public_id': 1, 'fields': {'hostname': 'srv-01'}, 'multi_data_sections': {}}]
+
+    def test_values_never_renders(self) -> None:
+        """
+        The values view is built from the stored document, never from a render
+
+        Its whole purpose is to skip the renderer, so RenderList must not be constructed - that is
+        what makes it cheaper than the render view rather than a reshape on top of it.
+        """
+        objects = [SimpleNamespace(public_id=1, fields=[], multi_data_sections=[])]
+
+        with patch(f'{HELPER_PATH}.RenderList') as render_list_ctor:
+            render_or_native(ObjectViewMode.VALUES, objects, MagicMock())
+
+        render_list_ctor.assert_not_called()
 
     def test_unknown_view_aborts_400(self) -> None:
         """An unrecognised view mode aborts with HTTP 400."""
@@ -1747,3 +1774,274 @@ class TestHelperErrorArms:
 
         assert exc_info.value.code == 404
         objects_manager.update_object.assert_called_once()
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              build_field_value_map                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestBuildFieldValueMap:
+    """build_field_value_map turns a stored fields list into a name-keyed value map."""
+
+    def test_maps_every_name_to_its_value(self) -> None:
+        """Each entry contributes one key, and only its value survives."""
+        fields = [
+            {'name': 'hostname', 'value': 'srv-01', 'type': 'text'},
+            {'name': 'cpus', 'value': 8, 'type': 'number'},
+        ]
+
+        assert build_field_value_map(fields) == {'hostname': 'srv-01', 'cpus': 8}
+
+    def test_drops_the_type(self) -> None:
+        """
+        The type is deliberately not carried over
+
+        This is what makes the view read-only: a stored entry must always be a complete
+        {name, value, type} triple, so a map built from this can never be written back.
+        """
+        result = build_field_value_map([{'name': 'a', 'value': 1, 'type': 'text'}])
+
+        assert result == {'a': 1}
+        assert 'type' not in result
+
+    @pytest.mark.parametrize('value', [None, '', 0, False, []])
+    def test_keeps_falsy_values(self, value: Any) -> None:
+        """A falsy value is a value: the key is present, not skipped."""
+        result = build_field_value_map([{'name': 'a', 'value': value}])
+
+        assert result == {'a': value}
+        assert 'a' in result
+
+    def test_a_field_without_a_value_key_maps_to_none(self) -> None:
+        """An entry missing 'value' entirely still gets its key, holding None."""
+        assert build_field_value_map([{'name': 'a', 'type': 'text'}]) == {'a': None}
+
+    def test_an_empty_name_is_kept(self) -> None:
+        """
+        An empty field name is stored as a key rather than dropped
+
+        The type schema does not forbid it (backlog #199), and silently losing a field would be
+        worse than an awkward key.
+        """
+        assert build_field_value_map([{'name': '', 'value': 1}]) == {'': 1}
+
+    @pytest.mark.parametrize('name', [None, 1, ['a'], {'a': 1}])
+    def test_a_non_string_name_is_skipped(self, name: Any) -> None:
+        """A name that cannot be a JSON key is skipped instead of raising."""
+        assert build_field_value_map([{'name': name, 'value': 1}]) == {}
+
+    def test_a_duplicate_name_resolves_to_the_last_entry(self) -> None:
+        """
+        Only reachable on corrupted data - a field name is unique within its CmdbType
+
+        Pinned so the behaviour is a decision rather than an accident.
+        """
+        fields = [{'name': 'a', 'value': 'first'}, {'name': 'a', 'value': 'second'}]
+
+        assert build_field_value_map(fields) == {'a': 'second'}
+
+    def test_a_malformed_entry_does_not_cost_the_rest(self) -> None:
+        """One unusable row is skipped; the usable ones around it still map."""
+        fields = [{'name': 'a', 'value': 1}, 'not-a-dict', None, {'name': 'b', 'value': 2}]
+
+        assert build_field_value_map(fields) == {'a': 1, 'b': 2}
+
+    @pytest.mark.parametrize('fields', [None, 'text', 42, {'name': 'a'}])
+    def test_a_non_list_input_maps_to_empty(self, fields: Any) -> None:
+        """Anything that is not a list answers with an empty map rather than raising."""
+        assert build_field_value_map(fields) == {}
+
+    def test_an_empty_list_maps_to_empty(self) -> None:
+        """An object with no fields is a normal state."""
+        assert build_field_value_map([]) == {}
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               build_mds_value_map                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestBuildMdsValueMap:
+    """build_mds_value_map turns stored MDS sections into a section-keyed map of row value maps."""
+
+    def test_maps_each_section_to_its_rows(self) -> None:
+        """A section becomes its section_id key, holding one value map per row in stored order."""
+        sections = [{
+            'section_id': 'mds-interfaces',
+            'highest_id': 2,
+            'values': [
+                {'multi_data_id': 1, 'data': [{'name': 'ip', 'value': '10.0.0.1', 'type': 'text'}]},
+                {'multi_data_id': 2, 'data': [{'name': 'ip', 'value': '10.0.0.2', 'type': 'text'}]},
+            ],
+        }]
+
+        assert build_mds_value_map(sections) == {
+            'mds-interfaces': [{'ip': '10.0.0.1'}, {'ip': '10.0.0.2'}],
+        }
+
+    def test_drops_the_row_identity_and_the_counter(self) -> None:
+        """
+        multi_data_id and highest_id are both absent from the result
+
+        A row's identity IS its multi_data_id and never its position, so this view cannot be used to
+        write rows back - the positional index must not be mistaken for the id.
+        """
+        sections = [{
+            'section_id': 's1',
+            'highest_id': 7,
+            'values': [{'multi_data_id': 7, 'data': [{'name': 'a', 'value': 1}]}],
+        }]
+
+        result = build_mds_value_map(sections)
+
+        assert result == {'s1': [{'a': 1}]}
+        assert 'multi_data_id' not in result['s1'][0]
+
+    def test_several_sections_stay_separate(self) -> None:
+        """Each section keeps its own rows, keyed by its own name."""
+        sections = [
+            {'section_id': 's1', 'values': [{'multi_data_id': 1, 'data': [{'name': 'a', 'value': 1}]}]},
+            {'section_id': 's2', 'values': [{'multi_data_id': 1, 'data': [{'name': 'b', 'value': 2}]}]},
+        ]
+
+        assert build_mds_value_map(sections) == {'s1': [{'a': 1}], 's2': [{'b': 2}]}
+
+    def test_a_row_id_repeating_across_sections_is_not_a_conflict(self) -> None:
+        """
+        A multi_data_id is unique only WITHIN its section
+
+        Two sections both holding a row 1 must map to two independent lists.
+        """
+        sections = [
+            {'section_id': 's1', 'values': [{'multi_data_id': 1, 'data': [{'name': 'a', 'value': 'x'}]}]},
+            {'section_id': 's2', 'values': [{'multi_data_id': 1, 'data': [{'name': 'a', 'value': 'y'}]}]},
+        ]
+
+        assert build_mds_value_map(sections) == {'s1': [{'a': 'x'}], 's2': [{'a': 'y'}]}
+
+    def test_a_section_with_no_rows_maps_to_an_empty_list(self) -> None:
+        """
+        Kept rather than omitted
+
+        A consumer must be able to tell "this section exists and is empty" from "no such section".
+        """
+        assert build_mds_value_map([{'section_id': 's1', 'highest_id': 0, 'values': []}]) == {'s1': []}
+
+    def test_a_section_without_a_values_key_maps_to_an_empty_list(self) -> None:
+        """A section missing 'values' is treated as an empty section, not skipped."""
+        assert build_mds_value_map([{'section_id': 's1'}]) == {'s1': []}
+
+    @pytest.mark.parametrize('section_id', [None, 1, ['s']])
+    def test_a_section_without_a_usable_id_is_skipped(self, section_id: Any) -> None:
+        """A section id that cannot be a JSON key is skipped instead of raising."""
+        assert build_mds_value_map([{'section_id': section_id, 'values': []}]) == {}
+
+    def test_a_malformed_section_is_skipped(self) -> None:
+        """An entry of the sections list that is not a dict is skipped, not raised on."""
+        sections = ['not-a-dict', None, 42, {'section_id': 's1', 'values': []}]
+
+        assert build_mds_value_map(sections) == {'s1': []}
+
+    def test_a_malformed_row_is_skipped(self) -> None:
+        """One unusable row does not cost the section its other rows."""
+        sections = [{
+            'section_id': 's1',
+            'values': ['not-a-dict', {'multi_data_id': 1, 'data': [{'name': 'a', 'value': 1}]}],
+        }]
+
+        assert build_mds_value_map(sections) == {'s1': [{'a': 1}]}
+
+    @pytest.mark.parametrize('sections', [None, 'text', 42, {'section_id': 's1'}])
+    def test_a_non_list_input_maps_to_empty(self, sections: Any) -> None:
+        """Anything that is not a list answers with an empty map rather than raising."""
+        assert build_mds_value_map(sections) == {}
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            build_object_value_view                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestBuildObjectValueView:
+    """build_object_value_view reshapes only the two field-carrying keys of a stored document."""
+
+    @staticmethod
+    def _document() -> dict[str, Any]:
+        """One stored CmdbObject document with both field-carrying keys populated."""
+        return {
+            'public_id': 8802,
+            'type_id': 42,
+            'active': True,
+            'author_id': 1,
+            'version': '1.0.0',
+            'fields': [{'name': 'hostname', 'value': 'srv-01', 'type': 'text'}],
+            'multi_data_sections': [{
+                'section_id': 'mds-interfaces',
+                'highest_id': 1,
+                'values': [{'multi_data_id': 1, 'data': [{'name': 'ip', 'value': '10.0.0.1'}]}],
+            }],
+        }
+
+    def test_reshapes_both_field_carrying_keys(self) -> None:
+        """fields and multi_data_sections both come back as name-keyed maps."""
+        result = build_object_value_view(self._document())
+
+        assert result['fields'] == {'hostname': 'srv-01'}
+        assert result['multi_data_sections'] == {'mds-interfaces': [{'ip': '10.0.0.1'}]}
+
+    def test_passes_every_other_key_through_untouched(self) -> None:
+        """
+        Only the two field-carrying keys change
+
+        Everything else the native view returns is carried over as-is, so the two views differ in
+        those two keys and nowhere else.
+        """
+        document = self._document()
+
+        result = build_object_value_view(document)
+
+        for key in ('public_id', 'type_id', 'active', 'author_id', 'version'):
+            assert result[key] == document[key]
+
+    def test_adds_and_removes_no_top_level_key(self) -> None:
+        """The key set of the response is exactly the key set of the stored document."""
+        document = self._document()
+
+        assert set(build_object_value_view(document)) == set(document)
+
+    def test_does_not_mutate_the_stored_document(self) -> None:
+        """
+        The source document must survive untouched
+
+        On the list route the input is the live CmdbObject's __dict__, so reshaping in place would
+        corrupt the object the caller still holds.
+        """
+        document = self._document()
+
+        build_object_value_view(document)
+
+        assert document['fields'] == [{'name': 'hostname', 'value': 'srv-01', 'type': 'text'}]
+        assert isinstance(document['multi_data_sections'], list)
+
+    def test_a_document_without_the_two_keys_maps_to_empty_maps(self) -> None:
+        """A document carrying neither key still answers with both, empty."""
+        result = build_object_value_view({'public_id': 1})
+
+        assert result == {'public_id': 1, 'fields': {}, 'multi_data_sections': {}}
+
+    def test_an_mds_field_appears_in_both_blocks(self) -> None:
+        """
+        The flat fields map keeps MDS field names as stored (decided, not an oversight)
+
+        A CmdbObject's fields[] deliberately carries an entry for every field including MDS ones, and
+        this view does not strip them - so an MDS field name is present in both blocks, with the
+        per-row values under multi_data_sections being the authoritative ones.
+        """
+        document = {
+            'public_id': 1,
+            'fields': [{'name': 'ip', 'value': '', 'type': 'text'}],
+            'multi_data_sections': [{
+                'section_id': 's1',
+                'values': [{'multi_data_id': 1, 'data': [{'name': 'ip', 'value': '10.0.0.1'}]}],
+            }],
+        }
+
+        result = build_object_value_view(document)
+
+        assert result['fields'] == {'ip': ''}
+        assert result['multi_data_sections'] == {'s1': [{'ip': '10.0.0.1'}]}
