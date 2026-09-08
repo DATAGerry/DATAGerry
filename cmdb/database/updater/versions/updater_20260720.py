@@ -53,6 +53,9 @@ class Update20260720(BaseDatabaseUpdate):
         Group rights persist as name strings, so a group granted the now-removed right keeps a
         dangling entry. A single ``$pull`` over the groups whose ``rights`` still contain the name
         strips it; groups that never held it are not matched. Idempotent - a re-run matches nothing
+
+        Raises:
+            UpdaterException: If the groups could not be updated
         """
         try:
             self.dbm.update_many_raw(
@@ -64,4 +67,4 @@ class Update20260720(BaseDatabaseUpdate):
 
             self.increase_updater_version(self.creation_date())
         except Exception as err:
-            raise UpdaterException(str(err)) from err
+            raise UpdaterException(err) from err

@@ -25,7 +25,7 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.manager.generic_manager import GenericManager
 from cmdb.manager.query_builder import BuilderParameters
 
-from cmdb.models.log_model import CmdbObjectRelationLog, LogInteraction
+from cmdb.models.log_model import CmdbObjectRelationLog, ObjectRelationLogKey, LogInteraction
 from cmdb.models.object_relation_model import ObjectRelationKey, ObjectRelationFieldValueKey
 from cmdb.models.user_model import CmdbUser
 
@@ -216,23 +216,26 @@ class ObjectRelationLogsManager(GenericManager):
 
             # Initialise the log document with the attributes common to every action
             object_relation_log: dict[str, Any] = {
-                "action": action,
-                "creation_time": datetime.now(timezone.utc),
-                "author_id": request_user.get_public_id(),
-                "author_name": request_user.get_display_name(),
-                "object_relation_parent_id": object_relation.get(ObjectRelationKey.RELATION_PARENT_ID.value),
-                "object_relation_child_id": object_relation.get(ObjectRelationKey.RELATION_CHILD_ID.value),
-                "object_relation_id": object_relation.get(ObjectRelationKey.PUBLIC_ID.value),
-                "changes": {},
+                ObjectRelationLogKey.ACTION.value: action,
+                ObjectRelationLogKey.CREATION_TIME.value: datetime.now(timezone.utc),
+                ObjectRelationLogKey.AUTHOR_ID.value: request_user.get_public_id(),
+                ObjectRelationLogKey.AUTHOR_NAME.value: request_user.get_display_name(),
+                ObjectRelationLogKey.OBJECT_RELATION_PARENT_ID.value: object_relation.get(
+                    ObjectRelationKey.RELATION_PARENT_ID.value),
+                ObjectRelationLogKey.OBJECT_RELATION_CHILD_ID.value: object_relation.get(
+                    ObjectRelationKey.RELATION_CHILD_ID.value),
+                ObjectRelationLogKey.OBJECT_RELATION_ID.value: object_relation.get(
+                    ObjectRelationKey.PUBLIC_ID.value),
+                ObjectRelationLogKey.CHANGES.value: {},
             }
 
             if action == LogInteraction.CREATE:
-                object_relation_log["changes"] = {
+                object_relation_log[ObjectRelationLogKey.CHANGES.value] = {
                     item[ObjectRelationFieldValueKey.NAME.value]: item[ObjectRelationFieldValueKey.VALUE.value]
                     for item in new_object_relation.get(ObjectRelationKey.FIELD_VALUES.value, [])
                 }
             elif action == LogInteraction.EDIT:
-                object_relation_log["changes"] = self.get_field_value_changes(
+                object_relation_log[ObjectRelationLogKey.CHANGES.value] = self.get_field_value_changes(
                     old_object_relation.get(ObjectRelationKey.FIELD_VALUES.value, []),
                     new_object_relation.get(ObjectRelationKey.FIELD_VALUES.value, []),
                 )

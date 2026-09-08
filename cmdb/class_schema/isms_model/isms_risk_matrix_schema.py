@@ -32,6 +32,12 @@ def get_isms_risk_matrix_schema() -> dict[str, Any]:
     Returns:
         dict: Field name to Cerberus rule mapping, consumed as IsmsRiskMatrix.SCHEMA
     """
+    # pylint: disable=import-outside-toplevel
+    # Resolved at call time, not at module import time: the model imports this builder while its own
+    # package __init__ is still running, so a module-level import back into cmdb.models would close that
+    # cycle and leave every class_schema module unimportable on its own (see class_schema/__init__.py)
+    from cmdb.models.isms_model.isms_risk_matrix_constants import RiskMatrixCellKey
+
     return {
         'public_id': {  # public_id of the IsmsRiskMatrix
             'type': 'integer',
@@ -41,32 +47,33 @@ def get_isms_risk_matrix_schema() -> dict[str, Any]:
             'schema': {
                 'type': 'dict',
                 'schema': {
-                    'row': {  # Zero-based row index of the cell
+                    RiskMatrixCellKey.ROW.value: {  # Zero-based row index of the cell
                         'type': 'integer',
                         'min': 0,
                     },
-                    'column': {  # Zero-based column index of the cell
+                    RiskMatrixCellKey.COLUMN.value: {  # Zero-based column index of the cell
                         'type': 'integer',
                         'min': 0,
                     },
-                    'risk_class_id': {  # public_id of the IsmsRiskClass assigned to this cell
+                    RiskMatrixCellKey.RISK_CLASS_ID.value: {  # public_id of the IsmsRiskClass assigned to this cell
                         'type': 'integer',
                     },
-                    'impact_id': {  # public_id of the IsmsImpact represented by this cell
+                    RiskMatrixCellKey.IMPACT_ID.value: {  # public_id of the IsmsImpact represented by this cell
                         'type': 'integer',
                     },
-                    'impact_value': {  # calculation_basis of the cell's IsmsImpact
+                    RiskMatrixCellKey.IMPACT_VALUE.value: {  # calculation_basis of the cell's IsmsImpact
                         'type': 'float',
                         'min': 0.0,
                     },
-                    'likelihood_id': {  # public_id of the IsmsLikelihood represented by this cell
+                    RiskMatrixCellKey.LIKELIHOOD_ID.value: {  # public_id of the IsmsLikelihood represented by this cell
                         'type': 'integer',
                     },
-                    'likelihood_value': {  # calculation_basis of the cell's IsmsLikelihood
+                    RiskMatrixCellKey.LIKELIHOOD_VALUE.value: {  # calculation_basis of the cell's IsmsLikelihood
                         'type': 'float',
                         'min': 0.0,
                     },
-                    'calculated_value': {  # Computed risk value for the cell (impact x likelihood)
+                    # Computed risk value for the cell (impact x likelihood)
+                    RiskMatrixCellKey.CALCULATED_VALUE.value: {
                         'type': 'float',
                         'min': 0.0,
                     },

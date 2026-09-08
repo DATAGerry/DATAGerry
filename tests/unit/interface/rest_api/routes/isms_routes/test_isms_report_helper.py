@@ -24,6 +24,7 @@ from cmdb.interface.rest_api.responses.response_parameters import CollectionPara
 from cmdb.interface.rest_api.routes.isms_routes.isms_report_helper import (
     build_ra_report_search_stage,
     build_report_facet_stage,
+    build_report_filter_stages,
     build_report_pagination_stages,
     extract_report_page,
     object_reference_lookup_stages,
@@ -216,3 +217,46 @@ class TestPaginateReportRows:
 
         assert page == self.ROWS
         assert total == 7
+
+class TestBuildReportFilterStages:
+    """
+    build_report_filter_stages accepts both shapes the API documents for ``?filter=``
+
+    ``CollectionParameters`` types it ``dict | list[dict]``, and the rest of the backend reads it that
+    way: ``BaseQueryBuilder.__init_query`` treats a dict as one ``$match`` and a list as stages to
+    splice in, and ``objects_routes`` branches on both. The report routes used to wrap the value
+    unconditionally, so a list produced ``{"$match": [...]}`` - which MongoDB rejects, making a
+    documented filter shape answer 500.
+    """
+
+    def test_a_dict_becomes_one_match_stage(self) -> None:
+        """The ordinary case: a Mongo query document."""
+        assert build_report_filter_stages({'risk_category': 'Legal'}) == [
+            {'$match': {'risk_category': 'Legal'}}
+        ]
+
+    def test_a_list_is_spliced_in_as_stages(self) -> None:
+        """The shape that used to 500: the caller already sent pipeline stages."""
+        stages = [{'$match': {'priority': 3}}, {'$sort': {'risk_title': 1}}]
+
+        assert build_report_filter_stages(stages) == stages
+
+    def test_the_returned_list_is_a_copy(self) -> None:
+        """The caller's list must not be mutated when the route appends its facet stage."""
+        stages = [{'$match': {'priority': 3}}]
+
+        result = build_report_filter_stages(stages)
+        result.append({'$limit': 1})
+
+        assert stages == [{'$match': {'priority': 3}}]
+
+    def test_an_empty_filter_adds_no_stage(self) -> None:
+        """
+        No filter means no stage at all
+
+        The frontend's treatment-plan component sends ``filter: ''``, which CollectionParameters
+        normalises to ``{}`` - so this is the shape most requests actually take.
+        """
+        assert len(build_report_filter_stages({})) == 0
+        assert len(build_report_filter_stages([])) == 0
+        assert len(build_report_filter_stages(None)) == 0

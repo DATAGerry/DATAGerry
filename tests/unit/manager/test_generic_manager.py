@@ -56,6 +56,11 @@ class _StubModel:
         """Wraps the raw document in a _StubModel so the result is identifiable."""
         return cls(data)
 
+    @classmethod
+    def normalize_document(cls, data: dict[str, Any]) -> None:
+        """No-op hook, as CmdbDAO's default is: a real model may fill in its empty values here."""
+
+
 
 # Distinct exception types per operation so a test can assert the correct one is raised
 class _InsertErr(Exception):
@@ -122,6 +127,53 @@ def test_insert_item_serialises_model_instance_before_insert() -> None:
 
     mgr.insert.assert_called_once_with(SERIALIZED_DOC)
     assert result == PUBLIC_ID
+
+
+def test_insert_item_runs_the_models_document_normalisation() -> None:
+    """
+    A dict inserted as-is still gets the model's own normalisation
+
+    The write routes hand the validated payload straight to insert_item, so this is the only place
+    that can stop a payload's null (or an omitted optional key) from becoming a stored null. The
+    model instance path needs no equivalent - to_json produces normalised values by construction.
+    """
+    mgr = _mock_manager()
+
+    def _fill(document: dict[str, Any]) -> None:
+        document['normalized'] = True
+
+    mgr._normalize_document.side_effect = _fill  # pylint: disable=protected-access
+
+    GenericManager.insert_item(mgr, dict(RAW_DOC))
+
+    assert mgr.insert.call_args.args[0]['normalized'] is True
+
+
+def test_the_normalisation_hook_is_optional() -> None:
+    """
+    Not every model of a GenericManager is a CmdbDAO - CmdbUserSetting is not
+
+    Calling the hook unconditionally turned every user-setting write into a 400, which is why it is
+    read with getattr and skipped when the model declares none.
+    """
+    mgr = _mock_manager()
+    mgr.model = type('_Hookless', (), {'COLLECTION': 'x', 'DATE_FIELDS': ()})
+
+    GenericManager._normalize_document(mgr, dict(RAW_DOC))  # pylint: disable=protected-access
+
+
+def test_the_normalisation_hook_is_used_when_the_model_declares_one() -> None:
+    """A CmdbDAO model's hook is what fills in the empty values before a raw insert."""
+    mgr = _mock_manager()
+    document: dict[str, Any] = dict(RAW_DOC)
+
+    def _fill(data: dict[str, Any]) -> None:
+        data['normalized'] = True
+
+    with patch.object(_StubModel, 'normalize_document', staticmethod(_fill)):
+        GenericManager._normalize_document(mgr, document)  # pylint: disable=protected-access
+
+    assert document['normalized'] is True
 
 
 def test_insert_item_wraps_failure_in_insert_exception() -> None:
@@ -416,3 +468,55 @@ def test_init_wraps_a_failing_setup_in_the_init_exception() -> None:
 
     with pytest.raises(_InitErr):
         GenericManager(None, _StubModel, exceptions)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            find_existing_public_ids                                                  #
+# -------------------------------------------------------------------------------------------------------------------- #
+def test_find_existing_public_ids_reads_the_ids_in_one_projected_query() -> None:
+    """
+    One '$in' query projected to public_id, rather than a read per referenced id
+
+    The callers validate a list of references before a write (a person's groups, a group's members),
+    so the cost has to stay independent of how many ids the payload names.
+    """
+    mgr = _mock_manager()
+    mgr.find.return_value = [{'public_id': 1}, {'public_id': 3}]
+
+    result = GenericManager.find_existing_public_ids(mgr, [1, 2, 3])
+
+    mgr.find.assert_called_once_with(
+        criteria={'public_id': {'$in': [1, 2, 3]}},
+        projection={'public_id': 1},
+    )
+    assert result == {1, 3}
+
+
+def test_find_existing_public_ids_reports_nothing_for_an_empty_selection() -> None:
+    """
+    No ids to check means no query - an empty '$in' would still be a round trip
+
+    It also keeps the caller's 'unknown = wanted - existing' arithmetic correct for a payload that
+    references nothing.
+    """
+    mgr = _mock_manager()
+
+    assert GenericManager.find_existing_public_ids(mgr, []) == set()
+    mgr.find.assert_not_called()
+
+
+def test_find_existing_public_ids_accepts_a_set() -> None:
+    """The routes compute their reference sets with set arithmetic and pass them straight in."""
+    mgr = _mock_manager()
+    mgr.find.return_value = [{'public_id': 5}]
+
+    assert GenericManager.find_existing_public_ids(mgr, {5}) == {5}
+
+
+def test_find_existing_public_ids_wraps_failure_in_get_exception() -> None:
+    """A lookup failure is the manager's 'get' error, like every other read here."""
+    mgr = _mock_manager()
+    mgr.find.side_effect = RuntimeError('boom')
+
+    with pytest.raises(_GetErr):
+        GenericManager.find_existing_public_ids(mgr, [1])

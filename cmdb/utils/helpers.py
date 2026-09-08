@@ -341,6 +341,36 @@ def coerce_mongo_datetime(value: Any) -> datetime | None:
     return coerce_datetime(value)
 
 
+def coerce_empty_document_values(
+        document: dict[str, Any],
+        text_keys: Iterable[str] = (),
+        list_keys: Iterable[str] = ()) -> None:
+    """
+    Replaces a document's missing and null optional values with the empty string / empty list, in place
+
+    The rule that keeps a stored document sendable back: a Cerberus schema types an optional key
+    `string` or `list`, so a document holding null in one of them is a document its own schema
+    refuses - a GET followed by an unmodified PUT is answered 400, and code reading the value has to
+    guard for a third state that means exactly what the empty value means.
+
+    A key that is absent is filled in, so the documents of a collection have one shape rather than two,
+    and a key holding anything else - including a non-empty value of the wrong type - is left untouched
+    for the schema to reject.
+
+    Args:
+        document (dict[str, Any]): The document to normalise in place
+        text_keys (Iterable[str]): Keys whose empty value is ''
+        list_keys (Iterable[str]): Keys whose empty value is []
+    """
+    for key in text_keys:
+        if document.get(key) is None:
+            document[key] = ''
+
+    for key in list_keys:
+        if document.get(key) is None:
+            document[key] = []
+
+
 def coerce_document_dates(document: dict[str, Any], keys: Iterable[str]) -> list[str]:
     """
     Normalises a document's date fields into datetimes in place, naming the ones that failed

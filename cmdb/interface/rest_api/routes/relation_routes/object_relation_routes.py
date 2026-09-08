@@ -30,10 +30,14 @@ Two invariants the write routes enforce, both of them server-side only:
 
     - the referenced CmdbRelation must still exist, and the two endpoints must be different CmdbObjects
       (a CmdbObject is never related to itself)
-    - `author_id`, `creation_time` and `last_edit_time` are owned by the server. A create stamps the
-      author and the creation time; an update preserves the stored creation time, records the editing
-      user as `author_id` (the field doubles as "who last touched this" - a CmdbObjectRelation has no
-      separate editor field) and stamps `last_edit_time`
+    - `author_id`, `creation_time` and `last_edit_time` are owned by the server, and a value sent for
+      any of them is overwritten rather than trusted. A create stamps the author and the creation time
+      and clears `last_edit_time` (a relation that has never been edited has no edit time); an update
+      preserves the stored creation time, records the editing user as `author_id` (the field doubles as
+      "who last touched this" - a CmdbObjectRelation has no separate editor field) and stamps
+      `last_edit_time`. Until 2026-09-08 the create route left `last_edit_time` to the body, so a
+      client could claim - and backdate - an edit that never happened, and the `{'$date': ...}` wrapper
+      it sent was stored as a sub-document MongoDB cannot sort or range-filter
 
 Every write also writes its history through the ObjectRelationLogsManager. That is best-effort and
 always happens AFTER the write, so a failed write can never leave a log claiming a change that did not
@@ -114,7 +118,8 @@ def insert_cmdb_object_relation(data: dict[str, Any], request_user: CmdbUser) ->
     HTTP `POST` route to insert a CmdbObjectRelation into the database
 
     The referenced CmdbRelation must still exist and the two endpoints must be different CmdbObjects.
-    `author_id` and `creation_time` are stamped from the request, never taken from the body
+    `author_id` and `creation_time` are stamped from the request and `last_edit_time` is cleared, so
+    none of the three is ever taken from the body
 
     Args:
         data (CmdbObjectRelation.SCHEMA): Data of the CmdbObjectRelation which should be inserted
@@ -142,9 +147,11 @@ def insert_cmdb_object_relation(data: dict[str, Any], request_user: CmdbUser) ->
             data.get(ObjectRelationKey.RELATION_CHILD_ID.value),
         )
 
-        # Stamp server-controlled fields: the author and creation time are never trusted from the body
+        # Stamp server-controlled fields: none of the three is ever trusted from the body. Clearing
+        # last_edit_time is what keeps "never edited" a real state - a create is not an edit
         data[ObjectRelationKey.AUTHOR_ID.value] = request_user.get_public_id()
         data[ObjectRelationKey.CREATION_TIME.value] = datetime.now(timezone.utc)
+        data[ObjectRelationKey.LAST_EDIT_TIME.value] = None
 
         result_id: int = object_relations_manager.insert_object_relation(data)
 

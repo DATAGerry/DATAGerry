@@ -80,6 +80,26 @@ def test_status_recreates_missing_risk_matrix(
     assert recreated['matrix_unit'] is None
 
 
+def test_status_reports_an_empty_risk_matrix_as_unfinished(
+        rest_api, database_manager: MongoDatabaseManager, database_name: str) -> None:
+    """
+    A grid with no cells is not a finished risk-matrix step
+
+    ``all([])`` is vacuously true, so ``check_risk_classes_set_in_matrix`` used to answer True for an
+    empty grid. With every scale at its minimum that reached the wizard as
+    ``'risk_matrix': True`` - the step reported complete for a matrix nothing can be evaluated
+    against. The scale-minimum guard in build_isms_config_status is what masked it here, so this
+    asserts the flag directly against an empty grid.
+    """
+    matrix_collection = database_manager.get_collection(IsmsRiskMatrix.COLLECTION, database_name)
+    matrix_collection.update_one({'public_id': RISK_MATRIX_ID}, {'$set': {'risk_matrix': []}})
+
+    response = rest_api.get(STATUS_URL)
+
+    assert response.status_code == HTTPStatus.OK
+    assert response.json['risk_matrix'] is False
+
+
 def test_status_unexpected_error_returns_500(rest_api, monkeypatch) -> None:
     """An unexpected error while computing the configuration status surfaces as 500"""
     def _boom(*_args, **_kwargs):

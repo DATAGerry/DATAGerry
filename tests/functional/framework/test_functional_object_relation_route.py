@@ -739,3 +739,108 @@ class TestErrorMapping:
                 == HTTPStatus.INTERNAL_SERVER_ERROR
         finally:
             _purge_object_relation(database_manager, database_name, OR_ID_FOR_BULK_A)
+
+
+class TestTheTimestampsAreServerOwned:
+    """Neither timestamp may be set, backdated or shaped by the client."""
+
+    def test_create_ignores_a_last_edit_time_from_the_body(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """
+        A relation that has just been created has never been edited
+
+        The create route used to leave this key to the body, so a client could claim an edit that
+        never happened - and backdate it by years.
+        """
+        payload = _object_relation_payload()
+        payload['last_edit_time'] = {'$date': 1600000000000}
+
+        response = rest_api.post(f'{ROUTE_URL}/', json=payload)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+        created_id: int = response.get_json()['result_id']
+
+        try:
+            stored = database_manager.get_collection(CmdbObjectRelation.COLLECTION, database_name)\
+                .find_one({'public_id': created_id})
+
+            assert stored['last_edit_time'] is None
+        finally:
+            _purge_object_relation(database_manager, database_name, created_id)
+
+    def test_a_wrapped_timestamp_is_stored_as_a_real_date(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """
+        The stored value has to be something MongoDB can sort and range-filter
+
+        The frontend sends {'$date': <millis>}; before DATE_FIELDS was declared that wrapper was
+        stored as a sub-document, so one collection held two different types for its two date keys.
+        """
+        _insert_object_relation_doc(database_manager, database_name, OR_ID_FOR_UPDATE)
+
+        response = rest_api.put(f'{ROUTE_URL}/{OR_ID_FOR_UPDATE}', json=_object_relation_payload())
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+        stored = database_manager.get_collection(CmdbObjectRelation.COLLECTION, database_name)\
+            .find_one({'public_id': OR_ID_FOR_UPDATE})
+
+        assert isinstance(stored['last_edit_time'], datetime)
+        assert isinstance(stored['creation_time'], datetime)
+
+    def test_an_update_cannot_backdate_the_edit_time(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """The update route stamps the edit time itself, so a value in the body is overwritten."""
+        _insert_object_relation_doc(database_manager, database_name, OR_ID_FOR_UPDATE)
+
+        payload = _object_relation_payload()
+        payload['last_edit_time'] = {'$date': 1600000000000}
+
+        rest_api.put(f'{ROUTE_URL}/{OR_ID_FOR_UPDATE}', json=payload)
+
+        stored = database_manager.get_collection(CmdbObjectRelation.COLLECTION, database_name)\
+            .find_one({'public_id': OR_ID_FOR_UPDATE})
+
+        assert stored['last_edit_time'] > datetime(2020, 9, 13)
+
+    def test_an_unreadable_timestamp_in_the_body_never_reaches_the_document(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """
+        The fuzzy parser used to read 'sometime in March 2020' as a real date built from today
+
+        It cannot be reached through either write route any more, and for a better reason than
+        validation: the update pins the stored creation_time over whatever the body said, and the
+        create stamps its own. The refusal itself is pinned where it IS reachable - a direct
+        from_data, in tests/unit/models/object_relation_model. What this test guards is that the
+        stored value is the seeded one, i.e. that the pin happens before the model reads the payload.
+        """
+        _insert_object_relation_doc(database_manager, database_name, OR_ID_FOR_UPDATE)
+
+        payload = _object_relation_payload()
+        payload['creation_time'] = 'sometime in March 2020'
+
+        response = rest_api.put(f'{ROUTE_URL}/{OR_ID_FOR_UPDATE}', json=payload)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+        stored = database_manager.get_collection(CmdbObjectRelation.COLLECTION, database_name)\
+            .find_one({'public_id': OR_ID_FOR_UPDATE})
+
+        assert stored['creation_time'] == SEEDED_CREATION_TIME.replace(tzinfo=None)
+
+    def test_the_document_the_api_hands_out_can_be_sent_back(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """GET then an unmodified PUT - the only kind of update this API has."""
+        _insert_object_relation_doc(database_manager, database_name, OR_ID_FOR_UPDATE)
+
+        fetched = rest_api.get(f'{ROUTE_URL}/{OR_ID_FOR_UPDATE}').get_json()['result']
+
+        assert rest_api.put(f'{ROUTE_URL}/{OR_ID_FOR_UPDATE}', json=fetched).status_code in (
+            HTTPStatus.OK, HTTPStatus.ACCEPTED,
+        )

@@ -60,6 +60,7 @@ from cmdb.framework.ci_explorer.argparsing import (
     validate_node_type,
     validate_target_id,
 )
+from cmdb.framework.ci_explorer.context import CiExplorerGraphRequest, CiExplorerManagers
 from cmdb.framework.ci_explorer.graph import build_ci_explorer_graph
 
 from cmdb.framework.results import IterationResult
@@ -75,6 +76,10 @@ from cmdb.interface.rest_api.responses import (
     DeleteSingleResponse,
 )
 
+from cmdb.errors.ci_explorer import (
+    CiExplorerGraphBuildError,
+    CiExplorerTargetNotFoundError,
+)
 from cmdb.errors.manager.ci_explorer_profile_manager import (
     CiExplorerProfileManagerInsertError,
     CiExplorerProfileManagerGetError,
@@ -272,24 +277,34 @@ def get_ci_explorer_nodes_edges(request_user: CmdbUser) -> Response:  # pylint: 
         )
 
         response: dict[str, Any] = build_ci_explorer_graph(
-            target_id=target_id,
-            target_type=target_type,
-            with_root=with_root,
-            with_locations=with_locations,
-            with_ipam_relations=with_ipam_relations,
-            item_limit=item_limit,
-            types_filter=types_filter,
-            relations_filter=relations_filter,
-            objects_manager=objects_manager,
-            types_manager=types_manager,
-            relations_manager=relations_manager,
-            object_relations_manager=object_relations_manager,
-            locations_manager=locations_manager,
+            CiExplorerGraphRequest(
+                target_id=target_id,
+                target_type=target_type,
+                with_root=with_root,
+                with_locations=with_locations,
+                with_ipam_relations=with_ipam_relations,
+                item_limit=item_limit,
+                types_filter=types_filter,
+                relations_filter=relations_filter,
+            ),
+            CiExplorerManagers(
+                objects=objects_manager,
+                types=types_manager,
+                relations=relations_manager,
+                object_relations=object_relations_manager,
+                locations=locations_manager,
+            ),
         )
 
         return DefaultResponse(response).make_response()
     except HTTPException as http_err:
         raise http_err
+    except CiExplorerTargetNotFoundError as err:
+        LOGGER.error("[get_ci_explorer_nodes_edges] %s", err)
+        abort(404, f"The Object with ID:{target_id} was not found!")
+    except CiExplorerGraphBuildError as err:
+        LOGGER.error("[get_ci_explorer_nodes_edges] %s", err, exc_info=True)
+        abort(500, f"The CI Explorer graph of the Object with ID:{target_id} could not be built!")
     except Exception as err:
         LOGGER.error("[get_ci_explorer_nodes_edges] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, "An internal server error occured while retrieving CI Explorer nodes and edges!")

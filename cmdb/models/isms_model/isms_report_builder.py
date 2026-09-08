@@ -18,6 +18,7 @@ Implementation of IsmsReportBuilder
 """
 from logging import Logger, getLogger
 
+from cmdb.models.isms_model.isms_risk_matrix_constants import RiskMatrixCellKey
 from cmdb.manager.extendable_options_manager import ExtendableOptionsManager
 from cmdb.manager.isms_manager.risk_matrix_manager import RiskMatrixManager
 from cmdb.manager.isms_manager.risk_assessment_manager import RiskAssessmentManager
@@ -132,12 +133,15 @@ class IsmsReportBuilder:
         matrix = []
 
         for cell_data in (risk_matrix_data or {}).get('risk_matrix', []):
-            ra_ids = assessments_by_cell.get((cell_data['impact_id'], cell_data['likelihood_id']), [])
+            ra_ids = assessments_by_cell.get(
+                (cell_data[RiskMatrixCellKey.IMPACT_ID.value], cell_data[RiskMatrixCellKey.LIKELIHOOD_ID.value]),
+                [],
+            )
 
             matrix.append({
-                'row': cell_data['row'],
-                'column': cell_data['column'],
-                'risk_class_id': cell_data['risk_class_id'],
+                RiskMatrixCellKey.ROW.value: cell_data[RiskMatrixCellKey.ROW.value],
+                RiskMatrixCellKey.COLUMN.value: cell_data[RiskMatrixCellKey.COLUMN.value],
+                RiskMatrixCellKey.RISK_CLASS_ID.value: cell_data[RiskMatrixCellKey.RISK_CLASS_ID.value],
                 'count': len(ra_ids),
                 'risk_assessment_ids': ra_ids,
             })

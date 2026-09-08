@@ -315,6 +315,26 @@ def build_port_candidate(object_id: int, side: str, name: str, payload: dict[str
     }
 
 
+def collect_port_ids(ports: list[dict[str, Any]]) -> list[int]:
+    """
+    Reads the public_ids out of a list of port documents
+
+    Shared by the connected-flag projection and the object-level connection read, which ask the same
+    question of the same list. A port without a usable public_id is skipped rather than passed into a
+    '$in': it could never match a connection endpoint anyway
+
+    Args:
+        ports (list[dict[str, Any]]): Port documents
+
+    Returns:
+        list[int]: Their public_ids, in the order the ports were given
+    """
+    return [
+        port[PortKey.PUBLIC_ID.value] for port in ports
+        if isinstance(port.get(PortKey.PUBLIC_ID.value), int)
+    ]
+
+
 def with_connected_flag(
         port_connections_manager: PortConnectionsManager,
         ports: list[dict[str, Any]]) -> list[dict[str, Any]]:
@@ -335,11 +355,8 @@ def with_connected_flag(
     Returns:
         list[dict[str, Any]]: The same port documents, each carrying the flag
     """
-    port_ids: list[int] = [
-        port[PortKey.PUBLIC_ID.value] for port in ports
-        if isinstance(port.get(PortKey.PUBLIC_ID.value), int)
-    ]
-
-    connections: list[dict[str, Any]] = port_connections_manager.get_connections_of_ports(port_ids)
+    connections: list[dict[str, Any]] = port_connections_manager.get_connections_of_ports(
+        collect_port_ids(ports),
+    )
 
     return project_connected(ports, connections, PORT_CONNECTED_KEY)

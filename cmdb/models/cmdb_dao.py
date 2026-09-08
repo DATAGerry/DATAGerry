@@ -25,7 +25,13 @@ from pymongo import IndexModel
 
 from cmdb.models.cmdb_versioning import Versioning
 
-from cmdb.errors.cmdb_object import NoPublicIDError, NoVersionError, RequiredInitKeyNotFoundError
+from cmdb.errors.cmdb_object import (
+    CmdbDAOError,
+    NoPublicIDError,
+    NoVersionError,
+    RequiredInitKeyNotFoundError,
+    VersionTypeError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -59,9 +65,17 @@ class CmdbDAO:
             leaves a model with its own hand-written pair
         INIT_FROM_DATA_ERROR (type[Exception], optional): the error the shared from_data raises
         TO_JSON_ERROR (type[Exception], optional): the error the shared to_json raises
-        VERSIONING_MAJOR (int): addend for major version updates
-        VERSIONING_MINOR (int): addend for minor version updates
-        VERSIONING_PATCH (int): addend for small patches
+        VERSIONING_MAJOR (int): selector for a major version bump - 1.2.3 becomes 2.0.0
+        VERSIONING_MINOR (int): selector for a minor version bump - 1.2.3 becomes 1.3.0
+        VERSIONING_PATCH (int): selector for a patch version bump - 1.2.3 becomes 1.2.4
+
+    The three are the only values ``update_version`` accepts, and it stores the result on the
+    instance as well as returning it - see its docstring for what depended on that.
+
+    ``__init__`` turns every keyword it does not name into an attribute. Six models still rely on
+    that (CmdbSectionTemplate, CmdbReportCategory, CmdbReport, CmdbWebhook, CmdbWebhookEvent,
+    DocapiTemplate); the models migrated onto ``KEYS`` declare their parameters instead, so an
+    unknown document key is ignored rather than becoming a silent attribute
 
     Note:
         COLLECTION and REQUIRED_INIT_KEYS should always be overwritten by inherited classes
@@ -88,6 +102,11 @@ class CmdbDAO:
         }
     ]
 
+    # Declared so the versioning methods have an attribute to read and write rather than one that
+    # only ever appears through __init__'s keyword loop. A model that carries no version leaves it
+    # None, which both accessors read as "no version"
+    version: str | None = None
+
     REQUIRED_INIT_KEYS: list[str] = []
     INDEX_KEYS: list[dict[str, Any]] = []
     DATE_FIELDS: tuple[str, ...] = ()
@@ -108,19 +127,20 @@ class CmdbDAO:
         """
         self.public_id: int = int(public_id)
 
+        # Every leftover keyword becomes an attribute. 'version' used to have a branch of its own
+        # here, doing character for character what setattr does - see the class docstring for which
+        # models still reach this loop at all
         for key, value in kwargs.items():
-            if key == 'version':
-                self.version = value
-            else:
-                setattr(self, key, value)
+            setattr(self, key, value)
 
 
     def __new__(cls, *args: Any, **kwargs: Any):
         """
-        auto call function by object initialization
-        checks if all required keys for cmdb usage are present
-        @deprecated_implementation
-        if not all(key in key_list for key in cls.REQUIRED_INIT_KEYS):
+        Refuses a construction that omits a required key, before __init__ runs
+
+        Runs against the KEYWORD arguments only, which is why every model here is constructed by
+        keyword: public_id is read out of **kwargs, so a positional call raises here rather than
+        reaching __init__ at all
 
         Returns:
             Instance of the object
@@ -165,49 +185,90 @@ class CmdbDAO:
         """
         Retrieves a list of index models based on class-defined index keys
 
+        A model must not declare an index under a name the base already uses: index reconciliation
+        matches on the name and is additive, so the second declaration would be silently ignored and
+        the collection would carry whichever definition reached it first
+
+        Raises:
+            CmdbDAOError: If a declared index reuses one of the base's index names
+
         Returns:
             list: A list of IndexModel instances created from `INDEX_KEYS` and `SUPER_INDEX_KEYS`
         """
+        super_names: set[str] = {index['name'] for index in cls.SUPER_INDEX_KEYS}
+        clashing: list[str] = [
+            index['name'] for index in cls.INDEX_KEYS if index.get('name') in super_names
+        ]
+
+        if clashing:
+            raise CmdbDAOError(f"{cls.__name__} redeclares the inherited index name(s): {clashing}")
+
         return [IndexModel(**index) for index in cls.INDEX_KEYS + cls.SUPER_INDEX_KEYS]
 
 
     def update_version(self, update: int) -> str:
         """
-        Update the version number of the object
+        Applies a semantic version bump and stores the result on the instance
+
+        **This mutates ``self.version`` and returns it.** It used to only return the new string, so a
+        caller that wrote the return value into the document (the object update does) left the
+        instance carrying the old one - and the edit log, which reads ``get_version()`` off that same
+        instance, recorded every object edit one bump behind the object it described.
+
+        The bump kind must be one of the three VERSIONING_ constants. An unrecognised value used to
+        fall through to a patch bump, so a typo'd or future constant degraded silently instead of
+        being refused
 
         Args:
-            update (int): update step
-
-        Returns:
-            new version number
+            update (int): VERSIONING_MAJOR, VERSIONING_MINOR or VERSIONING_PATCH
 
         Raises:
-            NoVersionError: if object has no version control
-            TypeError: if version is not a float
+            NoVersionError: If the instance carries no usable version
+            VersionTypeError: If 'update' is not one of the three bump constants, or the stored
+                version is not a readable 'major.minor.patch'
+
+        Returns:
+            str: The new version, which is also now the instance's own
         """
-        if not hasattr(self, 'version') or self.version is None:
+        if not getattr(self, 'version', None):
             raise NoVersionError(f"The object (ID: {self.get_public_id()}) has no version property")
 
-        updater_version = Versioning(*map(int, self.version.split('.')))
+        if update not in (self.VERSIONING_MAJOR, self.VERSIONING_MINOR, self.VERSIONING_PATCH):
+            raise VersionTypeError(
+                f"Unknown version update type: {update} "
+                f"(expected one of {self.VERSIONING_MAJOR}, {self.VERSIONING_MINOR}, "
+                f"{self.VERSIONING_PATCH})"
+            )
+
+        try:
+            updated_version = Versioning(*(int(part) for part in self.version.split('.')))
+        except Exception as err:
+            raise VersionTypeError(
+                f"The object (ID: {self.get_public_id()}) has an unreadable version: {self.version}"
+            ) from err
 
         if update == self.VERSIONING_MAJOR:
-            updater_version.update_major()
+            updated_version.update_major()
         elif update == self.VERSIONING_MINOR:
-            updater_version.update_minor()
+            updated_version.update_minor()
         else:
-            updater_version.update_patch()
+            updated_version.update_patch()
 
-        return repr(updater_version)
+        self.version = repr(updated_version)
+
+        return self.version
 
 
     def get_version(self) -> str:
         """
-        Get version number if exists
-        Returns:
-            version number
+        Returns the instance's version number
 
-        Raiser:
-            NoVersionError: If not self.version
+        Raises:
+            NoVersionError: If the instance carries no version, using the same emptiness rule as
+                update_version - '' and None are both "no version", not a version to bump
+
+        Returns:
+            str: The version number
         """
         if self.version:
             return self.version
