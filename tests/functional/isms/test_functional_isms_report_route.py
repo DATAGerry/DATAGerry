@@ -29,9 +29,11 @@ from urllib.parse import urlencode
 import pytest
 
 from cmdb.database import MongoDatabaseManager
+from cmdb.manager.isms_manager.control_measure_manager import ControlMeasureManager
 from cmdb.manager.isms_manager.risk_assessment_manager import RiskAssessmentManager
 from cmdb.manager.license_manager.license_service import LicenseService
-from cmdb.models.isms_model import IsmsControlMeasure, IsmsRisk, IsmsRiskAssessment
+from cmdb.models.isms_model import IsmsControlMeasure, IsmsReportBuilder, IsmsRisk, IsmsRiskAssessment
+from cmdb.errors.manager.risk_assessment_manager import RiskAssessmentManagerIterationError
 from cmdb.models.extendable_option_model import CmdbExtendableOption, OptionType
 from cmdb.security.license.license_constants import LicenseFeature
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -518,6 +520,35 @@ class TestIsmsReports:
         assert all(kwargs.get('allowDiskUse') is True for kwargs in captured_kwargs)
 
 
+class TestReportFilterShapes:
+    """
+    Both filter shapes the API documents reach the reports without a 500
+
+    ``CollectionParameters`` types ``?filter=`` as ``dict | list[dict]`` and the rest of the backend
+    reads it that way, but the report routes used to wrap it unconditionally in ``{"$match": ...}`` -
+    so a list produced ``{"$match": [...]}``, which MongoDB rejects. A documented filter shape answered
+    500 until 2026-09-07.
+    """
+
+    @pytest.mark.parametrize('report', ['risk_treatment_plan', 'risk_assessments'])
+    def test_a_dict_filter_is_accepted(self, rest_api, report: str) -> None:
+        """The ordinary shape: a Mongo query document over the report's display fields."""
+        query = urlencode({'filter': json.dumps({'risk_treatment_option': 'AVOID'}), 'limit': 10})
+
+        assert rest_api.get(f'{ROUTE_URL}/{report}?{query}').status_code == HTTPStatus.OK
+
+    @pytest.mark.parametrize('report', ['risk_treatment_plan', 'risk_assessments'])
+    def test_a_list_filter_is_accepted(self, rest_api, report: str) -> None:
+        """The shape that used to 500: the caller sends pipeline stages instead of a query."""
+        stages = [{'$match': {'risk_treatment_option': 'AVOID'}}]
+        query = urlencode({'filter': json.dumps(stages), 'limit': 10})
+
+        response = rest_api.get(f'{ROUTE_URL}/{report}?{query}')
+
+        assert response.status_code == HTTPStatus.OK
+        assert 'results' in response.get_json()
+
+
 class TestReportErrorMapping:
     """Report routes map an unexpected aggregation failure to 500."""
 
@@ -529,6 +560,38 @@ class TestReportErrorMapping:
         monkeypatch.setattr(RiskAssessmentManager, 'aggregate', _boom)
 
         assert rest_api.get(f'{ROUTE_URL}/risk_assessments').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_risk_treatment_plan_iteration_error_returns_500(self, rest_api, monkeypatch) -> None:
+        """
+        The route's typed arm: a manager iteration failure has its own handler and its own message
+
+        It is distinct from the generic arm above - that one logs with exc_info, this one does not,
+        because a RiskAssessmentManagerIterationError already names what failed.
+        """
+        def _raise_iteration_error(*_args, **_kwargs):
+            raise RiskAssessmentManagerIterationError('no iteration')
+
+        monkeypatch.setattr(RiskAssessmentManager, 'aggregate', _raise_iteration_error)
+
+        assert rest_api.get(f'{ROUTE_URL}/risk_treatment_plan').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_risk_matrix_report_unexpected_error_returns_500(self, rest_api, monkeypatch) -> None:
+        """The RiskMatrix report has no pagination and no aggregation, so its builder is what can fail."""
+        def _boom(*_args, **_kwargs):
+            raise RuntimeError('boom')
+
+        monkeypatch.setattr(IsmsReportBuilder, 'build_risk_matrix_report', _boom)
+
+        assert rest_api.get(f'{ROUTE_URL}/risk_matrix').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_soa_report_unexpected_error_returns_500(self, rest_api, monkeypatch) -> None:
+        """The SOA reads its control measures with get_many, so that read is its failure point."""
+        def _boom(*_args, **_kwargs):
+            raise RuntimeError('boom')
+
+        monkeypatch.setattr(ControlMeasureManager, 'get_many', _boom)
+
+        assert rest_api.get(f'{ROUTE_URL}/soa').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     def test_risk_treatment_plan_unexpected_error_returns_500(self, rest_api, monkeypatch) -> None:
         """An unexpected error during the risk-treatment-plan report aggregation surfaces as 500."""

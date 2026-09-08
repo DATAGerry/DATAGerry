@@ -17,7 +17,7 @@
 This module contains the implementation of the GenericManager
 """
 from logging import Logger, getLogger
-from typing import Any
+from typing import Any, Iterable
 
 from cmdb.utils import coerce_document_dates
 
@@ -110,13 +110,32 @@ class GenericManager(BaseManager):
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
+    def _normalize_document(self, document: dict[str, Any]) -> None:
+        """
+        Runs the model's own document normalisation over a raw document, in place
+
+        The hook a CmdbDAO model uses to fill the optional keys a payload omitted with their empty
+        values, so a dict written directly is stored the same way one built through the model would
+        be. Read with getattr: not every model of a GenericManager is a CmdbDAO - CmdbUserSetting is
+        not - and a model that declares no hook simply has nothing to normalise
+
+        Args:
+            document (dict[str, Any]): The document to normalise in place
+        """
+        normalize = getattr(self.model, 'normalize_document', None)
+
+        if normalize:
+            normalize(document)
+
+
     def insert_item(self, document: dict[str, Any] | CmdbDAO) -> int:
         """
         Inserts a document into the manager's collection
 
-        A model instance is serialised via the model's to_json() before insertion; a dict has the
-        model's declared date fields normalised (see _normalize_dates) and is otherwise inserted
-        unchanged
+        A model instance is serialised via the model's to_json() before insertion; a dict is passed
+        through the model's own document normalisation first - its declared date fields (see
+        _normalize_dates) and its normalize_document hook, which is what fills the optional keys a
+        payload omitted with their empty values instead of storing null
 
         Args:
             document (dict[str, Any] | CmdbDAO): The document or model instance to insert
@@ -133,6 +152,7 @@ class GenericManager(BaseManager):
                 document = self.model.to_json(document)
             else:
                 self._normalize_dates(document)
+                self._normalize_document(document)
 
             return self.insert(document)
         except Exception as err:
@@ -144,9 +164,9 @@ class GenericManager(BaseManager):
         """
         Inserts several raw documents into the manager's collection in one call
 
-        The batch counterpart of insert_item for dicts: each document has the model's declared date
-        fields normalised before the batch is written, so a bulk create cannot bypass what the
-        single-document path enforces
+        The batch counterpart of insert_item for dicts: each document is normalised the same way
+        before the batch is written - date fields and the normalize_document hook - so a bulk create
+        cannot bypass what the single-document path enforces
 
         Args:
             documents (list[dict[str, Any]]): The documents to insert
@@ -161,6 +181,7 @@ class GenericManager(BaseManager):
         try:
             for document in documents:
                 self._normalize_dates(document)
+                self._normalize_document(document)
 
             return self.insert_many(documents)
         except Exception as err:
@@ -168,6 +189,39 @@ class GenericManager(BaseManager):
             raise self.exceptions.get("insert", Exception)(f"Insertion error: {err}") from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
+
+    def find_existing_public_ids(self, public_ids: Iterable[int]) -> set[int]:
+        """
+        Reports which of the given public_ids exist in the manager's collection
+
+        One projected '$in' query, so a caller validating a list of references does not read a document
+        per id - and reads no payload at all, only the ids themselves
+
+        Args:
+            public_ids (Iterable[int]): The public_ids to look for; an empty selection queries nothing
+
+        Raises:
+            Exception: The configured 'get' exception if the lookup fails
+
+        Returns:
+            set[int]: The subset that exists. Subtract it from the input to get the unknown ids
+        """
+        wanted: list[int] = list(public_ids or [])
+
+        if not wanted:
+            return set()
+
+        try:
+            documents: list[dict[str, Any]] = self.find(
+                criteria={CmdbDAO.PUBLIC_ID_KEY: {'$in': wanted}},
+                projection={CmdbDAO.PUBLIC_ID_KEY: 1},
+            )
+
+            return {document[CmdbDAO.PUBLIC_ID_KEY] for document in documents}
+        except Exception as err:
+            LOGGER.error("[find_existing_public_ids] Exception: %s. Type: %s", err, type(err))
+            raise self.exceptions.get("get", Exception)(f"Retrieval error: {err}") from err
+
 
     def get_item(self, public_id: int, as_dict: bool = False) -> dict[str, Any] | CmdbDAO | None:
         """
@@ -221,8 +275,8 @@ class GenericManager(BaseManager):
         """
         Updates the item with the given public_id
 
-        A model instance is serialised via the model's to_json() before the update; a dict has the
-        model's declared date fields normalised first (see _normalize_dates)
+        A model instance is serialised via the model's to_json() before the update; a dict is passed
+        through the model's own document normalisation first (see insert_item)
 
         Args:
             public_id (int): The public_id of the item to update
@@ -236,6 +290,7 @@ class GenericManager(BaseManager):
                 data = self.model.to_json(data)
             else:
                 self._normalize_dates(data)
+                self._normalize_document(data)
 
             self.update({'public_id': public_id}, data)
         except Exception as err:

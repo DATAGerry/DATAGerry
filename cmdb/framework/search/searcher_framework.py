@@ -110,7 +110,12 @@ class SearcherFramework:
         if len(raw_search_result_list[0]['data']) > 0:
             raw_search_result_list_entry = raw_search_result_list[0]
             # parse result list
-            pre_rendered_result_list = [CmdbObject(**raw_result) for raw_result in raw_search_result_list_entry['data']]
+            # from_data rather than CmdbObject(**raw_result): an aggregation result may carry keys the
+            # model does not declare, and from_data ignores those instead of turning them into silent
+            # attributes - it also normalises the two timestamps
+            pre_rendered_result_list = [
+                CmdbObject.from_data(raw_result) for raw_result in raw_search_result_list_entry['data']
+            ]
 
             rendered_result_list: list[RenderResult] = RenderList(
                 pre_rendered_result_list,

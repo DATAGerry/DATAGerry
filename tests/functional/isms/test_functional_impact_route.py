@@ -30,7 +30,13 @@ import pytest
 from cmdb.database import MongoDatabaseManager
 from cmdb.manager.isms_manager.impact_manager import ImpactManager
 from cmdb.manager.license_manager.license_service import LicenseService
-from cmdb.models.isms_model import IsmsImpact, IsmsRiskAssessment
+from cmdb.models.isms_model import (
+    IsmsImpact,
+    IsmsLikelihood,
+    IsmsRiskAssessment,
+    IsmsRiskClass,
+    IsmsRiskMatrix,
+)
 from cmdb.security.license.license_constants import LicenseFeature
 from cmdb.interface.rest_api.routes.isms_routes.isms_routes_constants import MAX_ISMS_SCALE_ENTRIES
 from cmdb.errors.manager.impact_manager import (
@@ -63,6 +69,9 @@ ALL_IMPACT_IDS: list[int] = [
 ALL_RISK_ASSESSMENT_IDS: list[int] = [RISK_ASSESSMENT_ID]
 
 BASIS_DEFAULT: float = 1.5
+
+# The likelihood seeded for the risk-matrix regeneration test
+MATRIX_LIKELIHOOD_ID: int = 97590
 BASIS_OTHER: float = 2.5
 
 
@@ -141,6 +150,47 @@ class TestImpactWithoutADescriptionCanBeSaved:
 
         assert rest_api.post(f'{ROUTE_URL}/', json=payload)\
             .status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+
+class TestTheRiskMatrixIsRegeneratedWithoutRiskClasses:
+    """
+    Creating an impact builds the grid even when no IsmsRiskClass exists yet
+
+    ``calculate_risk_matrix`` used to require at least one risk class - which is not an input to the
+    calculation - and no risk-class route recalculates, so configuring risk classes LAST left the grid
+    permanently empty while the config wizard reported that step complete.
+    """
+
+    def test_the_grid_is_written_with_no_risk_classes_configured(
+            self, rest_api, database_manager: MongoDatabaseManager, database_name: str) -> None:
+        """One impact and one likelihood are enough for a one-cell grid."""
+        risk_classes = database_manager.get_collection(IsmsRiskClass.COLLECTION, database_name)
+        likelihoods = database_manager.get_collection(IsmsLikelihood.COLLECTION, database_name)
+        matrix = database_manager.get_collection(IsmsRiskMatrix.COLLECTION, database_name)
+        removed_risk_classes = list(risk_classes.find({}, {'_id': 0}))
+        removed_likelihoods = list(likelihoods.find({}, {'_id': 0}))
+        stored_matrix = matrix.find_one({'public_id': 1}, {'_id': 0})
+        try:
+            risk_classes.delete_many({})
+            likelihoods.delete_many({})
+            likelihoods.insert_one({'public_id': MATRIX_LIKELIHOOD_ID, 'name': 'Rare',
+                                    'calculation_basis': 2.0, 'description': None})
+
+            response = rest_api.post(f'{ROUTE_URL}/', json=_impact_payload(IMPACT_ID_FOR_GET))
+
+            assert response.status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+            grid = matrix.find_one({'public_id': 1})['risk_matrix']
+            assert len(grid) == 1
+            assert grid[0]['risk_class_id'] == 0
+            assert grid[0]['calculated_value'] == round(2.0 * BASIS_DEFAULT, 2)
+        finally:
+            likelihoods.delete_one({'public_id': MATRIX_LIKELIHOOD_ID})
+            if removed_risk_classes:
+                risk_classes.insert_many(removed_risk_classes)
+            if removed_likelihoods:
+                likelihoods.insert_many(removed_likelihoods)
+            if stored_matrix:
+                matrix.replace_one({'public_id': 1}, stored_matrix, upsert=True)
 
 
 class TestZeroWeightIsRefused:

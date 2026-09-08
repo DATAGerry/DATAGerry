@@ -18,6 +18,7 @@ Provides all CmdbObjectRelation relevant classes and its shared document constan
 """
 from .cmdb_object_relation import CmdbObjectRelation
 from .object_relation_constants import (
+    OBJECT_RELATION_DATE_KEYS,
     ObjectRelationKey,
     ObjectRelationFieldValueKey,
     ObjectRelationRole,
@@ -28,6 +29,7 @@ from .object_relation_constants import (
 __all__: list[str] = [
     'CmdbObjectRelation',
     'ObjectRelationKey',
+    'OBJECT_RELATION_DATE_KEYS',
     'ObjectRelationFieldValueKey',
     'ObjectRelationRole',
     'RelationTabKey',

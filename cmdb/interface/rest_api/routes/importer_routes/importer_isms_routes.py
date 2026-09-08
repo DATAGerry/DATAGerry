@@ -61,6 +61,8 @@ from cmdb.models.isms_model.isms_control_measure_constants import (
     ControlMeasureKey,
 )
 from cmdb.models.isms_model.isms_risk_constants import RISK_IMPORT_KEYS, RiskKey
+from cmdb.models.isms_model.isms_threat_constants import THREAT_IMPORT_KEYS
+from cmdb.models.isms_model.isms_vulnerability_constants import VULNERABILITY_IMPORT_KEYS
 from cmdb.models.extendable_option_model import OptionType, ExtendableOptionKey
 from cmdb.utils import parse_import_bool
 
@@ -83,8 +85,10 @@ REQUEST_FILE = "file"
 CSV_ENCODING: str = 'utf-8-sig'
 
 # Header sets each target requires; also the contract with the CSV templates offered in the frontend
-THREAT_HEADERS: set[str] = {"name", "source", "identifier", "description"}
-VULNERABILITY_HEADERS: set[str] = {"name", "source", "identifier", "description"}
+# Derived from the document keys rather than repeated: both catalogues carry every key except the
+# server-owned public_id, and the two sets were byte-identical literals of each other
+THREAT_HEADERS: set[str] = set(THREAT_IMPORT_KEYS)
+VULNERABILITY_HEADERS: set[str] = set(VULNERABILITY_IMPORT_KEYS)
 # Derived from the document keys rather than repeated: a risk CSV carries every key except the
 # server-owned public_id and category_id, which the import does not accept (RISK_IMPORT_KEYS)
 RISK_HEADERS: set[str] = set(RISK_IMPORT_KEYS)

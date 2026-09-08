@@ -27,6 +27,7 @@ from cmdb.utils import BaseStrEnum
 
 __all__: list[str] = [
     'ObjectRelationKey',
+    'OBJECT_RELATION_DATE_KEYS',
     'ObjectRelationFieldValueKey',
     'ObjectRelationRole',
     'RelationTabKey',
@@ -45,6 +46,15 @@ class ObjectRelationKey(BaseStrEnum):
     CREATION_TIME = 'creation_time'
     LAST_EDIT_TIME = 'last_edit_time'
     FIELD_VALUES = 'field_values'
+
+
+# The keys holding a timestamp, in the order the document carries them. Read as CmdbObjectRelation's
+# DATE_FIELDS, which is what makes every write path normalise them into real datetimes: a payload
+# carries the {'$date': ...} wrapper, and MongoDB can only sort and range-filter a real date
+OBJECT_RELATION_DATE_KEYS: tuple[ObjectRelationKey, ...] = (
+    ObjectRelationKey.CREATION_TIME,
+    ObjectRelationKey.LAST_EDIT_TIME,
+)
 
 
 class ObjectRelationFieldValueKey(BaseStrEnum):

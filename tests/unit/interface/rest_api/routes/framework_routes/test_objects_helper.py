@@ -1678,7 +1678,9 @@ class TestHelperErrorArms:
     def test_delete_cascade_syncs_the_config_item_count_in_cloud_mode(self, flask_app: Flask) -> None:
         """Cloud mode reports the new total after a delete; on-premise has nothing to report."""
         flask_app.cloud_mode = True
-        deleted = MagicMock()
+        # A real CmdbObject: the shared to_json type-checks its instance and reads the document keys
+        # as attributes, so a MagicMock is refused - which is the guard working, not a test-only quirk
+        deleted = _make_object([])
 
         with flask_app.test_request_context('/'):
             with patch(f'{HELPER_PATH}.handle_delete_object_location'), \

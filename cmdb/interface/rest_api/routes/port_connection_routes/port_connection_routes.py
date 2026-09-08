@@ -57,6 +57,10 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.models.port_connection_model import PortConnectionKey, sort_endpoints
 from cmdb.models.user_model import CmdbUser
 
+from cmdb.security.acl.permission import AccessControlPermission
+
+from cmdb.errors.security import AccessDeniedError
+from cmdb.errors.manager.ports_manager import PortsManagerGetError
 from cmdb.errors.manager.port_connections_manager import (
     PortConnectionsManagerDeleteError,
     PortConnectionsManagerGetError,
@@ -78,6 +82,10 @@ from cmdb.interface.rest_api.responses import (
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
     ConnectionRequestKey,
     ConnectionRight,
+)
+from cmdb.interface.rest_api.routes.port_routes.port_route_helper import (
+    collect_port_ids,
+    get_accessible_owner_or_abort,
 )
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper import (
     build_cable_info,
@@ -252,6 +260,76 @@ def get_cmdb_port_connections_of_port(port_id: int, request_user: CmdbUser) -> R
     except Exception as err:
         LOGGER.error("[get_cmdb_port_connections_of_port] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, f'An internal server error occured while retrieving the connections of Port ID: {port_id}!')
+
+@port_connection_blueprint.route('/object/<int:object_id>', methods=['GET', 'HEAD'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+@port_connection_blueprint.protect(auth=True, right=ConnectionRight.VIEW.value)
+def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) -> Response:
+    """
+    HTTP `GET`/`HEAD` route to retrieve every CmdbPortConnection of one CmdbObject's CmdbPorts
+
+    What an object view needs to show the cabling of a device in one request. Without it a client had
+    to read the object's ports and then ask per port, so a 48-port switch cost 49 round trips for a
+    question two indexed reads answer.
+
+    An object with no ports, or with none of them connected, answers with an empty list - "nothing is
+    cabled here" is a normal state. The OBJECT not existing is a 404, because that is a different
+    answer.
+
+    **Each connection appears once**, even the internal pairing of a patch panel, whose two endpoints
+    are both ports of this object: they are one document, matched once by the `$in`.
+
+    **On the ACL**: this route is keyed by an object, so the object's own READ permission is checked
+    exactly as `/ports/object/<id>` checks it - the caller is asking what is attached to *that device*.
+    What decision Q13 governs is the PEER end: the returned connections may name ports of objects the
+    caller cannot read, and their ids are not filtered out, because a connection is a fact about the
+    cabling rather than about either device
+
+    Args:
+        object_id (int): public_id of the owner CmdbObject
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Raises:
+        HTTPException: 403 when the object's ACL denies it; 404 when the object does not exist;
+                       400 when the ports or the connections could not be read;
+                       500 on an unexpected error
+
+    Returns:
+        DefaultResponse: The CmdbPortConnections of the object's CmdbPorts as a list
+    """
+    try:
+        objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+        ports_manager: PortsManager = ManagerProvider.get_manager(ManagerType.PORTS, request_user)
+        port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
+            ManagerType.PORT_CONNECTIONS, request_user)
+
+        get_accessible_owner_or_abort(
+            objects_manager, object_id, request_user, AccessControlPermission.READ,
+        )
+
+        ports: list[dict[str, Any]] = ports_manager.get_ports_of_object(object_id)
+
+        return DefaultResponse(
+            port_connections_manager.get_connections_of_ports(collect_port_ids(ports)),
+        ).make_response()
+    except HTTPException as http_err:
+        raise http_err
+    except AccessDeniedError as err:
+        LOGGER.error("[get_cmdb_port_connections_of_object] AccessDeniedError: %s", err, exc_info=True)
+        abort(403, str(err))
+    except PortsManagerGetError as err:
+        LOGGER.error("[get_cmdb_port_connections_of_object] PortsManagerGetError: %s", err, exc_info=True)
+        abort(400, f'Failed to retrieve the Ports of CmdbObject ID: {object_id} from the database!')
+    except PortConnectionsManagerGetError as err:
+        LOGGER.error("[get_cmdb_port_connections_of_object] PortConnectionsManagerGetError: %s", err,
+                     exc_info=True)
+        abort(400, f'Failed to retrieve the Port connections of CmdbObject ID: {object_id}!')
+    except Exception as err:
+        LOGGER.error("[get_cmdb_port_connections_of_object] Exception: %s. Type: %s", err, type(err),
+                     exc_info=True)
+        abort(500,
+              f'An internal server error occured while retrieving the connections of CmdbObject ID: {object_id}!')
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   CRUD - UPDATE                                                      #

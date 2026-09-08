@@ -109,6 +109,9 @@ bin: requirements buildvars webapp
 		--hidden-import cmdb.database.updater.versions.updater_20260901 \
 		--hidden-import cmdb.database.updater.versions.updater_20260902 \
 		--hidden-import cmdb.database.updater.versions.updater_20260907 \
+		--hidden-import cmdb.database.updater.versions.updater_20260908 \
+		--hidden-import cmdb.database.updater.versions.updater_20260909 \
+		--hidden-import cmdb.database.updater.versions.updater_20260910 \
 		--hidden-import cmdb.framework.exporter \
 		--hidden-import cmdb.framework.exporter.format \
 		--hidden-import cmdb.interface.gunicorn \

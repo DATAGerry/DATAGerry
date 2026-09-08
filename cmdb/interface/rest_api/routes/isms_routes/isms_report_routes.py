@@ -30,7 +30,15 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.models.user_model import CmdbUser
-from cmdb.models.isms_model import IsmsControlMeasure, IsmsReportBuilder
+from cmdb.models.isms_model import (
+    IsmsControlMeasure,
+    IsmsControlMeasureAssignment,
+    IsmsProtectionGoal,
+    IsmsReportBuilder,
+    IsmsRisk,
+)
+from cmdb.models.person_model import CmdbPerson
+from cmdb.models.person_group_model import CmdbPersonGroup
 from cmdb.models.isms_model.isms_control_measure_constants import ControlMeasureKey
 from cmdb.models.extendable_option_model import OptionType, CmdbExtendableOption
 from cmdb.models.object_group_model.object_reference_type_enum import ObjectReferenceType
@@ -43,9 +51,13 @@ from cmdb.interface.rest_api.responses.response_parameters import CollectionPara
 from cmdb.interface.rest_api.routes.isms_routes.isms_report_helper import (
     build_ra_report_search_stage,
     build_report_facet_stage,
+    build_report_filter_stages,
     extract_report_page,
     object_reference_lookup_stages,
     paginate_report_rows,
+    risk_assessment_report_projection_stage,
+    risk_calculation_projection_fields,
+    risk_assessment_report_stages,
     risk_matrix_class_lookup_stages,
 )
 
@@ -61,6 +73,10 @@ SOA_FIXED_ORDER_DIRECTION: int = 1
 
 # The source whose controls the SOA lists first, matched against the RESOLVED source label
 SOA_PRIMARY_SOURCE: str = 'ISO 27001:2022'
+
+# Shown in place of an assessed object whose CmdbObject no longer resolves. The row is kept rather
+# than dropped: a risk assessment naming a deleted object is exactly what a reader needs to see
+UNKNOWN_OBJECT_LABEL: str = 'Unknown object'
 
 isms_report_blueprint = APIBlueprint('isms_report', __name__)
 
@@ -91,9 +107,9 @@ def _replace_object_ids_with_summaries(items: list[dict], object_key: str, objec
     )
 
     for item in target_items:
-        item[object_key] = summaries.get(item[object_key], 'Unknown object')
+        item[object_key] = summaries.get(item[object_key], UNKNOWN_OBJECT_LABEL)
 
-# ---------------------------------------------------- CRUD-CREATE --------------------------------------------------- #
+# ----------------------------------------------------- REPORTS ------------------------------------------------------ #
 
 @isms_report_blueprint.route('/risk_matrix', methods=['GET', 'HEAD'])
 @insert_request_user
@@ -146,6 +162,17 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
     The report is paginated: ``limit``/``page``/``sort``/``order``/``filter`` are read from the query
     string (see CollectionParameters) and the response is wrapped in a GetMultiResponse envelope.
 
+    **``sort`` and ``filter`` both address the report's RESOLVED display fields** - ``risk_name``,
+    ``risk_category``, ``implementation_status`` and the rest of the ``$project`` below - not the raw
+    IsmsRiskAssessment document. That is why the filter stages are appended after the projection: the
+    pagination ``$sort`` runs inside the facet stage, i.e. after it too, and the two must not address
+    different field sets. ``filter`` accepts a MongoDB query dict or a list of pipeline stages, as
+    everywhere else in the backend.
+
+    Note this report calls the risk's name ``risk_name`` while the RiskAssessment report calls the same
+    value ``risk_title``. Both are frontend-visible contract, so the difference is recorded rather than
+    resolved here.
+
     Args:
         params (CollectionParameters): Pagination, sort and filter parameters for the report
         request_user (CmdbUser): CmdbUser requesting the Risk Treatment Plan report
@@ -163,14 +190,16 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
         objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
 
         query_pipeline = [
-            # Step 0: Get all IsmsRiskAssessments matching the filter
-            {
-                "$match": params.filter
-            },
+            # Step 0: Start from all IsmsRiskAssessments. The column filters target this report's
+            # RESOLVED display fields (risk_name, risk_category, implementation_status, ...), which do
+            # not exist yet on the raw document - and the pagination $sort inside the facet stage runs
+            # after the $project too, so filtering here would have addressed a different field set than
+            # sorting did. params.filter is applied after the $project below, as on the sibling report.
+            {"$match": {}},
             # Step 1: Lookup associated Risk
             {
                 "$lookup": {
-                    "from": "isms.risk",
+                    "from": IsmsRisk.COLLECTION,
                     "localField": "risk_id",
                     "foreignField": "public_id",
                     "as": "risk"
@@ -181,7 +210,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             # Step 2: Lookup implementation status (ExtendableOption)
             {
                 "$lookup": {
-                    "from": "framework.extendableOptions",
+                    "from": CmdbExtendableOption.COLLECTION,
                     "localField": "implementation_status",
                     "foreignField": "public_id",
                     "as": "implementation_status"
@@ -192,7 +221,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             # Step 3: Lookup risk category label (ExtendableOption)
             {
                 "$lookup": {
-                    "from": "framework.extendableOptions",
+                    "from": CmdbExtendableOption.COLLECTION,
                     "localField": "risk.category_id",
                     "foreignField": "public_id",
                     "as": "risk_category"
@@ -203,7 +232,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             # Lookup protection goals by IDs in risk.protection_goals
             {
                 "$lookup": {
-                    "from": "isms.protectionGoal",
+                    "from": IsmsProtectionGoal.COLLECTION,
                     "localField": "risk.protection_goals",
                     "foreignField": "public_id",
                     "as": "protection_goals"
@@ -216,7 +245,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             # Step 6: Lookup person/personGroup
             {
                 "$lookup": {
-                    "from": "management.person",
+                    "from": CmdbPerson.COLLECTION,
                     "localField": "responsible_persons_id",
                     "foreignField": "public_id",
                     "as": "responsible_person"
@@ -224,7 +253,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             },
             {
                 "$lookup": {
-                    "from": "management.personGroup",
+                    "from": CmdbPersonGroup.COLLECTION,
                     "localField": "responsible_persons_id",
                     "foreignField": "public_id",
                     "as": "responsible_person_group"
@@ -238,7 +267,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             # Step 9: Lookup assigned control measures
             {
                 "$lookup": {
-                    "from": "isms.controlMeasureAssignment",
+                    "from": IsmsControlMeasureAssignment.COLLECTION,
                     "localField": "public_id",
                     "foreignField": "risk_assessment_id",
                     "as": "control_assignments"
@@ -246,7 +275,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
             },
             {
                 "$lookup": {
-                    "from": "isms.controlMeasure",
+                    "from": IsmsControlMeasure.COLLECTION,
                     "localField": "control_assignments.control_measure_id",
                     "foreignField": "public_id",
                     "as": "control_measures"
@@ -279,22 +308,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
                         ]
                     },
                     "object_id_ref_type": 1,
-                    "risk_before": {
-                        "value": "$risk_before.calculated_value",
-                        "risk_class_id": "$risk_before_class.public_id",
-                        "color": "$risk_before_class.color"
-                    },
-                    "risk_after": {
-                        "value": {
-                            "$ifNull": ["$risk_after.calculated_value", None]
-                        },
-                        "risk_class_id": {
-                            "$ifNull": ["$risk_after_class.public_id", None]
-                        },
-                        "color": {
-                            "$ifNull": ["$risk_after_class.color", None]
-                        }
-                    },
+                    **risk_calculation_projection_fields(),
 
                     "risk_treatment_option": "$risk_treatment_option",
                     "implementation_status": {
@@ -323,10 +337,14 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
                     "control_measures": "$control_measures.title"
                 }
             },
-
-            # Step 11: Page the rows and count the full result set in a single pass
-            build_report_facet_stage(params),
         ]
+
+        # Column filters, applied after the $project so they target the resolved display fields - and
+        # so both the returned page and the total reflect them
+        query_pipeline.extend(build_report_filter_stages(params.filter))
+
+        # Page the rows and count the full result set in a single pass
+        query_pipeline.append(build_report_facet_stage(params))
 
         # allowDiskUse lets the pagination $sort spill to disk instead of hitting the 100MB in-memory limit
         aggregation = risk_assessment_manager.aggregate(query_pipeline, allowDiskUse=True)
@@ -361,6 +379,15 @@ def get_isms_soa_report(params: CollectionParameters, request_user: CmdbUser) ->
     The report is paginated (``limit``/``page``) and wrapped in a GetMultiResponse envelope. Its
     ordering is fixed by the SOA business rules (see ``sort_key``: ISO 27001:2022 source first, then a
     natural identifier sort), so ``sort``/``order``/``filter`` query params are not applied here.
+
+    **This is the one report that pages in Python**, and deliberately so: its two sibling reports append
+    ``build_report_facet_stage`` and let MongoDB sort, skip and count in a single pass, which this one
+    cannot. ``sort_key`` orders by the source label only AFTER it has been resolved from a
+    CmdbExtendableOption, and then by a natural identifier sort that splits an identifier into digit and
+    non-digit runs and compares variable-length tuples - neither is expressible as a ``$sort``. So the
+    whole (bounded, catalogue-sized) control-measure set is read, ordered, and only then sliced by
+    ``paginate_report_rows``. Do not fold this into the shared facet helpers without first changing the
+    ordering contract that the certifier-facing document depends on.
 
     Args:
         params (CollectionParameters): Pagination parameters for the report
@@ -446,6 +473,16 @@ def get_isms_risk_assessments_report(params: CollectionParameters, request_user:
     The report is paginated: ``limit``/``page``/``sort``/``order``/``filter`` are read from the query
     string (see CollectionParameters) and the response is wrapped in a GetMultiResponse envelope.
 
+    It also accepts **``?search=``**, a free-text term matched case-insensitively as a literal substring
+    (the term is regex-escaped) across the resolved risk name, category and protection goals. Search and
+    ``filter`` are both applied after the ``$project``, so they target the display fields the frontend
+    reads and both the returned page and the total reflect them; together they compose as an implicit
+    AND. ``filter`` accepts a MongoDB query dict or a list of pipeline stages.
+
+    Note this report calls the risk's name ``risk_title`` while the Risk Treatment Plan calls the same
+    value ``risk_name`` - both are frontend-visible contract, so the difference is recorded rather than
+    resolved here.
+
     Args:
         params (CollectionParameters): Pagination, sort and filter parameters for the report
         request_user (CmdbUser): CmdbUser requesting the RiskAssessment report
@@ -469,516 +506,13 @@ def get_isms_risk_assessments_report(params: CollectionParameters, request_user:
             # not here.
             {"$match": {}},
 
-            # Step 2: Lookup assigned Risk
-            {"$lookup": {
-                "from": "isms.risk",
-                "localField": "risk_id",
-                "foreignField": "public_id",
-                "as": "risk"
-            }},
-            {"$unwind": "$risk"},
+            # Step 2: Resolve every reference the report displays - risk, category, protection goals,
+            # implementation status, the assessed object, the four person references, the risk classes,
+            # the impact-category rollups and the likelihood levels
+            *risk_assessment_report_stages(),
 
-            # Step 3: Lookup risk category label (ExtendableOption)
-            {
-                "$lookup": {
-                    "from": "framework.extendableOptions",
-                    "localField": "risk.category_id",
-                    "foreignField": "public_id",
-                    "as": "risk_category"
-                }
-            },
-            {"$unwind": {"path": "$risk_category", "preserveNullAndEmptyArrays": True}},
-
-            # Step 4: Lookup Protection Goals
-            {"$lookup": {
-                "from": "isms.protectionGoal",
-                "localField": "risk.protection_goals",
-                "foreignField": "public_id",
-                "as": "protection_goals"
-            }},
-
-            # Step 5: Lookup Implementation Status
-            {
-                "$lookup": {
-                    "from": "framework.extendableOptions",
-                    "localField": "implementation_status",
-                    "foreignField": "public_id",
-                    "as": "implementation_status"
-                }
-            },
-            {"$unwind": {"path": "$implementation_status", "preserveNullAndEmptyArrays": True}},
-
-            # Lookup Object / ObjectGroup / type label for the assessed object
-            *object_reference_lookup_stages(),
-
-            # Step 7: Lookup the Risk Assessor (P)
-            {
-                "$lookup": {
-                    "from": "management.person",
-                    "localField": "risk_assessor_id",
-                    "foreignField": "public_id",
-                    "as": "risk_assessor_person"
-                }
-            },
-            {
-                "$unwind": {
-                    "path": "$risk_assessor_person",
-                    "preserveNullAndEmptyArrays": True
-                }
-            },
-
-            # Step 8: Lookup Risk Owner (P or PG)
-            {
-                "$lookup": {
-                    "from": "management.person",
-                    "localField": "risk_owner_id",
-                    "foreignField": "public_id",
-                    "as": "risk_owner_person"
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "management.personGroup",
-                    "localField": "risk_owner_id",
-                    "foreignField": "public_id",
-                    "as": "risk_owner_group"
-                }
-            },
-
-            # Step 9: Lookup Responsible Person (P or PG)
-            {
-                "$lookup": {
-                    "from": "management.person",
-                    "localField": "responsible_persons_id",
-                    "foreignField": "public_id",
-                    "as": "responsible_person"
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "management.personGroup",
-                    "localField": "responsible_persons_id",
-                    "foreignField": "public_id",
-                    "as": "responsible_person_group"
-                }
-            },
-
-            # Step 10: Lookup Auditor (P or PG)
-            {
-                "$lookup": {
-                    "from": "management.person",
-                    "localField": "auditor_id",
-                    "foreignField": "public_id",
-                    "as": "auditor_person"
-                }
-            },
-            {
-                "$lookup": {
-                    "from": "management.personGroup",
-                    "localField": "auditor_id",
-                    "foreignField": "public_id",
-                    "as": "auditor_group"
-                }
-            },
-
-            # Step 11: Lookup Interviewed Persons (multiple P)
-            {"$lookup": {
-                "from": "management.person",
-                "localField": "interviewed_persons",
-                "foreignField": "public_id",
-                "as": "interviewed_persons_data"
-            }},
-
-            # Step 12: Lookup risk class matrix values for risk_before
-            {
-                "$lookup": {
-                    "from": "isms.riskMatrix",
-                    "let": {
-                        "likelihood_id": "$risk_calculation_before.likelihood_id",
-                        "impact_id": "$risk_calculation_before.maximum_impact_id"
-                    },
-                    "pipeline": [
-                        { "$match": { "public_id": 1 } },
-                        { "$unwind": "$risk_matrix" },
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        { "$eq": ["$risk_matrix.likelihood_id", "$$likelihood_id"] },
-                                        { "$eq": ["$risk_matrix.impact_id", "$$impact_id"] }
-                                    ]
-                                }
-                            }
-                        },
-                        { "$replaceRoot": { "newRoot": "$risk_matrix" } }
-                    ],
-                    "as": "risk_before"
-                }
-            },
-            { "$unwind": { "path": "$risk_before", "preserveNullAndEmptyArrays": True } },
-            {
-                "$lookup": {
-                    "from": "isms.riskClass",
-                    "localField": "risk_before.risk_class_id",
-                    "foreignField": "public_id",
-                    "as": "risk_before_class"
-                }
-            },
-            { "$unwind": { "path": "$risk_before_class", "preserveNullAndEmptyArrays": True } },
-
-            # Step 13: Repeat for risk after treatment
-            {
-                "$lookup": {
-                    "from": "isms.riskMatrix",
-                    "let": {
-                        "likelihood_id": "$risk_calculation_after.likelihood_id",
-                        "impact_id": "$risk_calculation_after.maximum_impact_id"
-                    },
-                    "pipeline": [
-                        { "$match": { "public_id": 1 } },
-                        { "$unwind": "$risk_matrix" },
-                        {
-                            "$match": {
-                                "$expr": {
-                                    "$and": [
-                                        { "$eq": ["$risk_matrix.likelihood_id", "$$likelihood_id"] },
-                                        { "$eq": ["$risk_matrix.impact_id", "$$impact_id"] }
-                                    ]
-                                }
-                            }
-                        },
-                        { "$replaceRoot": { "newRoot": "$risk_matrix" } }
-                    ],
-                    "as": "risk_after"
-                }
-            },
-            { "$unwind": { "path": "$risk_after", "preserveNullAndEmptyArrays": True } },
-            {
-                "$lookup": {
-                    "from": "isms.riskClass",
-                    "localField": "risk_after.risk_class_id",
-                    "foreignField": "public_id",
-                    "as": "risk_after_class"
-                }
-            },
-            { "$unwind": { "path": "$risk_after_class", "preserveNullAndEmptyArrays": True } },
-
-            # Step 14: Create Impact categories before list
-            # Step A: Unwind before impacts
-            { "$unwind": { "path": "$risk_calculation_before.impacts", "preserveNullAndEmptyArrays": True } },
-
-            # Step B: Lookup impact category
-            {
-            "$lookup": {
-                "from": "isms.impactCategory",
-                "localField": "risk_calculation_before.impacts.impact_category_id",
-                "foreignField": "public_id",
-                "as": "impact_category_before"
-            }
-            },
-            { "$unwind": { "path": "$impact_category_before", "preserveNullAndEmptyArrays": True } },
-
-            # Step C: Lookup impact
-            {
-            "$lookup": {
-                "from": "isms.impact",
-                "localField": "risk_calculation_before.impacts.impact_id",
-                "foreignField": "public_id",
-                "as": "impact_before"
-            }
-            },
-            { "$unwind": { "path": "$impact_before", "preserveNullAndEmptyArrays": True } },
-
-            # Step D: Group and build new array
-            {
-            "$group": {
-                "_id": "$_id",
-                "doc": { "$first": "$$ROOT" },
-                "impact_categories_before": {
-                "$push": {
-                    "impact_category": "$impact_category_before.name",
-                    "impact_value": {
-                    "$cond": {
-                        "if": { "$and": [
-                            { "$ne": ["$impact_before.calculation_basis", None] },
-                            { "$ne": ["$impact_before.name", None]}]
-                        },
-                        "then": {
-                        "$concat": [
-                            { "$toString": "$impact_before.calculation_basis" },
-                            " - ",
-                            "$impact_before.name"
-                        ]
-                        },
-                        "else": None
-                    }
-                    }
-                }
-                }
-            }
-            },
-            { "$replaceRoot": { "newRoot": { "$mergeObjects": ["$doc", {
-                                            "impact_categories_before": "$impact_categories_before" }] } } },
-
-            # Step 15: Create Impact categories after list
-            # Step A: Unwind after impacts
-            { "$unwind": { "path": "$risk_calculation_after.impacts", "preserveNullAndEmptyArrays": True } },
-
-            # Step B: Lookup impact category
-            {
-            "$lookup": {
-                "from": "isms.impactCategory",
-                "localField": "risk_calculation_after.impacts.impact_category_id",
-                "foreignField": "public_id",
-                "as": "impact_category_after"
-            }
-            },
-            { "$unwind": { "path": "$impact_category_after", "preserveNullAndEmptyArrays": True } },
-
-            # Step C: Lookup impact
-            {
-            "$lookup": {
-                "from": "isms.impact",
-                "localField": "risk_calculation_after.impacts.impact_id",
-                "foreignField": "public_id",
-                "as": "impact_after"
-            }
-            },
-            { "$unwind": { "path": "$impact_after", "preserveNullAndEmptyArrays": True } },
-
-            # Step D: Group and build new array
-            {
-            "$group": {
-                "_id": "$_id",
-                "doc": { "$first": "$$ROOT" },
-                "impact_categories_after": {
-                "$push": {
-                    "impact_category": "$impact_category_after.name",
-                    "impact_value": {
-                    "$cond": {
-                        "if": { "$and": [
-                            { "$ne": ["$impact_after.calculation_basis", None] },
-                            { "$ne": ["$impact_after.name", None]}]
-                        },
-                        "then": {
-                        "$concat": [
-                            { "$toString": "$impact_after.calculation_basis" },
-                            " - ",
-                            "$impact_after.name"
-                        ]
-                        },
-                        "else": None
-                    }
-                    }
-                }
-                }
-            }
-            },
-            { "$replaceRoot": { "newRoot": { "$mergeObjects": ["$doc", {
-                                            "impact_categories_after": "$impact_categories_after" }] } } },
-
-            # Lookup Likelihood before
-            {
-            "$lookup": {
-                "from": "isms.likelihood",
-                "localField": "risk_calculation_before.likelihood_id",
-                "foreignField": "public_id",
-                "as": "likelihood_before"
-            }
-            },
-            { "$unwind": { "path": "$likelihood_before", "preserveNullAndEmptyArrays": True } },
-
-            # Lookup Likelihood after
-            {
-            "$lookup": {
-                "from": "isms.likelihood",
-                "localField": "risk_calculation_after.likelihood_id",
-                "foreignField": "public_id",
-                "as": "likelihood_after"
-            }
-            },
-            { "$unwind": { "path": "$likelihood_after", "preserveNullAndEmptyArrays": True } },
-
-            # Last Step: Project the Fields
-            {"$project": {
-                "_id": 0,
-                # Kept only as the pagination sort tiebreaker; dropped again after paging
-                "public_id": 1,
-                "risk_title": "$risk.name",
-                "risk_category": "$risk_category.value",
-                "protection_goals": {
-                    "$map": {
-                        "input": "$protection_goals",
-                        "as": "pg",
-                        "in": "$$pg.name"
-                    }
-                },
-                "risk_owner": {
-                    "$cond": [
-                        { "$eq": ["$risk_owner_id_ref_type", "PERSON"] },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$risk_owner_person.display_name", 0] },
-                                None
-                            ]
-                        },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$risk_owner_group.name", 0] },
-                                None
-                            ]
-                        }
-                    ]
-                },
-                "responsible_person": {
-                    "$cond": [
-                        { "$eq": ["$responsible_persons_id_ref_type", "PERSON"] },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$responsible_person.display_name", 0] },
-                                None
-                            ]
-                        },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$responsible_person_group.name", 0] },
-                                None
-                            ]
-                        }
-                    ]
-                },
-                "auditor": {
-                    "$cond": [
-                        { "$eq": ["$auditor_id_ref_type", "PERSON"] },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$auditor_person.display_name", 0] },
-                                None
-                            ]
-                        },
-                        {
-                            "$ifNull": [
-                                { "$arrayElemAt": ["$auditor_group.name", 0] },
-                                None
-                            ]
-                        }
-                    ]
-                },
-                "implementation_status": {
-                    "$ifNull": ["$implementation_status.value", None]
-                },
-                "priority": {
-                    "$switch": {
-                        "branches": [
-                            {"case": {"$eq": ["$priority", 1]}, "then": "Low"},
-                            {"case": {"$eq": ["$priority", 2]}, "then": "Medium"},
-                            {"case": {"$eq": ["$priority", 3]}, "then": "High"},
-                            {"case": {"$eq": ["$priority", 4]}, "then": "Very High"}
-                        ],
-                        "default": None
-                    }
-                },
-                "assigned_object": {
-                    "$cond": [
-                        {"$eq": ["$object_id_ref_type", "OBJECT_GROUP"]},
-                        {"$arrayElemAt": ["$object_group.name", 0]},
-                        {"$arrayElemAt": ["$object.public_id", 0]}
-                    ]
-                },
-                "assigned_object_type": {
-                    "$cond": [
-                        {"$eq": ["$object_id_ref_type", "OBJECT_GROUP"]},
-                        "Object group",
-                        {"$arrayElemAt": ["$object_type.label", 0]}
-                    ]
-                },
-                "risk_assessor": {
-                    "$ifNull": ["$risk_assessor_person.display_name", None]
-                },
-                "interviewed_persons": {
-                    "$cond": {
-                        "if": { "$gt": [{ "$size": "$interviewed_persons_data" }, 0] },
-                        "then": {
-                            "$map": {
-                                "input": "$interviewed_persons_data",
-                                "as": "person",
-                                "in": "$$person.display_name"
-                            }
-                        },
-                        "else": None
-                    }
-                },
-                "risk_before": {
-                    "value": "$risk_before.calculated_value",
-                    "risk_class_id": "$risk_before_class.public_id",
-                    "color": "$risk_before_class.color"
-                },
-                "risk_after": {
-                    "value": {
-                        "$ifNull": ["$risk_after.calculated_value", None]
-                    },
-                    "risk_class_id": {
-                        "$ifNull": ["$risk_after_class.public_id", None]
-                    },
-                    "color": {
-                        "$ifNull": ["$risk_after_class.color", None]
-                    }
-                },
-                "impact_categories_before": 1,
-                "impact_categories_after": 1,
-                "likelihood_value_before": {
-                    "$cond": {
-                        "if": {
-                        "$and": [
-                            { "$ne": ["$likelihood_before.calculation_basis", None] },
-                            { "$ne": ["$likelihood_before.name", None] }
-                        ]
-                        },
-                        "then": {
-                        "$concat": [
-                            { "$toString": "$likelihood_before.calculation_basis" },
-                            " - ",
-                            "$likelihood_before.name"
-                        ]
-                        },
-                        "else": None
-                    }
-                },
-                "likelihood_value_after": {
-                    "$cond": {
-                        "if": {
-                        "$and": [
-                            { "$ne": ["$likelihood_after.calculation_basis", None] },
-                            { "$ne": ["$likelihood_after.name", None] }
-                        ]
-                        },
-                        "then": {
-                        "$concat": [
-                            { "$toString": "$likelihood_after.calculation_basis" },
-                            " - ",
-                            "$likelihood_after.name"
-                        ]
-                        },
-                        "else": None
-                    }
-                },
-                "additional_information": 1,
-                "risk_treatment_option": {
-                    "$ifNull": ["$risk_treatment_option", None]
-                },
-                "risk_treatment_description": 1,
-                "risk_assessment_date": 1,
-                "additional_info": 1,
-                "planned_implementation_date": 1,
-                "finished_implementation_date": 1,
-                "implementation_finished_on": 1,
-                "required_resources": 1,
-                "costs_for_implementation": 1,
-                "costs_for_implementation_currency": 1,
-                "audit_done_date": 1,
-                "audit_result": 1,
-                "object_id_ref_type": 1,
-            }},
+            # Last Step: Project the display fields the frontend reads
+            risk_assessment_report_projection_stage(),
         ]
 
         # Optional free-text search over the resolved display fields (risk name / category /
@@ -988,12 +522,11 @@ def get_isms_risk_assessments_report(params: CollectionParameters, request_user:
         if search:
             pipeline.append(build_ra_report_search_stage(search))
 
-        # Optional column filters. params.filter is a standard MongoDB query (the general filter
-        # convention used across the backend / by the sibling reports), applied as a $match. It runs
-        # after the $project - like the search - so it can target the resolved display fields, and so
-        # both the returned page and the total reflect it; it composes with the search as an implicit AND.
-        if params.filter:
-            pipeline.append({"$match": params.filter})
+        # Optional column filters. params.filter is a standard MongoDB query - a dict, or a list of
+        # pipeline stages, which is the convention the whole backend reads it by. It runs after the
+        # $project - like the search - so it can target the resolved display fields, and so both the
+        # returned page and the total reflect it; it composes with the search as an implicit AND.
+        pipeline.extend(build_report_filter_stages(params.filter))
 
         # Page the rows and count the full result set in a single pass
         pipeline.append(build_report_facet_stage(params))

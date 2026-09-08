@@ -33,6 +33,7 @@ from flask import abort
 from cmdb.database import MongoDatabaseManager
 from cmdb.manager import ObjectsManager, TypesManager
 from cmdb.models.object_model import CmdbObject
+from cmdb.models.log_model.cmdb_meta_log import CmdbMetaLog
 from cmdb.models.type_model import CmdbType
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.errors.manager.objects_manager import (
@@ -524,6 +525,40 @@ class TestPatchObject:
             stored = CmdbObject.from_data(follow_up.get_json())
             assert stored.version == UPDATE_VERSION
         finally:
+            _drop_object(database_manager, database_name, OBJECT_ID_FOR_PATCH)
+
+    def test_the_edit_log_records_the_version_the_object_now_carries(
+        self,
+        rest_api,
+        database_manager: MongoDatabaseManager,
+        database_name: str,
+    ) -> None:
+        """
+        The log and the document agreed on nothing until 2026-09-08
+
+        ``update_version`` returned the new version without storing it, so the update wrote the bumped
+        string into the document while the edit log read the un-bumped one off the model instance -
+        every object's history was one bump behind the object it described.
+        """
+        _insert_object_doc(database_manager, database_name, OBJECT_ID_FOR_PATCH, ORIGINAL_VALUE)
+        logs = database_manager.get_collection(CmdbMetaLog.COLLECTION, database_name)
+        logs.delete_many({'object_id': OBJECT_ID_FOR_PATCH})
+
+        try:
+            rest_api.patch(
+                f'{ROUTE_URL}/{OBJECT_ID_FOR_PATCH}',
+                json={'fields': [{'name': NAME_FIELD, 'value': UPDATED_VALUE}]},
+            )
+
+            stored = CmdbObject.from_data(
+                rest_api.get(f'{ROUTE_URL}/native/{OBJECT_ID_FOR_PATCH}').get_json()
+            )
+            edit_log = logs.find_one({'object_id': OBJECT_ID_FOR_PATCH, 'action_name': 'EDIT'})
+
+            assert edit_log is not None
+            assert edit_log['version'] == stored.version == UPDATE_VERSION
+        finally:
+            logs.delete_many({'object_id': OBJECT_ID_FOR_PATCH})
             _drop_object(database_manager, database_name, OBJECT_ID_FOR_PATCH)
 
     def test_patch_stamps_editor_id_to_request_user(

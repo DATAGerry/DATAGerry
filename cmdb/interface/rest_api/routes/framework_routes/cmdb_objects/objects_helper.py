@@ -1241,7 +1241,9 @@ def compute_object_version(current_object: CmdbObject, updated_object: CmdbObjec
 
     The bump is chosen from how many fields changed relative to the total field count: a single
     changed field is a PATCH, all fields a MAJOR, more than half a MINOR, and anything else a PATCH.
-    ``updated_object`` is mutated in place with the new version
+    ``updated_object`` is mutated in place with the new version, which is what makes the edit log's
+    ``get_version()`` read agree with the version written into the document - until 2026-09-08
+    ``update_version`` only returned the string, so the log recorded every edit one bump behind
 
     Args:
         current_object (CmdbObject): The stored object before the update

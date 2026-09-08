@@ -87,3 +87,11 @@ class CmdbObjectMdsRowKey(BaseStrEnum):
     """
     MULTI_DATA_ID = 'multi_data_id'
     DATA = 'data'
+
+
+# The keys holding a timestamp, read as CmdbObject's DATE_FIELDS: a payload carries the
+# {'$date': ...} wrapper, and MongoDB can only sort and range-filter a real date
+OBJECT_DATE_KEYS: tuple[CmdbObjectKey, ...] = (
+    CmdbObjectKey.CREATION_TIME,
+    CmdbObjectKey.LAST_EDIT_TIME,
+)

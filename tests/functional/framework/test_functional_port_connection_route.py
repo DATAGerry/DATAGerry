@@ -46,6 +46,9 @@ from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.type_model import CmdbType, FieldType, SectionType
 from cmdb.manager.license_manager.license_service import LicenseService
 from cmdb.manager.port_connections_manager import PortConnectionsManager
+from cmdb.manager.ports_manager import PortsManager
+from cmdb.errors.manager.ports_manager import PortsManagerGetError
+from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager.port_connections_manager import (
     PortConnectionsManagerDeleteError,
     PortConnectionsManagerGetError,
@@ -76,6 +79,7 @@ SPARE_PORT_ID: int = 9944
 
 MISSING_PORT_ID: int = 9998
 MISSING_CONNECTION_ID: int = 9997
+MISSING_OBJECT_ID: int = 9996
 
 NAME_FIELD: str = 'dg-name'
 
@@ -504,6 +508,90 @@ class TestReadConnection:
         assert response.status_code == HTTPStatus.NOT_FOUND
 
 
+class TestReadConnectionsOfObject:
+    """GET /port_connections/object/<object_id> - the whole cabling of one device in one request"""
+
+    def test_reads_every_connection_of_every_port_of_the_object(self, rest_api) -> None:
+        """
+        What an object view needs: the panel's internal pairing AND the cable leaving it
+
+        Reading this per port cost one request per port; this is two indexed reads whatever the port
+        count is.
+        """
+        _create(rest_api, [FRONT_PORT_ID, REAR_PORT_ID], connection_type=ConnectionType.INTERNAL.value)
+        _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID])
+
+        response = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.OK
+        assert len(response.get_json()) == 2
+
+    def test_an_internal_connection_between_two_own_ports_appears_once(self, rest_api) -> None:
+        """
+        Both endpoints of a panel's internal pairing are ports of this object
+
+        It is one document and the '$in' matches it once, so the answer must not list it twice - the
+        thing a naive per-port loop plus concatenation would get wrong.
+        """
+        _create(rest_api, [FRONT_PORT_ID, REAR_PORT_ID], connection_type=ConnectionType.INTERNAL.value)
+
+        body = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').get_json()
+
+        assert len(body) == 1
+        assert sorted(body[0][PortConnectionKey.ENDPOINTS.value]) == sorted([FRONT_PORT_ID, REAR_PORT_ID])
+
+    def test_the_peer_side_is_included_whichever_end_the_object_owns(self, rest_api) -> None:
+        """A cable is found from both of its ends, because the endpoints share one array field."""
+        _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID])
+
+        from_owner = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').get_json()
+        from_peer = rest_api.get(f'{ROUTE_URL}/object/{PEER_OBJECT_ID}').get_json()
+
+        assert len(from_owner) == 1
+        assert from_owner == from_peer
+
+    def test_an_object_whose_ports_are_all_free_answers_with_an_empty_list(self, rest_api) -> None:
+        """'Nothing is cabled here' is a normal state, not a 404."""
+        response = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.get_json() == []
+
+    def test_an_object_without_ports_answers_with_an_empty_list(self, rest_api) -> None:
+        """An object of a type that does not use ports is empty rather than an error."""
+        response = rest_api.get(f'{ROUTE_URL}/object/{PLAIN_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.get_json() == []
+
+    def test_a_missing_object_is_a_404(self, rest_api) -> None:
+        """A different answer from 'this device is not cabled', so a typo is distinguishable."""
+        response = rest_api.get(f'{ROUTE_URL}/object/{MISSING_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
+    def test_the_answer_matches_the_per_port_reads_it_replaces(self, rest_api) -> None:
+        """
+        The route is a batching of the per-port reads and must agree with them
+
+        Pinned because the two use different manager methods - one '$in' against one equality - and a
+        divergence would show as a panel that disagrees with itself.
+        """
+        _create(rest_api, [FRONT_PORT_ID, REAR_PORT_ID], connection_type=ConnectionType.INTERNAL.value)
+        _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID])
+
+        per_object = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').get_json()
+
+        per_port: list[dict[str, Any]] = []
+
+        for port_id in (FRONT_PORT_ID, REAR_PORT_ID):
+            per_port.extend(rest_api.get(f'{ROUTE_URL}/port/{port_id}').get_json())
+
+        expected_ids = {connection[PortConnectionKey.PUBLIC_ID.value] for connection in per_port}
+
+        assert {connection[PortConnectionKey.PUBLIC_ID.value] for connection in per_object} == expected_ids
+
+
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       UPDATE                                                         #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -808,3 +896,48 @@ class TestErrorMapping:
         monkeypatch.setattr(PortConnectionsManager, 'delete_item', _raiser(RuntimeError('boom')))
 
         assert rest_api.delete(f'{ROUTE_URL}/{new_id}').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+    def test_object_read_ports_manager_error_is_400(self, rest_api, monkeypatch) -> None:
+        """
+        The object route reads twice, and each read has its own arm
+
+        A failure fetching the object's PORTS is reported as a bad request naming the object, not as
+        the connection read's message - the two are different problems.
+        """
+        monkeypatch.setattr(PortsManager, 'get_ports_of_object', _raiser(PortsManagerGetError('boom')))
+
+        response = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'Ports' in response.get_json()['message']
+
+    def test_object_read_connections_manager_error_is_400(self, rest_api, monkeypatch) -> None:
+        """The second read's own arm."""
+        monkeypatch.setattr(
+            PortConnectionsManager, 'get_connections_of_ports',
+            _raiser(PortConnectionsManagerGetError('boom')),
+        )
+
+        response = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'Port connections' in response.get_json()['message']
+
+    def test_object_read_denied_by_the_object_acl_is_403(self, rest_api, monkeypatch) -> None:
+        """
+        The route is keyed by an object, so the object's own READ permission governs it
+
+        Exactly as /ports/object/<id> does - what Q13 leaves unchecked is the PEER end of a
+        connection, not the device being asked about.
+        """
+        monkeypatch.setattr(PortsManager, 'get_ports_of_object', _raiser(AccessDeniedError('nope')))
+
+        assert rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').status_code == HTTPStatus.FORBIDDEN
+
+    def test_object_read_unexpected_error_is_500(self, rest_api, monkeypatch) -> None:
+        """Not a 400: nothing is wrong with the request."""
+        monkeypatch.setattr(PortsManager, 'get_ports_of_object', _raiser(RuntimeError('boom')))
+
+        assert rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').status_code \
+            == HTTPStatus.INTERNAL_SERVER_ERROR

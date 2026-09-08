@@ -38,6 +38,7 @@ from cmdb.models.port_model import PortKey
 from cmdb.models.port_connection_model import ConnectionType, PortConnectionKey
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.type_model import TypeSchemaKey
+from cmdb.interface.rest_api.routes.port_routes.port_route_helper import collect_port_ids
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
     ConnectionRequestKey,
     ConnectionRight,
@@ -573,3 +574,35 @@ def test_the_four_rights_are_pinned() -> None:
         'EDIT': 'base.framework.connection.edit',
         'DELETE': 'base.framework.connection.delete',
     }
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              collect_port_ids                                                        #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestCollectPortIds:
+    """
+    The id list both the connected-flag projection and the object-level connection read build
+
+    Extracted when the second caller appeared: the two ask the same question of the same list, and a
+    second inline copy is how the two would have drifted.
+    """
+
+    def test_reads_the_public_ids_in_order(self) -> None:
+        """The order is the ports' own, which is what keeps a response's pairing stable."""
+        ports: list[dict[str, Any]] = [{'public_id': 3}, {'public_id': 1}, {'public_id': 2}]
+
+        assert collect_port_ids(ports) == [3, 1, 2]
+
+    def test_an_empty_page_collects_nothing(self) -> None:
+        """An object with no ports is the common case on every object view that does not use them."""
+        assert collect_port_ids([]) == []
+
+    def test_a_port_without_a_usable_public_id_is_skipped(self) -> None:
+        """
+        It could never match a connection endpoint anyway
+
+        Passing it into the '$in' would only widen the query with a value that cannot hit.
+        """
+        ports: list[dict[str, Any]] = [{'public_id': 1}, {'public_id': None}, {'public_id': 'x'}, {}]
+
+        assert collect_port_ids(ports) == [1]
