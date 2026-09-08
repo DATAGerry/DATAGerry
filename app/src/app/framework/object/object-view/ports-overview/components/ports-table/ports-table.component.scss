@@ -15,7 +15,7 @@
 
 .ports-name {
     font-weight: 500;
-    color: #1f2937;
+    color: var(--dg-ink);
 }
 
 .ports-badge {
@@ -25,15 +25,15 @@
     font-size: 0.75rem;
     font-weight: 500;
     line-height: 1.4;
-    background-color: #eef2ff;
-    color: #3730a3;
-    border: 1px solid #e0e7ff;
+    background-color: rgba(var(--dg-brand-rgb), 0.08);
+    color: var(--dg-brand-ink);
+    border: 1px solid rgba(var(--dg-brand-rgb), 0.18);
 }
 
 .ports-badge--status {
-    background-color: #f1f5f9;
-    color: #334155;
-    border-color: #e2e8f0;
+    background-color: var(--dg-surface);
+    color: var(--dg-label);
+    border-color: var(--dg-border);
 }
 
 .ports-state {
@@ -42,26 +42,26 @@
     gap: 0.4rem;
     font-size: 0.8125rem;
     font-weight: 500;
-    color: #6b7280;
+    color: var(--dg-muted);
 }
 
 .ports-state__dot {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background-color: #adb5bd;
+    background-color: var(--dg-faint);
 }
 
 .ports-state--connected {
-    color: #1f2937;
+    color: var(--dg-ink);
 
     .ports-state__dot {
-        background-color: #198754;
+        background-color: var(--dg-success);
     }
 }
 
 .ports-muted {
-    color: #9ca3af;
+    color: var(--dg-faint);
 }
 
 .ports-row-actions {

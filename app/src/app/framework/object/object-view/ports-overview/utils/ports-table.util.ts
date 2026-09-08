@@ -43,14 +43,7 @@ const SORT_FIELDS: Record<string, keyof PortRow> = {
 };
 
 
-/**
- * Turns the API's ports into table rows, resolving the option ids into labels.
- *
- * An id without a matching option keeps no label rather than showing the raw number: the option was
- * deleted or is not readable, and a bare id means nothing to the reader. The nullable fields fall back
- * because the route declares them nullable - the port itself is always an object, so it is read
- * directly.
- */
+/** Builds the table rows. An option id with no label shows a dash, never the raw number. */
 export function toPortRows(ports: readonly CmdbPort[], labels: Map<string, string>): PortRow[] {
     return ports.map((port) => {
         const side = normalizeSide(port.side);
@@ -85,12 +78,7 @@ export function toOptionLabels(optionsByType: Map<string, FieldOption[]>): Map<s
 }
 
 
-/**
- * Whether the backend computes the connection state at all.
- *
- * `connected` is derived from a port's connections on read, so a backend without that surface simply
- * omits the key - and a column that then reads "Free" for every port would be a claim, not a fact.
- */
+/** Whether the backend sends `connected` at all; without it the column would claim "Free" for every port. */
 export function hasConnectionState(ports: readonly CmdbPort[]): boolean {
     return ports.some((port) => 'connected' in port);
 }
@@ -102,12 +90,7 @@ export function hasPanelSides(rows: readonly PortRow[]): boolean {
 }
 
 
-/**
- * Orders the full port list.
- *
- * Kept separate from paging so the caller knows the real result count for the pagination footer, and
- * returns a copy so the loaded list keeps the order the backend sent.
- */
+/** Orders a copy of the full list, so the loaded ports keep the order the backend sent. */
 export function sortPortRows(rows: readonly PortRow[], sort: Sort): PortRow[] {
     const field = SORT_FIELDS[sort?.name];
     const ordered = [...rows];

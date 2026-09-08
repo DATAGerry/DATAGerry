@@ -23,10 +23,11 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
+    Type,
     inject
 } from '@angular/core';
 
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subject, forkJoin, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 
@@ -37,6 +38,7 @@ import { LoaderService } from 'src/app/core/services/loader.service';
 import { PermissionService } from 'src/app/modules/auth/services/permission.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { PortCreateWizardModalComponent } from './components/port-create-wizard-modal/port-create-wizard-modal.component';
 import { PortFormModalComponent } from './components/port-form-modal/port-form-modal.component';
 import {
     CmdbPort,
@@ -67,12 +69,7 @@ interface LoadedPorts {
 }
 
 
-/**
- * The ports section of an object view, shown in the attributes card like a multi-data section.
- *
- * The route hands over every port of the object in one answer, so sorting and paging are done here
- * rather than by the server.
- */
+/** The ports section of an object view. The route sends every port at once, so paging is client-side. */
 @Component({
     selector: 'cmdb-ports-overview',
     templateUrl: './ports-overview.component.html',
@@ -173,6 +170,21 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     }
 
 
+    /** The creation assistant: a whole device's ports, named and previewed server-side. */
+    public onCreatePorts(): void {
+        if (this.objectId == null) {
+            return;
+        }
+
+        const modal = this.openModal(PortCreateWizardModalComponent);
+
+        modal.componentInstance.objectId = this.objectId;
+        modal.componentInstance.objectLabel = this.objectLabel;
+
+        this.reloadWhenStored(modal);
+    }
+
+
     public onEditPort(row: PortRow): void {
         const port = this.portsById.get(row.publicId);
 
@@ -219,17 +231,27 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
             return;
         }
 
-        // Hosted inside the fullscreen element while one is open; a body-level modal is not painted there.
-        const modal = this.modalService.open(PortFormModalComponent, this.fullscreenModal.withFullscreenContainer({
-            size: 'lg',
-            windowClass: 'dg-modal-window',
-            backdropClass: 'dg-modal-window-backdrop'
-        }));
+        const modal = this.openModal(PortFormModalComponent);
 
         modal.componentInstance.objectId = this.objectId;
         modal.componentInstance.objectLabel = this.objectLabel;
         modal.componentInstance.port = port;
 
+        this.reloadWhenStored(modal);
+    }
+
+
+    /** Hosted inside the fullscreen element while one is open; a body-level modal is not painted there. */
+    private openModal<T>(component: Type<T>): NgbModalRef {
+        return this.modalService.open(component, this.fullscreenModal.withFullscreenContainer({
+            size: 'lg',
+            windowClass: 'dg-modal-window',
+            backdropClass: 'dg-modal-window-backdrop'
+        }));
+    }
+
+
+    private reloadWhenStored(modal: NgbModalRef): void {
         // Dismissing rejects the promise; cancelling is not an error.
         modal.result.then(
             (stored: boolean) => {
@@ -270,10 +292,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     }
 
 
-    /**
-     * The ports and the option lists their labels come from are read together, so the table is built
-     * once instead of first showing ids and then replacing them.
-     */
+    /** Ports and option labels are read together, so the table is built once instead of twice. */
     private readPorts(objectId: number): Observable<LoadedPorts> {
         this.loaderService.show();
         this.hasError = false;

@@ -54,6 +54,7 @@ import { IpamAssignIpModalComponent } from './object-view/ipam-overview/componen
 import { PortsOverviewComponent } from './object-view/ports-overview/ports-overview.component';
 import { PortsTableComponent } from './object-view/ports-overview/components/ports-table/ports-table.component';
 import { PortFormModalComponent } from './object-view/ports-overview/components/port-form-modal/port-form-modal.component';
+import { PortCreateWizardModalComponent } from './object-view/ports-overview/components/port-create-wizard-modal/port-create-wizard-modal.component';
 import { RackOverviewComponent } from './object-view/rack-overview/rack-overview.component';
 import { RackElevationComponent } from './object-view/rack-overview/components/rack-elevation/rack-elevation.component';
 import { RackInspectorComponent } from './object-view/rack-overview/components/rack-inspector/rack-inspector.component';
@@ -124,6 +125,7 @@ import { ConnectionDetailsModalComponent } from './object-view/graph-editor/moda
         PortsOverviewComponent,
         PortsTableComponent,
         PortFormModalComponent,
+        PortCreateWizardModalComponent,
         RackOverviewComponent,
         RackElevationComponent,
         RackInspectorComponent,

@@ -29,12 +29,7 @@ export const PORT_ADD_RIGHT = 'base.framework.port.add';
 export const PORT_EDIT_RIGHT = 'base.framework.port.edit';
 export const PORT_DELETE_RIGHT = 'base.framework.port.delete';
 
-/**
- * Which face of its owner object a port sits on.
- *
- * FRONT/REAR are the two faces of a patch panel and only ever appear in pairs, SINGLE is an ordinary
- * device port. Panel-ness is read from this field alone - never from port names.
- */
+/** Which face of its object a port sits on. FRONT/REAR are a patch panel's two faces. */
 export enum PortSide {
     SINGLE = 'single',
     FRONT = 'front',
@@ -45,9 +40,8 @@ export enum PortSide {
 /**
  * A port as `GET /ports/object/<object_id>` returns it.
  *
- * The three option fields hold the `public_id` of a CmdbExtendableOption, not a label, so they have to
- * be resolved before they can be shown. `connected` is computed from the port's connections on read
- * and never stored, which is why it is optional here: an older backend simply omits it.
+ * The option fields hold a CmdbExtendableOption `public_id`, not a label. `connected` is derived on
+ * read, so a backend without it omits the key.
  */
 export interface CmdbPort {
     public_id: number;
