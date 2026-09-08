@@ -20,6 +20,12 @@
         padding: 0.5rem 0.6rem;
         border-radius: 8px;
         white-space: normal;
+
+        // Bootstrap paints dropdown items with the primary accent while pressed
+        &:active {
+            background-color: var(--dg-surface);
+            color: var(--dg-ink);
+        }
     }
 
     &__icon {
