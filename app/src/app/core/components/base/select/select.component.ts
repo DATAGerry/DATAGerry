@@ -43,6 +43,11 @@ import {
     standalone: false
 })
   export class SelectComponent implements ControlValueAccessor, OnInit {
+    /** Ties the label to the ng-select input; unique per instance. */
+    public readonly controlId = `form-select-${ ++SelectComponent.instances }`;
+
+    private static instances = 0;
+
     /**
      * The label to be displayed above or alongside the select component
      */

@@ -23,6 +23,12 @@ import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
 import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
+import {
+    PortBulkRequest,
+    PortBulkResult,
+    PortNamePreview,
+    PortNamingRequest
+} from '../models/port-bulk.types';
 import { CmdbPort, PortPayload } from '../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -37,12 +43,7 @@ export class PortService {
 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
-    /**
-     * Every port of one object, already ordered by the backend (port number, then name).
-     *
-     * The route answers with a plain array, and an object without ports answers with an empty one -
-     * "no ports yet" is a normal state, not an error.
-     */
+    /** Every port of one object, ordered by the backend. No ports is an empty array, not an error. */
     public getPortsOfObject(objectId: number): Observable<CmdbPort[]> {
         const options = { headers: this.jsonHeaders, params: new HttpParams(), observe: resp };
 
@@ -52,12 +53,7 @@ export class PortService {
     }
 
 
-    /**
-     * Creates one port and answers with the stored port.
-     *
-     * The owner rides in the payload: a port is created against an object, not under it. A name
-     * already taken on that face of the object comes back as a readable 400.
-     */
+    /** Creates one port. The owner rides in the payload; a name already taken answers 400. */
     public createPort(payload: PortPayload): Observable<CmdbPort> {
         const options = { headers: this.jsonHeaders, observe: resp };
 
@@ -67,18 +63,45 @@ export class PortService {
     }
 
 
-    /**
-     * Replaces one port with the payload and answers with its new data.
-     *
-     * The route takes the whole port, so every field has to be sent - an omitted one is stored as
-     * null. Owner and side are immutable: naming a different one is refused, not ignored.
-     */
+    /** Replaces one port. The route takes the whole port; an omitted field is stored as null. */
     public updatePort(publicId: number, payload: PortPayload): Observable<CmdbPort> {
         const options = { headers: this.jsonHeaders, observe: resp };
         const route = `${ this.servicePrefix }/${ publicId }`;
 
         return this.api.callPut<APIUpdateSingleResponse<CmdbPort>>(route, payload, options).pipe(
             map((response: HttpResponse<APIUpdateSingleResponse<CmdbPort>>) => response?.body?.result)
+        );
+    }
+
+
+    /**
+     * The names a bulk creation would generate, together with the collisions on each face.
+     *
+     * Names come from the server on purpose: the route that previews them is the route that creates
+     * them, so what the user approves is what is written.
+     */
+    public previewPortNames(objectId: number, payload: PortNamingRequest): Observable<PortNamePreview> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+        const route = `${ this.servicePrefix }/object/${ objectId }/name_preview`;
+
+        return this.api.callPost<PortNamePreview>(route, payload, options).pipe(
+            map((response: HttpResponse<PortNamePreview>) => response?.body)
+        );
+    }
+
+
+    /**
+     * Creates a whole device's ports in one call, and a patch panel's internal pairing with them.
+     *
+     * The route re-runs the preview and refuses the batch as a whole if any name collides, so nothing
+     * is written half-way.
+     */
+    public bulkCreatePorts(objectId: number, payload: PortBulkRequest): Observable<PortBulkResult> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+        const route = `${ this.servicePrefix }/object/${ objectId }/bulk`;
+
+        return this.api.callPost<PortBulkResult>(route, payload, options).pipe(
+            map((response: HttpResponse<PortBulkResult>) => response?.body)
         );
     }
 
