@@ -20,16 +20,29 @@
 
 <cmdb-table
   [items]="rows()"
-  [columns]="columns"
+  [columns]="columns()"
   [loading]="loading()"
   [totalItems]="total()"
   [pageSize]="pageSize()"
   [page]="page()"
+  [sort]="tableSort()"
   [selectEnabled]="true"
   [searchEnabled]="false"
+  [toggleable]="true"
+  [initialVisibleColumns]="initialVisibleColumns()"
+  [stateEnabled]="true"
+  [stateUrl]="stateUrl()"
+  [id]="stateId"
+  [tableStates]="tableStates()"
+  [tableState]="tableState()"
   (pageChange)="onPageChange($event)"
   (pageSizeChange)="onPageSizeChange($event)"
   (sortChange)="onSortChange($event)"
+  (stateSelect)="onStateSelect($event)"
+  (stateSave)="onStateSave($event)"
+  (stateUpdate)="onStateUpdate($event)"
+  (stateDelete)="onStateDelete($event)"
+  (stateReset)="onStateReset()"
   (selectedChange)="onSelectionChange($event)">
 </cmdb-table>
 
@@ -49,6 +62,30 @@
     </a>
     <span *ngIf="counterpart.summary_line"> - {{ counterpart.summary_line }}</span>
   </ng-container>
+</ng-template>
+
+<!-- Relation field columns: one cell per field of the relation definition -->
+<ng-template #fieldTemplate let-data="data">
+  @if (data?.value === null || data?.value === undefined || data?.value === '') {
+    <span class="text-muted">-</span>
+  } @else {
+    @switch (data.field.type) {
+      @case ('checkbox') {
+        <i [class]="data.value ? 'fas fa-check text-success' : 'fas fa-times text-muted'" aria-hidden="true"></i>
+        <span class="visually-hidden">{{ data.value ? 'Yes' : 'No' }}</span>
+      }
+      @case ('date') {
+        {{ data.value | dateFormatter }}
+      }
+      @case ('password') {
+        <span>••••••</span>
+        <span class="visually-hidden">Hidden value</span>
+      }
+      @default {
+        {{ displayValue(data.field, data.value) }}
+      }
+    }
+  }
 </ng-template>
 
 <!-- Row actions -->
