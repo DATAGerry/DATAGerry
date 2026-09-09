@@ -19,6 +19,10 @@ Unit tests for the CmdbPortConnection route guards
 Pure tests: the managers are mocks and every helper is called inside a Flask request context, because
 they abort.
 
+Since 2026-09-09 the unassigned-cable picker's three helpers are here too: which cables to hide (and
+why the edited connection's own cable is not one of them), the picker's default sort key, and the
+batched CmdbType-label read of one page.
+
 Two things are worth pinning above the rest. First, that the cable-CI key is OMITTED rather than
 nulled when a request names none - the unique index guaranteeing one CI per connection is filtered on
 that key's presence, so a null would make the second CI-less connection in the installation a
@@ -27,7 +31,7 @@ the pre-checks use: the pre-checks are reads followed by writes and cannot survi
 message a losing request receives has to come from there
 """
 from typing import Any
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 from flask import Flask
@@ -35,7 +39,13 @@ from werkzeug.exceptions import HTTPException
 
 from cmdb.models.object_model.cmdb_object_key_enum import CmdbObjectKey
 from cmdb.models.port_model import PortKey
-from cmdb.models.port_connection_model import ConnectionType, PortConnectionKey
+from cmdb.models.port_connection_model import (
+    CableSource,
+    CableViewKey,
+    ConnectionType,
+    PortConnectionKey,
+    CABLE_VIEW_KEY,
+)
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.type_model import TypeSchemaKey
 from cmdb.interface.rest_api.routes.port_routes.port_route_helper import collect_port_ids
@@ -44,8 +54,10 @@ from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route
     ConnectionRight,
 )
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper import (
+    CABLE_NAME_SORT,
     build_cable_info,
     build_connection_candidate,
+    collect_claimed_cable_ci_ids,
     duplicate_key_abort,
     enforce_cable_ci_free,
     enforce_connection_shape,
@@ -54,6 +66,10 @@ from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route
     get_port_or_abort,
     get_requested_connection_type_or_abort,
     refuse_identity_change,
+    resolve_cable_sort,
+    shape_unassigned_cable_page,
+    with_cable_view,
+    with_cable_views,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 # Several tests take the 'ctx' fixture purely for its side effect - it opens the request context the
@@ -70,6 +86,7 @@ PORT_A: int = 6201
 PORT_B: int = 6202
 PORT_C: int = 6203
 CABLE_CI_ID: int = 6301
+OTHER_CABLE_CI_ID: int = 6302
 CABLE_TYPE_ID: int = 6401
 
 
@@ -606,3 +623,152 @@ class TestCollectPortIds:
         ports: list[dict[str, Any]] = [{'public_id': 1}, {'public_id': None}, {'public_id': 'x'}, {}]
 
         assert collect_port_ids(ports) == [1]
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                          with_cable_view / with_cable_views                                          #
+# -------------------------------------------------------------------------------------------------------------------- #
+HELPER_PATH: str = 'cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper'
+
+
+class TestWithCableViews:
+    """
+    The one door every connection leaves through
+
+    The three reads and the create and update responses all go through here, which is what keeps a
+    write answered with exactly the shape a following read returns.
+    """
+
+    def test_it_resolves_the_block_with_the_two_managers(self) -> None:
+        """The managers come from the provider, so a route names neither of them"""
+        connection: dict[str, Any] = {
+            PortConnectionKey.PUBLIC_ID.value: 1,
+            PortConnectionKey.CONNECTION_TYPE.value: ConnectionType.CABLE.value,
+            PortConnectionKey.CABLE_NAME.value: 'Patch 1',
+        }
+
+        with patch(f'{HELPER_PATH}.ManagerProvider.get_manager', return_value=MagicMock()):
+            result = with_cable_views([connection], MagicMock())
+
+        assert PortConnectionKey.CABLE_NAME.value not in result[0]
+        assert result[0][CABLE_VIEW_KEY][CableViewKey.SOURCE.value] == CableSource.INLINE.value
+        assert result[0][CABLE_VIEW_KEY][CableViewKey.NAME.value] == 'Patch 1'
+
+    def test_the_single_form_answers_with_one_connection(self) -> None:
+        """Used by the single read and by both write responses"""
+        connection: dict[str, Any] = {
+            PortConnectionKey.PUBLIC_ID.value: 1,
+            PortConnectionKey.CONNECTION_TYPE.value: ConnectionType.INTERNAL.value,
+        }
+
+        with patch(f'{HELPER_PATH}.ManagerProvider.get_manager', return_value=MagicMock()):
+            result = with_cable_view(connection, MagicMock())
+
+        assert result[CABLE_VIEW_KEY] is None
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             the unassigned-cable picker                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestCollectClaimedCableCiIds:
+    """Which Cable CIs the picker hides - every claimed one, except the edited connection's own."""
+
+    @staticmethod
+    def _manager(claimed: list[int], connection: dict[str, Any] | None = None) -> MagicMock:
+        """A PortConnectionsManager mock answering the two reads this helper makes."""
+        manager = MagicMock(name='port_connections_manager')
+        manager.get_assigned_cable_ci_ids.return_value = claimed
+        manager.get_item.return_value = connection
+
+        return manager
+
+    def test_without_a_connection_id_every_claimed_cable_is_hidden(self, ctx) -> None:
+        """Filling a NEW connection: nothing may be reused"""
+        manager = self._manager([CABLE_CI_ID, OTHER_CABLE_CI_ID])
+
+        assert collect_claimed_cable_ci_ids(manager, None) == [CABLE_CI_ID, OTHER_CABLE_CI_ID]
+        manager.get_item.assert_not_called()
+
+    def test_the_edited_connections_own_cable_stays_offered(self, ctx) -> None:
+        """An edit form has to be able to preselect the value it already holds"""
+        manager = self._manager(
+            [CABLE_CI_ID, OTHER_CABLE_CI_ID],
+            _connection(**{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID}),
+        )
+
+        assert collect_claimed_cable_ci_ids(manager, CONNECTION_ID) == [OTHER_CABLE_CI_ID]
+
+    def test_an_edited_connection_without_a_cable_hides_everything(self, ctx) -> None:
+        """A connection carrying inline cable info claims no CI, so nothing is re-offered"""
+        manager = self._manager([CABLE_CI_ID], _connection())
+
+        assert collect_claimed_cable_ci_ids(manager, CONNECTION_ID) == [CABLE_CI_ID]
+
+    def test_unknown_connection_id_aborts_404(self, ctx) -> None:
+        """A question about a connection that does not exist is answered, not ignored"""
+        manager = self._manager([CABLE_CI_ID], None)
+
+        with pytest.raises(HTTPException) as exc_info:
+            collect_claimed_cable_ci_ids(manager, OTHER_CONNECTION_ID)
+
+        assert exc_info.value.code == HTTP_NOT_FOUND
+
+
+class TestResolveCableSort:
+    """The picker orders by cable name unless the caller asked for something else."""
+
+    def test_no_sort_parameter_defaults_to_the_cable_name(self) -> None:
+        """'public_id' is the pager's default for every collection route, i.e. creation order"""
+        app = Flask(__name__)
+
+        with app.test_request_context('/port_connections/cables/unassigned/'):
+            assert resolve_cable_sort('public_id') == CABLE_NAME_SORT
+
+    def test_an_explicit_sort_is_kept(self) -> None:
+        """An explicit ?sort=public_id is a choice, and indistinguishable from the default value"""
+        app = Flask(__name__)
+
+        with app.test_request_context('/port_connections/cables/unassigned/?sort=public_id'):
+            assert resolve_cable_sort('public_id') == 'public_id'
+
+    def test_the_default_sort_targets_the_fields_array(self) -> None:
+        """The cable name lives inside 'fields', which the query builder addresses with a prefix"""
+        assert CABLE_NAME_SORT == 'fields.dg-cable-name'
+
+
+class TestShapeUnassignedCablePage:
+    """One batched type-label read per page, and none at all for an empty page."""
+
+    def test_type_labels_are_read_once_for_the_distinct_ids(self) -> None:
+        """Two candidates of the same type cost one lookup, scoped to the page"""
+        types_manager = MagicMock(name='types_manager')
+        types_manager.get_types_lookup.return_value = {}
+        documents: list[dict[str, Any]] = [
+            {CmdbObjectKey.PUBLIC_ID.value: CABLE_CI_ID, CmdbObjectKey.TYPE_ID.value: 11},
+            {CmdbObjectKey.PUBLIC_ID.value: OTHER_CABLE_CI_ID, CmdbObjectKey.TYPE_ID.value: 11},
+        ]
+
+        shape_unassigned_cable_page(types_manager, documents)
+
+        types_manager.get_types_lookup.assert_called_once_with([11])
+
+    def test_rows_carry_the_resolved_label(self) -> None:
+        """The label comes from the lookup, the cable values from the documents in hand"""
+        types_manager = MagicMock(name='types_manager')
+        cmdb_type = MagicMock()
+        cmdb_type.label = 'Cable'
+        types_manager.get_types_lookup.return_value = {11: cmdb_type}
+        documents: list[dict[str, Any]] = [
+            {CmdbObjectKey.PUBLIC_ID.value: CABLE_CI_ID, CmdbObjectKey.TYPE_ID.value: 11},
+        ]
+
+        rows = shape_unassigned_cable_page(types_manager, documents)
+
+        assert rows[0]['type_label'] == 'Cable'
+
+    def test_empty_page_reads_no_types(self) -> None:
+        """A page with no candidates costs no query at all"""
+        types_manager = MagicMock(name='types_manager')
+
+        assert shape_unassigned_cable_page(types_manager, []) == []
+        types_manager.get_types_lookup.assert_not_called()

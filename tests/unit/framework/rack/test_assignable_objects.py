@@ -28,7 +28,6 @@ import pytest
 
 from cmdb.framework.rack.rack_constants import RackOverviewKey
 from cmdb.framework.rack.assignable_objects import (
-    append_criteria_to_filter,
     build_assignable_criteria,
     build_assignable_row,
     build_assignable_rows,
@@ -105,65 +104,6 @@ def test_an_empty_rack_excludes_no_object() -> None:
     criteria = build_assignable_criteria(LOCATION_TYPE_IDS, [RACK_TYPE_ID], [])
 
     assert PUBLIC_ID_KEY not in criteria
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                          append_criteria_to_filter                                                   #
-# -------------------------------------------------------------------------------------------------------------------- #
-
-def test_a_dict_filter_becomes_a_match_stage_the_rules_follow() -> None:
-    """The caller's filter narrows the candidates and the rules narrow them further"""
-    criteria = build_assignable_criteria(LOCATION_TYPE_IDS, [RACK_TYPE_ID], [])
-
-    pipeline = append_criteria_to_filter({TYPE_ID_KEY: TYPE_ID}, criteria)
-
-    assert pipeline == [{MATCH: {TYPE_ID_KEY: TYPE_ID}}, {MATCH: criteria}]
-
-
-def test_a_pipeline_filter_keeps_its_stages_and_gains_one() -> None:
-    """A caller who already sent stages gets the rules appended after them"""
-    stages: list[dict[str, Any]] = [{MATCH: {TYPE_ID_KEY: TYPE_ID}}, {'$sort': {PUBLIC_ID_KEY: 1}}]
-    criteria = build_assignable_criteria(LOCATION_TYPE_IDS, [], [OBJECT_ID])
-
-    pipeline = append_criteria_to_filter(stages, criteria)
-
-    assert pipeline == [*stages, {MATCH: criteria}]
-
-
-def test_the_callers_pipeline_is_not_mutated() -> None:
-    """The parsed request filter is shared state - appending to it in place would leak across the request"""
-    stages: list[dict[str, Any]] = [{MATCH: {TYPE_ID_KEY: TYPE_ID}}]
-
-    append_criteria_to_filter(stages, build_assignable_criteria(LOCATION_TYPE_IDS, [RACK_TYPE_ID], []))
-
-    assert stages == [{MATCH: {TYPE_ID_KEY: TYPE_ID}}]
-
-
-def test_a_caller_cannot_overwrite_a_rule_by_naming_the_same_key() -> None:
-    """
-    Appending rather than merging is what makes the rules unbypassable
-
-    A filter asking for exactly the Rack type still ends up behind the exclusion of that type, so the
-    two stages contradict and the result is empty - not 'the caller wins'.
-    """
-    criteria = build_assignable_criteria(LOCATION_TYPE_IDS, [RACK_TYPE_ID], [])
-
-    pipeline = append_criteria_to_filter({TYPE_ID_KEY: RACK_TYPE_ID}, criteria)
-
-    assert pipeline[0] == {MATCH: {TYPE_ID_KEY: RACK_TYPE_ID}}
-    assert pipeline[-1][MATCH][TYPE_ID_KEY][NIN] == [RACK_TYPE_ID]
-
-
-@pytest.mark.parametrize('request_filter', [None, {}, []], ids=['none', 'empty-dict', 'empty-list'])
-def test_no_filter_yields_the_rules_alone(request_filter: Any) -> None:
-    """An unfiltered request still gets every rule"""
-    criteria = build_assignable_criteria(LOCATION_TYPE_IDS, [RACK_TYPE_ID], [])
-
-    assert append_criteria_to_filter(request_filter, criteria) == [{MATCH: criteria}]
-
-
-def test_no_filter_and_no_criteria_yields_an_empty_pipeline() -> None:
-    """Nothing to narrow by means no stages, not a stage matching everything"""
-    assert append_criteria_to_filter(None, {}) == []
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                             the picker rows                                                          #

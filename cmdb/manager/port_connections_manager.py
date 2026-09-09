@@ -142,6 +142,34 @@ class PortConnectionsManager(GenericManager):
             raise PortConnectionsManagerGetError(str(err)) from err
 
 
+    def get_assigned_cable_ci_ids(self) -> list[int]:
+        """
+        Retrieves the public_ids of every Cable CI that some CmdbPortConnection already uses
+
+        The complement of "unassigned": a Cable CI is free exactly when it is not in this list. One
+        distinct query over the partial index on 'cable_ci_id', so no connection document is loaded.
+        The criteria ask for the key's PRESENCE because `to_json` omits it rather than writing null,
+        which is also what that partial index is filtered on
+
+        Raises:
+            PortConnectionsManagerGetError: If the lookup failed
+
+        Returns:
+            list[int]: The claimed Cable CI ids, empty when no connection names one
+        """
+        try:
+            return [
+                cable_ci_id
+                for cable_ci_id in self.get_distinct(
+                    PortConnectionKey.CABLE_CI_ID.value,
+                    {PortConnectionKey.CABLE_CI_ID.value: {'$exists': True}},
+                )
+                if isinstance(cable_ci_id, int)
+            ]
+        except (BaseManagerGetError, Exception) as err:
+            raise PortConnectionsManagerGetError(str(err)) from err
+
+
     def get_connections_of_ports(self, port_ids: list[int]) -> list[dict[str, Any]]:
         """
         Retrieves every CmdbPortConnection touching any of the given CmdbPorts

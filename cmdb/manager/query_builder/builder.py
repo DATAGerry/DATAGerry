@@ -244,6 +244,43 @@ class Builder(ABC):
 
 
     @staticmethod
+    def graph_lookup_(
+        from_collection: str,
+        start_with: str,
+        connect_from_field: str,
+        connect_to_field: str,
+        as_field: str,
+    ) -> dict:
+        """
+        Recursively follows a parent/child edge and collects every reachable document
+
+        The recursion starts from the `start_with` expression of each incoming document and keeps
+        joining `connect_from_field` -> `connect_to_field` until no further match is found. Cycles
+        are detected by MongoDB itself, so a malformed edge chain terminates instead of recursing
+        forever
+
+        Args:
+            from_collection (str): The collection to search recursively
+            start_with (str): Expression the recursion starts from (e.g. `'$parent'`)
+            connect_from_field (str): Field of a visited document whose value is followed further
+            connect_to_field (str): Field the followed value is matched against
+            as_field (str): Name of the new array field the reachable documents are added under
+
+        Returns:
+            dict: A `$graphLookup` stage
+        """
+        return {
+            '$graphLookup': {
+                'from': from_collection,
+                'startWith': start_with,
+                'connectFromField': connect_from_field,
+                'connectToField': connect_to_field,
+                'as': as_field,
+            }
+        }
+
+
+    @staticmethod
     def unwind_(path: str | dict) -> dict:
         """
         Outputs one document per element of an array field

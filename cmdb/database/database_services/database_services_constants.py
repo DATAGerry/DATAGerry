@@ -73,6 +73,7 @@ class Updater:
 class BootstrapDocumentKey(BaseStrEnum):
     """Document keys read or written while seeding predefined bootstrap data"""
     ID = '_id'
+    PUBLIC_ID = 'public_id'
     NAME = 'name'
     PREDEFINED = 'predefined'
 

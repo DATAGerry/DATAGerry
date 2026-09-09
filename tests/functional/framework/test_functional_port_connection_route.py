@@ -33,6 +33,7 @@ in this shape:
 Note the test database never goes through CollectionValidator, so its collections carry no declared
 index. The suite builds the CmdbPortConnection indexes itself where the index is the thing under test
 """
+from datetime import datetime
 from http import HTTPStatus
 from typing import Any
 
@@ -41,13 +42,33 @@ import pytest
 from cmdb.database import MongoDatabaseManager
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.port_model import CmdbPort, PortKey, PortSide
-from cmdb.models.port_connection_model import CmdbPortConnection, ConnectionType, PortConnectionKey
+from cmdb.models.port_connection_model import (
+    CableSource,
+    CableViewKey,
+    CmdbPortConnection,
+    ConnectionType,
+    PortConnectionKey,
+    CABLE_VIEW_KEY,
+)
+from cmdb.models.extendable_option_model import (
+    CmdbExtendableOption,
+    ExtendableOptionKey,
+    OptionType,
+)
+from cmdb.class_schema.port_connection_model import get_cmdb_port_connection_write_schema
+from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
+    ConnectionRequestKey,
+)
+from cmdb.models.special_type_model.cable_constants import CableField
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.type_model import CmdbType, FieldType, SectionType
+from cmdb.manager import ObjectsManager, TypesManager
 from cmdb.manager.license_manager.license_service import LicenseService
 from cmdb.manager.port_connections_manager import PortConnectionsManager
 from cmdb.manager.ports_manager import PortsManager
+from cmdb.errors.manager.objects_manager import ObjectsManagerIterationError
 from cmdb.errors.manager.ports_manager import PortsManagerGetError
+from cmdb.errors.manager.types_manager import TypesManagerGetError
 from cmdb.errors.security import AccessDeniedError
 from cmdb.errors.manager.port_connections_manager import (
     PortConnectionsManagerDeleteError,
@@ -83,9 +104,21 @@ MISSING_OBJECT_ID: int = 9996
 
 NAME_FIELD: str = 'dg-name'
 
+UNASSIGNED_ROUTE: str = '/cables/unassigned/'
+INACTIVE_CABLE_CI_ID: int = 9935
+# Deliberately cased against their alphabetical order: MongoDB's binary collation would sort 'Zeta'
+# before 'alpha', so the expected order proves the sort really folds case
+CABLE_NAME_FIRST: str = 'alpha patch'
+CABLE_NAME_SECOND: str = 'Zeta patch'
+CABLE_NAME_INACTIVE: str = 'retired patch'
+
+CABLE_TYPE_OPTION_ID: int = 9960
+CABLE_TYPE_LABEL: str = 'CAT6'
+
 ALL_TYPE_IDS: list[int] = [PORT_TYPE_ID, CABLE_TYPE_ID, PLAIN_TYPE_ID]
 ALL_OBJECT_IDS: list[int] = [
     OWNER_OBJECT_ID, PEER_OBJECT_ID, CABLE_CI_ID, OTHER_CABLE_CI_ID, PLAIN_OBJECT_ID,
+    INACTIVE_CABLE_CI_ID,
 ]
 ALL_PORT_IDS: list[int] = [
     FRONT_PORT_ID, REAR_PORT_ID, SERVER_PORT_ID, SWITCH_PORT_ID, SPARE_PORT_ID,
@@ -145,6 +178,18 @@ def _object_doc(public_id: int, type_id: int) -> dict[str, Any]:
     }
 
 
+def _cable_ci_doc(public_id: int, cable_name: str, active: bool = True) -> dict[str, Any]:
+    """A CABLE SpecialType CmdbObject carrying its dg-cable-name, the way a user would have filled it."""
+    document: dict[str, Any] = _object_doc(public_id, CABLE_TYPE_ID)
+    document['active'] = active
+    document['fields'] = [
+        {'name': CableField.NAME.value, 'value': cable_name, 'type': FieldType.TEXT.value},
+        {'name': CableField.TYPE.value, 'value': CABLE_TYPE_LABEL, 'type': FieldType.TEXT.value},
+    ]
+
+    return document
+
+
 def _port_doc(public_id: int, object_id: int, name: str, side: str = PortSide.SINGLE.value) -> dict[str, Any]:
     """A stored CmdbPort document."""
     return {
@@ -196,8 +241,9 @@ def fixture_seeded(database_manager: MongoDatabaseManager, database_name: str):
     objects.insert_many([
         _object_doc(OWNER_OBJECT_ID, PORT_TYPE_ID),
         _object_doc(PEER_OBJECT_ID, PORT_TYPE_ID),
-        _object_doc(CABLE_CI_ID, CABLE_TYPE_ID),
-        _object_doc(OTHER_CABLE_CI_ID, CABLE_TYPE_ID),
+        _cable_ci_doc(CABLE_CI_ID, CABLE_NAME_SECOND),
+        _cable_ci_doc(OTHER_CABLE_CI_ID, CABLE_NAME_FIRST),
+        _cable_ci_doc(INACTIVE_CABLE_CI_ID, CABLE_NAME_INACTIVE, active=False),
         _object_doc(PLAIN_OBJECT_ID, PLAIN_TYPE_ID),
     ])
     ports.insert_many([
@@ -233,6 +279,37 @@ def _create(rest_api, endpoints: list[int], **kwargs: Any):
     return rest_api.post(f'{ROUTE_URL}/', json=_payload(endpoints, **kwargs))
 
 
+def _fill_cable_ci(database_manager: MongoDatabaseManager, database_name: str, **values: Any) -> None:
+    """Gives the seeded Cable CI its dg-cable-* values, the way a user would have filled them in."""
+    objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+
+    objects.update_one(
+        {'public_id': CABLE_CI_ID},
+        {'$set': {'fields': [
+            {'name': name, 'value': value, 'type': FieldType.TEXT.value}
+            for name, value in values.items()
+        ]}},
+    )
+
+
+@pytest.fixture(name='cable_type_option')
+def fixture_cable_type_option(database_manager: MongoDatabaseManager, database_name: str):
+    """A CABLE_TYPE CmdbExtendableOption, so an inline connection's cable_type has a label to resolve."""
+    options = database_manager.get_collection(CmdbExtendableOption.COLLECTION, database_name)
+
+    options.delete_many({ExtendableOptionKey.PUBLIC_ID.value: CABLE_TYPE_OPTION_ID})
+    options.insert_one({
+        ExtendableOptionKey.PUBLIC_ID.value: CABLE_TYPE_OPTION_ID,
+        ExtendableOptionKey.VALUE.value: CABLE_TYPE_LABEL,
+        ExtendableOptionKey.OPTION_TYPE.value: OptionType.CABLE_TYPE.value,
+        ExtendableOptionKey.PREDEFINED.value: False,
+    })
+
+    yield CABLE_TYPE_OPTION_ID
+
+    options.delete_many({ExtendableOptionKey.PUBLIC_ID.value: CABLE_TYPE_OPTION_ID})
+
+
 def _created_id(response) -> int:
     """Reads the public_id out of an InsertSingleResponse."""
     return response.get_json()['result_id']
@@ -260,7 +337,11 @@ class TestCreateConnection:
 
         created = response.get_json()['raw']
 
-        assert created[PortConnectionKey.CABLE_NAME.value] == 'Patch 1'
+        # The write is answered with the same resolved shape a following read returns: the flat cable
+        # keys are gone and the values live in the 'cable' block
+        assert PortConnectionKey.CABLE_NAME.value not in created
+        assert created[CABLE_VIEW_KEY][CableViewKey.SOURCE.value] == CableSource.INLINE.value
+        assert created[CABLE_VIEW_KEY][CableViewKey.NAME.value] == 'Patch 1'
         assert created[PortConnectionKey.AUTHOR_ID.value] is not None
         assert created[PortConnectionKey.CREATION_TIME.value] is not None
 
@@ -608,8 +689,8 @@ class TestUpdateConnection:
 
         updated = rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result']
 
-        assert updated[PortConnectionKey.CABLE_NAME.value] == 'New'
-        assert updated[PortConnectionKey.CABLE_LENGTH.value] == '3 m'
+        assert updated[CABLE_VIEW_KEY][CableViewKey.NAME.value] == 'New'
+        assert updated[CABLE_VIEW_KEY][CableViewKey.LENGTH.value] == '3 m'
 
     def test_an_omitted_cable_ci_is_really_removed(self, rest_api, seeded) -> None:
         """
@@ -941,3 +1022,425 @@ class TestErrorMapping:
 
         assert rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').status_code \
             == HTTPStatus.INTERNAL_SERVER_ERROR
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              THE RESOLVED CABLE BLOCK                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestCableIsDescribedOnce:
+    """
+    A cable lives in ONE place, and a client reads it in one shape
+
+    The write half refuses the inline fields alongside a Cable CI, so the five values can not be
+    duplicated between the link and the asset that IS the cable and then drift apart. The read half
+    resolves whichever of the two the connection uses into a single 'cable' block.
+    """
+
+    def test_inline_fields_alongside_a_cable_ci_are_refused(self, rest_api) -> None:
+        """The duplication the design forbids, refused at the door"""
+        response = _create(
+            rest_api, [SERVER_PORT_ID, FRONT_PORT_ID],
+            cable_ci_id=CABLE_CI_ID, cable_name='Patch 1',
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert PortConnectionKey.CABLE_NAME.value in response.get_json()['message']
+        assert str(CABLE_CI_ID) in response.get_json()['message']
+
+    def test_every_duplicated_field_is_named_in_one_message(self, rest_api) -> None:
+        """One response, one fixed payload - not a rule discovered per request"""
+        response = _create(
+            rest_api, [SERVER_PORT_ID, FRONT_PORT_ID],
+            cable_ci_id=CABLE_CI_ID, cable_name='Patch 1', cable_color='blue',
+        )
+
+        message: str = response.get_json()['message']
+
+        assert PortConnectionKey.CABLE_NAME.value in message
+        assert PortConnectionKey.CABLE_COLOR.value in message
+
+    def test_a_cable_ci_alone_is_accepted(self, rest_api) -> None:
+        """Scenario B: the CI owns the values and the connection only points at it"""
+        response = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+    def test_an_update_refuses_the_duplication_too(self, rest_api) -> None:
+        """Both write routes hold the rule; only one of them would be a hole in it"""
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_name='Patch 1'))
+
+        response = rest_api.put(
+            f'{ROUTE_URL}/{new_id}',
+            json={'cable_ci_id': CABLE_CI_ID, 'cable_name': 'Patch 1'},
+        )
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_a_link_can_be_handed_over_to_a_cable_ci_in_one_write(self, rest_api) -> None:
+        """
+        Switching between the two ways of describing a cable is an ordinary update
+
+        The inline values go, the reference arrives, and the block now reads from the CI.
+        """
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_name='Patch 1'))
+
+        response = rest_api.put(f'{ROUTE_URL}/{new_id}', json={'cable_ci_id': CABLE_CI_ID})
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.ACCEPTED)
+
+        block = rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result'][CABLE_VIEW_KEY]
+
+        assert block[CableViewKey.SOURCE.value] == CableSource.CI.value
+        assert block[CableViewKey.CABLE_CI_ID.value] == CABLE_CI_ID
+
+    def test_the_block_carries_the_cable_cis_own_values(
+            self, rest_api, database_manager, database_name) -> None:
+        """The point of linking a CI: the asset owns the values and the link shows them"""
+        _fill_cable_ci(database_manager, database_name, **{
+            CableField.NAME.value: 'CAB-000471',
+            CableField.TYPE.value: CABLE_TYPE_LABEL,
+            CableField.LENGTH.value: '3 m',
+            CableField.COLOR.value: 'blue',
+            CableField.DESCRIPTION.value: 'Rack 12 -> Rack 14',
+        })
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID))
+
+        block = rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result'][CABLE_VIEW_KEY]
+
+        assert block[CableViewKey.SOURCE.value] == CableSource.CI.value
+        assert block[CableViewKey.NAME.value] == 'CAB-000471'
+        assert block[CableViewKey.TYPE.value] == CABLE_TYPE_LABEL
+        assert block[CableViewKey.TYPE_ID.value] is None
+        assert block[CableViewKey.LENGTH.value] == '3 m'
+        assert block[CableViewKey.COLOR.value] == 'blue'
+        assert block[CableViewKey.DESCRIPTION.value] == 'Rack 12 -> Rack 14'
+
+    def test_an_inline_cable_type_is_reported_as_its_label(self, rest_api, cable_type_option) -> None:
+        """
+        The stored value is a CABLE_TYPE option id; a client should not have to resolve it
+
+        Both keys are filled here, unlike the CI case: the id exists, so it is reported alongside the
+        label the edit form needs.
+        """
+        new_id: int = _created_id(_create(
+            rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_name='Patch 1', cable_type=cable_type_option,
+        ))
+
+        block = rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result'][CABLE_VIEW_KEY]
+
+        assert block[CableViewKey.SOURCE.value] == CableSource.INLINE.value
+        assert block[CableViewKey.TYPE.value] == CABLE_TYPE_LABEL
+        assert block[CableViewKey.TYPE_ID.value] == cable_type_option
+
+    def test_a_deleted_cable_ci_is_reported_and_the_link_survives(
+            self, rest_api, database_manager, database_name) -> None:
+        """
+        The soft reference of step 10: reported, never cascaded
+
+        The two ports are still patched together, so the connection stays - only the asset record
+        describing its cable is gone.
+        """
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID))
+
+        objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+        objects.delete_one({'public_id': CABLE_CI_ID})
+
+        response = rest_api.get(f'{ROUTE_URL}/{new_id}')
+
+        assert response.status_code == HTTPStatus.OK
+
+        block = response.get_json()['result'][CABLE_VIEW_KEY]
+
+        assert block[CableViewKey.CABLE_CI_ID.value] == CABLE_CI_ID
+        assert block[CableViewKey.RESOLVED.value] is False
+        assert block[CableViewKey.NAME.value] is None
+
+    def test_an_internal_connection_has_no_cable_block(self, rest_api) -> None:
+        """A panel's front-to-rear pairing is not a piece of cabling, and says so once"""
+        new_id: int = _created_id(_create(
+            rest_api, [FRONT_PORT_ID, REAR_PORT_ID], connection_type=ConnectionType.INTERNAL.value,
+        ))
+
+        assert rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result'][CABLE_VIEW_KEY] is None
+
+    def test_every_read_route_answers_in_the_same_shape(
+            self, rest_api, database_manager, database_name) -> None:
+        """
+        The single read, the per-port read and the per-object read are one contract
+
+        A client that renders a device's cabling must not have to branch on which route produced it.
+        """
+        _fill_cable_ci(database_manager, database_name, **{CableField.NAME.value: 'CAB-000471'})
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID))
+
+        single = rest_api.get(f'{ROUTE_URL}/{new_id}').get_json()['result']
+        per_port = rest_api.get(f'{ROUTE_URL}/port/{FRONT_PORT_ID}').get_json()[0]
+        per_object = rest_api.get(f'{ROUTE_URL}/object/{OWNER_OBJECT_ID}').get_json()[0]
+
+        for connection in (single, per_port, per_object):
+            assert PortConnectionKey.CABLE_NAME.value not in connection
+            assert PortConnectionKey.CABLE_CI_ID.value not in connection
+            assert connection[CABLE_VIEW_KEY][CableViewKey.NAME.value] == 'CAB-000471'
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              THE WRITE BODY'S SCHEMA                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestWriteSchema:
+    """
+    What the routes accept as a body at all
+
+    Both write routes validate against the write schema before any handler runs. Until 2026-09-08 they
+    did not: the document schema existed but nothing enforced it, so a value of the wrong type was
+    stored as-is under a key the schema declares a string.
+    """
+
+    def test_a_number_where_a_cable_field_declares_text_is_refused(self, rest_api) -> None:
+        """
+        The gap the schema closes
+
+        cable_length is text on purpose - '5 m', '2.5 m' - and a bare 5 used to be stored verbatim.
+        """
+        response = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_length=5)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_a_non_integer_cable_ci_id_is_refused(self, rest_api) -> None:
+        """The reference is a public_id, and a string could never resolve to one"""
+        response = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id='nine')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_the_update_body_is_validated_too(self, rest_api) -> None:
+        """One validated route and one unvalidated one would just move the hole"""
+        new_id: int = _created_id(_create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID]))
+
+        response = rest_api.put(f'{ROUTE_URL}/{new_id}', json={'cable_color': 42})
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_a_server_owned_key_in_the_body_never_reaches_the_handler(self, rest_api, seeded) -> None:
+        """
+        Purged rather than ignored
+
+        The write schema does not declare the audit fields, and the validator purges what it does not
+        declare - so a body claiming another author cannot even be read by the route.
+        """
+        response = rest_api.post(f'{ROUTE_URL}/', json={
+            **_payload([SERVER_PORT_ID, FRONT_PORT_ID], cable_name='Patch 1'),
+            'author_id': 4242,
+            'creation_time': 'whenever',
+        })
+
+        assert response.status_code in (HTTPStatus.OK, HTTPStatus.CREATED)
+
+        stored = seeded.find_one({PortConnectionKey.PUBLIC_ID.value: _created_id(response)})
+
+        assert stored[PortConnectionKey.AUTHOR_ID.value] != 4242
+        assert isinstance(stored[PortConnectionKey.CREATION_TIME.value], datetime)
+
+    def test_an_unusable_endpoint_list_still_gets_its_own_message(self, rest_api) -> None:
+        """
+        endpoints stays UNTYPED in the write schema on purpose
+
+        A type rule would refuse it first with the decorator's generic wording, replacing the message
+        that names the actual rule.
+        """
+        response = _create(rest_api, [SERVER_PORT_ID])
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'endpoints' in response.get_json()['message'].lower()
+
+    def test_an_unknown_connection_type_still_gets_its_own_message(self, rest_api) -> None:
+        """Same reason: the validator lists the allowed types, a type rule could not"""
+        response = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], connection_type='WIRELESS')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'WIRELESS' in response.get_json()['message']
+
+    def test_the_write_schema_accepts_exactly_the_documented_request_keys(self) -> None:
+        """
+        The schema and ConnectionRequestKey are two statements of the same list
+
+        They live in different layers - the schema may not import the route constants - so nothing but
+        this assertion keeps them from drifting.
+        """
+        assert set(get_cmdb_port_connection_write_schema()) == {
+            key.value for key in ConnectionRequestKey
+        }
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                    GET /port_connections/cables/unassigned/                                          #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestUnassignedCablePicker:
+    """
+    The picker behind a connection's ``cable_ci_id``
+
+    Two rules and three parameters: only CABLE-marked objects, never a cable another connection
+    already claims, ``?connection_id=`` to keep the edited connection's own cable, ``?search=`` on the
+    cable name, and the standard pager - whose `sort` this route defaults to the cable name.
+    """
+
+    @staticmethod
+    def _get(rest_api, query: str = ''):
+        """GETs the picker, optionally with a query string."""
+        return rest_api.get(f'{ROUTE_URL}{UNASSIGNED_ROUTE}{query}')
+
+    @staticmethod
+    def _ids(response) -> list[int]:
+        """The public_ids of one page, in the order the route returned them."""
+        return [row['public_id'] for row in response.get_json()['results']]
+
+    def test_lists_every_unclaimed_cable_with_the_pager_envelope(self, rest_api) -> None:
+        """A GetMultiResponse: the rows, the total and the echoed parameters"""
+        response = self._get(rest_api)
+
+        assert response.status_code == HTTPStatus.OK
+        body = response.get_json()
+        assert set(self._ids(response)) == {CABLE_CI_ID, OTHER_CABLE_CI_ID, INACTIVE_CABLE_CI_ID}
+        assert body['total'] == 3
+        assert body['parameters']['sort'] == 'fields.dg-cable-name'
+
+    def test_only_cable_types_are_offered(self, rest_api) -> None:
+        """An object of an ordinary type is not a cable, whatever it is called"""
+        assert PLAIN_OBJECT_ID not in self._ids(self._get(rest_api))
+
+    def test_a_row_carries_the_cable_name_and_its_type(self, rest_api) -> None:
+        """The picker draws the name; the CmdbType label is what tells two cable types apart"""
+        row = next(
+            row for row in self._get(rest_api).get_json()['results']
+            if row['public_id'] == OTHER_CABLE_CI_ID
+        )
+
+        assert row['name'] == CABLE_NAME_FIRST
+        assert row['cable_type'] == CABLE_TYPE_LABEL
+        assert row['type_id'] == CABLE_TYPE_ID
+        assert row['type_label'] == f'Connection Type {CABLE_TYPE_ID}'
+        assert row['active'] is True
+
+    def test_rows_are_ordered_by_cable_name_by_default(self, rest_api) -> None:
+        """Name-ascending and case-folded: binary collation would put 'Zeta patch' first"""
+        assert self._ids(self._get(rest_api)) == [
+            OTHER_CABLE_CI_ID, INACTIVE_CABLE_CI_ID, CABLE_CI_ID,
+        ]
+
+    def test_an_explicit_sort_is_honoured(self, rest_api) -> None:
+        """The default applies only when the caller sent no ?sort= of its own"""
+        response = self._get(rest_api, '?sort=public_id&order=1')
+
+        assert response.get_json()['parameters']['sort'] == 'public_id'
+        assert self._ids(response) == [CABLE_CI_ID, OTHER_CABLE_CI_ID, INACTIVE_CABLE_CI_ID]
+
+    def test_a_claimed_cable_is_not_offered(self, rest_api) -> None:
+        """Cabling a connection to a CI takes it out of the picker"""
+        _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+
+        response = self._get(rest_api)
+
+        assert CABLE_CI_ID not in self._ids(response)
+        assert response.get_json()['total'] == 2
+
+    def test_resolving_the_connection_offers_the_cable_again(self, rest_api) -> None:
+        """The cable is free the moment the connection is gone - nothing else is written"""
+        created = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+        rest_api.delete(f'{ROUTE_URL}/{_created_id(created)}')
+
+        assert CABLE_CI_ID in self._ids(self._get(rest_api))
+
+    def test_connection_id_keeps_the_edited_connections_own_cable(self, rest_api) -> None:
+        """What an edit form needs: its current value is in the list it renders"""
+        created = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+        connection_id: int = _created_id(created)
+
+        ids = self._ids(self._get(rest_api, f'?connection_id={connection_id}'))
+
+        assert CABLE_CI_ID in ids
+        assert OTHER_CABLE_CI_ID in ids
+
+    def test_connection_id_hides_the_cables_of_other_connections(self, rest_api) -> None:
+        """Only the addressed connection's own cable comes back, not every claimed one"""
+        first = _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+        _create(rest_api, [SWITCH_PORT_ID, REAR_PORT_ID], cable_ci_id=OTHER_CABLE_CI_ID)
+
+        ids = self._ids(self._get(rest_api, f'?connection_id={_created_id(first)}'))
+
+        assert CABLE_CI_ID in ids
+        assert OTHER_CABLE_CI_ID not in ids
+
+    def test_unknown_connection_id_returns_404(self, rest_api) -> None:
+        """A question about a connection that does not exist is answered, not ignored"""
+        assert self._get(rest_api, '?connection_id=987654').status_code == HTTPStatus.NOT_FOUND
+
+    def test_search_matches_the_cable_name_case_insensitively(self, rest_api) -> None:
+        """The picker's search box: a literal substring of the name, in any case"""
+        response = self._get(rest_api, '?search=ALPHA')
+
+        assert self._ids(response) == [OTHER_CABLE_CI_ID]
+        assert response.get_json()['total'] == 1
+
+    def test_search_without_a_match_answers_an_empty_page(self, rest_api) -> None:
+        """An empty result, not an error"""
+        response = self._get(rest_api, '?search=nothing-like-this')
+
+        assert response.status_code == HTTPStatus.OK
+        assert response.get_json()['results'] == []
+        assert response.get_json()['total'] == 0
+
+    def test_the_page_size_and_page_are_honoured(self, rest_api) -> None:
+        """Pagination is the standard pager: total counts every candidate, results one page"""
+        first_page = self._get(rest_api, '?limit=1&page=1')
+        second_page = self._get(rest_api, '?limit=1&page=2')
+
+        assert first_page.get_json()['total'] == 3
+        assert self._ids(first_page) == [OTHER_CABLE_CI_ID]
+        assert self._ids(second_page) == [INACTIVE_CABLE_CI_ID]
+
+    def test_a_caller_filter_narrows_the_candidates(self, rest_api) -> None:
+        """The rules are appended behind ?filter=, so a filter can only narrow the list"""
+        response = self._get(rest_api, f'?filter={{"public_id": {OTHER_CABLE_CI_ID}}}')
+
+        assert self._ids(response) == [OTHER_CABLE_CI_ID]
+
+    def test_a_caller_filter_can_not_widen_past_the_rules(self, rest_api) -> None:
+        """Naming a claimed cable in the filter does not bring it back"""
+        _create(rest_api, [SERVER_PORT_ID, FRONT_PORT_ID], cable_ci_id=CABLE_CI_ID)
+
+        response = self._get(rest_api, f'?filter={{"public_id": {CABLE_CI_ID}}}')
+
+        assert response.get_json()['results'] == []
+
+    def test_inactive_cables_are_hidden_when_the_cookie_asks_for_active_objects(self, rest_api) -> None:
+        """The picker honours the active-objects setting exactly as the object list does"""
+        ids = self._ids(self._get(rest_api, '?onlyActiveObjCookie=true'))
+
+        assert INACTIVE_CABLE_CI_ID not in ids
+        assert set(ids) == {CABLE_CI_ID, OTHER_CABLE_CI_ID}
+
+    def test_head_answers_without_a_body(self, rest_api) -> None:
+        """HEAD is the pager's count-only form"""
+        response = rest_api.head(f'{ROUTE_URL}{UNASSIGNED_ROUTE}')
+
+        assert response.status_code == HTTPStatus.OK
+        assert not response.get_data()
+
+
+class TestUnassignedCablePickerErrorTails:
+    """Each read behind the picker maps to its own refusal rather than one blanket 500."""
+
+    @pytest.mark.parametrize('manager, method, error, expected', [
+        (PortConnectionsManager, 'get_assigned_cable_ci_ids',
+         PortConnectionsManagerGetError('boom'), HTTPStatus.BAD_REQUEST),
+        (TypesManager, 'get_type_ids_of_special_type',
+         TypesManagerGetError('boom'), HTTPStatus.BAD_REQUEST),
+        (ObjectsManager, 'iterate_query',
+         ObjectsManagerIterationError('boom'), HTTPStatus.BAD_REQUEST),
+        (ObjectsManager, 'iterate_query', RuntimeError('boom'), HTTPStatus.INTERNAL_SERVER_ERROR),
+    ], ids=['claimed-cables', 'cable-types', 'candidates', 'unexpected'])
+    def test_a_failing_read_maps_to_its_own_status(
+            self, rest_api, monkeypatch, manager: Any, method: str, error: Exception, expected: int,
+    ) -> None:
+        """The three reads are told apart, and anything else is a 500"""
+        monkeypatch.setattr(manager, method, _raiser(error))
+
+        assert rest_api.get(f'{ROUTE_URL}{UNASSIGNED_ROUTE}').status_code == expected

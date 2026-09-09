@@ -33,6 +33,7 @@ import pytest
 from cmdb.framework.port.connection_constants import PortConnectionError
 from cmdb.framework.port.connection_validator import (
     cable_ci_blockers,
+    cable_duplication_blockers,
     cable_field_blockers,
     coerce_connection_type,
     endpoint_blockers,
@@ -46,6 +47,7 @@ from cmdb.models.port_connection_model import (
     ConnectionType,
     PortConnectionKey,
     CABLE_FIELD_KEYS,
+    INLINE_CABLE_FIELD_KEYS,
 )
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.type_model import TypeSchemaKey
@@ -305,6 +307,51 @@ class TestCableCiBlockers:
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    the aggregate                                                     #
 # -------------------------------------------------------------------------------------------------------------------- #
+class TestCableDuplicationBlockers:
+    """A cable is described inline OR by reference, never both."""
+
+    def test_inline_fields_alone_are_accepted(self) -> None:
+        """Scenario A - no cable is inventoried and the connection owns the values"""
+        assert cable_duplication_blockers({
+            PortConnectionKey.CABLE_NAME.value: 'Patch 1',
+            PortConnectionKey.CABLE_COLOR.value: 'blue',
+        }) == []
+
+    def test_a_cable_ci_alone_is_accepted(self) -> None:
+        """Scenario B - the CI owns the values and the connection only points at it"""
+        assert cable_duplication_blockers({PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID}) == []
+
+    def test_each_inline_field_sent_with_a_cable_ci_is_reported(self) -> None:
+        """
+        Every duplicated field is named at once, so one edit fixes the payload
+
+        Storing both copies would duplicate five values between the link and the asset that IS the
+        cable, and the two would drift apart the moment either side is edited.
+        """
+        blockers = cable_duplication_blockers({
+            PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID,
+            PortConnectionKey.CABLE_NAME.value: 'Patch 1',
+            PortConnectionKey.CABLE_LENGTH.value: '3 m',
+        })
+
+        assert len(blockers) == 2
+        assert all(str(CABLE_CI_ID) in blocker for blocker in blockers)
+
+    def test_every_inline_field_is_judged(self) -> None:
+        """The rule is derived from INLINE_CABLE_FIELD_KEYS, so a sixth field can not be forgotten"""
+        payload: dict[str, Any] = {PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID}
+        payload.update({key.value: 'x' for key in INLINE_CABLE_FIELD_KEYS})
+
+        assert len(cable_duplication_blockers(payload)) == len(INLINE_CABLE_FIELD_KEYS)
+
+    def test_an_explicit_null_is_not_a_value(self) -> None:
+        """Clearing a field the CI owns is not an attempt to own it on the connection"""
+        assert cable_duplication_blockers({
+            PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID,
+            PortConnectionKey.CABLE_NAME.value: None,
+        }) == []
+
+
 class TestShapeBlockers:
     """The pure half of the write guard, in one call."""
 
@@ -324,6 +371,17 @@ class TestShapeBlockers:
 
         assert PortConnectionError.SELF_CONNECTION.value in blockers
         assert len(blockers) == 2
+
+    def test_it_reports_a_cable_described_twice(self) -> None:
+        """The duplication rule runs as part of the pure half, not only at the route"""
+        blockers = shape_blockers(ConnectionType.CABLE.value, {
+            PortConnectionKey.ENDPOINTS.value: [PORT_A, PORT_B],
+            PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID,
+            PortConnectionKey.CABLE_NAME.value: 'Patch 1',
+        })
+
+        assert len(blockers) == 1
+        assert PortConnectionKey.CABLE_NAME.value in blockers[0]
 
     def test_it_touches_no_manager(self) -> None:
         """

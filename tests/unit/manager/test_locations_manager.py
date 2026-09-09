@@ -19,8 +19,9 @@ Unit tests for cmdb.manager.locations_manager.LocationsManager
 Pure tests: no Mongo. Each method is driven against a ``MagicMock(spec=LocationsManager)`` with
 its database collaborators (insert / get_many / aggregate / update / delete_*) stubbed, so only
 the manager's own behavior is exercised - payload coercion, the ``$graphLookup`` pipeline shape,
-the update match key, the empty-data guard, and the error-wrapping into the LocationsManager
-error hierarchy. The ``$graphLookup`` query itself is pinned against real MongoDB in
+the update match key, the empty-data guard, the canonical document + name ordering of the
+tree-facing reads, the root-deletion and parentless-promotion refusals, and the error-wrapping into
+the LocationsManager error hierarchy. The ``$graphLookup`` query itself is pinned against real MongoDB in
 tests/integration/framework/test_integration_locations_crud.py.
 """
 # pylint: disable=protected-access
@@ -29,9 +30,14 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from cmdb.manager.locations_manager import LocationsManager
+from cmdb.manager.base_manager import BaseManager
+from cmdb.manager.locations_manager import (
+    LocationsManager,
+    ancestors_lookup_stage,
+    descendants_lookup_stage,
+)
 from cmdb.models.location_model.cmdb_location import CmdbLocation
-from cmdb.models.location_model.location_constants import RootLocationDefault
+from cmdb.models.location_model.location_constants import CmdbLocationDefault, RootLocationDefault
 
 from cmdb.errors.models.cmdb_location import CmdbLocationToJsonError
 from cmdb.errors.manager import (
@@ -42,6 +48,7 @@ from cmdb.errors.manager import (
     BaseManagerUpdateError,
 )
 from cmdb.errors.manager.locations_manager import (
+    LocationsManagerInitError,
     LocationsManagerInsertError,
     LocationsManagerGetError,
     LocationsManagerUpdateError,
@@ -122,6 +129,14 @@ class TestInsertLocation:
             with pytest.raises(LocationsManagerInsertError):
                 LocationsManager.insert_location(mgr, location)
 
+    def test_missing_public_id_wraps_as_locations_insert_error(self) -> None:
+        """An insert answering with no public_id is reported instead of returned as None."""
+        mgr = _mock_manager()
+        mgr.insert.return_value = None
+
+        with pytest.raises(LocationsManagerInsertError):
+            LocationsManager.insert_location(mgr, dict(SAMPLE_LOCATION_DICT))
+
     def test_unexpected_error_wraps_as_locations_insert_error(self) -> None:
         """A generic exception is wrapped as ``LocationsManagerInsertError``."""
         mgr = _mock_manager()
@@ -201,6 +216,22 @@ class TestGetLocation:
         mgr.get_one_by.assert_called_once_with({'object_id': OBJECT_ID})
         assert result == SAMPLE_LOCATION_DICT
 
+    def test_get_location_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A generic exception from ``get_one`` is wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.get_one.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_location(mgr, LOCATION_PUBLIC_ID)
+
+    def test_get_location_for_object_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A generic exception from ``get_one_by`` is wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.get_one_by.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_location_for_object(mgr, OBJECT_ID)
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   get_locations_by                                                  #
@@ -251,11 +282,13 @@ class TestGetAllDescendantLocations:
         assert graph_lookup['connectFromField'] == 'public_id'
         assert graph_lookup['connectToField'] == 'parent'
         assert graph_lookup['as'] == 'descendants'
+        # only the descendants' public_id leaves the server
+        assert pipeline[2]['$project'] == {'_id': 0, 'descendants.public_id': 1}
 
     def test_returns_descendants_from_first_result_row(self) -> None:
         """The descendants array of the matched root document is returned."""
         mgr = _mock_manager()
-        descendants = [{'public_id': 8, 'object_id': 108}, {'public_id': 9, 'object_id': 109}]
+        descendants = [{'public_id': 8}, {'public_id': 9}]
         mgr.aggregate.return_value = [{'descendants': descendants}]
 
         result = LocationsManager.get_all_descendant_locations(mgr, LOCATION_PUBLIC_ID)
@@ -291,36 +324,6 @@ class TestGetAllDescendantLocations:
 
         with pytest.raises(LocationsManagerChildrenError):
             LocationsManager.get_all_descendant_locations(mgr, LOCATION_PUBLIC_ID)
-
-
-# -------------------------------------------------------------------------------------------------------------------- #
-#                                                location_has_children                                                #
-# -------------------------------------------------------------------------------------------------------------------- #
-class TestLocationHasChildren:
-    """``location_has_children`` reports whether any location has this one as its parent."""
-
-    def test_true_when_children_exist(self) -> None:
-        """A positive child count scoped to the parent field reports True."""
-        mgr = _mock_manager()
-        mgr.count_documents.return_value = 2
-
-        assert LocationsManager.location_has_children(mgr, LOCATION_PUBLIC_ID) is True
-        mgr.count_documents.assert_called_once_with({'parent': LOCATION_PUBLIC_ID})
-
-    def test_false_when_no_children(self) -> None:
-        """A zero child count reports False."""
-        mgr = _mock_manager()
-        mgr.count_documents.return_value = 0
-
-        assert LocationsManager.location_has_children(mgr, LOCATION_PUBLIC_ID) is False
-
-    def test_get_error_wraps_as_locations_get_error(self) -> None:
-        """A ``BaseManagerGetError`` from the count is wrapped as ``LocationsManagerGetError``."""
-        mgr = _mock_manager()
-        mgr.count_documents.side_effect = BaseManagerGetError('db down')
-
-        with pytest.raises(LocationsManagerGetError):
-            LocationsManager.location_has_children(mgr, LOCATION_PUBLIC_ID)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -367,7 +370,7 @@ class TestUpdateLocationsByType:
         """Empty update data short-circuits before any ``update_many`` is issued."""
         mgr = _mock_manager()
 
-        LocationsManager.update_locations_by_type(mgr, TYPE_ID, {})
+        assert LocationsManager.update_locations_by_type(mgr, TYPE_ID, {}) is False
 
         mgr.update_many.assert_not_called()
 
@@ -376,7 +379,7 @@ class TestUpdateLocationsByType:
         mgr = _mock_manager()
         changed_data = {'type_label': 'Renamed'}
 
-        LocationsManager.update_locations_by_type(mgr, TYPE_ID, changed_data)
+        assert LocationsManager.update_locations_by_type(mgr, TYPE_ID, changed_data) is True
 
         mgr.update_many.assert_called_once_with(criteria={'type_id': TYPE_ID}, update=changed_data)
 
@@ -384,6 +387,14 @@ class TestUpdateLocationsByType:
         """A ``BaseManagerUpdateError`` from ``update_many`` becomes ``LocationsManagerUpdateError``."""
         mgr = _mock_manager()
         mgr.update_many.side_effect = BaseManagerUpdateError('write failed')
+
+        with pytest.raises(LocationsManagerUpdateError):
+            LocationsManager.update_locations_by_type(mgr, TYPE_ID, {'type_label': 'Renamed'})
+
+    def test_unexpected_error_wraps_as_locations_update_error(self) -> None:
+        """A generic exception from ``update_many`` becomes ``LocationsManagerUpdateError``."""
+        mgr = _mock_manager()
+        mgr.update_many.side_effect = RuntimeError('boom')
 
         with pytest.raises(LocationsManagerUpdateError):
             LocationsManager.update_locations_by_type(mgr, TYPE_ID, {'type_label': 'Renamed'})
@@ -414,6 +425,9 @@ class TestSearchLocationsWithAncestors:
 
         assert [loc['public_id'] for loc in result] == [5, 10, 11]
         assert all('ancestors' not in loc for loc in result)
+        # every row is a canonical location document, with the optional render keys defaulted
+        assert result[0]['type_icon'] == CmdbLocationDefault.TYPE_ICON
+        assert result[0]['type_selectable'] == CmdbLocationDefault.TYPE_SELECTABLE
 
     def test_pipeline_uses_escaped_case_insensitive_regex_and_excludes_root(self) -> None:
         """The query is escaped to a literal case-insensitive substring; the synthetic root is skipped."""
@@ -428,6 +442,7 @@ class TestSearchLocationsWithAncestors:
         graph = pipeline[1]['$graphLookup']
         assert graph['connectFromField'] == 'parent'
         assert graph['connectToField'] == 'public_id'
+        assert pipeline[2]['$project'] == {'_id': 0, 'ancestors._id': 0}
 
     def test_empty_query_returns_empty_without_querying(self) -> None:
         """A blank query short-circuits to [] and never touches the database."""
@@ -443,6 +458,26 @@ class TestSearchLocationsWithAncestors:
 
         with pytest.raises(LocationsManagerGetError):
             LocationsManager.search_locations_with_ancestors(mgr, 'srv')
+
+    def test_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A generic exception from the aggregation is also wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.aggregate.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.search_locations_with_ancestors(mgr, 'srv')
+
+    def test_result_is_ordered_by_name_case_insensitively(self) -> None:
+        """Matches come back name-ascending regardless of case or of the aggregation's own order."""
+        mgr = _mock_manager()
+        mgr.aggregate.return_value = [
+            self._match(10, 'beta', 5, []),
+            self._match(11, 'Alpha', 5, []),
+        ]
+
+        result = LocationsManager.search_locations_with_ancestors(mgr, 'a')
+
+        assert [loc['name'] for loc in result] == ['Alpha', 'beta']
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -461,12 +496,12 @@ class TestGetLocationsOnPathTo:
             {'public_id': ROOT_PUBLIC_ID, 'name': 'Root', 'parent': 0},
         ]
         mgr.aggregate.return_value = [{'public_id': 9, 'name': 't', 'parent': 5, 'ancestors': ancestors}]
-        level_rows = [{'public_id': 9}]
-        mgr.get_many.return_value = level_rows
+        mgr.get_many.return_value = [{'public_id': 9, 'name': 't', 'parent': 5}]
 
         result = LocationsManager.get_locations_on_path_to(mgr, 9)
 
-        assert result is level_rows
+        assert [loc['public_id'] for loc in result] == [9]
+        assert result[0]['type_icon'] == CmdbLocationDefault.TYPE_ICON
         parent_filter = mgr.get_many.call_args.kwargs['parent']
         assert sorted(parent_filter['$in']) == [ROOT_PUBLIC_ID, 2, 5]
 
@@ -485,6 +520,20 @@ class TestGetLocationsOnPathTo:
         assert graph['startWith'] == '$parent'
         assert graph['connectFromField'] == 'parent'
         assert graph['connectToField'] == 'public_id'
+        assert pipeline[2]['$project'] == {'_id': 0, 'ancestors.public_id': 1}
+
+    def test_levels_are_ordered_by_name_case_insensitively(self) -> None:
+        """The expanded levels come back name-ascending, not in the read's public_id order."""
+        mgr = _mock_manager()
+        mgr.aggregate.return_value = [{'public_id': 9, 'parent': ROOT_PUBLIC_ID, 'ancestors': []}]
+        mgr.get_many.return_value = [
+            {'public_id': 9, 'name': 'beta', 'parent': ROOT_PUBLIC_ID},
+            {'public_id': 8, 'name': 'Alpha', 'parent': ROOT_PUBLIC_ID},
+        ]
+
+        result = LocationsManager.get_locations_on_path_to(mgr, 9)
+
+        assert [loc['name'] for loc in result] == ['Alpha', 'beta']
 
     def test_root_level_target_expands_only_the_root(self) -> None:
         """A target directly under the synthetic root expands just the root level (no ancestors)."""
@@ -558,6 +607,41 @@ class TestReparentChildrenToGrandparent:
 
         mgr.update_many.assert_not_called()
 
+    @pytest.mark.parametrize(
+        'stored_parent', [None, 'not-an-id', True], ids=['null_parent', 'non_int_parent', 'bool_parent'],
+    )
+    def test_childless_node_without_a_usable_parent_is_a_noop(self, stored_parent: Any) -> None:
+        """``parent`` is nullable: with nothing to promote the deletion may still go ahead."""
+        mgr = _mock_manager()
+        mgr.get_one_by.return_value = {**SAMPLE_LOCATION_DICT, 'parent': stored_parent}
+        mgr.get_parents_with_children.return_value = set()
+
+        LocationsManager._reparent_children_to_grandparent(mgr, LOCATION_PUBLIC_ID)
+
+        mgr.update_many.assert_not_called()
+
+    def test_absent_parent_key_is_treated_as_no_parent(self) -> None:
+        """A document that carries no ``parent`` key at all is read without raising a KeyError."""
+        mgr = _mock_manager()
+        stored = {key: value for key, value in SAMPLE_LOCATION_DICT.items() if key != 'parent'}
+        mgr.get_one_by.return_value = stored
+        mgr.get_parents_with_children.return_value = set()
+
+        LocationsManager._reparent_children_to_grandparent(mgr, LOCATION_PUBLIC_ID)
+
+        mgr.update_many.assert_not_called()
+
+    def test_children_without_a_usable_parent_refuse_the_promotion(self) -> None:
+        """Children are never written onto a null parent - that would drop them out of the tree."""
+        mgr = _mock_manager()
+        mgr.get_one_by.return_value = {**SAMPLE_LOCATION_DICT, 'parent': None}
+        mgr.get_parents_with_children.return_value = {LOCATION_PUBLIC_ID}
+
+        with pytest.raises(LocationsManagerUpdateError):
+            LocationsManager._reparent_children_to_grandparent(mgr, LOCATION_PUBLIC_ID)
+
+        mgr.update_many.assert_not_called()
+
 
 class TestDeleteLocation:
     """``delete_location`` removes one row after promoting its direct children."""
@@ -582,6 +666,16 @@ class TestDeleteLocation:
         mgr._reparent_children_to_grandparent.assert_called_once_with(LOCATION_PUBLIC_ID)
         mgr.delete.assert_called_once_with({'public_id': LOCATION_PUBLIC_ID})
 
+    def test_root_location_is_refused(self) -> None:
+        """The synthetic root anchors every tree level and can not be deleted."""
+        mgr = _mock_manager()
+
+        with pytest.raises(LocationsManagerDeleteError):
+            LocationsManager.delete_location(mgr, ROOT_PUBLIC_ID)
+
+        mgr._reparent_children_to_grandparent.assert_not_called()
+        mgr.delete.assert_not_called()
+
     def test_delete_location_error_wraps_as_locations_delete_error(self) -> None:
         """A ``BaseManagerDeleteError`` from ``delete`` becomes ``LocationsManagerDeleteError``."""
         mgr = _mock_manager()
@@ -605,3 +699,177 @@ class TestDeleteLocation:
 
         with pytest.raises(LocationsManagerDeleteError):
             LocationsManager.delete_location(mgr, LOCATION_PUBLIC_ID)
+
+    def test_delete_location_reparent_refusal_wraps_as_locations_delete_error(self) -> None:
+        """The parentless-promotion refusal reaches the caller as a delete error."""
+        mgr = _mock_manager()
+        mgr._reparent_children_to_grandparent.side_effect = LocationsManagerUpdateError('no parent')
+
+        with pytest.raises(LocationsManagerDeleteError):
+            LocationsManager.delete_location(mgr, LOCATION_PUBLIC_ID)
+
+    def test_delete_location_unexpected_error_wraps_as_locations_delete_error(self) -> None:
+        """A generic exception is also wrapped as ``LocationsManagerDeleteError``."""
+        mgr = _mock_manager()
+        mgr.delete.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerDeleteError):
+            LocationsManager.delete_location(mgr, LOCATION_PUBLIC_ID)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                       __init__                                                       #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestInit:
+    """The constructor binds the CmdbLocation collection and reports a failing base init."""
+
+    def test_base_init_failure_wraps_as_locations_init_error(self) -> None:
+        """A failure inside ``BaseManager.__init__`` surfaces as ``LocationsManagerInitError``."""
+        with patch.object(BaseManager, '__init__', side_effect=RuntimeError('no connection')):
+            with pytest.raises(LocationsManagerInitError):
+                LocationsManager(MagicMock())
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             get_child_location_documents                                            #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestGetChildLocationDocuments:
+    """One tree level: canonical documents of the direct children, name-ordered, no model round trip."""
+
+    def test_reads_the_children_of_the_parent(self) -> None:
+        """The read is scoped to the ``parent`` field of the requested location."""
+        mgr = _mock_manager()
+        mgr.get_many.return_value = []
+
+        assert LocationsManager.get_child_location_documents(mgr, PARENT_ID) == []
+        mgr.get_many.assert_called_once_with(parent=PARENT_ID)
+
+    def test_documents_are_canonical_with_defaulted_render_keys(self) -> None:
+        """Every row carries the canonical key set; the optional render keys fall back to their defaults."""
+        mgr = _mock_manager()
+        mgr.get_many.return_value = [dict(SAMPLE_LOCATION_DICT)]
+
+        result = LocationsManager.get_child_location_documents(mgr, PARENT_ID)
+
+        assert result == [{
+            'public_id': LOCATION_PUBLIC_ID,
+            'name': 'srv',
+            'parent': PARENT_ID,
+            'object_id': OBJECT_ID,
+            'type_id': TYPE_ID,
+            'type_label': 'Server',
+            'type_icon': CmdbLocationDefault.TYPE_ICON,
+            'type_selectable': CmdbLocationDefault.TYPE_SELECTABLE,
+        }]
+
+    def test_level_is_ordered_by_name_case_insensitively(self) -> None:
+        """The level is name-ascending regardless of the public_id-descending document read."""
+        mgr = _mock_manager()
+        mgr.get_many.return_value = [
+            {**SAMPLE_LOCATION_DICT, 'public_id': 9, 'name': 'beta'},
+            {**SAMPLE_LOCATION_DICT, 'public_id': 8, 'name': 'Alpha'},
+        ]
+
+        result = LocationsManager.get_child_location_documents(mgr, PARENT_ID)
+
+        assert [location['name'] for location in result] == ['Alpha', 'beta']
+
+    def test_keys_outside_the_schema_are_dropped(self) -> None:
+        """A legacy document's extra keys do not leak into the tree payload."""
+        mgr = _mock_manager()
+        mgr.get_many.return_value = [{**SAMPLE_LOCATION_DICT, 'legacy_key': 'gone'}]
+
+        result = LocationsManager.get_child_location_documents(mgr, PARENT_ID)
+
+        assert 'legacy_key' not in result[0]
+
+    def test_get_error_wraps_as_locations_get_error(self) -> None:
+        """A ``BaseManagerGetError`` from the read is wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.get_many.side_effect = BaseManagerGetError('db down')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_child_location_documents(mgr, PARENT_ID)
+
+    def test_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A generic exception from the read is also wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.get_many.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_child_location_documents(mgr, PARENT_ID)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                               get_parents_with_children                                             #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestGetParentsWithChildren:
+    """The per-level has-children hint: one grouped aggregation, never a count per node."""
+
+    def test_groups_the_candidate_parents_in_one_pipeline(self) -> None:
+        """The pipeline matches the candidates by ``parent`` and groups by that same field."""
+        mgr = _mock_manager()
+        mgr.aggregate.return_value = []
+
+        LocationsManager.get_parents_with_children(mgr, [PARENT_ID, LOCATION_PUBLIC_ID])
+
+        pipeline = mgr.aggregate.call_args.args[0]
+        assert pipeline == [
+            {'$match': {'parent': {'$in': [PARENT_ID, LOCATION_PUBLIC_ID]}}},
+            {'$group': {'_id': '$parent'}},
+        ]
+
+    def test_returns_the_grouped_parent_ids(self) -> None:
+        """The group ids are the parents that actually have a child."""
+        mgr = _mock_manager()
+        mgr.aggregate.return_value = [{'_id': PARENT_ID}, {'_id': LOCATION_PUBLIC_ID}]
+
+        result = LocationsManager.get_parents_with_children(mgr, [PARENT_ID, LOCATION_PUBLIC_ID])
+
+        assert result == {PARENT_ID, LOCATION_PUBLIC_ID}
+
+    def test_empty_input_short_circuits_without_querying(self) -> None:
+        """An empty candidate list answers with an empty set and never touches the database."""
+        mgr = _mock_manager()
+
+        assert LocationsManager.get_parents_with_children(mgr, []) == set()
+        mgr.aggregate.assert_not_called()
+
+    def test_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A failing aggregation is wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.aggregate.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_parents_with_children(mgr, [PARENT_ID])
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   lookup stage builders                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestLookupStageBuilders:
+    """The two shared ``$graphLookup`` stages walk the parent edge in opposite directions."""
+
+    def test_ancestors_stage_walks_upwards(self) -> None:
+        """The ancestor stage starts at ``parent`` and connects ``parent`` -> ``public_id``."""
+        assert ancestors_lookup_stage() == {
+            '$graphLookup': {
+                'from': CmdbLocation.COLLECTION,
+                'startWith': '$parent',
+                'connectFromField': 'parent',
+                'connectToField': 'public_id',
+                'as': 'ancestors',
+            }
+        }
+
+    def test_descendants_stage_walks_downwards(self) -> None:
+        """The descendant stage starts at ``public_id`` and connects ``public_id`` -> ``parent``."""
+        assert descendants_lookup_stage() == {
+            '$graphLookup': {
+                'from': CmdbLocation.COLLECTION,
+                'startWith': '$public_id',
+                'connectFromField': 'public_id',
+                'connectToField': 'parent',
+                'as': 'descendants',
+            }
+        }

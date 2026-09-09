@@ -244,6 +244,35 @@ class TestLookup:
         assert stage['$lookup']['as'] == 'type_objects'
 
 
+class TestGraphLookup:
+    """$graphLookup follows one edge recursively; the location tree is built on it."""
+
+    def test_shape(self) -> None:
+        """The five arguments map onto Mongo's from / startWith / connectFromField / connectToField / as."""
+        assert Builder.graph_lookup_('framework.locations', '$parent', 'parent', 'public_id', 'ancestors') == {
+            '$graphLookup': {
+                'from': 'framework.locations',
+                'startWith': '$parent',
+                'connectFromField': 'parent',
+                'connectToField': 'public_id',
+                'as': 'ancestors',
+            }
+        }
+
+    def test_keyword_call_walks_the_edge_downwards(self) -> None:
+        """The same constructor builds the opposite direction, so the parameter names are the contract."""
+        stage = Builder.graph_lookup_(
+            from_collection='framework.locations',
+            start_with='$public_id',
+            connect_from_field='public_id',
+            connect_to_field='parent',
+            as_field='descendants',
+        )
+
+        assert stage['$graphLookup']['startWith'] == '$public_id'
+        assert stage['$graphLookup']['as'] == 'descendants'
+
+
 class TestSort:
     """$sort validates its direction, which is the only guard in the whole vocabulary."""
 

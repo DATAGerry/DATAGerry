@@ -595,7 +595,7 @@ class TestGetCmdbLocationParent:
 #                                                   get_cmdb_children                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestGetCmdbChildren:
-    """``get_cmdb_children`` returns the direct child locations serialized to dicts."""
+    """``get_cmdb_children`` returns the direct child locations as canonical documents."""
 
     @staticmethod
     def _call(flask_app: Flask, object_id: int) -> Any:
@@ -603,22 +603,21 @@ class TestGetCmdbChildren:
         with flask_app.test_request_context('/', method='GET'):
             return _unwrap(get_cmdb_children)(object_id=object_id, request_user=MagicMock())
 
-    def test_serializes_each_child_via_to_json(
+    def test_answers_with_the_child_documents(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
-        """Direct children are fetched by parent public_id and serialized with ``to_json``."""
+        """Direct children are read by parent public_id as canonical documents, no model round trip."""
         del patched_provider
         managers[ManagerType.LOCATIONS].get_location_for_object.return_value = {'public_id': LOCATION_PUBLIC_ID}
-        managers[ManagerType.LOCATIONS].get_locations_by.return_value = ['child1', 'child2']
+        managers[ManagerType.LOCATIONS].get_child_location_documents.return_value = ['child1', 'child2']
         sentinel_response = MagicMock(name='wsgi_response')
 
-        with patch(f'{ROUTE_PATH}.CmdbLocation.to_json', side_effect=lambda x: f'json-{x}'), \
-             patch(f'{ROUTE_PATH}.DefaultResponse') as response_ctor:
+        with patch(f'{ROUTE_PATH}.DefaultResponse') as response_ctor:
             response_ctor.return_value.make_response.return_value = sentinel_response
             result = self._call(flask_app, OBJECT_ID)
 
-        managers[ManagerType.LOCATIONS].get_locations_by.assert_called_once_with(parent=LOCATION_PUBLIC_ID)
-        response_ctor.assert_called_once_with(['json-child1', 'json-child2'])
+        managers[ManagerType.LOCATIONS].get_child_location_documents.assert_called_once_with(LOCATION_PUBLIC_ID)
+        response_ctor.assert_called_once_with(['child1', 'child2'])
         assert result is sentinel_response
 
     def test_no_location_returns_empty_children(
@@ -632,7 +631,7 @@ class TestGetCmdbChildren:
             self._call(flask_app, OBJECT_ID)
 
         response_ctor.assert_called_once_with([])
-        managers[ManagerType.LOCATIONS].get_locations_by.assert_not_called()
+        managers[ManagerType.LOCATIONS].get_child_location_documents.assert_not_called()
 
     def test_get_error_maps_to_400(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
@@ -674,19 +673,20 @@ class TestGetCmdbLocationTreeRoots:
     def test_fetches_root_children_and_builds_level(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
-        """The root's direct children are serialized and passed to build_location_level, then wrapped."""
+        """The root's direct child documents are passed to build_location_level, then wrapped."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.return_value = ['loc1', 'loc2']
+        managers[ManagerType.LOCATIONS].get_child_location_documents.return_value = ['loc1', 'loc2']
         sentinel_response = MagicMock(name='wsgi_response')
 
-        with patch(f'{ROUTE_PATH}.CmdbLocation.to_json', side_effect=lambda x: f'json-{x}'), \
-             patch(f'{ROUTE_PATH}.build_location_level', return_value=['node1', 'node2']) as build_level, \
+        with patch(f'{ROUTE_PATH}.build_location_level', return_value=['node1', 'node2']) as build_level, \
              patch(f'{ROUTE_PATH}.DefaultResponse') as response_ctor:
             response_ctor.return_value.make_response.return_value = sentinel_response
             result = self._call(flask_app)
 
-        managers[ManagerType.LOCATIONS].get_locations_by.assert_called_once_with(parent=RootLocationDefault.PUBLIC_ID)
-        build_level.assert_called_once_with(['json-loc1', 'json-loc2'], managers[ManagerType.LOCATIONS])
+        managers[ManagerType.LOCATIONS].get_child_location_documents.assert_called_once_with(
+            RootLocationDefault.PUBLIC_ID
+        )
+        build_level.assert_called_once_with(['loc1', 'loc2'], managers[ManagerType.LOCATIONS])
         response_ctor.assert_called_once_with(['node1', 'node2'])
         assert result is sentinel_response
 
@@ -695,7 +695,7 @@ class TestGetCmdbLocationTreeRoots:
     ) -> None:
         """A ``LocationsManagerGetError`` is translated to HTTP 400."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.side_effect = LocationsManagerGetError('boom')
+        managers[ManagerType.LOCATIONS].get_child_location_documents.side_effect = LocationsManagerGetError('boom')
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app)
@@ -707,7 +707,7 @@ class TestGetCmdbLocationTreeRoots:
     ) -> None:
         """Any other exception is translated to HTTP 500."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.side_effect = RuntimeError('boom')
+        managers[ManagerType.LOCATIONS].get_child_location_documents.side_effect = RuntimeError('boom')
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app)
@@ -730,19 +730,18 @@ class TestGetCmdbLocationTreeChildren:
     def test_fetches_children_by_location_id_and_builds_level(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
-        """Children are fetched by the location's public_id and passed to build_location_level."""
+        """Child documents are read by the location's public_id and passed to build_location_level."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.return_value = ['loc1']
+        managers[ManagerType.LOCATIONS].get_child_location_documents.return_value = ['loc1']
         sentinel_response = MagicMock(name='wsgi_response')
 
-        with patch(f'{ROUTE_PATH}.CmdbLocation.to_json', side_effect=lambda x: f'json-{x}'), \
-             patch(f'{ROUTE_PATH}.build_location_level', return_value=['node1']) as build_level, \
+        with patch(f'{ROUTE_PATH}.build_location_level', return_value=['node1']) as build_level, \
              patch(f'{ROUTE_PATH}.DefaultResponse') as response_ctor:
             response_ctor.return_value.make_response.return_value = sentinel_response
             result = self._call(flask_app, LOCATION_PUBLIC_ID)
 
-        managers[ManagerType.LOCATIONS].get_locations_by.assert_called_once_with(parent=LOCATION_PUBLIC_ID)
-        build_level.assert_called_once_with(['json-loc1'], managers[ManagerType.LOCATIONS])
+        managers[ManagerType.LOCATIONS].get_child_location_documents.assert_called_once_with(LOCATION_PUBLIC_ID)
+        build_level.assert_called_once_with(['loc1'], managers[ManagerType.LOCATIONS])
         response_ctor.assert_called_once_with(['node1'])
         assert result is sentinel_response
 
@@ -751,7 +750,7 @@ class TestGetCmdbLocationTreeChildren:
     ) -> None:
         """A ``LocationsManagerGetError`` is translated to HTTP 400."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.side_effect = LocationsManagerGetError('boom')
+        managers[ManagerType.LOCATIONS].get_child_location_documents.side_effect = LocationsManagerGetError('boom')
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app, LOCATION_PUBLIC_ID)
@@ -763,7 +762,7 @@ class TestGetCmdbLocationTreeChildren:
     ) -> None:
         """Any other exception is translated to HTTP 500."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].get_locations_by.side_effect = RuntimeError('boom')
+        managers[ManagerType.LOCATIONS].get_child_location_documents.side_effect = RuntimeError('boom')
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app, LOCATION_PUBLIC_ID)

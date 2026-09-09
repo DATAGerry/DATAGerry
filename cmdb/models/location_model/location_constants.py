@@ -23,13 +23,15 @@ which meant the interface layer imported a document-key enum *upward* from the d
 model is the one place all of them can depend on downward
 
 ``LocationKey`` names the document keys, ``RootLocationDefault`` the identity and sentinel values of
-the synthetic root node. Both extend / behave as plain strings and ints, so members compare equal to
-their value for dict construction, lookup and JSON/BSON serialization
+the synthetic root node and ``CmdbLocationDefault`` the fallbacks for the two optional render keys.
+LocationKey extends / behaves as a plain string, so members compare equal to their value for dict
+construction, lookup and JSON/BSON serialization
 """
 from cmdb.utils import BaseStrEnum
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
+    'CmdbLocationDefault',
     'LocationKey',
     'RootLocationDefault',
 ]
@@ -62,3 +64,16 @@ class RootLocationDefault:
     NO_TYPE: int = 0
     ICON: str = 'fas fa-globe'
     SELECTABLE: bool = True
+
+
+class CmdbLocationDefault:
+    """
+    Fallback values for the optional render keys of a CmdbLocation
+
+    A CmdbLocation document may omit 'type_icon' and 'type_selectable' (both carry a default in
+    CmdbLocation.__init__ / from_data and in the Cerberus schema). Any code that reads a raw
+    location document instead of going through the model applies the same two fallbacks from here,
+    so a document-level read and a model round trip answer with the identical key set
+    """
+    TYPE_ICON: str = 'fas fa-cube'
+    TYPE_SELECTABLE: bool = True

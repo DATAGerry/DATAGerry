@@ -280,3 +280,72 @@ class TestMatchedFields:
         matched_names = [] if entry is None else [match['name'] for match in entry[SearchResultMapKey.MATCHES.value]]
 
         assert EMPTY_FIELD not in matched_names
+
+
+class TestAnUnusableSearchParameterIsRefused:
+    """
+    A search that cannot read one of its parameters answers 400 instead of searching without it
+
+    Until 2026-09-08 the parameter was logged and skipped, so the request ran with fewer criteria than
+    the caller sent - and a dropped FILTER returns more objects than the filter allows, with a 200.
+    """
+
+    def test_a_parameter_without_a_form_is_a_400(self, rest_api) -> None:
+        """The message names the position, which is the only way to identify one tag of several."""
+        body = json.dumps([{'searchText': 'srv'}])
+
+        response = rest_api.post(SEARCH_URL, data=body, content_type='application/json')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'position 0' in response.get_json()['message']
+
+    def test_an_unknown_form_is_a_400(self, rest_api) -> None:
+        """A typo'd form used to widen the search silently."""
+        body = json.dumps([{'searchText': 'srv', 'searchForm': 'not-a-form'}])
+
+        response = rest_api.post(SEARCH_URL, data=body, content_type='application/json')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'not-a-form' in response.get_json()['message']
+
+    def test_one_bad_parameter_refuses_the_whole_request(self, rest_api) -> None:
+        """
+        The valid tags are not searched on their own
+
+        Answering with the results of a partial filter set is exactly the failure this replaced.
+        """
+        body = json.dumps([
+            {'searchText': 'srv', 'searchForm': 'text'},
+            {'searchText': 'x', 'searchForm': 'not-a-form'},
+        ])
+
+        assert rest_api.post(SEARCH_URL, data=body, content_type='application/json').status_code \
+            == HTTPStatus.BAD_REQUEST
+
+    def test_a_non_numeric_public_id_search_is_a_400_naming_the_form(self, rest_api) -> None:
+        """
+        It used to fail two layers away, in the pipeline builder's bare int()
+
+        The route could only answer a generic 400 there; the form is known here, so the message says
+        what was wrong with which parameter.
+        """
+        body = json.dumps([{'searchText': 'abc', 'searchForm': 'publicID'}])
+
+        response = rest_api.post(SEARCH_URL, data=body, content_type='application/json')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert 'publicID' in response.get_json()['message']
+
+    def test_the_payload_the_frontend_sends_is_still_accepted(self, rest_api) -> None:
+        """
+        The search bar's OR mode appends a 'disjunction' marker parameter that nothing reads
+
+        It is accepted on purpose: rejecting it would 400 every OR type search the UI performs.
+        """
+        body = json.dumps([
+            {'searchText': 'srv', 'searchForm': 'text'},
+            {'searchText': 'or', 'searchForm': 'disjunction', 'searchLabel': 'or', 'disjunction': True},
+        ])
+
+        assert rest_api.post(SEARCH_URL, data=body, content_type='application/json').status_code \
+            == HTTPStatus.OK

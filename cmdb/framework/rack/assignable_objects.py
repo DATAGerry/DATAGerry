@@ -30,9 +30,9 @@ mounting it moves it. So the answer does depend on which rack is being filled, a
 route narrows the result rather than only validating the request.
 
 Pure: the reads happen in the route, their results are passed in, so the filter construction and the row
-projection are unit-testable without a database. The rules are appended as '$match' stages onto the
-caller's own ``?filter=``, so a caller-supplied filter still applies and can not widen the result past
-them
+projection are unit-testable without a database. The route appends the rules as a '$match' stage onto
+the caller's own ``?filter=`` (routes_helper.append_criteria_to_filter), so a caller-supplied filter
+still applies and can not widen the result past them
 """
 from logging import Logger, getLogger
 from typing import Any
@@ -80,38 +80,6 @@ def build_assignable_criteria(
         criteria[CmdbObjectKey.PUBLIC_ID.value] = {'$nin': excluded_object_ids}
 
     return criteria
-
-
-def append_criteria_to_filter(
-        request_filter: dict[str, Any] | list[dict[str, Any]] | None,
-        criteria: dict[str, Any]) -> list[dict[str, Any]]:
-    """
-    Appends the assignable criteria to the caller's ``?filter=`` as a further pipeline stage
-
-    The same technique the objects route uses for its active-objects filter: a dict filter becomes a
-    single '$match' stage and the exclusions are appended after it, so the caller's filter narrows the
-    result and the exclusions narrow it further. Appending rather than merging means a caller can not
-    overwrite an exclusion by naming the same key
-
-    Args:
-        request_filter (dict[str, Any] | list[dict[str, Any]] | None): The parsed ``?filter=``, either a
-            criteria dict or an aggregation pipeline
-        criteria (dict[str, Any]): The assignable criteria from build_assignable_criteria
-
-    Returns:
-        list[dict[str, Any]]: The pipeline to hand to the query builder
-    """
-    if isinstance(request_filter, list):
-        pipeline: list[dict[str, Any]] = list(request_filter)
-    elif request_filter:
-        pipeline = [{'$match': request_filter}]
-    else:
-        pipeline = []
-
-    if criteria:
-        pipeline.append({'$match': criteria})
-
-    return pipeline
 
 
 def build_assignable_row(

@@ -84,6 +84,40 @@ def fetch_only_active_objects() -> bool:
     return request.args.get('onlyActiveObjCookie') in ['True', 'true']
 
 
+def append_criteria_to_filter(
+        request_filter: dict[str, Any] | list[dict[str, Any]] | None,
+        criteria: dict[str, Any]) -> list[dict[str, Any]]:
+    """
+    Appends route-owned criteria to the caller's ``?filter=`` as a further pipeline stage
+
+    The technique the objects route uses for its active-objects filter: a dict filter becomes a single
+    '$match' stage and the route's own criteria are appended after it, so the caller's filter narrows
+    the result and the route's rules narrow it further. Appending rather than merging means a caller
+    can not overwrite one of those rules by naming the same key. Shared by every list route that
+    answers a "which of these may I pick" question - the Rack's assignable objects and the
+    port-connection picker's unassigned cables
+
+    Args:
+        request_filter (dict[str, Any] | list[dict[str, Any]] | None): The parsed ``?filter=``, either
+            a criteria dict or an aggregation pipeline
+        criteria (dict[str, Any]): The route's own criteria; an empty dict appends nothing
+
+    Returns:
+        list[dict[str, Any]]: The pipeline to hand to the query builder
+    """
+    if isinstance(request_filter, list):
+        pipeline: list[dict[str, Any]] = list(request_filter)
+    elif request_filter:
+        pipeline = [{'$match': request_filter}]
+    else:
+        pipeline = []
+
+    if criteria:
+        pipeline.append({'$match': criteria})
+
+    return pipeline
+
+
 def extract_public_ids(public_ids: str) -> list[int]:
     """
     Parses a comma-separated public_id path segment into a list of integers

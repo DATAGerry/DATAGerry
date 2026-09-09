@@ -27,6 +27,10 @@ Since 2026-08-27 also: the per-route error tails no test reached (the ``/tree/se
 move routes' manager-error and unexpected-error arms), the HTTPException pass-throughs the five read
 routes were missing, and the ``/<id>/parent`` route answering 200 with ``null`` for a dangling parent
 instead of 404.
+
+Since 2026-09-09 also: the root document is reachable as ``DELETE /<0>/object`` (it carries the
+object_id sentinel 0) and is refused there, and one tree level answers in name order rather than in
+the read's insertion order.
 """
 from datetime import datetime, timezone
 from http import HTTPStatus
@@ -36,6 +40,7 @@ import pytest
 from werkzeug.exceptions import NotFound
 
 from cmdb.database import MongoDatabaseManager
+from cmdb.database.predefined_data.cmdb_data import get_root_location_data
 from cmdb.models.type_model import CmdbType
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.location_model.cmdb_location import CmdbLocation
@@ -82,6 +87,18 @@ DERIVE_PUT_LOCATION_ID: int = 9892
 
 MISSING_LOCATION_ID: int = 9898
 MISSING_OBJECT_ID: int = 9899
+
+ROOT_OBJECT_ID_SENTINEL: int = 0
+
+# level-ordering fixtures: two children whose names are the reverse of their public_id order
+LEVEL_PARENT_LOC: int = 9860
+LEVEL_PARENT_OBJECT: int = 9860
+LEVEL_FIRST_LOC: int = 9861
+LEVEL_FIRST_OBJECT: int = 9861
+LEVEL_SECOND_LOC: int = 9862
+LEVEL_SECOND_OBJECT: int = 9862
+LEVEL_FIRST_NAME: str = 'zeta'
+LEVEL_SECOND_NAME: str = 'Alpha'
 
 # path tree fixtures: DC <- {Rack, Rack2}; Rack <- {target, target-sibling}; target <- child; Office <- child.
 # Expanding to the target returns every sibling level down to it, excluding the target's child and
@@ -181,6 +198,12 @@ def _location_doc(public_id: int, object_id: int, parent: int, name: str = ORIGI
         'type_icon': 'fas fa-cube',
         'type_selectable': True,
     }
+
+
+def _root_location_doc() -> dict[str, Any]:
+    """The predefined synthetic root document, re-keyed to the plain strings MongoDB stores."""
+    # str() of a (str, Enum) member is 'LocationKey.NAME', not its value - the value is the key
+    return {key.value: value for key, value in get_root_location_data().items()}
 
 
 def _location_payload(object_id: int, parent: int, name: str = ORIGINAL_NAME) -> dict[str, Any]:
@@ -363,6 +386,43 @@ class TestGetLocationTreeAndRelations:
 
         assert response.status_code == HTTPStatus.OK
         assert response.get_json() == []
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                  TREE LEVEL ORDER                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestTreeLevelOrdering:
+    """One level of the tree answers in name order, not in the order the documents were written."""
+
+    @pytest.fixture(autouse=True)
+    def _seed_level(self, database_manager: MongoDatabaseManager, database_name: str):
+        """A parent with two children whose names run counter to their public_ids."""
+        _insert_location(database_manager, database_name, _location_doc(
+            LEVEL_PARENT_LOC, LEVEL_PARENT_OBJECT, ROOT_PARENT_ID,
+        ))
+        _insert_location(database_manager, database_name, _location_doc(
+            LEVEL_FIRST_LOC, LEVEL_FIRST_OBJECT, LEVEL_PARENT_LOC, name=LEVEL_FIRST_NAME,
+        ))
+        _insert_location(database_manager, database_name, _location_doc(
+            LEVEL_SECOND_LOC, LEVEL_SECOND_OBJECT, LEVEL_PARENT_LOC, name=LEVEL_SECOND_NAME,
+        ))
+        yield
+        _drop_locations_by_ids(database_manager, database_name,
+                               [LEVEL_PARENT_LOC, LEVEL_FIRST_LOC, LEVEL_SECOND_LOC])
+
+    def test_tree_children_are_name_ordered(self, rest_api) -> None:
+        """GET /locations/tree/<id>/children sorts case-insensitively by name."""
+        response = rest_api.get(f'{ROUTE_URL}/tree/{LEVEL_PARENT_LOC}/children')
+
+        assert response.status_code == HTTPStatus.OK
+        assert [node['name'] for node in response.get_json()] == [LEVEL_SECOND_NAME, LEVEL_FIRST_NAME]
+
+    def test_object_children_lookup_is_name_ordered(self, rest_api) -> None:
+        """The object-scoped ``/<id>/children`` lookup shares the same ordering."""
+        response = rest_api.get(f'{ROUTE_URL}/{LEVEL_PARENT_OBJECT}/children')
+
+        assert response.status_code == HTTPStatus.OK
+        assert [child['name'] for child in response.get_json()] == [LEVEL_SECOND_NAME, LEVEL_FIRST_NAME]
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -616,6 +676,25 @@ class TestDeleteLocation:
         finally:
             _drop_locations_by_ids(database_manager, database_name, [LOCATION_ID_FOR_DELETE])
 
+    def test_delete_of_the_root_document_is_refused(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """The root carries object_id 0, so this route reaches it - and the manager refuses it."""
+        # the test database is created empty, so the predefined root document is seeded here
+        _insert_location(database_manager, database_name, _root_location_doc())
+        _insert_location(database_manager, database_name, _location_doc(
+            ROOT_LOCATION_ID, ROOT_OBJECT_ID, ROOT_PARENT_ID,
+        ))
+        try:
+            response = rest_api.delete(f'{ROUTE_URL}/{ROOT_OBJECT_ID_SENTINEL}/object')
+
+            assert response.status_code == HTTPStatus.BAD_REQUEST
+            # the root is untouched and the top-level location still hangs off it
+            assert rest_api.get(f'{ROUTE_URL}/{ROOT_PARENT_ID}').status_code == HTTPStatus.OK
+            assert rest_api.get(f'{ROUTE_URL}/{ROOT_LOCATION_ID}').get_json()['parent'] == ROOT_PARENT_ID
+        finally:
+            _drop_locations_by_ids(database_manager, database_name, [ROOT_LOCATION_ID, ROOT_PARENT_ID])
+
     def test_delete_missing_returns_404(self, rest_api) -> None:
         """A DELETE for an object with no location returns 404."""
         response = rest_api.delete(f'{ROUTE_URL}/{MISSING_OBJECT_ID}/object')
@@ -676,9 +755,9 @@ class TestReadRouteHttpExceptionPassThrough:
     @pytest.mark.parametrize('url, manager_method', [
         ('/', 'iterate'),
         ('/tree', 'iterate'),
-        ('/tree/roots', 'get_locations_by'),
+        ('/tree/roots', 'get_child_location_documents'),
         ('/tree/search?query=x', 'search_locations_with_ancestors'),
-        ('/tree/1/children', 'get_locations_by'),
+        ('/tree/1/children', 'get_child_location_documents'),
         (f'/{OBJECT_ID_FOR_GET}/children', 'get_location_for_object'),
         (f'/{OBJECT_ID_FOR_GET}/parent', 'get_location_for_object'),
     ], ids=['list', 'tree', 'tree-roots', 'tree-search', 'tree-children', 'object-children',

@@ -26,8 +26,18 @@ NOT express, because a per-field schema cannot:
     of partial unique indexes on ``endpoints``, and it is the feature's only hard guarantee
   - that the two endpoints differ, and that both name real ports - the connection validator's job
   - that an INTERNAL connection carries no cable info - the per-type field rule, also the validator's
+  - that a connection describes its cable inline OR by reference and never both - the validator's too
+
+``get_cmdb_port_connection_write_schema`` derives the REQUEST body's schema from the document's. It
+exists because the two are not the same thing: a request may not carry the server-owned keys at all,
+and the two identity keys are deliberately left UNTYPED there, so the connection validator keeps
+answering for them with a message a caller can act on
 """
 from typing import Any
+
+# The three shapes a date arrives in: the Mongo extended-JSON wrapper {'$date': ...} the frontend
+# sends, a timestamp string from an API client, and a real datetime (an already-normalised payload)
+_DATE_TYPES: list[str] = ['dict', 'string', 'datetime']
 # -------------------------------------------------------------------------------------------------------------------- #
 # pylint: disable=R0801
 def get_cmdb_port_connection_schema() -> dict[str, Any]:
@@ -102,13 +112,58 @@ def get_cmdb_port_connection_schema() -> dict[str, Any]:
             'required': False,
         },
         PortConnectionKey.CREATION_TIME.value: {  # When the connection was created
-            'type': 'dict',
+            'anyof_type': _DATE_TYPES,
             'nullable': True,
             'required': False,
         },
         PortConnectionKey.LAST_EDIT_TIME.value: {  # When the connection was last changed
-            'type': 'dict',
+            'anyof_type': _DATE_TYPES,
             'nullable': True,
             'required': False,
         },
+    }
+
+
+def get_cmdb_port_connection_write_schema() -> dict[str, Any]:
+    """
+    Builds the Cerberus validation schema for a CmdbPortConnection REQUEST body
+
+    Derived from the document schema so a field's type is declared once, with two deliberate
+    differences:
+
+      - the SERVER-OWNED keys are absent (public_id and the three audit fields). The validator runs
+        with ``purge_unknown=True``, so leaving them out does more than ignore them - a payload
+        carrying an author_id or a creation_time never reaches the route at all
+      - ``endpoints`` and ``connection_type`` are accepted UNTYPED. Both are judged by
+        cmdb.framework.port.connection_validator, which answers 'a connection needs exactly 2 port
+        ids' or names the allowed types; letting a type rule refuse them first would replace those
+        messages with the decorator's generic one
+
+    What this schema is really for is the cable half: five text fields and two ids that nothing else
+    type-checks, so before it a CSV-shaped number reached the database as the value of a field the
+    document schema declares a string
+
+    Returns:
+        dict: Field name to Cerberus rule mapping for a create or update body
+    """
+    # pylint: disable=import-outside-toplevel
+    # Same cycle as above: resolved at call time, not at module import time
+    from cmdb.models.port_connection_model.port_connection_constants import PortConnectionKey
+
+    document_schema: dict[str, Any] = get_cmdb_port_connection_schema()
+    server_owned: set[str] = {
+        PortConnectionKey.PUBLIC_ID.value,
+        PortConnectionKey.AUTHOR_ID.value,
+        PortConnectionKey.CREATION_TIME.value,
+        PortConnectionKey.LAST_EDIT_TIME.value,
+    }
+    untyped: set[str] = {
+        PortConnectionKey.ENDPOINTS.value,
+        PortConnectionKey.CONNECTION_TYPE.value,
+    }
+
+    return {
+        key: ({'required': False} if key in untyped else {**rules, 'required': False})
+        for key, rules in document_schema.items()
+        if key not in server_owned
     }

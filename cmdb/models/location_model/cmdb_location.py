@@ -21,6 +21,7 @@ from typing import Any
 from cmdb.models.cmdb_dao import CmdbDAO
 
 from cmdb.class_schema.location_model.cmdb_location_schema import get_cmdb_location_schema
+from cmdb.models.location_model.location_constants import CmdbLocationDefault
 
 from cmdb.errors.models.cmdb_location import (
     CmdbLocationInitError,
@@ -66,8 +67,8 @@ class CmdbLocation(CmdbDAO):
                  object_id: int,
                  type_id: int,
                  type_label: str,
-                 type_icon: str = "fas fa-cube",
-                 type_selectable: bool = True):
+                 type_icon: str = CmdbLocationDefault.TYPE_ICON,
+                 type_selectable: bool = CmdbLocationDefault.TYPE_SELECTABLE):
         """
         Initialises a CmdbLocation
 
@@ -78,7 +79,8 @@ class CmdbLocation(CmdbDAO):
             object_id (int): public_id of CmdbObject who has this CmdbLocation
             type_id (int): public_id of CmdbType for which this CmdbLocation is set
             type_label (str): label of CmdbType for which this location is set
-            type_icon (str): icon of CmdbType for which this CmdbLocation is set, default is 'fas fa-cube'
+            type_icon (str): icon of CmdbType for which this CmdbLocation is set. Defaults to
+                             CmdbLocationDefault.TYPE_ICON
             type_selectable (bool): sets if this CmdbType is selectable as a parent for other CmdbLocations.
                                     Defaults to True
 
@@ -122,8 +124,8 @@ class CmdbLocation(CmdbDAO):
                 object_id = data.get('object_id'),
                 type_id = data.get('type_id'),
                 type_label = data.get('type_label'),
-                type_icon = data.get('type_icon', 'fas fa-cube'),
-                type_selectable = data.get('type_selectable', True),
+                type_icon = data.get('type_icon', CmdbLocationDefault.TYPE_ICON),
+                type_selectable = data.get('type_selectable', CmdbLocationDefault.TYPE_SELECTABLE),
             )
         except Exception as err:
             raise CmdbLocationInitFromDataError(err) from err

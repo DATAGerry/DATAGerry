@@ -15,6 +15,26 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 This module contains the implementation of the LocationsManager
+
+Beyond plain CRUD this is the engine of the location tree, and three invariants of the
+``framework.locations`` collection shape everything in here:
+
+* the tree is rooted in a **synthetic root document** with ``public_id`` 1 and the 0 sentinels
+  ``object_id`` / ``type_id`` (see RootLocationDefault). It is seeded with the database, is not
+  backed by a CmdbObject and must never be deleted - ``delete_location`` refuses it, because the
+  document is reachable through ``get_location_for_object(0)`` like any other node
+* ``object_id`` is **unique**: a CmdbObject owns at most one node, which is why the object-driven
+  reads are single-document lookups
+* ``parent`` is a nullable integer in the schema, so a stored document may carry no usable parent.
+  The delete path refuses to promote children onto such a node instead of writing them out of the
+  tree
+
+Every relationship walk (subtree, ancestor chain, expanded path) is resolved in a single
+``$graphLookup`` - MongoDB detects cycles itself, so a malformed parent chain terminates - and the
+per-level "does this node have children" hint is one grouped aggregation for the whole level rather
+than a count per node. The tree-facing reads answer with canonical location documents
+(``to_location_document``) ordered by name (``sort_locations_by_name``), so the frontend never
+depends on insertion order
 """
 import re
 from logging import Logger, getLogger
@@ -22,12 +42,19 @@ from typing import Any
 
 from cmdb.database import MongoDatabaseManager
 from cmdb.manager.query_builder import BuilderParameters
+from cmdb.manager.query_builder.builder import Builder
 from cmdb.manager.base_manager import BaseManager
+from cmdb.manager.locations_manager_constants import (
+    CASE_INSENSITIVE_REGEX_OPTIONS,
+    LocationLookupField,
+    MONGO_ID_KEY,
+)
 
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.framework.results import IterationResult
 
 from cmdb.models.location_model.location_constants import LocationKey, RootLocationDefault
+from cmdb.models.location_model.location_utils import sort_locations_by_name, to_location_document
 
 from cmdb.errors.manager import (
     BaseManagerGetError,
@@ -50,6 +77,46 @@ LOGGER: Logger = getLogger(__name__)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
+def ancestors_lookup_stage() -> dict[str, Any]:
+    """
+    Builds the ``$graphLookup`` stage that collects the ancestor chain of a CmdbLocation
+
+    Follows ``parent`` -> ``public_id`` upwards from each incoming document and writes every
+    reachable ancestor - the synthetic root included - into the ``ancestors`` array. Shared by the
+    tree search and the path expansion so both walk the edge in exactly the same direction
+
+    Returns:
+        dict[str, Any]: The `$graphLookup` stage collecting the ancestors of a CmdbLocation
+    """
+    return Builder.graph_lookup_(
+        CmdbLocation.COLLECTION,
+        f"${LocationKey.PARENT.value}",
+        LocationKey.PARENT.value,
+        LocationKey.PUBLIC_ID.value,
+        LocationLookupField.ANCESTORS.value,
+    )
+
+
+def descendants_lookup_stage() -> dict[str, Any]:
+    """
+    Builds the ``$graphLookup`` stage that collects the whole subtree beneath a CmdbLocation
+
+    The mirror image of :func:`ancestors_lookup_stage`: it follows ``public_id`` -> ``parent``
+    downwards and writes every reachable descendant into the ``descendants`` array
+
+    Returns:
+        dict[str, Any]: The `$graphLookup` stage collecting the descendants of a CmdbLocation
+    """
+    return Builder.graph_lookup_(
+        CmdbLocation.COLLECTION,
+        f"${LocationKey.PUBLIC_ID.value}",
+        LocationKey.PUBLIC_ID.value,
+        LocationKey.PARENT.value,
+        LocationLookupField.DESCENDANTS.value,
+    )
+
+# -------------------------------------------------------------------------------------------------------------------- #
+
 class LocationsManager(BaseManager):
     """
     The LocationsManager manages the interaction between CmdbLocations and the database
@@ -57,7 +124,7 @@ class LocationsManager(BaseManager):
     Extends: BaseManager
     """
 
-    def __init__(self, dbm: MongoDatabaseManager, database: str | None = None):
+    def __init__(self, dbm: MongoDatabaseManager, database: str | None = None) -> None:
         """
         Set the database connection for the LocationsManager
 
@@ -84,7 +151,8 @@ class LocationsManager(BaseManager):
             location (CmdbLocation | dict): Raw data of the CmdbLocation
 
         Raises:
-            LocationsManagerInsertError: When a CmdbLocation could not be inserted into the database
+            LocationsManagerInsertError: When a CmdbLocation could not be inserted into the database,
+                                         or when the insert returned no public_id
 
         Returns:
             int: The public_id of the created CmdbLocation
@@ -93,7 +161,17 @@ class LocationsManager(BaseManager):
             if isinstance(location, CmdbLocation):
                 location = CmdbLocation.to_json(location)
 
-            return self.insert(location)
+            created_id: int | None = self.insert(location)
+
+            # BaseManager.insert only answers with None when it is told to skip the public_id
+            # generation, which this path never does - so a None here is a broken write, not a
+            # CmdbLocation the caller could work with
+            if created_id is None:
+                raise LocationsManagerInsertError('The inserted CmdbLocation carries no public_id!')
+
+            return created_id
+        except LocationsManagerInsertError:
+            raise
         except Exception as err:
             LOGGER.error("[insert_location] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerInsertError(str(err)) from err
@@ -130,6 +208,9 @@ class LocationsManager(BaseManager):
         """
         Retrieves a CmdbLocation from the database
 
+        The synthetic root document (public_id 1) is a CmdbLocation like any other here and is
+        returned as-is
+
         Args:
             public_id (int): public_id of the CmdbLocation
 
@@ -143,11 +224,18 @@ class LocationsManager(BaseManager):
             return self.get_one(public_id)
         except BaseManagerGetError as err:
             raise LocationsManagerGetError(str(err)) from err
+        except Exception as err:
+            LOGGER.error("[get_location] Exception: %s. Type: %s", err, type(err))
+            raise LocationsManagerGetError(str(err)) from err
 
 
     def get_location_for_object(self, object_id: int) -> dict[str, Any] | None:
         """
         Retrieves a single CmdbLocation for the given CmdbObject's public_id
+
+        ``object_id`` is unique in the collection, so this is a single-document lookup. Note that
+        the synthetic root carries the object_id sentinel 0 (RootLocationDefault.NO_OBJECT) and is
+        therefore what this returns for object_id 0
 
         Args:
             object_id (int): public_id of the CmdbObject
@@ -159,14 +247,21 @@ class LocationsManager(BaseManager):
             dict[str, Any] | None: The requested CmdbLocation as dict if found, else None
         """
         try:
-            return self.get_one_by({'object_id':object_id})
+            return self.get_one_by({LocationKey.OBJECT_ID.value: object_id})
         except BaseManagerGetError as err:
+            raise LocationsManagerGetError(str(err)) from err
+        except Exception as err:
+            LOGGER.error("[get_location_for_object] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerGetError(str(err)) from err
 
 
     def get_locations_by(self, **requirements: Any) -> list[CmdbLocation]:
         """
         Retrieves all CmdbLocations matching the key-value pairs
+
+        Hydrates every match into the model. Callers that only pass the result on as JSON should use
+        :meth:`get_child_location_documents` (or read the documents directly) instead of paying for
+        a dict -> model -> dict round trip
 
         Args:
             **requirements (Any): Key-value pairs used to filter the CmdbLocations
@@ -191,14 +286,48 @@ class LocationsManager(BaseManager):
             raise LocationsManagerGetError(str(err)) from err
 
 
+    def get_child_location_documents(self, parent_id: int) -> list[dict[str, Any]]:
+        """
+        Retrieves the direct children of a CmdbLocation as canonical, name-ordered documents
+
+        The read behind one level of the lazily-expanded tree (the root level is the children of
+        RootLocationDefault.PUBLIC_ID). Answers with the same key set ``CmdbLocation.to_json``
+        produces - without building the model - and in name order (case-insensitive, public_id as
+        tie-breaker), because the underlying document read is public_id-descending and the tree must
+        not depend on insertion order
+
+        Args:
+            parent_id (int): public_id of the parent CmdbLocation whose children are requested
+
+        Raises:
+            LocationsManagerGetError: If the child CmdbLocations could not be retrieved
+
+        Returns:
+            list[dict[str, Any]]: The canonical documents of the direct children, name-ascending
+        """
+        try:
+            documents: list[dict[str, Any]] = self.get_many(**{LocationKey.PARENT.value: parent_id})
+        except BaseManagerGetError as err:
+            raise LocationsManagerGetError(str(err)) from err
+        except Exception as err:
+            LOGGER.error("[get_child_location_documents] Exception: %s. Type: %s", err, type(err))
+            raise LocationsManagerGetError(str(err)) from err
+
+        return sort_locations_by_name([to_location_document(document) for document in documents])
+
+
     def get_all_descendant_locations(self, public_id: int) -> list[dict[str, Any]]:
         """
-        Retrieves every descendant CmdbLocation beneath the given CmdbLocation
+        Retrieves the public_id of every descendant CmdbLocation beneath the given CmdbLocation
 
         Resolves the full subtree in a single ``$graphLookup`` aggregation (following
-        ``parent`` -> ``public_id`` edges) instead of loading the whole collection and walking
+        ``public_id`` -> ``parent`` edges) instead of loading the whole collection and walking
         it in Python. ``$graphLookup`` detects cycles internally, so a malformed parent chain
         cannot cause infinite recursion. Requires MongoDB 3.4+ (well within the 7.0 floor)
+
+        Only the ``public_id`` of each descendant is projected out: the callers use the ids to
+        forbid cyclic re-parenting, and the subtree of a large tree is not worth sending in full
+        (the aggregation still materialises it inside the server's memory limit)
 
         Args:
             public_id (int): public_id of the CmdbLocation whose descendants should be retrieved
@@ -207,21 +336,19 @@ class LocationsManager(BaseManager):
             LocationsManagerChildrenError: If the descendant CmdbLocations could not be retrieved
 
         Returns:
-            list[dict[str, Any]]: All descendant CmdbLocations (the location itself is excluded)
+            list[dict[str, Any]]: One ``{'public_id': int}`` document per descendant CmdbLocation
+                                  (the location itself is excluded)
         """
         try:
+            descendants_field: str = LocationLookupField.DESCENDANTS.value
+
             pipeline: list[dict[str, Any]] = [
-                {"$match": {"public_id": public_id}},
-                {
-                    "$graphLookup": {
-                        "from": CmdbLocation.COLLECTION,
-                        "startWith": "$public_id",
-                        "connectFromField": "public_id",
-                        "connectToField": "parent",
-                        "as": "descendants",
-                    }
-                },
-                {"$project": {"_id": 0, "descendants": 1}},
+                Builder.match_({LocationKey.PUBLIC_ID.value: public_id}),
+                descendants_lookup_stage(),
+                Builder.project_({
+                    MONGO_ID_KEY: 0,
+                    f"{descendants_field}.{LocationKey.PUBLIC_ID.value}": 1,
+                }),
             ]
 
             result: list[dict[str, Any]] = list(self.aggregate(pipeline))
@@ -229,31 +356,12 @@ class LocationsManager(BaseManager):
             if not result:
                 return []
 
-            return result[0].get("descendants", [])
+            return result[0].get(descendants_field, [])
         except BaseManagerIterationError as err:
             raise LocationsManagerChildrenError(str(err)) from err
         except Exception as err:
             LOGGER.error("[get_all_descendant_locations] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerChildrenError(str(err)) from err
-
-
-    def location_has_children(self, public_id: int) -> bool:
-        """
-        Checks whether a CmdbLocation has any direct child CmdbLocations
-
-        Args:
-            public_id (int): public_id of the CmdbLocation to check
-
-        Raises:
-            LocationsManagerGetError: If the child count could not be retrieved
-
-        Returns:
-            bool: True if at least one CmdbLocation has this location as its parent
-        """
-        try:
-            return self.count_documents({LocationKey.PARENT: public_id}) > 0
-        except BaseManagerGetError as err:
-            raise LocationsManagerGetError(str(err)) from err
 
 
     def get_parents_with_children(self, parent_ids: list[int]) -> set[int]:
@@ -262,7 +370,8 @@ class LocationsManager(BaseManager):
 
         Resolves the has-children hint for a whole tree level in a single grouped aggregation
         (``$match`` on the candidate parents, then ``$group`` by parent) instead of one count per
-        node, so a lazily-expanded tree level stays a single query
+        node, so a lazily-expanded tree level stays a single query. The ``parent`` index of the
+        collection serves the match
 
         Args:
             parent_ids (list[int]): public_ids of the CmdbLocations to test for children
@@ -277,12 +386,12 @@ class LocationsManager(BaseManager):
             return set()
 
         pipeline: list[dict[str, Any]] = [
-            {"$match": {LocationKey.PARENT.value: {"$in": parent_ids}}},
-            {"$group": {"_id": f"${LocationKey.PARENT.value}"}},
+            Builder.match_(Builder.in_(LocationKey.PARENT.value, parent_ids)),
+            Builder.group_(f"${LocationKey.PARENT.value}"),
         ]
 
         try:
-            return {doc["_id"] for doc in self.aggregate(pipeline)}
+            return {document[MONGO_ID_KEY] for document in self.aggregate(pipeline)}
         except Exception as err:
             LOGGER.error("[get_parents_with_children] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerGetError(str(err)) from err
@@ -297,9 +406,14 @@ class LocationsManager(BaseManager):
         stays a literal substring). Each match is returned together with every ancestor up to - but
         excluding - the synthetic root, resolved in a single ``$graphLookup`` (parent -> public_id)
         so the ancestor paths cost one aggregation instead of a walk per match. The flat,
-        de-duplicated result (sorted by public_id) is meant to be assembled into a pruned forest by
+        de-duplicated result is name-ordered and meant to be assembled into a pruned forest by
         build_location_forest: non-matching descendants of a match are intentionally absent.
         Requires MongoDB 3.4+ (well within the 7.0 floor)
+
+        Cost note: an unanchored case-insensitive regex cannot be served by an index (no index on
+        ``name`` would change that, and a text index would match whole words instead of
+        substrings), so the match stage is a deliberate collection scan bounded by the number of
+        locations - typically the smallest collection in the database
 
         Args:
             query (str): The search string; an empty/whitespace query yields no matches
@@ -308,27 +422,23 @@ class LocationsManager(BaseManager):
             LocationsManagerGetError: If the search aggregation fails
 
         Returns:
-            list[dict[str, Any]]: matching locations + their ancestors, flat and de-duplicated
+            list[dict[str, Any]]: canonical documents of the matches + their ancestors, flat,
+                                  de-duplicated and name-ascending
         """
         if not query.strip():
             return []
 
+        ancestors_field: str = LocationLookupField.ANCESTORS.value
+
         pipeline: list[dict[str, Any]] = [
-            {
-                "$match": {
-                    LocationKey.NAME.value: {"$regex": re.escape(query), "$options": "i"},
-                    LocationKey.PUBLIC_ID.value: {"$gt": RootLocationDefault.PUBLIC_ID},
-                }
-            },
-            {
-                "$graphLookup": {
-                    "from": CmdbLocation.COLLECTION,
-                    "startWith": f"${LocationKey.PARENT.value}",
-                    "connectFromField": LocationKey.PARENT.value,
-                    "connectToField": LocationKey.PUBLIC_ID.value,
-                    "as": "ancestors",
-                }
-            },
+            Builder.match_({
+                **Builder.regex_(
+                    LocationKey.NAME.value, re.escape(query), CASE_INSENSITIVE_REGEX_OPTIONS,
+                ),
+                LocationKey.PUBLIC_ID.value: {'$gt': RootLocationDefault.PUBLIC_ID},
+            }),
+            ancestors_lookup_stage(),
+            Builder.project_({MONGO_ID_KEY: 0, f"{ancestors_field}.{MONGO_ID_KEY}": 0}),
         ]
 
         try:
@@ -343,7 +453,7 @@ class LocationsManager(BaseManager):
         collected: dict[int, dict[str, Any]] = {}
 
         for match in matches:
-            ancestors: list[dict[str, Any]] = match.pop("ancestors", [])
+            ancestors: list[dict[str, Any]] = match.pop(ancestors_field, [])
 
             for location in [match, *ancestors]:
                 public_id: int = location[LocationKey.PUBLIC_ID.value]
@@ -351,9 +461,9 @@ class LocationsManager(BaseManager):
                 if public_id == RootLocationDefault.PUBLIC_ID or public_id in collected:
                     continue
 
-                collected[public_id] = location
+                collected[public_id] = to_location_document(location)
 
-        return sorted(collected.values(), key=lambda location: location[LocationKey.PUBLIC_ID.value])
+        return sort_locations_by_name(list(collected.values()))
 
 
     def get_locations_on_path_to(self, public_id: int) -> list[dict[str, Any]]:
@@ -367,11 +477,12 @@ class LocationsManager(BaseManager):
         set of siblings at each level along the path, so the user keeps sideways context). The
         target itself and its own siblings are included (they are the deepest expanded level); the
         target's own children are NOT - like the rest of the lazy tree they load on demand via
-        get_locations_by.
+        get_child_location_documents.
 
-        The ancestor chain is resolved in a single ``$graphLookup`` (parent -> public_id); the
-        sibling levels are then one ``$in`` query over {root} + {ancestors}. Returns an empty list
-        when the target does not exist. Requires MongoDB 3.4+ (well within the 7.0 floor)
+        The ancestor chain is resolved in a single ``$graphLookup`` (parent -> public_id) which
+        projects nothing but the ancestors' public_ids; the sibling levels are then one ``$in``
+        query over {root} + {ancestors}, returned as canonical, name-ordered documents. Returns an
+        empty list when the target does not exist. Requires MongoDB 3.4+ (well within the 7.0 floor)
 
         Args:
             public_id (int): public_id of the target CmdbLocation to expand the tree to
@@ -380,21 +491,19 @@ class LocationsManager(BaseManager):
             LocationsManagerGetError: If the path/level aggregation fails
 
         Returns:
-            list[dict[str, Any]]: flat, de-duplicated list of every root location plus all direct
-                children of each ancestor on the path to the target (which includes the target and
-                its siblings); empty when the target does not exist
+            list[dict[str, Any]]: flat, de-duplicated and name-ascending list of every root location
+                plus all direct children of each ancestor on the path to the target (which includes
+                the target and its siblings); empty when the target does not exist
         """
+        ancestors_field: str = LocationLookupField.ANCESTORS.value
+
         ancestor_pipeline: list[dict[str, Any]] = [
-            {"$match": {LocationKey.PUBLIC_ID.value: public_id}},
-            {
-                "$graphLookup": {
-                    "from": CmdbLocation.COLLECTION,
-                    "startWith": f"${LocationKey.PARENT.value}",
-                    "connectFromField": LocationKey.PARENT.value,
-                    "connectToField": LocationKey.PUBLIC_ID.value,
-                    "as": "ancestors",
-                }
-            },
+            Builder.match_({LocationKey.PUBLIC_ID.value: public_id}),
+            ancestors_lookup_stage(),
+            Builder.project_({
+                MONGO_ID_KEY: 0,
+                f"{ancestors_field}.{LocationKey.PUBLIC_ID.value}": 1,
+            }),
         ]
 
         try:
@@ -404,7 +513,7 @@ class LocationsManager(BaseManager):
             if not matches:
                 return []
 
-            ancestors: list[dict[str, Any]] = matches[0].get("ancestors", [])
+            ancestors: list[dict[str, Any]] = matches[0].get(ancestors_field, [])
 
             # The parents whose direct children make up the expanded levels: the synthetic root plus
             # every ancestor of the target (the synthetic root is excluded from the ancestor chain)
@@ -416,7 +525,11 @@ class LocationsManager(BaseManager):
             }
 
             # One $in over all sibling levels at once (children of the root + of each ancestor)
-            return self.get_many(**{LocationKey.PARENT.value: {"$in": list(expand_parents)}})
+            documents: list[dict[str, Any]] = self.get_many(
+                **{LocationKey.PARENT.value: {'$in': list(expand_parents)}}
+            )
+
+            return sort_locations_by_name([to_location_document(document) for document in documents])
         except (BaseManagerGetError, BaseManagerIterationError) as err:
             raise LocationsManagerGetError(str(err)) from err
         except Exception as err:
@@ -430,7 +543,7 @@ class LocationsManager(BaseManager):
         Updates the CmdbLocation linked to the given CmdbObject
 
         Args:
-            object_id (int): object_id of the CmdbLocation which should be updated
+            object_id (int): public_id of the CmdbObject whose CmdbLocation should be updated
             data (CmdbLocation | dict): The new data for the CmdbLocation
 
         Raises:
@@ -440,15 +553,19 @@ class LocationsManager(BaseManager):
             if isinstance(data, CmdbLocation):
                 data = CmdbLocation.to_json(data)
 
-            self.update({'object_id': object_id}, data)
+            self.update({LocationKey.OBJECT_ID.value: object_id}, data)
         except Exception as err:
             LOGGER.error("[update_location] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerUpdateError(str(err)) from err
 
 
-    def update_locations_by_type(self, type_id: int, data: dict[str, Any]) -> None:
+    def update_locations_by_type(self, type_id: int, data: dict[str, Any]) -> bool:
         """
         Updates all CmdbLocations of the provided CmdbTypes public_id
+
+        An empty payload is a no-op rather than an error - the type update path calls this with
+        whatever of the mirrored type metadata (label, icon, selectable) actually changed, which is
+        regularly nothing. The return value tells the caller which of the two happened
 
         Args:
             type_id (int): public_id of CmdbType for which the CmdbLocations should be updated
@@ -456,14 +573,22 @@ class LocationsManager(BaseManager):
 
         Raises:
             LocationsManagerUpdateError: When the Update-Operation fails
+
+        Returns:
+            bool: True when an update was executed, False when there was no data to apply
         """
         try:
             if not data:
-                LOGGER.error("No data provided to [update_locations_by_type] therefore no update executed!")
-                return
+                LOGGER.debug("No data provided to [update_locations_by_type] therefore no update executed!")
+                return False
 
-            self.update_many(criteria={"type_id": type_id}, update=data)
+            self.update_many(criteria={LocationKey.TYPE_ID.value: type_id}, update=data)
+
+            return True
         except BaseManagerUpdateError as err:
+            raise LocationsManagerUpdateError(str(err)) from err
+        except Exception as err:
+            LOGGER.error("[update_locations_by_type] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerUpdateError(str(err)) from err
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
@@ -478,10 +603,18 @@ class LocationsManager(BaseManager):
         :meth:`delete_location` so a deleted node's subtree is promoted one level instead of
         being orphaned
 
+        ``parent`` is nullable in the schema, so the promotion target may be missing, None or (in a
+        document the schema never validated) some other non-id value. That cannot be written onto the
+        children - no tree level queries for a null parent, so they would
+        silently disappear from the tree - and the deletion is refused instead. A node without a
+        usable parent that has no children at all is still deletable: there is nothing to promote
+
         Args:
             public_id (int): public_id of the CmdbLocation whose children should be promoted
 
         Raises:
+            LocationsManagerGetError: If the children lookup of a parentless location fails
+            LocationsManagerUpdateError: If the location carries no usable parent but has children
             BaseManagerGetError: If the location lookup fails
             BaseManagerUpdateError: If the re-parenting update fails
         """
@@ -490,9 +623,21 @@ class LocationsManager(BaseManager):
         if not location:
             return
 
+        grandparent_id: Any = location.get(LocationKey.PARENT.value)
+
+        # bool is a subclass of int, so it has to be ruled out explicitly - a 'parent': True would
+        # otherwise be written onto every child exactly like a None would
+        if not isinstance(grandparent_id, int) or isinstance(grandparent_id, bool):
+            if public_id in self.get_parents_with_children([public_id]):
+                raise LocationsManagerUpdateError(
+                    f"The Location with ID:{public_id} has no parent to promote its children to!"
+                )
+
+            return
+
         self.update_many(
             criteria={LocationKey.PARENT.value: public_id},
-            update={LocationKey.PARENT.value: location[LocationKey.PARENT.value]},
+            update={LocationKey.PARENT.value: grandparent_id},
         )
 
 
@@ -502,20 +647,34 @@ class LocationsManager(BaseManager):
 
         Before the location is removed, every CmdbLocation that has it as ``parent`` is re-parented
         onto the deleted location's own parent (its grandparent). This keeps the location tree
-        connected: the deleted node's subtree simply shifts up one level rather than being orphaned
+        connected: the deleted node's subtree simply shifts up one level rather than being orphaned.
+        The promotion is a separate write from the deletion and there is no transaction around the
+        pair (see the open discussion-backlog item), so a deletion that fails afterwards leaves the
+        children already promoted
+
+        The synthetic root (RootLocationDefault.PUBLIC_ID) is refused: it is the anchor every tree
+        level is queried against, it is not backed by a CmdbObject, and its own ``parent`` sentinel
+        is 0 - deleting it would move every top-level location out of the tree
 
         Args:
             public_id (int): public_id of the CmdbLocation which should be deleted
 
         Raises:
-            LocationsManagerDeleteError: When the delete operation fails
+            LocationsManagerDeleteError: When the CmdbLocation is the synthetic root, or when the
+                                         delete operation fails
 
         Returns:
             bool: True if deletion was successful
         """
+        if public_id == RootLocationDefault.PUBLIC_ID:
+            raise LocationsManagerDeleteError('The root Location can not be deleted!')
+
         try:
             self._reparent_children_to_grandparent(public_id)
 
             return self.delete({LocationKey.PUBLIC_ID.value: public_id})
         except (BaseManagerGetError, BaseManagerUpdateError, BaseManagerDeleteError) as err:
+            raise LocationsManagerDeleteError(str(err)) from err
+        except Exception as err:
+            LOGGER.error("[delete_location] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerDeleteError(str(err)) from err

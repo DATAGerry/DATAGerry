@@ -62,6 +62,19 @@ class ConnectionRequestKey(BaseStrEnum):
     CABLE_CI_ID = 'cable_ci_id'
 
 
+class ConnectionParam(BaseStrEnum):
+    """
+    Query-string keys the port-connection routes read on top of the standard pager parameters
+
+    CONNECTION_ID belongs to the unassigned-cable picker: the cable an existing connection already
+    holds is excluded from the list like every other claimed one, and naming that connection keeps it
+    in - which is what an edit form needs to preselect its current value. SEARCH is that picker's
+    substring match on the cable name; the generic ``?filter=`` can express anything else
+    """
+    CONNECTION_ID = 'connection_id'
+    SEARCH = 'search'
+
+
 # Refusal (HTTP 404) when the addressed connection does not exist
 CONNECTION_NOT_FOUND_MESSAGE: str = 'The Port connection with ID:{public_id} was not found!'
 
