@@ -26,19 +26,27 @@ of a duplicate-key error, and ``duplicate_key_abort`` covers the race with the s
 from logging import Logger, getLogger
 from typing import Any, NoReturn
 
-from flask import abort
+from flask import abort, request
 
 from cmdb.manager import ObjectsManager, TypesManager
+from cmdb.manager.extendable_options_manager import ExtendableOptionsManager
+from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.manager.port_connections_manager import PortConnectionsManager
 from cmdb.manager.ports_manager import PortsManager
 
+from cmdb.models.user_model import CmdbUser
+
+from cmdb.models.object_model.cmdb_object_key_enum import CmdbObjectKey
 from cmdb.models.port_connection_model import (
     ConnectionType,
     PortConnectionKey,
     CABLE_FIELD_KEYS,
     sort_endpoints,
 )
+from cmdb.models.special_type_model.cable_constants import CableField
 
+from cmdb.framework.port.assignable_cables import build_unassigned_cable_rows
+from cmdb.framework.port.connection_cable_view import attach_cable_view, attach_cable_views
 from cmdb.framework.port.connection_validator import (
     cable_ci_blockers,
     coerce_connection_type,
@@ -46,6 +54,9 @@ from cmdb.framework.port.connection_validator import (
     shape_blockers,
     unknown_connection_type_blocker,
 )
+
+from cmdb.manager.query_builder.query_builder_constants import SortPipeline
+from cmdb.interface.rest_api.responses.response_parameters.response_parameters_constants import ParameterKey
 
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
     CONNECTION_ABORT_PREFIX,
@@ -124,6 +135,49 @@ def get_port_or_abort(ports_manager: PortsManager, port_id: int) -> dict[str, An
         abort(404, CONNECTION_PORT_NOT_FOUND_MESSAGE.format(port_id=port_id))
 
     return port
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                   the read payload                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+def with_cable_views(connections: list[dict[str, Any]], request_user: CmdbUser) -> list[dict[str, Any]]:
+    """
+    Turns stored connections into the payload the read routes answer with
+
+    Every route that hands a connection back goes through here - the three reads and the create and
+    update responses - so a client sees the resolved cable block in the same shape everywhere, and a
+    write is answered with exactly what a following read would return
+
+    Args:
+        connections (list[dict[str, Any]]): The stored connection documents
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Returns:
+        list[dict[str, Any]]: The connections, each with its cable keys replaced by a 'cable' block
+    """
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+    extendable_options_manager: ExtendableOptionsManager = ManagerProvider.get_manager(
+        ManagerType.EXTENDABLE_OPTIONS, request_user)
+
+    return attach_cable_views(connections, objects_manager, extendable_options_manager)
+
+
+def with_cable_view(connection: dict[str, Any], request_user: CmdbUser) -> dict[str, Any]:
+    """
+    The single-connection form of with_cable_views
+
+    Args:
+        connection (dict[str, Any]): The stored connection document
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Returns:
+        dict[str, Any]: The connection with its cable keys replaced by a 'cable' block
+    """
+    objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+    extendable_options_manager: ExtendableOptionsManager = ManagerProvider.get_manager(
+        ManagerType.EXTENDABLE_OPTIONS, request_user)
+
+    return attach_cable_view(connection, objects_manager, extendable_options_manager)
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                    write guards                                                      #
@@ -392,3 +446,101 @@ def duplicate_key_abort(
         ).format(port_id=endpoints[0]))
 
     abort(400, CONNECTION_DUPLICATE_MESSAGE)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             the unassigned-cable picker                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+# Sort key of the picker's default order: the cable's name, which lives inside the object's 'fields'
+# array and is therefore addressed through the query builder's fields.<name> sort form
+CABLE_NAME_SORT: str = f'{SortPipeline.FIELDS_PREFIX}{CableField.NAME.value}'
+
+
+def collect_claimed_cable_ci_ids(
+        port_connections_manager: PortConnectionsManager,
+        connection_id: int | None) -> list[int]:
+    """
+    Reads the Cable CIs the picker has to hide, keeping the edited connection's own cable
+
+    Every cable some connection already uses is hidden, because `cable_ci_id` holds a partial unique
+    index and offering a claimed cable would only produce a refusal. ``?connection_id=`` names the
+    connection being edited, and its cable is kept in the list - otherwise an edit form could not
+    preselect the value it already holds. A connection_id naming nothing is a 404 rather than a
+    silently ignored parameter: the caller asked a question about a connection that does not exist
+
+    Args:
+        port_connections_manager (PortConnectionsManager): db interface for CmdbPortConnections
+        connection_id (int | None): public_id of the connection being edited, or None when the picker
+            is filling a new connection
+
+    Raises:
+        HTTPException: 404 when connection_id names no CmdbPortConnection
+
+    Returns:
+        list[int]: public_ids of the Cable CIs to exclude
+    """
+    claimed: list[int] = port_connections_manager.get_assigned_cable_ci_ids()
+
+    if connection_id is None:
+        return claimed
+
+    connection: dict[str, Any] = get_connection_or_abort(port_connections_manager, connection_id)
+    own_cable_ci_id: Any = connection.get(PortConnectionKey.CABLE_CI_ID.value)
+
+    if not isinstance(own_cable_ci_id, int):
+        return claimed
+
+    return [cable_ci_id for cable_ci_id in claimed if cable_ci_id != own_cable_ci_id]
+
+
+def resolve_cable_sort(requested_sort: str) -> str:
+    """
+    Answers with the sort key the picker should use
+
+    The pager defaults ``sort`` to 'public_id' for every collection route, which for a cable picker
+    means "creation order" - so this route defaults to the cable's name instead. The default only
+    applies when the caller sent no ``?sort=`` at all: an explicit `?sort=public_id` is a choice and
+    is kept, which is why the query string is consulted rather than the parsed value alone
+
+    Args:
+        requested_sort (str): The sort key the pager parsed
+
+    Returns:
+        str: The sort key to query with
+    """
+    if ParameterKey.SORT.value in request.args:
+        return requested_sort
+
+    return CABLE_NAME_SORT
+
+
+def shape_unassigned_cable_page(
+        types_manager: TypesManager,
+        object_docs: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """
+    Resolves one page of Cable CIs into the rows the picker draws
+
+    One bulk read for the CmdbType labels actually present on the page - scoping it to the page rather
+    than to every CABLE type keeps an installation with many cable types from paying for labels it
+    does not render. The cable values themselves need no read: they are in the documents already
+
+    Args:
+        types_manager (TypesManager): db interface for CmdbTypes
+        object_docs (list[dict[str, Any]]): The candidate Cable CI documents of one page
+
+    Returns:
+        list[dict[str, Any]]: One picker row per document, in input order
+    """
+    type_ids: list[int] = [
+        doc[CmdbObjectKey.TYPE_ID.value]
+        for doc in object_docs
+        if isinstance(doc.get(CmdbObjectKey.TYPE_ID.value), int)
+    ]
+
+    type_labels: dict[int, str] = {
+        type_id: cmdb_type.label
+        for type_id, cmdb_type in types_manager.get_types_lookup(list(set(type_ids))).items()
+    } if type_ids else {}
+
+    return build_unassigned_cable_rows(object_docs, type_labels)

@@ -20,12 +20,15 @@ Pins the manager-layer behavior against a real MongoDB instance:
 
 - insert / get / get_for_object / update / delete round-trip through the bound collection
 - get_locations_by filters by parent and returns model-bound results
+- get_child_location_documents reads one tree level as canonical, name-ordered documents
 - update_locations_by_type bulk-updates only the matching type and leaves others untouched
 - delete_location removes one row and re-parents its direct children onto the grandparent
 - get_all_descendant_locations resolves the full subtree with a real ``$graphLookup`` (the
   query that the unit suite can only mock) - including the multi-level chain, exclusion of
   unrelated branches, and cycle-safety for a malformed parent loop
 - search_locations_with_ancestors matches names and folds in each match's ancestor chain
+- delete_location refuses the synthetic root, and refuses to promote children onto a
+  document whose ``parent`` is null (both would drop locations out of the tree)
 """
 from typing import Any
 
@@ -35,6 +38,8 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.query_builder import BuilderParameters
 from cmdb.models.location_model.cmdb_location import CmdbLocation
+
+from cmdb.errors.manager.locations_manager import LocationsManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 ORDER_ASCENDING: int = 1
@@ -110,6 +115,25 @@ SEARCH_SIBLING_NAME: str = 'Server-beta'
 SEARCH_UNRELATED_NAME: str = 'Office'
 SEARCH_OBJECT_BASE_ID: int = 9990
 
+# level fixtures: three children of one parent whose names are deliberately not in id order
+LEVEL_PARENT_ID: int = 9720
+LEVEL_CHILD_BETA_ID: int = 9721
+LEVEL_CHILD_ALPHA_ID: int = 9722
+LEVEL_CHILD_GAMMA_ID: int = 9723
+LEVEL_OBJECT_BASE_ID: int = 9620
+LEVEL_BETA_NAME: str = 'beta'
+LEVEL_ALPHA_NAME: str = 'Alpha'
+LEVEL_GAMMA_NAME: str = 'gamma'
+
+# parentless fixtures: a document whose 'parent' is null (the schema allows it), once with a child
+NULL_PARENT_WITH_CHILD_ID: int = 9730
+NULL_PARENT_CHILD_ID: int = 9731
+NULL_PARENT_LEAF_ID: int = 9732
+NULL_PARENT_OBJECT_BASE_ID: int = 9630
+
+ROOT_CHILD_ID: int = 9740
+ROOT_CHILD_OBJECT_ID: int = 9640
+
 ITERATE_A_ID: int = 9778
 ITERATE_B_ID: int = 9779
 ITERATE_A_OBJECT_ID: int = 9978
@@ -133,6 +157,8 @@ ALL_SEED_IDS: list[int] = [
     SEARCH_ROOT_ID, SEARCH_MID_ID, SEARCH_MATCH_ID, SEARCH_SIBLING_ID, SEARCH_UNRELATED_ID,
     PATH_ROOT_A_ID, PATH_ROOT_B_ID, PATH_MID_ID, PATH_MID_SIBLING_ID, PATH_TARGET_ID,
     PATH_TARGET_SIBLING_ID, PATH_TARGET_CHILD_ID, PATH_OTHER_BRANCH_ID,
+    LEVEL_PARENT_ID, LEVEL_CHILD_BETA_ID, LEVEL_CHILD_ALPHA_ID, LEVEL_CHILD_GAMMA_ID,
+    NULL_PARENT_WITH_CHILD_ID, NULL_PARENT_CHILD_ID, NULL_PARENT_LEAF_ID, ROOT_CHILD_ID,
 ]
 
 
@@ -509,18 +535,12 @@ class TestGetAllDescendantLocations:
 
         descendant_ids = {loc['public_id'] for loc in descendants}
         assert descendant_ids == {CHAIN_MID_ID, CHAIN_LEAF_ID}
+        # only the public_id is projected out of the server
+        assert all(set(loc) == {'public_id'} for loc in descendants)
 
     def test_leaf_has_no_descendants(self, locations_manager: LocationsManager) -> None:
         """A leaf location resolves to an empty descendant set."""
         assert locations_manager.get_all_descendant_locations(CHAIN_LEAF_ID) == []
-
-    def test_location_has_children_true_for_a_parent(self, locations_manager: LocationsManager) -> None:
-        """A location with a direct child reports has-children True."""
-        assert locations_manager.location_has_children(CHAIN_ROOT_ID) is True
-
-    def test_location_has_children_false_for_a_leaf(self, locations_manager: LocationsManager) -> None:
-        """A leaf location reports has-children False."""
-        assert locations_manager.location_has_children(CHAIN_LEAF_ID) is False
 
 
 class TestGetAllDescendantLocationsCycleSafety:
@@ -570,3 +590,113 @@ class TestGetParentsWithChildren:
     def test_empty_input_returns_empty_set(self, locations_manager: LocationsManager) -> None:
         """An empty id list short-circuits to an empty set (no query)."""
         assert locations_manager.get_parents_with_children([]) == set()
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                             ONE TREE LEVEL (documents)                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestGetChildLocationDocuments:
+    """``get_child_location_documents`` reads one level as canonical, name-ordered documents."""
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """A parent with three children whose names deliberately disagree with their public_ids."""
+        _insert_docs(database_manager, database_name, [
+            _location_doc(LEVEL_PARENT_ID, LEVEL_OBJECT_BASE_ID, ROOT_PARENT_ID),
+            _location_doc(LEVEL_CHILD_BETA_ID, LEVEL_OBJECT_BASE_ID + 1, LEVEL_PARENT_ID, name=LEVEL_BETA_NAME),
+            _location_doc(LEVEL_CHILD_ALPHA_ID, LEVEL_OBJECT_BASE_ID + 2, LEVEL_PARENT_ID, name=LEVEL_ALPHA_NAME),
+            _location_doc(LEVEL_CHILD_GAMMA_ID, LEVEL_OBJECT_BASE_ID + 3, LEVEL_PARENT_ID, name=LEVEL_GAMMA_NAME),
+        ])
+        yield
+        _drop_ids(database_manager, database_name,
+                  [LEVEL_PARENT_ID, LEVEL_CHILD_BETA_ID, LEVEL_CHILD_ALPHA_ID, LEVEL_CHILD_GAMMA_ID])
+
+    def test_level_is_name_ordered_case_insensitively(self, locations_manager: LocationsManager) -> None:
+        """The level comes back name-ascending, not in the read's public_id-descending order."""
+        documents = locations_manager.get_child_location_documents(LEVEL_PARENT_ID)
+
+        assert [document['name'] for document in documents] == [
+            LEVEL_ALPHA_NAME, LEVEL_BETA_NAME, LEVEL_GAMMA_NAME,
+        ]
+
+    def test_documents_match_a_model_round_trip(self, locations_manager: LocationsManager) -> None:
+        """Each document carries exactly what a from_data -> to_json round trip would produce."""
+        documents = locations_manager.get_child_location_documents(LEVEL_PARENT_ID)
+
+        expected = CmdbLocation.to_json(CmdbLocation.from_data(
+            _location_doc(LEVEL_CHILD_ALPHA_ID, LEVEL_OBJECT_BASE_ID + 2, LEVEL_PARENT_ID, name=LEVEL_ALPHA_NAME)
+        ))
+        assert documents[0] == expected
+        assert '_id' not in documents[0]
+
+    def test_childless_parent_reads_an_empty_level(self, locations_manager: LocationsManager) -> None:
+        """A leaf has no level to expand."""
+        assert locations_manager.get_child_location_documents(LEVEL_CHILD_ALPHA_ID) == []
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                 DELETE REFUSALS                                                     #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestRootDeletionIsRefused:
+    """The synthetic root anchors every tree level: deleting it would detach the whole tree."""
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """One top-level location, i.e. a direct child of the synthetic root."""
+        _insert_docs(database_manager, database_name, [
+            _location_doc(ROOT_CHILD_ID, ROOT_CHILD_OBJECT_ID, ROOT_PARENT_ID),
+        ])
+        yield
+        _drop_ids(database_manager, database_name, [ROOT_CHILD_ID])
+
+    def test_delete_of_the_root_raises_and_writes_nothing(
+        self, locations_manager: LocationsManager, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """The refusal happens before any write: the top-level location keeps its root parent."""
+        with pytest.raises(LocationsManagerDeleteError):
+            locations_manager.delete_location(ROOT_PARENT_ID)
+
+        stored = database_manager.get_collection(CmdbLocation.COLLECTION, database_name)\
+            .find_one({'public_id': ROOT_CHILD_ID})
+        assert stored['parent'] == ROOT_PARENT_ID
+
+
+class TestDeleteWithoutAUsableParent:
+    """``parent`` is nullable, so the promotion target of a delete can be missing."""
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """A parentless location with a child, plus a parentless leaf."""
+        with_child = _location_doc(NULL_PARENT_WITH_CHILD_ID, NULL_PARENT_OBJECT_BASE_ID, ROOT_PARENT_ID)
+        with_child['parent'] = None
+        leaf = _location_doc(NULL_PARENT_LEAF_ID, NULL_PARENT_OBJECT_BASE_ID + 2, ROOT_PARENT_ID)
+        leaf['parent'] = None
+
+        _insert_docs(database_manager, database_name, [
+            with_child,
+            _location_doc(NULL_PARENT_CHILD_ID, NULL_PARENT_OBJECT_BASE_ID + 1, NULL_PARENT_WITH_CHILD_ID),
+            leaf,
+        ])
+        yield
+        _drop_ids(database_manager, database_name,
+                  [NULL_PARENT_WITH_CHILD_ID, NULL_PARENT_CHILD_ID, NULL_PARENT_LEAF_ID])
+
+    def test_children_are_not_promoted_onto_a_null_parent(
+        self, locations_manager: LocationsManager, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """The delete is refused and the child keeps its parent instead of leaving the tree."""
+        with pytest.raises(LocationsManagerDeleteError):
+            locations_manager.delete_location(NULL_PARENT_WITH_CHILD_ID)
+
+        collection = database_manager.get_collection(CmdbLocation.COLLECTION, database_name)
+        assert collection.find_one({'public_id': NULL_PARENT_CHILD_ID})['parent'] == NULL_PARENT_WITH_CHILD_ID
+        assert collection.find_one({'public_id': NULL_PARENT_WITH_CHILD_ID}) is not None
+
+    def test_a_parentless_leaf_is_still_deletable(
+        self, locations_manager: LocationsManager, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """With no children there is nothing to promote, so the deletion goes ahead."""
+        assert locations_manager.delete_location(NULL_PARENT_LEAF_ID) is True
+
+        collection = database_manager.get_collection(CmdbLocation.COLLECTION, database_name)
+        assert collection.find_one({'public_id': NULL_PARENT_LEAF_ID}) is None

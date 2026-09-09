@@ -31,6 +31,9 @@ What is left over is what this module holds:
   - **cable information is rejected on an INTERNAL connection** - the per-type field rule, the same
     shape as the Rack's occupant_validator: one document holds two kinds of link, so something has to
     say which fields belong to which
+  - **the inline cable fields are rejected alongside a cable CI** - a connection describes its cable
+    either itself or by reference, never both, so the five values can not be duplicated between a link
+    and the asset that IS the cable and then drift apart
   - a ``cable_ci_id`` names an existing CmdbObject of a CABLE SpecialType
 
 Pure and free of Flask: every function reports its reasons and the routes decide whether to abort. The
@@ -51,6 +54,7 @@ from cmdb.models.port_connection_model.port_connection_constants import (
     PortConnectionKey,
     CABLE_FIELD_KEYS,
     ENDPOINT_COUNT,
+    INLINE_CABLE_FIELD_KEYS,
 )
 from cmdb.models.port_connection_model.port_connection_helpers import (
     coerce_endpoints,
@@ -195,6 +199,39 @@ def cable_field_blockers(connection_type: str, payload: dict[str, Any]) -> list[
         if payload.get(key.value) is not None
     ]
 
+def cable_duplication_blockers(payload: dict[str, Any]) -> list[str]:
+    """
+    Judges a request that describes its cable twice - inline AND by reference
+
+    A connection carries the five cable values itself OR names a Cable CI that owns them, never both.
+    Storing both would duplicate five values between a link and the asset that IS the cable, and the
+    two copies would then drift apart silently the moment someone edits the CI - which is the
+    inconsistency a CMDB exists to prevent. The same shape as the per-type field rule above: one
+    document can describe a cable in two ways, so something has to say which one is in use.
+
+    Only keys the payload actually carries are judged, and an explicit null is not a value - clearing
+    a field the CI does not own is not an attempt to own it here
+
+    Args:
+        payload (dict[str, Any]): The request body
+
+    Returns:
+        list[str]: One reason per inline cable field sent alongside a cable CI; empty when the request
+            uses exactly one of the two ways
+    """
+    cable_ci_id: Any = payload.get(PortConnectionKey.CABLE_CI_ID.value)
+
+    if cable_ci_id is None:
+        return []
+
+    return [
+        PortConnectionError.CABLE_FIELD_WITH_CABLE_CI.format(
+            field=key.value, cable_ci_id=cable_ci_id,
+        )
+        for key in INLINE_CABLE_FIELD_KEYS
+        if payload.get(key.value) is not None
+    ]
+
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                     cable CI                                                         #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -259,5 +296,6 @@ def shape_blockers(connection_type: str, payload: dict[str, Any]) -> list[str]:
     blockers: list[str] = endpoint_blockers(payload.get(PortConnectionKey.ENDPOINTS.value))
 
     blockers.extend(cable_field_blockers(connection_type, payload))
+    blockers.extend(cable_duplication_blockers(payload))
 
     return blockers

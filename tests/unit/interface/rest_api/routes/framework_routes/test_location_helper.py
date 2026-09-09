@@ -361,23 +361,16 @@ class TestValidateObjectLocationChange:
         with flask_app.test_request_context():
             validate_object_location_change(OBJECT_ID, NEW_PARENT_ID, manager)
 
-    def test_remove_with_children_is_allowed(self, flask_app: Flask) -> None:
+    def test_remove_is_always_allowed_without_any_children_lookup(self, flask_app: Flask) -> None:
         """Removing the placement is always allowed - the node's children are promoted, not orphaned."""
         manager = self._manager({'public_id': OWN_LOCATION_ID, 'parent': NEW_PARENT_ID})
-        manager.location_has_children.return_value = True  # must not be consulted anymore
 
         with flask_app.test_request_context():
             validate_object_location_change(OBJECT_ID, None, manager)
 
-        manager.location_has_children.assert_not_called()
-
-    def test_remove_without_children_passes(self, flask_app: Flask) -> None:
-        """Removing the placement is allowed when the object's location has no children."""
-        manager = self._manager({'public_id': OWN_LOCATION_ID, 'parent': NEW_PARENT_ID})
-        manager.location_has_children.return_value = False
-
-        with flask_app.test_request_context():
-            validate_object_location_change(OBJECT_ID, None, manager)
+        # no child lookup of any kind is consulted before allowing the removal
+        manager.get_parents_with_children.assert_not_called()
+        manager.get_all_descendant_locations.assert_not_called()
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

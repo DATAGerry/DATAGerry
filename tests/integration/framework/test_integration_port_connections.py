@@ -23,6 +23,9 @@ are held by the DATABASE and by nothing else. Four things only a real MongoDB ca
      unbuildable otherwise - while a SECOND cable on the same port is refused by the index
   2. a duplicate pair is refused, and so is the same pair entered in the OPPOSITE order, which works
      only because the endpoints are stored sorted
+  3a. get_assigned_cable_ci_ids answers with exactly the cable CIs some connection claims - the
+     complement the unassigned-cable picker excludes - and the read asks for the key's PRESENCE,
+     because to_json omits it rather than writing null
   3. one cable CI belongs to at most one connection, while any number of connections carrying no CI
      coexist - the presence-filtered index
   4. the plain multikey index really finds a port at either end, and the delete cascades scope
@@ -54,10 +57,19 @@ from cmdb.framework.port.cascade import (
     delete_connections_of_port,
     delete_ports_of_object,
 )
+from cmdb.framework.port.connection_cable_view import attach_cable_views
+from cmdb.manager.extendable_options_manager import ExtendableOptionsManager
+from cmdb.manager.objects_manager import ObjectsManager
+from cmdb.models.extendable_option_model import CmdbExtendableOption, ExtendableOptionKey, OptionType
+from cmdb.models.object_model import CmdbObject
+from cmdb.models.special_type_model.cable_constants import CableField
 from cmdb.models.port_connection_model import (
+    CableSource,
+    CableViewKey,
     CmdbPortConnection,
     ConnectionType,
     PortConnectionKey,
+    CABLE_VIEW_KEY,
     CABLE_CI_INDEX_NAME,
     ENDPOINTS_CABLE_INDEX_NAME,
     ENDPOINTS_INDEX_NAME,
@@ -663,3 +675,184 @@ def test_the_peers_of_a_deleted_object_are_free_again(
     ))
 
     assert len(manager.get_connections_of_port(SERVER_PORT)) == 1
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                        the resolved cable block, end to end                                          #
+# -------------------------------------------------------------------------------------------------------------------- #
+# The Cable CIs and the CABLE_TYPE option the block resolves against
+CABLE_TYPE_OPTION_ID: int = 48401
+CABLE_TYPE_LABEL: str = 'CAT6'
+MISSING_CABLE_CI_ID: int = 48399
+
+
+def _cable_ci_doc(public_id: int, name: str, length: Any) -> dict[str, Any]:
+    """A CABLE-SpecialType CmdbObject carrying two of the five dg-cable-* values."""
+    return {
+        'public_id': public_id,
+        'type_id': 48001,
+        'active': True,
+        'author_id': 1,
+        'version': '1.0.0',
+        'fields': [
+            {'name': CableField.NAME.value, 'value': name, 'type': 'text'},
+            {'name': CableField.LENGTH.value, 'value': length, 'type': 'text'},
+        ],
+        'multi_data_sections': [],
+    }
+
+
+@pytest.fixture(name='cable_assets')
+def fixture_cable_assets(database_manager: MongoDatabaseManager, database_name: str):
+    """Two Cable CIs and one CABLE_TYPE option, cleared around each test"""
+    objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+    options = database_manager.get_collection(CmdbExtendableOption.COLLECTION, database_name)
+
+    def _purge() -> None:
+        objects.delete_many({'public_id': {'$in': [CABLE_CI_ID, OTHER_CABLE_CI_ID]}})
+        options.delete_many({ExtendableOptionKey.PUBLIC_ID.value: CABLE_TYPE_OPTION_ID})
+
+    _purge()
+
+    objects.insert_many([
+        _cable_ci_doc(CABLE_CI_ID, 'CAB-000471', '3 m'),
+        # A number where a text field was meant - what a CSV import leaves behind
+        _cable_ci_doc(OTHER_CABLE_CI_ID, 'CAB-000472', 5),
+    ])
+    options.insert_one({
+        ExtendableOptionKey.PUBLIC_ID.value: CABLE_TYPE_OPTION_ID,
+        ExtendableOptionKey.VALUE.value: CABLE_TYPE_LABEL,
+        ExtendableOptionKey.OPTION_TYPE.value: OptionType.CABLE_TYPE.value,
+        ExtendableOptionKey.PREDEFINED.value: False,
+    })
+
+    yield
+
+    _purge()
+
+
+def _resolve(database_manager: MongoDatabaseManager, stored: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Runs the read-side resolution with real managers against the test database"""
+    return attach_cable_views(
+        stored, ObjectsManager(database_manager), ExtendableOptionsManager(database_manager),
+    )
+
+
+def test_each_connection_gets_the_values_of_its_own_cable_ci(
+        connections, manager: PortConnectionsManager, database_manager, cable_assets) -> None:
+    """
+    Two links, two cables, and the values must not cross
+
+    The batched read returns the CIs in whatever order the collection hands them over, so a block
+    built by position rather than by id would swap these two and no unit test with one CI would show
+    it.
+    """
+    manager.insert_item(CmdbPortConnection.from_data(_connection_doc(
+        CONNECTION_IDS[0], [SERVER_PORT, FRONT_PORT],
+        **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+    )))
+    manager.insert_item(CmdbPortConnection.from_data(_connection_doc(
+        CONNECTION_IDS[1], [REAR_PORT, SWITCH_PORT],
+        **{PortConnectionKey.CABLE_CI_ID.value: OTHER_CABLE_CI_ID},
+    )))
+
+    resolved = _resolve(database_manager, manager.get_connections_of_ports(
+        [FRONT_PORT, REAR_PORT, SERVER_PORT, SWITCH_PORT],
+    ))
+    by_id = {
+        connection[PortConnectionKey.PUBLIC_ID.value]: connection[CABLE_VIEW_KEY]
+        for connection in resolved
+    }
+
+    assert by_id[CONNECTION_IDS[0]][CableViewKey.NAME.value] == 'CAB-000471'
+    assert by_id[CONNECTION_IDS[0]][CableViewKey.LENGTH.value] == '3 m'
+    assert by_id[CONNECTION_IDS[1]][CableViewKey.NAME.value] == 'CAB-000472'
+    # The imported number reads as text rather than failing the whole page
+    assert by_id[CONNECTION_IDS[1]][CableViewKey.LENGTH.value] == '5'
+
+
+def test_an_inline_cable_type_resolves_to_its_stored_option_label(
+        connections, manager: PortConnectionsManager, database_manager, cable_assets) -> None:
+    """The id is what is stored; the label is what a client renders, and it comes from the option list"""
+    manager.insert_item(CmdbPortConnection.from_data(_connection_doc(
+        CONNECTION_IDS[0], [SERVER_PORT, FRONT_PORT],
+        **{
+            PortConnectionKey.CABLE_NAME.value: 'Patch A-12',
+            PortConnectionKey.CABLE_TYPE.value: CABLE_TYPE_OPTION_ID,
+        },
+    )))
+
+    block = _resolve(database_manager, manager.get_connections_of_port(FRONT_PORT))[0][CABLE_VIEW_KEY]
+
+    assert block[CableViewKey.SOURCE.value] == CableSource.INLINE.value
+    assert block[CableViewKey.TYPE.value] == CABLE_TYPE_LABEL
+    assert block[CableViewKey.TYPE_ID.value] == CABLE_TYPE_OPTION_ID
+
+
+def test_a_cable_ci_that_no_longer_exists_is_reported_not_fatal(
+        connections, manager: PortConnectionsManager, database_manager, cable_assets) -> None:
+    """
+    The soft reference against a real collection
+
+    Deleting an inventoried cable leaves the two ports patched together, so the link is still read -
+    it just says its cable record is gone.
+    """
+    manager.insert_item(CmdbPortConnection.from_data(_connection_doc(
+        CONNECTION_IDS[0], [SERVER_PORT, FRONT_PORT],
+        **{PortConnectionKey.CABLE_CI_ID.value: MISSING_CABLE_CI_ID},
+    )))
+
+    block = _resolve(database_manager, manager.get_connections_of_port(FRONT_PORT))[0][CABLE_VIEW_KEY]
+
+    assert block[CableViewKey.CABLE_CI_ID.value] == MISSING_CABLE_CI_ID
+    assert block[CableViewKey.RESOLVED.value] is False
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                      the claimed cables the picker excludes                                          #
+# -------------------------------------------------------------------------------------------------------------------- #
+def test_no_connection_claims_a_cable(connections, manager: PortConnectionsManager) -> None:
+    """
+    With nothing cabled to a CI the exclusion list is empty, so every Cable CI is assignable
+
+    The connections seeded here carry inline cable information instead of a CI, which is the case the
+    'cable_ci_id' key is ABSENT for - a read asking for null instead of presence would report them.
+    """
+    connections.insert_many([
+        _connection_doc(CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT]),
+        _connection_doc(CONNECTION_IDS[1], [REAR_PORT, SWITCH_PORT]),
+    ])
+
+    assert manager.get_assigned_cable_ci_ids() == []
+
+
+def test_every_claimed_cable_is_reported_once(connections, manager: PortConnectionsManager) -> None:
+    """Two connections naming two different Cable CIs report both, whatever else is stored"""
+    connections.insert_many([
+        _connection_doc(
+            CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT],
+            **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+        ),
+        _connection_doc(
+            CONNECTION_IDS[1], [REAR_PORT, SWITCH_PORT],
+            **{PortConnectionKey.CABLE_CI_ID.value: OTHER_CABLE_CI_ID},
+        ),
+        _connection_doc(CONNECTION_IDS[2], [FRONT_PORT, REAR_PORT],
+                        connection_type=ConnectionType.INTERNAL.value),
+    ])
+
+    assert sorted(manager.get_assigned_cable_ci_ids()) == [CABLE_CI_ID, OTHER_CABLE_CI_ID]
+
+
+def test_a_resolved_connection_frees_its_cable_again(connections, manager: PortConnectionsManager) -> None:
+    """Deleting the connection is what makes the cable assignable again - nothing else is written"""
+    connections.insert_one(_connection_doc(
+        CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT],
+        **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+    ))
+
+    assert manager.get_assigned_cable_ci_ids() == [CABLE_CI_ID]
+
+    connections.delete_one({PortConnectionKey.PUBLIC_ID.value: CONNECTION_IDS[0]})
+
+    assert manager.get_assigned_cable_ci_ids() == []

@@ -341,11 +341,17 @@ def delete_location_with_reparenting(
         locations_manager (LocationsManager): db interface for CmdbLocations
         objects_manager (ObjectsManager): db interface for CmdbObjects
 
+    Raises:
+        LocationsManagerDeleteError: When the CmdbLocation is the synthetic root, when it has
+            children but no parent to promote them onto, or when the deletion itself fails
+
     Returns:
         bool: True if the location was deleted
     """
     public_id: int = location[LocationKey.PUBLIC_ID.value]
-    grandparent_id: int = location[LocationKey.PARENT.value]
+    # 'parent' is nullable in the schema; a node without one is refused by delete_location below,
+    # unless it has no children at all - in which case there is no object field to re-point either
+    grandparent_id: int | None = location.get(LocationKey.PARENT.value)
 
     # snapshot the owning objects of the direct children BEFORE the delete promotes their nodes
     child_object_ids: list[int] = [

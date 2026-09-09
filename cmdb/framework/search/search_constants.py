@@ -54,3 +54,40 @@ class SearchResultMapKey(BaseStrEnum):
     """
     RESULT = 'result'
     MATCHES = 'matches'
+
+
+class SearchFormType(BaseStrEnum):
+    """
+    The kinds of search parameter a request may carry
+
+    A **frontend-visible contract**: the Angular search bar builds these strings itself
+    (`addTag('text' | 'regex' | 'type' | 'category')`) and the result bar appends the DISJUNCTION
+    marker, so a member removed here rejects a payload the UI still sends.
+
+    Four of the six drive a pipeline stage. The other two do not, and both are deliberate:
+
+      - PUBLIC_ID is accepted from API clients; the frontend expresses "search by id" as a TEXT tag
+        carrying a `publicID` setting instead
+      - DISJUNCTION is a marker the result bar appends when type filtering switches to OR. Nothing
+        reads it: the OR itself comes from each TYPE parameter's own `disjunction` flag, which
+        defaults to True. It is accepted so the UI's payload validates - see discussion-backlog for
+        whether it should be implemented or dropped
+    """
+    TEXT = 'text'
+    REGEX = 'regex'
+    TYPE = 'type'
+    CATEGORY = 'category'
+    DISJUNCTION = 'disjunction'
+    PUBLIC_ID = 'publicID'
+
+
+class SearchParamKey(BaseStrEnum):
+    """
+    Keys of one search parameter as the frontend sends it
+
+    Mirrors the Angular `SearchBarTag`, so these spellings are a frontend-visible contract
+    """
+    SEARCH_TEXT = 'searchText'
+    SEARCH_FORM = 'searchForm'
+    SETTINGS = 'settings'
+    DISJUNCTION = 'disjunction'

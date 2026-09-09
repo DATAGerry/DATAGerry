@@ -68,16 +68,102 @@ class PortConnectionKey(BaseStrEnum):
     LAST_EDIT_TIME = 'last_edit_time'
 
 
-# The cable-info fields, in the order they are presented and reported. An INTERNAL connection may
-# carry none of them - a panel's internal pairing is a fact about the panel, not a piece of cabling -
-# and the per-type field rule is derived from this tuple rather than restating it
-CABLE_FIELD_KEYS: tuple[PortConnectionKey, ...] = (
+class CableSource(BaseStrEnum):
+    """
+    Where the cable information of a connection comes from
+
+    A connection describes its cable in exactly ONE of these two ways, never both: the write routes
+    refuse the inline fields alongside a cable CI, so the duplication can not exist in stored data.
+
+      - INLINE - the connection carries the five cable_* values itself (no cable is inventoried)
+      - CI - the connection names a CABLE SpecialType CmdbObject and that object owns the values
+    """
+    INLINE = 'inline'
+    CI = 'ci'
+
+
+class CableViewKey(BaseStrEnum):
+    """
+    Keys of the resolved ``cable`` block the READ routes return
+
+    Not document keys: a connection is stored with the flat cable_* fields, and the read layer
+    resolves them - from the cable CI when one is named, from the connection itself otherwise - into
+    this one block, so a client renders both storage modes with the same code.
+
+    TYPE is always a LABEL and TYPE_ID always the CABLE_TYPE CmdbExtendableOption public_id behind it.
+    Inline connections fill both (the stored id is resolved to its label); a cable CI fills only TYPE,
+    because an ordinary CmdbType select stores the label and knows no option id.
+
+    RESOLVED is written only when it is False - a named cable CI that no longer exists. The reference
+    is soft by design (it is reported, never cascaded), and its absence means the block is complete
+    """
+    SOURCE = 'source'
+    CABLE_CI_ID = 'cable_ci_id'
+    RESOLVED = 'resolved'
+    NAME = 'name'
+    TYPE = 'type'
+    TYPE_ID = 'type_id'
+    LENGTH = 'length'
+    COLOR = 'color'
+    DESCRIPTION = 'description'
+
+
+class AssignableCableKey(BaseStrEnum):
+    """
+    Keys of one row of the unassigned-cable picker
+
+    A read view like `CableViewKey`, not document keys: the row is assembled from a CABLE SpecialType
+    CmdbObject, whose cable values live in its `fields` triples.
+
+    NAME / CABLE_TYPE / LENGTH / COLOR / DESCRIPTION are the object's own `dg-cable-*` values, the
+    same five a linked connection reports in its `cable` block - so the value a caller picked here is
+    the value it will read back there. CABLE_TYPE is spelled out rather than shortened to `type`
+    (which is what the cable block calls it) because TYPE_ID / TYPE_LABEL on this row are the
+    **CmdbType** of the Cable CI, as on every other picker row in the API, and one row may not use
+    "type" for two different things.
+
+    PUBLIC_ID is what a caller sends as a connection's `cable_ci_id`
+    """
+    PUBLIC_ID = 'public_id'
+    NAME = 'name'
+    CABLE_TYPE = 'cable_type'
+    LENGTH = 'length'
+    COLOR = 'color'
+    DESCRIPTION = 'description'
+    TYPE_ID = 'type_id'
+    TYPE_LABEL = 'type_label'
+    ACTIVE = 'active'
+
+
+# Key under which the READ routes carry the resolved cable block. It REPLACES the flat cable_* keys
+# and cable_ci_id in a response - returning both would leave a client free to read the wrong one
+CABLE_VIEW_KEY: str = 'cable'
+
+# The five fields a connection can carry INLINE, in the order they are presented and reported. These
+# are what an INTERNAL connection may not carry, and what a connection naming a cable CI may not carry
+# either - the CI owns them then
+INLINE_CABLE_FIELD_KEYS: tuple[PortConnectionKey, ...] = (
     PortConnectionKey.CABLE_NAME,
     PortConnectionKey.CABLE_TYPE,
     PortConnectionKey.CABLE_LENGTH,
     PortConnectionKey.CABLE_COLOR,
     PortConnectionKey.CABLE_DESCRIPTION,
+)
+
+# The cable-info fields, the reference included. An INTERNAL connection may carry none of them - a
+# panel's internal pairing is a fact about the panel, not a piece of cabling - and the per-type field
+# rule is derived from this tuple rather than restating it
+CABLE_FIELD_KEYS: tuple[PortConnectionKey, ...] = (
+    *INLINE_CABLE_FIELD_KEYS,
     PortConnectionKey.CABLE_CI_ID,
+)
+
+# The audit timestamps, in the order they are stamped. Declared as the model's DATE_FIELDS, which is
+# what normalises the three shapes a date arrives in - the frontend's {'$date': ...} wrapper, an API
+# client's timestamp string, and a real datetime read back from MongoDB - into one stored type
+PORT_CONNECTION_DATE_KEYS: tuple[PortConnectionKey, ...] = (
+    PortConnectionKey.CREATION_TIME,
+    PortConnectionKey.LAST_EDIT_TIME,
 )
 
 # A connection joins exactly two ports - never one, never three. The count is named because both the

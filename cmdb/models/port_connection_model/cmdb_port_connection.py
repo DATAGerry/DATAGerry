@@ -20,7 +20,7 @@ from logging import Logger, getLogger
 from datetime import datetime, timezone
 from typing import Any
 
-from dateutil.parser import parse
+from cmdb.utils import coerce_document_dates
 
 from cmdb.models.cmdb_dao import CmdbDAO
 from cmdb.models.port_connection_model.port_connection_constants import (
@@ -30,6 +30,7 @@ from cmdb.models.port_connection_model.port_connection_constants import (
     ENDPOINTS_CABLE_INDEX_NAME,
     ENDPOINTS_INDEX_NAME,
     ENDPOINTS_INTERNAL_INDEX_NAME,
+    PORT_CONNECTION_DATE_KEYS,
 )
 from cmdb.models.port_connection_model.port_connection_helpers import sort_endpoints
 
@@ -73,6 +74,8 @@ class CmdbPortConnection(CmdbDAO):
         PortConnectionKey.ENDPOINTS.value,
         PortConnectionKey.CONNECTION_TYPE.value,
     ]
+
+    DATE_FIELDS: tuple[str, ...] = tuple(date_key.value for date_key in PORT_CONNECTION_DATE_KEYS)
 
     INDEX_KEYS: list[dict[str, Any]] = [
         # No port may appear in two CABLE connections. This is the feature's hard cardinality
@@ -194,25 +197,28 @@ class CmdbPortConnection(CmdbDAO):
         """
         Initialises a CmdbPortConnection from a dict
 
+        The two audit timestamps are normalised in place first, whichever of the three shapes they
+        arrive in - the ``{'$date': ...}`` wrapper the frontend sends, a timestamp string from an API
+        client, or an already-normalised datetime. A value that is present but unreadable is REFUSED
+        rather than guessed: this used to parse strings with ``fuzzy=True``, which turns a note like
+        'sometime in March' into a date built from today's day number
+
         Args:
-            data (dict): Data with which the CmdbPortConnection should be initialised
+            data (dict): Data with which the CmdbPortConnection should be initialised, edited in place
+                to normalise its date fields
 
         Raises:
-            CmdbPortConnectionInitFromDataError: If the initialisation with the given data fails
+            CmdbPortConnectionInitFromDataError: If the initialisation with the given data fails,
+                including a present timestamp that cannot be read as a date
 
         Returns:
             CmdbPortConnection: CmdbPortConnection with the given data
         """
         try:
-            creation_time = data.get(PortConnectionKey.CREATION_TIME.value, None)
+            unusable_dates: list[str] = coerce_document_dates(data, cls.DATE_FIELDS)
 
-            if creation_time and isinstance(creation_time, str):
-                creation_time = parse(creation_time, fuzzy=True)
-
-            last_edit_time = data.get(PortConnectionKey.LAST_EDIT_TIME.value, None)
-
-            if last_edit_time and isinstance(last_edit_time, str):
-                last_edit_time = parse(last_edit_time, fuzzy=True)
+            if unusable_dates:
+                raise ValueError(f"Unreadable date value(s) for: {unusable_dates}")
 
             return cls(
                 public_id = data.get(PortConnectionKey.PUBLIC_ID.value),
@@ -225,10 +231,8 @@ class CmdbPortConnection(CmdbDAO):
                 cable_description = data.get(PortConnectionKey.CABLE_DESCRIPTION.value),
                 cable_ci_id = data.get(PortConnectionKey.CABLE_CI_ID.value),
                 author_id = data.get(PortConnectionKey.AUTHOR_ID.value),
-                # The audit timestamps parse strictly: an unusable one surfaces as the model's own
-                # error rather than silently becoming "now"
-                creation_time = creation_time,
-                last_edit_time = last_edit_time,
+                creation_time = data.get(PortConnectionKey.CREATION_TIME.value),
+                last_edit_time = data.get(PortConnectionKey.LAST_EDIT_TIME.value),
             )
         except Exception as err:
             raise CmdbPortConnectionInitFromDataError(err) from err

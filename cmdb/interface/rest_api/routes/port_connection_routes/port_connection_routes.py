@@ -16,7 +16,7 @@
 """
 Implementation of all API routes for handling CmdbPortConnections
 
-These routes are the only way a connection is written. Four invariants hold across them:
+These routes are the only way a connection is written. Five invariants hold across them:
 
 1. **The connection rights alone govern the surface.** A connection spans two CmdbObjects, and unlike
    the /ports routes these do NOT additionally check either endpoint object's ACL - decision Q13,
@@ -26,13 +26,24 @@ These routes are the only way a connection is written. Four invariants hold acro
 2. **The endpoints and the connection type are immutable.** An update writes cable information only;
    a re-cable is a delete plus a create. Moving an endpoint would drop the row onto a port whose
    cardinality slot was never checked for it.
-3. **The identity and the audit fields are server-owned.** A payload public_id is ignored, and
-   `author_id` / `creation_time` / `last_edit_time` are stamped from the request.
+3. **The identity and the audit fields are server-owned.** Neither write route's schema declares
+   `public_id` or the three audit fields, and the validator purges what it does not declare, so a body
+   carrying one never reaches the handler; `author_id` / `creation_time` / `last_edit_time` are stamped
+   from the request. The schema types the cable half - before it, a CSV-shaped number reached the
+   database as the value of a field the document schema declares a string - while `endpoints` and
+   `connection_type` are left untyped for the connection validator, whose messages name what is wrong.
 4. **The cardinality rules are the DATABASE's.** A port holds at most one cable and at most one
    internal connection, no pair repeats, and a cable CI belongs to one connection - all four held by
    the collection's partial unique indexes. The routes pre-check them for a readable 400 and translate
    the index's duplicate-key error into the same wording, which is what covers two concurrent
    requests, since a pre-check is a read followed by a write.
+
+5. **A cable is described ONCE, and read as one block.** A connection either carries the five
+   `cable_*` values itself or names a Cable CI that owns them - sending both is a 400, so the
+   duplication can not exist in stored data. Every response here therefore replaces the flat cable
+   keys with a resolved `cable` block (`with_cable_view`), filled from the CI when one is linked and
+   from the connection otherwise, so a client renders both storage modes with the same code and never
+   reads a value that is null for half the connections. An INTERNAL connection answers `cable: null`.
 
 `§35`'s rule holds by construction: every route here touches exactly the connection it addresses, and
 the delete cascades are scoped to the ports actually being removed - resolving or deleting one
@@ -53,14 +64,26 @@ from cmdb.manager import ObjectsManager, TypesManager
 from cmdb.manager.port_connections_manager import PortConnectionsManager
 from cmdb.manager.ports_manager import PortsManager
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
+from cmdb.manager.query_builder import BuilderParameters
 
+from cmdb.models.object_model.cmdb_object_key_enum import CmdbObjectKey
 from cmdb.models.port_connection_model import PortConnectionKey, sort_endpoints
+from cmdb.models.special_type_model.special_type_enum import SpecialType
+
+from cmdb.class_schema.port_connection_model import get_cmdb_port_connection_write_schema
 from cmdb.models.user_model import CmdbUser
 
 from cmdb.security.acl.permission import AccessControlPermission
 
+from cmdb.framework.port.assignable_cables import (
+    build_cable_name_search_criteria,
+    build_unassigned_cable_criteria,
+)
+
 from cmdb.errors.security import AccessDeniedError
+from cmdb.errors.manager.objects_manager import ObjectsManagerIterationError
 from cmdb.errors.manager.ports_manager import PortsManagerGetError
+from cmdb.errors.manager.types_manager import TypesManagerGetError
 from cmdb.errors.manager.port_connections_manager import (
     PortConnectionsManagerDeleteError,
     PortConnectionsManagerGetError,
@@ -74,12 +97,19 @@ from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import (
     DefaultResponse,
     DeleteSingleResponse,
+    GetMultiResponse,
     GetSingleResponse,
     InsertSingleResponse,
     UpdateSingleResponse,
 )
+from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
+from cmdb.interface.rest_api.routes.routes_helper import (
+    append_criteria_to_filter,
+    fetch_only_active_objects,
+)
 
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
+    ConnectionParam,
     ConnectionRequestKey,
     ConnectionRight,
 )
@@ -90,6 +120,7 @@ from cmdb.interface.rest_api.routes.port_routes.port_route_helper import (
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper import (
     build_cable_info,
     build_connection_candidate,
+    collect_claimed_cable_ci_ids,
     duplicate_key_abort,
     enforce_cable_ci_free,
     enforce_connection_shape,
@@ -98,6 +129,10 @@ from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route
     get_port_or_abort,
     get_requested_connection_type_or_abort,
     refuse_identity_change,
+    resolve_cable_sort,
+    shape_unassigned_cable_page,
+    with_cable_view,
+    with_cable_views,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -113,25 +148,33 @@ port_connection_blueprint = APIBlueprint('port_connections', __name__)
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
 @port_connection_blueprint.protect(auth=True, right=ConnectionRight.ADD.value)
-def insert_cmdb_port_connection(request_user: CmdbUser) -> Response:
+@port_connection_blueprint.validate(get_cmdb_port_connection_write_schema())
+def insert_cmdb_port_connection(data: dict[str, Any], request_user: CmdbUser) -> Response:
     """
     HTTP `POST` route to create a CmdbPortConnection between two CmdbPorts
 
     The endpoints are stored canonically sorted, which is what makes the link undirected: 'A to B' and
     'B to A' are the same document, so neither end is a source and a duplicate pair cannot exist
 
+    **The cable is described once.** A body carrying a `cable_ci_id` may not also carry the inline
+    cable fields - the CI owns them, and storing both would duplicate five values between the link and
+    the asset that IS the cable, to drift apart the moment either is edited.
+
     Args:
+        data (dict[str, Any]): The request body, validated against the write schema
         request_user (CmdbUser): CmdbUser requesting this operation
 
     Raises:
-        HTTPException: 400 when the shape is invalid, an endpoint's slot of this kind is taken, or the
-                       cable CI is already used; 404 when the created connection cannot be read back;
-                       500 on an unexpected error
+        HTTPException: 400 when the body fails the schema, the shape is invalid, an endpoint's slot of
+                       this kind is taken, the cable CI is already used, or the body describes its
+                       cable both inline and by reference; 404 when the created connection cannot be
+                       read back; 500 on an unexpected error
 
     Returns:
-        InsertSingleResponse: The new CmdbPortConnection and its public_id
+        InsertSingleResponse: The new CmdbPortConnection, with its resolved cable block, and its
+            public_id
     """
-    payload: dict[str, Any] = {}
+    # Both are read by the duplicate-key arm below, which the write can reach before either is set
     connection_type: str = ''
     endpoints: list[int] | None = None
 
@@ -142,21 +185,19 @@ def insert_cmdb_port_connection(request_user: CmdbUser) -> Response:
         port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
             ManagerType.PORT_CONNECTIONS, request_user)
 
-        payload = request.get_json(silent=True) or {}
-
-        connection_type = get_requested_connection_type_or_abort(payload)
-        enforce_connection_shape(ports_manager, objects_manager, types_manager, connection_type, payload)
+        connection_type = get_requested_connection_type_or_abort(data)
+        enforce_connection_shape(ports_manager, objects_manager, types_manager, connection_type, data)
 
         # Sorted only after the shape check passed, so an unusable value was already refused with its
         # own message rather than reaching here as None
-        endpoints = sort_endpoints(payload.get(ConnectionRequestKey.ENDPOINTS.value))
+        endpoints = sort_endpoints(data.get(ConnectionRequestKey.ENDPOINTS.value))
 
         enforce_endpoints_free(port_connections_manager, connection_type, endpoints)
         enforce_cable_ci_free(
-            port_connections_manager, payload.get(ConnectionRequestKey.CABLE_CI_ID.value),
+            port_connections_manager, data.get(ConnectionRequestKey.CABLE_CI_ID.value),
         )
 
-        candidate: dict[str, Any] = build_connection_candidate(endpoints, connection_type, payload)
+        candidate: dict[str, Any] = build_connection_candidate(endpoints, connection_type, data)
         candidate[PortConnectionKey.AUTHOR_ID.value] = request_user.get_public_id()
         candidate[PortConnectionKey.CREATION_TIME.value] = datetime.now(timezone.utc)
         candidate[PortConnectionKey.LAST_EDIT_TIME.value] = None
@@ -168,7 +209,7 @@ def insert_cmdb_port_connection(request_user: CmdbUser) -> Response:
         if not created:
             abort(404, 'Could not retrieve the created Port connection from the database!')
 
-        return InsertSingleResponse(created, new_id).make_response()
+        return InsertSingleResponse(with_cable_view(created, request_user), new_id).make_response()
     except HTTPException as http_err:
         raise http_err
     except PortConnectionsManagerInsertError as err:
@@ -200,7 +241,7 @@ def get_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Response
         HTTPException: 404 when the connection does not exist; 500 on an unexpected error
 
     Returns:
-        GetSingleResponse: The requested CmdbPortConnection
+        GetSingleResponse: The requested CmdbPortConnection, with its resolved cable block
     """
     try:
         port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
@@ -208,7 +249,9 @@ def get_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Response
 
         connection: dict[str, Any] = get_connection_or_abort(port_connections_manager, public_id)
 
-        return GetSingleResponse(connection, body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(
+            with_cable_view(connection, request_user), body=request.method == 'HEAD',
+        ).make_response()
     except HTTPException as http_err:
         raise http_err
     except PortConnectionsManagerGetError as err:
@@ -240,7 +283,7 @@ def get_cmdb_port_connections_of_port(port_id: int, request_user: CmdbUser) -> R
         HTTPException: 404 when the port does not exist; 500 on an unexpected error
 
     Returns:
-        DefaultResponse: The port's CmdbPortConnections as a list
+        DefaultResponse: The port's CmdbPortConnections as a list, each with its resolved cable block
     """
     try:
         ports_manager: PortsManager = ManagerProvider.get_manager(ManagerType.PORTS, request_user)
@@ -250,7 +293,7 @@ def get_cmdb_port_connections_of_port(port_id: int, request_user: CmdbUser) -> R
         get_port_or_abort(ports_manager, port_id)
 
         return DefaultResponse(
-            port_connections_manager.get_connections_of_port(port_id),
+            with_cable_views(port_connections_manager.get_connections_of_port(port_id), request_user),
         ).make_response()
     except HTTPException as http_err:
         raise http_err
@@ -296,7 +339,9 @@ def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) 
                        500 on an unexpected error
 
     Returns:
-        DefaultResponse: The CmdbPortConnections of the object's CmdbPorts as a list
+        DefaultResponse: The CmdbPortConnections of the object's CmdbPorts as a list, each with its
+            resolved cable block. The Cable CIs and cable-type labels are resolved in two batched
+            reads for the whole list, so a 48-port switch costs two extra queries rather than ninety-six
     """
     try:
         objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
@@ -311,7 +356,9 @@ def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) 
         ports: list[dict[str, Any]] = ports_manager.get_ports_of_object(object_id)
 
         return DefaultResponse(
-            port_connections_manager.get_connections_of_ports(collect_port_ids(ports)),
+            with_cable_views(
+                port_connections_manager.get_connections_of_ports(collect_port_ids(ports)), request_user,
+            ),
         ).make_response()
     except HTTPException as http_err:
         raise http_err
@@ -331,6 +378,100 @@ def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) 
         abort(500,
               f'An internal server error occured while retrieving the connections of CmdbObject ID: {object_id}!')
 
+@port_connection_blueprint.route('/cables/unassigned/', methods=['GET', 'HEAD'])
+@port_connection_blueprint.parse_collection_parameters()
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+@port_connection_blueprint.protect(auth=True, right=ConnectionRight.VIEW.value)
+def get_unassigned_cables(params: CollectionParameters, request_user: CmdbUser) -> Response:
+    """
+    HTTP `GET`/`HEAD` route to list the Cable CIs that can still be assigned to a CmdbPortConnection
+
+    The picker behind a connection's ``cable_ci_id``. Two rules decide it: the CmdbObject's type must
+    carry the CABLE marker, and a cable another connection already uses is out - `cable_ci_id` holds a
+    partial unique index, so offering a claimed cable would only produce a refusal. Both are appended
+    behind the caller's own `?filter=`, which can narrow the candidates but never widen them past the
+    rules
+
+    ``?connection_id=`` names the connection being edited and keeps ITS cable in the list, so an edit
+    form can preselect the value it already holds. ``?search=`` matches the cable name as a literal,
+    case-insensitive substring. Ordering, paging and filtering are the standard collection parameters,
+    except that `sort` defaults to the cable name instead of the public_id
+
+    Guarded by the connection view right, like every read here: this is a question, not a change. The
+    candidates' own ACLs are not applied - Q13's rule for this surface, and the same trade-off the
+    Rack's assignable-objects picker documents
+
+    Args:
+        params (CollectionParameters): Filtering, sorting and pagination parameters
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Raises:
+        HTTPException: 404 when ``?connection_id=`` names no connection; 400 when a read fails;
+                       500 on an unexpected error
+
+    Returns:
+        GetMultiResponse: One picker row per assignable Cable CI of the requested page
+    """
+    try:
+        objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+        types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
+        port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
+            ManagerType.PORT_CONNECTIONS, request_user)
+
+        claimed_cable_ci_ids: list[int] = collect_claimed_cable_ci_ids(
+            port_connections_manager,
+            request.args.get(ConnectionParam.CONNECTION_ID.value, type=int),
+        )
+
+        criteria: dict[str, Any] = build_unassigned_cable_criteria(
+            types_manager.get_type_ids_of_special_type(SpecialType.CABLE),
+            claimed_cable_ci_ids,
+        )
+
+        params.filter = append_criteria_to_filter(params.filter, criteria)
+
+        search_criteria: dict[str, Any] = build_cable_name_search_criteria(
+            request.args.get(ConnectionParam.SEARCH.value, type=str),
+        )
+
+        if search_criteria:
+            params.filter.append({'$match': search_criteria})
+
+        if fetch_only_active_objects():
+            params.filter.append({'$match': {CmdbObjectKey.ACTIVE.value: {'$eq': True}}})
+
+        params.sort = resolve_cable_sort(params.sort)
+
+        builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
+
+        # The raw aggregation documents, not hydrated CmdbObjects: a picker row is nine keys read out
+        # of the document, so building a model per candidate only to project it away is wasted work
+        object_docs, total = objects_manager.iterate_query(builder_params)
+
+        return GetMultiResponse(
+            shape_unassigned_cable_page(types_manager, object_docs),
+            total=total,
+            params=params,
+            url=request.url,
+            body=request.method == 'HEAD',
+        ).make_response()
+    except HTTPException as http_err:
+        raise http_err
+    except PortConnectionsManagerGetError as err:
+        LOGGER.error("[get_unassigned_cables] PortConnectionsManagerGetError: %s", err, exc_info=True)
+        abort(400, 'Failed to retrieve the Cables already used by a Port connection!')
+    except ObjectsManagerIterationError as err:
+        LOGGER.error("[get_unassigned_cables] ObjectsManagerIterationError: %s", err, exc_info=True)
+        abort(400, 'Failed to retrieve the Cables assignable to a Port connection!')
+    except TypesManagerGetError as err:
+        LOGGER.error("[get_unassigned_cables] TypesManagerGetError: %s", err, exc_info=True)
+        abort(400, 'Failed to retrieve the Cable types!')
+    except Exception as err:
+        LOGGER.error("[get_unassigned_cables] Exception: %s. Type: %s", err, type(err), exc_info=True)
+        abort(500, 'An internal server error occured while listing the assignable Cables!')
+
+
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   CRUD - UPDATE                                                      #
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -339,7 +480,8 @@ def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) 
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
 @port_connection_blueprint.protect(auth=True, right=ConnectionRight.EDIT.value)
-def update_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Response:
+@port_connection_blueprint.validate(get_cmdb_port_connection_write_schema())
+def update_cmdb_port_connection(public_id: int, data: dict[str, Any], request_user: CmdbUser) -> Response:
     """
     HTTP `PUT`/`PATCH` route to update the cable information of a single CmdbPortConnection
 
@@ -351,17 +493,23 @@ def update_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Respo
     key has to be unset rather than nulled because the index that guarantees one CI per connection is
     filtered on the key's presence
 
+    **Switching between the two ways of describing a cable is one write.** A body naming a
+    `cable_ci_id` and no inline fields hands the values over to the CI; a body carrying the inline
+    fields and no `cable_ci_id` takes them back. Carrying both is refused
+
     Args:
         public_id (int): public_id of the CmdbPortConnection to update
+        data (dict[str, Any]): The request body, validated against the write schema
         request_user (CmdbUser): CmdbUser requesting this operation
 
     Raises:
-        HTTPException: 400 when the payload changes an immutable field, the cable CI is already used,
-                       or a cable field is set on an INTERNAL connection; 404 when the connection does
-                       not exist; 500 on an unexpected error
+        HTTPException: 400 when the body fails the schema, the payload changes an immutable field, the
+                       cable CI is already used, a cable field is set on an INTERNAL connection, or the
+                       body describes its cable both inline and by reference; 404 when the connection
+                       does not exist; 500 on an unexpected error
 
     Returns:
-        UpdateSingleResponse: The new data of the CmdbPortConnection
+        UpdateSingleResponse: The new data of the CmdbPortConnection, with its resolved cable block
     """
     try:
         objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
@@ -369,11 +517,9 @@ def update_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Respo
         port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
             ManagerType.PORT_CONNECTIONS, request_user)
 
-        payload: dict[str, Any] = request.get_json(silent=True) or {}
-
         stored: dict[str, Any] = get_connection_or_abort(port_connections_manager, public_id)
 
-        refuse_identity_change(stored, payload)
+        refuse_identity_change(stored, data)
 
         # The stored type decides which fields are allowed, not the payload's: the type is immutable,
         # so a body that omits it must be judged by what the connection actually IS
@@ -382,21 +528,21 @@ def update_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Respo
         enforce_connection_shape(
             ManagerProvider.get_manager(ManagerType.PORTS, request_user),
             objects_manager, types_manager, connection_type,
-            {**payload, ConnectionRequestKey.ENDPOINTS.value: stored.get(PortConnectionKey.ENDPOINTS.value)},
+            {**data, ConnectionRequestKey.ENDPOINTS.value: stored.get(PortConnectionKey.ENDPOINTS.value)},
         )
         enforce_cable_ci_free(
-            port_connections_manager, payload.get(ConnectionRequestKey.CABLE_CI_ID.value),
+            port_connections_manager, data.get(ConnectionRequestKey.CABLE_CI_ID.value),
             exclude_id=public_id,
         )
 
-        cable_info: dict[str, Any] = build_cable_info(payload)
+        cable_info: dict[str, Any] = build_cable_info(data)
         cable_info[PortConnectionKey.LAST_EDIT_TIME.value] = datetime.now(timezone.utc)
 
         port_connections_manager.replace_connection(public_id, cable_info)
 
         updated: dict[str, Any] = get_connection_or_abort(port_connections_manager, public_id)
 
-        return UpdateSingleResponse(updated).make_response()
+        return UpdateSingleResponse(with_cable_view(updated, request_user)).make_response()
     except HTTPException as http_err:
         raise http_err
     except PortConnectionsManagerUpdateError as err:

@@ -22,9 +22,15 @@ class ObjectsManagerError(Exception):
     """
     Raised to catch all ObjectsManager related errors
     """
-    def __init__(self, err: str) -> None:
+    def __init__(self, err: str | Exception) -> None:
         """
         Raised to catch all ObjectsManager related errors
+
+        Takes the wrapped exception itself as readily as a message: str() reads the same either way,
+        but args[0] then carries the pymongo or model error a caller could branch on
+
+        Args:
+            err (str | Exception): The message, or the error being wrapped
         """
         super().__init__(err)
 

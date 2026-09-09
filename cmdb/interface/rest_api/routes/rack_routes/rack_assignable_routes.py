@@ -56,12 +56,12 @@ from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import GetMultiResponse
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
-from cmdb.interface.rest_api.routes.routes_helper import fetch_only_active_objects
-
-from cmdb.framework.rack.assignable_objects import (
+from cmdb.interface.rest_api.routes.routes_helper import (
     append_criteria_to_filter,
-    build_assignable_criteria,
+    fetch_only_active_objects,
 )
+
+from cmdb.framework.rack.assignable_objects import build_assignable_criteria
 
 from cmdb.interface.rest_api.routes.rack_routes.rack_route_constants import RackMountParam, RackRight
 from cmdb.interface.rest_api.routes.rack_routes.rack_mount_helper import (

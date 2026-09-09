@@ -616,3 +616,99 @@ class TestReferences:
         result = objects_manager.references(target, criteria=[], limit=0, skip=0, sort='public_id', order=1)
 
         assert REF_SOURCE_OBJECT_ID in {obj.public_id for obj in result.results}
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                            delete_with_follow_up: access is verified before the cascade                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestARefusedDeleteKeepsTheRiskAssessments:
+    """
+    The ordering defect, against a real database
+
+    ``delete_with_follow_up`` used to cascade first and check the permission second, so a delete that
+    was refused answered 403 with the object's risk assessments and their control-measure assignments
+    already deleted. A deactivated type is the cheapest way to make the guard refuse - no ACL setup -
+    and it is a real case: a type is deactivated precisely to stop its objects being changed.
+    """
+
+    GUARDED_TYPE_ID: int = 9861
+    GUARDED_OBJECT_ID: int = 9862
+    GUARDED_RA_ID: int = 9863
+    GUARDED_CMA_ID: int = 9864
+
+    @pytest.fixture(autouse=True)
+    def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
+        """Seeds a deactivated type, an object of it, and one RA + CMA referencing that object."""
+        types = database_manager.get_collection(CmdbType.COLLECTION, database_name)
+        objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+        risk_assessments = database_manager.get_collection(IsmsRiskAssessment.COLLECTION, database_name)
+        assignments = database_manager.get_collection(IsmsControlMeasureAssignment.COLLECTION, database_name)
+
+        def _purge() -> None:
+            types.delete_many({'public_id': self.GUARDED_TYPE_ID})
+            objects.delete_many({'public_id': self.GUARDED_OBJECT_ID})
+            risk_assessments.delete_many({'public_id': self.GUARDED_RA_ID})
+            assignments.delete_many({'public_id': self.GUARDED_CMA_ID})
+
+        _purge()
+
+        types.insert_one({
+            'public_id': self.GUARDED_TYPE_ID,
+            'name': 'deactivated-type',
+            'label': 'Deactivated',
+            'active': False,
+            'author_id': 1,
+            'creation_time': datetime.now(timezone.utc),
+            'version': '1.0.0',
+            'fields': [],
+            'render_meta': {'sections': [], 'summary': {'fields': []}},
+            'acl': {'activated': False},
+        })
+        objects.insert_one(_object_doc(self.GUARDED_OBJECT_ID, type_id=self.GUARDED_TYPE_ID))
+        risk_assessments.insert_one({
+            'public_id': self.GUARDED_RA_ID,
+            'object_id_ref_type': ObjectReferenceType.OBJECT.value,
+            'object_id': self.GUARDED_OBJECT_ID,
+        })
+        assignments.insert_one({
+            'public_id': self.GUARDED_CMA_ID, 'risk_assessment_id': self.GUARDED_RA_ID,
+        })
+
+        yield
+
+        _purge()
+
+    def test_the_refused_delete_destroys_nothing(
+        self, objects_manager: ObjectsManager, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """
+        The object, its risk assessment and the assignment all survive the refusal
+
+        Before the fix the assessment and the assignment were already gone by the time the error was
+        raised - and the object, which the caller was not allowed to delete, remained.
+        """
+        with pytest.raises(AccessDeniedError):
+            objects_manager.delete_with_follow_up(self.GUARDED_OBJECT_ID)
+
+        objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+        risk_assessments = database_manager.get_collection(IsmsRiskAssessment.COLLECTION, database_name)
+        assignments = database_manager.get_collection(IsmsControlMeasureAssignment.COLLECTION, database_name)
+
+        assert objects.find_one({'public_id': self.GUARDED_OBJECT_ID}) is not None
+        assert risk_assessments.find_one({'public_id': self.GUARDED_RA_ID}) is not None
+        assert assignments.find_one({'public_id': self.GUARDED_CMA_ID}) is not None
+
+    def test_deleting_an_unknown_object_cascades_nothing(
+        self, objects_manager: ObjectsManager, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """
+        A public_id that resolves to nothing answers False without touching the ISMS collections
+
+        Cascading there would delete the risk assessments of an object that is already gone, on a call
+        that reports it deleted nothing.
+        """
+        assert objects_manager.delete_with_follow_up(LOOKUP_MISSING_ID) is False
+
+        risk_assessments = database_manager.get_collection(IsmsRiskAssessment.COLLECTION, database_name)
+
+        assert risk_assessments.find_one({'public_id': self.GUARDED_RA_ID}) is not None

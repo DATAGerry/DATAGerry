@@ -276,6 +276,48 @@ class TestSerialisation:
                 _connection_data(**{PortConnectionKey.CREATION_TIME.value: 'not a timestamp'}),
             )
 
+    def test_from_data_reads_the_frontends_date_wrapper(self) -> None:
+        """
+        The shape the frontend actually sends
+
+        A date reaches a write as {'$date': millis}, and before DATE_FIELDS the model only handled a
+        string - the wrapper went through untouched and was stored as a sub-document, which MongoDB
+        can neither sort nor range-filter.
+        """
+        connection = CmdbPortConnection.from_data(_connection_data(**{
+            PortConnectionKey.CREATION_TIME.value: {'$date': 1788859177706},
+        }))
+
+        assert isinstance(connection.creation_time, datetime)
+        assert connection.creation_time.year == 2026
+
+    def test_a_note_that_merely_contains_a_number_is_refused(self) -> None:
+        """
+        The reason fuzzy parsing had to go
+
+        'Patch 5' used to parse to the 5th of the CURRENT month, so a mis-sent cable name became a
+        plausible-looking creation date that nothing about the wrong answer looked wrong about.
+        """
+        with pytest.raises(CmdbPortConnectionInitFromDataError):
+            CmdbPortConnection.from_data(
+                _connection_data(**{PortConnectionKey.CREATION_TIME.value: 'Patch 5'}),
+            )
+
+    def test_an_emptied_timestamp_reads_as_no_date(self) -> None:
+        """An emptied date widget means 'no date', not 'a broken date'"""
+        connection = CmdbPortConnection.from_data(_connection_data(**{
+            PortConnectionKey.LAST_EDIT_TIME.value: '',
+        }))
+
+        assert connection.last_edit_time is None
+
+    def test_both_audit_timestamps_are_declared_as_date_fields(self) -> None:
+        """DATE_FIELDS is what opts the model into the shared normalisation, on read and on write"""
+        assert CmdbPortConnection.DATE_FIELDS == (
+            PortConnectionKey.CREATION_TIME.value,
+            PortConnectionKey.LAST_EDIT_TIME.value,
+        )
+
     def test_an_unusable_public_id_raises_the_models_init_error(self) -> None:
         """CmdbDAO refuses a missing public_id, and the model reports it as its own"""
         with pytest.raises(CmdbPortConnectionInitError):

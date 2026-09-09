@@ -26,11 +26,16 @@ sorted ascending, which is also what lets the collection's two partial unique in
 feature's cardinality guarantee. port_connection_helpers is the single source of that canonical form
 """
 from cmdb.models.port_connection_model.port_connection_constants import (
+    AssignableCableKey,
+    CableSource,
+    CableViewKey,
     ConnectionType,
     PortConnectionKey,
     CABLE_CI_INDEX_NAME,
     CABLE_FIELD_KEYS,
+    CABLE_VIEW_KEY,
     ENDPOINT_COUNT,
+    INLINE_CABLE_FIELD_KEYS,
     ENDPOINTS_CABLE_INDEX_NAME,
     ENDPOINTS_INDEX_NAME,
     ENDPOINTS_INTERNAL_INDEX_NAME,
@@ -44,11 +49,16 @@ from cmdb.models.port_connection_model.cmdb_port_connection import CmdbPortConne
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
+    'AssignableCableKey',
+    'CableSource',
+    'CableViewKey',
     'ConnectionType',
     'PortConnectionKey',
     'CABLE_CI_INDEX_NAME',
     'CABLE_FIELD_KEYS',
+    'CABLE_VIEW_KEY',
     'ENDPOINT_COUNT',
+    'INLINE_CABLE_FIELD_KEYS',
     'ENDPOINTS_CABLE_INDEX_NAME',
     'ENDPOINTS_INDEX_NAME',
     'ENDPOINTS_INTERNAL_INDEX_NAME',

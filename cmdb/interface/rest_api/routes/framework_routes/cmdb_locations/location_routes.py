@@ -33,7 +33,12 @@ Four things govern a change here:
 * **The tree is read lazily.** ``/tree/roots`` + ``/tree/<id>/children`` walk one level at a time,
   ``/tree/path/<id>`` opens straight to a node and ``/tree/search`` returns a pruned forest; each node
   carries ``has_children`` so the frontend can offer an expand without fetching the subtree. ``/tree``
-  is the older eager route that returns the whole forest and is still used by the frontend.
+  is the older eager route that returns the whole forest and is still used by the frontend. Every level
+  is name-ordered by the manager (case-insensitive, public_id as tie-break), so no route sorts.
+* **The synthetic root is reachable here.** It is a CmdbLocation like any other, and it carries the
+  ``object_id`` sentinel 0 - so ``DELETE /0/object`` addresses the root. ``delete_location`` refuses it
+  (400); no route may work around that, because promoting the root's children onto its own ``parent``
+  sentinel would empty the tree.
 * **Three write routes have no frontend caller.** ``POST /``, ``PUT|PATCH /update_location`` and
   ``DELETE /<object_id>/object`` are unused by ``location.service.ts`` - the object write path mirrors
   the location itself, and the frontend deletes via ``DELETE /objects/<id>/locations``. They remain
@@ -310,15 +315,15 @@ def get_cmdb_location_tree_roots(request_user: CmdbUser) -> Response:
             unexpected error
 
     Returns:
-        Response: The root location's direct children, each with has_children (DefaultResponse)
+        Response: The root location's direct children, name-ascending and each with has_children
+                  (DefaultResponse)
     """
     try:
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
 
-        children: list[dict[str, Any]] = [
-            CmdbLocation.to_json(location)
-            for location in locations_manager.get_locations_by(parent=RootLocationDefault.PUBLIC_ID)
-        ]
+        children: list[dict[str, Any]] = locations_manager.get_child_location_documents(
+            RootLocationDefault.PUBLIC_ID
+        )
 
         return DefaultResponse(build_location_level(children, locations_manager)).make_response()
     except HTTPException as http_err:
@@ -464,15 +469,13 @@ def get_cmdb_location_tree_children(public_id: int, request_user: CmdbUser) -> R
             unexpected error
 
     Returns:
-        Response: The location's direct children, each with has_children (DefaultResponse)
+        Response: The location's direct children, name-ascending and each with has_children
+                  (DefaultResponse)
     """
     try:
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
 
-        children: list[dict[str, Any]] = [
-            CmdbLocation.to_json(location)
-            for location in locations_manager.get_locations_by(parent=public_id)
-        ]
+        children: list[dict[str, Any]] = locations_manager.get_child_location_documents(public_id)
 
         return DefaultResponse(build_location_level(children, locations_manager)).make_response()
     except HTTPException as http_err:
@@ -646,7 +649,8 @@ def get_cmdb_children(object_id: int, request_user: CmdbUser) -> Response:
             unexpected error
 
     Returns:
-        Response: The direct child CmdbLocations for the given object_id (DefaultResponse)
+        Response: The direct child CmdbLocations for the given object_id, name-ascending
+                  (DefaultResponse)
     """
     try:
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
@@ -656,10 +660,9 @@ def get_cmdb_children(object_id: int, request_user: CmdbUser) -> Response:
         current_location = locations_manager.get_location_for_object(object_id)
 
         if current_location:
-            child_locations: list[CmdbLocation] = locations_manager.get_locations_by(
-                parent=current_location[LocationKey.PUBLIC_ID.value]
+            children = locations_manager.get_child_location_documents(
+                current_location[LocationKey.PUBLIC_ID.value]
             )
-            children = [CmdbLocation.to_json(child) for child in child_locations]
 
         return DefaultResponse(children).make_response()
     except HTTPException as http_err:

@@ -1,4 +1,4 @@
-# DataGerry - OpenSource Enterprise CMDB
+# DATAGERRY - OpenSource Enterprise CMDB
 # Copyright (C) 2026 becon GmbH
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,17 +14,12 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Validation schemas of the Port Connectivity connection entities
-
-Mirrors cmdb/models/port_connection_model/ one-to-one, as every package under cmdb/class_schema/ does
+This module provides all errors of the object search
 """
-from cmdb.class_schema.port_connection_model.cmdb_port_connection_schema import (
-    get_cmdb_port_connection_schema,
-    get_cmdb_port_connection_write_schema,
-)
+from .search_errors import SearchError, SearchParamError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
-    'get_cmdb_port_connection_schema',
-    'get_cmdb_port_connection_write_schema',
+    'SearchError',
+    'SearchParamError',
 ]

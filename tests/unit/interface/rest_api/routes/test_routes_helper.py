@@ -17,9 +17,14 @@
 Unit tests for cmdb.interface.rest_api.routes.routes_helper
 
 The shared multipart-request helpers (get_file_in_request / get_element_from_data_request, consolidated
-here from the importer + media-library route utils) plus fetch_only_active_objects and the two public_id
-readers (extract_public_ids for a URL segment, normalize_public_id_list for a JSON body), exercised
-inside a minimal Flask request context (no REST API booted).
+here from the importer + media-library route utils) plus fetch_only_active_objects, the two public_id
+readers (extract_public_ids for a URL segment, normalize_public_id_list for a JSON body) and
+append_criteria_to_filter, exercised inside a minimal Flask request context (no REST API booted).
+
+append_criteria_to_filter came here on 2026-09-09 from cmdb/framework/rack/assignable_objects.py, when
+the port-connection picker became its second caller: it is route-layer plumbing (a parsed ``?filter=``
+turned into pipeline stages) and knows nothing about either domain. Its tests moved with it, which is
+why they read in terms of a generic criteria dict rather than of the rack's rules.
 """
 import json
 from io import BytesIO
@@ -31,6 +36,7 @@ from werkzeug.exceptions import HTTPException
 from typing import Any
 
 from cmdb.interface.rest_api.routes.routes_helper import (
+    append_criteria_to_filter,
     get_file_in_request,
     get_element_from_data_request,
     fetch_only_active_objects,
@@ -207,3 +213,60 @@ class TestNormalizePublicIdList:
             normalize_public_id_list([1, 'nope'])
 
         assert 'nope' in exc_info.value.description
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                          append_criteria_to_filter                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+TYPE_ID_KEY: str = 'type_id'
+PUBLIC_ID_KEY: str = 'public_id'
+TYPE_ID: int = 70
+MATCH: str = '$match'
+RULE_CRITERIA: dict[str, Any] = {TYPE_ID_KEY: {'$in': [TYPE_ID]}, PUBLIC_ID_KEY: {'$nin': [800]}}
+
+
+class TestAppendCriteriaToFilter:
+    """A route's own rules are appended behind the caller's ?filter=, never merged into it."""
+
+    def test_a_dict_filter_becomes_a_match_stage_the_rules_follow(self) -> None:
+        """The caller's filter narrows the candidates and the rules narrow them further"""
+        pipeline = append_criteria_to_filter({TYPE_ID_KEY: TYPE_ID}, RULE_CRITERIA)
+
+        assert pipeline == [{MATCH: {TYPE_ID_KEY: TYPE_ID}}, {MATCH: RULE_CRITERIA}]
+
+    def test_a_pipeline_filter_keeps_its_stages_and_gains_one(self) -> None:
+        """A caller who already sent stages gets the rules appended after them"""
+        stages: list[dict[str, Any]] = [{MATCH: {TYPE_ID_KEY: TYPE_ID}}, {'$sort': {PUBLIC_ID_KEY: 1}}]
+
+        pipeline = append_criteria_to_filter(stages, RULE_CRITERIA)
+
+        assert pipeline == [*stages, {MATCH: RULE_CRITERIA}]
+
+    def test_the_callers_pipeline_is_not_mutated(self) -> None:
+        """The parsed request filter is shared state - appending in place would leak across the request"""
+        stages: list[dict[str, Any]] = [{MATCH: {TYPE_ID_KEY: TYPE_ID}}]
+
+        append_criteria_to_filter(stages, RULE_CRITERIA)
+
+        assert stages == [{MATCH: {TYPE_ID_KEY: TYPE_ID}}]
+
+    def test_a_caller_cannot_overwrite_a_rule_by_naming_the_same_key(self) -> None:
+        """
+        Appending rather than merging is what makes the rules unbypassable
+
+        A filter asking for exactly the id a rule excludes still ends up behind that exclusion, so the
+        two stages contradict and the result is empty - not 'the caller wins'.
+        """
+        pipeline = append_criteria_to_filter({PUBLIC_ID_KEY: 800}, RULE_CRITERIA)
+
+        assert pipeline[0] == {MATCH: {PUBLIC_ID_KEY: 800}}
+        assert pipeline[-1][MATCH][PUBLIC_ID_KEY] == {'$nin': [800]}
+
+    @pytest.mark.parametrize('request_filter', [None, {}, []], ids=['none', 'empty-dict', 'empty-list'])
+    def test_no_filter_yields_the_rules_alone(self, request_filter: Any) -> None:
+        """An unfiltered request still gets every rule"""
+        assert append_criteria_to_filter(request_filter, RULE_CRITERIA) == [{MATCH: RULE_CRITERIA}]
+
+    def test_no_filter_and_no_criteria_yields_an_empty_pipeline(self) -> None:
+        """Nothing to narrow by means no stages, not a stage matching everything"""
+        assert append_criteria_to_filter(None, {}) == []

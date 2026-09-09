@@ -27,6 +27,8 @@ from cmdb.manager.query_builder import QuickSearchPipelineBuilder, SearchPipelin
 from cmdb.manager import ObjectsManager
 
 from cmdb.framework.search.search_param import SearchParam
+
+from cmdb.errors.framework_search import SearchParamError
 from cmdb.framework.search.searcher_framework import SearcherFramework
 from cmdb.models.user_model import CmdbUser
 from cmdb.interface.blueprints import APIBlueprint
@@ -126,9 +128,14 @@ def search_framework(request_user: CmdbUser) -> Response:
                 # LOGGER.debug(f"POST search_parameters: {search_parameters}")
             else:
                 abort(405, f"Method: {request.method} not allowed!")
+        except SearchParamError as err:
+            # The parameter list itself is unusable, and the message names which entry: a search that
+            # dropped the bad one would answer 200 with more objects than the filter allows
+            LOGGER.error("[search_framework] SearchParamError: %s", err)
+            abort(400, str(err))
         except Exception as err:
             LOGGER.error("[search_framework] Exception: %s. Type: %s", err, type(err), exc_info=True)
-            abort(400, "As unexpected error occured while processing the search request!")
+            abort(400, "An unexpected error occured while processing the search request!")
 
         try:
             searcher = SearcherFramework(objects_manager)

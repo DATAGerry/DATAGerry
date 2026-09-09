@@ -15,6 +15,23 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 This module contains the implementation of the ObjectsManager
+
+The persistence layer of ``framework.objects`` - every object read, write, delete and reference lookup
+in the product goes through it. Three rules govern the methods here:
+
+**Every write is guarded by the object's CmdbType, and the guard runs first.** ``_guard_writable_type``
+is the one place that checks the type exists, is active, and that the caller's ACL grants the
+permission; insert, update and delete all call it, and ``delete_with_follow_up`` calls it *before* the
+ISMS cascade so a refused delete cannot destroy the object's risk assessments (it used to).
+
+**A read may skip what the caller cannot see, a write may not.** ``get_objects_by`` and
+``group_objects_by_value`` drop the objects whose type ACL denies the user and return the rest, so a
+list is filtered rather than refused - the counts they produce are therefore the caller's counts, not
+the collection's. Every other method raises ``AccessDeniedError``.
+
+**The ACL is only applied when a user and a permission are passed.** Several internal callers pass
+neither on purpose (a cascade cleaning up after a delete, the CI Explorer's neighbour reads); a route
+that omits them is a bug, and the ones that do are recorded in the discussion backlog
 """
 from logging import Logger, getLogger
 import copy
@@ -44,6 +61,10 @@ from cmdb.models.type_model.field_type_enum import FieldType
 from cmdb.models.type_model.section_type_enum import SectionType
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.isms_model import IsmsControlMeasureAssignment, IsmsRiskAssessment
+from cmdb.models.isms_model.isms_risk_assessment_constants import RiskAssessmentKey
+from cmdb.models.isms_model.isms_control_measure_assignment_constants import (
+    ControlMeasureAssignmentKey,
+)
 from cmdb.security.acl.helpers import verify_access
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.framework.results import IterationResult
@@ -51,7 +72,6 @@ from cmdb.framework.results import IterationResult
 from cmdb.errors.manager import (
     BaseManagerGetError,
     BaseManagerIterationError,
-    BaseManagerDeleteError,
 )
 from cmdb.errors.manager.objects_manager import (
     ObjectsManagerInitError,
@@ -63,9 +83,6 @@ from cmdb.errors.manager.objects_manager import (
     ObjectsManagerIterationError,
     ObjectsManagerMdsReferencesError,
     ObjectsManagerSummaryLineError,
-)
-from cmdb.errors.models.cmdb_object import (
-    CmdbObjectInitFromDataError,
 )
 from cmdb.errors.models.cmdb_type import CmdbTypeInitFromDataError
 from cmdb.errors.security import AccessDeniedError
@@ -104,9 +121,58 @@ class ObjectsManager(BaseManager):
         try:
             super().__init__(CmdbObject.COLLECTION, dbm, database)
         except Exception as err:
-            raise ObjectsManagerInitError(str(err)) from err
+            raise ObjectsManagerInitError(err) from err
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
+
+    def _guard_writable_type(
+            self,
+            type_id: int,
+            user: CmdbUser | None,
+            permission: AccessControlPermission | None,
+            missing_type_error: type[Exception],
+            action: str,
+            object_type: CmdbType | None = None) -> CmdbType:
+        """
+        Resolves an object's CmdbType and refuses the write when it may not be performed
+
+        The three checks every write shares, in one place: the type has to exist, it has to be
+        active, and the user's ACL has to grant the permission. They were written out separately in
+        insert, update and delete, with three different error types for the missing type and three
+        copies of the deactivated-type message
+
+        Args:
+            type_id (int): public_id of the object's CmdbType
+            user (CmdbUser | None): The CmdbUser performing the write, or None to skip the ACL
+            permission (AccessControlPermission | None): The permission required, or None
+            missing_type_error (type[Exception]): The error to raise when the type is gone - each
+                                                  caller reports its own operation
+            action (str): The verb for the deactivated-type message ('created', 'updated', 'removed')
+            object_type (CmdbType | None): An already-resolved type, which a bulk caller holding a
+                                           type map passes to skip one lookup per object
+
+        Raises:
+            AccessDeniedError: If the type is deactivated or the ACL denies the permission
+            Exception: 'missing_type_error' when no CmdbType carries the type_id
+
+        Returns:
+            CmdbType: The resolved (and permitted) CmdbType
+        """
+        if object_type is None:
+            object_type = self.get_object_type(type_id)
+
+        if not object_type:
+            raise missing_type_error("CmdbType of CmdbObject not found in database!")
+
+        if not object_type.active:
+            raise AccessDeniedError(
+                f'Objects cannot be {action} because type `{object_type.name}` is deactivated.'
+            )
+
+        verify_access(object_type, user, permission)
+
+        return object_type
+
 
     def insert_object(
         self,
@@ -132,24 +198,16 @@ class ObjectsManager(BaseManager):
         try:
             new_object: CmdbObject = CmdbObject.from_data(data)
 
-            object_type = self.get_object_type(new_object.type_id)
-
-            if not object_type:
-                raise ObjectsManagerInsertError("CmdbType of CmdbObject not found in database!")
-
-            if not object_type.active:
-                raise AccessDeniedError(
-                    f'Objects cannot be created because type `{object_type.name}` is deactivated.'
-                )
-
-            verify_access(object_type, user, permission)
+            self._guard_writable_type(
+                new_object.type_id, user, permission, ObjectsManagerInsertError, 'created',
+            )
 
             return self.insert(CmdbObject.to_json(new_object))
         except AccessDeniedError as err:
             raise err
         except Exception as err:
             LOGGER.error("[insert_object] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerInsertError(str(err)) from err
+            raise ObjectsManagerInsertError(err) from err
 
 
     def bulk_update_multi_data_sections(self, updated_objects: list[CmdbObject]) -> None:
@@ -177,7 +235,7 @@ class ObjectsManager(BaseManager):
             self.bulk_write(operations)
         except Exception as err:
             LOGGER.error("[bulk_update_multi_data_sections] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerUpdateError(str(err)) from err
+            raise ObjectsManagerUpdateError(err) from err
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
@@ -219,7 +277,7 @@ class ObjectsManager(BaseManager):
             raise err
         except Exception as err:
             LOGGER.error("[get_object] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerGetError(str(err)) from err
+            raise ObjectsManagerGetError(err) from err
 
 
     def iterate(
@@ -251,7 +309,7 @@ class ObjectsManager(BaseManager):
             return iteration_result
         except Exception as err:
             LOGGER.error("[iterate] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     def iterate_results(
@@ -285,7 +343,7 @@ class ObjectsManager(BaseManager):
             return [CmdbObject.from_data(result) for result in aggregation_result]
         except Exception as err:
             LOGGER.error("[iterate_results] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     def get_objects_by(
@@ -343,7 +401,7 @@ class ObjectsManager(BaseManager):
             raise err
         except Exception as err:
             LOGGER.error("[get_objects_by] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerGetError(str(err)) from err
+            raise ObjectsManagerGetError(err) from err
 
 
     def group_objects_by_value(
@@ -407,7 +465,7 @@ class ObjectsManager(BaseManager):
             return grouped_objects
         except Exception as err:
             LOGGER.error("[group_objects_by_value] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     def get_object_type(self, type_id: int, as_dict: bool = False) -> dict[str, Any] | CmdbType | None:
@@ -439,10 +497,10 @@ class ObjectsManager(BaseManager):
 
             return None
         except (BaseManagerGetError, CmdbTypeInitFromDataError) as err:
-            raise ObjectsManagerGetTypeError(str(err)) from err
+            raise ObjectsManagerGetTypeError(err) from err
         except Exception as err:
             LOGGER.error("[get_object_type] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerGetTypeError(str(err)) from err
+            raise ObjectsManagerGetTypeError(err) from err
 
 
     def find_objects(
@@ -486,7 +544,7 @@ class ObjectsManager(BaseManager):
             return [CmdbObject.from_data(found_object) for found_object in found_objects]
         except Exception as err:
             LOGGER.error("[find_objects] Exception: %s. Type: %s", err, type(err))
-            raise ObjectsManagerGetError(str(err)) from err
+            raise ObjectsManagerGetError(err) from err
 
 
     def get_new_object_public_id(self) -> int:
@@ -502,7 +560,7 @@ class ObjectsManager(BaseManager):
         try:
             return self.get_next_public_id(inc_id=True)
         except BaseManagerGetError as err:
-            raise ObjectsManagerGetError(str(err)) from err
+            raise ObjectsManagerGetError(err) from err
 
 
     def aggregate_objects(self, pipeline: list[dict], **kwargs) -> CommandCursor:
@@ -525,7 +583,7 @@ class ObjectsManager(BaseManager):
         try:
             return self.aggregate(pipeline=pipeline, **kwargs)
         except BaseManagerIterationError as err:
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     def count_objects_grouped_by_type(self) -> dict[int, int]:
@@ -660,7 +718,7 @@ class ObjectsManager(BaseManager):
             return self._filter_mds_results_referencing(results, referenced_object.public_id)
         except Exception as err:
             LOGGER.error("[get_mds_references_for_object] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     def _ref_field_names_by_type(self, type_ids: list[int]) -> dict[int, set[str]]:
@@ -744,8 +802,8 @@ class ObjectsManager(BaseManager):
 
 
     # The reference query exposes the full pagination/sort surface (limit/skip/sort/order) plus the
-    # target object and the ACL user/permission, so the argument count is inherent to the contract
-    # pylint: disable=too-many-arguments,too-many-positional-arguments
+    # target object and the ACL user/permission - eight, which is exactly what pylint allows, so the
+    # suppression this comment used to carry was doing nothing
     def references(
         self,
         object_: CmdbObject,
@@ -812,12 +870,12 @@ class ObjectsManager(BaseManager):
 
             return merge_result
         except ObjectsManagerMdsReferencesError as err:
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
         except ObjectsManagerIterationError as err:
             raise err
         except Exception as err:
             LOGGER.error("[references] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerIterationError(str(err)) from err
+            raise ObjectsManagerIterationError(err) from err
 
 
     @staticmethod
@@ -905,23 +963,14 @@ class ObjectsManager(BaseManager):
             else:
                 type_id = instance.get('type_id')
 
-            object_type = self.get_object_type(type_id)
+            self._guard_writable_type(type_id, user, permission, ObjectsManagerUpdateError, 'updated')
 
-            if not object_type:
-                raise ObjectsManagerUpdateError("CmdbType of CmdbObject not found in database!")
-
-            if not object_type.active:
-                raise AccessDeniedError(
-                    f'Objects cannot be updated because type `{object_type.name}` is deactivated.'
-                )
-            verify_access(object_type, user, permission)
-
-            self.update({'public_id': public_id}, instance)
+            self.update({CmdbObjectKey.PUBLIC_ID.value: public_id}, instance)
         except AccessDeniedError as err:
             raise err
         except Exception as err:
             LOGGER.error("[update_object] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerUpdateError(str(err)) from err
+            raise ObjectsManagerUpdateError(err) from err
 
 # --------------------------------------------------- CRUD - DELETE -------------------------------------------------- #
 
@@ -959,28 +1008,19 @@ class ObjectsManager(BaseManager):
 
             type_id = CmdbObject.from_data(to_delete_object).type_id
 
-            # Reuse a caller-supplied type when present (bulk-delete N+1 avoidance), else resolve it
-            if object_type is None:
-                object_type = self.get_object_type(type_id)
+            # A caller-supplied type skips the lookup (bulk-delete N+1 avoidance)
+            self._guard_writable_type(
+                type_id, user, permission, ObjectsManagerDeleteError, 'removed', object_type,
+            )
 
-            if not object_type:
-                raise ObjectsManagerDeleteError("CmdbType of CmdbObject not found in database!")
-
-            if not object_type.active:
-                raise AccessDeniedError(
-                    f'Objects cannot be removed because type `{object_type.name}` is deactivated.'
-                )
-
-            verify_access(object_type, user, permission)
-
-            return self.delete({'public_id': public_id})
+            return self.delete({CmdbObjectKey.PUBLIC_ID.value: public_id})
         except AccessDeniedError as err:
             raise err
-        except (ObjectsManagerGetError, BaseManagerDeleteError, CmdbObjectInitFromDataError) as err:
-            raise ObjectsManagerDeleteError(str(err)) from err
         except Exception as err:
+            # One arm, one log line: the named errors used to be re-wrapped silently while everything
+            # else was logged, so the likely failures were the ones an operator could not see
             LOGGER.error("[delete_object] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerDeleteError(str(err)) from err
+            raise ObjectsManagerDeleteError(err) from err
 
 
     def delete_with_follow_up(
@@ -990,15 +1030,27 @@ class ObjectsManager(BaseManager):
             object_type: CmdbType | None = None
         ) -> bool:
         """
-        Deletes a CmdbObject by its public_id after verifying access and type status and also deletes
-        RiskAssessments using this Object!
+        Deletes a CmdbObject together with the IsmsRiskAssessments that reference it
+
+        **Access is verified before anything is deleted.** The cascade used to run first and the
+        permission check second - inside ``delete_object`` - so a delete the caller was not allowed
+        to make, or one whose type had been deactivated, answered 403 with the object's risk
+        assessments and their control-measure assignments already gone. The object survived; its
+        risk history did not.
+
+        The cost of the ordering is one extra read of the object: this method resolves its type to
+        run the guard, and ``delete_object`` reads it again to delete it. A refused delete that
+        destroys ISMS data is worth more than a round trip.
+
+        A missing object is answered False without cascading - there is nothing to authorise and
+        nothing to delete
 
         Args:
             public_id (int): public_id of the CmdbObject which should be deleted
             user (CmdbUser | None): The CmdbUser requesting deletion
             permission (AccessControlPermission | None): The required permission for deletion
-            object_type (CmdbType | None): The object's already-resolved CmdbType, forwarded to
-                ``delete_object`` to skip its internal type lookup (see ``delete_object``)
+            object_type (CmdbType | None): The object's already-resolved CmdbType, used for the guard
+                here and forwarded to ``delete_object`` (see there)
 
         Raises:
             AccessDeniedError: If the object's type is deactivated or the user lacks permission
@@ -1007,6 +1059,24 @@ class ObjectsManager(BaseManager):
         Returns:
             bool: True if the CmdbObject was successfully deleted, False otherwise
         """
+        try:
+            to_delete_object: dict[str, Any] | None = self.get_one(public_id)
+        except Exception as err:
+            LOGGER.error("[delete_with_follow_up] Exception: %s, Type: %s", err, type(err))
+            raise ObjectsManagerDeleteError(err) from err
+
+        if not to_delete_object:
+            return False
+
+        object_type = self._guard_writable_type(
+            CmdbObject.from_data(to_delete_object).type_id,
+            user,
+            permission,
+            ObjectsManagerDeleteError,
+            'removed',
+            object_type,
+        )
+
         self.delete_object_from_risk_assessment_cascade(public_id)
 
         return self.delete_object(public_id, user, permission, object_type)
@@ -1103,7 +1173,7 @@ class ObjectsManager(BaseManager):
             )
         except Exception as err:
             LOGGER.error("[delete_all_object_references] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerUpdateError(str(err)) from err
+            raise ObjectsManagerUpdateError(err) from err
 
 
     def set_location_field_for_objects(self, object_ids: list[int], parent_id: int | None) -> None:
@@ -1138,7 +1208,7 @@ class ObjectsManager(BaseManager):
             )
         except Exception as err:
             LOGGER.error("[set_location_field_for_objects] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerUpdateError(str(err)) from err
+            raise ObjectsManagerUpdateError(err) from err
 
 
     def clear_location_field_for_objects(self, object_ids: list[int]) -> None:
@@ -1158,58 +1228,20 @@ class ObjectsManager(BaseManager):
 
     def delete_object_from_risk_assessment_cascade(self, deleted_object_id: int) -> None:
         """
-        Deletes all RiskAssessments and their ControlMeasureAssignments that reference an Object
-
-        Performed in three steps:
-        1. Find all RiskAssessments whose 'object_id_ref_type' is OBJECT and whose 'object_id'
-           matches the deleted object's public_id
-        2. Delete those RiskAssessments
-        3. Delete all ControlMeasureAssignments referencing the deleted RiskAssessments
+        Deletes every IsmsRiskAssessment of one CmdbObject, and their IsmsControlMeasureAssignments
 
         Args:
             deleted_object_id (int): The public_id of the deleted CmdbObject
         """
-        # Find all RiskAssessments referencing this Object
-        risk_assessment_query: dict[str, Any] = {
-            'object_id_ref_type': ObjectReferenceType.OBJECT,
-            'object_id': deleted_object_id
-        }
-
-        matching_risk_assessments: list[dict[str, Any]] = list(self.dbm.find(
-            IsmsRiskAssessment.COLLECTION,
-            self.db_name,
-            risk_assessment_query,
-            projection={'public_id': 1}
-        ))
-
-        if not matching_risk_assessments:
-            return
-
-        # Collect all RiskAssessment public_ids
-        risk_assessment_ids = [ra['public_id'] for ra in matching_risk_assessments]
-
-        if risk_assessment_ids:
-            # Delete the RiskAssessments
-            self.delete_many_from_other_collection(
-                IsmsRiskAssessment.COLLECTION,
-                {'public_id': {'$in': risk_assessment_ids}}
-            )
-
-            # Delete all ControlMeasureAssignments referencing those RiskAssessments
-            self.delete_many_from_other_collection(
-                IsmsControlMeasureAssignment.COLLECTION,
-                {'risk_assessment_id': {'$in': risk_assessment_ids}}
-            )
+        self._delete_risk_assessments_of_objects(deleted_object_id)
 
 
     def delete_objects_from_risk_assessment_cascade(self, deleted_object_ids: list[int]) -> None:
         """
-        Batched variant of ``delete_object_from_risk_assessment_cascade`` for a list of objects
+        The batched form: every IsmsRiskAssessment of ANY of the given CmdbObjects, in one pass
 
-        Deletes every RiskAssessment referencing ANY of the given objects, plus all their
-        ControlMeasureAssignments, using a single ``$in`` query per collection instead of the
-        per-object round-trips that calling the single-object cascade in a loop would issue.
-        The net effect is identical to invoking the single-object cascade for each id
+        One '$in' query per collection instead of the per-object round trips a loop over the
+        single-object form would issue. The net effect is identical
 
         Args:
             deleted_object_ids (list[int]): public_ids of the deleted CmdbObjects
@@ -1217,38 +1249,56 @@ class ObjectsManager(BaseManager):
         if not deleted_object_ids:
             return
 
-        # Find all RiskAssessments referencing any of these Objects in one query
-        risk_assessment_query: dict[str, Any] = {
-            'object_id_ref_type': ObjectReferenceType.OBJECT,
-            'object_id': {'$in': deleted_object_ids},
-        }
+        self._delete_risk_assessments_of_objects({'$in': deleted_object_ids})
 
+
+    def _delete_risk_assessments_of_objects(self, object_id_criteria: Any) -> None:
+        """
+        Deletes the IsmsRiskAssessments matching an object criterion, and their assignments
+
+        The single and the batched cascade differ only in that criterion - one public_id or an
+        '$in' of them - so the three steps live here once: find the assessments of those objects,
+        delete them, then delete the assignments that belonged to them.
+
+        The assessments are read before anything is deleted because the assignments are found by the
+        ids of the assessments that are about to go: deleting the assessments first would leave
+        nothing to look their assignments up by.
+
+        Only assessments whose reference type is OBJECT are touched - an assessment of an
+        ObjectGroup that happens to share the public_id is another entity's business, and its own
+        cascade in ObjectGroupsManager handles it
+
+        Args:
+            object_id_criteria (Any): The 'object_id' filter value - a public_id, or an '$in' clause
+        """
         matching_risk_assessments: list[dict[str, Any]] = list(self.dbm.find(
             IsmsRiskAssessment.COLLECTION,
             self.db_name,
-            risk_assessment_query,
-            projection={'public_id': 1},
+            {
+                RiskAssessmentKey.OBJECT_ID_REF_TYPE.value: ObjectReferenceType.OBJECT.value,
+                RiskAssessmentKey.OBJECT_ID.value: object_id_criteria,
+            },
+            projection={RiskAssessmentKey.PUBLIC_ID.value: 1},
         ))
 
         if not matching_risk_assessments:
             return
 
-        risk_assessment_ids: list[int] = [ra['public_id'] for ra in matching_risk_assessments]
+        risk_assessment_ids: list[int] = [
+            assessment[RiskAssessmentKey.PUBLIC_ID.value] for assessment in matching_risk_assessments
+        ]
 
-        # Delete the RiskAssessments
         self.delete_many_from_other_collection(
             IsmsRiskAssessment.COLLECTION,
-            {'public_id': {'$in': risk_assessment_ids}},
+            {RiskAssessmentKey.PUBLIC_ID.value: {'$in': risk_assessment_ids}},
         )
 
-        # Delete all ControlMeasureAssignments referencing those RiskAssessments
         self.delete_many_from_other_collection(
             IsmsControlMeasureAssignment.COLLECTION,
-            {'risk_assessment_id': {'$in': risk_assessment_ids}},
+            {ControlMeasureAssignmentKey.RISK_ASSESSMENT_ID.value: {'$in': risk_assessment_ids}},
         )
 
 
-    #pylint: disable=R0917
     def __merge_mds_references(self,
                                 mds_result: list,
                                 obj_result: IterationResult,
@@ -1311,7 +1361,7 @@ class ObjectsManager(BaseManager):
             return obj_result
         except Exception as err:
             LOGGER.error("[__merge_mds_references] Exception: %s, Type: %s", err, type(err))
-            raise ObjectsManagerMdsReferencesError(str(err)) from err
+            raise ObjectsManagerMdsReferencesError(err) from err
 
 
     def _compose_summary_line(

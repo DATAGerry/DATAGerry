@@ -32,6 +32,7 @@ import pytest
 
 from cmdb.errors.manager.objects_manager import (
     ObjectsManagerGetError,
+    ObjectsManagerInsertError,
     ObjectsManagerUpdateError,
     ObjectsManagerDeleteError,
     ObjectsManagerInitError,
@@ -42,6 +43,7 @@ from cmdb.errors.manager.objects_manager import (
 )
 from cmdb.errors.manager import BaseManagerGetError, BaseManagerIterationError
 from cmdb.errors.security import AccessDeniedError
+from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.type_model.field_type_enum import FieldType
@@ -667,12 +669,19 @@ def test_get_objects_by_batches_types_and_skips_access_denied() -> None:
 #                                      update_object / delete_object null type                                         #
 # -------------------------------------------------------------------------------------------------------------------- #
 def test_update_object_raises_when_type_missing() -> None:
-    """A missing CmdbType surfaces as ObjectsManagerUpdateError, not an AttributeError"""
+    """
+    A missing CmdbType surfaces as ObjectsManagerUpdateError, not an AttributeError
+
+    The three checks (type exists, type active, ACL) moved into _guard_writable_type, so the update
+    passes it the error type it wants raised - which is what this asserts.
+    """
     mock_self = MagicMock()
-    mock_self.get_object_type.return_value = None
+    mock_self._guard_writable_type.side_effect = ObjectsManagerUpdateError('gone')
 
     with pytest.raises(ObjectsManagerUpdateError):
         ObjectsManager.update_object(mock_self, OWNER_OBJECT_ID, {'type_id': OWNER_TYPE_ID, 'fields': []})
+
+    assert mock_self._guard_writable_type.call_args.args[3] is ObjectsManagerUpdateError
 
 
 def test_update_object_partial_writes_only_the_given_keys() -> None:
@@ -683,7 +692,7 @@ def test_update_object_partial_writes_only_the_given_keys() -> None:
     with patch(f'{PATH}.verify_access'):
         ObjectsManager.update_object(mock_self, OWNER_OBJECT_ID, {'ci_explorer_tooltip': 'hint'}, partial=True)
 
-    mock_self.get_object_type.assert_called_once_with(OWNER_TYPE_ID)
+    assert mock_self._guard_writable_type.call_args.args[0] == OWNER_TYPE_ID
     mock_self.update.assert_called_once_with({'public_id': OWNER_OBJECT_ID}, {'ci_explorer_tooltip': 'hint'})
 
 
@@ -766,7 +775,7 @@ def test_delete_object_raises_when_type_missing() -> None:
     """A present object whose type is gone surfaces as ObjectsManagerDeleteError, not AttributeError"""
     mock_self = MagicMock()
     mock_self.get_one.return_value = {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID}
-    mock_self.get_object_type.return_value = None
+    mock_self._guard_writable_type.side_effect = ObjectsManagerDeleteError('gone')
 
     with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=OWNER_TYPE_ID)):
         with pytest.raises(ObjectsManagerDeleteError):
@@ -939,7 +948,7 @@ def test_delete_object_wraps_get_type_error_as_delete_error() -> None:
     """An ObjectsManagerGetError while resolving the type surfaces as ObjectsManagerDeleteError."""
     mock_self = MagicMock()
     mock_self.get_one.return_value = {'public_id': 1, 'type_id': 5}
-    mock_self.get_object_type.side_effect = ObjectsManagerGetError('boom')
+    mock_self._guard_writable_type.side_effect = ObjectsManagerGetError('boom')
 
     with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=5)):
         with pytest.raises(ObjectsManagerDeleteError):
@@ -999,3 +1008,414 @@ def test_merge_mds_references_wraps_failure() -> None:
     with patch(f'{PATH}.CmdbObject.from_data', side_effect=RuntimeError('boom')):
         with pytest.raises(ObjectsManagerMdsReferencesError):
             merge(mock_self, [{'public_id': 9}], obj_result, 0, 0, 'public_id', 1)
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                     the shared write guard and the delete ordering                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestGuardWritableType:
+    """
+    The one place a write checks the type exists, is active, and that the ACL allows it
+
+    Insert, update and delete wrote the three checks out separately, with three different errors for
+    the missing type and three copies of the deactivated-type message.
+    """
+
+    def test_it_resolves_the_type_when_none_was_given(self) -> None:
+        """The ordinary path: one lookup, and the resolved type handed back to the caller."""
+        mock_self = MagicMock()
+        object_type = MagicMock(active=True)
+        mock_self.get_object_type.return_value = object_type
+
+        with patch(f'{PATH}.verify_access'):
+            resolved = ObjectsManager._guard_writable_type(  # pylint: disable=protected-access
+                mock_self, OWNER_TYPE_ID, None, None, ObjectsManagerDeleteError, 'removed',
+            )
+
+        mock_self.get_object_type.assert_called_once_with(OWNER_TYPE_ID)
+        assert resolved is object_type
+
+    def test_a_supplied_type_skips_the_lookup(self) -> None:
+        """
+        What keeps a bulk delete from resolving the same type once per object
+
+        The caller holding a type map passes it in, and the guard trusts it.
+        """
+        mock_self = MagicMock()
+        object_type = MagicMock(active=True)
+
+        with patch(f'{PATH}.verify_access'):
+            ObjectsManager._guard_writable_type(  # pylint: disable=protected-access
+                mock_self, OWNER_TYPE_ID, None, None, ObjectsManagerDeleteError, 'removed', object_type,
+            )
+
+        mock_self.get_object_type.assert_not_called()
+
+    def test_a_missing_type_raises_the_callers_own_error(self) -> None:
+        """
+        Each write reports its own operation
+
+        An insert failing because the type is gone must not surface as a delete error.
+        """
+        mock_self = MagicMock()
+        mock_self.get_object_type.return_value = None
+
+        with pytest.raises(ObjectsManagerInsertError):
+            ObjectsManager._guard_writable_type(  # pylint: disable=protected-access
+                mock_self, OWNER_TYPE_ID, None, None, ObjectsManagerInsertError, 'created',
+            )
+
+    def test_a_deactivated_type_is_refused_with_the_action_in_the_message(self) -> None:
+        """The message tells the user what they were trying to do, which is why 'action' is passed."""
+        mock_self = MagicMock()
+        mock_self.get_object_type.return_value = MagicMock(active=False, name='Server')
+
+        with pytest.raises(AccessDeniedError) as caught:
+            ObjectsManager._guard_writable_type(  # pylint: disable=protected-access
+                mock_self, OWNER_TYPE_ID, None, None, ObjectsManagerUpdateError, 'updated',
+            )
+
+        assert 'updated' in str(caught.value)
+
+    def test_the_acl_is_consulted_with_the_user_and_permission(self) -> None:
+        """The ACL check is the guard's last step, and it is the type's ACL that decides."""
+        mock_self = MagicMock()
+        object_type = MagicMock(active=True)
+        mock_self.get_object_type.return_value = object_type
+        user = MagicMock()
+
+        with patch(f'{PATH}.verify_access') as verify:
+            ObjectsManager._guard_writable_type(  # pylint: disable=protected-access
+                mock_self, OWNER_TYPE_ID, user, AccessControlPermission.DELETE,
+                ObjectsManagerDeleteError, 'removed',
+            )
+
+        verify.assert_called_once_with(object_type, user, AccessControlPermission.DELETE)
+
+
+class TestDeleteWithFollowUpChecksAccessFirst:
+    """
+    The ordering defect: the ISMS cascade used to run before the permission check
+
+    A delete the caller was not allowed to make answered 403 with the object's risk assessments and
+    their control-measure assignments already deleted - the object survived, its risk history did not.
+    """
+
+    def test_a_refused_delete_leaves_the_risk_assessments_alone(self) -> None:
+        """Nothing is deleted when the guard refuses - not the cascade, not the object."""
+        mock_self = MagicMock()
+        mock_self.get_one.return_value = {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID}
+        mock_self._guard_writable_type.side_effect = AccessDeniedError('denied')
+
+        with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=OWNER_TYPE_ID)):
+            with pytest.raises(AccessDeniedError):
+                ObjectsManager.delete_with_follow_up(mock_self, OWNER_OBJECT_ID, MagicMock(),
+                                                     AccessControlPermission.DELETE)
+
+        mock_self.delete_object_from_risk_assessment_cascade.assert_not_called()
+        mock_self.delete_object.assert_not_called()
+
+    def test_a_permitted_delete_cascades_then_deletes(self) -> None:
+        """The order the ISMS data depends on: guard, cascade, delete."""
+        mock_self = MagicMock()
+        mock_self.get_one.return_value = {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID}
+        order: list[str] = []
+        mock_self._guard_writable_type.side_effect = lambda *_a, **_k: order.append('guard')
+        mock_self.delete_object_from_risk_assessment_cascade.side_effect = lambda *_: order.append('cascade')
+        mock_self.delete_object.side_effect = lambda *_a, **_k: order.append('delete') or True
+
+        with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=OWNER_TYPE_ID)):
+            assert ObjectsManager.delete_with_follow_up(mock_self, OWNER_OBJECT_ID) is True
+
+        assert order == ['guard', 'cascade', 'delete']
+
+    def test_a_missing_object_neither_cascades_nor_raises(self) -> None:
+        """
+        There is nothing to authorise and nothing to delete
+
+        Cascading here would delete the risk assessments of an object that is already gone, on a call
+        that answers False.
+        """
+        mock_self = MagicMock()
+        mock_self.get_one.return_value = None
+
+        assert ObjectsManager.delete_with_follow_up(mock_self, OWNER_OBJECT_ID) is False
+        mock_self.delete_object_from_risk_assessment_cascade.assert_not_called()
+
+    def test_the_resolved_type_is_handed_to_the_delete(self) -> None:
+        """The guard already resolved it, so delete_object must not look it up a second time."""
+        mock_self = MagicMock()
+        mock_self.get_one.return_value = {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID}
+        object_type = MagicMock(active=True)
+        mock_self._guard_writable_type.return_value = object_type
+
+        with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=OWNER_TYPE_ID)):
+            ObjectsManager.delete_with_follow_up(mock_self, OWNER_OBJECT_ID)
+
+        assert mock_self.delete_object.call_args.args[3] is object_type
+
+    def test_a_failing_read_is_wrapped(self) -> None:
+        """The read happens outside delete_object now, so it needs its own mapping."""
+        mock_self = MagicMock()
+        mock_self.get_one.side_effect = RuntimeError('boom')
+
+        with pytest.raises(ObjectsManagerDeleteError):
+            ObjectsManager.delete_with_follow_up(mock_self, OWNER_OBJECT_ID)
+
+
+class TestTheSharedRiskAssessmentCascade:
+    """One implementation for the single and the batched form."""
+
+    def test_the_single_form_filters_on_one_object_id(self) -> None:
+        """Both public methods are thin wrappers over the shared criterion."""
+        mock_self = MagicMock()
+
+        ObjectsManager.delete_object_from_risk_assessment_cascade(mock_self, OWNER_OBJECT_ID)
+
+        mock_self._delete_risk_assessments_of_objects.assert_called_once_with(OWNER_OBJECT_ID)
+
+    def test_the_batched_form_filters_with_an_in_clause(self) -> None:
+        """One '$in' query per collection instead of a round trip per object."""
+        mock_self = MagicMock()
+
+        ObjectsManager.delete_objects_from_risk_assessment_cascade(mock_self, [1, 2, 3])
+
+        mock_self._delete_risk_assessments_of_objects.assert_called_once_with({'$in': [1, 2, 3]})
+
+    def test_the_batched_form_does_nothing_for_an_empty_list(self) -> None:
+        """A bulk delete of nothing must not query, let alone delete."""
+        mock_self = MagicMock()
+
+        ObjectsManager.delete_objects_from_risk_assessment_cascade(mock_self, [])
+
+        mock_self._delete_risk_assessments_of_objects.assert_not_called()
+
+    def test_only_assessments_of_OBJECT_reference_type_are_deleted(self) -> None:
+        """
+        An assessment of an ObjectGroup that happens to share the public_id belongs to another cascade
+
+        The two counters are independent, so overlapping ids are the normal case.
+        """
+        mock_self = MagicMock()
+        mock_self.dbm.find.return_value = []
+
+        ObjectsManager._delete_risk_assessments_of_objects(  # pylint: disable=protected-access
+            mock_self, OWNER_OBJECT_ID,
+        )
+
+        criteria = mock_self.dbm.find.call_args.args[2]
+
+        assert criteria['object_id_ref_type'] == 'OBJECT'
+        assert criteria['object_id'] == OWNER_OBJECT_ID
+
+    def test_nothing_is_deleted_when_no_assessment_matches(self) -> None:
+        """The common case: an object nobody assessed costs one query and no deletes."""
+        mock_self = MagicMock()
+        mock_self.dbm.find.return_value = []
+
+        ObjectsManager._delete_risk_assessments_of_objects(  # pylint: disable=protected-access
+            mock_self, OWNER_OBJECT_ID,
+        )
+
+        mock_self.delete_many_from_other_collection.assert_not_called()
+
+    def test_the_assignments_are_deleted_by_the_assessment_ids(self) -> None:
+        """
+        Read first, delete second: the assignments are found by the ids of the assessments going away
+
+        Deleting the assessments first would leave nothing to look their assignments up by.
+        """
+        mock_self = MagicMock()
+        mock_self.dbm.find.return_value = [{'public_id': 11}, {'public_id': 12}]
+
+        ObjectsManager._delete_risk_assessments_of_objects(  # pylint: disable=protected-access
+            mock_self, OWNER_OBJECT_ID,
+        )
+
+        assessments_call, assignments_call = mock_self.delete_many_from_other_collection.call_args_list
+
+        assert assessments_call.args[1] == {'public_id': {'$in': [11, 12]}}
+        assert assignments_call.args[1] == {'risk_assessment_id': {'$in': [11, 12]}}
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                  the ACL arms: refused, skipped, and re-raised                                       #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestAccessDeniedTravelsUnwrapped:
+    """
+    A denial is not a manager failure
+
+    Every write and single read re-raises AccessDeniedError as-is, so the route can answer 403 rather
+    than the 400 its manager-error arm would produce.
+    """
+
+    def test_insert_re_raises_a_denial(self) -> None:
+        """The guard refuses, and the insert must not turn that into an insert error."""
+        mock_self = MagicMock()
+        mock_self._guard_writable_type.side_effect = AccessDeniedError('denied')
+
+        with pytest.raises(AccessDeniedError):
+            ObjectsManager.insert_object(
+                mock_self,
+                {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID, 'author_id': 1, 'fields': []},
+            )
+
+        mock_self.insert.assert_not_called()
+
+    def test_update_re_raises_a_denial(self) -> None:
+        """Same on the update path."""
+        mock_self = MagicMock()
+        mock_self._guard_writable_type.side_effect = AccessDeniedError('denied')
+
+        with pytest.raises(AccessDeniedError):
+            ObjectsManager.update_object(mock_self, OWNER_OBJECT_ID, {'type_id': OWNER_TYPE_ID, 'fields': []})
+
+        mock_self.update.assert_not_called()
+
+    def test_a_single_read_re_raises_a_denial(self) -> None:
+        """
+        Reading one object the caller may not see is a 403, not an empty result
+
+        The list reads below are the deliberate exception to that.
+        """
+        mock_self = MagicMock()
+        mock_self.get_one.return_value = {'public_id': OWNER_OBJECT_ID, 'type_id': OWNER_TYPE_ID}
+
+        with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(type_id=OWNER_TYPE_ID)), \
+             patch(f'{PATH}.verify_access', side_effect=AccessDeniedError('denied')):
+            with pytest.raises(AccessDeniedError):
+                ObjectsManager.get_object(mock_self, OWNER_OBJECT_ID, MagicMock(), 'READ')
+
+    def test_a_denial_raised_outside_the_per_object_loop_propagates(self) -> None:
+        """
+        get_objects_by skips the objects the caller may not see - but only those
+
+        A denial from the query itself is a real refusal and reaches the caller.
+        """
+        mock_self = MagicMock()
+        mock_self.get_many.side_effect = AccessDeniedError('denied')
+
+        with pytest.raises(AccessDeniedError):
+            ObjectsManager.get_objects_by(mock_self, user=MagicMock(), permission='READ')
+
+
+class TestListReadsSkipWhatTheCallerMayNotSee:
+    """The deliberate exception: a list is filtered rather than refused."""
+
+    def test_get_objects_by_drops_the_inaccessible_objects(self) -> None:
+        """
+        Two objects, one type the caller may not read - the other object is still returned
+
+        Which also means the list is the caller's list, not the collection's.
+        """
+        mock_self = MagicMock()
+        mock_self.get_many.return_value = [{'type_id': 1}, {'type_id': 2}]
+        mock_self._load_types_lookup.return_value = {1: 'allowed-type', 2: 'denied-type'}
+
+        def _verify(object_type: Any, *_args: Any) -> None:
+            if object_type == 'denied-type':
+                raise AccessDeniedError('denied')
+
+        with patch(f'{PATH}.CmdbObject.from_data', side_effect=lambda doc: MagicMock(type_id=doc['type_id'])), \
+             patch(f'{PATH}.verify_access', side_effect=_verify):
+            result = ObjectsManager.get_objects_by(mock_self, user=MagicMock(), permission='READ')
+
+        assert [item.type_id for item in result] == [1]
+
+    def test_group_objects_by_value_drops_the_inaccessible_groups(self) -> None:
+        """
+        The same rule on the grouped read, which feeds the object-count widgets
+
+        So a count shown to a restricted user is their count, not the total.
+        """
+        mock_self = MagicMock()
+        mock_self.aggregate_objects.return_value = [{'result': {'type_id': 1}}, {'result': {'type_id': 2}}]
+        mock_self.get_object_type.side_effect = lambda type_id: type_id
+
+        def _verify(object_type: Any, *_args: Any) -> None:
+            if object_type == 2:
+                raise AccessDeniedError('denied')
+
+        with patch(f'{PATH}.CmdbObject.from_data', side_effect=lambda doc: MagicMock(type_id=doc['type_id'])), \
+             patch(f'{PATH}.verify_access', side_effect=_verify):
+            grouped = ObjectsManager.group_objects_by_value(
+                mock_self, 'type_id', user=MagicMock(), permission='READ',
+            )
+
+        assert grouped == [{'result': {'type_id': 1}}]
+
+
+class TestTheFilterShapesBothQueryBuildersAccept:
+    """A criterion may be one match stage or a whole pipeline, and both paths are live."""
+
+    def test_the_mds_reference_query_accepts_a_single_match(self) -> None:
+        """A dict filter is appended as one stage."""
+        mock_self = MagicMock()
+        mock_self.aggregate_from_other_collection.return_value = []
+        referenced = MagicMock(type_id=OWNER_TYPE_ID)
+
+        ObjectsManager.get_mds_references_for_object(mock_self, referenced, {'$match': {'active': True}})
+
+        pipeline = mock_self.aggregate_from_other_collection.call_args.args[1]
+
+        assert {'$match': {'active': True}} in pipeline
+
+    def test_the_reference_query_accepts_a_single_match(self) -> None:
+        """The same shape on the reference lookup."""
+        mock_self = MagicMock()
+        mock_self._build_reference_match_queries.return_value = []
+
+        with patch(f'{PATH}.BuilderParameters') as builder_params:
+            ObjectsManager.references(mock_self, MagicMock(), {'$match': {'active': True}}, 10, 0, 'public_id', 1)
+
+        pipeline = builder_params.call_args.kwargs['criteria']
+
+        assert {'$match': {'active': True}} in pipeline
+
+
+class TestTheMdsMerge:
+    """Merging the MDS reference hits into the ordinary ones."""
+
+    def test_an_object_already_referenced_is_not_added_twice(self) -> None:
+        """
+        The same object can be reached through a normal field AND an MDS row
+
+        It is one node in the result, which is what the referenced-ids set is for.
+        """
+        mock_self = MagicMock()
+        existing = MagicMock(public_id=7)
+        obj_result = MagicMock(results=[existing], total=1)
+
+        with patch(f'{PATH}.CmdbObject.from_data', return_value=MagicMock(public_id=7)):
+            merged = ObjectsManager._ObjectsManager__merge_mds_references(  # pylint: disable=protected-access
+                mock_self, [{'public_id': 7}], obj_result, 0, 0, 'public_id', 1,
+            )
+
+        assert merged.total == 1
+        assert merged.results == [existing]
+
+    def test_the_mds_reference_query_tolerates_no_filter_at_all(self) -> None:
+        """
+        A criterion that is neither a match nor a pipeline contributes nothing
+
+        Pinned as tolerated rather than refused: the reference lookup is called internally with
+        whatever the route parsed, and an empty search there means "no extra filter", not an error.
+        """
+        mock_self = MagicMock()
+        mock_self.aggregate_from_other_collection.return_value = []
+
+        ObjectsManager.get_mds_references_for_object(mock_self, MagicMock(type_id=OWNER_TYPE_ID), None)
+
+        pipeline = mock_self.aggregate_from_other_collection.call_args.args[1]
+
+        assert all('$match' not in str(stage) or 'fields' in str(stage) for stage in pipeline[:1])
+
+    def test_the_reference_query_tolerates_no_filter_at_all(self) -> None:
+        """The same tolerance on the reference lookup."""
+        mock_self = MagicMock()
+        mock_self._build_reference_match_queries.return_value = []
+
+        with patch(f'{PATH}.BuilderParameters') as builder_params:
+            ObjectsManager.references(mock_self, MagicMock(), None, 10, 0, 'public_id', 1)
+
+        assert isinstance(builder_params.call_args.kwargs['criteria'], list)

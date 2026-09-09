@@ -37,6 +37,8 @@ class PortConnectionError(BaseStrEnum):
     ENDPOINT_NOT_FOUND = 'No Port with ID {port_id} exists!'
     CABLE_FIELD_ON_INTERNAL = "'{field}' describes a cable and can not be set on an {connection_type} " \
                               'connection!'
+    CABLE_FIELD_WITH_CABLE_CI = "'{field}' is owned by the linked Cable CI (ID {cable_ci_id}) and can " \
+                                'not be set on the connection - edit the Cable CI instead!'
     CABLE_CI_NOT_FOUND = 'No CmdbObject with ID {cable_ci_id} exists!'
     CABLE_CI_NOT_A_CABLE = 'The CmdbObject with ID {cable_ci_id} is not a Cable!'
 

@@ -26,12 +26,21 @@ Five things live here today:
     half-built device behind
   - the connection validator: the rules a CmdbPortConnection has to satisfy that neither its document
     schema nor its indexes can express
+  - the resolved cable block a connection is READ with: one shape whether the cable lives on the
+    connection or on the Cable CI it names
   - the derivation of a port's `connected` flag, computed on read and never stored
+  - the unassigned-cable picker: which Cable CIs a connection may still claim, and the row it shows
 
 The write invariants a PORT has to satisfy live in the route layer's helper instead, because they are
 request-shaped (they abort). Everything here is pure and reports its result, so a write, a dry-run
 pre-check, a read projection and a preview can all share it
 """
+from .assignable_cables import (
+    build_cable_name_search_criteria,
+    build_unassigned_cable_criteria,
+    build_unassigned_cable_row,
+    build_unassigned_cable_rows,
+)
 from .bulk_create import BulkCreateResult, create_batch, roll_back
 from .cascade import (
     delete_connections_of_port,
@@ -62,9 +71,11 @@ from .interface_links import (
     is_dangling,
     resolve_link_row,
 )
+from .connection_cable_view import attach_cable_view, attach_cable_views, build_cable_view
 from .connection_constants import PortConnectionError, CONNECTION_ABORT_PREFIX
 from .connection_validator import (
     cable_ci_blockers,
+    cable_duplication_blockers,
     cable_field_blockers,
     coerce_connection_type,
     endpoint_blockers,
@@ -75,6 +86,10 @@ from .connection_validator import (
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
+    'build_cable_name_search_criteria',
+    'build_unassigned_cable_criteria',
+    'build_unassigned_cable_row',
+    'build_unassigned_cable_rows',
     'BulkCreateResult',
     'create_batch',
     'roll_back',
@@ -102,7 +117,11 @@ __all__: list[str] = [
     'syntax_blockers',
     'PortConnectionError',
     'CONNECTION_ABORT_PREFIX',
+    'attach_cable_view',
+    'attach_cable_views',
+    'build_cable_view',
     'cable_ci_blockers',
+    'cable_duplication_blockers',
     'cable_field_blockers',
     'coerce_connection_type',
     'endpoint_blockers',

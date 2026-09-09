@@ -14,17 +14,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Provides CmdbLocation related classes and methods
+This module contains the classes of all object-search errors
 """
-from .location_utils import (
-    sort_locations_by_name,
-    to_location_document,
-    validate_root_location,
-)
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__: list[str] = [
-    'sort_locations_by_name',
-    'to_location_document',
-    'validate_root_location',
-]
+class SearchError(Exception):
+    """
+    Raised to catch all object-search related errors
+    """
+    def __init__(self, err: str | Exception) -> None:
+        """
+        Raised to catch all object-search related errors
+
+        Args:
+            err (str | Exception): The message, or the error being wrapped
+        """
+        super().__init__(err)
+
+# ------------------------------------------------- SEARCH - ERRORS -------------------------------------------------- #
+
+class SearchParamError(SearchError):
+    """
+    Raised when a search parameter of the request cannot be read
+
+    The route answers 400: a parameter that cannot be parsed used to be dropped, and a search that
+    silently loses a filter returns MORE objects than the caller asked to see
+    """
