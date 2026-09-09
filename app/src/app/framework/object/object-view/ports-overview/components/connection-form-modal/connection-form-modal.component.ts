@@ -41,7 +41,7 @@ import { cableSwatchColor } from '../../utils/port-connection.util';
 import { ChoiceCard } from '../choice-card-group/choice-card-group.component';
 import { ObjectOption } from '../object-option-picker/object-option-picker.component';
 import { ConnectionForm, ConnectionFormGroup, ConnectionStep } from './connection-form';
-import { ReviewRow, buildReviewRows } from './connection-review';
+import { ReviewRow, buildEndpointRows, buildReviewRows } from './connection-review';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /**
@@ -317,7 +317,10 @@ export class ConnectionFormModalComponent implements OnInit, OnDestroy {
 
 
     public get reviewRows(): ReviewRow[] {
-        return buildReviewRows(this.connectionForm, this.cableTypeOptions, this.linkedCableLabel);
+        return [
+            ...buildEndpointRows(this.nearEndpoint, this.farEndpoint),
+            ...buildReviewRows(this.connectionForm, this.cableTypeOptions, this.linkedCableLabel)
+        ];
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */

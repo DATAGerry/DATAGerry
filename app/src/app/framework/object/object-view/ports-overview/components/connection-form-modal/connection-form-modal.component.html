@@ -5,45 +5,6 @@
   [subtitle]="objectLabel"
   (dismiss)="activeModal.dismiss()">
 
-  <!-- A connection is undirected, so the two ends are shown side by side and never as an arrow. -->
-  <section class="connection-pair" aria-label="Connected ports">
-    @if (nearEndpoint; as near) {
-      <div class="endpoint-card">
-        <span class="endpoint-card__role">This port</span>
-        <span class="endpoint-card__port">
-          {{ near.portName }}
-          @if (near.sideLabel) {
-            <span class="endpoint-card__side">{{ near.sideLabel }}</span>
-          }
-        </span>
-        <span class="endpoint-card__object">{{ near.objectLabel }}</span>
-      </div>
-    }
-
-    <span class="connection-pair__link">
-      <span aria-hidden="true">&harr;</span>
-      <span class="visually-hidden">is connected to</span>
-    </span>
-
-    @if (farEndpoint; as far) {
-      <div class="endpoint-card">
-        <span class="endpoint-card__role">Far end</span>
-        <span class="endpoint-card__port">
-          {{ far.portName }}
-          @if (far.sideLabel) {
-            <span class="endpoint-card__side">{{ far.sideLabel }}</span>
-          }
-        </span>
-        <span class="endpoint-card__object">{{ far.objectLabel }}</span>
-      </div>
-    } @else {
-      <div class="endpoint-card endpoint-card--empty">
-        <span class="endpoint-card__role">Far end</span>
-        <span class="endpoint-card__port">{{ isEdit ? 'Reading…' : 'Not chosen yet' }}</span>
-      </div>
-    }
-  </section>
-
   @if (isInternal) {
     <app-warning-alert
       title="Created automatically:"

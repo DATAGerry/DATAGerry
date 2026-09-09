@@ -24,74 +24,6 @@
     }
 }
 
-/* The two ends of the link, read left to right without implying a direction. */
-.connection-pair {
-    display: grid;
-    align-items: stretch;
-    gap: 0.5rem;
-    grid-template-columns: 1fr auto 1fr;
-    margin-bottom: 0.5rem;
-
-    &__link {
-        display: flex;
-        align-items: center;
-        color: var(--dg-faint);
-        font-size: 1.35rem;
-        line-height: 1;
-    }
-}
-
-.endpoint-card {
-    display: grid;
-    align-content: start;
-    gap: 0.2rem;
-    padding: 0.55rem 0.8rem;
-    border: 1px solid var(--dg-border);
-    border-radius: var(--dg-radius-md);
-    background: var(--dg-surface);
-    min-width: 0;
-
-    &--empty {
-        border-style: dashed;
-        background: var(--dg-surface-tint);
-    }
-
-    &__role {
-        color: var(--dg-muted);
-        font-size: 0.7rem;
-        font-weight: 600;
-        letter-spacing: 0.05em;
-        text-transform: uppercase;
-    }
-
-    &__port {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        color: var(--dg-ink);
-        font-size: 0.95rem;
-        font-weight: 650;
-        overflow-wrap: anywhere;
-    }
-
-    &__side {
-        padding: 0.05rem 0.4rem;
-        border: 1px solid rgba(var(--dg-brand-rgb), 0.18);
-        border-radius: 999px;
-        background: rgba(var(--dg-brand-rgb), 0.08);
-        color: var(--dg-brand-ink);
-        font-size: 0.7rem;
-        font-weight: 500;
-    }
-
-    &__object {
-        color: var(--dg-muted);
-        font-size: 0.8rem;
-        line-height: 1.35;
-        overflow-wrap: anywhere;
-    }
-}
-
 .connection-form {
     &__lead {
         margin: 0 0 1rem;
@@ -177,15 +109,3 @@ cmdb-choice-card-group {
     margin-bottom: 1rem;
 }
 
-/* The pair stacks before it gets too narrow to read. */
-@media (max-width: 575.98px) {
-    .connection-pair {
-        grid-template-columns: 1fr;
-        justify-items: stretch;
-    }
-
-    .connection-pair__link {
-        justify-content: center;
-        transform: rotate(90deg);
-    }
-}

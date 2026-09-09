@@ -17,6 +17,8 @@
 */
 import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 
+import { ConnectionEndpoint } from '../../models/port-connection.types';
+
 import { ConnectionForm } from './connection-form';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -33,6 +35,20 @@ export interface ReviewRow {
  * A linked CI lists no cable values: they are not part of the write, and repeating them here would
  * claim the dialog is about to store something it does not send.
  */
+/** The two ends, listed as plain review lines. */
+export function buildEndpointRows(
+    near: ConnectionEndpoint | null,
+    far: ConnectionEndpoint | null
+): ReviewRow[] {
+    const rows: ReviewRow[] = [];
+
+    pushRow(rows, 'This port', describeEndpoint(near));
+    pushRow(rows, 'Far end', describeEndpoint(far));
+
+    return rows;
+}
+
+
 export function buildReviewRows(
     form: ConnectionForm,
     cableTypeOptions: readonly FieldOption[],
@@ -60,6 +76,18 @@ export function buildReviewRows(
 }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
+
+/** The port, its side where the type has one, and the object it sits in. */
+function describeEndpoint(endpoint: ConnectionEndpoint | null): string | null {
+    if (!endpoint) {
+        return null;
+    }
+
+    const port = endpoint.sideLabel ? `${ endpoint.portName } (${ endpoint.sideLabel })` : endpoint.portName;
+
+    return endpoint.objectLabel ? `${ port } - ${ endpoint.objectLabel }` : port;
+}
+
 
 /** An unanswered question is left out rather than listed as empty. */
 function pushRow(rows: ReviewRow[], label: string, value: string | null): void {
