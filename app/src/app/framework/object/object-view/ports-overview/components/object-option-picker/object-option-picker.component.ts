@@ -45,6 +45,13 @@ import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 import { objectDisplayLabel } from '../../utils/object-label.util';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+/** An option is an id and a label, so the fields and sections of every object are left unread. */
+const OPTION_LABEL_PROJECTION = {
+    'object_information.object_id': 1,
+    'summary_line': 1,
+    'type_information': 1
+};
+
 /** Objects are pulled in pages as the dropdown is scrolled. */
 const PAGE_SIZE = 10;
 
@@ -56,6 +63,9 @@ const SEARCH_DEBOUNCE_MS = 300;
 export interface ObjectOption {
     public_id: number;
     option_label: string;
+
+    /** The type the option is listed under, so a long device list reads by class. */
+    group: string;
 }
 
 
@@ -235,6 +245,7 @@ export class ObjectOptionPickerComponent implements ControlValueAccessor, OnInit
         this.objectService
             .getObjects({
                 filter: searchFilter.length ? searchFilter : undefined,
+                projection: OPTION_LABEL_PROJECTION,
                 limit: PAGE_SIZE,
                 sort: 'public_id',
                 order: 1,
@@ -287,7 +298,8 @@ export class ObjectOptionPickerComponent implements ControlValueAccessor, OnInit
     private toOption(result: RenderResult): ObjectOption {
         return {
             public_id: result?.object_information?.object_id,
-            option_label: objectDisplayLabel(result)
+            option_label: objectDisplayLabel(result),
+            group: result?.type_information?.type_label?.trim() || 'Unknown type'
         };
     }
 
