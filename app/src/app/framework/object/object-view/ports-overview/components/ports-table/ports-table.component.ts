@@ -145,6 +145,21 @@ export class PortsTableComponent implements OnInit, OnChanges {
         this.disconnectPort.emit(row);
     }
 
+/* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+    /** A row without any permitted action shows a dash instead of an empty menu. */
+    public hasRowActions(row: PortRow): boolean {
+        return this.canEdit || this.canDelete || this.hasConnectionActions(row);
+    }
+
+
+    /** Connect applies to a free port; edit cable and disconnect to a cabled one. */
+    public hasConnectionActions(row: PortRow): boolean {
+        return row.cableConnectionId
+            ? this.canEditConnection || this.canDisconnect
+            : this.canConnect;
+    }
+
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
 
     private applyColumns(): void {
@@ -240,7 +255,7 @@ export class PortsTableComponent implements OnInit, OnChanges {
                 searchable: false,
                 fixed: true,
                 template: this.actionsTemplate,
-                style: { 'width': '140px', 'text-align': 'center' }
+                style: { 'width': '72px', 'text-align': 'center' }
             }
         ];
 
