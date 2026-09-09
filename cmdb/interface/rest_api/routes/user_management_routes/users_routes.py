@@ -56,6 +56,7 @@ from cmdb.errors.manager.users_manager import (
     UsersManagerUpdateError,
     UsersManagerDeleteError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -147,7 +148,7 @@ def get_cmdb_users(params: CollectionParameters, request_user: CmdbUser) -> Resp
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except UsersManagerIterationError as err:
@@ -180,7 +181,7 @@ def get_cmdb_user(public_id: int, request_user: CmdbUser) -> Response:
         if not requested_user:
             abort(404, f"The User with ID:{public_id} was not found!")
 
-        return GetSingleResponse(CmdbUser.to_public_json(requested_user), body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(CmdbUser.to_public_json(requested_user), body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except UsersManagerGetError as err:

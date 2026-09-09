@@ -91,6 +91,7 @@ from cmdb.interface.rest_api.routes.port_routes.port_interface_link_helper impor
     refuse_identity_change,
     with_interface_rows,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -273,7 +274,7 @@ def get_port_interface_link(public_id: int, request_user: CmdbUser) -> Response:
 
         with_interface_rows(objects_manager, [link])
 
-        return GetSingleResponse(link, body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(link, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except AccessDeniedError as err:

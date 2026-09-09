@@ -36,7 +36,7 @@ from typing import Any
 import pytest
 
 from cmdb.class_schema.isms_model.isms_risk_assessment_schema import get_isms_risk_assessment_schema
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.models.isms_model import IsmsRiskAssessment
 from cmdb.models.isms_model.isms_risk_assessment_constants import (
     CONTROL_MEASURE_ASSIGNMENTS_KEY,

@@ -48,6 +48,7 @@ from cmdb.interface.rest_api.responses import (
 )
 
 from cmdb.interface.rest_api.routes.log_routes.object_relation_log_constants import ObjectRelationLogRight
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 
 from cmdb.errors.manager.object_relation_logs_manager import (
     ObjectRelationLogsManagerIterationError,
@@ -101,7 +102,7 @@ def get_cmdb_object_relation_logs(params: CollectionParameters, request_user: Cm
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:
@@ -144,7 +145,7 @@ def get_cmdb_object_relation_log(public_id: int, request_user: CmdbUser) -> Resp
         requested_object_relation_log = object_relation_logs_manager.get_object_relation_log(public_id)
 
         if requested_object_relation_log:
-            api_response = GetSingleResponse(requested_object_relation_log, body=request.method == 'HEAD')
+            api_response = GetSingleResponse(requested_object_relation_log, body=request_wants_body())
 
             return api_response.make_response()
 

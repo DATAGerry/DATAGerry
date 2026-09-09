@@ -59,6 +59,7 @@ from cmdb.interface.rest_api.responses.response_parameters import CollectionPara
 from cmdb.interface.rest_api.routes.routes_helper import (
     append_criteria_to_filter,
     fetch_only_active_objects,
+    request_wants_body,
 )
 
 from cmdb.framework.rack.assignable_objects import build_assignable_criteria
@@ -148,7 +149,7 @@ def get_assignable_objects(params: CollectionParameters, rack_id: int, request_u
             total=total,
             params=params,
             url=request.url,
-            body=request.method == 'HEAD',
+            body=request_wants_body(),
         ).make_response()
     except HTTPException as http_err:
         raise http_err

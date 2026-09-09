@@ -19,7 +19,8 @@ Unit tests for cmdb.database.mongo_database_manager.MongoDatabaseManager
 Pure tests (no MongoDB): the manager is built via __new__ (skipping the real connector + keepalive
 thread) and its collection/connector calls are mocked. Covers the happy paths of the create/counter
 helpers and, for every wrapper, the ``except -> raise <typed error>`` mapping. Error paths raise a
-plain Exception (not a PyMongoError) so the @retry_operation decorator does not retry + sleep.
+plain Exception, i.e. a deterministic failure, so the @retry_operation decorator reports it on the
+first attempt instead of repeating it - its policy and budget are tested in test_retry.py.
 """
 from unittest.mock import MagicMock
 

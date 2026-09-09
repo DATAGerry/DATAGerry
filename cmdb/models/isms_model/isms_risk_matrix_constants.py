@@ -31,7 +31,10 @@ from cmdb.utils import BaseStrEnum
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
+    'MatrixType',
     'RiskMatrixCellKey',
+    'RiskMatrixReportKey',
+    'RISK_MATRIX_GRID_KEY',
     'RISK_MATRIX_PUBLIC_ID',
     'UNASSIGNED_RISK_CLASS_ID',
 ]
@@ -41,6 +44,9 @@ RISK_MATRIX_PUBLIC_ID: int = 1
 
 # A cell with no IsmsRiskClass assigned yet
 UNASSIGNED_RISK_CLASS_ID: int = 0
+
+# The key holding the grid on the IsmsRiskMatrix document
+RISK_MATRIX_GRID_KEY: str = 'risk_matrix'
 
 
 class RiskMatrixCellKey(BaseStrEnum):
@@ -59,3 +65,45 @@ class RiskMatrixCellKey(BaseStrEnum):
     LIKELIHOOD_VALUE = 'likelihood_value'
     CALCULATED_VALUE = 'calculated_value'
     RISK_CLASS_ID = 'risk_class_id'
+
+
+class MatrixType(BaseStrEnum):
+    """
+    The three matrices of the risk-matrix report
+
+    Each is the same grid counted differently: BEFORE_TREATMENT places every risk assessment by its
+    before-treatment calculation, AFTER_TREATMENT by its after-treatment one, and CURRENT_STATE by
+    whichever applies - the after-treatment values only for an assessment whose implementation status
+    is `ImplementationState.IMPLEMENTED`.
+
+    `report_key` is the key that matrix takes in the response, and the Angular `ReportRiskMatrix`
+    model mirrors those three, so they are a frontend-visible contract
+    """
+    BEFORE_TREATMENT = 'before_treatment'
+    CURRENT_STATE = 'current_state'
+    AFTER_TREATMENT = 'after_treatment'
+
+
+    @property
+    def report_key(self) -> str:
+        """
+        The key this matrix is reported under
+
+        Returns:
+            str: The response key, e.g. 'risk_matrix_before_treatment'
+        """
+        return f'{RISK_MATRIX_GRID_KEY}_{self.value}'
+
+
+class RiskMatrixReportKey(BaseStrEnum):
+    """
+    The keys of the risk-matrix report that are the report's own
+
+    A reported cell carries the identity keys of `RiskMatrixCellKey` (row, column, risk_class_id) plus
+    these two, and CONFIGURED sits beside the three matrices: an ISMS whose risk matrix the config
+    wizard has not produced yet answers with three empty grids, and without this flag that is
+    indistinguishable from a configured matrix nothing has been assessed against
+    """
+    COUNT = 'count'
+    RISK_ASSESSMENT_IDS = 'risk_assessment_ids'
+    CONFIGURED = 'configured'

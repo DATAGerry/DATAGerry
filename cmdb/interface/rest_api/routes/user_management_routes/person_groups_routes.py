@@ -66,6 +66,7 @@ from cmdb.errors.manager.person_groups_manager import (
     PersonGroupsManagerDeleteError,
     PersonGroupsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -149,7 +150,7 @@ def get_cmdb_person_groups(params: CollectionParameters, request_user: CmdbUser)
         GetMultiResponse: All the CmdbPersonGroups matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         person_groups_manager: PersonGroupsManager = ManagerProvider.get_manager(ManagerType.PERSON_GROUP,
                                                                                  request_user)
@@ -200,7 +201,7 @@ def get_cmdb_person_group(public_id: int, request_user: CmdbUser) -> Response:
         requested_person_group = person_groups_manager.get_item(public_id, as_dict=True)
 
         if requested_person_group:
-            return GetSingleResponse(requested_person_group, body = request.method == 'HEAD').make_response()
+            return GetSingleResponse(requested_person_group, body=request_wants_body()).make_response()
 
         abort(404, f"The PersonGroup with ID:{public_id} was not found!")
     except HTTPException as http_err:

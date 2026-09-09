@@ -60,6 +60,7 @@ from cmdb.errors.manager.object_groups_manager import (
     ObjectGroupsManagerDeleteError,
     ObjectGroupsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -136,7 +137,7 @@ def get_cmdb_object_groups(params: CollectionParameters, request_user: CmdbUser)
         GetMultiResponse: All the CmdbObjectGroups matching the CollectionParameters
     """
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         object_groups_manager: ObjectGroupsManager = ManagerProvider.get_manager(
             ManagerType.OBJECT_GROUP,
@@ -197,7 +198,7 @@ def get_cmdb_object_group(public_id: int, request_user: CmdbUser) -> Response:
         if not requested_object_group:
             abort(404, f"The ObjectGroup with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_object_group, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_object_group, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except ObjectGroupsManagerGetError as err:

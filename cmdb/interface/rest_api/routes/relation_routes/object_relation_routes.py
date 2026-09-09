@@ -74,7 +74,7 @@ from cmdb.interface.rest_api.responses import (
     DefaultResponse,
 )
 
-from cmdb.interface.rest_api.routes.routes_helper import normalize_public_id_list
+from cmdb.interface.rest_api.routes.routes_helper import normalize_public_id_list, request_wants_body
 from cmdb.interface.rest_api.routes.relation_routes.relation_constants import (
     DEFAULT_TAB_PAGE_SIZE,
     MAX_TAB_PAGE_SIZE,
@@ -199,7 +199,7 @@ def get_cmdb_object_relations(params: CollectionParameters, request_user: CmdbUs
         GetMultiResponse: All the CmdbObjectRelations matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         object_relations_manager: ObjectRelationsManager = ManagerProvider.get_manager(
             ManagerType.OBJECT_RELATIONS, request_user)
@@ -351,7 +351,7 @@ def get_cmdb_object_relation(public_id: int, request_user: CmdbUser) -> Response
         requested_object_relation = object_relations_manager.get_object_relation(public_id)
 
         if requested_object_relation:
-            api_response = GetSingleResponse(requested_object_relation, body=request.method == 'HEAD')
+            api_response = GetSingleResponse(requested_object_relation, body=request_wants_body())
 
             return api_response.make_response()
 

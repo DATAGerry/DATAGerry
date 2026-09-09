@@ -27,8 +27,10 @@ serves. The routes stay thin: they validate the request, resolve managers and de
   guards the body, the ``*_patch_multi_data_rows`` helpers apply the row operations, and
   ``build_patched_object_data`` merges the result into a full payload that is then handed to the
   SHARED ``apply_object_update`` pipeline, so a patch gets identical invariants, versioning and events
-* **Delete** - ``guard_object_delete`` refuses what may not be deleted, ``delete_one_cascade`` runs the
-  consequences (locations, object groups, relations, webhooks, log, cloud config-item sync)
+* **Delete** - ``guard_object[s]_delete`` refuses what may not be deleted (IPAM licence + invariants,
+  and a Cable CI a Port connection still uses) and is shared by the single AND the bulk route so a new
+  rule lands on both; ``delete_one_cascade`` runs the consequences (locations, object groups, relations,
+  ports, racks, webhooks, log, cloud config-item sync)
 * **Side effects** - ``handle_notify_webhooks``, ``handle_create_object_log`` and
   ``emit_object_*_events`` are **best-effort**: each catches and logs its own failures so a webhook or
   logging problem never rolls back a stored object. The trade-off is that a successful write can leave
@@ -52,7 +54,7 @@ from pymongo import UpdateOne
 from flask import abort, current_app
 from werkzeug.exceptions import HTTPException
 
-from cmdb.database.database_utils import default, object_hook
+from cmdb.database.json_codec import default, object_hook
 from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.framework.rendering.render_list import RenderList
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
@@ -108,6 +110,7 @@ from cmdb.framework.object_required_fields import (
     split_required_field_names,
 )
 from cmdb.interface.rest_api.routes.port_routes.port_object_hooks import (
+    guard_cable_objects_delete,
     handle_object_deleted as handle_port_object_deleted,
 )
 from cmdb.interface.rest_api.routes.rack_routes.rack_object_hooks import (
@@ -1873,6 +1876,53 @@ def build_patched_object_data(
 
 # --------------------------------------------------- DELETE GUARD --------------------------------------------------- #
 
+def guard_objects_delete(
+        objects_manager: ObjectsManager,
+        types_manager: TypesManager,
+        request_user: CmdbUser,
+        target_objects: list[dict[str, Any]],
+    ) -> None:
+    """
+    Runs the full pre-delete guard for a WHOLE delete selection: IPAM license + IPAM invariants + cables
+
+    The one place both delete routes state what may not be deleted, so a rule added here lands on the
+    single and the bulk delete at once. Evaluated before anything is deleted and aborting on the first
+    violation, which is what makes a bulk delete all-or-nothing: refusing halfway would leave the
+    earlier targets already gone.
+
+    Per target: the IPAM license guard (deleting an IPAM special-type object needs a valid license) and
+    the IPAM delete invariants (e.g. a SUPERNET / SUBNET still referenced by other IPAM objects). For
+    the selection as a whole: the Cable CI guard, which costs one query however many objects are being
+    deleted - see `guard_cable_objects_delete`. A non-IPAM, non-Cable selection with no dangling
+    references is a no-op
+
+    Args:
+        objects_manager (ObjectsManager): db interface for CmdbObjects
+        types_manager (TypesManager): db interface for CmdbTypes
+        request_user (CmdbUser): The CmdbUser performing the deletion
+        target_objects (list[dict[str, Any]]): The CmdbObject documents being deleted
+
+    Raises:
+        HTTPException: 403 when a gated delete is unlicensed, 400 on an IPAM invariant violation or
+            when a Cable CI in the selection is still used by a CmdbPortConnection
+    """
+    for target_object in target_objects:
+        guard_object_delete_license(types_manager, request_user, target_object)
+
+        ipam_delete_errors: list[dict[str, Any]] = enforce_delete_guards(
+            objects_manager,
+            types_manager,
+            target_object,
+        )
+
+        if ipam_delete_errors:
+            abort(400, format_errors_for_abort(ipam_delete_errors))
+
+    # A Port connection describes a physical patch and outlives its cable record, so a used Cable CI
+    # is refused rather than cascaded or left dangling
+    guard_cable_objects_delete(request_user, types_manager, target_objects)
+
+
 def guard_object_delete(
         objects_manager: ObjectsManager,
         types_manager: TypesManager,
@@ -1880,12 +1930,10 @@ def guard_object_delete(
         target_object: dict[str, Any],
     ) -> None:
     """
-    Runs the full pre-delete guard for a single CmdbObject: IPAM license + IPAM invariants
+    Runs the full pre-delete guard for a single CmdbObject
 
-    Combines the two checks every object-delete route performs up front: the IPAM license guard
-    (blocks deleting an IPAM special-type object when IPAM is unlicensed) and the IPAM delete
-    invariants (e.g. a SUPERNET / SUBNET still referenced by other IPAM objects). Aborts on the
-    first violation; a no-op for a non-IPAM object with no dangling references
+    The one-target form of `guard_objects_delete`, kept because the single-object delete route reads
+    exactly one object; the rules themselves live in the batched function so both routes cannot drift
 
     Args:
         objects_manager (ObjectsManager): db interface for CmdbObjects
@@ -1894,18 +1942,10 @@ def guard_object_delete(
         target_object (dict[str, Any]): The CmdbObject document being deleted
 
     Raises:
-        HTTPException: 403 when a gated delete is unlicensed, 400 on an IPAM invariant violation
+        HTTPException: 403 when a gated delete is unlicensed, 400 on an IPAM invariant violation or
+            when the object is a Cable CI still used by a CmdbPortConnection
     """
-    guard_object_delete_license(types_manager, request_user, target_object)
-
-    ipam_delete_errors: list[dict[str, Any]] = enforce_delete_guards(
-        objects_manager,
-        types_manager,
-        target_object,
-    )
-
-    if ipam_delete_errors:
-        abort(400, format_errors_for_abort(ipam_delete_errors))
+    guard_objects_delete(objects_manager, types_manager, request_user, [target_object])
 
 
 # ------------------------------------------------ OBJECT STATE CHANGE ----------------------------------------------- #

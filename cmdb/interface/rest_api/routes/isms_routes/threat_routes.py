@@ -36,7 +36,7 @@ from cmdb.interface.rest_api.routes.isms_routes.isms_routes_helper import (
     get_item_or_404,
     bulk_delete_reporting_in_use,
 )
-from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids
+from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids, request_wants_body
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
@@ -122,7 +122,7 @@ def get_isms_threats(params: CollectionParameters, request_user: CmdbUser) -> Re
         GetMultiResponse: All the IsmsThreats matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         threat_manager: ThreatManager = ManagerProvider.get_manager(ManagerType.THREAT, request_user)
 
@@ -167,7 +167,7 @@ def get_isms_threat(public_id: int, request_user: CmdbUser) -> Response:
         requested_threat = get_item_or_404(threat_manager, public_id,
                                             f"The Threat with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_threat, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_threat, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except ThreatManagerGetError as err:

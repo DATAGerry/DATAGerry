@@ -45,3 +45,22 @@ class PortConnectionError(BaseStrEnum):
 
 # Prefix of the aggregated abort message the connection routes build from the reasons above
 CONNECTION_ABORT_PREFIX: str = 'Port connection validation failed'
+
+
+# Refusal (HTTP 400) when a CABLE SpecialType CmdbObject is deleted while a connection still names it
+# as its cable. The connection is a fact about the two ports and survives its cable record, so the
+# deletion is refused rather than cascaded - resolving or re-describing the connection is the user's
+# decision. One line per blocked cable, joined by CABLE_IN_USE_SEPARATOR
+CABLE_IN_USE_MESSAGE: str = (
+    'The Cable with ID:{cable_ci_id} is used by Port connection ID:{connection_id} '
+    '(Ports {port_ids})'
+)
+
+# Prefix of the aggregated refusal, so a bulk delete says what it refused and what to do about it
+CABLE_IN_USE_ABORT_PREFIX: str = (
+    'Deletion refused - resolve the Port connection(s) first, or edit them to describe their cable '
+    'without the Cable CI'
+)
+
+# Separator between the blocked cables of one refusal
+CABLE_IN_USE_SEPARATOR: str = ' | '

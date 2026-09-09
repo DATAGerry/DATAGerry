@@ -18,8 +18,9 @@ Functional coverage for the /search routes
 
 Covers the quick-search counter (result envelope, the empty -> zeroed counts, and the
 ObjectsManagerIterationError -> 400 / unexpected -> 500 mappings) and the search framework
-(GET + POST happy paths, the query/body parse errors -> 400, and the graceful search-failure
-degrade to an empty 204).
+(GET + POST happy paths, the query/body parse errors -> 400, and - since 2026-09-09 - a failing
+search REPORTED as 400/500 instead of the empty 204 it used to answer, plus the paging contract:
+`limit=0` means every match, a negative limit or skip is refused).
 
 TestMatchedFields drives the whole chain against a seeded type + object: a text search must come
 back with the matching field reported under `matches`, in the shape the Angular search result
@@ -35,7 +36,12 @@ import pytest
 from cmdb.database import MongoDatabaseManager
 from cmdb.manager import ObjectsManager
 from cmdb.manager.manager_provider_model import ManagerProvider
-from cmdb.framework.search.search_constants import SearchResultKey, SearchResultMapKey
+from cmdb.framework.search.search_constants import (
+    SearchFormType,
+    SearchGroupKey,
+    SearchResultKey,
+    SearchResultMapKey,
+)
 from cmdb.framework.search.searcher_framework import SearcherFramework
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.type_model import CmdbType
@@ -46,6 +52,7 @@ QUICK_COUNT_URL: str = '/search/quick/count/'
 SEARCH_URL: str = '/search/'
 
 TYPE_ID: int = 47601
+TYPE_LABEL: str = 'Search Obj Type'
 OBJECT_ID: int = 47611
 NAME_FIELD: str = 'dg-search-name'
 NAME_LABEL: str = 'Name'
@@ -66,7 +73,7 @@ def _type_doc() -> dict[str, Any]:
     return {
         'public_id': TYPE_ID,
         'name': 'search-obj-type',
-        'label': 'Search Obj Type',
+        'label': TYPE_LABEL,
         'author_id': 1,
         'creation_time': datetime.now(timezone.utc),
         'active': True,
@@ -184,13 +191,49 @@ class TestSearchFramework:
 
         assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    def test_search_failure_degrades_to_204(self, rest_api, monkeypatch) -> None:
-        """A failure during aggregation degrades to an empty 204 rather than erroring."""
+    def test_search_failure_is_reported_not_answered_as_empty(self, rest_api, monkeypatch) -> None:
+        """
+        A failing search is a 500, not an empty 204
+
+        Until 2026-09-09 every error inside the search block answered 204 with an empty body, which a
+        client cannot tell apart from "nothing matched" - so a broken pipeline, a Mongo timeout and an
+        unusable page size all looked like a successful empty search.
+        """
         monkeypatch.setattr(SearcherFramework, 'aggregate', _raiser(RuntimeError('boom')))
 
         response = rest_api.get(f'{SEARCH_URL}?query={{}}')
 
-        assert response.status_code == HTTPStatus.NO_CONTENT
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+    def test_an_aggregation_failure_is_a_400(self, rest_api, monkeypatch) -> None:
+        """The database refusing the pipeline is the caller's problem, and says so"""
+        monkeypatch.setattr(
+            SearcherFramework, 'aggregate', _raiser(ObjectsManagerIterationError('bad pipeline')),
+        )
+
+        response = rest_api.get(f'{SEARCH_URL}?query={{}}')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+
+    def test_limit_zero_returns_every_match(self, rest_api) -> None:
+        """
+        0 means unlimited here as in every paginated route
+
+        It used to produce a `$limit: 0`, which MongoDB refuses - and the refusal was swallowed as an
+        empty 204, so asking for "all results" answered with none.
+        """
+        response = rest_api.get(f'{SEARCH_URL}?query={{}}&limit=0')
+
+        assert response.status_code == HTTPStatus.OK
+        body = response.get_json()
+        assert len(body[SearchResultKey.RESULTS.value]) == body[SearchResultKey.TOTAL_RESULTS.value]
+
+    @pytest.mark.parametrize('query', ['limit=-1', 'skip=-1'], ids=['limit', 'skip'])
+    def test_negative_paging_is_refused(self, rest_api, query: str) -> None:
+        """A negative page size or offset is an unusable request, not a weaker 'unlimited'"""
+        response = rest_api.get(f'{SEARCH_URL}?query={{}}&{query}')
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
 
     def test_unexpected_error_returns_500(self, rest_api, monkeypatch) -> None:
         """An unexpected error before the search runs surfaces as 500."""
@@ -264,6 +307,28 @@ class TestMatchedFields:
 
         assert result['type_information']['type_id'] == TYPE_ID
         assert 'summary_line' in result
+
+    def test_the_per_type_group_is_a_ready_made_type_parameter(self, rest_api) -> None:
+        """
+        The `groups` entries are what the Angular result bar re-submits as a TYPE tag
+
+        It reads `searchLabel` and `total` off each entry, so these keys are a frontend contract - and
+        the group branch of the search facet builds them by hand, where nothing else would notice a
+        rename.
+        """
+        body = rest_api.post(
+            SEARCH_URL, data=_search_body(NAME_VALUE), content_type='application/json',
+        ).get_json()
+
+        group = next(
+            entry for entry in body[SearchResultKey.GROUPS.value]
+            if entry[SearchGroupKey.SETTINGS.value][SearchGroupKey.TYPES.value] == [TYPE_ID]
+        )
+
+        assert group[SearchGroupKey.SEARCH_FORM.value] == SearchFormType.TYPE.value
+        assert group[SearchGroupKey.SEARCH_LABEL.value] == TYPE_LABEL
+        assert group[SearchGroupKey.SEARCH_TEXT.value] == TYPE_LABEL
+        assert group[SearchGroupKey.TOTAL.value] >= 1
 
     def test_unmatched_term_returns_no_hit(self, rest_api) -> None:
         """A term absent from every field does not return the seeded object."""

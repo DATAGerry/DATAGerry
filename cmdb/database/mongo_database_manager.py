@@ -49,7 +49,7 @@ from cmdb.database.database_constants import (
     MONGO_LOCK_TIMEOUT_ERROR_CODE,
     MONGO_SORT_DESCENDING,
 )
-from cmdb.database.database_utils import retry_operation
+from cmdb.database.retry import retry_operation
 
 from cmdb.errors.database import (
     CollectionAlreadyExistsError,

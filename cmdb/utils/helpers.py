@@ -63,7 +63,7 @@ _FALSY_IMPORT_VALUES: frozenset[str] = frozenset({'false', 'no', '0'})
 MONGO_DATE_KEY: str = '$date'
 
 # A '$date' wrapper holding a number counts milliseconds since the epoch, matching what
-# `cmdb.database.database_utils.default` writes when it serialises a datetime for a response
+# `cmdb.database.json_codec.default` writes when it serialises a datetime for a response
 _MILLISECONDS_PER_SECOND: int = 1000
 
 # Values that mean 'no date' when they arrive in a date field: an empty request field, an empty
@@ -307,7 +307,7 @@ def coerce_mongo_datetime(value: Any) -> datetime | None:
     Coerces a timestamp into a datetime, accepting the Mongo extended-JSON wrapper as well
 
     Extends `coerce_datetime` with the `{'$date': ...}` shape, which is not an exotic input but the
-    only shape a datetime has on the wire: `cmdb.database.database_utils.default` serialises every
+    only shape a datetime has on the wire: `cmdb.database.json_codec.default` serialises every
     datetime in a REST response as `{'$date': <epoch millis>}`, so that is what the frontend sends
     back. The wrapper carries either a number of milliseconds or a timestamp string.
 

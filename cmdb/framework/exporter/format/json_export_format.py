@@ -19,7 +19,7 @@ Implementation of JsonExportFormat
 from logging import Logger, getLogger
 import json
 
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.models.object_model.cmdb_object_key_enum import CmdbObjectKey
 from cmdb.models.type_model.field_key_enum import FieldKey
 from cmdb.framework.exporter.format.base_exporter_format import (

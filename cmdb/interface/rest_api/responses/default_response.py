@@ -51,7 +51,7 @@ class DefaultResponse(BaseAPIResponse):
         super().__init__(OperationType.GET)
 
 
-    def make_response(self, status: int = 200) -> Response:
+    def make_response(self, *args: Any, status: int = 200, **kwargs: Any) -> Response:
         """
         Constructs and returns a valid HTTP response with the given status code
 
@@ -60,7 +60,9 @@ class DefaultResponse(BaseAPIResponse):
         status code
 
         Args:
+            *args (Any): Unused; kept so every response answers to the same call
             status (int, optional): The HTTP status code for the response. Defaults to 200 (OK)
+            **kwargs (Any): Unused; kept so every response answers to the same call
 
         Returns:
             Response: The HTTP response instance containing the `value` and the provided status code

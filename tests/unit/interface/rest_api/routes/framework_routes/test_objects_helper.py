@@ -57,6 +57,7 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper
     delete_patch_multi_data_rows,
     build_patched_object_data,
     guard_object_delete,
+    guard_objects_delete,
     emit_object_state_change_events,
     realign_objects_to_type,
     clean_type_reports,
@@ -1275,11 +1276,12 @@ class TestPatchNewFieldTypeBackfill:
 #                                              guard_object_delete                                                    #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestGuardObjectDelete:
-    """guard_object_delete combines the IPAM license guard and the IPAM delete invariants."""
+    """guard_object_delete is the one-target form of the shared delete guard."""
 
     def test_passes_when_no_license_gate_and_no_invariant_errors(self) -> None:
         """A non-gated object with no dangling references is a no-op (no abort)."""
         with patch(f'{HELPER_PATH}.guard_object_delete_license') as license_guard, \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete'), \
              patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[]) as delete_guards:
             guard_object_delete(MagicMock(), MagicMock(), MagicMock(), {'public_id': 1})
 
@@ -1289,12 +1291,88 @@ class TestGuardObjectDelete:
     def test_aborts_400_on_invariant_violation(self) -> None:
         """A non-empty delete-guard error list aborts with 400."""
         with patch(f'{HELPER_PATH}.guard_object_delete_license'), \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete'), \
              patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[{'error': 'still referenced'}]), \
              patch(f'{HELPER_PATH}.format_errors_for_abort', return_value='still referenced'):
             with pytest.raises(HTTPException) as exc_info:
                 guard_object_delete(MagicMock(), MagicMock(), MagicMock(), {'public_id': 1})
 
         assert exc_info.value.code == 400
+
+    def test_delegates_to_the_batched_guard_with_one_target(self) -> None:
+        """The rules live in the batched function, so the two delete routes cannot drift apart."""
+        objects_manager, types_manager, request_user = MagicMock(), MagicMock(), MagicMock()
+        target = {'public_id': 1}
+
+        with patch(f'{HELPER_PATH}.guard_objects_delete') as batched:
+            guard_object_delete(objects_manager, types_manager, request_user, target)
+
+        batched.assert_called_once_with(objects_manager, types_manager, request_user, [target])
+
+    def test_the_cable_guard_runs_for_the_single_delete_too(self) -> None:
+        """A Cable CI is refused whichever route deletes it."""
+        types_manager, request_user = MagicMock(), MagicMock()
+        target = {'public_id': 1}
+
+        with patch(f'{HELPER_PATH}.guard_object_delete_license'), \
+             patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[]), \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete') as cable_guard:
+            guard_object_delete(MagicMock(), types_manager, request_user, target)
+
+        cable_guard.assert_called_once_with(request_user, types_manager, [target])
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              guard_objects_delete                                                   #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestGuardObjectsDelete:
+    """guard_objects_delete evaluates the delete rules for a whole selection, before anything is deleted."""
+
+    TARGETS: list[dict[str, Any]] = [{'public_id': 1}, {'public_id': 2}, {'public_id': 3}]
+
+    def test_the_ipam_rules_are_evaluated_for_every_target(self) -> None:
+        """A bulk delete is refused as a whole, so every target has to be asked up front."""
+        with patch(f'{HELPER_PATH}.guard_object_delete_license') as license_guard, \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete'), \
+             patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[]) as delete_guards:
+            guard_objects_delete(MagicMock(), MagicMock(), MagicMock(), self.TARGETS)
+
+        assert license_guard.call_count == len(self.TARGETS)
+        assert delete_guards.call_count == len(self.TARGETS)
+
+    def test_the_cable_rule_is_evaluated_once_for_the_selection(self) -> None:
+        """One batched read for all targets is what keeps the guard affordable on a bulk delete."""
+        types_manager, request_user = MagicMock(), MagicMock()
+
+        with patch(f'{HELPER_PATH}.guard_object_delete_license'), \
+             patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[]), \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete') as cable_guard:
+            guard_objects_delete(MagicMock(), types_manager, request_user, self.TARGETS)
+
+        cable_guard.assert_called_once_with(request_user, types_manager, self.TARGETS)
+
+    def test_an_ipam_violation_refuses_before_the_cable_read(self) -> None:
+        """The first violation aborts; nothing after it needs to be read."""
+        with patch(f'{HELPER_PATH}.guard_object_delete_license'), \
+             patch(f'{HELPER_PATH}.enforce_delete_guards', return_value=[{'error': 'still referenced'}]), \
+             patch(f'{HELPER_PATH}.format_errors_for_abort', return_value='still referenced'), \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete') as cable_guard:
+            with pytest.raises(HTTPException) as exc_info:
+                guard_objects_delete(MagicMock(), MagicMock(), MagicMock(), self.TARGETS)
+
+        assert exc_info.value.code == 400
+        cable_guard.assert_not_called()
+
+    def test_an_empty_selection_is_a_no_op(self) -> None:
+        """Nothing to delete has nothing to refuse."""
+        with patch(f'{HELPER_PATH}.guard_object_delete_license') as license_guard, \
+             patch(f'{HELPER_PATH}.enforce_delete_guards') as delete_guards, \
+             patch(f'{HELPER_PATH}.guard_cable_objects_delete') as cable_guard:
+            guard_objects_delete(MagicMock(), MagicMock(), MagicMock(), [])
+
+        license_guard.assert_not_called()
+        delete_guards.assert_not_called()
+        cable_guard.assert_called_once()
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

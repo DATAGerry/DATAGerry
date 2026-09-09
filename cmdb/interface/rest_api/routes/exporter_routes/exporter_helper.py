@@ -25,7 +25,7 @@ import json
 from typing import Any
 from flask import abort, Response
 
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.models.type_model import CmdbType
 from cmdb.utils import is_truthy_query_arg
 from cmdb.framework.exporter.export_filename_helper import build_type_export_filename

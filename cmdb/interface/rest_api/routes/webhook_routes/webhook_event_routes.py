@@ -55,6 +55,7 @@ from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.routes.webhook_routes.webhook_constants import WebhookRight
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.webhook_model.cmdb_webhook_event import CmdbWebhookEvent
 from cmdb.framework.results import IterationResult
@@ -164,7 +165,7 @@ def get_webhook_events(params: CollectionParameters, request_user: CmdbUser) -> 
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:

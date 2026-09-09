@@ -35,6 +35,7 @@ from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.log_model.cmdb_object_log import CmdbObjectLog
 from cmdb.interface.rest_api.responses import GetMultiResponse
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_logs.logs_constants import (
     LogKey,
@@ -43,7 +44,6 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_logs.logs_constants im
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 
-HTTP_HEAD_METHOD: str = 'HEAD'
 
 
 def _include_users_requested(request: Request) -> bool:
@@ -96,7 +96,7 @@ def build_object_logs_response(logs_manager: LogsManager,
         logs_manager (LogsManager): Manager used to iterate the logs collection
         query (dict[str, Any] | list[dict[str, Any]]): Match filter or aggregation pipeline
         params (CollectionParameters): Pagination/sort parameters from the request
-        request (Request): Active request, used for the response URL, HEAD + include_users detection
+        request (Request): Active request, used for the response URL and the include_users detection
         request_user (CmdbUser): User making the request (used to resolve the UsersManager)
 
     Returns:
@@ -111,7 +111,7 @@ def build_object_logs_response(logs_manager: LogsManager,
                                     iteration_result.total,
                                     params,
                                     request.url,
-                                    request.method == HTTP_HEAD_METHOD)
+                                    request_wants_body(request))
 
     # The response is built from the plain log LIST first, on purpose: GetMultiResponse derives `count`
     # from len(results) in its constructor, so wrapping the logs in {logs, users} before that point

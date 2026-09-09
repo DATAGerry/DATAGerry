@@ -21,7 +21,7 @@ from typing import Any
 
 import pytest
 
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.errors.utils import ClassLoadError
 from cmdb.utils import (
     coerce_datetime,
@@ -212,7 +212,7 @@ class TestCoerceMongoDatetime:
         """
         The caster and the response encoder are two halves of one contract.
 
-        `database_utils.default` turns a datetime into the wrapper; reading that wrapper back has to
+        `json_codec.default` turns a datetime into the wrapper; reading that wrapper back has to
         return the same instant, or a stored date would drift by a round-trip through the API.
         """
         stamp = datetime(2020, 9, 13, 12, 26, 40, tzinfo=timezone.utc)

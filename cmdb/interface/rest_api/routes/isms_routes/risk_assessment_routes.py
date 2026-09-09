@@ -66,6 +66,7 @@ from cmdb.errors.manager.risk_assessment_manager import (
     RiskAssessmentManagerDeleteError,
     RiskAssessmentManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -367,7 +368,7 @@ def get_isms_risk_assessments(params: CollectionParameters, request_user: CmdbUs
     # response, so the branch / local / statement counts legitimately exceed the defaults
     # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         risk_assessment_manager: RiskAssessmentManager = ManagerProvider.get_manager(
             ManagerType.RISK_ASSESSMENT,
@@ -544,7 +545,7 @@ def get_isms_risk_assessment(public_id: int, request_user: CmdbUser) -> Response
         requested_risk_assessment = get_item_or_404(risk_assessment_manager, public_id,
                                                      f"The RiskAssessment with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_risk_assessment, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_risk_assessment, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except RiskAssessmentManagerGetError as err:

@@ -86,6 +86,7 @@ from cmdb.errors.manager.relations_manager import (
     RelationsManagerDeleteError,
 )
 from cmdb.errors.manager.types_manager import TypesManagerGetError
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -183,7 +184,7 @@ def get_cmdb_relations(params: CollectionParameters, request_user: CmdbUser) -> 
         GetMultiResponse: All the CmdbRelations matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         relations_manager: RelationsManager = ManagerProvider.get_manager(
             ManagerType.RELATIONS,
@@ -238,7 +239,7 @@ def get_cmdb_relation(public_id: int, request_user: CmdbUser) -> Response:
         requested_relation: dict | None = relations_manager.get_relation(public_id)
 
         if requested_relation:
-            return GetSingleResponse(requested_relation, body = request.method == 'HEAD').make_response()
+            return GetSingleResponse(requested_relation, body=request_wants_body()).make_response()
 
         abort(404, f"The Relation with ID:{public_id} was not found!")
     except HTTPException as http_err:

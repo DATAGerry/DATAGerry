@@ -109,6 +109,51 @@ def test_insert_many_wraps_failure() -> None:
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                          count_from_other_collection                                                #
 # -------------------------------------------------------------------------------------------------------------------- #
+def test_get_many_from_other_collection_passes_the_criteria_and_no_projection() -> None:
+    """Without a projection the database layer's own default applies (it only drops `_id`)"""
+    mgr = _mock_manager()
+    mgr.dbm.find_all.return_value = []
+
+    BaseManager.get_many_from_other_collection(mgr, 'framework.objects', type_id=7)
+
+    call = mgr.dbm.find_all.call_args
+    assert call.kwargs['collection'] == 'framework.objects'
+    assert call.kwargs['filter'] == {'type_id': 7}
+    assert 'projection' not in call.kwargs
+
+
+def test_get_many_from_other_collection_forwards_a_projection() -> None:
+    """
+    A caller reading a few keys of a large document does not pay for the rest
+
+    The MDS propagation reads four keys of an object this way; a projection has to reach the driver
+    for that to be true.
+    """
+    mgr = _mock_manager()
+    mgr.dbm.find_all.return_value = []
+    projection = {'public_id': 1, '_id': 0}
+
+    BaseManager.get_many_from_other_collection(
+        mgr, 'framework.objects', projection=projection, type_id=7,
+    )
+
+    assert mgr.dbm.find_all.call_args.kwargs['projection'] is projection
+
+
+def test_get_many_from_other_collection_accepts_a_dotted_filter_key() -> None:
+    """The MDS narrowing is a dotted path, which is a valid keyword here even though it is no identifier"""
+    mgr = _mock_manager()
+    mgr.dbm.find_all.return_value = []
+
+    BaseManager.get_many_from_other_collection(
+        mgr, 'framework.objects', **{'multi_data_sections.section_id': {'$in': ['sec-a']}},
+    )
+
+    assert mgr.dbm.find_all.call_args.kwargs['filter'] == {
+        'multi_data_sections.section_id': {'$in': ['sec-a']},
+    }
+
+
 def test_count_from_other_collection_delegates_to_other_collection() -> None:
     """Counts against the GIVEN collection (not the manager's own) with the manager's db + criteria"""
     mgr = _mock_manager()

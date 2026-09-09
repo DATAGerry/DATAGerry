@@ -49,7 +49,7 @@ from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import HTTPException
 
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.manager import (
     ObjectsManager,

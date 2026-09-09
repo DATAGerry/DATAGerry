@@ -32,7 +32,10 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.manager.isms_manager.control_measure_manager import ControlMeasureManager
 from cmdb.manager.isms_manager.risk_assessment_manager import RiskAssessmentManager
 from cmdb.manager.license_manager.license_service import LicenseService
-from cmdb.models.isms_model import IsmsControlMeasure, IsmsReportBuilder, IsmsRisk, IsmsRiskAssessment
+from cmdb.models.isms_model import IsmsControlMeasure, IsmsRisk, IsmsRiskAssessment
+from cmdb.framework.isms import RiskMatrixReportBuilder
+from cmdb.errors.framework_isms import RiskMatrixReportError
+from cmdb.models.isms_model.isms_risk_matrix_constants import MatrixType, RiskMatrixReportKey
 from cmdb.errors.manager.risk_assessment_manager import RiskAssessmentManagerIterationError
 from cmdb.models.extendable_option_model import CmdbExtendableOption, OptionType
 from cmdb.security.license.license_constants import LicenseFeature
@@ -202,6 +205,37 @@ class TestIsmsReports:
 
         assert response.status_code == HTTPStatus.OK
         assert isinstance(response.get_json(), dict)
+
+    def test_risk_matrix_report_reports_the_unconfigured_state(self, rest_api) -> None:
+        """
+        The test database has no IsmsRiskMatrix, and since 2026-09-09 the report says so
+
+        `configured: false` is what distinguishes "the config wizard has not run" from "the matrix is
+        configured and nothing has been assessed against it" - both answered three empty grids before.
+        """
+        body = rest_api.get(f'{ROUTE_URL}/risk_matrix').get_json()
+
+        assert body[RiskMatrixReportKey.CONFIGURED.value] is False
+        assert [body[matrix_type.report_key] for matrix_type in MatrixType] == [[], [], []]
+
+    def test_risk_matrix_report_carries_one_key_per_matrix(self, rest_api) -> None:
+        """The three keys the Angular ReportRiskMatrix model mirrors"""
+        body = rest_api.get(f'{ROUTE_URL}/risk_matrix').get_json()
+
+        assert {matrix_type.report_key for matrix_type in MatrixType} <= set(body)
+
+    def test_risk_matrix_report_build_failure_returns_400(self, rest_api, monkeypatch) -> None:
+        """
+        A report that cannot be built from the stored data is a 400, not a 500
+
+        Every failure behind it used to reach the route's blanket handler.
+        """
+        def _fail(*_args, **_kwargs):
+            raise RiskMatrixReportError('unusable configuration')
+
+        monkeypatch.setattr(RiskMatrixReportBuilder, 'build_risk_matrix_report', _fail)
+
+        assert rest_api.get(f'{ROUTE_URL}/risk_matrix').status_code == HTTPStatus.BAD_REQUEST
 
     @pytest.mark.parametrize('report', PAGINATED_REPORTS)
     def test_paginated_report_responds(self, rest_api, report: str) -> None:
@@ -580,7 +614,7 @@ class TestReportErrorMapping:
         def _boom(*_args, **_kwargs):
             raise RuntimeError('boom')
 
-        monkeypatch.setattr(IsmsReportBuilder, 'build_risk_matrix_report', _boom)
+        monkeypatch.setattr(RiskMatrixReportBuilder, 'build_risk_matrix_report', _boom)
 
         assert rest_api.get(f'{ROUTE_URL}/risk_matrix').status_code == HTTPStatus.INTERNAL_SERVER_ERROR
 
