@@ -44,11 +44,21 @@
   }
 </ng-template>
 
-<ng-template #connectedTemplate let-data="data">
-  <span class="ports-state" [class.ports-state--connected]="data === true">
-    <span class="ports-state__dot" aria-hidden="true"></span>
-    {{ data === true ? 'Connected' : 'Free' }}
-  </span>
+<ng-template #connectionTemplate let-item="item">
+  <div class="ports-connection">
+    <span
+      class="ports-state"
+      [class.ports-state--connected]="item.connectionState === connectionState.CABLED"
+      [class.ports-state--paired]="item.connectionState === connectionState.PAIRED">
+      <span class="ports-state__dot" aria-hidden="true"></span>
+      {{ item.connectionLabel }}
+    </span>
+
+    <!-- A panel port can hold a cable and its pairing at once, so the pairing is named as well. -->
+    @if (item.pairedPortName && item.connectionState === connectionState.CABLED) {
+      <small class="ports-connection__pair">Paired with {{ item.pairedPortName }}</small>
+    }
+  </div>
 </ng-template>
 
 <ng-template #valueTemplate let-data="data">
@@ -61,6 +71,36 @@
 
 <ng-template #actionsTemplate let-item="item">
   <div class="ports-row-actions">
+    @if (canConnect && !item.cableConnectionId) {
+      <app-button
+        label=""
+        icon="fas fa-link"
+        bootstrapClass="btn-sm btn-link"
+        title="Connect this port"
+        ariaLabel="Connect port {{ item.name }}"
+        (clicked)="onConnectPort(item)">
+      </app-button>
+    }
+    @if (canEditConnection && item.cableConnectionId) {
+      <app-button
+        label=""
+        icon="fas fa-plug"
+        bootstrapClass="btn-sm btn-link"
+        title="Edit the cable of this port"
+        ariaLabel="Edit the cable of port {{ item.name }}"
+        (clicked)="onEditConnection(item)">
+      </app-button>
+    }
+    @if (canDisconnect && item.cableConnectionId) {
+      <app-button
+        label=""
+        icon="fas fa-unlink"
+        bootstrapClass="btn-sm btn-link"
+        title="Disconnect this port"
+        ariaLabel="Disconnect port {{ item.name }}"
+        (clicked)="onDisconnectPort(item)">
+      </app-button>
+    }
     @if (canEdit) {
       <app-button
         label=""

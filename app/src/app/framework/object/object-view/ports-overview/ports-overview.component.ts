@@ -23,23 +23,25 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
-    Type,
     inject
 } from '@angular/core';
 
-import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { Observable, Subject, forkJoin, of } from 'rxjs';
 import { catchError, finalize, map, switchMap, takeUntil } from 'rxjs/operators';
 
 import { DeleteModalService } from 'src/app/core/services/delete-modal.service';
 import { ExtendableOptionCatalogService } from 'src/app/core/services/extendable-option-catalog.service';
-import { FullscreenModalService } from 'src/app/core/services/fullscreen-modal.service';
 import { LoaderService } from 'src/app/core/services/loader.service';
 import { PermissionService } from 'src/app/modules/auth/services/permission.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
-import { PortCreateWizardModalComponent } from './components/port-create-wizard-modal/port-create-wizard-modal.component';
-import { PortFormModalComponent } from './components/port-form-modal/port-form-modal.component';
+import {
+    CONNECTION_ADD_RIGHT,
+    CONNECTION_DELETE_RIGHT,
+    CONNECTION_EDIT_RIGHT,
+    CmdbPortConnection,
+    PortConnectionInfo
+} from './models/port-connection.types';
 import {
     CmdbPort,
     PORT_ADD_RIGHT,
@@ -48,7 +50,10 @@ import {
     PORT_OPTION_TYPES,
     PortRow
 } from './models/ports-overview.types';
+import { PortConnectionService } from './services/port-connection.service';
+import { PortDialogService } from './services/port-dialog.service';
 import { PortService } from './services/port.service';
+import { indexConnectionsByPort } from './utils/port-connection.util';
 import {
     clampPage,
     hasConnectionState,
@@ -62,10 +67,11 @@ import {
 
 const DEFAULT_PAGE_SIZE = 10;
 
-/** One load: the object's ports together with the option labels they are shown by. */
+/** One load: the object's ports, the option labels they are shown by, and what is cabled to them. */
 interface LoadedPorts {
     ports: CmdbPort[];
     labels: Map<string, string>;
+    connections: CmdbPortConnection[];
 }
 
 
@@ -80,10 +86,10 @@ interface LoadedPorts {
 export class PortsOverviewComponent implements OnChanges, OnDestroy {
 
     private readonly portService = inject(PortService);
+    private readonly portConnectionService = inject(PortConnectionService);
     private readonly optionCatalog = inject(ExtendableOptionCatalogService);
     private readonly loaderService = inject(LoaderService);
-    private readonly modalService = inject(NgbModal);
-    private readonly fullscreenModal = inject(FullscreenModalService);
+    private readonly portDialogs = inject(PortDialogService);
     private readonly deleteModal = inject(DeleteModalService);
     private readonly permission = inject(PermissionService);
     private readonly toastService = inject(ToastService);
@@ -113,6 +119,9 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     public readonly portAddRight = PORT_ADD_RIGHT;
 
     private allRows: PortRow[] = [];
+
+    /** The connections of the loaded ports, so an edit starts from the stored connection. */
+    private connectionsByPort = new Map<number, PortConnectionInfo>();
 
     /** The loaded ports by public_id, so an edit starts from the stored port and not from its row. */
     private portsById = new Map<number, CmdbPort>();
@@ -176,12 +185,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
             return;
         }
 
-        const modal = this.openModal(PortCreateWizardModalComponent);
-
-        modal.componentInstance.objectId = this.objectId;
-        modal.componentInstance.objectLabel = this.objectLabel;
-
-        this.reloadWhenStored(modal);
+        this.reloadWhenStored(this.portDialogs.openCreateWizard(this.objectId, this.objectLabel));
     }
 
 
@@ -202,13 +206,53 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
             itemType: 'Port',
             itemName: row.name,
             warningMessage: 'Any connection and interface link of this port is removed with it.',
-            onConfirm: () => this.deletePort(row.publicId)
+            onConfirm: () => this.remove(
+                this.portService.deletePort(row.publicId),
+                'Port was successfully deleted!'
+            )
+        });
+    }
+
+
+    /** Cables this port to another one. The far end is chosen inside the dialog. */
+    public onConnectPort(row: PortRow): void {
+        this.openConnectionForm(row, null);
+    }
+
+
+    public onEditConnection(row: PortRow): void {
+        const cable = this.connectionsByPort.get(row.publicId)?.cable ?? null;
+
+        if (!cable) {
+            return;
+        }
+
+        this.openConnectionForm(row, cable);
+    }
+
+
+    public onDisconnectPort(row: PortRow): void {
+        const cable = this.connectionsByPort.get(row.publicId)?.cable ?? null;
+
+        if (!cable) {
+            return;
+        }
+
+        this.deleteModal.confirmDelete({
+            title: 'Disconnect port',
+            itemType: 'Connection',
+            itemName: row.connectionLabel,
+            warningMessage: 'The cable information is removed with the connection. Both ports stay.',
+            onConfirm: () => this.remove(
+                this.portConnectionService.deleteConnection(cable.public_id),
+                'The ports were successfully disconnected!'
+            )
         });
     }
 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
-    /** Both gate one action of the table and, together, its whole actions column. */
+    /** Each gates one action of the table and, together, they gate its whole actions column. */
     public get canEdit(): boolean {
         return this.manageable && this.hasRight(PORT_EDIT_RIGHT);
     }
@@ -218,6 +262,22 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
         return this.manageable && this.hasRight(PORT_DELETE_RIGHT);
     }
 
+
+    /** Connections are guarded by their own rights: they are a fact about the cabling, not about the port. */
+    public get canConnect(): boolean {
+        return this.manageable && this.hasRight(CONNECTION_ADD_RIGHT);
+    }
+
+
+    public get canEditConnection(): boolean {
+        return this.manageable && this.hasRight(CONNECTION_EDIT_RIGHT);
+    }
+
+
+    public get canDisconnect(): boolean {
+        return this.manageable && this.hasRight(CONNECTION_DELETE_RIGHT);
+    }
+
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
 
     private hasRight(right: string): boolean {
@@ -225,56 +285,45 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     }
 
 
-    /** One modal for both writes; it reports `true` once the port is stored. */
+    /** One dialog for both port writes; it reports once the port is stored. */
     private openForm(port: CmdbPort | null): void {
         if (this.objectId == null) {
             return;
         }
 
-        const modal = this.openModal(PortFormModalComponent);
-
-        modal.componentInstance.objectId = this.objectId;
-        modal.componentInstance.objectLabel = this.objectLabel;
-        modal.componentInstance.port = port;
-
-        this.reloadWhenStored(modal);
+        this.reloadWhenStored(this.portDialogs.openPortForm(this.objectId, this.objectLabel, port));
     }
 
 
-    /** Hosted inside the fullscreen element while one is open; a body-level modal is not painted there. */
-    private openModal<T>(component: Type<T>): NgbModalRef {
-        return this.modalService.open(component, this.fullscreenModal.withFullscreenContainer({
-            size: 'lg',
-            windowClass: 'dg-modal-window',
-            backdropClass: 'dg-modal-window-backdrop'
-        }));
+    /** One dialog for both connection writes; the row's stored port is what it starts from. */
+    private openConnectionForm(row: PortRow, connection: CmdbPortConnection | null): void {
+        const port = this.portsById.get(row.publicId);
+
+        if (!port) {
+            return;
+        }
+
+        this.reloadWhenStored(this.portDialogs.openConnectionForm(port, this.objectLabel, connection));
     }
 
 
-    private reloadWhenStored(modal: NgbModalRef): void {
-        // Dismissing rejects the promise; cancelling is not an error.
-        modal.result.then(
-            (stored: boolean) => {
-                if (stored) {
-                    this.load();
-                }
-            },
-            () => undefined
-        );
+    private reloadWhenStored(stored$: Observable<void>): void {
+        stored$.pipe(takeUntil(this.destroy$)).subscribe(() => this.load());
     }
 
 
-    private deletePort(publicId: number): void {
+    /** Both deletions report the same way; only the request and the confirmation differ. */
+    private remove(request: Observable<void>, message: string): void {
         this.loaderService.show();
 
-        this.portService.deletePort(publicId)
+        request
             .pipe(
                 takeUntil(this.destroy$),
                 finalize(() => this.loaderService.hide())
             )
             .subscribe({
                 next: () => {
-                    this.toastService.success('Port was successfully deleted!');
+                    this.toastService.success(message);
                     this.load();
                 },
                 error: (err) => this.toastService.error(err?.error?.message)
@@ -292,19 +341,27 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     }
 
 
-    /** Ports and option labels are read together, so the table is built once instead of twice. */
+    /**
+     * Ports, option labels and connections are read together, so the table is built once.
+     *
+     * The connections are the one part allowed to fail on its own: a user who may list the ports but
+     * not the cabling still gets the list, with every port reading as free.
+     */
     private readPorts(objectId: number): Observable<LoadedPorts> {
         this.loaderService.show();
         this.hasError = false;
 
         return forkJoin({
             ports: this.portService.getPortsOfObject(objectId),
-            options: this.optionCatalog.optionsForTypes(PORT_OPTION_TYPES)
+            options: this.optionCatalog.optionsForTypes(PORT_OPTION_TYPES),
+            connections: this.portConnectionService.getConnectionsOfObject(objectId).pipe(
+                catchError(() => of<CmdbPortConnection[]>([]))
+            )
         }).pipe(
-            map(({ ports, options }) => ({ ports, labels: toOptionLabels(options) })),
+            map(({ ports, options, connections }) => ({ ports, labels: toOptionLabels(options), connections })),
             catchError(() => {
                 this.hasError = true;
-                return of<LoadedPorts>({ ports: [], labels: new Map() });
+                return of<LoadedPorts>({ ports: [], labels: new Map(), connections: [] });
             }),
             finalize(() => {
                 this.loaderService.hide();
@@ -314,8 +371,9 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     }
 
 
-    private applyPorts({ ports, labels }: LoadedPorts): void {
-        this.allRows = toPortRows(ports, labels);
+    private applyPorts({ ports, labels, connections }: LoadedPorts): void {
+        this.connectionsByPort = indexConnectionsByPort(connections);
+        this.allRows = toPortRows(ports, labels, this.connectionsByPort);
         this.portsById = new Map(ports.map((port) => [port.public_id, port]));
         this.showSideColumn = hasPanelSides(this.allRows);
         this.showConnectionColumn = hasConnectionState(ports);
@@ -337,6 +395,7 @@ export class PortsOverviewComponent implements OnChanges, OnDestroy {
     private reset(): void {
         this.allRows = [];
         this.portsById = new Map();
+        this.connectionsByPort = new Map();
         this.rows = [];
         this.totalRows = 0;
         this.showSideColumn = false;

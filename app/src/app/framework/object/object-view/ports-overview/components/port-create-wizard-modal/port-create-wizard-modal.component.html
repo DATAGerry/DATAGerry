@@ -15,23 +15,13 @@
 
       <p class="port-wizard__lead">This decides how the ports are named and paired.</p>
 
-      <div class="kind-grid" role="radiogroup" aria-label="Device type">
-        @for (choice of deviceKinds; track choice.kind) {
-          <label class="kind-card"
-            [class.kind-card--selected]="form.controls.deviceKind.value === choice.kind">
-            <input
-              class="kind-card__input"
-              type="radio"
-              name="deviceKind"
-              [value]="choice.kind"
-              [checked]="form.controls.deviceKind.value === choice.kind"
-              (change)="onSelectDeviceKind(choice.kind)">
-            <span class="kind-card__icon" aria-hidden="true"><i [class]="choice.icon"></i></span>
-            <span class="kind-card__label">{{ choice.label }}</span>
-            <span class="kind-card__text">{{ choice.description }}</span>
-          </label>
-        }
-      </div>
+      <cmdb-choice-card-group
+        name="deviceKind"
+        groupLabel="Device type"
+        [choices]="deviceKinds"
+        [selected]="form.controls.deviceKind.value"
+        (choiceSelected)="onSelectDeviceKind($event)">
+      </cmdb-choice-card-group>
     </aw-wizard-step>
 
     <aw-wizard-step stepId="2" stepTitle="Naming" [canExit]="canExitStep"

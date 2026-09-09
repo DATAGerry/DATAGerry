@@ -55,6 +55,10 @@ import { PortsOverviewComponent } from './object-view/ports-overview/ports-overv
 import { PortsTableComponent } from './object-view/ports-overview/components/ports-table/ports-table.component';
 import { PortFormModalComponent } from './object-view/ports-overview/components/port-form-modal/port-form-modal.component';
 import { PortCreateWizardModalComponent } from './object-view/ports-overview/components/port-create-wizard-modal/port-create-wizard-modal.component';
+import { ConnectionFormModalComponent } from './object-view/ports-overview/components/connection-form-modal/connection-form-modal.component';
+import { ConnectionEndpointPickerComponent } from './object-view/ports-overview/components/connection-endpoint-picker/connection-endpoint-picker.component';
+import { ChoiceCardGroupComponent } from './object-view/ports-overview/components/choice-card-group/choice-card-group.component';
+import { ObjectOptionPickerComponent } from './object-view/ports-overview/components/object-option-picker/object-option-picker.component';
 import { RackOverviewComponent } from './object-view/rack-overview/rack-overview.component';
 import { RackElevationComponent } from './object-view/rack-overview/components/rack-elevation/rack-elevation.component';
 import { RackInspectorComponent } from './object-view/rack-overview/components/rack-inspector/rack-inspector.component';
@@ -126,6 +130,7 @@ import { ConnectionDetailsModalComponent } from './object-view/graph-editor/moda
         PortsTableComponent,
         PortFormModalComponent,
         PortCreateWizardModalComponent,
+        ConnectionFormModalComponent,
         RackOverviewComponent,
         RackElevationComponent,
         RackInspectorComponent,
@@ -195,7 +200,10 @@ import { ConnectionDetailsModalComponent } from './object-view/graph-editor/moda
         CoreModule,
         RiskAssessmentModule,
         QRCodeComponent,
-        RackObjectPickerComponent],
+        RackObjectPickerComponent,
+        ConnectionEndpointPickerComponent,
+        ChoiceCardGroupComponent,
+        ObjectOptionPickerComponent],
     exports: [
         ObjectViewRenderComponent,
         ObjectTableActionsComponent,

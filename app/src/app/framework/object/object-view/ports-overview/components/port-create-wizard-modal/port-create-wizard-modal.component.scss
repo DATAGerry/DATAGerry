@@ -46,66 +46,6 @@
     }
 }
 
-/* Step 1: the device kind, a radio group drawn as two cards. */
-.kind-grid {
-    display: grid;
-    gap: 0.75rem;
-    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-.kind-card {
-    display: grid;
-    position: relative;
-    align-content: start;
-    gap: 0.4rem;
-    padding: 1.1rem 1.25rem;
-    border: 1px solid var(--dg-border);
-    border-radius: 10px;
-    background: #fff;
-    cursor: pointer;
-    transition: border-color 150ms ease, box-shadow 150ms ease;
-
-    &:hover {
-        border-color: rgba(var(--dg-success-rgb), 0.5);
-    }
-
-    /* The input carries the focus, so the card has to show it. */
-    &:focus-within {
-        outline: 2px solid var(--dg-success);
-        outline-offset: 2px;
-    }
-
-    &--selected {
-        border-color: var(--dg-success);
-        box-shadow: 0 0 0 3px rgba(var(--dg-success-rgb), 0.14);
-    }
-
-    &__input {
-        position: absolute;
-        top: 1.1rem;
-        right: 1.1rem;
-        accent-color: var(--dg-success);
-    }
-
-    &__icon {
-        margin-bottom: 0.15rem;
-        color: var(--dg-success);
-        font-size: 1.4rem;
-    }
-
-    &__label {
-        color: var(--dg-ink);
-        font-size: 0.95rem;
-        font-weight: 650;
-    }
-
-    &__text {
-        color: var(--dg-muted);
-        font-size: 0.85rem;
-        line-height: 1.45;
-    }
-}
-
 /* Step 4: what the server will create. */
 .preview-summary {
     display: flex;

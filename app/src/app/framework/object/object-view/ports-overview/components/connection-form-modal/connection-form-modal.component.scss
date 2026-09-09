@@ -1,0 +1,191 @@
+/* ng-bootstrap renders this component inside .modal-content, so the host sits between it (a flex
+   column capped to the viewport) and the shell. It has to be a shrinkable flex column itself, or the
+   body cannot scroll and the footer is pushed out of view. */
+:host {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.connection-wizard {
+    display: block;
+
+    /* Keeps the footer from jumping between a short step and a tall one. The option panels do not
+       need this room: they are rendered on the modal window instead of inline. */
+    min-height: 18rem;
+
+    /* The navigation bar ends on the step labels, so the step's own content has to start clear of
+       them. Only the visible step is styled: archwizard hides the others with [hidden], and a rule
+       that also matched them would outrank that and stack every step on top of each other. */
+    aw-wizard-step:not([hidden]) {
+        display: block;
+        padding-top: 1rem;
+    }
+}
+
+/* The two ends of the link, read left to right without implying a direction. */
+.connection-pair {
+    display: grid;
+    align-items: stretch;
+    gap: 0.5rem;
+    grid-template-columns: 1fr auto 1fr;
+    margin-bottom: 0.5rem;
+
+    &__link {
+        display: flex;
+        align-items: center;
+        color: var(--dg-faint);
+        font-size: 1.35rem;
+        line-height: 1;
+    }
+}
+
+.endpoint-card {
+    display: grid;
+    align-content: start;
+    gap: 0.2rem;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid var(--dg-border);
+    border-radius: var(--dg-radius-md);
+    background: var(--dg-surface);
+    min-width: 0;
+
+    &--empty {
+        border-style: dashed;
+        background: var(--dg-surface-tint);
+    }
+
+    &__role {
+        color: var(--dg-muted);
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    &__port {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--dg-ink);
+        font-size: 0.95rem;
+        font-weight: 650;
+        overflow-wrap: anywhere;
+    }
+
+    &__side {
+        padding: 0.05rem 0.4rem;
+        border: 1px solid rgba(var(--dg-brand-rgb), 0.18);
+        border-radius: 999px;
+        background: rgba(var(--dg-brand-rgb), 0.08);
+        color: var(--dg-brand-ink);
+        font-size: 0.7rem;
+        font-weight: 500;
+    }
+
+    &__object {
+        color: var(--dg-muted);
+        font-size: 0.8rem;
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+    }
+}
+
+.connection-form {
+    &__lead {
+        margin: 0 0 1rem;
+        max-width: 74ch;
+        color: var(--dg-muted);
+        font-size: 0.875rem;
+        line-height: 1.5;
+    }
+
+    &__hint {
+        display: block;
+        margin: -0.6rem 0 0.75rem;
+        color: var(--dg-muted);
+        font-size: 0.78rem;
+        line-height: 1.35;
+    }
+}
+
+/* What the last step will write, one row per answered question. */
+.review-list {
+    display: grid;
+    gap: 0.4rem;
+    margin: 0;
+
+    &__row {
+        display: grid;
+        align-items: baseline;
+        gap: 0.15rem 1rem;
+        padding: 0.5rem 0.85rem;
+        border: 1px solid var(--dg-border);
+        border-radius: var(--dg-radius-md);
+        background: var(--dg-surface);
+        grid-template-columns: minmax(8rem, 12rem) 1fr;
+
+        dt {
+            color: var(--dg-muted);
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        dd {
+            margin: 0;
+            color: var(--dg-ink);
+            font-size: 0.875rem;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+@media (max-width: 575.98px) {
+    .review-list__row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* The colour is free text; the swatch only appears once it is something a browser can paint. */
+.cable-color {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+
+    &__field {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    &__swatch {
+        flex: 0 0 auto;
+        width: 2.1rem;
+        height: 2.1rem;
+        margin-bottom: 1rem;
+        border: 1px solid var(--dg-border);
+        border-radius: var(--dg-radius-sm);
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
+    }
+}
+
+/* Metadata or an inventoried CI, as two cards. */
+cmdb-choice-card-group {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+/* The pair stacks before it gets too narrow to read. */
+@media (max-width: 575.98px) {
+    .connection-pair {
+        grid-template-columns: 1fr;
+        justify-items: stretch;
+    }
+
+    .connection-pair__link {
+        justify-content: center;
+        transform: rotate(90deg);
+    }
+}

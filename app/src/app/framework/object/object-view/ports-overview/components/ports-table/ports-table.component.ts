@@ -29,11 +29,20 @@ import {
 } from '@angular/core';
 
 import { Column, Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { PortConnectionState } from '../../models/port-connection.types';
 import { PortRow } from '../../models/ports-overview.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** Inputs that decide whether an optional column is part of the table. */
-const OPTIONAL_COLUMN_INPUTS = ['showSideColumn', 'showConnectionColumn', 'canEdit', 'canDelete'] as const;
+const OPTIONAL_COLUMN_INPUTS = [
+    'showSideColumn',
+    'showConnectionColumn',
+    'canEdit',
+    'canDelete',
+    'canConnect',
+    'canEditConnection',
+    'canDisconnect'
+] as const;
 
 
 /** Presentational port list. Owns the column definition only; every state change is handed upwards. */
@@ -59,25 +68,33 @@ export class PortsTableComponent implements OnInit, OnChanges {
     /** Only shown once the backend reports a connection state; see `hasConnectionState`. */
     @Input() public showConnectionColumn = false;
 
-    /** Both gate their own action AND, together, the whole actions column. */
+    /** Each gates its own action AND, together, the whole actions column. */
     @Input() public canEdit = false;
     @Input() public canDelete = false;
+    @Input() public canConnect = false;
+    @Input() public canEditConnection = false;
+    @Input() public canDisconnect = false;
 
     @Output() public readonly pageChange = new EventEmitter<number>();
     @Output() public readonly pageSizeChange = new EventEmitter<number>();
     @Output() public readonly sortChange = new EventEmitter<Sort>();
     @Output() public readonly editPort = new EventEmitter<PortRow>();
     @Output() public readonly deletePort = new EventEmitter<PortRow>();
+    @Output() public readonly connectPort = new EventEmitter<PortRow>();
+    @Output() public readonly editConnection = new EventEmitter<PortRow>();
+    @Output() public readonly disconnectPort = new EventEmitter<PortRow>();
 
     @ViewChild('nameTemplate', { static: true }) public nameTemplate: TemplateRef<unknown>;
     @ViewChild('sideTemplate', { static: true }) public sideTemplate: TemplateRef<unknown>;
     @ViewChild('statusTemplate', { static: true }) public statusTemplate: TemplateRef<unknown>;
-    @ViewChild('connectedTemplate', { static: true }) public connectedTemplate: TemplateRef<unknown>;
+    @ViewChild('connectionTemplate', { static: true }) public connectionTemplate: TemplateRef<unknown>;
     @ViewChild('valueTemplate', { static: true }) public valueTemplate: TemplateRef<unknown>;
     @ViewChild('actionsTemplate', { static: true }) public actionsTemplate: TemplateRef<unknown>;
 
     public columns: Column[] = [];
     public visibleColumns: string[] = [];
+
+    public readonly connectionState = PortConnectionState;
 
 /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
@@ -114,6 +131,18 @@ export class PortsTableComponent implements OnInit, OnChanges {
 
     public onDeletePort(row: PortRow): void {
         this.deletePort.emit(row);
+    }
+
+    public onConnectPort(row: PortRow): void {
+        this.connectPort.emit(row);
+    }
+
+    public onEditConnection(row: PortRow): void {
+        this.editConnection.emit(row);
+    }
+
+    public onDisconnectPort(row: PortRow): void {
+        this.disconnectPort.emit(row);
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
@@ -188,11 +217,11 @@ export class PortsTableComponent implements OnInit, OnChanges {
             {
                 display: 'Connection',
                 name: 'connected',
-                data: 'connected',
+                data: 'connectionLabel',
                 sortable: true,
                 searchable: false,
-                template: this.connectedTemplate,
-                style: { 'min-width': '120px' }
+                template: this.connectionTemplate,
+                style: { 'min-width': '180px' }
             },
             {
                 display: 'Description',
@@ -211,7 +240,7 @@ export class PortsTableComponent implements OnInit, OnChanges {
                 searchable: false,
                 fixed: true,
                 template: this.actionsTemplate,
-                style: { 'width': '90px', 'text-align': 'center' }
+                style: { 'width': '140px', 'text-align': 'center' }
             }
         ];
 
@@ -229,7 +258,8 @@ export class PortsTableComponent implements OnInit, OnChanges {
         }
 
         if (name === 'actions') {
-            return this.canEdit || this.canDelete;
+            return this.canEdit || this.canDelete || this.canConnect
+                || this.canEditConnection || this.canDisconnect;
         }
 
         return true;

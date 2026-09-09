@@ -22,7 +22,11 @@ import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
-import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
+import {
+    APIGetSingleResponse,
+    APIInsertSingleResponse,
+    APIUpdateSingleResponse
+} from 'src/app/services/models/api-response';
 import {
     PortBulkRequest,
     PortBulkResult,
@@ -49,6 +53,16 @@ export class PortService {
 
         return this.api.callGet<CmdbPort[]>(`${ this.servicePrefix }/object/${ objectId }`, options).pipe(
             map((response: HttpResponse<CmdbPort[]>) => response?.body ?? [])
+        );
+    }
+
+
+    /** One port by id. Used to name the far end of a connection, which belongs to another object. */
+    public getPort(publicId: number): Observable<CmdbPort> {
+        const options = { headers: this.jsonHeaders, params: new HttpParams(), observe: resp };
+
+        return this.api.callGet<APIGetSingleResponse<CmdbPort>>(`${ this.servicePrefix }/${ publicId }`, options).pipe(
+            map((response: HttpResponse<APIGetSingleResponse<CmdbPort>>) => response?.body?.result)
         );
     }
 

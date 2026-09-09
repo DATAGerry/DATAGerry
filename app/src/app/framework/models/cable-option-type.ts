@@ -16,39 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 
-export enum SpecialType {
-    SUPERNET = 'SUPERNET',
-    SUBNET = 'SUBNET',
-    VLAN = 'VLAN',
-    RACK = 'RACK',
-    CABLE = 'CABLE'
-}
-
-
-export interface SpecialTypeSchemaSection {
-    type: 'section';
-    name: string;
-    label: string;
-    fields: Array<string>;
-}
-
-
-export interface SpecialTypeSchemaField {
-    type: string;
-    name: string;
-    label: string;
-}
-
-
-export interface SpecialTypeSchema {
-    special_type: SpecialType;
-    sections: Array<SpecialTypeSchemaSection>;
-    fields: Array<SpecialTypeSchemaField>;
-}
-
-
-export interface SpecialTypeOption {
-    value: SpecialType;
-    label: string;
-    description: string;
+/** The CmdbExtendableOption type a cable's type is selected from. */
+export enum CableOptionType {
+    CABLE_TYPE = 'CABLE_TYPE'
 }
