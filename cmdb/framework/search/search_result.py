@@ -310,7 +310,7 @@ class SearchResult(Generic[R]):
         """
         Serialize the search result to a JSON-serializable dictionary
 
-        `results` holds `SearchResultMap` instances rather than dicts; the `database_utils.default`
+        `results` holds `SearchResultMap` instances rather than dicts; the `json_codec.default`
         JSON hook converts them on the way out
 
         Returns:

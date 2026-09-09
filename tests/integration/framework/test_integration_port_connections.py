@@ -57,6 +57,7 @@ from cmdb.framework.port.cascade import (
     delete_connections_of_port,
     delete_ports_of_object,
 )
+from cmdb.framework.port.cable_usage import cable_usage_blocker, collect_cable_usage
 from cmdb.framework.port.connection_cable_view import attach_cable_views
 from cmdb.manager.extendable_options_manager import ExtendableOptionsManager
 from cmdb.manager.objects_manager import ObjectsManager
@@ -856,3 +857,76 @@ def test_a_resolved_connection_frees_its_cable_again(connections, manager: PortC
     connections.delete_one({PortConnectionKey.PUBLIC_ID.value: CONNECTION_IDS[0]})
 
     assert manager.get_assigned_cable_ci_ids() == []
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                   the cable a deleted CI would strand                                                #
+# -------------------------------------------------------------------------------------------------------------------- #
+def test_a_cable_ci_in_use_is_reported_with_its_connection_and_ports(
+    connections, manager: PortConnectionsManager,
+) -> None:
+    """
+    The delete guard's read, against the real partial index on 'cable_ci_id'
+
+    A unit test can only pin what the manager is asked; that the query really finds the connection -
+    and finds it through the index that exists because ``to_json`` OMITS the key when there is no CI -
+    is measurable here only.
+    """
+    connections.insert_many([
+        _connection_doc(
+            CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT],
+            **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+        ),
+        _connection_doc(CONNECTION_IDS[1], [REAR_PORT, SWITCH_PORT]),
+    ])
+
+    usages = collect_cable_usage(manager, [CABLE_CI_ID, OTHER_CABLE_CI_ID])
+
+    assert len(usages) == 1
+    assert usages[0].cable_ci_id == CABLE_CI_ID
+    assert usages[0].connection_id == CONNECTION_IDS[0]
+    assert usages[0].endpoints == sorted([FRONT_PORT, SERVER_PORT])
+    assert cable_usage_blocker(usages) is not None
+
+
+def test_a_cable_ci_no_connection_claims_blocks_nothing(connections, manager: PortConnectionsManager) -> None:
+    """An inline-cabled connection stores no cable_ci_id, so its cable CI is free to be deleted"""
+    connections.insert_one(_connection_doc(CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT]))
+
+    assert collect_cable_usage(manager, [CABLE_CI_ID]) == []
+    assert cable_usage_blocker(collect_cable_usage(manager, [CABLE_CI_ID])) is None
+
+
+def test_a_bulk_selection_of_cables_is_answered_in_one_read(connections, manager: PortConnectionsManager) -> None:
+    """Both used cables come back from the single '$in', ordered by the cable's own public_id"""
+    connections.insert_many([
+        _connection_doc(
+            CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT],
+            **{PortConnectionKey.CABLE_CI_ID.value: OTHER_CABLE_CI_ID},
+        ),
+        _connection_doc(
+            CONNECTION_IDS[1], [REAR_PORT, SWITCH_PORT],
+            **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+        ),
+    ])
+
+    usages = collect_cable_usage(manager, [CABLE_CI_ID, OTHER_CABLE_CI_ID])
+
+    assert [usage.cable_ci_id for usage in usages] == [CABLE_CI_ID, OTHER_CABLE_CI_ID]
+    assert cable_usage_blocker(usages).count(str(CONNECTION_IDS[0])) == 1
+
+
+def test_resolving_the_connection_releases_the_cable_for_deletion(
+    connections, manager: PortConnectionsManager,
+) -> None:
+    """The way out of the refusal: delete the connection, then the Cable CI may go"""
+    connections.insert_one(_connection_doc(
+        CONNECTION_IDS[0], [FRONT_PORT, SERVER_PORT],
+        **{PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID},
+    ))
+
+    assert collect_cable_usage(manager, [CABLE_CI_ID]) != []
+
+    connections.delete_one({PortConnectionKey.PUBLIC_ID.value: CONNECTION_IDS[0]})
+
+    assert collect_cable_usage(manager, [CABLE_CI_ID]) == []

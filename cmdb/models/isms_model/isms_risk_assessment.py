@@ -27,7 +27,7 @@ the shape the frontend sends back - and are normalised into ``datetime`` objects
 (as this model did until 2026-09-07, migrated by ``updater_20260907``) leaves a sub-document where a
 date belongs, which MongoDB cannot sort, range-filter or ``$dateToString`` - the reports could only
 ever project such a value, never query it. The wire format is unchanged either way, because
-``cmdb.database.database_utils.default`` serialises a datetime back into the same wrapper.
+``cmdb.database.json_codec.default`` serialises a datetime back into the same wrapper.
 
 **Its key set is closed.** ``RiskAssessmentKey`` names every persisted key, and ``from_data`` /
 ``to_json`` are a lossless round-trip over exactly that set - which the read routes depend on, since
@@ -325,7 +325,7 @@ class IsmsRiskAssessment(CmdbDAO):
 
         Emits exactly the keys of ``RiskAssessmentKey``, which makes it the inverse of ``from_data``
         over the closed key set. The date values stay ``datetime`` objects: that is what MongoDB
-        stores, and the response encoder (``cmdb.database.database_utils.default``) turns them into
+        stores, and the response encoder (``cmdb.database.json_codec.default``) turns them into
         the ``{'$date': <epoch millis>}`` wrapper the frontend expects
 
         Args:

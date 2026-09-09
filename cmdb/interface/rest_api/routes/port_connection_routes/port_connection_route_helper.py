@@ -46,6 +46,7 @@ from cmdb.models.port_connection_model import (
 from cmdb.models.special_type_model.cable_constants import CableField
 
 from cmdb.framework.port.assignable_cables import build_unassigned_cable_rows
+from cmdb.framework.port.cable_usage import CableUsage, collect_cable_usage
 from cmdb.framework.port.connection_cable_view import attach_cable_view, attach_cable_views
 from cmdb.framework.port.connection_validator import (
     cable_ci_blockers,
@@ -70,6 +71,7 @@ from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route
     CONNECTION_PORT_NOT_FOUND_MESSAGE,
     DUPLICATE_KEY_CABLE_CI_MARKER,
     DUPLICATE_KEY_ENDPOINTS_MARKER,
+    CableUsageKey,
     ConnectionRequestKey,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -544,3 +546,42 @@ def shape_unassigned_cable_page(
     } if type_ids else {}
 
     return build_unassigned_cable_rows(object_docs, type_labels)
+
+
+def build_cable_usage_payload(port_connections_manager: PortConnectionsManager, object_id: int) -> dict[str, Any]:
+    """
+    Builds the pre-check answer for one Cable CI: is a CmdbPortConnection still using it?
+
+    The read behind ``GET /port_connections/cable_usage/<object_id>``, so a client can tell BEFORE it
+    offers the delete what the delete guard would refuse - the same relationship
+    ``/types/uses_ports_usage/<id>`` has with the uses_ports guard. A cable is used at most once
+    (``cable_ci_id`` carries a partial unique index), which is why the answer names one connection
+    instead of a list
+
+    Args:
+        port_connections_manager (PortConnectionsManager): db interface for CmdbPortConnections
+        object_id (int): public_id of the CmdbObject to inspect
+
+    Raises:
+        PortConnectionsManagerGetError: If the connection lookup fails
+
+    Returns:
+        dict[str, Any]: { in_use: bool, connection_id: int | None, endpoints: list[int] | None } -
+            the last two are null when the cable is free (and for any object that is not a Cable CI)
+    """
+    usages: list[CableUsage] = collect_cable_usage(port_connections_manager, [object_id])
+
+    if not usages:
+        return {
+            CableUsageKey.IN_USE.value: False,
+            CableUsageKey.CONNECTION_ID.value: None,
+            CableUsageKey.ENDPOINTS.value: None,
+        }
+
+    usage: CableUsage = usages[0]
+
+    return {
+        CableUsageKey.IN_USE.value: True,
+        CableUsageKey.CONNECTION_ID.value: usage.connection_id,
+        CableUsageKey.ENDPOINTS.value: list(usage.endpoints),
+    }

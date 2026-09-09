@@ -56,6 +56,7 @@ from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper import (
     CABLE_NAME_SORT,
     build_cable_info,
+    build_cable_usage_payload,
     build_connection_candidate,
     collect_claimed_cable_ci_ids,
     duplicate_key_abort,
@@ -772,3 +773,50 @@ class TestShapeUnassignedCablePage:
 
         assert shape_unassigned_cable_page(types_manager, []) == []
         types_manager.get_types_lookup.assert_not_called()
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            build_cable_usage_payload                                                 #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestBuildCableUsagePayload:
+    """The pre-check answer behind GET /port_connections/cable_usage/<object_id>"""
+
+    CONNECTION_ID: int = 7
+    ENDPOINTS: list[int] = [31, 32]
+
+    @staticmethod
+    def _manager(*connections: dict[str, Any]) -> MagicMock:
+        """A PortConnectionsManager answering the batched cable read."""
+        manager = MagicMock(name='port_connections_manager')
+        manager.get_connections_by_cable_cis.return_value = list(connections)
+
+        return manager
+
+    def test_a_free_cable_reports_no_usage(self) -> None:
+        """in_use false is what lets a client offer the delete; the other two keys stay present"""
+        payload = build_cable_usage_payload(self._manager(), CABLE_CI_ID)
+
+        assert payload == {'in_use': False, 'connection_id': None, 'endpoints': None}
+
+    def test_a_used_cable_names_the_connection_and_its_ports(self) -> None:
+        """What the delete guard would refuse with, in the shape a client can render"""
+        payload = build_cable_usage_payload(
+            self._manager({
+                PortConnectionKey.PUBLIC_ID.value: self.CONNECTION_ID,
+                PortConnectionKey.CABLE_CI_ID.value: CABLE_CI_ID,
+                PortConnectionKey.ENDPOINTS.value: self.ENDPOINTS,
+            }),
+            CABLE_CI_ID,
+        )
+
+        assert payload == {
+            'in_use': True, 'connection_id': self.CONNECTION_ID, 'endpoints': self.ENDPOINTS,
+        }
+
+    def test_one_cable_is_one_query(self) -> None:
+        """The pre-check shares the batched read of the delete guard"""
+        manager = self._manager()
+
+        build_cable_usage_payload(manager, CABLE_CI_ID)
+
+        manager.get_connections_by_cable_cis.assert_called_once_with([CABLE_CI_ID])

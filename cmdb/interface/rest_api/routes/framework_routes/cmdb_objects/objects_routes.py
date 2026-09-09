@@ -55,6 +55,9 @@ from cmdb.manager import (
     ObjectsManager,
     TypesManager,
 )
+from cmdb.manager.port_connections_manager import PortConnectionsManager
+from cmdb.manager.port_interface_links_manager import PortInterfaceLinksManager
+from cmdb.manager.ports_manager import PortsManager
 from cmdb.security.acl.permission import AccessControlPermission
 from cmdb.models.type_model.cmdb_type import CmdbType
 from cmdb.models.user_model import CmdbUser
@@ -67,9 +70,10 @@ from cmdb.framework.rendering.render_result import RenderResult
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.route_utils import insert_request_user, verify_api_access, handle_db_errors
 from cmdb.interface.rest_api.routes.routes_helper import (
-    fetch_only_active_objects,
     extract_public_ids,
+    fetch_only_active_objects,
     normalize_public_id_list,
+    request_wants_body,
 )
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper import (
     delete_one_cascade,
@@ -80,12 +84,14 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_objects.objects_helper
     handle_delete_from_object_groups,
     handle_delete_object_location,
     handle_rack_object_deleted,
+    handle_port_object_deleted,
     render_or_native,
     build_object_value_view,
     apply_object_update,
     validate_object_patch_payload,
     build_patched_object_data,
     guard_object_delete,
+    guard_objects_delete,
     emit_object_state_change_events,
     apply_object_insert,
 )
@@ -296,7 +302,7 @@ def get_cmdb_objects(params: CollectionParameters, request_user: CmdbUser) -> Re
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:
@@ -657,7 +663,7 @@ def get_cmdb_object_references(public_id: int, params: CollectionParameters, req
                             total=iteration_result.total,
                             params=params,
                             url=request.url,
-                            body=request.method == 'HEAD')
+                            body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:
@@ -1068,6 +1074,14 @@ def delete_many_cmdb_objects(public_ids: str, request_user: CmdbUser) -> Respons
         types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
         # Resolved once and reused for every target's location cleanup in the loop below
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
+        # Same for the Port cascade: three managers for the whole selection instead of three per object
+        ports_manager: PortsManager = ManagerProvider.get_manager(ManagerType.PORTS, request_user)
+        port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
+            ManagerType.PORT_CONNECTIONS, request_user,
+        )
+        port_interface_links_manager: PortInterfaceLinksManager = ManagerProvider.get_manager(
+            ManagerType.PORT_INTERFACE_LINKS, request_user,
+        )
 
         to_delete_object_ids: list[int] = extract_public_ids(public_ids)
 
@@ -1095,7 +1109,9 @@ def delete_many_cmdb_objects(public_ids: str, request_user: CmdbUser) -> Respons
                     'not found in database!'
                 )
 
-            guard_object_delete(objects_manager, types_manager, request_user, to_check)
+        # The shared delete guard, asked ONCE for the whole selection: the per-target IPAM checks plus
+        # the Cable CI check, which costs a single query for all targets together
+        guard_objects_delete(objects_manager, types_manager, request_user, to_delete_objects)
 
         # RiskAssessment/ControlMeasureAssignment cascade for all targets in one query pair instead
         # of the per-object cascade delete_with_follow_up would run for each object
@@ -1131,6 +1147,14 @@ def delete_many_cmdb_objects(public_ids: str, request_user: CmdbUser) -> Respons
             handle_rack_object_deleted(
                 request_user, CmdbObject.to_json(current_object), objects_manager, types_manager,
                 locations_manager,
+            )
+
+            # A port lives outside its owner's document, so nothing else removes it - and this is the
+            # only place the bulk delete can do it: the single delete's delete_one_cascade is not run
+            # here. Same three pre-resolved managers for every target
+            handle_port_object_deleted(
+                request_user, CmdbObject.to_json(current_object), ports_manager,
+                port_connections_manager, port_interface_links_manager,
             )
 
             # Send deletion event to all active webhooks

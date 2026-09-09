@@ -18,7 +18,7 @@ Unit tests for RenderResult
 
 The serialization is a frontend contract: the Angular `RenderResult` model mirrors the attribute
 names one to one, and declares `current_render_time` as the bson extended-JSON `{$date: ...}` shape,
-which the `database_utils.default` hook produces from the raw datetime left in place here.
+which the `json_codec.default` hook produces from the raw datetime left in place here.
 """
 from datetime import datetime
 

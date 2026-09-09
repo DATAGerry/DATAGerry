@@ -94,15 +94,26 @@ def quick_search_result_counter(request_user: CmdbUser) -> Response:
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
 def search_framework(request_user: CmdbUser) -> Response:
     """
-    Processes a search request (GET or POST) using the SearcherFramework, applying filters, pagination, and 
-    optional reference resolution
+    Processes a search request (GET or POST) using the SearcherFramework
+
+    The criteria are built with the request user and READ permission, so the pipeline the searcher
+    runs is ACL-filtered before it reaches the database. `?limit=` 0 means every match (the pager
+    convention of this API), `?skip=` pages through them and `?resolve=true` renders referenced
+    CmdbObjects instead of their ids
+
+    A failure is reported as a failure: until 2026-09-09 every error in the search block answered
+    **204 with an empty body**, which a client cannot tell apart from "nothing matched" - and which
+    turned an unusable `?limit=0` into a silently empty page
 
     Args:
         request_user (CmdbUser): The user making the request, used for permission checks and data access
 
+    Raises:
+        HTTPException: 400 when the parameters or the search itself are unusable, 405 for an
+                       unsupported method, 500 on an unexpected error
+
     Returns:
-        Response: A Response object containing the search results (list of objects) or an empty list 
-                  with HTTP 204 if an error occurs during search aggregation
+        Response: A Response object carrying the rendered page, the total and the per-type groups
     """
     try:
         objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
@@ -115,6 +126,11 @@ def search_framework(request_user: CmdbUser) -> Response:
             resolve_object_references: bool = request.args.get('resolve', 'false') in ['True', 'true']
         except ValueError:
             abort(400, "Could not retrieve the parameters from the request!")
+
+        # 0 is 'every match' here as in every paginated route; a negative page size or offset is not a
+        # weaker version of that but an unusable request, and MongoDB would refuse the stage anyway
+        if limit < 0 or skip < 0:
+            abort(400, "The 'limit' and 'skip' parameters of a search must not be negative!")
 
         try:
             search_parameters: dict | list = {}
@@ -137,30 +153,28 @@ def search_framework(request_user: CmdbUser) -> Response:
             LOGGER.error("[search_framework] Exception: %s. Type: %s", err, type(err), exc_info=True)
             abort(400, "An unexpected error occured while processing the search request!")
 
-        try:
-            searcher = SearcherFramework(objects_manager)
-            builder = SearchPipelineBuilder()
+        searcher = SearcherFramework(objects_manager)
+        builder = SearchPipelineBuilder()
 
-            query: list[dict] = builder.build(search_parameters,
-                                            user=request_user,
-                                            permission=AccessControlPermission.READ,
-                                            active_flag=only_active)
+        query: list[dict] = builder.build(search_parameters,
+                                          user=request_user,
+                                          permission=AccessControlPermission.READ,
+                                          active_flag=only_active)
 
-            result = searcher.aggregate(
-                                                     pipeline=query,
-                                                     request_user=request_user,
-                                                     limit=limit,
-                                                     skip=skip,
-                                                     resolve=resolve_object_references,
-                                                     active=only_active
-                                                 )
+        result = searcher.aggregate(
+            pipeline=query,
+            request_user=request_user,
+            limit=limit,
+            skip=skip,
+            resolve=resolve_object_references,
+        )
 
-            return DefaultResponse(result).make_response()
-        except Exception as err:
-            LOGGER.error("[search_framework]: Exception: %s, Type: %s",err, type(err), exc_info=True)
-            return DefaultResponse([]).make_response(204)
+        return DefaultResponse(result).make_response()
     except HTTPException as http_err:
         raise http_err
+    except ObjectsManagerIterationError as err:
+        LOGGER.error("[search_framework] ObjectsManagerIterationError: %s", err, exc_info=True)
+        abort(400, "Failed to aggregate the Objects for the search request!")
     except Exception as err:
         LOGGER.error("[search_framework] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, "An internal server error occured while processing the search request!")

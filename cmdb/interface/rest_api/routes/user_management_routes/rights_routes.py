@@ -42,6 +42,7 @@ from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import GetMultiResponse, GetSingleResponse
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 
 from cmdb.errors.manager.rights_manager import RightsManagerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -85,7 +86,7 @@ def get_rights(params: CollectionParameters) -> Response:
         Calling the route over HTTP HEAD will result in an empty body
     """
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         if params.optional['view'] == 'tree':
             api_response = GetMultiResponse(RightsManager.tree_to_json(ALL_RIGHTS),
@@ -144,7 +145,7 @@ def get_right(name: str) -> Response:
         if not right:
             abort(404, f"Right with name: {name} was not found!")
 
-        return GetSingleResponse(BaseRight.to_dict(right), body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(BaseRight.to_dict(right), body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except RightsManagerGetError as err:
@@ -173,7 +174,7 @@ def get_levels() -> Response:
         Calling the route over HTTP HEAD method will result in an empty body
     """
     try:
-        return GetSingleResponse(NAME_TO_LEVEL, body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(NAME_TO_LEVEL, body=request_wants_body()).make_response()
     except Exception as err:
         LOGGER.error("[get_levels] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, "An internal server error occured while processing Right levels!")

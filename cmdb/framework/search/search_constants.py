@@ -85,9 +85,46 @@ class SearchParamKey(BaseStrEnum):
     """
     Keys of one search parameter as the frontend sends it
 
-    Mirrors the Angular `SearchBarTag`, so these spellings are a frontend-visible contract
+    Mirrors the Angular `SearchBarTag`, so these spellings are a frontend-visible contract.
+
+    SEARCH_LABEL is sent by the search bar on every tag and is NOT read by `SearchParam.from_request`
+    - the backend derives what it needs from SEARCH_TEXT and SETTINGS. It is named here because the
+    per-type groups of a search response carry it back (see `SearchGroupKey`), and the result bar
+    re-submits a group as a tag
     """
     SEARCH_TEXT = 'searchText'
     SEARCH_FORM = 'searchForm'
+    SEARCH_LABEL = 'searchLabel'
     SETTINGS = 'settings'
     DISJUNCTION = 'disjunction'
+
+
+class SearchFacetKey(BaseStrEnum):
+    """
+    The three branches of the object search's `$facet` stage
+
+    One aggregation answers a whole search: METADATA counts every match, DATA carries the requested
+    page and GROUP the per-type tallies. The names are pipeline-internal - the searcher reads them
+    off the single document `$facet` emits and none of them reaches a client
+    """
+    METADATA = 'metadata'
+    DATA = 'data'
+    GROUP = 'group'
+
+
+class SearchGroupKey(BaseStrEnum):
+    """
+    Keys of one per-type group in a search response (`SearchResultKey.GROUPS`)
+
+    A **frontend-visible contract**: the Angular result bar reads SEARCH_LABEL and TOTAL to draw the
+    type filter and re-submits the entry as a TYPE tag, which is why the first four members are
+    deliberately the same strings as the matching `SearchParamKey` members - a group IS a ready-made
+    search parameter. TOTAL is the group's own addition (how many matches carry that type) and TYPES
+    is the key inside SETTINGS holding the single type id, the shape a TYPE parameter expects
+    """
+    SEARCH_TEXT = SearchParamKey.SEARCH_TEXT.value
+    SEARCH_FORM = SearchParamKey.SEARCH_FORM.value
+    SEARCH_LABEL = SearchParamKey.SEARCH_LABEL.value
+    SETTINGS = SearchParamKey.SETTINGS.value
+    TOTAL = 'total'
+    TYPES = 'types'

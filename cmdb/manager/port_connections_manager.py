@@ -142,6 +142,32 @@ class PortConnectionsManager(GenericManager):
             raise PortConnectionsManagerGetError(str(err)) from err
 
 
+    def get_connections_by_cable_cis(self, cable_ci_ids: list[int]) -> list[dict[str, Any]]:
+        """
+        Retrieves the connections claiming any of the given Cable CIs
+
+        The batched form of `get_connection_by_cable_ci`: the object-delete guard asks it once for a
+        whole selection rather than once per candidate, so a bulk delete of 200 objects still costs
+        one query. Served by the partial index on 'cable_ci_id'
+
+        Args:
+            cable_ci_ids (list[int]): public_ids of the CABLE SpecialType CmdbObjects to check
+
+        Raises:
+            PortConnectionsManagerGetError: If the CmdbPortConnections could not be retrieved
+
+        Returns:
+            list[dict[str, Any]]: The connections using any of those Cable CIs, empty when none do
+        """
+        if not cable_ci_ids:
+            return []
+
+        try:
+            return self.get_many(**{PortConnectionKey.CABLE_CI_ID.value: {'$in': cable_ci_ids}})
+        except (BaseManagerGetError, Exception) as err:
+            raise PortConnectionsManagerGetError(str(err)) from err
+
+
     def get_assigned_cable_ci_ids(self) -> list[int]:
         """
         Retrieves the public_ids of every Cable CI that some CmdbPortConnection already uses

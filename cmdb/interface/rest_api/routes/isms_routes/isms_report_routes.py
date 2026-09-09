@@ -20,6 +20,7 @@ from logging import Logger, getLogger
 import re
 from flask import abort, request
 from werkzeug import Response
+from werkzeug.exceptions import HTTPException
 
 from cmdb.manager.objects_manager import ObjectsManager
 from cmdb.manager.extendable_options_manager import ExtendableOptionsManager
@@ -34,9 +35,9 @@ from cmdb.models.isms_model import (
     IsmsControlMeasure,
     IsmsControlMeasureAssignment,
     IsmsProtectionGoal,
-    IsmsReportBuilder,
     IsmsRisk,
 )
+from cmdb.framework.isms import RiskMatrixReportBuilder
 from cmdb.models.person_model import CmdbPerson
 from cmdb.models.person_group_model import CmdbPersonGroup
 from cmdb.models.isms_model.isms_control_measure_constants import ControlMeasureKey
@@ -61,7 +62,9 @@ from cmdb.interface.rest_api.routes.isms_routes.isms_report_helper import (
     risk_matrix_class_lookup_stages,
 )
 
+from cmdb.errors.framework_isms import RiskMatrixReportError
 from cmdb.errors.manager.risk_assessment_manager import RiskAssessmentManagerIterationError
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -119,8 +122,17 @@ def get_isms_risk_matrix_report(request_user: CmdbUser) -> Response:
     """
     HTTP `GET`/`HEAD` route to retrieve the IsmsRiskMatrix report
 
+    The body carries the grid counted three ways - `risk_matrix_before_treatment`,
+    `risk_matrix_current_state`, `risk_matrix_after_treatment` - plus `configured`, which is False
+    while the ISMS config wizard has not produced the risk matrix yet. Before 2026-09-09 that state
+    was indistinguishable from a configured matrix nothing had been assessed against
+
     Args:
         request_user (CmdbUser): CmdbUser requesting the RiskMatrix report
+
+    Raises:
+        HTTPException: 400 when the report could not be built from the stored data, 500 on an
+                       unexpected error
 
     Returns:
         DefaultResponse: The RiskMatrix report as a dictionary
@@ -136,15 +148,20 @@ def get_isms_risk_matrix_report(request_user: CmdbUser) -> Response:
                                                                                 ManagerType.EXTENDABLE_OPTIONS,
                                                                                 request_user)
 
-        isms_report_builder = IsmsReportBuilder(
+        report_builder = RiskMatrixReportBuilder(
             risk_assessment_manager,
             risk_matrix_manager,
             extendable_options_manager
         )
 
-        risk_matrix_report = isms_report_builder.build_risk_matrix_report()
+        risk_matrix_report = report_builder.build_risk_matrix_report()
 
         return DefaultResponse(risk_matrix_report).make_response()
+    except HTTPException as http_err:
+        raise http_err
+    except RiskMatrixReportError as err:
+        LOGGER.error("[get_isms_risk_matrix_report] RiskMatrixReportError: %s", err, exc_info=True)
+        abort(400, "Failed to build the RiskMatrix report from the stored ISMS configuration!")
     except Exception as err:
         LOGGER.error("[get_isms_risk_matrix_report] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, "An internal server error occured while retrieving the RiskMatrix report!")
@@ -181,7 +198,7 @@ def get_isms_risk_treatment_plan_report(params: CollectionParameters, request_us
         GetMultiResponse: The paginated Risk Treatment Plan report
     """
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         risk_assessment_manager: RiskAssessmentManager = ManagerProvider.get_manager(
                                                                             ManagerType.RISK_ASSESSMENT,
@@ -400,7 +417,7 @@ def get_isms_soa_report(params: CollectionParameters, request_user: CmdbUser) ->
     # legitimately exceeds the default
     # pylint: disable=too-many-locals
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         control_measure_manager: ControlMeasureManager = ManagerProvider.get_manager(
                                                                             ManagerType.CONTROL_MEASURE,
@@ -491,7 +508,7 @@ def get_isms_risk_assessments_report(params: CollectionParameters, request_user:
         GetMultiResponse: The paginated RiskAssessment report
     """
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         risk_assessment_manager: RiskAssessmentManager = ManagerProvider.get_manager(
                                                                             ManagerType.RISK_ASSESSMENT,

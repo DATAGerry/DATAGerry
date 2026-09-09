@@ -74,6 +74,7 @@ from cmdb.errors.manager.section_templates_manager import (
     SectionTemplatesManagerUpdateError,
     SectionTemplatesManagerDeleteError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -200,7 +201,7 @@ def get_all_section_templates(params: CollectionParameters, request_user: CmdbUs
             iteration_result.total,
             params,
             request.url,
-            request.method == 'HEAD'
+            request_wants_body()
         )
 
         return api_response.make_response()

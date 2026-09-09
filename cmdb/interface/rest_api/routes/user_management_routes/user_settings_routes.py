@@ -18,7 +18,7 @@ Implementation of all API routes for CmdbUserSettings
 """
 from logging import Logger, getLogger
 from typing import Any
-from flask import abort, request
+from flask import abort
 from werkzeug import Response
 from werkzeug.exceptions import HTTPException
 
@@ -45,6 +45,7 @@ from cmdb.errors.manager.user_settings_manager import (
     UserSettingsManagerDeleteError,
     UserSettingsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -128,7 +129,7 @@ def get_cmdb_user_settings(user_id: int, request_user: CmdbUser) -> Response:
 
         raw_user_settings = [CmdbUserSetting.to_json(user_setting) for user_setting in user_settings]
 
-        return GetListResponse(results=raw_user_settings, body=request.method == 'HEAD').make_response()
+        return GetListResponse(results=raw_user_settings, body=request_wants_body()).make_response()
     except UserSettingsManagerIterationError as err:
         LOGGER.error("[get_cmdb_user_settings] UserSettingsManagerIterationError: %s", err, exc_info=True)
         abort(400, "Failed to retrieve UserSettings from the database!")
@@ -159,7 +160,7 @@ def get_cmdb_user_setting(user_id: int, resource: str, request_user: CmdbUser) -
         requested_user_setting = user_settings_manager.get_user_setting(user_id, resource)
 
         if requested_user_setting:
-            return GetSingleResponse(requested_user_setting, body=request.method == 'HEAD').make_response()
+            return GetSingleResponse(requested_user_setting, body=request_wants_body()).make_response()
 
         abort(404, f"The requested UserSetting for resource: '{resource}' was not found!")
     except HTTPException as http_err:

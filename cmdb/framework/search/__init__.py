@@ -18,5 +18,7 @@ Object search of DataGerry
 
 `SearcherFramework` runs a search pipeline through the `ObjectsManager` and wraps the rendered hits
 in a `SearchResult`, which additionally reports, per hit, which of its fields matched the search
-patterns. `SearchParam` models one parsed search criterion from the request
+patterns. `SearchParam` models one parsed search criterion from the request, `search_facet` builds the
+one `$facet` stage that answers the total, the page and the per-type groups together, and
+`search_constants` holds the key vocabularies - several of which the Angular search bar mirrors
 """

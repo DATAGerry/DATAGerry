@@ -60,6 +60,7 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_docapi_templates.docap
     DocapiTemplateRight,
 )
 from cmdb.interface.blueprints import APIBlueprint
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 
 from cmdb.security.license.license_constants import LicenseFeature
 
@@ -172,7 +173,7 @@ def get_templates(params: CollectionParameters, request_user: CmdbUser) -> Respo
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:

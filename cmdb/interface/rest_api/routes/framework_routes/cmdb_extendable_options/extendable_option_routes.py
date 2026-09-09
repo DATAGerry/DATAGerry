@@ -57,6 +57,7 @@ from cmdb.errors.manager.extendable_options_manager import (
     ExtendableOptionsManagerDeleteError,
     ExtendableOptionsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -135,7 +136,7 @@ def get_cmdb_extendable_options(params: CollectionParameters, request_user: Cmdb
         GetMultiResponse: All the CmdbExtendableOptions matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         extendable_options_manager: ExtendableOptionsManager = ManagerProvider.get_manager(
                                                                     ManagerType.EXTENDABLE_OPTIONS,
@@ -189,7 +190,7 @@ def get_cmdb_extendable_option(public_id: int, request_user: CmdbUser) -> Respon
         extendable_option = extendable_options_manager.get_item(public_id, as_dict=True)
 
         if extendable_option:
-            return GetSingleResponse(extendable_option, body=request.method == 'HEAD').make_response()
+            return GetSingleResponse(extendable_option, body=request_wants_body()).make_response()
 
         abort(404, f"The ExtendableOption with ID:{public_id} was not found!")
     except HTTPException as http_err:

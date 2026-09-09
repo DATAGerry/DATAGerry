@@ -64,7 +64,7 @@ class RenderResult:
         so this must stay a plain attribute dump rather than a curated mapping
 
         The values are returned unconverted: `current_render_time` stays a `datetime` and is turned
-        into its `{'$date': <millis>}` form further down by the `database_utils.default` JSON hook,
+        into its `{'$date': <millis>}` form further down by the `json_codec.default` JSON hook,
         which is the shape the frontend model declares
 
         Returns:

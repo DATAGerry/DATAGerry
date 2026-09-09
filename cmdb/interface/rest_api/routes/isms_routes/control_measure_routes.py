@@ -36,7 +36,7 @@ from cmdb.interface.rest_api.routes.isms_routes.isms_routes_helper import (
     get_item_or_404,
     bulk_delete_reporting_in_use,
 )
-from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids
+from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids, request_wants_body
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
@@ -124,7 +124,7 @@ def get_isms_control_measures(params: CollectionParameters, request_user: CmdbUs
         GetMultiResponse: All the IsmsControlMeasures matching the CollectionParameters
     """
     try:
-        body: bool = request.method == 'HEAD'
+        body: bool = request_wants_body()
 
         control_measure_manager: ControlMeasureManager = ManagerProvider.get_manager(ManagerType.CONTROL_MEASURE,
                                                                                        request_user)
@@ -172,7 +172,7 @@ def get_isms_control_measure(public_id: int, request_user: CmdbUser) -> Response
         requested_control_measure = get_item_or_404(control_measure_manager, public_id,
                                                     f"The ControlMeasure with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_control_measure, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_control_measure, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except ControlMeasureManagerGetError as err:

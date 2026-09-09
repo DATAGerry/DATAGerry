@@ -26,6 +26,9 @@ from werkzeug.wrappers import Request
 
 LOGGER: Logger = getLogger(__name__)
 
+# The one HTTP method that asks for a response without a payload
+HEAD_METHOD: str = 'HEAD'
+
 # -------------------------------------------------------------------------------------------------------------------- #
 
 def get_file_in_request(file_name: str) -> FileStorage:
@@ -82,6 +85,29 @@ def fetch_only_active_objects() -> bool:
         bool: True if cookie value is true or True else False
     """
     return request.args.get('onlyActiveObjCookie') in ['True', 'true']
+
+
+def request_wants_body(current_request: Request | None = None) -> bool:
+    """
+    Answers whether a request expects a response body
+
+    Every read route that serves `HEAD` alongside `GET` passes this into its response class, which is
+    what makes a HEAD answer carry the status and the headers (`X-Total-Count` included) but no
+    payload - and, because the payload is then never built, no serialization cost either.
+
+    It exists as one function on purpose: until 2026-09-09 the routes spelled the question inline as
+    `body=request.method == 'HEAD'` in six different spellings, which is the answer INVERTED (the flag
+    means "send a body"), and the mistake was invisible because the flag itself was inert.
+
+    Args:
+        current_request (Request | None): The request to judge. Defaults to the active one, which is
+            what a route wants; a helper that already receives a request passes it in, so the rule
+            still lives in one place
+
+    Returns:
+        bool: False for a HEAD request, True for every other method
+    """
+    return (current_request or request).method != HEAD_METHOD
 
 
 def append_criteria_to_filter(

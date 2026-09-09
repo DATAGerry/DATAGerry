@@ -33,7 +33,7 @@ value is written back through ``$convert`` with both ``onError`` and ``onNull`` 
 original field - so an object that is not a ``$date`` wrapper, or a wrapper whose payload cannot be
 read as a date, is left exactly as it was rather than being nulled.
 
-**Nothing changes on the wire.** ``cmdb.database.database_utils.default`` serialises a datetime back
+**Nothing changes on the wire.** ``cmdb.database.json_codec.default`` serialises a datetime back
 into ``{'$date': <epoch millis>}``, so a converted document reaches the frontend in the same shape it
 had before.
 

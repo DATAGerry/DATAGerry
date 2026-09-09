@@ -96,6 +96,7 @@ from cmdb.interface.rest_api.routes.port_routes.port_route_helper import (
     get_requested_side_or_abort,
     refuse_owner_change,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -228,7 +229,7 @@ def get_cmdb_port(public_id: int, request_user: CmdbUser) -> Response:
 
         with_connected_flag(port_connections_manager, [port])
 
-        return GetSingleResponse(port, body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(port, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except AccessDeniedError as err:

@@ -66,6 +66,7 @@ from cmdb.errors.manager.persons_manager import (
     PersonsManagerDeleteError,
     PersonsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -149,7 +150,7 @@ def get_cmdb_persons(params: CollectionParameters, request_user: CmdbUser) -> Re
         GetMultiResponse: All the CmdbPersons matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         persons_manager: PersonsManager = ManagerProvider.get_manager(ManagerType.PERSON, request_user)
 
@@ -198,7 +199,7 @@ def get_cmdb_person(public_id: int, request_user: CmdbUser) -> Response:
         requested_person = persons_manager.get_item(public_id, as_dict=True)
 
         if requested_person:
-            return GetSingleResponse(requested_person, body = request.method == 'HEAD').make_response()
+            return GetSingleResponse(requested_person, body=request_wants_body()).make_response()
 
         abort(404, f"The Person with ID:{public_id} was not found!")
     except HTTPException as http_err:

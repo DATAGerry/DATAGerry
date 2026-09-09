@@ -80,6 +80,7 @@ from cmdb.interface.rest_api.routes.user_management_routes.cmdb_groups.groups_he
     resolve_move_target,
     ensure_admin_group_keeps_master_right,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -173,7 +174,7 @@ def get_cmdb_user_groups(params: CollectionParameters, request_user: CmdbUser) -
             total=iteration_result.total,
             params=params,
             url=request.url,
-            body=request.method == 'HEAD'
+            body=request_wants_body()
         )
 
         return api_response.make_response()
@@ -216,7 +217,7 @@ def get_cmdb_user_group(public_id: int, request_user: CmdbUser) -> Response:
 
         return GetSingleResponse(
             CmdbUserGroup.to_json(requested_group),
-            body=request.method == 'HEAD'
+            body=request_wants_body()
         ).make_response()
     except HTTPException as http_err:
         raise http_err

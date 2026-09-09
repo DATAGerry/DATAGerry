@@ -99,6 +99,7 @@ from cmdb.interface.rest_api.routes.ci_explorer_routes.ci_explorer_helper import
     load_ci_explorer_entity,
     record_tooltip_edit_log,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -186,7 +187,7 @@ def get_cmdb_ci_explorer_profiles(params: CollectionParameters, request_user: Cm
         GetMultiResponse: All the CmdbCiExplorerProfiles matching the CollectionParameters
     """
     try:
-        is_head_request: bool = request.method == 'HEAD'
+        send_body: bool = request_wants_body()
 
         ci_explorer_profile_manager: CiExplorerProfileManager = ManagerProvider.get_manager(
                                                                             ManagerType.CI_EXPLORER_PROFILE,
@@ -205,7 +206,7 @@ def get_cmdb_ci_explorer_profiles(params: CollectionParameters, request_user: Cm
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        is_head_request)
+                                        send_body)
 
         return api_response.make_response()
     except HTTPException as http_err:

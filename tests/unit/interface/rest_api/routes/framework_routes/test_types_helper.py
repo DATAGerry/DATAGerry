@@ -60,6 +60,7 @@ from cmdb.interface.rest_api.routes.framework_routes.cmdb_types.types_helper imp
     get_objects_using_location_field,
     type_deletion_followup,
     apply_type_changes_to_locations,
+    apply_type_changes_to_mds,
     enforce_special_type_license,
     enforce_rack_selectable_as_parent,
     enforce_uses_ports_license,
@@ -396,6 +397,49 @@ def test_apply_type_update_side_effects_runs_special_wiring_with_marker() -> Non
         apply_type_update_side_effects(MagicMock(), MagicMock(), MagicMock(), updated_type, (set(), {}))
 
     mock_special.assert_called_once()
+
+
+# --------------------------------------------------- apply_type_changes_to_mds -------------------------------------- #
+
+def _mds_managers(batches: list[list[Any]]) -> tuple[MagicMock, MagicMock]:
+    """Builds the two managers the MDS propagation uses, with the propagation yielding the batches."""
+    objects_manager = MagicMock(name='objects_manager')
+    types_manager = MagicMock(name='types_manager')
+    types_manager.handle_multi_data_sections.return_value = iter(batches)
+
+    def _provider(manager_type: ManagerType, _request_user: Any) -> MagicMock:
+        return objects_manager if manager_type == ManagerType.OBJECTS else types_manager
+
+    return objects_manager, types_manager, _provider
+
+
+def test_apply_type_changes_to_mds_writes_every_batch() -> None:
+    """
+    Each batch is written before the next is read
+
+    The propagation yields rather than collecting, which is what keeps a type with many objects from
+    becoming one unbounded read and one unbounded bulk write - so the caller has to loop.
+    """
+    first_batch = [MagicMock(name='object-1')]
+    second_batch = [MagicMock(name='object-2')]
+    objects_manager, _types_manager, provider = _mds_managers([first_batch, second_batch])
+
+    with patch(f'{PATH}.ManagerProvider.get_manager', side_effect=provider):
+        apply_type_changes_to_mds(MagicMock(), MagicMock(), {})
+
+    assert [call.args[0] for call in objects_manager.bulk_update_multi_data_sections.call_args_list] == [
+        first_batch, second_batch,
+    ]
+
+
+def test_apply_type_changes_to_mds_writes_nothing_without_changes() -> None:
+    """A propagation that yields nothing performs no write at all"""
+    objects_manager, _types_manager, provider = _mds_managers([])
+
+    with patch(f'{PATH}.ManagerProvider.get_manager', side_effect=provider):
+        apply_type_changes_to_mds(MagicMock(), MagicMock(), {})
+
+    objects_manager.bulk_update_multi_data_sections.assert_not_called()
 
 
 # ------------------------------------------------------ verify_type_is_unique --------------------------------------- #

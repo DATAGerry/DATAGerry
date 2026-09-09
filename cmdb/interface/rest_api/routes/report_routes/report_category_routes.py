@@ -70,6 +70,7 @@ from cmdb.interface.rest_api.routes.report_routes.report_category_helper import 
     load_category_or_404,
     normalize_category_params,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -195,7 +196,7 @@ def get_cmdb_report_categories(params: CollectionParameters, request_user: CmdbU
                                         iteration_result.total,
                                         params,
                                         request.url,
-                                        request.method == 'HEAD')
+                                        request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:

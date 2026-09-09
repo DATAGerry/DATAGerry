@@ -101,6 +101,7 @@ from cmdb.errors.manager.locations_manager import (
     LocationsManagerDeleteError,
     LocationsManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -229,7 +230,7 @@ def get_cmdb_locations(params: CollectionParameters, request_user: CmdbUser) -> 
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:
@@ -280,7 +281,7 @@ def get_cmdb_locations_tree(params: CollectionParameters, request_user: CmdbUser
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:

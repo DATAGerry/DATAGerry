@@ -51,7 +51,7 @@ from datetime import datetime, timezone
 from flask import abort
 import requests
 
-from cmdb.database.database_utils import default
+from cmdb.database.json_codec import default
 from cmdb.manager.query_builder import BuilderParameters
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 from cmdb.manager import WebhooksManager, WebhooksEventManager

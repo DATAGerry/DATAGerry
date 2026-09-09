@@ -28,7 +28,7 @@ test in the session.
 Several tests pin behaviour the audit flagged as wrong and that was deliberately left unchanged: the
 'ssl' option being dropped without carrying its value into 'tls' (discussion-backlog #139), the
 caller's options dict being mutated in place (#140), `is_connected` raising instead of returning False
-(#141), the `retry_operation` wrappers never retrying (#142) and `disconnect` swallowing a failed close
+(#141) and `disconnect` swallowing a failed close
 (#143). They are regression pins for the CURRENT contract, not endorsements - each names its item so a
 fix knows which test to rewrite.
 """
@@ -47,6 +47,8 @@ from cmdb.database.database_constants import (
     MONGO_TLS_OPTION,
 )
 from cmdb.database.mongo_connector import MongoConnector
+from cmdb.database import retry as retry_module
+from cmdb.database.retry import RETRY_MAX_ATTEMPTS
 from cmdb.errors.database import DatabaseConnectionError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -266,8 +268,16 @@ def test_connect_raises_when_the_server_is_unreachable() -> None:
     assert exc_info.value.__cause__ is cause
 
 
-def test_connect_does_not_retry_a_pymongo_failure() -> None:
-    """#142: the retry wrapper never fires, because connect converts the error before it can escape"""
+def test_connect_retries_a_transient_failure(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    The retry wrapper fires again since 2026-09-09 (was discussion-backlog #142)
+
+    ``connect`` converts a `ConnectionFailure` into a `DatabaseConnectionError`, which the decorator
+    used to ignore - so the four decorators on this class never retried anything. The policy now
+    reads the typed error's cause, and a failed connection attempt is exactly what may be repeated.
+    """
+    monkeypatch.setattr(retry_module.time, 'sleep', lambda *_args: None)
+
     client = MagicMock()
     client.admin.command.side_effect = ConnectionFailure('server down')
     connector = _with_client(_connector({}), client)
@@ -275,7 +285,7 @@ def test_connect_does_not_retry_a_pymongo_failure() -> None:
     with pytest.raises(DatabaseConnectionError):
         connector.connect()
 
-    assert client.admin.command.call_count == 1
+    assert client.admin.command.call_count == RETRY_MAX_ATTEMPTS
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

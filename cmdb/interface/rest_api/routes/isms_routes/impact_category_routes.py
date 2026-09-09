@@ -54,6 +54,7 @@ from cmdb.errors.manager.impact_category_manager import (
     ImpactCategoryManagerDeleteError,
     ImpactCategoryManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -121,7 +122,7 @@ def get_isms_impact_categories(params: CollectionParameters, request_user: CmdbU
         GetMultiResponse: All the IsmsImpactCategories matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         impact_category_manager: ImpactCategoryManager = ManagerProvider.get_manager(ManagerType.IMPACT_CATEGORY,
                                                                                      request_user)
@@ -169,7 +170,7 @@ def get_isms_impact_category(public_id: int, request_user: CmdbUser) -> Response
         requested_impact = get_item_or_404(impact_category_manager, public_id,
                                             f"The ImpactCategory with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_impact, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_impact, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except ImpactCategoryManagerGetError as err:

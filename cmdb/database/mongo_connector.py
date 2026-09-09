@@ -32,9 +32,12 @@ Two behaviours of this module are surprising and are recorded as open items rath
   in place (#140).
 * **A failed connection check raises rather than reporting a failure.** `connect()` converts every
   error into `DatabaseConnectionError`, so `is_connected()` returns True or raises but never returns
-  False (#141), and the `@retry_operation` decorators on this class never actually retry, because the
-  errors they catch are converted before they can escape (#142). `disconnect()` conversely swallows
-  its failure and reports it as an ordinary disconnect (#143).
+  False (#141). `disconnect()` conversely swallows its failure and reports it as an ordinary
+  disconnect (#143).
+* **The `@retry_operation` decorators do retry since 2026-09-09.** They used to be inert, because the
+  errors they caught were converted before they could escape; `cmdb.database.retry` now decides from
+  the typed error's cause, so a failed `connect()` is repeated (a connection attempt has no side
+  effect) within a sub-second budget.
 
 The singleton, its lifecycle and the `__new__` / `__init__` overlap are tracked as #144-#147.
 """
@@ -45,7 +48,7 @@ from pymongo import MongoClient
 from pymongo.database import Database
 
 from cmdb.database.connection_status import ConnectionStatus
-from cmdb.database.database_utils import retry_operation
+from cmdb.database.retry import retry_operation
 from cmdb.database.database_constants import (
     MONGO_COMMAND_OK_KEY,
     MONGO_COMMAND_OK_VALUE,
@@ -183,8 +186,8 @@ class MongoConnector:
         """
         Retrieves database from client
 
-        A purely local lookup on the client - no I/O, so the `retry_operation` wrapper never has a
-        retryable error to act on (see discussion-backlog #142)
+        A purely local lookup on the client - no I/O of its own, so the `retry_operation` wrapper only
+        ever sees the client construction failing
 
         Args:
             db_name (str): name of Database
@@ -207,8 +210,9 @@ class MongoConnector:
         reported**: a returned ConnectionStatus is always `connected=True`, and an unreachable server,
         an unacknowledged response and a client that cannot be built all surface as
         DatabaseConnectionError. Callers wanting a boolean therefore have to catch (see
-        discussion-backlog #141). Because the raised error is not a pymongo error, the
-        `retry_operation` wrapper never retries the probe either (#142)
+        discussion-backlog #141). The `retry_operation` wrapper does repeat the probe when the cause
+        was a connection failure - reaching the database is by definition side-effect free - within
+        its wall-clock budget (see `cmdb.database.retry`)
 
         Raises:
             DatabaseConnectionError: If the database connection check fails, if the server does not

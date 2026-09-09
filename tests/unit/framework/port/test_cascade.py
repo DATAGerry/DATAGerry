@@ -175,6 +175,28 @@ def test_the_hook_resolves_the_managers_and_delegates() -> None:
     links_manager.delete_links_of_ports.assert_called_once_with(PORT_IDS)
 
 
+def test_the_hook_uses_the_managers_it_is_given() -> None:
+    """
+    The bulk delete resolves the three managers once and passes them in
+
+    Resolving them inside the hook would build three managers per deleted object, which for a
+    200-object selection is 600 managers for three collections.
+    """
+    ports_manager = _ports_manager_with(PORT_IDS, removed=2)
+    connections_manager = _connections_manager(removed=3)
+    links_manager = _links_manager(removed=1)
+
+    with patch(f'{HOOK_PATH}.ManagerProvider.get_manager') as get_manager:
+        port_object_hooks.handle_object_deleted(
+            MagicMock(), _object(), ports_manager, connections_manager, links_manager,
+        )
+
+    get_manager.assert_not_called()
+    ports_manager.delete_ports_of_object.assert_called_once_with(OBJECT_ID)
+    connections_manager.delete_connections_of_ports.assert_called_once_with(PORT_IDS)
+    links_manager.delete_links_of_ports.assert_called_once_with(PORT_IDS)
+
+
 @pytest.mark.parametrize('public_id', [None, 'not-an-int'], ids=['none', 'string'])
 def test_the_hook_resolves_no_manager_for_a_malformed_document(public_id: Any) -> None:
     """

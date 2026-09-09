@@ -306,6 +306,7 @@ class BaseManager:
             sort: str = 'public_id',
             direction: int = -1,
             limit: int = 0,
+            projection: dict[str, Any] | None = None,
             **requirements: Any) -> list[dict[str, Any]]:
         """
         Retrieves documents from a given collection that match the specified requirements
@@ -315,7 +316,12 @@ class BaseManager:
             sort (str): Field to sort by (default: 'public_id')
             direction (int): Sorting direction (1 for ascending, -1 for descending)
             limit (int): Number of documents to retrieve (0 for no limit)
-            **requirements (dict): Key-value pairs for filtering the documents
+            projection (dict[str, Any] | None): The fields to return, as a MongoDB projection. When
+                given it replaces the database layer's default (which only drops `_id`), so a caller
+                reading a few keys of a large document does not pay for the rest - remember to
+                exclude `_id` explicitly, since MongoDB returns it unless told otherwise
+            **requirements (dict): Key-value pairs for filtering the documents; a dotted path
+                (`'multi_data_sections.section_id'`) is a valid key here
 
         Raises:
             BaseManagerGetError: If an error occurs during the retrieval process
@@ -326,12 +332,14 @@ class BaseManager:
         try:
             requirements_filter = requirements if requirements else {}
             formatted_sort = [(sort, direction)]
+            find_options: dict[str, Any] = {} if projection is None else {'projection': projection}
 
             return self.dbm.find_all(collection=collection,
                                      db_name=self.db_name,
                                      limit=limit,
                                      filter=requirements_filter,
-                                     sort=formatted_sort)
+                                     sort=formatted_sort,
+                                     **find_options)
         except DocumentGetError as err:
             raise BaseManagerGetError(str(err)) from err
 

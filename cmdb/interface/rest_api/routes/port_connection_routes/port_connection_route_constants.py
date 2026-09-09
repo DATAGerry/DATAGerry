@@ -75,6 +75,19 @@ class ConnectionParam(BaseStrEnum):
     SEARCH = 'search'
 
 
+class CableUsageKey(BaseStrEnum):
+    """
+    Keys of the cable pre-check answer (`GET /port_connections/cable_usage/<object_id>`)
+
+    IN_USE is what a client offers or refuses the delete on; CONNECTION_ID and ENDPOINTS name what to
+    resolve first and are null when the cable is free. One connection rather than a list, because
+    `cable_ci_id` carries a partial unique index
+    """
+    IN_USE = 'in_use'
+    CONNECTION_ID = 'connection_id'
+    ENDPOINTS = 'endpoints'
+
+
 # Refusal (HTTP 404) when the addressed connection does not exist
 CONNECTION_NOT_FOUND_MESSAGE: str = 'The Port connection with ID:{public_id} was not found!'
 

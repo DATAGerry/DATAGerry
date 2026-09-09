@@ -106,6 +106,7 @@ from cmdb.interface.rest_api.responses.response_parameters import CollectionPara
 from cmdb.interface.rest_api.routes.routes_helper import (
     append_criteria_to_filter,
     fetch_only_active_objects,
+    request_wants_body,
 )
 
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_constants import (
@@ -119,6 +120,7 @@ from cmdb.interface.rest_api.routes.port_routes.port_route_helper import (
 )
 from cmdb.interface.rest_api.routes.port_connection_routes.port_connection_route_helper import (
     build_cable_info,
+    build_cable_usage_payload,
     build_connection_candidate,
     collect_claimed_cable_ci_ids,
     duplicate_key_abort,
@@ -250,7 +252,7 @@ def get_cmdb_port_connection(public_id: int, request_user: CmdbUser) -> Response
         connection: dict[str, Any] = get_connection_or_abort(port_connections_manager, public_id)
 
         return GetSingleResponse(
-            with_cable_view(connection, request_user), body=request.method == 'HEAD',
+            with_cable_view(connection, request_user), body=request_wants_body(),
         ).make_response()
     except HTTPException as http_err:
         raise http_err
@@ -378,6 +380,62 @@ def get_cmdb_port_connections_of_object(object_id: int, request_user: CmdbUser) 
         abort(500,
               f'An internal server error occured while retrieving the connections of CmdbObject ID: {object_id}!')
 
+@port_connection_blueprint.route('/cable_usage/<int:object_id>', methods=['GET', 'HEAD'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+@port_connection_blueprint.protect(auth=True, right=ConnectionRight.VIEW.value)
+def get_cable_usage_of_object(object_id: int, request_user: CmdbUser) -> Response:
+    """
+    HTTP `GET`/`HEAD` route to answer whether a Cable CI is still used by a CmdbPortConnection
+
+    The pre-check for the delete guard: deleting a Cable CI a connection still names is refused with a
+    400 (the connection describes a physical patch and outlives the inventory record - see
+    `cmdb.framework.port.cable_usage`), so a client asks here first and can say *why* the delete is
+    unavailable instead of offering it and reporting an error. The same relationship
+    `/types/uses_ports_usage/<id>` has with the uses_ports guard.
+
+    ``in_use: false`` means the object may be deleted as far as its cable role is concerned - the other
+    delete guards (IPAM, locations, ACL) are independent of this answer. An object that is not a Cable
+    CI at all answers ``in_use: false`` too: it uses the same lookup, and "no connection names this
+    object as its cable" is the true answer for it
+
+    Args:
+        object_id (int): public_id of the CmdbObject to inspect
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Raises:
+        HTTPException: 403 when the object's ACL denies it; 404 when the object does not exist;
+                       400 when the connections could not be read; 500 on an unexpected error
+
+    Returns:
+        DefaultResponse: { in_use: bool, connection_id: int | None, endpoints: list[int] | None } -
+            connection_id and endpoints name what to resolve first, and are null when the cable is free
+    """
+    try:
+        objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+        port_connections_manager: PortConnectionsManager = ManagerProvider.get_manager(
+            ManagerType.PORT_CONNECTIONS, request_user)
+
+        get_accessible_owner_or_abort(
+            objects_manager, object_id, request_user, AccessControlPermission.READ,
+        )
+
+        return DefaultResponse(
+            build_cable_usage_payload(port_connections_manager, object_id),
+        ).make_response()
+    except HTTPException as http_err:
+        raise http_err
+    except AccessDeniedError as err:
+        LOGGER.error("[get_cable_usage_of_object] AccessDeniedError: %s", err, exc_info=True)
+        abort(403, str(err))
+    except PortConnectionsManagerGetError as err:
+        LOGGER.error("[get_cable_usage_of_object] PortConnectionsManagerGetError: %s", err, exc_info=True)
+        abort(400, f'Failed to determine the Port connection usage of the Cable with ID: {object_id}!')
+    except Exception as err:
+        LOGGER.error("[get_cable_usage_of_object] Exception: %s. Type: %s", err, type(err), exc_info=True)
+        abort(500, 'An internal server error occured while determining the Port connection usage of the '
+                   f'Cable with ID: {object_id}!')
+
 @port_connection_blueprint.route('/cables/unassigned/', methods=['GET', 'HEAD'])
 @port_connection_blueprint.parse_collection_parameters()
 @insert_request_user
@@ -454,7 +512,7 @@ def get_unassigned_cables(params: CollectionParameters, request_user: CmdbUser) 
             total=total,
             params=params,
             url=request.url,
-            body=request.method == 'HEAD',
+            body=request_wants_body(),
         ).make_response()
     except HTTPException as http_err:
         raise http_err

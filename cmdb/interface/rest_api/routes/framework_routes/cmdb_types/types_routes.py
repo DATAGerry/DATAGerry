@@ -54,7 +54,7 @@ from cmdb.models.object_model import CmdbObjectKey
 from cmdb.framework.results import IterationResult
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
-from cmdb.interface.rest_api.routes.routes_helper import fetch_only_active_objects
+from cmdb.interface.rest_api.routes.routes_helper import fetch_only_active_objects, request_wants_body
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_types.types_helper import (
     verify_type_is_unique,
     prepare_builder_parameters,
@@ -234,7 +234,7 @@ def get_cmdb_types(params: TypeIterationParameters, request_user: CmdbUser) -> R
             total=iteration_result.total,
             params=params,
             url=request.url,
-            body=request.method == 'HEAD'
+            body=request_wants_body()
         )
 
         return api_response.make_response()
@@ -298,7 +298,7 @@ def get_cmdb_types_overview(params: TypeIterationParameters, request_user: CmdbU
             total=iteration_result.total,
             params=params,
             url=request.url,
-            body=request.method == 'HEAD'
+            body=request_wants_body()
         )
 
         return api_response.make_response()
@@ -338,7 +338,7 @@ def get_cmdb_type(public_id: int, request_user: CmdbUser) -> Response:
 
         requested_type: dict[str, Any] = get_type_or_404(types_manager, public_id)
 
-        return GetSingleResponse(requested_type, body=request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_type, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except TypesManagerGetError as err:

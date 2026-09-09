@@ -18,7 +18,7 @@ Implementation of all API routes for the IsmsRiskMatrix
 """
 from logging import Logger, getLogger
 from typing import Any
-from flask import request, abort
+from flask import abort
 from werkzeug import Response
 from werkzeug.exceptions import HTTPException
 
@@ -42,6 +42,7 @@ from cmdb.errors.manager.risk_matrix_manager import (
     RiskMatrixManagerGetError,
     RiskMatrixManagerUpdateError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -74,7 +75,7 @@ def get_isms_risk_matrix(public_id: int, request_user: CmdbUser) -> Response:
         requested_risk_matrix = get_item_or_404(risk_matrix_manager, public_id,
                                                  f"The RiskMatrix with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_risk_matrix, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_risk_matrix, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except RiskMatrixManagerGetError as err:

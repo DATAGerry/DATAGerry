@@ -38,7 +38,7 @@ from cmdb.interface.rest_api.routes.isms_routes.isms_routes_constants import (
     RISK_BULK_DELETED_RA_KEY,
     RISK_BULK_DELETED_CMA_KEY,
 )
-from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids
+from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids, request_wants_body
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.responses import (
@@ -128,7 +128,7 @@ def get_isms_risks(params: CollectionParameters, request_user: CmdbUser) -> Resp
         GetMultiResponse: All the IsmsRisks matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         risk_manager: RiskManager = ManagerProvider.get_manager(ManagerType.RISK, request_user)
 
@@ -173,7 +173,7 @@ def get_isms_risk(public_id: int, request_user: CmdbUser) -> Response:
         requested_risk = get_item_or_404(risk_manager, public_id,
                                          f"The Risk with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_risk, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_risk, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except RiskManagerGetError as err:

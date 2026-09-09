@@ -30,6 +30,8 @@ Five things live here today:
     connection or on the Cable CI it names
   - the derivation of a port's `connected` flag, computed on read and never stored
   - the unassigned-cable picker: which Cable CIs a connection may still claim, and the row it shows
+  - the cable-usage guard: a Cable CI a connection still names may not be deleted, because the
+    connection is a fact about its two ports and survives its cable record
 
 The write invariants a PORT has to satisfy live in the route layer's helper instead, because they are
 request-shaped (they abort). Everything here is pure and reports its result, so a write, a dry-run
@@ -42,6 +44,7 @@ from .assignable_cables import (
     build_unassigned_cable_rows,
 )
 from .bulk_create import BulkCreateResult, create_batch, roll_back
+from .cable_usage import CableUsage, cable_usage_blocker, collect_cable_usage
 from .cascade import (
     delete_connections_of_port,
     delete_connections_of_ports,
@@ -91,6 +94,9 @@ __all__: list[str] = [
     'build_unassigned_cable_row',
     'build_unassigned_cable_rows',
     'BulkCreateResult',
+    'CableUsage',
+    'cable_usage_blocker',
+    'collect_cable_usage',
     'create_batch',
     'roll_back',
     'delete_connections_of_port',

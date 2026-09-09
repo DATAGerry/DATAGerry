@@ -48,7 +48,6 @@ from cmdb.models.type_model.type_reference_section import TypeReferenceSection
 from cmdb.models.type_model.type_reference_section_entry import resolve_pulled_field_names
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.user_model.cmdb_user import CmdbUser
-from cmdb.models.object_model.cmdb_object import CmdbObject
 from cmdb.models.object_model import CmdbObjectKey, CmdbObjectFieldKey
 from cmdb.models.port_model import PortKey
 from cmdb.models.reports_model.cmdb_report import CmdbReport
@@ -382,20 +381,30 @@ def apply_type_changes_to_locations(request_user: CmdbUser, old_type: CmdbType, 
 
 def apply_type_changes_to_mds(request_user: CmdbUser, old_type: CmdbType, updated_type: dict[str, Any]) -> None:
     """
-    Applies changes to all multi-data sections (MDS) for a given CmdbType
+    Applies a CmdbType's multi-data-section changes to every object of that type
+
+    The manager decides and performs the changes in memory, batch by batch; the writing belongs here,
+    because a manager does not drive another manager. A field the edit added is appended to every row,
+    a field it dropped is stripped, and a **section** the edit no longer declares is removed from the
+    objects - none keeps rows of a section its type does not have
 
     Args:
         request_user (CmdbUser): The user performing the update
         old_type (CmdbType): The existing CmdbType object before changes
         updated_type (dict): The updated CmdbType data
+
+    Raises:
+        TypesManagerUpdateMDSError: If the propagation fails - the type is already written by then,
+            which is why the route reports it with its own message
+        ObjectsManagerUpdateError: If a batch of changed objects could not be written
     """
     objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
     types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
 
-    # Check and update all MDS for the CmdbType if required
-    objects_to_update: list[CmdbObject] = types_manager.handle_multi_data_sections(old_type, updated_type)
-
-    if objects_to_update:
+    # The propagation yields the changed objects batch by batch and performs its next read only when
+    # the previous batch has been written, so neither the objects held in memory nor a single bulk
+    # write is sized by the whole type
+    for objects_to_update in types_manager.handle_multi_data_sections(old_type, updated_type):
         objects_manager.bulk_update_multi_data_sections(objects_to_update)
 
 

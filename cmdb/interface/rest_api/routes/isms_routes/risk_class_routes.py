@@ -57,6 +57,7 @@ from cmdb.errors.manager.risk_class_manager import (
     RiskClassManagerDeleteError,
     RiskClassManagerIterationError,
 )
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -127,7 +128,7 @@ def get_isms_risk_classes(params: CollectionParameters, request_user: CmdbUser) 
         GetMultiResponse: All the IsmsRiskClasses matching the CollectionParameters
     """
     try:
-        body = request.method == 'HEAD'
+        body = request_wants_body()
 
         risk_class_manager: RiskClassManager = ManagerProvider.get_manager(ManagerType.RISK_CLASS, request_user)
 
@@ -172,7 +173,7 @@ def get_isms_risk_class(public_id: int, request_user: CmdbUser) -> Response:
         requested_risk_class = get_item_or_404(risk_class_manager, public_id,
                                                f"The RiskClass with ID:{public_id} was not found!")
 
-        return GetSingleResponse(requested_risk_class, body = request.method == 'HEAD').make_response()
+        return GetSingleResponse(requested_risk_class, body=request_wants_body()).make_response()
     except HTTPException as http_err:
         raise http_err
     except RiskClassManagerGetError as err:

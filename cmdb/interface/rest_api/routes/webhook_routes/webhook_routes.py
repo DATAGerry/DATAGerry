@@ -44,6 +44,7 @@ from cmdb.interface.rest_api.responses import DefaultResponse, GetMultiResponse,
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
 from cmdb.interface.rest_api.routes.webhook_routes.webhook_constants import WebhookRight
 from cmdb.interface.rest_api.routes.webhook_routes.webhook_helper import parse_webhook_params
+from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
 from cmdb.framework.results import IterationResult
 
 from cmdb.errors.manager.webhooks_manager import (
@@ -181,7 +182,7 @@ def get_webhooks(params: CollectionParameters, request_user: CmdbUser) -> Respon
                                         total=iteration_result.total,
                                         params=params,
                                         url=request.url,
-                                        body=request.method == 'HEAD')
+                                        body=request_wants_body())
 
         return api_response.make_response()
     except HTTPException as http_err:
