@@ -31,6 +31,14 @@ import { portSideLabel } from '../utils/port-side.util';
 import { PortService } from './port.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
+/** Only the label is read; the object's fields and sections say nothing about its two ends. */
+const LABEL_PROJECTION = {
+    'object_information.object_id': 1,
+    'summary_line': 1,
+    'type_information': 1
+};
+
+
 /** Names the two ends of a connection: device first, then port, as the user recognises them. */
 @Injectable({ providedIn: 'root' })
 export class ConnectionEndpointService {
@@ -85,6 +93,7 @@ export class ConnectionEndpointService {
         return this.objectService
             .getObjects({
                 filter: [{ $match: { public_id: objectId } }],
+                projection: LABEL_PROJECTION,
                 limit: 1,
                 sort: 'public_id',
                 order: 1,

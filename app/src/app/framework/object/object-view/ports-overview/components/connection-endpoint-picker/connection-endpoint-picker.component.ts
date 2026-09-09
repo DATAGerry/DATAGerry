@@ -35,15 +35,13 @@ import { catchError, finalize } from 'rxjs/operators';
 
 import { CoreModule } from 'src/app/core/core.module';
 import { LoaderService } from 'src/app/core/services/loader.service';
-import { CmdbType } from 'src/app/framework/models/cmdb-type';
-import { TypeService } from 'src/app/framework/services/type.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
-import { APIGetMultiResponse } from 'src/app/services/models/api-response';
 
 import { CmdbPortConnection, ConnectionEndpoint } from '../../models/port-connection.types';
 import { CmdbPort } from '../../models/ports-overview.types';
 import { PortConnectionService } from '../../services/port-connection.service';
 import { PortService } from '../../services/port.service';
+import { PortTypeCatalogService } from '../../services/port-type-catalog.service';
 import { indexConnectionsByPort } from '../../utils/port-connection.util';
 import { portSideGroup, portSideLabel } from '../../utils/port-side.util';
 import { ObjectOption, ObjectOptionPickerComponent } from '../object-option-picker/object-option-picker.component';
@@ -82,7 +80,7 @@ interface PortOption {
 })
 export class ConnectionEndpointPickerComponent implements ControlValueAccessor, OnInit {
 
-    private readonly typeService = inject(TypeService);
+    private readonly portTypeCatalog = inject(PortTypeCatalogService);
     private readonly portService = inject(PortService);
     private readonly portConnectionService = inject(PortConnectionService);
     private readonly loaderService = inject(LoaderService);
@@ -182,16 +180,13 @@ export class ConnectionEndpointPickerComponent implements ControlValueAccessor, 
     private loadPortCapableTypes(): void {
         this.loaderService.show();
 
-        this.typeService
-            .getTypes({ filter: { uses_ports: true }, limit: 0, sort: 'public_id', order: 1, page: 1 })
+        this.portTypeCatalog.portCapableTypeIds()
             .pipe(
                 takeUntilDestroyed(this.destroyRef),
                 finalize(() => this.loaderService.hide())
             )
             .subscribe({
-                next: (response: APIGetMultiResponse<CmdbType>) => this.portCapableTypeIds.set(
-                    (response?.results ?? []).map((type) => type.public_id)
-                ),
+                next: (typeIds) => this.portCapableTypeIds.set(typeIds),
                 error: (err) => this.toastService.error(err?.error?.message)
             });
     }

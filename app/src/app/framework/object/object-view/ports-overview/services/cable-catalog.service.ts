@@ -23,11 +23,9 @@ import { catchError, map } from 'rxjs/operators';
 import { ExtendableOptionCatalogService } from 'src/app/core/services/extendable-option-catalog.service';
 import { CableOptionType } from 'src/app/framework/models/cable-option-type';
 import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
-import { CmdbType } from 'src/app/framework/models/cmdb-type';
-import { SpecialType } from 'src/app/framework/models/special-type';
-import { TypeService } from 'src/app/framework/services/type.service';
 
 import { CABLE_OPTION_TYPES } from '../models/port-connection.types';
+import { PortTypeCatalogService } from './port-type-catalog.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** What the cable step of the connection wizard needs before it can be filled in. */
@@ -44,7 +42,7 @@ export interface CableCatalog {
 export class CableCatalogService {
 
     private readonly optionCatalog = inject(ExtendableOptionCatalogService);
-    private readonly typeService = inject(TypeService);
+    private readonly portTypeCatalog = inject(PortTypeCatalogService);
 
 /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
 
@@ -71,11 +69,6 @@ export class CableCatalogService {
      * yet - and the caller says so instead of failing.
      */
     private readCableCiTypes(): Observable<number[]> {
-        return this.typeService
-            .getTypes({ filter: { special_type: SpecialType.CABLE }, limit: 0, sort: 'public_id', order: 1, page: 1 })
-            .pipe(
-                map((response) => ((response?.results ?? []) as CmdbType[]).map((type) => type.public_id)),
-                catchError(() => of<number[]>([]))
-            );
+        return this.portTypeCatalog.cableTypeIds().pipe(catchError(() => of<number[]>([])));
     }
 }
