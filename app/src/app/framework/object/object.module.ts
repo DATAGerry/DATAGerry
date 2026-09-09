@@ -59,6 +59,7 @@ import { ConnectionFormModalComponent } from './object-view/ports-overview/compo
 import { ConnectionEndpointPickerComponent } from './object-view/ports-overview/components/connection-endpoint-picker/connection-endpoint-picker.component';
 import { ChoiceCardGroupComponent } from './object-view/ports-overview/components/choice-card-group/choice-card-group.component';
 import { ObjectOptionPickerComponent } from './object-view/ports-overview/components/object-option-picker/object-option-picker.component';
+import { CableCiPickerComponent } from './object-view/ports-overview/components/cable-ci-picker/cable-ci-picker.component';
 import { RackOverviewComponent } from './object-view/rack-overview/rack-overview.component';
 import { RackElevationComponent } from './object-view/rack-overview/components/rack-elevation/rack-elevation.component';
 import { RackInspectorComponent } from './object-view/rack-overview/components/rack-inspector/rack-inspector.component';
@@ -203,7 +204,8 @@ import { ConnectionDetailsModalComponent } from './object-view/graph-editor/moda
         RackObjectPickerComponent,
         ConnectionEndpointPickerComponent,
         ChoiceCardGroupComponent,
-        ObjectOptionPickerComponent],
+        ObjectOptionPickerComponent,
+        CableCiPickerComponent],
     exports: [
         ObjectViewRenderComponent,
         ObjectTableActionsComponent,

@@ -37,6 +37,7 @@ import { CableManagementMode } from '../../models/port-connection.types';
 import { CmdbPort, PortSide } from '../../models/ports-overview.types';
 import { PortConnectionService } from '../../services/port-connection.service';
 import { PortService } from '../../services/port.service';
+import { CableCiPickerComponent } from '../cable-ci-picker/cable-ci-picker.component';
 import { ChoiceCardGroupComponent } from '../choice-card-group/choice-card-group.component';
 import { ConnectionEndpointPickerComponent } from '../connection-endpoint-picker/connection-endpoint-picker.component';
 import { ObjectOptionPickerComponent } from '../object-option-picker/object-option-picker.component';
@@ -112,7 +113,8 @@ describe('ConnectionFormModalComponent', () => {
 
         portService = jasmine.createSpyObj<PortService>('PortService', ['getPortsOfObject', 'getPort']);
         portConnectionService = jasmine.createSpyObj<PortConnectionService>(
-            'PortConnectionService', ['getConnectionsOfObject', 'createConnection', 'updateCableInfo']);
+            'PortConnectionService',
+            ['getConnectionsOfObject', 'createConnection', 'updateCableInfo', 'getUnassignedCables']);
         objectService = jasmine.createSpyObj<ObjectService>('ObjectService', ['getObjects']);
         typeService = jasmine.createSpyObj<TypeService>('TypeService', ['getTypes']);
         activeModal = jasmine.createSpyObj<NgbActiveModal>('NgbActiveModal', ['close', 'dismiss']);
@@ -144,6 +146,7 @@ describe('ConnectionFormModalComponent', () => {
         portService.getPortsOfObject.and.returnValue(of([FAR_PORT]));
         portService.getPort.and.returnValue(of(FAR_PORT));
         portConnectionService.getConnectionsOfObject.and.returnValue(of([]));
+        portConnectionService.getUnassignedCables.and.returnValue(of({ results: [], total: 0, count: 0 } as any));
         portConnectionService.createConnection.and.returnValue(of({ public_id: 1 } as CmdbPortConnection));
         portConnectionService.updateCableInfo.and.returnValue(of({ public_id: 1 } as CmdbPortConnection));
 
@@ -154,7 +157,8 @@ describe('ConnectionFormModalComponent', () => {
                 ArchwizardModule,
                 ChoiceCardGroupComponent,
                 ConnectionEndpointPickerComponent,
-                ObjectOptionPickerComponent
+                ObjectOptionPickerComponent,
+                CableCiPickerComponent
             ],
             declarations: [ConnectionFormModalComponent],
             providers: [
@@ -185,7 +189,8 @@ describe('ConnectionFormModalComponent', () => {
     describe('the endpoints step', () => {
         it('opens on it, with the far end still unknown', () => {
             expect(component.currentStep).toBe(ConnectionStep.ENDPOINTS);
-            expect(element.textContent).toContain('Not chosen yet');
+            expect(element.textContent).toContain('Gi0/1 - User #61');
+            expect(element.textContent).not.toContain('Far end');
         });
 
         it('refuses to move on until a port is chosen, and says which answer is missing', async () => {

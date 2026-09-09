@@ -16,15 +16,33 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { Injectable, inject } from '@angular/core';
-import { HttpHeaders, HttpResponse } from '@angular/common/http';
+import { HttpHeaders, HttpParams, HttpResponse } from '@angular/common/http';
 
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 
 import { ApiCallService, resp } from 'src/app/services/api-call.service';
-import { APIInsertSingleResponse, APIUpdateSingleResponse } from 'src/app/services/models/api-response';
-import { CableInfoPayload, CmdbPortConnection, PortConnectionPayload } from '../models/port-connection.types';
+import {
+    APIGetMultiResponse,
+    APIInsertSingleResponse,
+    APIUpdateSingleResponse
+} from 'src/app/services/models/api-response';
+import {
+    CableInfoPayload,
+    CmdbPortConnection,
+    PortConnectionPayload,
+    UnassignedCable
+} from '../models/port-connection.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
+
+/** One page of the unassigned-cable list. */
+export interface UnassignedCableRequest {
+    page: number;
+    limit: number;
+    search?: string;
+    connectionId?: number | null;
+}
+
 
 /** REST access to the connections of the CmdbObject collection `framework.portConnections`. */
 @Injectable({ providedIn: 'root' })
@@ -51,6 +69,37 @@ export class PortConnectionService {
     /** Every connection one port takes part in: its cable and, on a panel, its internal pairing. */
     public getConnectionsOfPort(portId: number): Observable<CmdbPortConnection[]> {
         return this.readList(`${ this.servicePrefix }/port/${ portId }`);
+    }
+
+
+    /**
+     * The cable CIs that are free to be linked, one page at a time.
+     *
+     * `connectionId` adds the cable of that connection to the answer, so an edit form can preselect
+     * what is already linked - a cable in use is otherwise left out.
+     */
+    public getUnassignedCables(request: UnassignedCableRequest): Observable<APIGetMultiResponse<UnassignedCable>> {
+        // Sorted explicitly, so a page scrolled to later cannot repeat or skip a cable.
+        let params = new HttpParams()
+            .set('page', String(request.page))
+            .set('limit', String(request.limit))
+            .set('sort', 'public_id')
+            .set('order', '1');
+
+        if (request.search) {
+            params = params.set('search', request.search);
+        }
+
+        if (request.connectionId != null) {
+            params = params.set('connection_id', String(request.connectionId));
+        }
+
+        const options = { headers: this.jsonHeaders, params, observe: resp };
+        const route = `${ this.servicePrefix }/cables/unassigned/`;
+
+        return this.api.callGet<APIGetMultiResponse<UnassignedCable>>(route, options).pipe(
+            map((response: HttpResponse<APIGetMultiResponse<UnassignedCable>>) => response?.body)
+        );
     }
 
 

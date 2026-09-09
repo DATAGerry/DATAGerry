@@ -54,16 +54,16 @@
         @if (connectionForm.linksCableCi) {
           @if (cableCiTypeIds.length) {
             <form [formGroup]="form" novalidate autocomplete="off">
-              <cmdb-object-option-picker
+              <cmdb-cable-ci-picker
                 label="Cable CI"
                 placeholder="Type to search cables..."
-                [typeIds]="cableCiTypeIds"
+                [connectionId]="connection?.public_id ?? null"
                 [required]="true"
                 [errorMessage]="connectionForm.cableCiError"
                 [appendTo]="dropdownHost"
                 formControlName="cableCiId"
-                (objectSelected)="onCableCiSelected($event)">
-              </cmdb-object-option-picker>
+                (cableSelected)="onCableCiSelected($event)">
+              </cmdb-cable-ci-picker>
             </form>
 
             <small class="connection-form__hint">

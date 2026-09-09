@@ -38,8 +38,8 @@ import { CableCatalogService } from '../../services/cable-catalog.service';
 import { ConnectionEndpointService } from '../../services/connection-endpoint.service';
 import { PortConnectionService } from '../../services/port-connection.service';
 import { cableSwatchColor } from '../../utils/port-connection.util';
+import { CableOption } from '../cable-ci-picker/cable-ci-picker.component';
 import { ChoiceCard } from '../choice-card-group/choice-card-group.component';
-import { ObjectOption } from '../object-option-picker/object-option-picker.component';
 import { ConnectionForm, ConnectionFormGroup, ConnectionStep } from './connection-form';
 import { ReviewRow, buildEndpointRows, buildReviewRows } from './connection-review';
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -212,7 +212,7 @@ export class ConnectionFormModalComponent implements OnInit, OnDestroy {
     }
 
 
-    public onCableCiSelected(cableCi: ObjectOption | null): void {
+    public onCableCiSelected(cableCi: CableOption | null): void {
         this.cableCiLabel = cableCi?.option_label ?? '';
     }
 

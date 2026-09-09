@@ -72,6 +72,20 @@ export interface ResolvedCable {
 
 
 /**
+ * A cable CI that is free to be linked, as `GET /port_connections/cables/unassigned/` lists them.
+ *
+ * Asking for a connection returns its own cable as well, which is what makes the edit form able to
+ * preselect it - a cable already in use is otherwise not part of the answer.
+ */
+export interface UnassignedCable {
+    public_id: number;
+    name: string | null;
+    cable_type: string | null;
+    active: boolean;
+}
+
+
+/**
  * A connection as the `port_connections` routes return it.
  *
  * `endpoints` holds the two port ids sorted ascending - the link is undirected, so neither position
