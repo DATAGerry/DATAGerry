@@ -1131,7 +1131,9 @@ export class ObjectsByTypeComponent implements OnInit, OnDestroy {
                             this.objectsTableComponent.selectedItems = [];
                             this.loadObjects();
                         },
-                            (response) => this.toastService.error(response.error)
+                            // The delete guards refuse a whole selection with one message - a Cable CI
+                            // a Port connection still uses among them, for one.
+                            (response) => this.toastService.error(response?.error?.message)
                         );
                 }
             });

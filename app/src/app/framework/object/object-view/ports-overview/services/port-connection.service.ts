@@ -29,6 +29,7 @@ import {
 } from 'src/app/services/models/api-response';
 import {
     CableInfoPayload,
+    CableUsage,
     CmdbPortConnection,
     PortConnectionPayload,
     UnassignedCable
@@ -99,6 +100,21 @@ export class PortConnectionService {
 
         return this.api.callGet<APIGetMultiResponse<UnassignedCable>>(route, options).pipe(
             map((response: HttpResponse<APIGetMultiResponse<UnassignedCable>>) => response?.body)
+        );
+    }
+
+
+    /**
+     * Whether a connection still holds this cable CI, which is what makes the cable undeletable.
+     *
+     * `endpoints` names the two ports of that connection, so the caller can say where to disconnect it.
+     */
+    public getCableUsage(cableId: number): Observable<CableUsage> {
+        const options = { headers: this.jsonHeaders, observe: resp };
+        const route = `${ this.servicePrefix }/cable_usage/${ cableId }`;
+
+        return this.api.callGet<CableUsage>(route, options).pipe(
+            map((response: HttpResponse<CableUsage>) => response?.body)
         );
     }
 

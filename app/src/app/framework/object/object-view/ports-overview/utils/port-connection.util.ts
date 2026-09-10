@@ -17,6 +17,7 @@
 */
 import {
     CmdbPortConnection,
+    ConnectionEndpoint,
     ConnectionType,
     PortConnectionInfo,
     PortConnectionState
@@ -88,4 +89,16 @@ export function cableSummary(connection: CmdbPortConnection | null): string {
         .filter((part): part is string => !!part);
 
     return parts.join(' · ') || 'Cable';
+}
+
+
+/** One end of a connection in one line: the port, its side where the type has one, and its object. */
+export function describeEndpoint(endpoint: ConnectionEndpoint | null): string | null {
+    if (!endpoint) {
+        return null;
+    }
+
+    const port = endpoint.sideLabel ? `${ endpoint.portName } (${ endpoint.sideLabel })` : endpoint.portName;
+
+    return endpoint.objectLabel ? `${ port } - ${ endpoint.objectLabel }` : port;
 }

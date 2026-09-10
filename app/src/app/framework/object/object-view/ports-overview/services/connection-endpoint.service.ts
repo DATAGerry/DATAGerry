@@ -63,23 +63,28 @@ export class ConnectionEndpointService {
     /**
      * The far end of a stored connection.
      *
-     * Two reads, because a connection carries port ids only and the peer belongs to another object.
-     * Neither is required to succeed - the connection rights do not imply access to the peer's object,
-     * so an unreadable far end still shows its port. A connection the near port is not part of names
-     * nothing at all.
+     * A connection the near port is not part of names nothing at all.
      */
     public farEndpoint(connection: CmdbPortConnection, nearPortId: number): Observable<ConnectionEndpoint> {
         const peerPortId = peerPortIdOf(connection, nearPortId);
 
-        if (peerPortId == null) {
-            return EMPTY;
-        }
+        return peerPortId == null ? EMPTY : this.endpointOf(peerPortId);
+    }
 
-        return this.portService.getPort(peerPortId).pipe(
-            switchMap((peerPort) => this.readObjectLabel(peerPort?.object_id).pipe(
-                map((objectLabel) => this.toFarEndpoint(peerPortId, peerPort, objectLabel))
+
+    /**
+     * One end named from its port id alone.
+     *
+     * Two reads, because a connection carries port ids only and the port belongs to another object.
+     * Neither is required to succeed - the connection rights do not imply access to that object, so
+     * an unreadable end still shows its port.
+     */
+    public endpointOf(portId: number): Observable<ConnectionEndpoint> {
+        return this.portService.getPort(portId).pipe(
+            switchMap((port) => this.readObjectLabel(port?.object_id).pipe(
+                map((objectLabel) => this.toEndpoint(portId, port, objectLabel))
             )),
-            catchError(() => of(this.toFarEndpoint(peerPortId, null, '')))
+            catchError(() => of(this.toEndpoint(portId, null, '')))
         );
     }
 
@@ -106,12 +111,12 @@ export class ConnectionEndpointService {
     }
 
 
-    private toFarEndpoint(portId: number, peerPort: CmdbPort | null, objectLabel: string): ConnectionEndpoint {
+    private toEndpoint(portId: number, port: CmdbPort | null, objectLabel: string): ConnectionEndpoint {
         return {
             portId,
-            portName: this.portName(peerPort?.name, portId),
-            sideLabel: portSideLabel(peerPort?.side),
-            objectId: peerPort?.object_id ?? null,
+            portName: this.portName(port?.name, portId),
+            sideLabel: portSideLabel(port?.side),
+            objectId: port?.object_id ?? null,
             objectLabel: objectLabel || 'Unknown device'
         };
     }

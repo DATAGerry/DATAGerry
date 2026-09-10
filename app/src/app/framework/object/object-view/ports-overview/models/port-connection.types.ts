@@ -86,6 +86,19 @@ export interface UnassignedCable {
 
 
 /**
+ * What `GET /port_connections/cable_usage/<cable_public_id>` reports about a cable CI.
+ *
+ * `connection_id` and `endpoints` are filled in only while the cable is in use; `endpoints` names
+ * the two ports of the connection holding it.
+ */
+export interface CableUsage {
+    in_use: boolean;
+    connection_id: number | null;
+    endpoints: number[] | null;
+}
+
+
+/**
  * A connection as the `port_connections` routes return it.
  *
  * `endpoints` holds the two port ids sorted ascending - the link is undirected, so neither position

@@ -18,6 +18,7 @@
 import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 
 import { ConnectionEndpoint } from '../../models/port-connection.types';
+import { describeEndpoint } from '../../utils/port-connection.util';
 
 import { ConnectionForm } from './connection-form';
 /* ------------------------------------------------------------------------------------------------------------------ */
@@ -76,18 +77,6 @@ export function buildReviewRows(
 }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
-
-/** The port, its side where the type has one, and the object it sits in. */
-function describeEndpoint(endpoint: ConnectionEndpoint | null): string | null {
-    if (!endpoint) {
-        return null;
-    }
-
-    const port = endpoint.sideLabel ? `${ endpoint.portName } (${ endpoint.sideLabel })` : endpoint.portName;
-
-    return endpoint.objectLabel ? `${ port } - ${ endpoint.objectLabel }` : port;
-}
-
 
 /** An unanswered question is left out rather than listed as empty. */
 function pushRow(rows: ReviewRow[], label: string, value: string | null): void {
