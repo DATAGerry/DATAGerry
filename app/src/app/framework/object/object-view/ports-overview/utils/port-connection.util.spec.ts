@@ -22,7 +22,7 @@ import {
     PortConnectionState,
     ResolvedCable
 } from '../models/port-connection.types';
-import { cableSummary, cableSwatchColor, indexConnectionsByPort, peerPortIdOf } from './port-connection.util';
+import { cableSummary, indexConnectionsByPort, peerPortIdOf } from './port-connection.util';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 function cable(overrides: Partial<ResolvedCable> = {}): ResolvedCable {
@@ -135,21 +135,6 @@ describe('port-connection.util', () => {
 
         it('says nothing for a link that has no cable, such as a panel pairing', () => {
             expect(cableSummary(connection({ cable: null }))).toBe('');
-        });
-    });
-
-
-    describe('cableSwatchColor', () => {
-        it('paints a hex literal and a plain colour name', () => {
-            expect(cableSwatchColor('#1e88e5')).toBe('#1e88e5');
-            expect(cableSwatchColor('  blue ')).toBe('blue');
-        });
-
-        it('refuses anything that is not one of those', () => {
-            expect(cableSwatchColor('url(x)')).toBeNull();
-            expect(cableSwatchColor('light blue')).toBeNull();
-            expect(cableSwatchColor('')).toBeNull();
-            expect(cableSwatchColor(null)).toBeNull();
         });
     });
 });

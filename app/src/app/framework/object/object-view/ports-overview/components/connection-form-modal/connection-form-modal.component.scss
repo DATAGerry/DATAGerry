@@ -81,28 +81,6 @@
     }
 }
 
-/* The colour is free text; the swatch only appears once it is something a browser can paint. */
-.cable-color {
-    display: flex;
-    align-items: flex-end;
-    gap: 0.6rem;
-
-    &__field {
-        flex: 1 1 auto;
-        min-width: 0;
-    }
-
-    &__swatch {
-        flex: 0 0 auto;
-        width: 2.1rem;
-        height: 2.1rem;
-        margin-bottom: 1rem;
-        border: 1px solid var(--dg-border);
-        border-radius: var(--dg-radius-sm);
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.5);
-    }
-}
-
 /* Metadata or an inventoried CI, as two cards. */
 cmdb-choice-card-group {
     display: block;

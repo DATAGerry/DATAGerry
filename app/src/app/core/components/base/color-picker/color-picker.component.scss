@@ -1,0 +1,178 @@
+:host {
+    display: block;
+}
+
+.color-picker {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+}
+
+/* ----------------------------------------------------- LABEL ----------------------------------------------------- */
+
+.color-picker__label {
+    font-weight: 600;
+    font-size: 0.85rem;
+    color: var(--dg-label);
+    margin-top: 1rem;
+    margin-bottom: 0.25rem;
+}
+
+.color-picker__req {
+    margin-left: 0.15rem;
+    color: var(--dg-danger);
+}
+
+/* ----------------------------------------------------- FIELD ------------------------------------------------------ */
+
+.color-picker__field {
+    display: flex;
+    align-items: stretch;
+    border: var(--bs-border-width, 1px) solid var(--bs-border-color, var(--dg-border));
+    border-radius: var(--bs-border-radius, 0.375rem);
+    background: var(--bs-body-bg, #fff);
+    overflow: hidden;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+
+    &:focus-within {
+        border-color: var(--dg-brand);
+        box-shadow: var(--dg-focus-ring);
+    }
+
+    &--invalid {
+        border-color: var(--dg-danger);
+    }
+
+    &--disabled {
+        opacity: 0.65;
+    }
+}
+
+.color-picker__swatch {
+    flex: 0 0 auto;
+    width: 2.6rem;
+    border: none;
+    border-right: var(--bs-border-width, 1px) solid var(--bs-border-color, var(--dg-border));
+    cursor: pointer;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+
+    &--empty {
+        background-color: var(--dg-surface-tint, var(--dg-surface));
+        background-image:
+            linear-gradient(45deg, var(--dg-border) 25%, transparent 25%, transparent 75%, var(--dg-border) 75%),
+            linear-gradient(45deg, var(--dg-border) 25%, transparent 25%, transparent 75%, var(--dg-border) 75%);
+        background-size: 0.7rem 0.7rem;
+        background-position: 0 0, 0.35rem 0.35rem;
+    }
+}
+
+
+.color-picker__input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--bs-body-color, var(--dg-ink));
+    padding: 0.375rem 0.75rem;
+    font-size: 1rem;
+    line-height: 1.5;
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+/* ----------------------------------------------------- MENU ------------------------------------------------------- */
+.color-picker__menu {
+    padding: 0.9rem;
+    border: 1px solid var(--dg-border);
+    border-radius: var(--dg-radius-md);
+    box-shadow: var(--dg-shadow-modal);
+}
+
+.color-picker__grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1.6rem);
+    gap: 0.55rem;
+    margin-bottom: 0.85rem;
+}
+
+.color-picker__preset {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 50%;
+    color: #fff;
+    font-size: 0.65rem;
+    cursor: pointer;
+    transition: box-shadow 120ms ease;
+
+    &:hover {
+        box-shadow: 0 0 0 2px var(--dg-surface), 0 0 0 3px var(--dg-border);
+    }
+
+    &:focus-visible {
+        outline: none;
+        box-shadow: var(--dg-focus-ring);
+    }
+
+    &--active {
+        box-shadow: 0 0 0 2px var(--dg-surface), 0 0 0 3px var(--dg-brand);
+    }
+
+    i {
+        text-shadow: 0 0 2px rgba(0, 0, 0, 0.45);
+    }
+}
+
+.color-picker__custom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin: 0;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--dg-border);
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--dg-ink);
+    cursor: pointer;
+}
+
+.color-picker__custom-swatch {
+    position: relative;
+    display: block;
+    width: 1.9rem;
+    height: 1.9rem;
+    border: 1px solid var(--dg-border);
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.color-picker__native {
+    position: absolute;
+    inset: -4px;
+    width: calc(100% + 8px);
+    height: calc(100% + 8px);
+    padding: 0;
+    border: none;
+    cursor: pointer;
+}
+
+/* ----------------------------------------------------- ERROR ------------------------------------------------------ */
+.color-picker__error {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0.35rem 0 0;
+    color: var(--dg-danger);
+    font-size: 0.8rem;
+}

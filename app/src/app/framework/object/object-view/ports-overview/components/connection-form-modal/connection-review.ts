@@ -68,7 +68,7 @@ export function buildReviewRows(
     pushRow(rows, 'Cable name', cable.cable_name);
     pushRow(rows, 'Cable type', labelOfCableType(cable.cable_type, cableTypeOptions));
     pushRow(rows, 'Length', cable.cable_length);
-    pushRow(rows, 'Colour', cable.cable_color);
+    pushRow(rows, 'Color', cable.cable_color);
     pushRow(rows, 'Description', cable.cable_description);
     rows.push({ label: 'Cable', value: 'Described here, not inventoried' });
 

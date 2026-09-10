@@ -23,9 +23,6 @@ import {
 } from '../models/port-connection.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
-/** A colour is only painted as a swatch when it is a plain name or a hex literal. */
-const SAFE_COLOR = /^(#(?:[0-9a-f]{3}|[0-9a-f]{6})|[a-z]{3,20})$/i;
-
 const EMPTY_INFO: PortConnectionInfo = { state: PortConnectionState.FREE, cable: null, internal: null };
 
 
@@ -91,12 +88,4 @@ export function cableSummary(connection: CmdbPortConnection | null): string {
         .filter((part): part is string => !!part);
 
     return parts.join(' · ') || 'Cable';
-}
-
-
-/** The swatch colour of a cable, or null when the stored text is not one we can paint. */
-export function cableSwatchColor(color: string | null | undefined): string | null {
-    const value = (color ?? '').trim();
-
-    return SAFE_COLOR.test(value) ? value : null;
 }

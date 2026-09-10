@@ -37,7 +37,6 @@ import { CmdbPort } from '../../models/ports-overview.types';
 import { CableCatalogService } from '../../services/cable-catalog.service';
 import { ConnectionEndpointService } from '../../services/connection-endpoint.service';
 import { PortConnectionService } from '../../services/port-connection.service';
-import { cableSwatchColor } from '../../utils/port-connection.util';
 import { CableOption } from '../cable-ci-picker/cable-ci-picker.component';
 import { ChoiceCard } from '../choice-card-group/choice-card-group.component';
 import { ConnectionForm, ConnectionFormGroup, ConnectionStep } from './connection-form';
@@ -308,12 +307,6 @@ export class ConnectionFormModalComponent implements OnInit, OnDestroy {
     public readonly canExitStep = (direction: MovingDirection): boolean => {
         return direction !== MovingDirection.Forwards || this.canLeaveCurrentStep;
     };
-
-
-    /** The colour is free text, so it is only painted when it is something a browser can render. */
-    public get cableSwatch(): string | null {
-        return cableSwatchColor(this.form.controls.cableColor.value);
-    }
 
 
     public get reviewRows(): ReviewRow[] {

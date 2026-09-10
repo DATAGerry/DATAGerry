@@ -1,0 +1,83 @@
+<div class="color-picker">
+    @if (label) {
+    <label class="color-picker__label" [attr.for]="controlId">
+        {{ label }}
+        @if (required) {
+        <span class="color-picker__req" aria-hidden="true">*</span>
+        }
+    </label>
+    }
+
+    <div
+        ngbDropdown
+        #dd="ngbDropdown"
+        container="body"
+        class="color-picker__field"
+        [class.color-picker__field--invalid]="!!errorMessage"
+        [class.color-picker__field--disabled]="disabled">
+
+        <button
+            type="button"
+            ngbDropdownToggle
+            class="color-picker__swatch"
+            [class.color-picker__swatch--empty]="!swatchColor"
+            [style.background-color]="swatchColor"
+            [disabled]="disabled"
+            [attr.aria-label]="swatchColor ? 'Change colour, current ' + value : 'Pick a colour'"
+            title="Pick a colour">
+        </button>
+
+        <input
+            [id]="controlId"
+            type="text"
+            class="color-picker__input"
+            [placeholder]="placeholder"
+            [value]="value"
+            [disabled]="disabled"
+            [attr.aria-invalid]="errorMessage ? true : null"
+            [attr.aria-describedby]="errorMessage ? controlId + '-error' : null"
+            (input)="onTextInput($event)"
+            (blur)="onBlur()">
+
+        <div ngbDropdownMenu class="color-picker__menu" role="menu" aria-label="Colour presets">
+            <div class="color-picker__grid">
+                @for (preset of presets; track preset) {
+                <button
+                    type="button"
+                    role="menuitem"
+                    class="color-picker__preset"
+                    [style.background-color]="preset"
+                    [class.color-picker__preset--active]="preset === value"
+                    [attr.aria-label]="'Choose ' + preset"
+                    [attr.aria-pressed]="preset === value"
+                    (click)="onPickPreset(preset, dd)">
+                    @if (preset === value) {
+                    <i class="fas fa-check" aria-hidden="true"></i>
+                    }
+                </button>
+                }
+            </div>
+
+            <label class="color-picker__custom">
+                <span class="color-picker__custom-label">Custom colour</span>
+                <span class="color-picker__custom-swatch">
+                    <input
+                        type="color"
+                        class="color-picker__native"
+                        aria-label="Open the operating system colour picker"
+                        [value]="nativeValue"
+                        (click)="dd.close()"
+                        (input)="onNativePick($event)"
+                        (change)="onNativePick($event)">
+                </span>
+            </label>
+        </div>
+    </div>
+
+    @if (errorMessage) {
+    <p class="color-picker__error" [id]="controlId + '-error'" role="alert">
+        <i class="fas fa-triangle-exclamation" aria-hidden="true"></i>
+        {{ errorMessage }}
+    </p>
+    }
+</div>

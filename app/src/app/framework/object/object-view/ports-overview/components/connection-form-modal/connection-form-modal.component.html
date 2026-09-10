@@ -121,19 +121,12 @@
                 </app-form-input>
               </div>
               <div class="col-md-6">
-                <div class="cable-color">
-                  <app-form-input
-                    class="cable-color__field"
-                    label="Colour"
-                    placeholder="e.g. blue or #1e88e5"
-                    [errorMessage]="connectionForm.errorOf('cableColor')"
-                    formControlName="cableColor">
-                  </app-form-input>
-
-                  @if (cableSwatch) {
-                    <span class="cable-color__swatch" [style.background-color]="cableSwatch" aria-hidden="true"></span>
-                  }
-                </div>
+                <app-color-picker
+                  label="Color"
+                  placeholder="e.g. blue or #1e88e5"
+                  [errorMessage]="connectionForm.errorOf('cableColor')"
+                  formControlName="cableColor">
+                </app-color-picker>
               </div>
             </div>
 

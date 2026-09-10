@@ -259,7 +259,7 @@ describe('ConnectionFormModalComponent', () => {
             expect(rows).toContain('Cable type: Cat5e');
             expect(rows).toContain('Length: 4');
             expect(rows).toContain('Cable: Described here, not inventoried');
-            expect(rows.some(row => row.startsWith('Colour'))).toBeFalse();
+            expect(rows.some(row => row.startsWith('Color'))).toBeFalse();
         });
 
         it('writes the two ports, the length as text, and no cable CI key at all', async () => {

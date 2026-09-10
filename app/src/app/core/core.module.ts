@@ -18,6 +18,7 @@ import { CheckboxComponent } from './components/base/checkbox/checkbox.component
 import { RadioComponent } from './components/base/radio/radio.component';
 import { SelectComponent } from './components/base/select/select.component';
 import { FileDropzoneComponent } from './components/base/file-dropzone/file-dropzone.component';
+import { ColorPickerComponent } from './components/base/color-picker/color-picker.component';
 import { SliderComponent } from './components/base/slider/slider.component';
 import { ToggleComponent } from './components/base/toggle/toggle.component';
 import { FormDateComponent } from './components/base/date/form-date.component';
@@ -34,6 +35,7 @@ import { PremiumGateDirective } from './directives/premium-gate.directive';
 import { WizardStepperDirective } from './directives/wizard-stepper.directive';
 import { PremiumLockedComponent } from './components/premium-locked/premium-locked.component';
 import { CompactNumberPipe } from './pipes/compact-number.pipe';
+import { NgbDropdownModule } from '@ng-bootstrap/ng-bootstrap';
 
 @NgModule({
   declarations: [
@@ -51,6 +53,7 @@ import { CompactNumberPipe } from './pipes/compact-number.pipe';
     RadioComponent,
     SelectComponent,
     FileDropzoneComponent,
+    ColorPickerComponent,
     SliderComponent,
     ToggleComponent,
     FormDateComponent,
@@ -74,7 +77,8 @@ import { CompactNumberPipe } from './pipes/compact-number.pipe';
     PremiumGateDirective,
     WizardStepperDirective,
     PremiumLockedComponent,
-    DgModalComponent
+    DgModalComponent,
+    NgbDropdownModule
   ],
   exports: [
     LoadingPopupComponent,
@@ -89,6 +93,7 @@ import { CompactNumberPipe } from './pipes/compact-number.pipe';
     RadioComponent,
     SelectComponent,
     FileDropzoneComponent,
+    ColorPickerComponent,
     SliderComponent,
     ToggleComponent,
     FormDateComponent,
