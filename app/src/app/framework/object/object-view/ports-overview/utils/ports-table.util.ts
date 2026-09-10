@@ -17,15 +17,11 @@
 */
 import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
+import { PortConnectionInfo, PortConnectionState } from '../models/port-connection.types';
 import { CmdbPort, PortRow, PortSide } from '../models/ports-overview.types';
+import { cableSummary, peerPortIdOf } from './port-connection.util';
+import { normalizeSide, portSideLabel } from './port-side.util';
 /* ------------------------------------------------------------------------------------------------------------------ */
-
-/** How a panel side is written in the table. SINGLE has no face, so it stays empty. */
-const SIDE_LABELS: Record<PortSide, string> = {
-    [PortSide.SINGLE]: '',
-    [PortSide.FRONT]: 'Front',
-    [PortSide.REAR]: 'Rear'
-};
 
 // Port names are numbered ("Gi1/0/2", "Gi1/0/10"), so they have to collate numerically to read right.
 const COLLATOR = new Intl.Collator(undefined, { numeric: true, sensitivity: 'base' });
@@ -38,27 +34,44 @@ const SORT_FIELDS: Record<string, keyof PortRow> = {
     status: 'status',
     port_type: 'portType',
     speed: 'speed',
-    connected: 'connected',
+    connected: 'connectionLabel',
     description: 'description'
 };
 
 
-/** Builds the table rows. An option id with no label shows a dash, never the raw number. */
-export function toPortRows(ports: readonly CmdbPort[], labels: Map<string, string>): PortRow[] {
+/**
+ * Builds the table rows. An option id with no label shows a dash, never the raw number.
+ *
+ * `connectionsByPort` is what the connection cell reads. Without it every port reports as free -
+ * a section that may not read the connections still lists the ports.
+ */
+export function toPortRows(
+    ports: readonly CmdbPort[],
+    labels: Map<string, string>,
+    connectionsByPort: Map<number, PortConnectionInfo> = new Map()
+): PortRow[] {
+    const namesByPortId = new Map(ports.map((port) => [port.public_id, port.name ?? '']));
+
     return ports.map((port) => {
         const side = normalizeSide(port.side);
+        const connection = connectionsByPort.get(port.public_id) ?? null;
+        const pairedPortName = pairedPortNameOf(connection, port.public_id, namesByPortId);
 
         return {
             publicId: port.public_id,
             name: port.name ?? '',
             side,
-            sideLabel: SIDE_LABELS[side],
+            sideLabel: portSideLabel(side),
             portNumber: port.port_number ?? null,
             status: labelOf(port.status, labels),
             portType: labelOf(port.port_type, labels),
             speed: labelOf(port.speed, labels),
             description: port.description ?? null,
-            connected: port.connected === true
+            connected: port.connected === true,
+            connectionState: connection?.state ?? PortConnectionState.FREE,
+            connectionLabel: connectionLabelOf(connection, pairedPortName),
+            cableConnectionId: connection?.cable?.public_id ?? null,
+            pairedPortName
         };
     });
 }
@@ -128,6 +141,32 @@ export function clampPage(page: number, total: number, pageSize: number): number
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
 
+/** A cabled port reads as its cable, a paired one as its counterpart, and a free one as free. */
+function connectionLabelOf(connection: PortConnectionInfo | null, pairedPortName: string | null): string {
+    if (connection?.cable) {
+        return cableSummary(connection.cable);
+    }
+
+    if (!connection?.internal) {
+        return 'Free';
+    }
+
+    return pairedPortName ? `Paired with ${ pairedPortName }` : 'Paired internally';
+}
+
+
+/** Both ends of an internal pairing are ports of the same object, so the peer can be named here. */
+function pairedPortNameOf(
+    connection: PortConnectionInfo | null,
+    portId: number,
+    namesByPortId: Map<number, string>
+): string | null {
+    const peerId = peerPortIdOf(connection?.internal ?? null, portId);
+
+    return peerId == null ? null : namesByPortId.get(peerId) ?? null;
+}
+
+
 /** Empty values always sort last, so a table sorted by an optional column still starts with content. */
 function compare(left: PortRow[keyof PortRow], right: PortRow[keyof PortRow]): number {
     const leftEmpty = isEmpty(left);
@@ -156,10 +195,4 @@ function isEmpty(value: PortRow[keyof PortRow]): boolean {
 
 function labelOf(optionId: number | null, labels: Map<string, string>): string | null {
     return optionId == null ? null : labels.get(String(optionId)) ?? null;
-}
-
-
-/** An unknown or missing side reads as an ordinary device port, matching the stored default. */
-function normalizeSide(side: PortSide | undefined): PortSide {
-    return side === PortSide.FRONT || side === PortSide.REAR ? side : PortSide.SINGLE;
 }

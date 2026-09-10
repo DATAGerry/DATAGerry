@@ -88,7 +88,6 @@ $panel-foot: #f7f9fb;
 
 /* One label treatment for every control in the modal, including the ones the object picker owns. */
 .mount-form ::ng-deep .form-label {
-    margin-top: 0 !important; // the input control adds mt-3
     margin-bottom: 0.3rem;
     font-size: 0.85rem;
     font-weight: 600;

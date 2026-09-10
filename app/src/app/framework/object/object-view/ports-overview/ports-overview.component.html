@@ -54,12 +54,18 @@
     [showConnectionColumn]="showConnectionColumn"
     [canEdit]="canEdit"
     [canDelete]="canDelete"
+    [canConnect]="canConnect"
+    [canEditConnection]="canEditConnection"
+    [canDisconnect]="canDisconnect"
     [loading]="(isLoading$ | async) === true"
     (pageChange)="onPageChange($event)"
     (pageSizeChange)="onPageSizeChange($event)"
     (sortChange)="onSortChange($event)"
     (editPort)="onEditPort($event)"
-    (deletePort)="onDeletePort($event)">
+    (deletePort)="onDeletePort($event)"
+    (connectPort)="onConnectPort($event)"
+    (editConnection)="onEditConnection($event)"
+    (disconnectPort)="onDisconnectPort($event)">
   </cmdb-ports-table>
 </fieldset>
 

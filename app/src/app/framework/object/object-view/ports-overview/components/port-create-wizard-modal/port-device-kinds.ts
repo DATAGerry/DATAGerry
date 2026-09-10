@@ -16,34 +16,30 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { PortDeviceKind } from '../../models/port-bulk.types';
+import { ChoiceCard } from '../choice-card-group/choice-card-group.component';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** One device kind, as the first step offers it. */
-export interface DeviceKindChoice {
-    kind: PortDeviceKind;
-    label: string;
-    icon: string;
-    description: string;
-}
+export type DeviceKindChoice = ChoiceCard<PortDeviceKind>;
 
 
 export const DEVICE_KIND_CHOICES: readonly DeviceKindChoice[] = [
     {
-        kind: PortDeviceKind.PATCH_PANEL,
+        value: PortDeviceKind.PATCH_PANEL,
         label: 'Patch panel',
         icon: 'fas fa-grip-horizontal',
-        description: 'Front and rear ports, paired automatically.'
+        text: 'Front and rear ports, paired automatically.'
     },
     {
-        kind: PortDeviceKind.STANDARD,
+        value: PortDeviceKind.STANDARD,
         label: 'Standard network device',
         icon: 'fas fa-server',
-        description: 'Single ports, no internal pairing.'
+        text: 'Single ports, no internal pairing.'
     }
 ];
 
 
 /** Empty while nothing is picked yet, which is what the preview heading then shows. */
 export function labelOfDeviceKind(kind: PortDeviceKind | null): string {
-    return DEVICE_KIND_CHOICES.find((choice) => choice.kind === kind)?.label ?? '';
+    return DEVICE_KIND_CHOICES.find((choice) => choice.value === kind)?.label ?? '';
 }

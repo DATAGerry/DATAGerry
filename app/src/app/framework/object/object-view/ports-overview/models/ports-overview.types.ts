@@ -16,6 +16,7 @@
 * along with this program. If not, see <https://www.gnu.org/licenses/>.
 */
 import { PortOptionType } from 'src/app/framework/models/port-option-type';
+import { PortConnectionState } from './port-connection.types';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
 /** The option lists the three select fields of a port draw their values from. */
@@ -72,6 +73,16 @@ export interface PortRow {
     speed: string | null;
     description: string | null;
     connected: boolean;
+    connectionState: PortConnectionState;
+
+    /** What the connection cell reads: the cable in one line, the pairing, or "Free". */
+    connectionLabel: string;
+
+    /** The cable to edit or to cut; null while the port carries none. */
+    cableConnectionId: number | null;
+
+    /** The panel port on the other side of the internal pairing, which belongs to the same object. */
+    pairedPortName: string | null;
 }
 
 

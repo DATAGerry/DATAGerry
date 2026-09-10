@@ -29,6 +29,7 @@ import { ToastService } from 'src/app/layout/toast/toast.service';
 import { PermissionService } from 'src/app/modules/auth/services/permission.service';
 import { CmdbPort, PORT_DELETE_RIGHT, PORT_EDIT_RIGHT, PortSide } from './models/ports-overview.types';
 import { PortsOverviewComponent } from './ports-overview.component';
+import { PortConnectionService } from './services/port-connection.service';
 import { PortService } from './services/port.service';
 /* ------------------------------------------------------------------------------------------------------------------ */
 
@@ -38,6 +39,7 @@ describe('PortsOverviewComponent', () => {
     let permission: jasmine.SpyObj<PermissionService>;
     let deleteModal: jasmine.SpyObj<DeleteModalService>;
     let modalService: jasmine.SpyObj<NgbModal>;
+    let portConnectionService: jasmine.SpyObj<PortConnectionService>;
     let toast: jasmine.SpyObj<ToastService>;
 
     const port = (publicId: number, name: string): CmdbPort => ({
@@ -61,6 +63,8 @@ describe('PortsOverviewComponent', () => {
 
     beforeEach(() => {
         portService = jasmine.createSpyObj<PortService>('PortService', ['getPortsOfObject', 'deletePort']);
+        portConnectionService = jasmine.createSpyObj<PortConnectionService>(
+            'PortConnectionService', ['getConnectionsOfObject', 'deleteConnection']);
         permission = jasmine.createSpyObj<PermissionService>('PermissionService', ['hasRight', 'hasExtendedRight']);
         deleteModal = jasmine.createSpyObj<DeleteModalService>('DeleteModalService', ['confirmDelete']);
         modalService = jasmine.createSpyObj<NgbModal>('NgbModal', ['open']);
@@ -73,6 +77,8 @@ describe('PortsOverviewComponent', () => {
         catalog.optionsForTypes.and.returnValue(of(new Map()));
         portService.getPortsOfObject.and.returnValue(of([port(1, 'Gi0/1'), port(2, 'Gi0/2')]));
         portService.deletePort.and.returnValue(of(undefined));
+        portConnectionService.getConnectionsOfObject.and.returnValue(of([]));
+        portConnectionService.deleteConnection.and.returnValue(of(undefined));
         permission.hasRight.and.returnValue(true);
         permission.hasExtendedRight.and.returnValue(false);
         modalService.open.and.returnValue({ componentInstance: {}, result: Promise.resolve(false) } as any);
@@ -80,6 +86,7 @@ describe('PortsOverviewComponent', () => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: PortService, useValue: portService },
+                { provide: PortConnectionService, useValue: portConnectionService },
                 { provide: ExtendableOptionCatalogService, useValue: catalog },
                 { provide: LoaderService, useValue: loader },
                 { provide: PermissionService, useValue: permission },

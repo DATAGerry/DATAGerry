@@ -17,7 +17,15 @@
 */
 import { FieldOption } from 'src/app/framework/models/cmdb-section-template';
 import { Sort, SortDirection } from 'src/app/layout/table/table.types';
+import {
+    CableSource,
+    CmdbPortConnection,
+    ConnectionType,
+    PortConnectionState,
+    ResolvedCable
+} from '../models/port-connection.types';
 import { CmdbPort, PortSide } from '../models/ports-overview.types';
+import { indexConnectionsByPort } from './port-connection.util';
 import {
     clampPage,
     hasConnectionState,
@@ -40,6 +48,33 @@ function port(overrides: Partial<CmdbPort> = {}): CmdbPort {
         port_type: null,
         speed: null,
         description: null,
+        author_id: 1,
+        creation_time: null,
+        last_edit_time: null,
+        ...overrides
+    };
+}
+
+function cable(overrides: Partial<ResolvedCable> = {}): ResolvedCable {
+    return {
+        source: CableSource.INLINE,
+        cable_ci_id: null,
+        name: null,
+        type: null,
+        type_id: null,
+        length: null,
+        color: null,
+        description: null,
+        ...overrides
+    };
+}
+
+function connection(overrides: Partial<CmdbPortConnection> = {}): CmdbPortConnection {
+    return {
+        public_id: 1,
+        endpoints: [1, 2],
+        connection_type: ConnectionType.CABLE,
+        cable: cable(),
         author_id: 1,
         creation_time: null,
         last_edit_time: null,
@@ -93,6 +128,67 @@ describe('ports-table.util', () => {
             const [row] = toPortRows([port()], new Map());
 
             expect(row.connected).toBeFalse();
+        });
+    });
+
+
+    describe('the connection cell', () => {
+        const panel = [
+            port({ public_id: 1, name: 'PP-01/F01', side: PortSide.FRONT }),
+            port({ public_id: 2, name: 'PP-01/R01', side: PortSide.REAR })
+        ];
+
+        it('reads as free while nothing is connected', () => {
+            const [row] = toPortRows(panel, new Map());
+
+            expect(row.connectionState).toBe(PortConnectionState.FREE);
+            expect(row.connectionLabel).toBe('Free');
+            expect(row.cableConnectionId).toBeNull();
+        });
+
+        it('names the counterpart of an internal pairing, which belongs to the same object', () => {
+            const connections = indexConnectionsByPort([
+                connection({ endpoints: [1, 2], connection_type: ConnectionType.INTERNAL, cable: null })
+            ]);
+
+            const [front] = toPortRows(panel, new Map(), connections);
+
+            expect(front.connectionState).toBe(PortConnectionState.PAIRED);
+            expect(front.connectionLabel).toBe('Paired with PP-01/R01');
+            expect(front.pairedPortName).toBe('PP-01/R01');
+        });
+
+        it('reads as its cable once one is attached, and offers that cable to edit', () => {
+            const connections = indexConnectionsByPort([
+                connection({
+                    public_id: 7,
+                    endpoints: [1, 99],
+                    cable: cable({ name: 'Patch A-12', length: '3 m' })
+                })
+            ]);
+
+            const [front] = toPortRows(panel, new Map(), connections);
+
+            expect(front.connectionState).toBe(PortConnectionState.CABLED);
+            expect(front.connectionLabel).toBe('Patch A-12 · 3 m');
+            expect(front.cableConnectionId).toBe(7);
+        });
+
+        it('keeps the pairing of a panel port that also carries a cable', () => {
+            const connections = indexConnectionsByPort([
+                connection({ public_id: 7, endpoints: [1, 99] }),
+                connection({
+                    public_id: 8,
+                    endpoints: [1, 2],
+                    connection_type: ConnectionType.INTERNAL,
+                    cable: null
+                })
+            ]);
+
+            const [front] = toPortRows(panel, new Map(), connections);
+
+            expect(front.connectionState).toBe(PortConnectionState.CABLED);
+            expect(front.pairedPortName).toBe('PP-01/R01');
         });
     });
 
