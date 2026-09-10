@@ -12,11 +12,13 @@
         ngbDropdown
         #dd="ngbDropdown"
         container="body"
+        (openChange)="onPopoverToggle($event)"
         class="color-picker__field"
         [class.color-picker__field--invalid]="!!errorMessage"
         [class.color-picker__field--disabled]="disabled">
 
         <button
+            #swatchToggle
             type="button"
             ngbDropdownToggle
             class="color-picker__swatch"
@@ -39,12 +41,11 @@
             (input)="onTextInput($event)"
             (blur)="onBlur()">
 
-        <div ngbDropdownMenu class="color-picker__menu" role="menu" aria-label="Colour presets">
+        <div ngbDropdownMenu class="color-picker__menu" role="group" aria-label="Colour palette">
             <div class="color-picker__grid">
                 @for (preset of presets; track preset) {
                 <button
                     type="button"
-                    role="menuitem"
                     class="color-picker__preset"
                     [style.background-color]="preset"
                     [class.color-picker__preset--active]="preset === value"
@@ -58,19 +59,67 @@
                 }
             </div>
 
-            <label class="color-picker__custom">
-                <span class="color-picker__custom-label">Custom colour</span>
-                <span class="color-picker__custom-swatch">
+            <div class="color-picker__custom">
+                <div class="color-picker__custom-head">
+                    <span class="color-picker__custom-label">Custom colour</span>
+                    <span
+                        class="color-picker__custom-swatch"
+                        [style.background-color]="customColor"
+                        [attr.aria-label]="'Slider colour ' + customColor"
+                        role="img"></span>
+                </div>
+
+                <div class="color-picker__channel">
+                    <label [attr.for]="controlId + '-hue'">Hue</label>
                     <input
-                        type="color"
-                        class="color-picker__native"
-                        aria-label="Open the operating system colour picker"
-                        [value]="nativeValue"
-                        (click)="dd.close()"
-                        (input)="onNativePick($event)"
-                        (change)="onNativePick($event)">
-                </span>
-            </label>
+                        #hueSlider
+                        [id]="controlId + '-hue'"
+                        type="range"
+                        min="0"
+                        max="360"
+                        class="color-picker__range color-picker__range--hue"
+                        [disabled]="disabled"
+                        [value]="custom.hue"
+                        (input)="onCustomChannel('hue', $event)">
+                </div>
+
+                <div class="color-picker__channel">
+                    <label [attr.for]="controlId + '-saturation'">Saturation</label>
+                    <input
+                        [id]="controlId + '-saturation'"
+                        type="range"
+                        min="0"
+                        max="100"
+                        class="color-picker__range"
+                        [disabled]="disabled"
+                        [style.background]="saturationTrack"
+                        [value]="custom.saturation"
+                        (input)="onCustomChannel('saturation', $event)">
+                </div>
+
+                <div class="color-picker__channel">
+                    <label [attr.for]="controlId + '-lightness'">Lightness</label>
+                    <input
+                        [id]="controlId + '-lightness'"
+                        type="range"
+                        min="0"
+                        max="100"
+                        class="color-picker__range"
+                        [disabled]="disabled"
+                        [style.background]="lightnessTrack"
+                        [value]="custom.lightness"
+                        (input)="onCustomChannel('lightness', $event)">
+                </div>
+
+                <app-button
+                    label="Use this colour"
+                    bootstrapClass="btn-success btn-sm"
+                    [disabled]="disabled"
+                    padding="0.25rem 0.7rem"
+                    title="Apply the slider colour and close the palette"
+                    (clicked)="onUseCustom(dd)">
+                </app-button>
+            </div>
         </div>
     </div>
 

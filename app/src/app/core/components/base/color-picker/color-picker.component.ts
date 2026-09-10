@@ -15,16 +15,16 @@
 * You should have received a copy of the GNU Affero General Public License
 * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
-import { Component, Input, forwardRef } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { NgbDropdown } from '@ng-bootstrap/ng-bootstrap';
 
+import { Hsl, hexToHsl, hslToHex } from '../../../utils/color-utils';
+
 /** A colour is only painted/committed when it is a plain CSS name or a hex literal. */
 const SAFE_COLOR = /^(#(?:[0-9a-f]{3}|[0-9a-f]{6})|[a-z]{3,20})$/i;
-const HEX_COLOR = /^#(?:[0-9a-f]{3}|[0-9a-f]{6})$/i;
-const NATIVE_FALLBACK_HEX = '#808080';
 
-/** A small, fixed palette - enough to pick a common cable/port colour without opening the OS dialog. */
+/** A small, fixed palette - enough to pick a common cable/port colour without touching the sliders. */
 const DEFAULT_PRESETS: readonly string[] = [
     '#e94d18', '#f4511e', '#fb8c00', '#fdd835', '#7cb342', '#43a047',
     '#00897b', '#1e88e5', '#3949ab', '#8e24aa', '#d81b60', '#6d4c41',
@@ -34,9 +34,9 @@ const DEFAULT_PRESETS: readonly string[] = [
 let uniqueColorPickerId = 0;
 
 /**
- * Reusable colour field: free-text name/hex entry plus a swatch that opens a preset palette
- * and an OS colour dialog. Picking a preset closes the popover at once; opening the OS dialog
- * closes it too, since that dialog is a separate floating window we do not control.
+ * Reusable colour field: free-text name/hex entry plus a swatch that opens a preset palette and
+ * three HSL sliders. Everything happens inside the popover - a native `input[type=color]` would
+ * hand the job to a browser dialog no page can dismiss, which Firefox leaves standing on screen.
  */
 @Component({
     selector: 'app-color-picker',
@@ -59,8 +59,12 @@ export class ColorPickerComponent implements ControlValueAccessor {
     @Input() errorMessage = '';
     @Input() presets: readonly string[] = DEFAULT_PRESETS;
 
+    @ViewChild('swatchToggle') private swatchToggle?: ElementRef<HTMLButtonElement>;
+    @ViewChild('hueSlider') private hueSlider?: ElementRef<HTMLInputElement>;
+
     public readonly controlId = `app-color-picker-${ ++uniqueColorPickerId }`;
     public value = '';
+    public custom: Hsl = hexToHsl(null);
 
     private onChange: (value: string) => void = () => {};
     private onTouched: () => void = () => {};
@@ -74,17 +78,19 @@ export class ColorPickerComponent implements ControlValueAccessor {
         return SAFE_COLOR.test(trimmed) ? trimmed : null;
     }
 
-    /** The OS picker only understands #rrggbb, so a name or a short hex falls back to a neutral grey. */
-    public get nativeValue(): string {
-        const trimmed = this.value.trim();
+    /** What the sliders currently describe - shown next to them, not written until one is moved. */
+    public get customColor(): string {
+        return hslToHex(this.custom);
+    }
 
-        if (!HEX_COLOR.test(trimmed)) {
-            return NATIVE_FALLBACK_HEX;
-        }
+    public get saturationTrack(): string {
+        return `linear-gradient(to right, hsl(${ this.custom.hue }, 0%, ${ this.custom.lightness }%),`
+            + ` hsl(${ this.custom.hue }, 100%, ${ this.custom.lightness }%))`;
+    }
 
-        return trimmed.length === 4
-            ? '#' + [...trimmed.slice(1)].map((digit) => digit + digit).join('')
-            : trimmed;
+    public get lightnessTrack(): string {
+        return `linear-gradient(to right, #000,`
+            + ` hsl(${ this.custom.hue }, ${ this.custom.saturation }%, 50%), #fff)`;
     }
 
 /* --------------------------------------------- CONTROL VALUE ACCESSOR ---------------------------------------------- */
@@ -119,23 +125,57 @@ export class ColorPickerComponent implements ControlValueAccessor {
     public onPickPreset(preset: string, dropdown: NgbDropdown): void {
         this.setValue(preset);
         this.onTouched();
-        dropdown.close();
+        this.closePopover(dropdown);
     }
 
     /**
-     * The OS colour dialog (e.g. macOS's NSColorPanel) does not close itself once a colour is picked.
-     * Blurring the input is the only lever we have on it, and it works: Chromium treats the input
-     * losing focus as the dialog's owner going away and dismisses the panel.
+     * The sliders start from whatever the field holds, so opening the palette never loses a colour.
+     * The popover renders on the body, past every other control in the tab order, so it has to take
+     * focus to be reachable at all - and hand it back when it closes with focus still inside it.
      */
-    public onNativePick(event: Event): void {
-        const input = event.target as HTMLInputElement;
+    public onPopoverToggle(open: boolean): void {
+        if (!open) {
+            if (this.focusIsInPopover()) {
+                this.swatchToggle?.nativeElement.focus();
+            }
 
-        this.setValue(input.value);
+            return;
+        }
+
+        this.custom = hexToHsl(this.value);
+        /* The menu is still display:none until the open class lands. */
+        setTimeout(() => this.hueSlider?.nativeElement.focus());
+    }
+
+    /** Sliders write straight through - an untouched slider leaves the stored hex untouched too. */
+    public onCustomChannel(channel: keyof Hsl, event: Event): void {
+        const next: Hsl = { ...this.custom };
+
+        next[channel] = Number((event.target as HTMLInputElement).value);
+        this.custom = next;
+        this.setValue(hslToHex(next));
+    }
+
+    /** The sliders have no "picked" moment of their own, so this is how a custom colour is finished. */
+    public onUseCustom(dropdown: NgbDropdown): void {
         this.onTouched();
-        input.blur();
+        this.closePopover(dropdown);
     }
 
 /* ------------------------------------------------ PRIVATE FUNCTIONS ------------------------------------------------ */
+
+    /** True while focus sits on the popover's own markup, or was dropped when it was hidden. */
+    private focusIsInPopover(): boolean {
+        const active = document.activeElement;
+
+        return !active || active === document.body || !!active.closest('.color-picker__menu');
+    }
+
+    /** Focus would be stranded on a hidden element otherwise. */
+    private closePopover(dropdown: NgbDropdown): void {
+        dropdown.close();
+        this.swatchToggle?.nativeElement.focus();
+    }
 
     private setValue(value: string): void {
         this.value = value;
