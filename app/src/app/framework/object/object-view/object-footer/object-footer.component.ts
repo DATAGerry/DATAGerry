@@ -45,6 +45,9 @@ export class ObjectFooterComponent implements OnChanges {
 
   public activeTab: ObjectFooterTab = 'risk-assessments';
 
+  /** Tab panes mount on first activation so unopened tabs never fire their API calls. */
+  private readonly mountedTabs = new Set<ObjectFooterTab>([this.activeTab]);
+
   private rr: RenderResult;
 
   private readonly premiumFeatureService = inject(PremiumFeatureService);
@@ -58,7 +61,7 @@ export class ObjectFooterComponent implements OnChanges {
   public set renderResult(rr) {
     if (rr !== undefined) {
       this.rr = rr;
-      this.objectID = rr.object_information.object_id;
+      this.setObjectID(rr.object_information.object_id);
     }
   }
 
@@ -69,7 +72,7 @@ export class ObjectFooterComponent implements OnChanges {
   private readonly changesRef = inject(ChangeDetectorRef);
 
   public ngOnChanges(): void {
-    this.objectID = this.renderResult.object_information.object_id;
+    this.setObjectID(this.renderResult.object_information.object_id);
     this.changesRef.markForCheck();
   }
 
@@ -77,5 +80,24 @@ export class ObjectFooterComponent implements OnChanges {
 
   public selectTab(tab: ObjectFooterTab): void {
     this.activeTab = tab;
+    this.mountedTabs.add(tab);
+  }
+
+  /* ---------------------------------------------------- FUNCTIONS --------------------------------------------------- */
+
+  public isTabMounted(tab: ObjectFooterTab): boolean {
+    return this.mountedTabs.has(tab);
+  }
+
+  /* ------------------------------------------------ PRIVATE FUNCTIONS ----------------------------------------------- */
+
+  /** A different object invalidates what the previously opened tabs loaded. */
+  private setObjectID(objectID: number): void {
+    if (this.objectID !== objectID) {
+      this.mountedTabs.clear();
+      this.mountedTabs.add(this.activeTab);
+    }
+
+    this.objectID = objectID;
   }
 }

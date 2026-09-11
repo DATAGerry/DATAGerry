@@ -34,31 +34,45 @@
   <div class="card-body tab-content">
     <div class="tab-pane" id="object-tab-risk-assesments-list" role="tabpanel"
       [class.active]="activeTab === 'risk-assessments'">
-      @if (ismsAvailable) {
-      <app-risk-assessment-list [objectId]="objectID"></app-risk-assessment-list>
-      } @else {
-      <cmdb-premium-locked [feature]="LicenseFeature.Isms" title="Risk Assessments is a Pro feature"
-        text="Identify, assess and treat object risks with the ISMS module in the Self-Hosted Edition.">
-      </cmdb-premium-locked>
+      @if (isTabMounted('risk-assessments')) {
+        @if (ismsAvailable) {
+        <app-risk-assessment-list [objectId]="objectID"></app-risk-assessment-list>
+        } @else {
+        <cmdb-premium-locked [feature]="LicenseFeature.Isms" title="Risk Assessments is a Pro feature"
+          text="Identify, assess and treat object risks with the ISMS module in the Self-Hosted Edition.">
+        </cmdb-premium-locked>
+        }
       }
     </div>
     <div class="tab-pane" id="object-tab-reference" role="tabpanel" [class.active]="activeTab === 'references'">
-      <cmdb-object-references [publicID]="objectID"></cmdb-object-references>
+      @if (isTabMounted('references')) {
+        <cmdb-object-references [publicID]="objectID"></cmdb-object-references>
+      }
     </div>
     <div class="tab-pane" id="object-tab-logs" role="tabpanel" [class.active]="activeTab === 'logs'">
-      <cmdb-object-log-list [publicID]="objectID"></cmdb-object-log-list>
+      @if (isTabMounted('logs')) {
+        <cmdb-object-log-list [publicID]="objectID"></cmdb-object-log-list>
+      }
     </div>
     <div class="tab-pane" id="object-tab-relation-logs" role="tabpanel" [class.active]="activeTab === 'relation-logs'">
-      <relation-log-list [publicID]="objectID"></relation-log-list>
+      @if (isTabMounted('relation-logs')) {
+        <relation-log-list [publicID]="objectID"></relation-log-list>
+      }
     </div>
     <div class="tab-pane" id="object-tab-summaries" role="tabpanel" [class.active]="activeTab === 'summaries'">
-      <cmdb-object-summary [renderResult]="renderResult" [summaries]="renderResult?.summaries"></cmdb-object-summary>
+      @if (isTabMounted('summaries')) {
+        <cmdb-object-summary [renderResult]="renderResult" [summaries]="renderResult?.summaries"></cmdb-object-summary>
+      }
     </div>
     <div class="tab-pane" id="object-tab-meta" role="tabpanel" [class.active]="activeTab === 'metadata'">
-      <cmdb-object-view-meta [renderResult]="renderResult"></cmdb-object-view-meta>
+      @if (isTabMounted('metadata')) {
+        <cmdb-object-view-meta [renderResult]="renderResult"></cmdb-object-view-meta>
+      }
     </div>
     <div class="tab-pane" id="object-tab-qr" role="tabpanel" [class.active]="activeTab === 'qr'">
-      <cmdb-object-qr></cmdb-object-qr>
+      @if (isTabMounted('qr')) {
+        <cmdb-object-qr></cmdb-object-qr>
+      }
     </div>
   </div>
 </div>
