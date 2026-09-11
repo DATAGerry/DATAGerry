@@ -30,7 +30,6 @@ import { LoaderService } from 'src/app/core/services/loader.service';
 import { CmdbMode } from 'src/app/framework/modes.enum';
 import { ObjectChangeNotifierService } from 'src/app/framework/services/object-change-notifier.service';
 import { ObjectService } from 'src/app/framework/services/object.service';
-import { TypeService } from 'src/app/framework/services/type.service';
 import { ToastService } from 'src/app/layout/toast/toast.service';
 import { RenderResult } from 'src/app/framework/models/cmdb-render';
 import { SpecialType } from 'src/app/framework/models/special-type';
@@ -64,8 +63,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   public readonly ciExplorerViewRight = CI_EXPLORER_VIEW_RIGHT;
 
   // Graph header object selector
-  public allTypeIds: number[] = [];
-  public typesLoaded = false;
   public selectedObjectIdForSelector: number | null = null;
   public isHeaderSelectorLoading = false;
 
@@ -87,7 +84,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   }
 
   private pendingSelectedId: number | null = null;
-  private typesRequested = false;
   private readonly unsubscribe = new Subject<void>();
   /** What the view is built from. Fed by the route on arrival, and by a re-read after a write. */
   private readonly objectViewSubject = new BehaviorSubject<RenderResult>(undefined);
@@ -104,7 +100,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   /* --------------------------------------------------- LIFE CYCLE --------------------------------------------------- */
 
   constructor(
-    private typeService: TypeService,
     private activateRoute: ActivatedRoute,
     private toastService: ToastService,
     private changesRef: ChangeDetectorRef,
@@ -165,10 +160,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
 
   public toggleView(showGraph: boolean): void {
     this.isGraphView = showGraph && this.canViewCiExplorer;
-
-    if (this.isGraphView) {
-      this.loadGraphSelectorTypes();
-    }
   }
 
   /** Graph header selector change */
@@ -196,28 +187,6 @@ export class ObjectViewComponent implements OnInit, OnDestroy {
   }
 
   /* --------------------------------------------------- PRIVATE FUNCTIONS --------------------------------------------------- */
-
-  /** The graph object selector is the only consumer of the type list, so it is read on first open. */
-  private loadGraphSelectorTypes(): void {
-    if (this.typesRequested) {
-      return;
-    }
-
-    this.typesRequested = true;
-    const params = { filter: '', limit: 0, sort: 'public_id', order: 1, page: 1 } as any;
-
-    this.typeService.getTypes(params)
-      .pipe(takeUntil(this.unsubscribe), finalize(() => this.changesRef.markForCheck()))
-      .subscribe({
-        next: (resp: any) => {
-          this.allTypeIds = (resp?.results || []).map((type: any) => type.public_id);
-          this.typesLoaded = true;
-        },
-        error: () => {
-          this.typesLoaded = true;
-        }
-      });
-  }
 
   private readObject(objectId: number): Observable<RenderResult> {
     this.loaderService.show();
