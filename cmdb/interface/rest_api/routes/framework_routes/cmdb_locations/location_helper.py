@@ -354,9 +354,7 @@ def delete_location_with_reparenting(
     grandparent_id: int | None = location.get(LocationKey.PARENT.value)
 
     # snapshot the owning objects of the direct children BEFORE the delete promotes their nodes
-    child_object_ids: list[int] = [
-        child.object_id for child in locations_manager.get_locations_by(parent=public_id)
-    ]
+    child_object_ids: list[int] = locations_manager.get_child_object_ids(public_id)
 
     # promotes the child location NODES onto the grandparent, then removes this node
     ack: bool = locations_manager.delete_location(public_id)

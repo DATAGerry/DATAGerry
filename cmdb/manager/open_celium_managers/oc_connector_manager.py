@@ -15,18 +15,42 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Implementation of OpenCelium ConnectorManager
+
+A connector is one end of an OpenCelium connection - the credentials and endpoint of a system to talk
+to. DataGerry stores none of them: every method here is a single HTTP call, and what comes back is
+whatever OpenCelium answered.
+
+Two properties of a HOSTED installation shape the class:
+
+* **the master password.** OpenCelium is shared between tenants there, and every connector read and
+  write is authenticated with a master password taken from the environment
+  (`OC_MASTER_PW_ENV_VAR`). A hosted process without one cannot serve connectors at all, so the
+  manager refuses to be constructed - with a typed error, so a route can name the cause instead of
+  answering the generic "an internal server error occurred" a bare ValueError produced.
+* **the titles are tenant-prefixed.** Connectors are registered as `<database>_<title>` so tenants
+  cannot see each other's; the mapping is applied and undone by the ROUTES (`map_oc_name` /
+  `unmap_oc_name`), not here - this manager passes titles through as it is given them.
+
+On-premise neither applies: `master_pw` stays None, and the routes pass whatever password the caller
+provided.
 """
-import os
 from logging import Logger, getLogger
+from os import getenv
 from typing import Any
 from urllib.parse import quote
-
-from flask import current_app
 
 from cmdb.database.mongo_database_manager import MongoDatabaseManager
 from cmdb.manager.open_celium_managers.oc_base_manager import OcBaseManager
 
-from cmdb.errors.open_celium.connector import OcConnectorCreateError, OcConnectorGetError, OcConnectorUpdateError
+from cmdb.open_celium import is_hosted_cloud
+from cmdb.open_celium.oc_constants import OC_EXISTS_RESULT_KEY, OC_MASTER_PW_ENV_VAR
+
+from cmdb.errors.open_celium.connector import (
+    OcConnectorCreateError,
+    OcConnectorGetError,
+    OcConnectorMasterPasswordError,
+    OcConnectorUpdateError,
+)
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -42,6 +66,25 @@ CONNECTOR_EXISTS_URL: str = f"{CONNECTOR_URL}/exists"
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                              OcConnectorManager - CLASS                                              #
 # -------------------------------------------------------------------------------------------------------------------- #
+def _require(value: Any, message: str) -> None:
+    """
+    Refuses a missing argument before any HTTP call is made
+
+    Four reads used to open with their own copy of this guard. **Absence is what is refused, not
+    falsiness**: a connector id of 0 used to be reported as "not provided", because the id was read
+    for truthiness - and whether an id exists is OpenCelium's answer, not this proxy's
+
+    Args:
+        value (Any): The argument to check - None, an empty string or an empty list is missing
+        message (str): What to report when it is
+
+    Raises:
+        OcConnectorGetError: When the argument carries nothing
+    """
+    if value is None or (isinstance(value, (str, list, dict, tuple)) and not value):
+        raise OcConnectorGetError(message)
+
+
 class OcConnectorManager(OcBaseManager):
     """
     Manages Connectors of OpenCelium
@@ -51,14 +94,30 @@ class OcConnectorManager(OcBaseManager):
     def __init__(self, dbm: MongoDatabaseManager, db_name: str) -> None:
         """
         Initialises the OcConnectorManager
+
+        On a hosted installation the OpenCelium master password is read from the environment and is
+        mandatory: every connector operation there is authenticated with it, so a manager without one
+        could do nothing but fail per request. On-premise it stays None and the routes pass the
+        password the caller provided
+
+        Args:
+            dbm (MongoDatabaseManager): Database interaction manager
+            db_name (str): Name of the database the OpenCelium credentials are read from
+
+        Raises:
+            OcConnectorMasterPasswordError: On a hosted installation whose environment carries no
+                master password - a configuration fault, which is why it is not an OcConnectorGetError
         """
-        self.master_pw: str = None
+        self.master_pw: str | None = None
 
-        if current_app.cloud_mode and not current_app.local_mode:
-            self.master_pw = os.getenv('OC_MASTER_PW')
+        if is_hosted_cloud():
+            self.master_pw = getenv(OC_MASTER_PW_ENV_VAR)
 
-            if not self.master_pw and not current_app.local_mode:
-                raise ValueError("No OC master password provided via env variables!")
+            if not self.master_pw:
+                raise OcConnectorMasterPasswordError(
+                    f"No OpenCelium master password provided via the '{OC_MASTER_PW_ENV_VAR}' "
+                    'environment variable!'
+                )
 
         super().__init__(dbm, db_name)
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
@@ -96,26 +155,42 @@ class OcConnectorManager(OcBaseManager):
         return self.is_valid_response(self.oc_connector.oc_post(params, CHECK_CONNECTOR_URL))
 
 
-    def check_master_pw(self, password: str, raw: bool = False) -> bool | dict[str, Any]:
+    def check_master_pw(self, password: str) -> bool:
         """
-        Checks the master password of the Connector
+        Reports whether the given master password is the one OpenCelium holds
 
         Args:
-            password (str): the master password
-            raw (bool): when True, return the OpenCelium response body instead of a bool
-
-        Raises:
-            OcConnectorGetError: When raw is True and the check could not be performed
+            password (str): The master password to check
 
         Returns:
-            bool | dict[str, Any]: True/False when raw is False, else the OpenCelium response body
+            bool: True when OpenCelium accepted it, otherwise False
         """
-        check_pw_response = self.oc_connector.oc_get(CHECK_MASTER_PW_URL, password)
+        return self.is_valid_response(self.oc_connector.oc_get(CHECK_MASTER_PW_URL, password))
 
-        if not raw:
-            return self.is_valid_response(check_pw_response)
 
-        return self.parse_response(check_pw_response, OcConnectorGetError, "Failed to check master password!")
+    def get_master_pw_status(self, password: str) -> dict[str, Any]:
+        """
+        Answers OpenCelium's own master-password status body for the given password
+
+        The same request as `check_master_pw`, answered in full rather than as a bool: the
+        master-password route hands the body to the frontend, which reads more than "valid or not".
+        Two methods rather than one `raw=True` flag, so a caller cannot be surprised by which of two
+        shapes it got
+
+        Args:
+            password (str): The master password to check
+
+        Raises:
+            OcConnectorGetError: When the check could not be performed
+
+        Returns:
+            dict[str, Any]: The status as OpenCelium answered it
+        """
+        return self.parse_response(
+            self.oc_connector.oc_get(CHECK_MASTER_PW_URL, password),
+            OcConnectorGetError,
+            "Failed to check master password!",
+        )
 
 
     def check_master_pw_exists(self) -> dict[str, Any]:
@@ -149,8 +224,7 @@ class OcConnectorManager(OcBaseManager):
         Returns:
             list[dict[str, Any]]: The OcConnectors with the given connector_ids
         """
-        if not connector_ids:
-            raise OcConnectorGetError("No connectorIds for Connectors provided!")
+        _require(connector_ids, "No connectorIds for Connectors provided!")
 
         params: dict[str, Any] = {
             "identifiers": connector_ids
@@ -172,14 +246,13 @@ class OcConnectorManager(OcBaseManager):
             connector_id (int): connectorId of the OcConnector
 
         Raises:
-            OcConnectorGetError: When the connectorId was not provided to this method
-            OcConnectorGetError: When the OcConnector could not be retrieved
+            OcConnectorGetError: When no connectorId was provided - 0 IS a connectorId, and whether
+                it exists is OpenCelium's answer - or when the OcConnector could not be retrieved
 
         Returns:
             dict[str, Any]: The retrieved OcConnector
         """
-        if not connector_id:
-            raise OcConnectorGetError("No connectorId for Connector provided!")
+        _require(connector_id, "No connectorId for Connector provided!")
 
         return self.parse_response(
             self.oc_connector.oc_get(f"{CONNECTOR_URL}/{connector_id}", password),
@@ -202,8 +275,7 @@ class OcConnectorManager(OcBaseManager):
         Returns:
             dict[str, Any]: The retrieved OcConnector
         """
-        if not title:
-            raise OcConnectorGetError("No title for Connector provided!")
+        _require(title, "No title for Connector provided!")
 
         return self.parse_response(
             self.oc_connector.oc_get(f"{CONNECTOR_URL}?title={quote(title)}", password),
@@ -225,8 +297,7 @@ class OcConnectorManager(OcBaseManager):
         Returns:
             bool: True if it exists, else False
         """
-        if not title:
-            raise OcConnectorGetError("No title for Connector provided!")
+        _require(title, "No title for Connector provided!")
 
         conn_resp: dict[str, Any] = self.parse_response(
             self.oc_connector.oc_get(f"{CONNECTOR_EXISTS_URL}/{quote(title)}"),
@@ -234,7 +305,7 @@ class OcConnectorManager(OcBaseManager):
             f"Failed to check if Connector with title: {title} exists!",
         )
 
-        return bool(conn_resp.get('result'))
+        return bool(conn_resp.get(OC_EXISTS_RESULT_KEY))
 
 
     def get_all_connectors(self) -> list[dict[str, Any]] | None:
@@ -296,11 +367,15 @@ class OcConnectorManager(OcBaseManager):
 
 # ------------------------------------------------------ HELPERS ----------------------------------------------------- #
 
-    def get_master_pw(self) -> str:
+    def get_master_pw(self) -> str | None:
         """
-        Retrieves the master password for OpenCelium (cloud version only)
+        Retrieves the OpenCelium master password of a hosted installation
+
+        **None on-premise and in local cloud development**, where there is no shared OpenCelium to
+        authenticate against - the routes only ask for it inside their hosted-cloud branch, and pass
+        the caller's own password otherwise
 
         Returns:
-            str: The master passwaord for OpenCelium
+            str | None: The master password, or None when this installation has none
         """
         return self.master_pw

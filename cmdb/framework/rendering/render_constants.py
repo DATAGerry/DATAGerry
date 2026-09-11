@@ -17,6 +17,8 @@
 All constants for rendering in DataGerry
 """
 from cmdb.utils import BaseStrEnum
+
+from cmdb.models.type_model.type_reference_key_enum import TypeReferenceKey
 # -------------------------------------------------------------------------------------------------------------------- #
 
 ANONYMOUS_NAME = 'unknown'
@@ -35,8 +37,10 @@ class RenderedFieldKey(BaseStrEnum):
     """
     #: Set on a `FieldType.REFERENCE` field; holds the referenced object's expansion
     REFERENCE = 'reference'
-    #: List of the referenced object's summary fields, inside `REFERENCE`
-    SUMMARIES = 'summaries'
+    #: List of the referenced object's summary fields, inside `REFERENCE`. Derived from the enum that
+    #: owns that payload (`TypeReference.to_json` produces it) so the two cannot drift; it is
+    #: repeated here because a caller reading a rendered FIELD reaches for this enum first
+    SUMMARIES = TypeReferenceKey.SUMMARIES.value
     #: Set on a `FieldType.REF_SECTION` field; holds the pulled-in section's expansion
     REFERENCES = 'references'
     #: List of the pulled-in fields, inside `REFERENCES`

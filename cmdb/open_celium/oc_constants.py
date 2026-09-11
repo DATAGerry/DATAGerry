@@ -24,6 +24,40 @@ UNIQUE_POSITIVE: str = "NOT_EXISTS"
 UNIQUE_NEGATIVE: str = "EXISTS"
 OC_INTERNAL_CONNECTOR_NAME: str = "DataGerryInternal"
 
+# Name of the INVOKER that marks a business template as DataGerry's own, as registered in
+# OpenCelium. A cloud installation is registered under its own invoker, so the two are not
+# interchangeable: the detailed template route filters on whichever applies, and picking the wrong
+# one answers an empty template list rather than an error
+OC_DATAGERRY_INVOKER_NAME: str = "DataGerry"
+OC_DATAGERRY_CLOUD_INVOKER_NAME: str = "DataGerryCloud"
+
+# Environment variable carrying the OpenCelium MASTER password on a hosted installation. Every
+# connector read and write in cloud mode is authenticated with it, so a hosted process that does not
+# have it cannot serve connectors at all - OcConnectorManager refuses to be constructed
+OC_MASTER_PW_ENV_VAR: str = "OC_MASTER_PW"
+
+# Key of the boolean OpenCelium answers its 'does this connector exist' endpoint with. Read by the
+# connector AND the invoker manager, which answer the same question about two different entities
+OC_EXISTS_RESULT_KEY: str = "result"
+
+# Query parameter of OpenCelium's all-invokers endpoint. Named here because BOTH ends spell it: the
+# DataGerry route reads it off its own query string and the manager forwards it to OpenCelium
+OC_OPS_INCLUDED_PARAM: str = "opsIncluded"
+
+# Query parameters of OpenCelium's license-usage endpoint, with the page size DataGerry asks for by
+# default. Named here because both ends spell them: the route reads them off its own query string and
+# the manager forwards them to OpenCelium
+OC_PAGE_PARAM: str = "page"
+OC_SIZE_PARAM: str = "size"
+OC_DEFAULT_USAGE_PAGE: int = 0
+OC_DEFAULT_USAGE_SIZE: int = 5
+
+# The only value that turns the flag off. Deliberately not a truthiness test - `bool('false')` is
+# True, which is the footgun `request.args.get(..., type=bool)` walks into - and deliberately not a
+# list of spellings: whether '0' / 'no' / an EMPTY value should also disable operations is
+# discussion-backlog #223
+OC_FLAG_DISABLED_VALUE: str = "false"
+
 # OpenCelium login endpoint + max token-refresh attempts before giving up on a 403 loop
 OC_AUTH_URL: str = "/login"
 MAX_AUTH_RETRIES: int = 6

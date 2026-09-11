@@ -31,21 +31,16 @@ from flask import request, abort
 from werkzeug import Response
 from werkzeug.exceptions import HTTPException
 
-from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
-from cmdb.manager import TypesManager, SectionTemplatesManager
-
 from cmdb.models.user_model import CmdbUser
 from cmdb.framework.importer.responses.import_report_response import ImportReportResponse
 from cmdb.interface.rest_api.routes.importer_routes.importer_type_helper import (
-    parse_uploaded_types,
-    run_type_import_batch,
+    run_type_import_request,
     create_type_from_entry,
     update_type_from_entry,
 )
+from cmdb.interface.rest_api.routes.importer_routes.importer_constants import ImporterRight
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
-from cmdb.interface.rest_api.routes.cmdb_license.license_guard import feature_locked
-from cmdb.security.license.license_constants import LicenseFeature
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.responses import DefaultResponse
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -59,7 +54,7 @@ LOGGER: Logger = getLogger(__name__)
 @importer_type_blueprint.route('/create/', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_type_blueprint.protect(auth=True, right='base.import.type.*')
+@importer_type_blueprint.protect(auth=True, right=ImporterRight.TYPE.value)
 def add_type(request_user: CmdbUser) -> Response:
     """
     Adds new CmdbTypes based on uploaded JSON data
@@ -90,27 +85,15 @@ def add_type(request_user: CmdbUser) -> Response:
                   reason). An empty `failed_imports` means every type was imported
     """
     try:
-        types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
-        section_templates_manager: SectionTemplatesManager = ManagerProvider.get_manager(
-            ManagerType.SECTION_TEMPLATES, request_user,
-        )
-
-        new_type_list = parse_uploaded_types(request)
-        # The licence state is per request, not per entry - resolve it once for the whole batch
-        ipam_locked: bool = feature_locked(LicenseFeature.IPAM, request_user)
-
-        import_report: ImportReportResponse = run_type_import_batch(
-            new_type_list,
-            lambda new_type_data: create_type_from_entry(
-                new_type_data, types_manager, section_templates_manager, request_user, ipam_locked,
-            ),
+        import_report: ImportReportResponse = run_type_import_request(
+            request, request_user, create_type_from_entry,
         )
 
         return DefaultResponse(import_report).make_response()
     except HTTPException as http_err:
         raise http_err
     except Exception as err:
-        LOGGER.error("[add_type] Exception: %s. Type: %s", err, type(err), exc_info=True)
+        LOGGER.error("[add_type] Exception: %s. Type: %s", err, type(err).__name__, exc_info=True)
         abort(500, "An internal server error occured while creating Types from imported data!")
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
@@ -118,7 +101,7 @@ def add_type(request_user: CmdbUser) -> Response:
 @importer_type_blueprint.route('/update/', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_type_blueprint.protect(auth=True, right='base.import.type.*')
+@importer_type_blueprint.protect(auth=True, right=ImporterRight.TYPE.value)
 def update_type(request_user: CmdbUser) -> Response:
     """
     Updates existing CmdbTypes based on uploaded JSON data
@@ -147,25 +130,13 @@ def update_type(request_user: CmdbUser) -> Response:
                   reason). An empty `failed_imports` means every type was updated
     """
     try:
-        types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
-        section_templates_manager: SectionTemplatesManager = ManagerProvider.get_manager(
-            ManagerType.SECTION_TEMPLATES, request_user,
-        )
-
-        update_type_list = parse_uploaded_types(request)
-        # The licence state is per request, not per entry - resolve it once for the whole batch
-        ipam_locked: bool = feature_locked(LicenseFeature.IPAM, request_user)
-
-        import_report: ImportReportResponse = run_type_import_batch(
-            update_type_list,
-            lambda update_type_data: update_type_from_entry(
-                update_type_data, types_manager, section_templates_manager, request_user, ipam_locked,
-            ),
+        import_report: ImportReportResponse = run_type_import_request(
+            request, request_user, update_type_from_entry,
         )
 
         return DefaultResponse(import_report).make_response()
     except HTTPException as http_err:
         raise http_err
     except Exception as err:
-        LOGGER.error("[update_type] Exception: %s. Type: %s", err, type(err), exc_info=True)
+        LOGGER.error("[update_type] Exception: %s. Type: %s", err, type(err).__name__, exc_info=True)
         abort(500, "An internal server error occured while updating Types from imported data!")

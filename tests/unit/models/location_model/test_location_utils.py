@@ -34,6 +34,7 @@ tree-facing reads use instead of a dict -> model -> dict round trip: the first i
 actual ``from_data`` -> ``to_json`` round trip so the two can not drift apart, the second against the
 malformed documents (no name, no public_id) a level must survive.
 """
+import logging
 from typing import Any
 
 import pytest
@@ -42,10 +43,14 @@ from cmdb.database.predefined_data.cmdb_data import get_root_location_data
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.location_model.location_constants import CmdbLocationDefault, LocationKey, RootLocationDefault
 from cmdb.models.location_model.location_utils import (
+    coerce_type_icon,
+    coerce_type_selectable,
     sort_locations_by_name,
     to_location_document,
     validate_root_location,
 )
+
+from cmdb.errors.models.cmdb_location import CmdbLocationInitFromDataError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 EXTRA_KEY: str = 'inserted_by_a_later_migration'
@@ -106,25 +111,30 @@ def test_the_root_public_id_is_the_one_the_tree_expects():
     assert get_root_location_data()[LocationKey.PUBLIC_ID] == RootLocationDefault.PUBLIC_ID
 
 
+def _location_document(**overrides: Any) -> dict[str, Any]:
+    """A complete CmdbLocation document as it comes back from MongoDB."""
+    document: dict[str, Any] = {
+        LocationKey.PUBLIC_ID.value: 7,
+        LocationKey.NAME.value: 'srv',
+        LocationKey.PARENT.value: RootLocationDefault.PUBLIC_ID,
+        LocationKey.OBJECT_ID.value: 42,
+        LocationKey.TYPE_ID.value: 11,
+        LocationKey.TYPE_LABEL.value: 'Server',
+        LocationKey.TYPE_ICON.value: 'fas fa-server',
+        LocationKey.TYPE_SELECTABLE.value: False,
+    }
+    document.update(overrides)
+
+    return document
+
+
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                to_location_document                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestToLocationDocument:
     """The dict -> canonical dict normaliser the tree-facing reads use instead of the model."""
 
-    @staticmethod
-    def _stored_document() -> dict[str, Any]:
-        """A complete CmdbLocation document as it comes back from MongoDB."""
-        return {
-            LocationKey.PUBLIC_ID.value: 7,
-            LocationKey.NAME.value: 'srv',
-            LocationKey.PARENT.value: RootLocationDefault.PUBLIC_ID,
-            LocationKey.OBJECT_ID.value: 42,
-            LocationKey.TYPE_ID.value: 11,
-            LocationKey.TYPE_LABEL.value: 'Server',
-            LocationKey.TYPE_ICON.value: 'fas fa-server',
-            LocationKey.TYPE_SELECTABLE.value: False,
-        }
+    _stored_document = staticmethod(_location_document)
 
     def test_complete_document_is_passed_through_unchanged(self) -> None:
         """A document carrying every key comes back with exactly those values"""
@@ -219,3 +229,79 @@ class TestSortLocationsByName:
 
         assert result is not locations
         assert [location[LocationKey.PUBLIC_ID.value] for location in locations] == [1, 2]
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                         the optional render-key coercions                                            #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestCoerceTypeIcon:
+    """The icon a node renders with."""
+
+    def test_an_icon_is_answered_unchanged(self) -> None:
+        """It is a CSS class name and is handed to the frontend as it is stored"""
+        assert coerce_type_icon('fas fa-door-open') == 'fas fa-door-open'
+
+    def test_none_is_the_default(self) -> None:
+        """An absent key and a stored null are the same statement: no icon of its own"""
+        assert coerce_type_icon(None) == CmdbLocationDefault.TYPE_ICON
+
+    @pytest.mark.parametrize('icon', [7, True, ['fas'], {'icon': 'fas'}])
+    def test_a_non_string_is_refused(self, icon: Any) -> None:
+        """The model refuses it rather than passing a non-class-name to the tree"""
+        with pytest.raises(ValueError):
+            coerce_type_icon(icon)
+
+
+class TestCoerceTypeSelectable:
+    """The flag the tree draws drop targets from."""
+
+    @pytest.mark.parametrize('selectable', [True, False])
+    def test_a_boolean_is_answered_unchanged(self, selectable: bool) -> None:
+        """Both states are meaningful: a type may forbid being a parent"""
+        assert coerce_type_selectable(selectable) is selectable
+
+    def test_none_is_the_default(self) -> None:
+        """Two-state: an absent key or a stored null means the node is selectable"""
+        assert coerce_type_selectable(None) is CmdbLocationDefault.TYPE_SELECTABLE
+
+    @pytest.mark.parametrize('selectable', ['false', 'true', 0, 1, []])
+    def test_a_non_boolean_is_refused(self, selectable: Any) -> None:
+        """The frontend decides with 'type_selectable !== false', so a "false" would be a drop target"""
+        with pytest.raises(ValueError):
+            coerce_type_selectable(selectable)
+
+
+class TestTheReadIsMoreForgivingThanTheModel:
+    """A tree level cannot lose a node, so the document read never refuses one."""
+
+    def test_an_unusable_flag_falls_back_to_the_default(self) -> None:
+        """
+        The model refuses this document; the read answers it with the default
+
+        Skipping the row instead would orphan every child pointing at it - the difference to the
+        extendable-option list read, which does skip.
+        """
+        document = _location_document(type_selectable='false')
+
+        assert to_location_document(document)[LocationKey.TYPE_SELECTABLE.value] is (
+            CmdbLocationDefault.TYPE_SELECTABLE
+        )
+
+    def test_an_unusable_icon_falls_back_to_the_default(self) -> None:
+        """Same rule for the icon: a node without a usable one still renders"""
+        assert to_location_document(_location_document(type_icon=7))[LocationKey.TYPE_ICON.value] == (
+            CmdbLocationDefault.TYPE_ICON
+        )
+
+    def test_the_fallback_is_reported(self, caplog: pytest.LogCaptureFixture) -> None:
+        """An operator has to be able to find the document that carries the bad value"""
+        with caplog.at_level(logging.WARNING):
+            to_location_document(_location_document(type_icon=7))
+
+        assert str(_location_document()[LocationKey.PUBLIC_ID.value]) in caplog.text
+        assert LocationKey.TYPE_ICON.value in caplog.text
+
+    def test_the_model_refuses_what_the_read_defaults(self) -> None:
+        """The asymmetry is deliberate, so it is asserted from both sides in one place"""
+        with pytest.raises(CmdbLocationInitFromDataError):
+            CmdbLocation.from_data(_location_document(type_selectable='false'))

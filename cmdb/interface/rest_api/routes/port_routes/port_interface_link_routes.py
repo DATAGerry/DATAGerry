@@ -44,7 +44,7 @@ from flask import request, abort
 from werkzeug import Response
 from werkzeug.exceptions import HTTPException
 
-from cmdb.manager import ObjectsManager
+from cmdb.manager import ObjectsManager, TypesManager
 from cmdb.manager.port_interface_links_manager import PortInterfaceLinksManager
 from cmdb.manager.ports_manager import PortsManager
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
@@ -63,6 +63,7 @@ from cmdb.errors.manager.port_interface_links_manager import (
 )
 
 from cmdb.framework.port.interface_links import collect_dangling_links
+from cmdb.framework.port.assignable_interfaces import build_assignable_interfaces_page
 
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
@@ -77,10 +78,12 @@ from cmdb.interface.rest_api.responses import (
 
 from cmdb.interface.rest_api.routes.port_routes.port_route_constants import PortRight
 from cmdb.interface.rest_api.routes.port_routes.port_interface_link_constants import (
+    AssignableInterfaceParam,
     LINK_ALREADY_EXISTS_MESSAGE,
 )
 from cmdb.interface.rest_api.routes.port_routes.port_interface_link_helper import (
     build_link_candidate,
+    read_assignable_interface_rows,
     enforce_link_is_new,
     get_accessible_port_or_abort,
     get_interface_row_or_abort,
@@ -91,7 +94,12 @@ from cmdb.interface.rest_api.routes.port_routes.port_interface_link_helper impor
     refuse_identity_change,
     with_interface_rows,
 )
+from cmdb.interface.rest_api.routes.ipam_routes.ipam_route_helper import (
+    read_pagination_params,
+    read_search_param,
+)
 from cmdb.interface.rest_api.routes.routes_helper import request_wants_body
+from cmdb.utils import is_truthy_query_arg
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -334,6 +342,83 @@ def get_port_interface_links_of_port(port_id: int, request_user: CmdbUser) -> Re
     except Exception as err:
         LOGGER.error("[get_port_interface_links_of_port] Exception: %s. Type: %s", err, type(err), exc_info=True)
         abort(500, f'An internal server error occured while retrieving the interface links of Port ID: {port_id}!')
+
+@port_interface_link_blueprint.route('/<int:port_id>/assignable_interfaces/', methods=['GET', 'HEAD'])
+@insert_request_user
+@verify_api_access(required_api_level=ApiLevel.LOCKED)
+@port_interface_link_blueprint.protect(auth=True, right=PortRight.VIEW.value)
+def get_assignable_interfaces(port_id: int, request_user: CmdbUser) -> Response:
+    """
+    HTTP `GET`/`HEAD` route listing the IPAM interface rows this CmdbPort may still be linked to
+
+    **The port's own object by default, the tenant on request.** A port and the interface it carries
+    normally live on the same device, so that is what the picker opens on; `?all_objects=true` widens
+    it to every object holding an interface row, for the case the N:M relation exists for - an
+    interface reached over a port of another device.
+
+    Each row carries the create route's triple under its own key names plus the resolved interface
+    values, so selecting one and posting it is a copy. Rows without a `multi_data_id` and rows this
+    port already links are not offered: the first the create route refuses, the second the unique
+    index does.
+
+    Unlike the Rack and Cable pickers this one hands out addresses rather than names, so the caller's
+    READ ACL filters the candidate objects - a row of an object they cannot open is not offered
+
+    Query params:
+        all_objects (bool, default=false): Widen from the port's own object to every object
+        page (int, default=1): 1-based page number; clamped server-side
+        page_size (int, default=50): Page size; clamped server-side
+        search (str, optional): Case-insensitive substring over the addresses, the subnet name and the
+            owning object's summary line; `total` shrinks to the post-filter count
+
+    Args:
+        port_id (int): public_id of the CmdbPort the interface would be linked to
+        request_user (CmdbUser): CmdbUser requesting this data
+
+    Raises:
+        HTTPException: 400 when a read fails; 403 when the port owner's ACL denies it; 404 when the
+                       port does not exist; 500 on an unexpected error
+
+    Returns:
+        DefaultResponse: {'page', 'page_size', 'total', 'search', 'rows'}, one row per offerable
+            interface row of the requested page
+    """
+    try:
+        objects_manager: ObjectsManager = ManagerProvider.get_manager(ManagerType.OBJECTS, request_user)
+        types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
+        ports_manager: PortsManager = ManagerProvider.get_manager(ManagerType.PORTS, request_user)
+        port_interface_links_manager: PortInterfaceLinksManager = ManagerProvider.get_manager(
+            ManagerType.PORT_INTERFACE_LINKS, request_user)
+
+        port: dict[str, Any] = get_accessible_port_or_abort(
+            ports_manager, objects_manager, port_id, request_user, AccessControlPermission.READ,
+        )
+
+        rows: list[dict[str, Any]] = read_assignable_interface_rows(
+            objects_manager,
+            types_manager,
+            port_interface_links_manager,
+            port,
+            request_user,
+            is_truthy_query_arg(request.args.get(AssignableInterfaceParam.ALL_OBJECTS.value)),
+        )
+
+        page, page_size = read_pagination_params()
+
+        return DefaultResponse(
+            build_assignable_interfaces_page(rows, page=page, page_size=page_size, search=read_search_param()),
+        ).make_response()
+    except HTTPException as http_err:
+        raise http_err
+    except AccessDeniedError as err:
+        LOGGER.error("[get_assignable_interfaces] AccessDeniedError: %s", err, exc_info=True)
+        abort(403, str(err))
+    except PortInterfaceLinksManagerGetError as err:
+        LOGGER.error("[get_assignable_interfaces] PortInterfaceLinksManagerGetError: %s", err, exc_info=True)
+        abort(400, f'Failed to retrieve the interface links of Port ID: {port_id} from the database!')
+    except Exception as err:
+        LOGGER.error("[get_assignable_interfaces] Exception: %s. Type: %s", err, type(err).__name__, exc_info=True)
+        abort(500, f'An internal server error occured while listing the assignable interfaces of Port ID: {port_id}!')
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                   CRUD - UPDATE                                                      #

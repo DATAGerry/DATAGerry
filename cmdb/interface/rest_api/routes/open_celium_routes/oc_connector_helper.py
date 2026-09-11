@@ -19,15 +19,41 @@ Helper functions for the OpenCelium connector REST routes
 These consolidate the cache-first access checks (cache preferred, DG Service Portal fallback) that the
 cloud-mode connector handlers each performed inline. A resolved cached-user dict may be passed in to
 avoid re-reading (and potentially re-seeding) the cache within a single request.
+
+`build_connector_manager` is the same extraction the template and execution-log routes have: the
+construction was written out at thirteen sites in this package, and on a hosted installation it is the
+call that reads the OpenCelium master password (and refuses without one).
 """
 from typing import Any
 
+from flask import current_app
+
 from cmdb.manager import DgServicePortalManager, CachedUserManager
+from cmdb.manager.open_celium_managers.oc_connector_manager import OcConnectorManager
 
 from cmdb.open_celium import CachedOcIdType
 
 from cmdb.models.user_model import CmdbUser
 # -------------------------------------------------------------------------------------------------------------------- #
+
+
+def build_connector_manager(request_user: CmdbUser) -> OcConnectorManager:
+    """
+    Builds the OcConnectorManager for the requesting user
+
+    Every connector route needs the same two arguments - the process-wide database manager and the
+    caller's database, which is what selects the OpenCelium installation and its credentials
+
+    Args:
+        request_user (CmdbUser): The user making the request; its database scopes the manager
+
+    Raises:
+        OcConnectorMasterPasswordError: On a hosted installation carrying no master password
+
+    Returns:
+        OcConnectorManager: The manager to talk to OpenCelium with
+    """
+    return OcConnectorManager(current_app.database_manager, request_user.database)
 
 
 def connector_in_subscription(

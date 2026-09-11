@@ -63,6 +63,7 @@ from flask import abort
 from werkzeug.wrappers import Request
 
 from cmdb.manager import TypesManager, SectionTemplatesManager
+from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
 
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.type_model import CmdbType, TypeSchemaKey
@@ -72,6 +73,8 @@ from cmdb.framework.importer.responses.import_report_response import (
     build_import_summary_message,
 )
 from cmdb.framework.ipam.special_type_wiring import handle_special_types
+from cmdb.security.license.license_constants import LicenseFeature
+from cmdb.interface.rest_api.routes.cmdb_license.license_guard import feature_locked
 from cmdb.interface.rest_api.routes.framework_routes.cmdb_types.types_helper import (
     compute_removed_global_templates,
     apply_type_update_side_effects,
@@ -97,6 +100,12 @@ from cmdb.interface.rest_api.routes.importer_routes.importer_type_constants impo
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
+
+# One uploaded entry in, an error message (or None on success) out - the shape of create_type_from_entry
+# and update_type_from_entry, and the only thing the two import routes do differently
+TypeImportEntryStep = Callable[
+    [Any, TypesManager, SectionTemplatesManager, CmdbUser, bool], str | None,
+]
 
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -506,6 +515,50 @@ def run_type_import_batch(
         message=build_import_summary_message(success_count, len(failed_imports), ImportNoun.TYPE),
         success_imports=success_count,
         failed_imports=failed_imports,
+    )
+
+
+def run_type_import_request(
+    source_request: Request,
+    request_user: CmdbUser,
+    import_entry: TypeImportEntryStep,
+) -> ImportReportResponse:
+    """
+    Performs the request-level work both type-import routes do, around the per-entry step that differs
+
+    Create and update differ in exactly one thing - what happens to a single entry - so everything
+    around it is shared: the managers are resolved ONCE per request, the upload is parsed once, and the
+    licence state is resolved once for the whole batch rather than per entry, since it belongs to the
+    request and cannot change inside it.
+
+    The routes keep their own try/except: the 500 message names which import failed, and that is the
+    one thing a caller can act on when the failure happened before any entry ran
+
+    Args:
+        source_request (Request): The incoming request carrying the upload form field
+        request_user (CmdbUser): The CmdbUser performing the import, recorded as author or editor
+        import_entry (TypeImportEntryStep): Imports one entry - create_type_from_entry or
+                                            update_type_from_entry
+
+    Raises:
+        HTTPException: 400 if the upload is missing or unusable (raised by parse_uploaded_types)
+
+    Returns:
+        ImportReportResponse: The summary line, the imported count and the failures of the batch
+    """
+    types_manager: TypesManager = ManagerProvider.get_manager(ManagerType.TYPES, request_user)
+    section_templates_manager: SectionTemplatesManager = ManagerProvider.get_manager(
+        ManagerType.SECTION_TEMPLATES, request_user,
+    )
+
+    type_entries: list[Any] = parse_uploaded_types(source_request)
+    ipam_locked: bool = feature_locked(LicenseFeature.IPAM, request_user)
+
+    return run_type_import_batch(
+        type_entries,
+        lambda type_entry: import_entry(
+            type_entry, types_manager, section_templates_manager, request_user, ipam_locked,
+        ),
     )
 
 

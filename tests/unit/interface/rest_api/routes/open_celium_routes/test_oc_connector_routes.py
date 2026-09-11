@@ -17,7 +17,7 @@
 Unit tests for cmdb.interface.rest_api.routes.open_celium_routes.oc_connector_routes
 
 Each handler is unwrapped past its decorator chain and driven inside a BaseCmdbApp
-test_request_context with the managers (OcConnectorManager, DgServicePortalManager,
+test_request_context with the managers (build_connector_manager, DgServicePortalManager,
 CachedUserManager) patched at the route module path - no external OpenCelium HTTP, no Mongo. The app
 runs on-premise (cloud_mode/local_mode False), so the cloud title-mapping / Service-Portal branches
 are skipped and the local code paths are exercised. The AUTOMATIONS 403 gate is covered by the
@@ -97,8 +97,15 @@ def fixture_oc_manager() -> MagicMock:
 
 @pytest.fixture(name='patched_managers')
 def fixture_patched_managers(oc_manager: MagicMock) -> Any:
-    """Patches the three managers the connector handlers construct at the route module path."""
-    with patch(f'{ROUTE_PATH}.OcConnectorManager', return_value=oc_manager), \
+    """
+    Patches the managers the connector handlers use
+
+    The OcConnectorManager construction moved into `oc_connector_helper.build_connector_manager`
+    when the thirteen identical copies were extracted, so the routes' collaborator is that factory -
+    patching the manager class at this module path would let the real one be built (and, in cloud
+    mode, demand the OpenCelium master password from the environment).
+    """
+    with patch(f'{ROUTE_PATH}.build_connector_manager', return_value=oc_manager), \
          patch(f'{ROUTE_PATH}.DgServicePortalManager', return_value=MagicMock()), \
          patch(f'{ROUTE_PATH}.CachedUserManager', return_value=MagicMock()):
         yield
@@ -319,22 +326,32 @@ class TestCheckMasterPassword:
     def test_returns_manager_result(
         self, flask_app: BaseCmdbApp, oc_manager: MagicMock, patched_managers: Any,
     ) -> None:
-        """The manager's raw check result is returned with 200."""
+        """
+        The manager's status BODY is returned with 200
+
+        The route asks `get_master_pw_status` now: the `check_master_pw(pw, raw=True)` flag that used
+        to answer two different shapes from one method is gone.
+        """
         del patched_managers
-        oc_manager.check_master_pw.return_value = True
+        oc_manager.get_master_pw_status.return_value = {'status': 'set'}
 
         with flask_app.test_request_context(headers={MASTER_PW_HEADER: MASTER_PW}):
             response = _unwrap(check_master_password)(request_user=REQUEST_USER)
 
         assert response.status_code == HTTPStatus.OK
-        oc_manager.check_master_pw.assert_called_once_with(MASTER_PW, True)
+        oc_manager.get_master_pw_status.assert_called_once_with(MASTER_PW)
 
     def test_get_error_returns_500(
         self, flask_app: BaseCmdbApp, oc_manager: MagicMock, patched_managers: Any,
     ) -> None:
-        """An OcConnectorGetError maps to 500."""
+        """
+        An OcConnectorGetError maps to 500
+
+        Patched on `get_master_pw_status`, which is what the route calls since the `raw=True` flag
+        was split - stubbing the old method left this arm uncovered while the test still passed.
+        """
         del patched_managers
-        oc_manager.check_master_pw.side_effect = OcConnectorGetError('boom')
+        oc_manager.get_master_pw_status.side_effect = OcConnectorGetError('boom')
 
         with flask_app.test_request_context(headers={MASTER_PW_HEADER: MASTER_PW}):
             with pytest.raises(HTTPException) as exc_info:
@@ -661,7 +678,7 @@ def fixture_cloud_managers(oc_manager: MagicMock) -> Any:
     """
     cached = MagicMock()
     dg_sp = MagicMock()
-    with patch(f'{ROUTE_PATH}.OcConnectorManager', return_value=oc_manager), \
+    with patch(f'{ROUTE_PATH}.build_connector_manager', return_value=oc_manager), \
          patch(f'{ROUTE_PATH}.DgServicePortalManager', return_value=dg_sp), \
          patch(f'{ROUTE_PATH}.CachedUserManager', return_value=cached), \
          patch(f'{CONN_HELPER}.DgServicePortalManager', return_value=dg_sp), \

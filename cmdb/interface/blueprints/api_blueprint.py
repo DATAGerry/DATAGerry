@@ -26,11 +26,15 @@ from werkzeug.exceptions import HTTPException
 from cmdb.manager import UsersManager
 
 from cmdb.interface.rest_api.responses.response_parameters import CollectionParameters
-from cmdb.interface.route_utils import user_has_right, parse_authorization_header
+from cmdb.interface.route_utils import (
+    decode_request_token,
+    parse_authorization_header,
+    token_user_claim,
+    user_has_right,
+)
 from cmdb.models.user_model import CmdbUser
-from cmdb.security.token.validator import TokenValidator
 
-from cmdb.errors.security import TokenValidationError
+from cmdb.errors.security import TokenKeyMaterialError, TokenValidationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -131,15 +135,20 @@ class APIBlueprint(Blueprint):
                                 token = parse_authorization_header(auth_header)
 
                                 try:
-                                    decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
+                                    decrypted_token = decode_request_token(token)
+                                except TokenKeyMaterialError as err:
+                                    LOGGER.error("[protect] TokenKeyMaterialError: %s", err, exc_info=True)
+                                    abort(500,
+                                          "The token could not be verified because of a server-side key problem!")
                                 except TokenValidationError:
                                     abort(401, "Invalid Token")
 
                                 try:
-                                    user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+                                    user_claim = token_user_claim(decrypted_token)
+                                    user_id = user_claim['public_id']
 
                                     if current_app.cloud_mode:
-                                        database = decrypted_token['DATAGERRY']['value']['user']['database']
+                                        database = user_claim['database']
                                         users_manager = UsersManager(current_app.database_manager, database)
                                     else:
                                         users_manager = UsersManager(current_app.database_manager)

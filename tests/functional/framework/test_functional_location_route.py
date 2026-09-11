@@ -44,6 +44,7 @@ from cmdb.database.predefined_data.cmdb_data import get_root_location_data
 from cmdb.models.type_model import CmdbType
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.location_model.location_constants import CmdbLocationDefault, LocationKey
 from cmdb.manager import LocationsManager
 from cmdb.errors.manager.objects_manager import ObjectsManagerGetError, ObjectsManagerUpdateError
 from cmdb.errors.manager.locations_manager import LocationsManagerGetError, LocationsManagerUpdateError
@@ -304,6 +305,41 @@ class TestGetLocation:
         assert 'results' in body
         assert len(body['results']) == int(response.headers['X-Total-Count'])
 
+    def test_list_rows_carry_exactly_the_payload_keys(self, rest_api) -> None:
+        """
+        The eight LocationKey keys and nothing else - '_id' above all
+
+        The rows are answered as they are read now (no model per row), so the canonical
+        normalisation is what keeps the Mongo id out of a response the Angular tree consumes.
+        """
+        response = rest_api.get(f'{ROUTE_URL}/', query_string={'filter': '{"public_id": %s}' % LOCATION_ID_FOR_GET})
+
+        assert response.status_code == HTTPStatus.OK
+        rows = response.get_json()['results']
+        assert [row['public_id'] for row in rows] == [LOCATION_ID_FOR_GET]
+        assert set(rows[0]) == {key.value for key in LocationKey}
+
+    def test_list_defaults_the_optional_render_keys(
+        self, rest_api, database_manager: MongoDatabaseManager, database_name: str,
+    ) -> None:
+        """A document written without the render snapshot still answers a complete node"""
+        bare_document = _location_doc(DANGLING_LOCATION_ID, DANGLING_OBJECT_ID, ROOT_PARENT_ID)
+        del bare_document['type_icon']
+        del bare_document['type_selectable']
+        _insert_location(database_manager, database_name, bare_document)
+
+        try:
+            response = rest_api.get(
+                f'{ROUTE_URL}/', query_string={'filter': '{"public_id": %s}' % DANGLING_LOCATION_ID},
+            )
+
+            assert response.status_code == HTTPStatus.OK
+            row = response.get_json()['results'][0]
+            assert row['type_icon'] == CmdbLocationDefault.TYPE_ICON
+            assert row['type_selectable'] is CmdbLocationDefault.TYPE_SELECTABLE
+        finally:
+            _drop_locations_by_ids(database_manager, database_name, [DANGLING_LOCATION_ID])
+
     def test_get_location_for_object_missing_returns_404(self, rest_api) -> None:
         """GET /locations/<object_id>/object for an object with no location returns 404."""
         response = rest_api.get(f'{ROUTE_URL}/{MISSING_OBJECT_ID}/object')
@@ -332,6 +368,32 @@ class TestGetLocationTreeAndRelations:
 
         assert response.status_code == HTTPStatus.OK
         assert response.get_json()['results']
+
+    def test_tree_nodes_carry_the_tree_node_keys_only(self, rest_api) -> None:
+        """
+        The forest answers LocationNode's key set, which is NARROWER than the flat list's
+
+        A tree node drops ``type_id`` and ``type_label`` (LocationNode never reads them) and adds
+        ``children`` for a node that has any - a leaf omits the key entirely. Recorded here because
+        the eager tree and the flat list are two different frontend contracts over one document, and
+        the read that feeds both now answers the canonical eight either way.
+        """
+        response = rest_api.get(f'{ROUTE_URL}/tree')
+
+        root_node = next(
+            node for node in response.get_json()['results'] if node['public_id'] == ROOT_LOCATION_ID
+        )
+
+        assert set(root_node) == {
+            LocationKey.PUBLIC_ID.value,
+            LocationKey.NAME.value,
+            LocationKey.PARENT.value,
+            LocationKey.OBJECT_ID.value,
+            LocationKey.TYPE_ICON.value,
+            LocationKey.TYPE_SELECTABLE.value,
+            'children',
+        }
+        assert set(root_node['children'][0]) == set(root_node) - {'children'}
 
     def test_tree_view_nests_child_under_its_root(self, rest_api) -> None:
         """The seeded child appears nested under its root node in the forest, not at the top level."""
@@ -753,8 +815,8 @@ class TestReadRouteHttpExceptionPassThrough:
     """
 
     @pytest.mark.parametrize('url, manager_method', [
-        ('/', 'iterate'),
-        ('/tree', 'iterate'),
+        ('/', 'iterate_location_documents'),
+        ('/tree', 'iterate_location_documents'),
         ('/tree/roots', 'get_child_location_documents'),
         ('/tree/search?query=x', 'search_locations_with_ancestors'),
         ('/tree/1/children', 'get_child_location_documents'),

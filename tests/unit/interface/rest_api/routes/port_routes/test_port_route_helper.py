@@ -33,9 +33,12 @@ from cmdb.models.extendable_option_model import OptionType
 from cmdb.models.port_model import PortKey, PortSide
 from cmdb.models.type_model.type_schema_key_enum import TypeSchemaKey
 from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.interface.rest_api.routes.port_routes import port_interface_link_helper as link_helper_module
 from cmdb.interface.rest_api.routes.port_routes.port_route_constants import PortRequestKey
 from cmdb.interface.rest_api.routes.port_routes.port_route_constants import PORT_CONNECTED_KEY
 from cmdb.interface.rest_api.routes.port_routes.port_interface_link_helper import (
+    read_assignable_candidate_objects,
+    read_assignable_lookups,
     get_interface_row_or_abort,
 )
 from cmdb.interface.rest_api.routes.port_routes.port_route_helper import (
@@ -606,3 +609,104 @@ class TestGetInterfaceRowOrAbort:
         assert get_interface_row_or_abort(
             objects_manager, INTERFACE_OBJECT_ID, 'dg-ipam-interface', ROW_ID,
         ) is row
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                            the picker's candidate reads                                              #
+# -------------------------------------------------------------------------------------------------------------------- #
+CAPABLE_TYPE_ID: int = 7701
+DENIED_TYPE_ID: int = 7702
+OWNER_OBJECT_ID: int = 7801
+
+
+class TestReadAssignableCandidateObjects:
+    """Which CmdbObjects the picker is allowed to offer rows from."""
+
+    def test_the_narrow_scope_reads_only_the_ports_own_object(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """One document read - the object whose ACL the caller already passed to reach the route"""
+        owner = {'public_id': OWNER_OBJECT_ID}
+        objects_manager = MagicMock(name='objects_manager')
+        objects_manager.get_object.return_value = owner
+        types_manager = MagicMock(name='types_manager')
+
+        candidates = read_assignable_candidate_objects(
+            objects_manager, types_manager, OWNER_OBJECT_ID, None, False,
+        )
+
+        assert candidates == [owner]
+        objects_manager.find_objects.assert_not_called()
+        types_manager.get_types_lookup.assert_not_called()
+
+    def test_a_missing_owner_offers_nothing(self) -> None:
+        """A port whose object is gone has nothing to offer, which is not an error here"""
+        objects_manager = MagicMock(name='objects_manager')
+        objects_manager.get_object.return_value = None
+
+        assert read_assignable_candidate_objects(
+            objects_manager, MagicMock(name='types_manager'), OWNER_OBJECT_ID, None, False,
+        ) == []
+
+    def test_the_wide_scope_excludes_the_denied_types(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """
+        The ACL is applied as a type filter on the one object query, not per document
+
+        The denied types come from the same resolver the object pipeline uses, so a caller sees the
+        same set of types here as everywhere else.
+        """
+        objects_manager = MagicMock(name='objects_manager')
+        objects_manager.find_objects.return_value = []
+        monkeypatch.setattr(link_helper_module, 'find_ipam_capable_type_ids',
+                            lambda _types_manager: [CAPABLE_TYPE_ID, DENIED_TYPE_ID])
+        monkeypatch.setattr(link_helper_module, 'resolve_denied_type_ids',
+                            lambda _user, _permission: [DENIED_TYPE_ID])
+
+        read_assignable_candidate_objects(
+            objects_manager, MagicMock(name='types_manager'), OWNER_OBJECT_ID, None, True,
+        )
+
+        criteria = objects_manager.find_objects.call_args.args[0]
+
+        assert criteria['type_id'] == {'$in': [CAPABLE_TYPE_ID]}
+        assert criteria['multi_data_sections.section_id'] == 'dg-ipam-interface'
+
+    def test_every_capable_type_denied_skips_the_object_query(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Nothing to ask for - the query would match every object of no type at all"""
+        objects_manager = MagicMock(name='objects_manager')
+        monkeypatch.setattr(link_helper_module, 'find_ipam_capable_type_ids',
+                            lambda _types_manager: [DENIED_TYPE_ID])
+        monkeypatch.setattr(link_helper_module, 'resolve_denied_type_ids',
+                            lambda _user, _permission: [DENIED_TYPE_ID])
+
+        candidates = read_assignable_candidate_objects(
+            objects_manager, MagicMock(name='types_manager'), OWNER_OBJECT_ID, None, True,
+        )
+
+        assert candidates == []
+        objects_manager.find_objects.assert_not_called()
+
+
+class TestReadAssignableLookups:
+    """The two bulk lookups a page of rows displays."""
+
+    def test_no_candidates_asks_nothing(self) -> None:
+        """An empty page must not cost two queries"""
+        objects_manager = MagicMock(name='objects_manager')
+        types_manager = MagicMock(name='types_manager')
+
+        assert read_assignable_lookups(objects_manager, types_manager, []) == ({}, {})
+        objects_manager.get_summary_lines_lookup.assert_not_called()
+        types_manager.get_types_lookup.assert_not_called()
+
+    def test_the_documents_in_hand_are_reused(self) -> None:
+        """The summary lines are composed from the documents already read, not from a second load"""
+        objects_manager = MagicMock(name='objects_manager')
+        objects_manager.get_summary_lines_lookup.return_value = {OWNER_OBJECT_ID: 'Switch / edge-01'}
+        types_manager = MagicMock(name='types_manager')
+        types_manager.get_types_lookup.return_value = {CAPABLE_TYPE_ID: MagicMock(label='Switch')}
+        candidates = [{'public_id': OWNER_OBJECT_ID, 'type_id': CAPABLE_TYPE_ID}]
+
+        type_labels, summary_lines = read_assignable_lookups(objects_manager, types_manager, candidates)
+
+        assert (type_labels, summary_lines) == ({CAPABLE_TYPE_ID: 'Switch'},
+                                                {OWNER_OBJECT_ID: 'Switch / edge-01'})
+        assert objects_manager.get_summary_lines_lookup.call_args.kwargs['object_docs'] is candidates

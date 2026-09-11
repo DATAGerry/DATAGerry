@@ -25,7 +25,7 @@ from datetime import datetime, timezone
 from typing import Any, Callable
 import requests
 from requests.exceptions import ConnectTimeout, Timeout, ConnectionError
-from flask import request, abort, current_app
+from flask import request, abort, current_app, has_request_context
 from werkzeug._internal import _wsgi_decoding_dance
 from werkzeug.exceptions import HTTPException
 
@@ -41,13 +41,16 @@ from cmdb.manager import (
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.auth_method_enum import AuthMethod
 from cmdb.security.auth.auth_module import AuthModule
+from cmdb import __title__
 from cmdb.security.token.validator import TokenValidator
+from cmdb.security.token.token_constants import TokenClaim, TokenClaimWrapperKey
 from cmdb.security.token.generator import TokenGenerator
 
 from cmdb.models.user_model import CmdbUser
 
 from cmdb.errors.security import (
     TokenValidationError,
+    TokenKeyMaterialError,
     InvalidCloudUserError,
     NoAccessTokenError,
     MissingApiKeyError,
@@ -103,16 +106,20 @@ def user_has_right(required_right: str, request_user: CmdbUser | None = None) ->
     token = parse_authorization_header(auth_header)
 
     try:
-        decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
+        decrypted_token = decode_request_token(token)
+    except TokenKeyMaterialError as err:
+        LOGGER.error("[user_has_right] TokenKeyMaterialError: %s", err, exc_info=True)
+        abort(500, "The token could not be verified because of a server-side key problem!")
     except TokenValidationError as err:
         LOGGER.debug("[user_has_right] Error: %s", err)
         abort(401, "Invalid token!")
 
     try:
-        user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+        user_claim = token_user_claim(decrypted_token)
+        user_id = user_claim['public_id']
 
         if current_app.cloud_mode:
-            database = decrypted_token['DATAGERRY']['value']['user']['database']
+            database = user_claim['database']
             users_manager = UsersManager(current_app.database_manager, database)
             groups_manager = GroupsManager(current_app.database_manager, database)
 
@@ -268,9 +275,12 @@ def insert_request_user(func: Callable[..., Any]) -> Callable[..., Any]:
             token = parse_authorization_header(auth_header)
 
             with current_app.app_context():
-                decrypted_token = TokenValidator(current_app.database_manager).decode_token(token)
+                decrypted_token = decode_request_token(token)
         except HTTPException as http_err:
             raise http_err
+        except TokenKeyMaterialError as err:
+            LOGGER.error("[insert_request_user] TokenKeyMaterialError: %s", err, exc_info=True)
+            abort(500, "The token could not be verified because of a server-side key problem!")
         except TokenValidationError:
             abort(401, "Invalid Token!")
         except Exception as err:
@@ -278,10 +288,11 @@ def insert_request_user(func: Callable[..., Any]) -> Callable[..., Any]:
             abort(401, "Token could not be validated!")
 
         try:
-            user_id = decrypted_token['DATAGERRY']['value']['user']['public_id']
+            user_claim = token_user_claim(decrypted_token)
+            user_id = user_claim['public_id']
 
             if current_app.cloud_mode:
-                database = decrypted_token['DATAGERRY']['value']['user']['database']
+                database = user_claim['database']
                 users_manager = UsersManager(current_app.database_manager, database)
 
             user = users_manager.get_user(user_id)
@@ -467,6 +478,95 @@ def __check_api_level(
         return False
 
 
+# Per-request caches. Accepting a token costs a settings read of the RSA key document plus an RSA
+# signature verification, and up to three decorators of one route each used to redo the whole chain:
+# a single GET was measured at 4 TokenValidator constructions, 4 decodes and 12 reads of the key
+# document. The header parse (which for a bearer token also VALIDATES it, see _validate_bearer) and
+# the decode are therefore memoised for the duration of the request
+_PARSED_TOKEN_CACHE_KEY: str = 'dg_parsed_authorization_headers'
+_DECODED_TOKEN_CACHE_KEY: str = 'dg_decoded_tokens'
+
+
+def _request_cache(key: str) -> dict[str, Any] | None:
+    """
+    Returns the per-request cache under the given key, creating it on first use
+
+    Kept on the REQUEST object rather than on `flask.g`: `g` is bound to the application context,
+    and two of the three decorators push one of their own around the decode - so a `g`-based cache
+    would be thrown away with that inner context and never hit
+
+    Args:
+        key (str): The request attribute holding the cache
+
+    Returns:
+        dict[str, Any] | None: The cache, or None when there is no request to scope it to (a unit
+            test calling these helpers directly, or a CLI code path)
+    """
+    if not has_request_context():
+        return None
+
+    cache: dict[str, Any] | None = getattr(request, key, None)
+
+    if cache is None:
+        cache = {}
+        setattr(request, key, cache)
+
+    return cache
+
+
+def decode_request_token(token: str | bytes) -> dict[str, Any]:
+    """
+    Decodes a token's claims, once per request
+
+    The claims of one token cannot change within a request, so the decode - an RSA signature
+    verification plus a key read - is done for the first decorator that asks and answered from the
+    cache afterwards. Expiration is NOT checked here: `parse_authorization_header` has already run
+    the full two-step validation for the token it returns (see `_validate_bearer`)
+
+    Args:
+        token (str | bytes): The encoded JWT
+
+    Raises:
+        TokenValidationError: If the token is invalid, malformed or has a bad signature
+        TokenKeyMaterialError: If the public key could not be obtained (a server-side fault)
+
+    Returns:
+        dict[str, Any]: The decoded JWT claims
+    """
+    cache = _request_cache(_DECODED_TOKEN_CACHE_KEY)
+    cache_key = token.decode('utf-8') if isinstance(token, bytes) else token
+
+    if cache is not None and cache_key in cache:
+        return cache[cache_key]
+
+    claims = TokenValidator(current_app.database_manager).decode_token(token)
+
+    if cache is not None:
+        cache[cache_key] = claims
+
+    return claims
+
+
+def token_user_claim(claims: dict[str, Any]) -> dict[str, Any]:
+    """
+    Reads the acting user's data out of a token's claims
+
+    The `DATAGERRY` claim is wrapped - `{'essential': True, 'value': {...}}` - so every consumer
+    used to spell `claims['DATAGERRY']['value']['user']` by hand. See `token_constants` for why the
+    wrapper exists and why it stays
+
+    Args:
+        claims (dict[str, Any]): The decoded JWT claims
+
+    Raises:
+        KeyError: If the token carries no DataGerry user payload, which the callers answer with 401
+
+    Returns:
+        dict[str, Any]: The user payload - at least its `public_id`, plus `database` in cloud mode
+    """
+    return claims[TokenClaim.DATAGERRY.value][TokenClaimWrapperKey.VALUE.value]['user']
+
+
 def parse_authorization_header(header):
     """
     Parses the HTTP Auth Header to a JWT Token
@@ -484,6 +584,11 @@ def parse_authorization_header(header):
     if not header:
         return None
 
+    cache = _request_cache(_PARSED_TOKEN_CACHE_KEY)
+
+    if cache is not None and header in cache:
+        return cache[header]
+
     value = _wsgi_decoding_dance(header)
 
     try:
@@ -495,12 +600,16 @@ def parse_authorization_header(header):
         auth_info = value
 
     if auth_type == "basic":
-        return _authenticate_basic(auth_info)
+        token = _authenticate_basic(auth_info)
+    elif auth_type == "bearer":
+        token = _validate_bearer(auth_info)
+    else:
+        token = None
 
-    if auth_type == "bearer":
-        return _validate_bearer(auth_info)
+    if cache is not None:
+        cache[header] = token
 
-    return None
+    return token
 
 
 def _authenticate_basic(auth_info: str) -> str | None:
@@ -579,12 +688,28 @@ def _validate_bearer(auth_info: str) -> str | None:
     """
     try:
         with current_app.app_context():
-            tv = TokenValidator(current_app.database_manager)
-            decoded_token = tv.decode_token(auth_info)
-            tv.validate_token(decoded_token)
+            validator = TokenValidator(current_app.database_manager)
+            decoded_token = validator.decode_token(auth_info)
+            validator.validate_claims(decoded_token)
+            validator.validate_issuer(decoded_token, __title__)
+
+        # The claims are what every decorator of the route is about to ask for; handing them to the
+        # request cache here means the token is decoded ONCE per request instead of once per
+        # decorator (measured: 4 decodes and 12 key reads for a single GET before this)
+        cache = _request_cache(_DECODED_TOKEN_CACHE_KEY)
+
+        if cache is not None:
+            cache[auth_info] = decoded_token
 
         return auth_info
-    except Exception:
+    except TokenKeyMaterialError as err:
+        # Not the caller's fault, and answering None here would report it as a bad token - let it
+        # surface so the route can answer 500 instead of logging the user out
+        LOGGER.error("[_validate_bearer] TokenKeyMaterialError: %s", err, exc_info=True)
+        raise
+    except Exception as err:
+        LOGGER.debug("[_validate_bearer] Token refused: %s", err)
+
         return None
 
 # ------------------------------------------------------ HELPER ------------------------------------------------------ #

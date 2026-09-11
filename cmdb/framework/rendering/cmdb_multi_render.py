@@ -72,7 +72,7 @@ from cmdb.framework.rendering.render_constants import (
 )
 from cmdb.framework.rendering.render_result import RenderResult
 
-from cmdb.errors.models.cmdb_type import CmdbTypeFieldNotFoundError
+from cmdb.errors.models.cmdb_type import CmdbTypeFieldNotFoundError, CmdbTypeReferenceLineFillError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 LOGGER: Logger = getLogger(__name__)
@@ -721,7 +721,7 @@ class CmdbMultiRender:
         Returns:
             dict[str, Any]: The serialised reference data (empty reference when nothing resolves)
         """
-        reference = TypeReference(type_id=0, object_id=0, type_label='', line='')
+        reference = TypeReference.empty()
 
         # No value on the field - return an empty reference rather than None (callers expect a dict)
         if not current_field['value']:
@@ -748,21 +748,32 @@ class CmdbMultiRender:
             reference.prefix = ref_type.has_nested_prefix(nested_summaries)
             reference.summaries = summaries
 
-            try:
-                # fill the summary line with summaries value data
-                reference.line = nested_summary_line
+            # Only evaluate the line when one is configured: a reference field without a custom
+            # line has nothing to fill, and its summary FIELDS are what the frontend shows instead
+            reference.line = nested_summary_line
 
-                # Only evaluate the line when one is configured. A None nested summary line
-                # (the default when the ref field has no custom line) has no placeholders to
-                # check or fill, so skip it - line_requires_fields' regex would otherwise raise
-                # on a None line (caught, but it spammed DEBUG logs on every such reference)
-                if nested_summary_line:
-                    if not reference.line_requires_fields():
-                        reference.summaries = []
+            if nested_summary_line:
+                # A line without placeholders is shown as it is, which makes the summary fields
+                # redundant for this reference
+                if not reference.line_requires_fields():
+                    reference.summaries = []
 
+                try:
                     reference.fill_line(summary_values)
-            except Exception as err:
-                LOGGER.debug("[__merge_references] Could not fill summary line: %s", err)
+                except CmdbTypeReferenceLineFillError as err:
+                    # The line is left unfilled by fill_line, and answering it would show the raw
+                    # '{}' template in the reference block. An EMPTY line is the frontend's
+                    # documented fallback (icon + label + #id + summaries), so degrade to that -
+                    # summary fields included, since they were only dropped because the line was
+                    # going to carry the information - and report it: a line that no longer fits its
+                    # type's summary fields is a configuration problem someone has to see
+                    LOGGER.warning(
+                        "[__merge_references] Summary line of Type ID:%s does not fit Object ID:%s, "
+                        "answering the reference without it: %s",
+                        ref_type.get_public_id(), reference.object_id, err,
+                    )
+                    reference.line = ''
+                    reference.summaries = summaries
 
             return TypeReference.to_json(reference)
         except Exception as err:

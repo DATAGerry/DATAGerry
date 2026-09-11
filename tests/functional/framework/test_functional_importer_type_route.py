@@ -19,7 +19,8 @@ Functional coverage for the /import/type routes
 Both verbs answer with the same partial report the object import returns (`message`, `success_imports`,
 `failed_imports`): every uploaded entry is processed independently; an imported one only adds to the
 `success_imports` count, a rejected one is reported with the data the user provided plus a diagnostic
-message, so one bad entry never discards the rest of the batch. Covers create (add_type): types are inserted with server-assigned public_ids;
+message, so one bad entry never discards the rest of the batch. Covers create (add_type): types are
+inserted with server-assigned public_ids;
 update (update_type): existing types are updated and an unknown public_id is reported instead of
 silently succeeding; the special_type rules (known value, unique marker, immutable across an update);
 the name / field / section rules and the silent repairs (default icon, cleared dangling cross-type
@@ -42,6 +43,7 @@ from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.section_template_model.cmdb_section_template import CmdbSectionTemplate
 from cmdb.models.special_type_model.special_type_enum import SpecialType
 from cmdb.models.special_type_model.ipam_constants import SubnetField
+from cmdb.interface.rest_api.routes.importer_routes import importer_type_routes
 from tests.utils.ipam_doc_builders import make_type_doc, make_object_doc, make_field
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -2041,3 +2043,38 @@ class TestImportUsesPortsFlag:
         assert response.status_code == HTTPStatus.OK
         assert _errors(response) != []
         assert _imported_count(response) == 0
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                    THE ERROR TAIL                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
+class TestUnexpectedFailure:
+    """
+    The catch-all of both routes, which answers 500 and names which import failed
+
+    Everything that can go wrong per ENTRY is already caught by the batch runner and reported as a
+    failed entry, so this arm only ever sees a failure of the request-level work itself - resolving the
+    managers, parsing the upload, reading the licence state. That is why it needs a forced exception to
+    reach: nothing in a normal request, however malformed, gets here.
+
+    The 400 arm above it is exercised by the missing-upload / malformed-JSON / non-list tests: an
+    HTTPException must pass through untouched rather than be reported as a server fault.
+    """
+
+    @pytest.mark.parametrize(
+        'url, operation',
+        [(CREATE_URL, 'creating'), (UPDATE_URL, 'updating')],
+        ids=['create', 'update'],
+    )
+    def test_an_unexpected_failure_is_a_500(
+            self, rest_api, monkeypatch: pytest.MonkeyPatch, url: str, operation: str) -> None:
+        """A failure of the request-level work is a server fault, and the message says which import it was"""
+        def _explode(*_args: Any, **_kwargs: Any):
+            raise RuntimeError('request-level failure')
+
+        monkeypatch.setattr(importer_type_routes, 'run_type_import_request', _explode)
+
+        response = rest_api.post(url, data=_upload_form([]), content_type='multipart/form-data')
+
+        assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+        assert operation in response.get_json()['message']

@@ -39,7 +39,6 @@ from cmdb.manager.locations_manager import (
 from cmdb.models.location_model.cmdb_location import CmdbLocation
 from cmdb.models.location_model.location_constants import CmdbLocationDefault, RootLocationDefault
 
-from cmdb.errors.models.cmdb_location import CmdbLocationToJsonError
 from cmdb.errors.manager import (
     BaseManagerInsertError,
     BaseManagerGetError,
@@ -87,7 +86,7 @@ def _mock_manager() -> MagicMock:
 #                                                   insert_location                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestInsertLocation:
-    """``insert_location`` forwards a dict as-is, converts a model, and wraps insert failures."""
+    """``insert_location`` forwards the document as-is and wraps insert failures."""
 
     def test_dict_payload_is_inserted_directly(self) -> None:
         """A dict payload is handed straight to ``insert`` and the new public_id is returned."""
@@ -99,19 +98,6 @@ class TestInsertLocation:
         mgr.insert.assert_called_once_with(SAMPLE_LOCATION_DICT)
         assert result == LOCATION_PUBLIC_ID
 
-    def test_cmdb_location_is_converted_via_to_json(self) -> None:
-        """A CmdbLocation instance is serialized with ``to_json`` before insert."""
-        mgr = _mock_manager()
-        mgr.insert.return_value = LOCATION_PUBLIC_ID
-        location = MagicMock(spec=CmdbLocation)
-
-        with patch(f'{MODULE_PATH}.CmdbLocation.to_json', return_value=SAMPLE_LOCATION_DICT) as to_json_mock:
-            result = LocationsManager.insert_location(mgr, location)
-
-        to_json_mock.assert_called_once_with(location)
-        mgr.insert.assert_called_once_with(SAMPLE_LOCATION_DICT)
-        assert result == LOCATION_PUBLIC_ID
-
     def test_base_insert_error_wraps_as_locations_insert_error(self) -> None:
         """A ``BaseManagerInsertError`` from ``insert`` is wrapped as ``LocationsManagerInsertError``."""
         mgr = _mock_manager()
@@ -119,15 +105,6 @@ class TestInsertLocation:
 
         with pytest.raises(LocationsManagerInsertError):
             LocationsManager.insert_location(mgr, dict(SAMPLE_LOCATION_DICT))
-
-    def test_to_json_error_wraps_as_locations_insert_error(self) -> None:
-        """A ``CmdbLocationToJsonError`` during conversion is wrapped as ``LocationsManagerInsertError``."""
-        mgr = _mock_manager()
-        location = MagicMock(spec=CmdbLocation)
-
-        with patch(f'{MODULE_PATH}.CmdbLocation.to_json', side_effect=CmdbLocationToJsonError('bad model')):
-            with pytest.raises(LocationsManagerInsertError):
-                LocationsManager.insert_location(mgr, location)
 
     def test_missing_public_id_wraps_as_locations_insert_error(self) -> None:
         """An insert answering with no public_id is reported instead of returned as None."""
@@ -147,25 +124,40 @@ class TestInsertLocation:
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                       iterate                                                       #
+#                                              iterate_location_documents                                             #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TestIterate:
-    """``iterate`` runs the aggregation and binds the rows to an IterationResult of CmdbLocation."""
+class TestIterateLocationDocuments:
+    """``iterate_location_documents`` answers canonical documents plus the total, building no model."""
 
-    def test_wraps_query_result_in_iteration_result(self) -> None:
-        """The aggregation result and total are forwarded to ``IterationResult`` with the model bound."""
+    def test_answers_canonical_documents_and_the_total(self) -> None:
+        """
+        The rows are normalised, not hydrated
+
+        Both list routes only pass the result on as JSON, so a CmdbLocation per row plus the dict it
+        was converted back into was two objects per node.
+        """
         mgr = _mock_manager()
-        aggregation_result = [SAMPLE_LOCATION_DICT]
-        mgr.iterate_query.return_value = (aggregation_result, TOTAL_LOCATIONS)
+        mgr.iterate_query.return_value = ([dict(SAMPLE_LOCATION_DICT, _id='oid')], TOTAL_LOCATIONS)
         builder_params = MagicMock(name='builder_params')
-        sentinel_result = MagicMock(name='iteration_result')
 
-        with patch(f'{MODULE_PATH}.IterationResult', return_value=sentinel_result) as result_ctor:
-            result = LocationsManager.iterate(mgr, builder_params)
+        documents, total = LocationsManager.iterate_location_documents(mgr, builder_params)
 
         mgr.iterate_query.assert_called_once_with(builder_params)
-        result_ctor.assert_called_once_with(aggregation_result, TOTAL_LOCATIONS, CmdbLocation)
-        assert result is sentinel_result
+        assert total == TOTAL_LOCATIONS
+        assert documents == [{
+            **SAMPLE_LOCATION_DICT,
+            'type_icon': CmdbLocationDefault.TYPE_ICON,
+            'type_selectable': CmdbLocationDefault.TYPE_SELECTABLE,
+        }]
+
+    def test_the_mongo_id_never_reaches_the_caller(self) -> None:
+        """The canonical key set is what keeps '_id' out of a response built from raw documents."""
+        mgr = _mock_manager()
+        mgr.iterate_query.return_value = ([dict(SAMPLE_LOCATION_DICT, _id='oid')], 1)
+
+        documents, _ = LocationsManager.iterate_location_documents(mgr, MagicMock())
+
+        assert '_id' not in documents[0]
 
     def test_iteration_error_wraps_as_locations_iteration_error(self) -> None:
         """A ``BaseManagerIterationError`` from ``iterate_query`` becomes ``LocationsManagerIterationError``."""
@@ -173,7 +165,7 @@ class TestIterate:
         mgr.iterate_query.side_effect = BaseManagerIterationError('bad pipeline')
 
         with pytest.raises(LocationsManagerIterationError):
-            LocationsManager.iterate(mgr, MagicMock())
+            LocationsManager.iterate_location_documents(mgr, MagicMock())
 
     def test_unexpected_error_wraps_as_locations_iteration_error(self) -> None:
         """A generic exception is also wrapped as ``LocationsManagerIterationError``."""
@@ -181,7 +173,7 @@ class TestIterate:
         mgr.iterate_query.side_effect = RuntimeError('boom')
 
         with pytest.raises(LocationsManagerIterationError):
-            LocationsManager.iterate(mgr, MagicMock())
+            LocationsManager.iterate_location_documents(mgr, MagicMock())
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -234,32 +226,102 @@ class TestGetLocation:
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
-#                                                   get_locations_by                                                  #
+#                                          get_location_names / get_child_object_ids                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TestGetLocationsBy:
-    """``get_locations_by`` filters the bound collection and hydrates each row to ``CmdbLocation``."""
+class TestGetLocationNames:
+    """``get_location_names`` resolves location references into labels, projected."""
 
-    def test_hydrates_each_raw_row_via_from_data(self) -> None:
-        """Filters are forwarded to ``get_many`` and every row is rehydrated through ``from_data``."""
+    def test_reads_only_the_two_keys_a_name_lookup_needs(self) -> None:
+        """A caller resolving names has no use for the render metadata, let alone for a model."""
         mgr = _mock_manager()
-        rows = [SAMPLE_LOCATION_DICT, {**SAMPLE_LOCATION_DICT, 'public_id': LOCATION_PUBLIC_ID + 1}]
-        mgr.get_many.return_value = rows
-        hydrated = [MagicMock(name='loc1'), MagicMock(name='loc2')]
+        mgr.find.return_value = []
 
-        with patch.object(CmdbLocation, 'from_data', side_effect=hydrated) as from_data_mock:
-            result = LocationsManager.get_locations_by(mgr, parent=PARENT_ID)
+        LocationsManager.get_location_names(mgr, [LOCATION_PUBLIC_ID])
 
-        mgr.get_many.assert_called_once_with(parent=PARENT_ID)
-        assert [c.args[0] for c in from_data_mock.call_args_list] == rows
-        assert result == hydrated
+        assert mgr.find.call_args.kwargs['criteria'] == {'public_id': {'$in': [LOCATION_PUBLIC_ID]}}
+        assert mgr.find.call_args.kwargs['projection'] == {'public_id': 1, 'name': 1}
+
+    def test_answers_a_name_per_public_id(self) -> None:
+        """The caller looks a reference up by id, so the id is the key"""
+        mgr = _mock_manager()
+        mgr.find.return_value = [
+            {'public_id': LOCATION_PUBLIC_ID, 'name': 'srv'},
+            {'public_id': PARENT_ID, 'name': 'rack'},
+        ]
+
+        assert LocationsManager.get_location_names(mgr, [LOCATION_PUBLIC_ID, PARENT_ID]) == {
+            LOCATION_PUBLIC_ID: 'srv',
+            PARENT_ID: 'rack',
+        }
+
+    def test_an_empty_selection_reads_nothing(self) -> None:
+        """An export with no location references must not query the whole collection."""
+        mgr = _mock_manager()
+
+        assert LocationsManager.get_location_names(mgr, []) == {}
+        assert mgr.find.call_count == 0
+
+    def test_a_nameless_location_is_left_out(self) -> None:
+        """
+        An unresolved reference reads as a missing location
+
+        Mapping it to None would put a null where the export shows a label.
+        """
+        mgr = _mock_manager()
+        mgr.find.return_value = [
+            {'public_id': LOCATION_PUBLIC_ID, 'name': 'srv'},
+            {'public_id': PARENT_ID},
+            {'public_id': TYPE_ID, 'name': 7},
+        ]
+
+        assert LocationsManager.get_location_names(mgr, [LOCATION_PUBLIC_ID, PARENT_ID, TYPE_ID]) == {
+            LOCATION_PUBLIC_ID: 'srv',
+        }
 
     def test_unexpected_error_wraps_as_locations_get_error(self) -> None:
-        """A failure during retrieval/hydration is wrapped as ``LocationsManagerGetError``."""
+        """A failure during retrieval is wrapped as ``LocationsManagerGetError``."""
         mgr = _mock_manager()
-        mgr.get_many.side_effect = RuntimeError('boom')
+        mgr.find.side_effect = RuntimeError('boom')
 
         with pytest.raises(LocationsManagerGetError):
-            LocationsManager.get_locations_by(mgr, parent=PARENT_ID)
+            LocationsManager.get_location_names(mgr, [LOCATION_PUBLIC_ID])
+
+
+class TestGetChildObjectIds:
+    """``get_child_object_ids`` answers which objects sit directly under a location."""
+
+    def test_reads_only_the_object_id(self) -> None:
+        """Both callers need one key, so the render metadata of a level is never transferred."""
+        mgr = _mock_manager()
+        mgr.find.return_value = []
+
+        LocationsManager.get_child_object_ids(mgr, PARENT_ID)
+
+        assert mgr.find.call_args.kwargs['criteria'] == {'parent': PARENT_ID}
+        assert mgr.find.call_args.kwargs['projection'] == {'object_id': 1}
+
+    def test_answers_the_object_ids(self) -> None:
+        """The CI Explorer grafts the objects, the delete guard re-points their location field."""
+        mgr = _mock_manager()
+        mgr.find.return_value = [{'object_id': CHILD_OBJECT_ID}, {'object_id': OBJECT_ID}]
+
+        assert LocationsManager.get_child_object_ids(mgr, PARENT_ID) == [CHILD_OBJECT_ID, OBJECT_ID]
+
+    @pytest.mark.parametrize('document', [{}, {'object_id': None}, {'object_id': 'x'}, {'object_id': True}])
+    def test_a_child_without_a_usable_object_id_is_left_out(self, document: dict[str, Any]) -> None:
+        """No object answers to it - and a bool would claim object 1."""
+        mgr = _mock_manager()
+        mgr.find.return_value = [{'object_id': CHILD_OBJECT_ID}, document]
+
+        assert LocationsManager.get_child_object_ids(mgr, PARENT_ID) == [CHILD_OBJECT_ID]
+
+    def test_unexpected_error_wraps_as_locations_get_error(self) -> None:
+        """A failure during retrieval is wrapped as ``LocationsManagerGetError``."""
+        mgr = _mock_manager()
+        mgr.find.side_effect = RuntimeError('boom')
+
+        with pytest.raises(LocationsManagerGetError):
+            LocationsManager.get_child_object_ids(mgr, PARENT_ID)
 
 
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -330,7 +392,7 @@ class TestGetAllDescendantLocations:
 #                                                    update_location                                                  #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestUpdateLocation:
-    """``update_location`` matches the row by its ``object_id`` and wraps update failures."""
+    """``update_location`` matches the row by its ``object_id``, takes a document, wraps failures."""
 
     def test_matches_on_object_id(self) -> None:
         """The update is scoped to the row's ``object_id``."""
@@ -340,16 +402,13 @@ class TestUpdateLocation:
 
         mgr.update.assert_called_once_with({'object_id': OBJECT_ID}, SAMPLE_LOCATION_DICT)
 
-    def test_cmdb_location_payload_is_converted_via_to_json(self) -> None:
-        """A CmdbLocation payload is serialized with ``to_json`` before the update."""
+    def test_a_partial_document_is_normal(self) -> None:
+        """The object mirror sends only the keys an object write can change, applied as a '$set'."""
         mgr = _mock_manager()
-        data = MagicMock(spec=CmdbLocation)
 
-        with patch(f'{MODULE_PATH}.CmdbLocation.to_json', return_value=SAMPLE_LOCATION_DICT) as to_json_mock:
-            LocationsManager.update_location(mgr, OBJECT_ID, data)
+        LocationsManager.update_location(mgr, OBJECT_ID, {'parent': PARENT_ID, 'name': 'srv'})
 
-        to_json_mock.assert_called_once_with(data)
-        mgr.update.assert_called_once_with({'object_id': OBJECT_ID}, SAMPLE_LOCATION_DICT)
+        mgr.update.assert_called_once_with({'object_id': OBJECT_ID}, {'parent': PARENT_ID, 'name': 'srv'})
 
     def test_unexpected_error_wraps_as_locations_update_error(self) -> None:
         """A failure from ``update`` is wrapped as ``LocationsManagerUpdateError``."""

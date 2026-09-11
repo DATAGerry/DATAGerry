@@ -90,3 +90,46 @@ LINK_IDENTITY_KEYS: tuple[PortInterfaceLinkKey, ...] = (
 PORT_ID_INDEX_NAME: str = 'port_id'
 INTERFACE_ROW_INDEX_NAME: str = 'interface_object_multi_data'
 LINK_IDENTITY_INDEX_NAME: str = 'port_interface_row'
+
+
+class AssignableInterfaceKey(BaseStrEnum):
+    """
+    Keys of one row of the assignable-interfaces picker
+
+    The row is a projection, not a stored document: the first three keys are exactly the triple a
+    create needs (`PortInterfaceLinkKey.INTERFACE_*`), so selecting a row and posting it is a copy
+    rather than a translation, and the rest is what the picker shows. The interface values are
+    resolved out of the MDS row's {name, value, type} entries and the subnet reference into
+    {public_id, name}, so a consumer renders the table without knowing a single
+    `dg-interface-*` field name
+    """
+    INTERFACE_OBJECT_ID = 'interface_object_id'
+    INTERFACE_SECTION_ID = 'interface_section_id'
+    INTERFACE_MULTI_DATA_ID = 'interface_multi_data_id'
+    ACTIVE = 'active'
+    IP = 'ip'
+    MAC = 'mac'
+    HOSTNAME = 'hostname'
+    DOMAIN = 'domain'
+    ADDRESS_FAMILY = 'address_family'
+    SUBNET = 'subnet'
+    OBJECT_INFO = 'object_info'
+
+
+class AssignableInterfaceObjectKey(BaseStrEnum):
+    """
+    Keys of a picker row's `object_info` sub-dict - the device the interface row lives on
+
+    Present because an interface row means nothing on its own: two devices can hold the same IP in
+    different subnets, and the caller is choosing between devices as much as between addresses
+    """
+    PUBLIC_ID = 'public_id'
+    TYPE_ID = 'type_id'
+    TYPE_LABEL = 'type_label'
+    SUMMARY_LINE = 'summary_line'
+
+
+class AssignableInterfaceSubnetKey(BaseStrEnum):
+    """Keys of a picker row's resolved `subnet` sub-dict, absent when the row references none"""
+    PUBLIC_ID = 'public_id'
+    NAME = 'name'

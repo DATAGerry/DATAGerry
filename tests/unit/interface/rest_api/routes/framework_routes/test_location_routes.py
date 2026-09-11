@@ -261,7 +261,7 @@ class TestInsertCmdbLocation:
 #                                                  get_cmdb_locations                                                 #
 # -------------------------------------------------------------------------------------------------------------------- #
 class TestGetCmdbLocations:
-    """``get_cmdb_locations`` iterates and serializes each row, mapping failures to 400/500."""
+    """``get_cmdb_locations`` answers the canonical documents of the page, mapping failures to 400/500."""
 
     @staticmethod
     def _call(flask_app: Flask) -> Any:
@@ -269,23 +269,27 @@ class TestGetCmdbLocations:
         with flask_app.test_request_context('/', method='GET'):
             return _unwrap(get_cmdb_locations)(params=MagicMock(), request_user=MagicMock())
 
-    def test_serializes_each_row_via_to_json(
+    def test_answers_the_documents_the_read_returned(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
-        """Every iterated row is serialized with ``CmdbLocation.to_json`` into the GetMultiResponse."""
+        """
+        The documents go into the envelope as they are read - no model per row
+
+        The manager normalises them (``to_location_document``), so the route neither hydrates a
+        CmdbLocation nor converts one back.
+        """
         del patched_provider
-        iteration_result = MagicMock(results=['raw1', 'raw2'], total=TOTAL_LOCATIONS)
-        managers[ManagerType.LOCATIONS].iterate.return_value = iteration_result
+        documents = [{'public_id': 1}, {'public_id': 2}]
+        managers[ManagerType.LOCATIONS].iterate_location_documents.return_value = (documents, TOTAL_LOCATIONS)
         sentinel_response = MagicMock(name='wsgi_response')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}), \
-             patch(f'{ROUTE_PATH}.CmdbLocation.to_json', side_effect=lambda x: f'json-{x}'), \
              patch(f'{ROUTE_PATH}.GetMultiResponse') as response_ctor:
             response_ctor.return_value.make_response.return_value = sentinel_response
             result = self._call(flask_app)
 
-        assert response_ctor.call_args.args[0] == ['json-raw1', 'json-raw2']
+        assert response_ctor.call_args.args[0] is documents
         assert response_ctor.call_args.kwargs['total'] == TOTAL_LOCATIONS
         assert result is sentinel_response
 
@@ -294,7 +298,8 @@ class TestGetCmdbLocations:
     ) -> None:
         """A ``LocationsManagerIterationError`` is translated to HTTP 400."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].iterate.side_effect = LocationsManagerIterationError('bad pipeline')
+        managers[ManagerType.LOCATIONS].iterate_location_documents.side_effect = LocationsManagerIterationError(
+            'bad pipeline')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}):
@@ -308,7 +313,7 @@ class TestGetCmdbLocations:
     ) -> None:
         """Any other exception is translated to HTTP 500."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].iterate.side_effect = RuntimeError('boom')
+        managers[ManagerType.LOCATIONS].iterate_location_documents.side_effect = RuntimeError('boom')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}):
@@ -330,24 +335,28 @@ class TestGetCmdbLocationsTree:
         with flask_app.test_request_context('/tree', method='GET'):
             return _unwrap(get_cmdb_locations_tree)(params=MagicMock(), request_user=MagicMock())
 
-    def test_passes_serialized_rows_to_build_location_forest(
+    def test_passes_the_canonical_documents_to_build_location_forest(
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
-        """The to_json'd rows are handed to ``build_location_forest`` and its output is the response body."""
+        """
+        The documents the read answered are what the forest is built from
+
+        The forest needs the same canonical key set the flat list answers - each node carries the
+        ``parent`` its children are nested under - so nothing is serialised per row here either.
+        """
         del patched_provider
-        iteration_result = MagicMock(results=['raw1'], total=TOTAL_LOCATIONS)
-        managers[ManagerType.LOCATIONS].iterate.return_value = iteration_result
+        documents = [{'public_id': 1}]
+        managers[ManagerType.LOCATIONS].iterate_location_documents.return_value = (documents, TOTAL_LOCATIONS)
         sentinel_response = MagicMock(name='wsgi_response')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}), \
-             patch(f'{ROUTE_PATH}.CmdbLocation.to_json', side_effect=lambda x: f'json-{x}'), \
              patch(f'{ROUTE_PATH}.build_location_forest', return_value=['forest']) as forest_mock, \
              patch(f'{ROUTE_PATH}.GetMultiResponse') as response_ctor:
             response_ctor.return_value.make_response.return_value = sentinel_response
             result = self._call(flask_app)
 
-        forest_mock.assert_called_once_with(['json-raw1'])
+        forest_mock.assert_called_once_with(documents)
         assert response_ctor.call_args.args[0] == ['forest']
         assert result is sentinel_response
 
@@ -356,7 +365,8 @@ class TestGetCmdbLocationsTree:
     ) -> None:
         """A ``LocationsManagerIterationError`` is translated to HTTP 400."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].iterate.side_effect = LocationsManagerIterationError('bad pipeline')
+        managers[ManagerType.LOCATIONS].iterate_location_documents.side_effect = LocationsManagerIterationError(
+            'bad pipeline')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}):
@@ -370,7 +380,7 @@ class TestGetCmdbLocationsTree:
     ) -> None:
         """Any other exception is translated to HTTP 500."""
         del patched_provider
-        managers[ManagerType.LOCATIONS].iterate.side_effect = RuntimeError('boom')
+        managers[ManagerType.LOCATIONS].iterate_location_documents.side_effect = RuntimeError('boom')
 
         with patch(f'{ROUTE_PATH}.BuilderParameters'), \
              patch(f'{ROUTE_PATH}.CollectionParameters.get_builder_params', return_value={}):
@@ -1043,7 +1053,7 @@ class TestMoveCmdbLocationForObject:
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
         """A parent of 0 (no-parent sentinel) reaches move_object_location as None."""
-        del patched_provider
+        del managers, patched_provider
 
         with patch(f'{ROUTE_PATH}.DefaultResponse'), \
              patch(f'{ROUTE_PATH}.move_object_location') as move:
@@ -1055,7 +1065,7 @@ class TestMoveCmdbLocationForObject:
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
         """A LocationsManager error from the move is translated to HTTP 400."""
-        del patched_provider
+        del managers, patched_provider
 
         with patch(f'{ROUTE_PATH}.move_object_location', side_effect=LocationsManagerUpdateError('boom')):
             with pytest.raises(HTTPException) as excinfo:
@@ -1080,7 +1090,7 @@ class TestMoveCmdbLocations:
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
         """A non-list object_ids body is rejected 400."""
-        del patched_provider
+        del managers, patched_provider
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app, {'object_ids': OBJECT_ID, 'parent': PARENT_ID})
@@ -1091,7 +1101,7 @@ class TestMoveCmdbLocations:
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
         """An empty object_ids list is rejected 400."""
-        del patched_provider
+        del managers, patched_provider
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app, {'object_ids': [], 'parent': PARENT_ID})
@@ -1102,7 +1112,7 @@ class TestMoveCmdbLocations:
         self, flask_app: Flask, managers: dict[ManagerType, MagicMock], patched_provider: Any,
     ) -> None:
         """A non-integer id in the list is rejected 400."""
-        del patched_provider
+        del managers, patched_provider
 
         with pytest.raises(HTTPException) as excinfo:
             self._call(flask_app, {'object_ids': ['not-an-int'], 'parent': PARENT_ID})

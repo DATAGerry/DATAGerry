@@ -19,7 +19,8 @@ Integration tests for the CmdbLocation CRUD surface of LocationsManager
 Pins the manager-layer behavior against a real MongoDB instance:
 
 - insert / get / get_for_object / update / delete round-trip through the bound collection
-- get_locations_by filters by parent and returns model-bound results
+- iterate_location_documents answers the canonical documents of a page plus the total
+- get_location_names and get_child_object_ids answer projected reads, no model built
 - get_child_location_documents reads one tree level as canonical, name-ordered documents
 - update_locations_by_type bulk-updates only the matching type and leaves others untouched
 - delete_location removes one row and re-parents its direct children onto the grandparent
@@ -38,6 +39,7 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.manager.locations_manager import LocationsManager
 from cmdb.manager.query_builder import BuilderParameters
 from cmdb.models.location_model.cmdb_location import CmdbLocation
+from cmdb.models.location_model.location_constants import LocationKey
 
 from cmdb.errors.manager.locations_manager import LocationsManagerDeleteError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -242,13 +244,19 @@ class TestInsertAndGet:
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       ITERATE                                                       #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TestIterate:
-    """``iterate`` returns model-bound CmdbLocation results and the matching total."""
+class TestIterateLocationDocuments:
+    """``iterate_location_documents`` answers the canonical documents of a page and the total."""
 
-    def test_returns_filtered_rows_as_cmdb_location_instances(
+    def test_returns_filtered_rows_as_canonical_documents(
         self, locations_manager: LocationsManager, database_manager: MongoDatabaseManager, database_name: str,
     ) -> None:
-        """A ``$in`` filtered, ascending-sorted iteration yields the seeded rows as CmdbLocation instances."""
+        """
+        A ``$in`` filtered, ascending-sorted read yields the seeded rows as payload documents
+
+        The two list routes send these straight into the response envelope, so what the read answers
+        is the wire shape: the eight LocationKey keys, the optional render keys defaulted, and no
+        ``_id``.
+        """
         seeded = [ITERATE_A_ID, ITERATE_B_ID]
         _insert_docs(database_manager, database_name, [
             _location_doc(ITERATE_A_ID, ITERATE_A_OBJECT_ID, ROOT_PARENT_ID),
@@ -258,11 +266,11 @@ class TestIterate:
             params = BuilderParameters(
                 criteria={'public_id': {'$in': seeded}}, sort='public_id', order=ORDER_ASCENDING,
             )
-            iteration_result = locations_manager.iterate(params)
+            documents, total = locations_manager.iterate_location_documents(params)
 
-            assert iteration_result.total == len(seeded)
-            assert [loc.public_id for loc in iteration_result.results] == seeded
-            assert all(isinstance(loc, CmdbLocation) for loc in iteration_result.results)
+            assert total == len(seeded)
+            assert [document['public_id'] for document in documents] == seeded
+            assert all(set(document) == {key.value for key in LocationKey} for document in documents)
         finally:
             _drop_ids(database_manager, database_name, seeded)
 
@@ -270,8 +278,8 @@ class TestIterate:
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                  GET_LOCATIONS_BY                                                   #
 # -------------------------------------------------------------------------------------------------------------------- #
-class TestGetLocationsBy:
-    """``get_locations_by`` filters by parent and hydrates each row to ``CmdbLocation``."""
+class TestProjectedReads:
+    """``get_location_names`` / ``get_child_object_ids`` answer one key each, over a real collection."""
 
     @pytest.fixture(autouse=True)
     def _seed(self, database_manager: MongoDatabaseManager, database_name: str):
@@ -284,12 +292,29 @@ class TestGetLocationsBy:
         yield
         _drop_ids(database_manager, database_name, [PARENT_LOCATION_ID, CHILD_A_LOCATION_ID, CHILD_B_LOCATION_ID])
 
-    def test_returns_only_children_of_parent_as_instances(self, locations_manager: LocationsManager) -> None:
-        """``parent=<id>`` returns exactly that parent's children as CmdbLocation instances."""
-        children = locations_manager.get_locations_by(parent=PARENT_LOCATION_ID)
+    def test_child_object_ids_are_exactly_that_parents_children(
+            self, locations_manager: LocationsManager) -> None:
+        """The CI Explorer grafts these objects; the delete guard re-points their location field."""
+        assert set(locations_manager.get_child_object_ids(PARENT_LOCATION_ID)) == {
+            OBJECT_ID_FOR_GET + 1, OBJECT_ID_FOR_GET + 2,
+        }
 
-        assert {child.public_id for child in children} == {CHILD_A_LOCATION_ID, CHILD_B_LOCATION_ID}
-        assert all(isinstance(child, CmdbLocation) for child in children)
+    def test_child_object_ids_of_a_leaf_are_empty(self, locations_manager: LocationsManager) -> None:
+        """A node with no children is not an error - it simply has nothing beneath it."""
+        assert locations_manager.get_child_object_ids(CHILD_A_LOCATION_ID) == []
+
+    def test_location_names_are_keyed_by_public_id(self, locations_manager: LocationsManager) -> None:
+        """A human-readable export resolves its location references through this map."""
+        names = locations_manager.get_location_names([PARENT_LOCATION_ID, CHILD_A_LOCATION_ID])
+
+        assert set(names) == {PARENT_LOCATION_ID, CHILD_A_LOCATION_ID}
+        assert all(isinstance(name, str) for name in names.values())
+
+    def test_location_names_skips_a_missing_location(self, locations_manager: LocationsManager) -> None:
+        """An unresolved reference is absent from the map rather than mapped to None."""
+        assert MISSING_LOCATION_ID not in locations_manager.get_location_names(
+            [PARENT_LOCATION_ID, MISSING_LOCATION_ID]
+        )
 
 
 # -------------------------------------------------------------------------------------------------------------------- #

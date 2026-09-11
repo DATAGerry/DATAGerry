@@ -155,6 +155,30 @@ class TestGetChildren:
         # The cycle-closing node is filtered out, so CHILD_A has no children
         assert children[0].children == []
 
+    def test_a_duplicated_id_in_one_level_is_expanded_once(self) -> None:
+        """
+        The ``visited`` guard's own arm: two documents claiming the same public_id
+
+        The level filter drops a child whose id is ALREADY visited, so the cycle above never reaches
+        the guard at the top of the recursion - only a duplicate does, because a whole level is
+        filtered before any of it is expanded. ``object_id`` is uniquely indexed and ``public_id``
+        cannot repeat either, so this is the belt to the tree's braces; it is pinned because it is
+        what keeps a duplicated row from being expanded twice into the same subtree.
+        """
+        parent = LocationNode(_location(PARENT_ID, ROOT_PUBLIC_ID))
+        candidates = [
+            _location(CHILD_A_ID, PARENT_ID),
+            _location(CHILD_A_ID, PARENT_ID),  # the same node again, as two documents
+            _location(CHILD_B_ID, CHILD_A_ID),
+        ]
+
+        children = parent.get_children(PARENT_ID, candidates)
+
+        assert [child.public_id for child in children] == [CHILD_A_ID, CHILD_A_ID]
+        # the first duplicate expands the subtree, the second is answered as a leaf
+        assert [child.public_id for child in children[0].children] == [CHILD_B_ID]
+        assert children[1].children == []
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 #                                                       to_json                                                        #

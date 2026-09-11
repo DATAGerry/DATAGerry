@@ -70,6 +70,7 @@ from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse
+from cmdb.interface.rest_api.routes.importer_routes.importer_constants import ImporterRight
 
 from cmdb.errors.manager.extendable_options_manager import ExtendableOptionsManagerInsertError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -109,7 +110,7 @@ RESULT_INVALID: str = 'invalid_objects'
 @isms_importer_blueprint.route('/<string:target>', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@isms_importer_blueprint.protect(auth=True, right='base.isms.import.add')
+@isms_importer_blueprint.protect(auth=True, right=ImporterRight.ISMS_ADD.value)
 def import_isms_objects(target: str, request_user: CmdbUser) -> Response:
     """
     Import IsmsThreats, IsmsMeasureControls, IsmsVulnerabilities and IsmsRisks

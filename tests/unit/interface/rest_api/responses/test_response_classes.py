@@ -288,6 +288,26 @@ class TestDefaultResponse:
         """The one response class that lets a route pick its status code"""
         assert DefaultResponse({'ok': True}).make_response(status=201).status_code == 201
 
+    def test_it_sends_the_body_by_default(self) -> None:
+        """Most callers are not HEAD-capable routes, so nothing had to change for them"""
+        assert loads(DefaultResponse(DOCUMENT).make_response().get_data()) == DOCUMENT
+
+    def test_a_bodyless_response_serializes_nothing(self) -> None:
+        """
+        The HEAD case, which this class ignored until 2026-09-10
+
+        The envelope sweep taught the three Get* classes to answer HEAD without building the
+        payload; DefaultResponse kept serializing it for werkzeug to throw away.
+        """
+        response = DefaultResponse(DOCUMENT, body=False).make_response()
+
+        assert response.get_data(as_text=True) == ''
+        assert response.status_code == 200
+
+    def test_a_bodyless_response_keeps_its_status(self) -> None:
+        """A route that picks a status still gets it without a payload"""
+        assert DefaultResponse(DOCUMENT, body=False).make_response(status=201).status_code == 201
+
 
 class TestLoginResponse:
     """The token exchange: user plus token, deliberately without the envelope keys."""
