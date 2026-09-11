@@ -21,6 +21,15 @@ header) and the validator (which whitelists it when decoding) can never drift ap
 time-claim enum names the registered JWT claims whose expiration semantics the validator
 enforces. All enums extend BaseStrEnum so members are interchangeable with their string
 values for JSON serialization, dict lookup and equality
+
+**A DataGerry token's non-registered claims are wrapped**: `iss` and `DATAGERRY` each hold
+`{'essential': True, 'value': <the actual value>}` rather than the value itself. That shape is a
+leftover of the authlib claims *specification* the generator used to hand to its validator, which
+now gets persisted as claim *data* - which is why every consumer reads
+`token['DATAGERRY']['value']['user']` and why `iss` cannot be checked by a plain claims registry.
+It is frontend- and token-compatibility contract: changing it would invalidate every token in
+circulation, so it is named here (`TokenClaim`, `TokenClaimWrapperKey`) and read through the enum
+instead of being fixed
 """
 from cmdb.utils import BaseStrEnum
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -40,3 +49,31 @@ class TokenTimeClaim(BaseStrEnum):
     ISSUED_AT = 'iat'
     EXPIRATION = 'exp'
     NOT_BEFORE = 'nbf'
+
+
+class TokenClaim(BaseStrEnum):
+    """
+    The non-registered claims a DataGerry token carries, both wrapped (see the module docstring)
+
+    ISSUER holds the product title and identifies a token as DataGerry's own; DATAGERRY holds the
+    payload every consumer reads the acting user out of
+    """
+    ISSUER = 'iss'
+    DATAGERRY = 'DATAGERRY'
+
+
+class TokenClaimWrapperKey(BaseStrEnum):
+    """
+    The two keys of the wrapper around a `TokenClaim` value
+
+    `VALUE` carries the claim's actual content; `ESSENTIAL` is the authlib specification flag that
+    ended up in the token as data and is not read by anything
+    """
+    ESSENTIAL = 'essential'
+    VALUE = 'value'
+
+
+# Tolerance in seconds for the registered time claims. DataGerry stamps 'iat' in one process and
+# validates in another - a gunicorn worker, or another node behind a load balancer - so a host clock
+# a second ahead must not make a freshly issued token invalid
+TOKEN_TIME_CLAIM_LEEWAY: int = 60

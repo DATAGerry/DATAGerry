@@ -81,3 +81,13 @@ LINK_ALREADY_EXISTS_MESSAGE: str = (
 LINK_FIELD_IMMUTABLE_MESSAGE: str = (
     "The '{field}' of a Port interface link can not be changed - delete it and create the new one!"
 )
+
+
+class AssignableInterfaceParam(BaseStrEnum):
+    """
+    Query-parameter names of the assignable-interfaces picker
+
+    Only the widening flag lives here: `page` / `page_size` / `search` are read with the shared IPAM
+    paging helpers, so their names belong to that convention rather than to this route
+    """
+    ALL_OBJECTS = 'all_objects'

@@ -47,13 +47,35 @@ ROW_ID: int = 3
 OTHER_ROW_ID: int = 4
 OTHER_SECTION: str = 'dg-some-other-section'
 
+ROW_IP: str = '10.0.0.1'
+OTHER_ROW_IP: str = '10.0.0.2'
+ROW_MAC: str = '00:1A:2B:3C:4D:5E'
+OTHER_ROW_MAC: str = '00:1A:2B:3C:4D:5F'
 
-def _row(multi_data_id: int, ip: str = '10.0.0.1') -> dict[str, Any]:
-    """One MDS row of the dg-ipam-interface section."""
+
+def _row(multi_data_id: int, ip: str = ROW_IP, mac: str = ROW_MAC) -> dict[str, Any]:
+    """
+    One MDS row of the dg-ipam-interface section, carrying both addresses the section declares
+
+    IP and MAC are the two values the interface is the single source of truth for - the concept keeps
+    neither on the port - so a row holding only the IP would not show that resolution hands the row
+    back whole.
+    """
     return {
         'multi_data_id': multi_data_id,
-        'data': [{'name': InterfaceField.IP.value, 'value': ip, 'type': 'text'}],
+        'data': [
+            {'name': InterfaceField.IP.value, 'value': ip, 'type': 'text'},
+            {'name': InterfaceField.MAC.value, 'value': mac, 'type': 'text'},
+        ],
     }
+
+
+def _row_value(interface_row: dict[str, Any], field_name: str) -> Any:
+    """Reads one field value out of an interface row, by name rather than by position."""
+    return next(
+        (entry.get('value') for entry in interface_row.get('data', []) if entry.get('name') == field_name),
+        None,
+    )
 
 
 def _object(
@@ -96,13 +118,27 @@ class TestFindInterfaceRow:
         assert row is not None
         assert row['multi_data_id'] == ROW_ID
 
+    def test_the_row_is_returned_whole(self) -> None:
+        """
+        Nothing is projected away on the way out
+
+        A caller reads the interface through its link, so every value the row carries - the MAC beside
+        the IP - has to survive the resolution. Selecting fields here would silently drop whatever the
+        section template gains later.
+        """
+        row = find_interface_row(_object(), IpamSection.INTERFACE.value, ROW_ID)
+
+        assert _row_value(row, InterfaceField.IP.value) == ROW_IP
+        assert _row_value(row, InterfaceField.MAC.value) == ROW_MAC
+
     def test_the_right_row_is_picked_out_of_several(self) -> None:
         """A device with a bond and two VLAN sub-interfaces has several rows in one section"""
-        obj = _object(rows=[_row(ROW_ID, '10.0.0.1'), _row(OTHER_ROW_ID, '10.0.0.2')])
+        obj = _object(rows=[_row(ROW_ID), _row(OTHER_ROW_ID, OTHER_ROW_IP, OTHER_ROW_MAC)])
 
         row = find_interface_row(obj, IpamSection.INTERFACE.value, OTHER_ROW_ID)
 
-        assert row['data'][0]['value'] == '10.0.0.2'
+        assert _row_value(row, InterfaceField.IP.value) == OTHER_ROW_IP
+        assert _row_value(row, InterfaceField.MAC.value) == OTHER_ROW_MAC
 
     def test_the_section_has_to_match_too(self) -> None:
         """

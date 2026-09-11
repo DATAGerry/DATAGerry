@@ -173,15 +173,13 @@ class TestHumanReadableLocationResolution:
         writer.data = [SimpleNamespace(fields=[{'type': 'location', 'value': 42}])]
 
         with patch(f'{MODULE_PATH}.LocationsManager') as locations_manager_cls:
-            locations_manager_cls.return_value.get_locations_by.return_value = [
-                SimpleNamespace(public_id=42, name='Berlin/Room-1')
-            ]
+            locations_manager_cls.return_value.get_location_names.return_value = {42: 'Berlin/Room-1'}
             writer.export()
 
         _, options = fmt.called_with
         assert options['location_names'] == {42: 'Berlin/Room-1'}
         assert options['human_readable'] == 'true'  # the original options are preserved
-        locations_manager_cls.return_value.get_locations_by.assert_called_once_with(public_id={'$in': [42]})
+        locations_manager_cls.return_value.get_location_names.assert_called_once_with([42])
 
     def test_without_flag_no_location_resolution(self) -> None:
         """Without the flag no LocationsManager is built and no location_names are injected."""
@@ -213,5 +211,5 @@ class TestHumanReadableLocationResolution:
         writer.data = [SimpleNamespace(fields=[{'type': 'location', 'value': 42}])]
 
         with patch(f'{MODULE_PATH}.LocationsManager') as locations_manager_cls:
-            locations_manager_cls.return_value.get_locations_by.side_effect = LocationsManagerGetError('boom')
+            locations_manager_cls.return_value.get_location_names.side_effect = LocationsManagerGetError('boom')
             assert writer._resolve_location_names() == {}

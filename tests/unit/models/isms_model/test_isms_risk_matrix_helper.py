@@ -40,7 +40,11 @@ from typing import Any, Optional
 
 import pytest
 
-from cmdb.models.isms_model.isms_helper import ensure_default_risk_matrix, check_risk_classes_set_in_matrix
+from cmdb.models.isms_model.isms_helper import (
+    ensure_default_risk_matrix,
+    ensure_risk_matrix_matches_scales,
+    check_risk_classes_set_in_matrix,
+)
 from cmdb.models.isms_model.isms_helper.isms_risk_matrix_helper import (
     SCALE_SORT_ASCENDING,
     SCALE_SORT_FIELD,
@@ -233,12 +237,19 @@ class _StubScaleManager:
     def __init__(self, entries: list[dict[str, Any]]) -> None:
         self._entries: list[dict[str, Any]] = entries
         self.read_with: list[tuple] = []
+        self.counted: int = 0
 
     def get_many(self, sort: str, direction: int) -> list[dict[str, Any]]:
         """Returns the scale, recording the sort it was asked for"""
         self.read_with.append((sort, direction))
 
         return self._entries
+
+    def count_documents(self, criteria: Optional[dict[str, Any]] = None, limit: Optional[int] = None) -> int:
+        """Returns the scale size, recording that the cheap check was used"""
+        self.counted += 1
+
+        return len(self._entries)
 
 
 class _RecordingRiskMatrixManager(_StubRiskMatrixManager):
@@ -437,3 +448,124 @@ def test_remove_resets_only_the_deleted_class(monkeypatch: pytest.MonkeyPatch) -
     assert written[1][CELL_RISK_CLASS_ID_KEY] == 8
     # The cell carrying no assignment at all is read defensively rather than raising
     assert CELL_RISK_CLASS_ID_KEY not in written[2]
+
+
+# ----------------------------------------- ensure_risk_matrix_matches_scales ---------------------------------------- #
+
+def _heal_with(monkeypatch: pytest.MonkeyPatch,
+               impacts: list[dict[str, Any]],
+               likelihoods: list[dict[str, Any]],
+               stored: dict[str, Any]) -> tuple[dict[str, Any], _RecordingRiskMatrixManager,
+                                                _StubScaleManager, _StubScaleManager]:
+    """
+    Runs ensure_risk_matrix_matches_scales against stub managers
+
+    Args:
+        monkeypatch (pytest.MonkeyPatch): Patches ManagerProvider.get_manager
+        impacts (list[dict[str, Any]]): The impact scale the stub serves
+        likelihoods (list[dict[str, Any]]): The likelihood scale the stub serves
+        stored (dict[str, Any]): The matrix as currently stored
+
+    Returns:
+        tuple: The served matrix, the matrix manager and the two scale managers, for assertions
+    """
+    matrix_manager = _RecordingRiskMatrixManager(stored)
+    impact_manager = _StubScaleManager(impacts)
+    likelihood_manager = _StubScaleManager(likelihoods)
+    by_type = {
+        ManagerType.RISK_MATRIX: matrix_manager,
+        ManagerType.IMPACT: impact_manager,
+        ManagerType.LIKELIHOOD: likelihood_manager,
+    }
+
+    monkeypatch.setattr(ManagerProvider, 'get_manager',
+                        staticmethod(lambda manager_type, _request_user: by_type[manager_type]))
+
+    served = ensure_risk_matrix_matches_scales(None, stored)
+
+    return served, matrix_manager, impact_manager, likelihood_manager
+
+
+def _matrix_doc(cells: list[dict[str, Any]]) -> dict[str, Any]:
+    """A stored matrix document carrying the given cells"""
+    return {
+        RiskMatrixKey.PUBLIC_ID: EXISTING_MATRIX_ID,
+        RiskMatrixKey.RISK_MATRIX: cells,
+        RiskMatrixKey.MATRIX_UNIT: None,
+    }
+
+
+def test_a_matching_grid_is_served_untouched(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The healthy path writes nothing and never loads a scale - two counts is the whole cost."""
+    stored = _matrix_doc(_generate_risk_matrix([_scale_entry(10, 2.0), _scale_entry(11, 3.0)],
+                                               [_scale_entry(20, 1.0)]))
+
+    served, matrix_manager, impact_manager, likelihood_manager = _heal_with(
+        monkeypatch,
+        impacts=[_scale_entry(10, 2.0), _scale_entry(11, 3.0)],
+        likelihoods=[_scale_entry(20, 1.0)],
+        stored=stored,
+    )
+
+    assert served is stored
+    assert matrix_manager.updated == []
+    assert (impact_manager.counted, likelihood_manager.counted) == (1, 1)
+    assert impact_manager.read_with == [] and likelihood_manager.read_with == []
+
+
+def test_an_empty_grid_is_rebuilt_from_the_scales(monkeypatch: pytest.MonkeyPatch) -> None:
+    """
+    The reported failure: scales configured, grid empty, and nothing but a scale write rebuilt it
+
+    Every database configured under the old minimum-configuration guard is in this state, and removing
+    that guard did not repair a single one of them - the grid is only written by the six scale routes.
+    """
+    served, matrix_manager, _, _ = _heal_with(
+        monkeypatch,
+        impacts=[_scale_entry(10, 2.0), _scale_entry(11, 3.0)],
+        likelihoods=[_scale_entry(20, 1.0), _scale_entry(21, 2.0)],
+        stored=_matrix_doc([]),
+    )
+
+    assert len(served[RiskMatrixKey.RISK_MATRIX]) == 4
+    assert len(matrix_manager.updated) == 1
+
+
+def test_healing_keeps_the_existing_assignments(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A repair must never cost the admin their risk-class assignments."""
+    assigned = _generate_risk_matrix([_scale_entry(10, 2.0)], [_scale_entry(20, 1.0)])
+    assigned[0][CELL_RISK_CLASS_ID_KEY] = 7
+
+    served, _, _, _ = _heal_with(
+        monkeypatch,
+        impacts=[_scale_entry(10, 2.0), _scale_entry(11, 3.0)],
+        likelihoods=[_scale_entry(20, 1.0)],
+        stored=_matrix_doc(assigned),
+    )
+
+    kept = [cell for cell in served[RiskMatrixKey.RISK_MATRIX]
+            if cell[CELL_IMPACT_ID_KEY] == 10 and cell[CELL_LIKELIHOOD_ID_KEY] == 20]
+
+    assert kept[0][CELL_RISK_CLASS_ID_KEY] == 7
+
+
+def test_empty_scales_and_an_empty_grid_agree(monkeypatch: pytest.MonkeyPatch) -> None:
+    """A fresh installation is consistent, not stale: 0 cells is exactly what no scales produce."""
+    stored = _matrix_doc([])
+
+    served, matrix_manager, _, _ = _heal_with(monkeypatch, impacts=[], likelihoods=[], stored=stored)
+
+    assert served is stored
+    assert matrix_manager.updated == []
+
+
+def test_a_stale_grid_left_by_an_emptied_scale_is_rebuilt(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Cells naming levels that no longer exist are dropped, not served."""
+    served, _, _, _ = _heal_with(
+        monkeypatch,
+        impacts=[],
+        likelihoods=[],
+        stored=_matrix_doc(_generate_risk_matrix([_scale_entry(10, 2.0)], [_scale_entry(20, 1.0)])),
+    )
+
+    assert served[RiskMatrixKey.RISK_MATRIX] == []

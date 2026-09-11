@@ -20,7 +20,8 @@ APIBlueprint provides the decorator layer every REST route is built on: ``protec
 enforcement + the ``excepted`` self-access carve-out), ``validate`` (Cerberus schema validation),
 and the ``parse_*`` query/body parameter decorators. Each test applies the decorator to a stub route
 and drives it inside a BaseCmdbApp ``test_request_context`` with the collaborators
-(``user_has_right`` / ``TokenValidator`` / ``UsersManager`` / ``CmdbUser`` / ``parse_authorization_header``)
+(``user_has_right`` / ``decode_request_token`` / ``UsersManager`` / ``CmdbUser`` /
+``parse_authorization_header``)
 patched at the module path - no Mongo, no tokens. The ``cloud_mode`` flag on the app selects the branch.
 """
 # pylint: disable=protected-access  # these tests intentionally exercise the module-private helper
@@ -35,7 +36,7 @@ from werkzeug.exceptions import HTTPException
 
 from cmdb.interface.blueprints.api_blueprint import APIBlueprint
 from cmdb.interface.cmdb_app import BaseCmdbApp
-from cmdb.errors.security import TokenValidationError
+from cmdb.errors.security import TokenKeyMaterialError, TokenValidationError
 # -------------------------------------------------------------------------------------------------------------------- #
 
 MODULE_PATH: str = 'cmdb.interface.blueprints.api_blueprint'
@@ -162,22 +163,35 @@ class TestProtectTokenExcepted:
         """A token that fails validation aborts 401."""
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
-            tv_cls.return_value.decode_token.side_effect = TokenValidationError('bad')
+             patch(f'{MODULE_PATH}.decode_request_token', side_effect=TokenValidationError('bad')):
             with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
                 with pytest.raises(HTTPException) as exc_info:
                     self._wrapped()(public_id=1)
         assert exc_info.value.code == HTTPStatus.UNAUTHORIZED
+
+    def test_key_material_failure_aborts_500(self) -> None:
+        """
+        The carve-out path reports a key problem as a server fault
+
+        Everywhere else in the stack does too - a 401 here would log the user out over an
+        installation problem.
+        """
+        with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
+             patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
+             patch(f'{MODULE_PATH}.decode_request_token', side_effect=TokenKeyMaterialError('no key')):
+            with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
+                with pytest.raises(HTTPException) as exc_info:
+                    self._wrapped()(public_id=1)
+        assert exc_info.value.code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     def test_token_user_matches_excepted_runs_route(self) -> None:
         """A token-resolved user acting on their own record passes the carve-out (non-cloud branch)."""
         users_manager = MagicMock()
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls, \
+             patch(f'{MODULE_PATH}.decode_request_token', return_value=DECODED_TOKEN), \
              patch(f'{MODULE_PATH}.UsersManager', return_value=users_manager) as um_cls, \
              patch(f'{MODULE_PATH}.CmdbUser') as cmdb_user:
-            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
             cmdb_user.to_public_json.return_value = {'public_id': 42}
             with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
                 assert self._wrapped()(public_id=42) == ROUTE_RESULT
@@ -190,10 +204,9 @@ class TestProtectTokenExcepted:
         users_manager = MagicMock()
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls, \
+             patch(f'{MODULE_PATH}.decode_request_token', return_value=DECODED_TOKEN), \
              patch(f'{MODULE_PATH}.UsersManager', return_value=users_manager) as um_cls, \
              patch(f'{MODULE_PATH}.CmdbUser') as cmdb_user:
-            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
             cmdb_user.to_public_json.return_value = {'public_id': 42}
             with _app(cloud_mode=True).test_request_context(headers={'Authorization': 'Bearer tok'}):
                 assert self._wrapped()(public_id=42) == ROUTE_RESULT
@@ -204,10 +217,9 @@ class TestProtectTokenExcepted:
         """A token-resolved user whose id does not match the route parameter is denied 403."""
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls, \
+             patch(f'{MODULE_PATH}.decode_request_token', return_value=DECODED_TOKEN), \
              patch(f'{MODULE_PATH}.UsersManager'), \
              patch(f'{MODULE_PATH}.CmdbUser') as cmdb_user:
-            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
             cmdb_user.to_public_json.return_value = {'public_id': 42}
             with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
                 with pytest.raises(HTTPException) as exc_info:
@@ -218,10 +230,9 @@ class TestProtectTokenExcepted:
         """An HTTPException from the matcher (missing route param) is re-raised, not swallowed as a lookup failure."""
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls, \
+             patch(f'{MODULE_PATH}.decode_request_token', return_value=DECODED_TOKEN), \
              patch(f'{MODULE_PATH}.UsersManager'), \
              patch(f'{MODULE_PATH}.CmdbUser') as cmdb_user:
-            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
             cmdb_user.to_public_json.return_value = {'public_id': 42}
             with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
                 with pytest.raises(HTTPException) as exc_info:
@@ -236,9 +247,8 @@ class TestProtectTokenExcepted:
         users_manager.get_user.side_effect = RuntimeError('boom')
         with patch(f'{MODULE_PATH}.user_has_right', return_value=False), \
              patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
-             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls, \
+             patch(f'{MODULE_PATH}.decode_request_token', return_value=DECODED_TOKEN), \
              patch(f'{MODULE_PATH}.UsersManager', return_value=users_manager):
-            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
             with _app().test_request_context(headers={'Authorization': 'Bearer tok'}):
                 with pytest.raises(HTTPException) as exc_info:
                     self._wrapped()(public_id=1)

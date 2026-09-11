@@ -14,7 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Shared constants for the CmdbObject import REST routes
+Shared constants for the import REST routes
+
+The form fields and the config keys belong to the CmdbObject import; ImporterRight covers the whole
+package, since the right an import route checks is the one thing every module here has
 """
 from cmdb.utils import BaseStrEnum
 from cmdb.framework.importer.importer_constants import IMPORTER_KIND_OBJECT
@@ -25,6 +28,7 @@ __all__: list[str] = [
     'IMPORTER_KIND_OBJECT',
     'ImporterFormField',
     'ImporterConfigKey',
+    'ImporterRight',
     'NO_CONTENT_TO_IMPORT_MESSAGE',
 ]
 
@@ -55,3 +59,19 @@ class ImporterConfigKey(BaseStrEnum):
     TYPE_ID = 'type_id'
     START_ELEMENT = 'start_element'
     MAX_ELEMENTS = 'max_elements'
+
+
+class ImporterRight(BaseStrEnum):
+    """
+    ACL right identifiers guarding the import REST routes
+
+    One member per import surface. The object and type imports are guarded by their family's wildcard
+    ('*' = every right below that prefix) because neither splits its surface further; the ISMS import
+    names one concrete right, since the ISMS tree separates add from the rest. The values mirror
+    ImportObjectRight / ImportTypeRight / IsmsImportRight in the right model - a value that does not
+    exist there denies every caller, which is why they are written down once here instead of being
+    spelled at each route
+    """
+    OBJECT = 'base.import.object.*'
+    TYPE = 'base.import.type.*'
+    ISMS_ADD = 'base.isms.import.add'

@@ -21,9 +21,14 @@ get_accessible_connector_ids) prefer the local cache and fall back to the DG Ser
 pre-resolved cached_user is reused instead of re-reading the cache.
 """
 from types import SimpleNamespace
+from typing import Any
 from unittest.mock import MagicMock
 
+import pytest
+
+from cmdb.interface.cmdb_app import BaseCmdbApp
 from cmdb.interface.rest_api.routes.open_celium_routes.oc_connector_helper import (
+    build_connector_manager,
     connector_in_subscription,
     validate_master_password,
     get_accessible_connector_ids,
@@ -139,3 +144,42 @@ class TestGetAccessibleConnectorIds:
 
         assert result == [9]
         dg_sp_manager.get_connector_ids.assert_called_once_with(REQUEST_USER.email, REQUEST_USER.database)
+
+# ------------------------------------------------- build_connector_manager ------------------------------------------ #
+
+class TestBuildConnectorManager:
+    """The construction the thirteen connector routes used to repeat."""
+
+    def test_it_scopes_the_manager_to_the_users_database(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """
+        The caller's database selects the OpenCelium installation and its credentials
+
+        Every route test patches this factory out, so its body is asserted here - otherwise the one
+        line that reaches OcConnectorManager would be covered by nothing.
+        """
+        recorded: dict[str, Any] = {}
+
+        class _RecordingManager:
+            """Captures how the factory constructs the manager."""
+
+            def __init__(self, dbm: Any, database: str) -> None:
+                """Records both arguments."""
+                recorded['dbm'] = dbm
+                recorded['database'] = database
+
+        monkeypatch.setattr(
+            'cmdb.interface.rest_api.routes.open_celium_routes.oc_connector_helper.OcConnectorManager',
+            _RecordingManager,
+        )
+
+        app = BaseCmdbApp(__name__)
+        app.database_manager = 'the-dbm'
+        app.cloud_mode = False
+        app.local_mode = False
+        request_user = SimpleNamespace(database='db_customer')
+
+        with app.app_context():
+            manager = build_connector_manager(request_user)
+
+        assert isinstance(manager, _RecordingManager)
+        assert recorded == {'dbm': 'the-dbm', 'database': 'db_customer'}

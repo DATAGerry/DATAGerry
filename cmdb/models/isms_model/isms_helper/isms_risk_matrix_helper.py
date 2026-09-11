@@ -102,7 +102,7 @@ def ensure_default_risk_matrix(risk_matrix_manager: RiskMatrixManager) -> dict[s
     return current_risk_matrix
 
 
-def calculate_risk_matrix(request_user: CmdbUser) -> None:
+def calculate_risk_matrix(request_user: CmdbUser) -> dict[str, Any]:
     """
     Regenerates the IsmsRiskMatrix from the current impact and likelihood scales
 
@@ -113,6 +113,10 @@ def calculate_risk_matrix(request_user: CmdbUser) -> None:
 
     Args:
         request_user (CmdbUser): The user requesting this operation
+
+    Returns:
+        dict[str, Any]: The IsmsRiskMatrix as it was just written, so a caller needing the fresh grid
+                        does not have to read it back
     """
     likelihood_manager: LikelihoodManager = ManagerProvider.get_manager(ManagerType.LIKELIHOOD, request_user)
     impact_manager: ImpactManager = ManagerProvider.get_manager(ManagerType.IMPACT, request_user)
@@ -131,6 +135,49 @@ def calculate_risk_matrix(request_user: CmdbUser) -> None:
     )
 
     risk_matrix_manager.update_item(RISK_MATRIX_PUBLIC_ID, current_risk_matrix)
+
+    return current_risk_matrix
+
+
+def ensure_risk_matrix_matches_scales(request_user: CmdbUser,
+                                      stored_risk_matrix: dict[str, Any]) -> dict[str, Any]:
+    """
+    Rebuilds the stored grid when its shape no longer matches the current scales
+
+    **Why a read repairs anything at all.** The grid is only ever written by the six impact and
+    likelihood write routes, so a database whose stored grid is wrong stays wrong forever - no read,
+    no restart and no later scale configuration corrects it. That is not hypothetical: every database
+    configured under the old minimum-configuration guard (scales created before the first
+    IsmsRiskClass) holds an empty grid that the guard's removal did not repair, and a restored dump or
+    a directly seeded database can arrive in the same state. Recomputing on read is what makes the
+    grid self-correcting.
+
+    **The check is two counts, not two scale loads.** The healthy path - every read of a correctly
+    built matrix - costs one `count_documents` per scale and nothing else; the full scales are only
+    read when the shape actually disagrees. A grid whose CELL COUNT matches the cross-product is
+    treated as current: the pairs inside it can only drift through a scale write, and every scale
+    write rebuilds the grid.
+
+    Rebuilding preserves the admin's work - `_transfer_risk_classes` carries every assignment whose
+    (impact_id, likelihood_id) pair still exists - so healing can never lose a risk-class assignment
+
+    Args:
+        request_user (CmdbUser): The user requesting this operation
+        stored_risk_matrix (dict[str, Any]): The IsmsRiskMatrix as currently stored
+
+    Returns:
+        dict[str, Any]: The stored matrix when its shape is current, otherwise the rebuilt one
+    """
+    impact_manager: ImpactManager = ManagerProvider.get_manager(ManagerType.IMPACT, request_user)
+    likelihood_manager: LikelihoodManager = ManagerProvider.get_manager(ManagerType.LIKELIHOOD, request_user)
+
+    expected_cell_count: int = impact_manager.count_documents() * likelihood_manager.count_documents()
+    stored_cell_count: int = len(stored_risk_matrix.get(RiskMatrixKey.RISK_MATRIX) or [])
+
+    if stored_cell_count == expected_cell_count:
+        return stored_risk_matrix
+
+    return calculate_risk_matrix(request_user)
 
 
 def remove_deleted_risk_class_from_matrix(deleted_risk_class_id: int, request_user: CmdbUser) -> None:

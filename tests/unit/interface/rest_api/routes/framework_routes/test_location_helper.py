@@ -518,9 +518,7 @@ class TestDeleteLocationWithReparenting:
         """The child nodes are promoted by delete_location; the owning objects' fields are re-pointed."""
         locations_manager = MagicMock(name='locations_manager')
         objects_manager = MagicMock(name='objects_manager')
-        locations_manager.get_locations_by.return_value = [
-            MagicMock(object_id=101), MagicMock(object_id=102),
-        ]
+        locations_manager.get_child_object_ids.return_value = [101, 102]
         locations_manager.delete_location.return_value = True
 
         result = delete_location_with_reparenting(
@@ -529,7 +527,7 @@ class TestDeleteLocationWithReparenting:
 
         assert result is True
         # children snapshotted by parent, then the node deleted (which promotes the child nodes)
-        locations_manager.get_locations_by.assert_called_once_with(parent=OWN_LOCATION_ID)
+        locations_manager.get_child_object_ids.assert_called_once_with(OWN_LOCATION_ID)
         locations_manager.delete_location.assert_called_once_with(OWN_LOCATION_ID)
         # the owning objects' location fields are re-pointed at the grandparent
         objects_manager.set_location_field_for_objects.assert_called_once_with([101, 102], NEW_PARENT_ID)
@@ -538,7 +536,7 @@ class TestDeleteLocationWithReparenting:
         """With no children the node is still deleted and the object-field sync is a no-op ([])."""
         locations_manager = MagicMock(name='locations_manager')
         objects_manager = MagicMock(name='objects_manager')
-        locations_manager.get_locations_by.return_value = []
+        locations_manager.get_child_object_ids.return_value = []
         locations_manager.delete_location.return_value = True
 
         delete_location_with_reparenting(

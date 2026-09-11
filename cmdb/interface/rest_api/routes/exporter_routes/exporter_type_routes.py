@@ -37,6 +37,7 @@ from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.routes.routes_helper import extract_public_ids
 from cmdb.interface.rest_api.routes.exporter_routes.exporter_helper import build_types_json_export_response
+from cmdb.interface.rest_api.routes.exporter_routes.exporter_constants import ExporterRight
 
 from cmdb.errors.models.cmdb_type import CmdbTypeToJsonError
 from cmdb.errors.manager.types_manager import TypesManagerGetError
@@ -51,7 +52,7 @@ exporter_type_blueprint = APIBlueprint('exporter_type', __name__)
 @exporter_type_blueprint.route('/', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@exporter_type_blueprint.protect(auth=True, right='base.export.type.*')
+@exporter_type_blueprint.protect(auth=True, right=ExporterRight.TYPE.value)
 def export_cmdb_types(request_user: CmdbUser) -> Response:
     """
     Exports every CmdbType as a downloadable JSON file
@@ -98,7 +99,7 @@ def export_cmdb_types(request_user: CmdbUser) -> Response:
 @exporter_type_blueprint.route('/<string:public_ids>', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@exporter_type_blueprint.protect(auth=True, right='base.export.type.*')
+@exporter_type_blueprint.protect(auth=True, right=ExporterRight.TYPE.value)
 def export_cmdb_types_by_ids(public_ids: str, request_user: CmdbUser) -> Response:
     """
     Exports the selected CmdbTypes by their public_ids as a downloadable JSON file

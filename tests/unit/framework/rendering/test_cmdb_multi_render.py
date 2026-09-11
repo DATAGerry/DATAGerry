@@ -23,6 +23,7 @@ object linking, the reference merges and the decomposed field/section merge help
 """
 from datetime import datetime
 from types import SimpleNamespace
+import logging
 from unittest.mock import Mock, patch
 
 import pytest
@@ -36,6 +37,7 @@ from cmdb.models.type_model import CmdbType
 from cmdb.models.type_model.field_type_enum import FieldType
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.type_model.type_reference import TypeReference
+from cmdb.models.type_model.type_reference_key_enum import TypeReferenceKey
 from cmdb.errors.models.cmdb_type import CmdbTypeFieldNotFoundError
 from tests.utils.ipam_doc_builders import make_type_doc
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -1213,18 +1215,58 @@ class TestRenderDegradation:
 
         assert merged == []
 
-    def test_a_failing_summary_line_fill_is_swallowed(self, managers) -> None:
-        """__merge_references keeps the reference even when its summary line cannot be filled"""
+    @staticmethod
+    def _render_with_summary_line(managers, summary_line: str):
+        """A renderer whose referenced type configures the given summary line."""
         ref_type = Mock()
         ref_type.get_public_id.return_value = REF_TYPE_ID
         ref_type.label = 'Ref'
         ref_type.get_icon.return_value = None
         ref_type.has_nested_prefix.return_value = False
-        ref_type.get_nested_summary_line.return_value = 'Name {}'
+        ref_type.get_nested_summary_line.return_value = summary_line
         ref_type.get_nested_summary_fields.return_value = [{'name': NAME_FIELD, 'type': FieldType.TEXT}]
         render = _render(managers, [], types_cache={}, objects_cache={})
         render.objects_cache[REF_OBJ_ID] = _ref_obj()
         render.types_cache[REF_TYPE_ID] = ref_type
+
+        return render
+
+    def test_an_unfillable_summary_line_is_answered_as_no_line(self, managers, caplog) -> None:
+        """
+        A line whose placeholders do not fit the summary values is answered EMPTY, not raw
+
+        fill_line leaves the template in place, and until 2026-09-10 the reference was answered with
+        it - so the Angular reference field rendered a literal '{}' (it shows `line` verbatim when
+        one is set). An empty line is its documented fallback: icon + label + #id + the summary
+        fields. The mismatch is reported at WARNING, because a summary line that no longer fits its
+        type is a configuration problem.
+        """
+        render = self._render_with_summary_line(managers, 'Name {} in {}')
+
+        with caplog.at_level(logging.WARNING):
+            result = render._CmdbMultiRender__merge_references({'value': REF_OBJ_ID, 'summaries': [{}]})
+
+        assert result[TypeReferenceKey.LINE.value] == ''
+        assert result[TypeReferenceKey.OBJECT_ID.value] == REF_OBJ_ID
+        assert str(REF_TYPE_ID) in caplog.text
+
+    def test_an_unfillable_line_keeps_the_summary_fields(self, managers) -> None:
+        """
+        The summary fields are what the frontend falls back to, so they must survive the failure
+
+        They are dropped for a line that needs no placeholders (the line carries the information
+        instead) - but once the line is gone, dropping them too would leave the block with nothing
+        but the id.
+        """
+        render = self._render_with_summary_line(managers, 'Name {} in {}')
+
+        result = render._CmdbMultiRender__merge_references({'value': REF_OBJ_ID, 'summaries': [{}]})
+
+        assert result[TypeReferenceKey.SUMMARIES.value]
+
+    def test_a_failing_line_check_still_answers_a_reference(self, managers) -> None:
+        """An unexpected error anywhere in the merge answers the reference built so far, never None"""
+        render = self._render_with_summary_line(managers, 'Name {}')
 
         with patch.object(TypeReference, 'line_requires_fields', side_effect=RuntimeError('bad line')):
             result = render._CmdbMultiRender__merge_references({'value': REF_OBJ_ID, 'summaries': [{}]})

@@ -34,6 +34,7 @@ from cmdb.interface.route_utils import insert_request_user, verify_api_access, h
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.rest_api.responses import DefaultResponse
 from cmdb.interface.rest_api.routes.open_celium_routes.oc_connector_helper import (
+    build_connector_manager,
     connector_in_subscription,
     validate_master_password,
     get_accessible_connector_ids,
@@ -71,10 +72,7 @@ def create_oc_connector(request_user: CmdbUser) -> Response:
         dict[str, Any]: The created OcConnector
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         params: dict[str, Any] = request.json
 
@@ -135,10 +133,7 @@ def check_oc_connector(request_user: CmdbUser) -> Response:
     Returns:
         dict[str, Any]: The created OcConnector
     """
-    oc_connector_manager: OcConnectorManager = OcConnectorManager(
-        current_app.database_manager,
-        request_user.database
-    )
+    oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
     params: dict[str, Any] = request.json
 
@@ -166,10 +161,7 @@ def check_oc_connector_master_pw(request_user: CmdbUser) -> Response:
     """
 
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         params: dict[str, Any] = request.json
         provided_pw = params.get(OcResponseKey.PASSWORD.value)
@@ -274,10 +266,7 @@ def get_oc_connector(request_user: CmdbUser, connector_id: int) -> Response:
         Response: DefaultResponse containing the OC Connector data
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         master_password = request.headers.get(MASTER_PW_HEADER)
 
@@ -364,12 +353,9 @@ def check_master_password(request_user: CmdbUser) -> Response:
         if not master_pw:
             abort(400, "No master password provided via header!")
 
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
-        pw_valid_response = oc_connector_manager.check_master_pw(master_pw, True)
+        pw_valid_response = oc_connector_manager.get_master_pw_status(master_pw)
 
         return DefaultResponse(pw_valid_response).make_response()
     except HTTPException as http_err:
@@ -395,10 +381,7 @@ def check_master_password_exists(request_user: CmdbUser) -> Response:
         Response: The response from OpenCelium
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         pw_exists_response = oc_connector_manager.check_master_pw_exists()
 
@@ -429,10 +412,7 @@ def get_all_oc_connectors(request_user: CmdbUser) -> Response:
         Response: DefaultResponse containing all OC Connectors
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         connectors: list[dict[str, Any]] = []
 
@@ -486,10 +466,7 @@ def check_oc_connector_exists(request_user: CmdbUser, title: str) -> Response:
         bool: True if the connector exists, else False
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         if current_app.cloud_mode and not current_app.local_mode:
             title = map_oc_name(request_user.database, title)
@@ -525,10 +502,7 @@ def update_oc_connector(request_user: CmdbUser, connector_id: int) -> Response:
         Response: DefaultResponse containing the updated OC Connector
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         params: dict[str, Any] = request.json
 
@@ -586,10 +560,7 @@ def delete_oc_connector(request_user: CmdbUser, connector_id: int) -> Response:
     """
     # No local try/except: delete_connector returns a bool and raises no domain error, so any
     # transport failure (or the not-found abort below) is handled by the outer @handle_oc_errors.
-    oc_connector_manager: OcConnectorManager = OcConnectorManager(
-        current_app.database_manager,
-        request_user.database
-    )
+    oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
     dg_sp_manager = None
     cached_user_manager = None
@@ -635,10 +606,7 @@ def create_oc_internal_connector(request_user: CmdbUser) -> Response:
         Response: DefaultResponse containing the created OcConnector
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         params: dict[str, Any] = request.json
 
@@ -694,10 +662,7 @@ def update_internal_oc_connector(request_user: CmdbUser) -> Response:
         Response: DefaultResponse containing the updated OcConnector
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
         params: dict[str, Any] = request.json
 
         # ----------------------------------------------------------
@@ -756,10 +721,7 @@ def get_internal_oc_connector(request_user: CmdbUser) -> Response:
         dict[str, Any]: The OcConnector from OpenCelium
     """
     try:
-        oc_connector_manager: OcConnectorManager = OcConnectorManager(
-            current_app.database_manager,
-            request_user.database
-        )
+        oc_connector_manager: OcConnectorManager = build_connector_manager(request_user)
 
         # Cloud-only collaborators; left None on-premise where the cloud branches are skipped
         dg_sp_manager = None

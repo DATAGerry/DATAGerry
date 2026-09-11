@@ -14,15 +14,22 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
-Shared constants for the CmdbObject export REST routes
+Shared constants for the export REST routes
 
-Covers only the object export, which is driven by the export engine in `cmdb/framework/exporter`. The
-CmdbType export has its own module, `exporter_type_constants`
+The format constants and query parameters cover only the object export, which is driven by the export
+engine in `cmdb/framework/exporter`; the CmdbType export has its own module, `exporter_type_constants`.
+ExporterRight spans the package, since the right an export route checks is the one thing both modules
+have
 """
 from cmdb.utils import BaseStrEnum
 # -------------------------------------------------------------------------------------------------------------------- #
 
-__all__: list[str] = ['ZIP_EXPORT_FORMAT', 'DEFAULT_EXPORT_FORMAT', 'ExporterQueryParam']
+__all__: list[str] = [
+    'ZIP_EXPORT_FORMAT',
+    'DEFAULT_EXPORT_FORMAT',
+    'ExporterQueryParam',
+    'ExporterRight',
+]
 
 # The 'zip' export packs an underlying format, so its class is a valid dynamic-load target too
 ZIP_EXPORT_FORMAT: str = 'ZipExportFormat'
@@ -35,3 +42,16 @@ class ExporterQueryParam(BaseStrEnum):
     """Query-parameter keys consumed by the object-export route"""
     ZIP = 'zip'
     CLASSNAME = 'classname'
+
+
+class ExporterRight(BaseStrEnum):
+    """
+    ACL right identifiers guarding the export REST routes
+
+    Both surfaces are guarded by their family's wildcard ('*' = every right below that prefix), neither
+    splitting further. The values mirror ExportObjectRight / ExportTypeRight in the right model - a
+    value that does not exist there denies every caller, which is why they are written down once here
+    instead of being spelled at each route
+    """
+    OBJECT = 'base.export.object.*'
+    TYPE = 'base.export.type.*'

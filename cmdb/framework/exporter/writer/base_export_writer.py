@@ -192,9 +192,8 @@ class BaseExportWriter:
 
         try:
             locations_manager = LocationsManager(self._dbm, self._db_name)
-            locations = locations_manager.get_locations_by(public_id={'$in': list(location_ids)})
 
-            return {location.public_id: location.name for location in locations}
+            return locations_manager.get_location_names(list(location_ids))
         except LocationsManagerGetError as err:
             LOGGER.error("[_resolve_location_names] Could not resolve location names: %s", err)
 

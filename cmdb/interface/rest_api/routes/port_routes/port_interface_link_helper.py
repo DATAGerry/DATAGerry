@@ -29,18 +29,26 @@ from typing import Any
 
 from flask import abort
 
-from cmdb.manager import ObjectsManager
+from cmdb.manager import ObjectsManager, TypesManager
 from cmdb.manager.port_interface_links_manager import PortInterfaceLinksManager
 from cmdb.manager.ports_manager import PortsManager
 
 from cmdb.models.port_interface_link_model import InterfaceRelationType, PortInterfaceLinkKey
+from cmdb.models.object_model.cmdb_object_key_enum import CmdbObjectKey, CmdbObjectMdsKey
 from cmdb.models.special_type_model.ipam_constants import IpamSection
 from cmdb.models.user_model import CmdbUser
 
 from cmdb.security.acl.permission import AccessControlPermission
+from cmdb.security.acl.builder import resolve_denied_type_ids
 
 from cmdb.utils import coerce_whole_number
 
+from cmdb.framework.ipam.assignable_objects import find_ipam_capable_type_ids
+from cmdb.framework.port.assignable_interfaces import (
+    build_assignable_interface_rows,
+    build_subnet_lookup,
+    referenced_subnet_ids,
+)
 from cmdb.framework.port.interface_links import find_interface_row, resolve_link_row
 
 from cmdb.interface.rest_api.routes.port_routes.port_interface_link_constants import (
@@ -395,3 +403,143 @@ def read_interface_objects(
             resolved[object_id] = interface_object
 
     return resolved
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                                the picker's reads                                                    #
+# -------------------------------------------------------------------------------------------------------------------- #
+
+def read_assignable_candidate_objects(
+        objects_manager: ObjectsManager,
+        types_manager: TypesManager,
+        owner_object_id: Any,
+        request_user: CmdbUser,
+        all_objects: bool) -> list[dict[str, Any]]:
+    """
+    Reads the CmdbObjects whose interface rows the picker may offer
+
+    Two shapes, one per scope. The narrow one is a single document read - the port's own object, whose
+    ACL the caller already passed to reach this route at all. The wide one asks the types collection
+    which types declare the interface section and which the caller may NOT read, then issues ONE object
+    query filtered on both plus the presence of an interface section: an object with no rows to offer
+    never enters the result. The ACL is applied as a `type_id $nin`, the same shape the object pipeline
+    uses, rather than as a per-object check
+
+    Args:
+        objects_manager (ObjectsManager): db interface for CmdbObjects
+        types_manager (TypesManager): db interface for CmdbTypes
+        owner_object_id (Any): public_id of the CmdbObject owning the port
+        request_user (CmdbUser): The user performing the request, whose ACL filters the candidates
+        all_objects (bool): Widen from the port's own object to every interface-bearing object
+
+    Returns:
+        list[dict[str, Any]]: The candidate CmdbObject documents, empty when none qualifies
+    """
+    if not all_objects:
+        owner: dict[str, Any] | None = objects_manager.get_object(owner_object_id, as_dict=True)
+
+        return [owner] if owner else []
+
+    capable_type_ids: list[int] = find_ipam_capable_type_ids(types_manager)
+    denied_type_ids: set[int] = set(resolve_denied_type_ids(request_user, AccessControlPermission.READ))
+    allowed_type_ids: list[int] = [type_id for type_id in capable_type_ids if type_id not in denied_type_ids]
+
+    if not allowed_type_ids:
+        return []
+
+    return objects_manager.find_objects(
+        {
+            CmdbObjectKey.TYPE_ID.value: {'$in': allowed_type_ids},
+            f'{CmdbObjectKey.MULTI_DATA_SECTIONS.value}.{CmdbObjectMdsKey.SECTION_ID.value}':
+                IpamSection.INTERFACE.value,
+        },
+        as_dict=True,
+    )
+
+
+def read_assignable_lookups(
+        objects_manager: ObjectsManager,
+        types_manager: TypesManager,
+        candidate_objects: list[dict[str, Any]]) -> tuple[dict[int, str], dict[int, str]]:
+    """
+    Bulk-resolves the type labels and summary lines the picker rows display
+
+    Two queries for the whole page whatever the row count: the documents are already in hand, so the
+    summary lines are composed from them rather than read back one object at a time
+
+    Args:
+        objects_manager (ObjectsManager): db interface for CmdbObjects
+        types_manager (TypesManager): db interface for CmdbTypes
+        candidate_objects (list[dict[str, Any]]): The candidate CmdbObject documents
+
+    Returns:
+        tuple[dict[int, str], dict[int, str]]: ({type_id: label}, {object public_id: summary line})
+    """
+    if not candidate_objects:
+        return {}, {}
+
+    type_ids: list[int] = list({
+        object_doc[CmdbObjectKey.TYPE_ID.value] for object_doc in candidate_objects
+        if object_doc.get(CmdbObjectKey.TYPE_ID.value) is not None
+    })
+    object_ids: list[int] = [
+        object_doc[CmdbObjectKey.PUBLIC_ID.value] for object_doc in candidate_objects
+        if object_doc.get(CmdbObjectKey.PUBLIC_ID.value) is not None
+    ]
+
+    type_labels: dict[int, str] = {
+        type_id: cmdb_type.label for type_id, cmdb_type in types_manager.get_types_lookup(type_ids).items()
+    }
+    summary_lines: dict[int, str] = objects_manager.get_summary_lines_lookup(
+        object_ids, object_docs=candidate_objects,
+    )
+
+    return type_labels, summary_lines
+
+
+def read_assignable_interface_rows(
+        objects_manager: ObjectsManager,
+        types_manager: TypesManager,
+        port_interface_links_manager: PortInterfaceLinksManager,
+        port: dict[str, Any],
+        request_user: CmdbUser,
+        all_objects: bool) -> list[dict[str, Any]]:
+    """
+    Reads and shapes every interface row the picker may offer for one CmdbPort
+
+    The whole read side of the picker in one place, so the route stays a route: the candidate objects,
+    the port's own links (the exclusion), the label / summary-line lookups and the subnet names. Four
+    queries at most for the entire page, none of them per row
+
+    Args:
+        objects_manager (ObjectsManager): db interface for CmdbObjects
+        types_manager (TypesManager): db interface for CmdbTypes
+        port_interface_links_manager (PortInterfaceLinksManager): db interface for the links
+        port (dict[str, Any]): The CmdbPort the interface would be linked to
+        request_user (CmdbUser): The user performing the request, whose ACL filters the candidates
+        all_objects (bool): Widen from the port's own object to every interface-bearing object
+
+    Returns:
+        list[dict[str, Any]]: The offerable rows, shaped and ordered, before search and pagination
+    """
+    candidate_objects: list[dict[str, Any]] = read_assignable_candidate_objects(
+        objects_manager, types_manager, port.get(PortKey.OBJECT_ID.value), request_user, all_objects,
+    )
+
+    linked_rows: set[tuple[Any, Any]] = {
+        (link.get(PortInterfaceLinkKey.INTERFACE_OBJECT_ID.value),
+         link.get(PortInterfaceLinkKey.INTERFACE_MULTI_DATA_ID.value))
+        for link in port_interface_links_manager.get_links_of_port(port.get(PortKey.PUBLIC_ID.value))
+    }
+
+    type_labels, summary_lines = read_assignable_lookups(objects_manager, types_manager, candidate_objects)
+    subnet_names: dict[int, str] = build_subnet_lookup(
+        objects_manager.find_objects(
+            {CmdbObjectKey.PUBLIC_ID.value: {'$in': referenced_subnet_ids(candidate_objects)}},
+            as_dict=True,
+        ),
+    )
+
+    return build_assignable_interface_rows(
+        candidate_objects, linked_rows, type_labels, summary_lines, subnet_names,
+    )

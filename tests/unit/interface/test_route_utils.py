@@ -47,6 +47,7 @@ from cmdb.errors.database import (
 )
 from cmdb.errors.security import (
     TokenValidationError,
+    TokenKeyMaterialError,
     InvalidCloudUserError,
     NoAccessTokenError,
     MissingApiKeyError,
@@ -54,7 +55,6 @@ from cmdb.errors.security import (
     RequestError,
 )
 from cmdb.errors.manager.users_manager import UsersManagerInsertError, UsersManagerGetError
-from cmdb.errors.manager.groups_manager import GroupsManagerGetError
 from cmdb.errors.open_celium import AuthError
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -122,6 +122,21 @@ class TestUserHasRight:
                 with pytest.raises(HTTPException) as exc_info:
                     ru.user_has_right('base.right')
         assert exc_info.value.code == HTTPStatus.UNAUTHORIZED
+
+    def test_key_material_failure_aborts_500(self) -> None:
+        """
+        A server-side key problem is not a bad credential
+
+        401 would tell the frontend the session ended and log the user out over an installation
+        problem their token had nothing to do with.
+        """
+        with patch(f'{MODULE_PATH}.UsersManager'), patch(f'{MODULE_PATH}.GroupsManager'), \
+             patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
+             patch(f'{MODULE_PATH}.decode_request_token', side_effect=TokenKeyMaterialError('no key')):
+            with _app().test_request_context(headers={'Authorization': BEARER_HEADER}):
+                with pytest.raises(HTTPException) as exc_info:
+                    ru.user_has_right('base.right')
+        assert exc_info.value.code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     def test_returns_true_when_group_has_right(self) -> None:
         """A group holding the right returns True."""
@@ -274,6 +289,16 @@ class TestInsertRequestUser:
                 with pytest.raises(HTTPException) as exc_info:
                     ru.insert_request_user(lambda **_: None)()
         assert exc_info.value.code == HTTPStatus.UNAUTHORIZED
+
+    def test_key_material_failure_aborts_500(self) -> None:
+        """The decorator every route carries reports a key problem as the server's, not the caller's"""
+        with patch(f'{MODULE_PATH}.UsersManager'), \
+             patch(f'{MODULE_PATH}.parse_authorization_header', return_value='tok'), \
+             patch(f'{MODULE_PATH}.decode_request_token', side_effect=TokenKeyMaterialError('no key')):
+            with _app().test_request_context(headers={'Authorization': BEARER_HEADER}):
+                with pytest.raises(HTTPException) as exc_info:
+                    ru.insert_request_user(lambda **_: None)()
+        assert exc_info.value.code == HTTPStatus.INTERNAL_SERVER_ERROR
 
     def test_generic_token_error_aborts_401(self) -> None:
         """Any non-token-specific error during decode aborts with 401."""
@@ -561,6 +586,130 @@ class TestParseAuthorizationHeader:
         """An unsupported scheme yields None."""
         assert ru.parse_authorization_header('Digest abc') is None
 
+    def test_the_parse_is_cached_for_the_request(self) -> None:
+        """
+        The same header is parsed once per request
+
+        Parsing a bearer header VALIDATES the token (see _validate_bearer), and a route carries up to
+        three decorators that each call this - the second and third read the cached answer.
+        """
+        with patch(f'{MODULE_PATH}._validate_bearer', return_value='sometoken') as mocked:
+            with _app().test_request_context():
+                first = ru.parse_authorization_header(BEARER_HEADER)
+                second = ru.parse_authorization_header(BEARER_HEADER)
+
+        assert (first, second) == ('sometoken', 'sometoken')
+        mocked.assert_called_once_with('sometoken')
+
+    def test_a_different_header_is_parsed_on_its_own(self) -> None:
+        """The cache is keyed by the header, so two credentials in one request cannot be confused"""
+        with patch(f'{MODULE_PATH}._validate_bearer', side_effect=['first', 'second']) as mocked:
+            with _app().test_request_context():
+                assert ru.parse_authorization_header('Bearer one') == 'first'
+                assert ru.parse_authorization_header('Bearer two') == 'second'
+
+        assert mocked.call_count == 2
+
+    def test_a_refused_header_is_cached_too(self) -> None:
+        """A None answer is an answer: re-validating a bad token per decorator buys nothing"""
+        with patch(f'{MODULE_PATH}._validate_bearer', return_value=None) as mocked:
+            with _app().test_request_context():
+                assert ru.parse_authorization_header(BEARER_HEADER) is None
+                assert ru.parse_authorization_header(BEARER_HEADER) is None
+
+        mocked.assert_called_once()
+
+    def test_without_a_request_nothing_is_cached(self) -> None:
+        """
+        The helpers stay callable outside a request
+
+        There is nothing to scope a cache to then - a CLI path or a direct unit test - so each call
+        parses again rather than failing. The context check is patched rather than assumed: another
+        module in the suite can leave a request context pushed.
+        """
+        with patch(f'{MODULE_PATH}.has_request_context', return_value=False), \
+             patch(f'{MODULE_PATH}._validate_bearer', return_value='sometoken') as mocked:
+            assert ru.parse_authorization_header(BEARER_HEADER) == 'sometoken'
+            assert ru.parse_authorization_header(BEARER_HEADER) == 'sometoken'
+
+        assert mocked.call_count == 2
+
+
+# ================================================ decode_request_token ============================================== #
+
+class TestDecodeRequestToken:
+    """The decode every decorator of a route shares."""
+
+    def test_the_claims_are_answered(self) -> None:
+        """The claims are what the caller reads the acting user out of"""
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
+            with _app().test_request_context():
+                assert ru.decode_request_token('sometoken') == DECODED_TOKEN
+
+    def test_the_decode_is_cached_for_the_request(self) -> None:
+        """
+        One RSA verification and one key read per request instead of one per decorator
+
+        A single GET was measured at 4 decodes and 12 reads of the key document before this.
+        """
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
+            with _app().test_request_context():
+                ru.decode_request_token('sometoken')
+                ru.decode_request_token('sometoken')
+
+        tv_cls.return_value.decode_token.assert_called_once()
+
+    def test_a_bytes_token_hits_the_same_cache_entry(self) -> None:
+        """The generator answers bytes and the header carries a str - the same token either way"""
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
+            with _app().test_request_context():
+                ru.decode_request_token('sometoken')
+                ru.decode_request_token(b'sometoken')
+
+        tv_cls.return_value.decode_token.assert_called_once()
+
+    def test_a_failure_is_not_cached_as_a_result(self) -> None:
+        """A refused token raises for every caller, rather than the first one poisoning the cache"""
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.side_effect = TokenValidationError('bad')
+            with _app().test_request_context():
+                for _ in range(2):
+                    with pytest.raises(TokenValidationError):
+                        ru.decode_request_token('sometoken')
+
+        assert tv_cls.return_value.decode_token.call_count == 2
+
+    def test_without_a_request_it_still_decodes(self) -> None:
+        """No request to scope a cache to is not an error - it just decodes every time"""
+        with patch(f'{MODULE_PATH}.has_request_context', return_value=False), \
+             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
+
+            assert ru.decode_request_token('sometoken') == DECODED_TOKEN
+            assert ru.decode_request_token('sometoken') == DECODED_TOKEN
+            assert tv_cls.return_value.decode_token.call_count == 2
+
+
+# ================================================= token_user_claim ================================================= #
+
+class TestTokenUserClaim:
+    """Reading the acting user out of the wrapped DataGerry claim."""
+
+    def test_the_user_payload_is_answered(self) -> None:
+        """Four call sites used to spell claims['DATAGERRY']['value']['user'] by hand"""
+        assert ru.token_user_claim(DECODED_TOKEN)['public_id'] == DECODED_TOKEN['DATAGERRY']['value']['user'][
+            'public_id'
+        ]
+
+    @pytest.mark.parametrize('claims', [{}, {'DATAGERRY': {}}, {'DATAGERRY': {'value': {}}}])
+    def test_a_token_without_the_payload_raises(self, claims: dict) -> None:
+        """The callers turn this into a 401 - a token without a user identifies nobody"""
+        with pytest.raises(KeyError):
+            ru.token_user_claim(claims)
+
 
 # ================================================ _authenticate_basic =============================================== #
 
@@ -667,12 +816,52 @@ class TestValidateBearer:
             with _app().test_request_context():
                 assert ru._validate_bearer('sometoken') == 'sometoken'
 
-    def test_invalid_token_returns_none(self) -> None:
-        """A token that fails validation yields None."""
+    def test_expired_token_returns_none(self) -> None:
+        """
+        A token whose claims fail validation yields None
+
+        This is the ONLY place expiry is enforced for a request - the per-route decorators decode
+        but do not re-validate - so the step is asserted here by name.
+        """
         with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
-            tv_cls.return_value.validate_token.side_effect = TokenValidationError('bad')
+            tv_cls.return_value.validate_claims.side_effect = TokenValidationError('expired')
             with _app().test_request_context():
                 assert ru._validate_bearer('sometoken') is None
+
+    def test_foreign_issuer_returns_none(self) -> None:
+        """A token this product did not issue is refused, even with a valid signature"""
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.validate_issuer.side_effect = TokenValidationError('foreign')
+            with _app().test_request_context():
+                assert ru._validate_bearer('sometoken') is None
+
+    def test_without_a_request_the_claims_are_not_cached(self) -> None:
+        """
+        The validation still runs, there is simply nowhere to keep its result
+
+        `_validate_bearer` hands its already-decoded claims to the request cache so the decorators
+        do not decode again; called outside a request there is no cache to hand them to.
+        """
+        with patch(f'{MODULE_PATH}.has_request_context', return_value=False), \
+             patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.return_value = DECODED_TOKEN
+            with _app().test_request_context():
+                assert ru._validate_bearer('sometoken') == 'sometoken'
+
+        tv_cls.return_value.validate_claims.assert_called_once()
+
+    def test_a_key_material_failure_is_not_answered_as_a_bad_token(self) -> None:
+        """
+        A server-side key problem propagates instead of degrading to None
+
+        Answering None here would make the caller abort 401, i.e. log every user out over a
+        misconfigured installation.
+        """
+        with patch(f'{MODULE_PATH}.TokenValidator') as tv_cls:
+            tv_cls.return_value.decode_token.side_effect = TokenKeyMaterialError('no key')
+            with _app().test_request_context():
+                with pytest.raises(TokenKeyMaterialError):
+                    ru._validate_bearer('sometoken')
 
 
 # =============================================== validate_right_cloud_api =========================================== #

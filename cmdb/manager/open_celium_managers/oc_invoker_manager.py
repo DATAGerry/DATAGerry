@@ -15,12 +15,22 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Implementation of OpenCelium InvokerManager
+
+An invoker is the OpenCelium plugin that knows how to talk to a given system; a connector is one
+configured instance of one. DataGerry stores none of them - every method here is a single HTTP call
+and answers whatever OpenCelium answered
 """
 from logging import Logger, getLogger
 from typing import Any
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
 from cmdb.manager.open_celium_managers.oc_base_manager import OcBaseManager
+
+from cmdb.open_celium.oc_constants import (
+    OC_EXISTS_RESULT_KEY,
+    OC_FLAG_DISABLED_VALUE,
+    OC_OPS_INCLUDED_PARAM,
+)
 
 from cmdb.errors.open_celium.invoker import OcInvokerGetError
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -87,7 +97,7 @@ class OcInvokerManager(OcBaseManager):
             f"Failed to check OpenCelium Invoker with name: {name}",
         )
 
-        return bool(data.get('result'))
+        return bool(data.get(OC_EXISTS_RESULT_KEY))
 
 
     def get_all_invokers(self, with_operations: bool = True) -> list[dict[str, Any]]:
@@ -106,7 +116,10 @@ class OcInvokerManager(OcBaseManager):
         invoker_route: str = ALL_INVOKERS_URL
 
         if not with_operations:
-            invoker_route = f"{ALL_INVOKERS_URL}?opsIncluded=false"
+            # The parameter is OpenCelium's, named in oc_constants so the route that reads it off the
+            # request and this call that forwards it cannot spell it differently
+            query = urlencode({OC_OPS_INCLUDED_PARAM: OC_FLAG_DISABLED_VALUE})
+            invoker_route = f"{ALL_INVOKERS_URL}?{query}"
 
         return self.parse_response(
             self.oc_connector.oc_get(invoker_route),

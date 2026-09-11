@@ -24,6 +24,9 @@ The reference to that row is SOFT - it addresses a non-durable MDS row id, so a 
 is tolerated and reported rather than cascaded
 """
 from cmdb.models.port_interface_link_model.port_interface_link_constants import (
+    AssignableInterfaceKey,
+    AssignableInterfaceObjectKey,
+    AssignableInterfaceSubnetKey,
     InterfaceRelationType,
     PortInterfaceLinkKey,
     INTERFACE_REFERENCE_KEYS,
@@ -36,6 +39,9 @@ from cmdb.models.port_interface_link_model.cmdb_port_interface_link import CmdbP
 # -------------------------------------------------------------------------------------------------------------------- #
 
 __all__: list[str] = [
+    'AssignableInterfaceKey',
+    'AssignableInterfaceObjectKey',
+    'AssignableInterfaceSubnetKey',
     'InterfaceRelationType',
     'PortInterfaceLinkKey',
     'INTERFACE_REFERENCE_KEYS',

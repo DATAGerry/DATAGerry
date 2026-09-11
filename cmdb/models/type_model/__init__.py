@@ -29,6 +29,7 @@ from .section_type_enum import SectionType
 from .field_key_enum import FieldKey
 from .section_key_enum import SectionKey
 from .section_reference_key_enum import SectionReferenceKey
+from .type_reference_key_enum import TypeReferenceKey
 from .type_schema_key_enum import TypeSchemaKey
 from .type_constants import DG_LOCATION_FIELD_NAME
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -47,6 +48,7 @@ __all__: list[str] = [
     'FieldKey',
     'SectionKey',
     'SectionReferenceKey',
+    'TypeReferenceKey',
     'TypeSchemaKey',
     'DG_LOCATION_FIELD_NAME',
 ]

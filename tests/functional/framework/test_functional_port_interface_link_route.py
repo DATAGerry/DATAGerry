@@ -36,6 +36,9 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.port_model import CmdbPort, PortKey, PortSide
 from cmdb.models.port_interface_link_model import (
+    AssignableInterfaceKey,
+    AssignableInterfaceObjectKey,
+    AssignableInterfaceSubnetKey,
     CmdbPortInterfaceLink,
     InterfaceRelationType,
     PortInterfaceLinkKey,
@@ -75,6 +78,11 @@ MISSING_OBJECT_ID: int = 9996
 ROW_ID: int = 1
 OTHER_ROW_ID: int = 2
 MISSING_ROW_ID: int = 99
+
+ROW_IP: str = '10.0.0.1'
+OTHER_ROW_IP: str = '10.0.0.2'
+ROW_MAC: str = '00:1A:2B:3C:4D:5E'
+OTHER_ROW_MAC: str = '00:1A:2B:3C:4D:5F'
 
 NAME_FIELD: str = 'dg-name'
 
@@ -118,12 +126,29 @@ def _type_doc(public_id: int, uses_ports: bool = False) -> dict[str, Any]:
     }
 
 
-def _interface_row(multi_data_id: int, ip: str) -> dict[str, Any]:
-    """One dg-ipam-interface MDS row."""
+def _interface_row(multi_data_id: int, ip: str, mac: str = ROW_MAC) -> dict[str, Any]:
+    """
+    One dg-ipam-interface MDS row, carrying both addresses the section declares
+
+    IP and MAC are the two values the interface is the single source of truth for - the concept keeps
+    neither on the port - so a fixture holding only the IP would let the read path drop the MAC
+    unnoticed.
+    """
     return {
         'multi_data_id': multi_data_id,
-        'data': [{'name': InterfaceField.IP.value, 'value': ip, 'type': FieldType.TEXT.value}],
+        'data': [
+            {'name': InterfaceField.IP.value, 'value': ip, 'type': FieldType.TEXT.value},
+            {'name': InterfaceField.MAC.value, 'value': mac, 'type': FieldType.TEXT.value},
+        ],
     }
+
+
+def _row_value(interface_row: dict[str, Any], field_name: str) -> Any:
+    """Reads one field value out of an interface row, by name rather than by position."""
+    return next(
+        (entry.get('value') for entry in interface_row.get('data', []) if entry.get('name') == field_name),
+        None,
+    )
 
 
 def _object_doc(public_id: int, type_id: int, rows: list[dict[str, Any]] | None = None) -> dict[str, Any]:
@@ -195,7 +220,8 @@ def fixture_seeded(database_manager: MongoDatabaseManager, database_name: str):
     objects.insert_many([
         _object_doc(SWITCH_OBJECT_ID, PORT_TYPE_ID),
         _object_doc(HOST_OBJECT_ID, HOST_TYPE_ID, [
-            _interface_row(ROW_ID, '10.0.0.1'), _interface_row(OTHER_ROW_ID, '10.0.0.2'),
+            _interface_row(ROW_ID, ROW_IP),
+            _interface_row(OTHER_ROW_ID, OTHER_ROW_IP, OTHER_ROW_MAC),
         ]),
     ])
     ports.insert_many([
@@ -361,14 +387,17 @@ class TestReadLink:
         """
         The point of the link: the interface's values come from the row, never from a copy
 
-        The IP the caller sees is the one stored on the object, so editing the interface is visible
-        immediately and no second truth exists.
+        The IP and the MAC the caller sees are the ones stored on the object, so editing the interface
+        is visible immediately and no second truth exists. The row is handed back whole: the read
+        projects nothing, which is what keeps a field added to the section template later visible here
+        without a change to this route.
         """
         new_id: int = _created_id(_create(rest_api))
 
         link = rest_api.get(f'{LINKS_URL}/{new_id}').get_json()['result']
 
-        assert link[INTERFACE_ROW_KEY]['data'][0]['value'] == '10.0.0.1'
+        assert _row_value(link[INTERFACE_ROW_KEY], InterfaceField.IP.value) == ROW_IP
+        assert _row_value(link[INTERFACE_ROW_KEY], InterfaceField.MAC.value) == ROW_MAC
 
     def test_a_missing_link_is_a_404(self, rest_api) -> None:
         """Addressing a row that does not exist"""
@@ -382,8 +411,11 @@ class TestReadLink:
         links = rest_api.get(f'{PORTS_URL}/{PORT_ID}/interface_links/').get_json()
 
         assert len(links) == 2
-        assert {link[INTERFACE_ROW_KEY]['data'][0]['value'] for link in links} == {
-            '10.0.0.1', '10.0.0.2',
+        assert {_row_value(link[INTERFACE_ROW_KEY], InterfaceField.IP.value) for link in links} == {
+            ROW_IP, OTHER_ROW_IP,
+        }
+        assert {_row_value(link[INTERFACE_ROW_KEY], InterfaceField.MAC.value) for link in links} == {
+            ROW_MAC, OTHER_ROW_MAC,
         }
 
     def test_a_port_without_links_answers_with_an_empty_list(self, rest_api) -> None:
@@ -820,3 +852,176 @@ class TestErrorMapping:
         response = rest_api.get(f'{PORTS_URL}/{PORT_ID}/interface_links/')
 
         assert response.status_code == HTTPStatus.FORBIDDEN
+
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                              THE ASSIGNABLE-INTERFACE PICKER                                         #
+# -------------------------------------------------------------------------------------------------------------------- #
+ASSIGNABLE_URL: str = f'{PORTS_URL}/{PORT_ID}/assignable_interfaces/'
+
+SUBNET_TYPE_ID: int = 9962
+SUBNET_OBJECT_ID: int = 9972
+SUBNET_NAME: str = 'Office LAN'
+
+
+class TestAssignableInterfaces:
+    """
+    The picker a client uses to choose what to link, which is the only way to discover an MDS row
+
+    Two scopes: the port's own object by default - a port and its interface normally live on the same
+    device - and every interface-bearing object behind ?all_objects=true, which is what the N:M
+    relation exists for.
+    """
+
+    @pytest.fixture(autouse=True)
+    def _picker_state(self, database_manager: MongoDatabaseManager, database_name: str, seeded):
+        """
+        Makes the host type IPAM-capable and gives the switch an interface row of its own
+
+        The shared fixture seeds a switch carrying the ports and a host carrying the interface rows,
+        which is exactly the cross-device case; the switch needs a row of its own for the default
+        scope to have anything to answer with.
+        """
+        types = database_manager.get_collection(CmdbType.COLLECTION, database_name)
+        objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+
+        interface_section = {'type': SectionType.MDS_SECTION.value,
+                             'name': IpamSection.INTERFACE.value, 'label': 'Interfaces', 'fields': []}
+
+        for type_id in (HOST_TYPE_ID, PORT_TYPE_ID):
+            types.update_one({'public_id': type_id},
+                             {'$push': {'render_meta.sections': interface_section}})
+
+        objects.update_one(
+            {'public_id': SWITCH_OBJECT_ID},
+            {'$set': {'multi_data_sections': [{
+                'section_id': IpamSection.INTERFACE.value,
+                'highest_id': ROW_ID,
+                'values': [_interface_row(ROW_ID, '10.9.9.9', '00:11:22:33:44:55')],
+            }]}},
+        )
+
+        yield objects
+
+        objects.delete_many({'public_id': {'$in': [SUBNET_OBJECT_ID]}})
+        types.delete_many({'public_id': {'$in': [SUBNET_TYPE_ID]}})
+
+    @staticmethod
+    def _rows(rest_api, query: str = '') -> list[dict[str, Any]]:
+        """GETs the picker and returns its rows"""
+        return rest_api.get(f'{ASSIGNABLE_URL}{query}').get_json()['rows']
+
+    def test_the_default_scope_is_the_ports_own_object(self, rest_api) -> None:
+        """The 95% case: a port and the interface it carries live on the same device"""
+        rows = self._rows(rest_api)
+
+        assert [row[AssignableInterfaceKey.INTERFACE_OBJECT_ID.value] for row in rows] == [SWITCH_OBJECT_ID]
+
+    def test_all_objects_widens_to_every_interface_bearing_object(self, rest_api) -> None:
+        """What the N:M relation exists for - an interface reached over a port of another device"""
+        object_ids = {row[AssignableInterfaceKey.INTERFACE_OBJECT_ID.value]
+                      for row in self._rows(rest_api, '?all_objects=true')}
+
+        assert object_ids == {SWITCH_OBJECT_ID, HOST_OBJECT_ID}
+
+    def test_a_row_carries_the_create_payload(self, rest_api) -> None:
+        """The point of the picker: posting a selected row back is a copy, not a translation"""
+        row = self._rows(rest_api)[0]
+
+        response = rest_api.post(
+            f'{PORTS_URL}/{PORT_ID}/interface_links/',
+            json={
+                'interface_object_id': row[AssignableInterfaceKey.INTERFACE_OBJECT_ID.value],
+                'interface_section_id': row[AssignableInterfaceKey.INTERFACE_SECTION_ID.value],
+                'interface_multi_data_id': row[AssignableInterfaceKey.INTERFACE_MULTI_DATA_ID.value],
+                'relation_type': InterfaceRelationType.PHYSICAL.value,
+            },
+        )
+
+        assert response.status_code == HTTPStatus.CREATED
+
+    def test_a_row_carries_the_resolved_values(self, rest_api) -> None:
+        """IP and MAC come from the interface, which is the single source for both"""
+        row = self._rows(rest_api)[0]
+
+        assert row[AssignableInterfaceKey.IP.value] == '10.9.9.9'
+        assert row[AssignableInterfaceKey.MAC.value] == '00:11:22:33:44:55'
+        assert row[AssignableInterfaceKey.OBJECT_INFO.value][
+            AssignableInterfaceObjectKey.PUBLIC_ID.value] == SWITCH_OBJECT_ID
+
+    def test_a_linked_row_drops_out(self, rest_api) -> None:
+        """Offering it would promise the 400 the unique index answers with"""
+        row = self._rows(rest_api)[0]
+        _create(rest_api, object_id=SWITCH_OBJECT_ID,
+                multi_data_id=row[AssignableInterfaceKey.INTERFACE_MULTI_DATA_ID.value])
+
+        assert self._rows(rest_api) == []
+
+    def test_another_ports_link_does_not_exclude_a_row(self, rest_api) -> None:
+        """The relation is N:M - a row another port reaches is still a legitimate choice here"""
+        _create(rest_api, port_id=OTHER_PORT_ID, object_id=SWITCH_OBJECT_ID, multi_data_id=ROW_ID)
+
+        assert len(self._rows(rest_api)) == 1
+
+    def test_the_subnet_is_resolved(self, rest_api, _picker_state,
+                                    database_manager: MongoDatabaseManager, database_name: str) -> None:
+        """A reference is a number on the row; the picker shows the network's name"""
+        types = database_manager.get_collection(CmdbType.COLLECTION, database_name)
+        types.insert_one(_type_doc(SUBNET_TYPE_ID))
+        subnet = _object_doc(SUBNET_OBJECT_ID, SUBNET_TYPE_ID)
+        subnet['fields'] = [{'name': 'dg-name', 'value': SUBNET_NAME, 'type': FieldType.TEXT.value}]
+        _picker_state.insert_one(subnet)
+        _picker_state.update_one(
+            {'public_id': SWITCH_OBJECT_ID},
+            {'$push': {'multi_data_sections.0.values.0.data': {
+                'name': InterfaceField.SUBNET.value, 'value': SUBNET_OBJECT_ID, 'type': 'ref'}}},
+        )
+
+        row = self._rows(rest_api)[0]
+
+        assert row[AssignableInterfaceKey.SUBNET.value][
+            AssignableInterfaceSubnetKey.NAME.value] == SUBNET_NAME
+
+    def test_the_search_narrows(self, rest_api) -> None:
+        """?search= matches the addresses, the subnet name and the owning device"""
+        page = rest_api.get(f'{ASSIGNABLE_URL}?all_objects=true&search=10.9.9').get_json()
+
+        assert page['total'] == 1
+        assert page['rows'][0][AssignableInterfaceKey.IP.value] == '10.9.9.9'
+
+    def test_the_envelope_is_paginated(self, rest_api) -> None:
+        """The shape the IPAM pickers answer with, since these are rows rather than documents"""
+        page = rest_api.get(f'{ASSIGNABLE_URL}?all_objects=true&page=1&page_size=1').get_json()
+
+        assert (page['page'], page['page_size'], page['total']) == (1, 1, 3)
+        assert len(page['rows']) == 1
+
+    def test_a_missing_port_is_a_404(self, rest_api) -> None:
+        """The picker answers for a port, so an unknown one is not an empty list"""
+        response = rest_api.get(f'{PORTS_URL}/{MISSING_PORT_ID}/assignable_interfaces/')
+
+        assert response.status_code == HTTPStatus.NOT_FOUND
+
+    def test_the_owner_acl_is_enforced(self, rest_api, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Reading a port's picker is reading part of its owner object"""
+        monkeypatch.setattr(ObjectsManager, 'get_object', _raiser(AccessDeniedError('nope')))
+
+        assert rest_api.get(ASSIGNABLE_URL).status_code == HTTPStatus.FORBIDDEN
+
+    def test_a_link_read_failure_is_400(self, rest_api, monkeypatch: pytest.MonkeyPatch) -> None:
+        """The exclusion needs the port's links, and a database failure there is recoverable"""
+        monkeypatch.setattr(
+            PortInterfaceLinksManager,
+            'get_links_of_port',
+            _raiser(PortInterfaceLinksManagerGetError('boom')),
+        )
+
+        assert rest_api.get(ASSIGNABLE_URL).status_code == HTTPStatus.BAD_REQUEST
+
+    def test_an_unexpected_failure_is_500(self, rest_api, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Anything the picker did not anticipate is a server fault, never a 400"""
+        monkeypatch.setattr(PortInterfaceLinksManager, 'get_links_of_port', _raiser(RuntimeError('boom')))
+
+        assert rest_api.get(ASSIGNABLE_URL).status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+

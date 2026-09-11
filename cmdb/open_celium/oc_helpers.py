@@ -15,7 +15,29 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 This file contains all helper methods for OpenCelium
+
+Beside the tenant name mapping, `is_hosted_cloud` names the predicate the whole integration branches
+on: OpenCelium is shared between tenants on a hosted installation - names are prefixed, connectors are
+authenticated with a master password - while `--cloud --local` is a developer's own stack and behaves
+like an on-premise one. It was spelled `current_app.cloud_mode and not current_app.local_mode` inline
+in the managers and a dozen times in the OpenCelium routes
 """
+from flask import current_app
+
+
+def is_hosted_cloud() -> bool:
+    """
+    Reports whether this process serves a HOSTED cloud installation
+
+    `--cloud --local` is a developer's local stack: cloud mode is on, but the OpenCelium instance is
+    that developer's own, so nothing is shared and nothing is prefixed. Both flags are set at process
+    start (see `cmdb/__init__.py`), so the answer cannot change within a request
+
+    Returns:
+        bool: True on a hosted cloud installation, False on-premise and in local cloud development
+    """
+    return bool(current_app.cloud_mode) and not bool(current_app.local_mode)
+
 
 def map_oc_name(map_name: str, input_str: str) -> str:
     """

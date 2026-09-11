@@ -28,7 +28,6 @@ from cmdb.manager.isms_manager.risk_matrix_manager import RiskMatrixManager
 from cmdb.manager.isms_manager.risk_assessment_manager import RiskAssessmentManager
 from cmdb.manager.isms_manager.control_measure_manager import ControlMeasureManager
 from cmdb.manager.manager_provider_model import ManagerProvider, ManagerType
-from cmdb.manager.query_builder.builder_parameters import BuilderParameters
 
 from cmdb.models.user_model import CmdbUser
 from cmdb.models.isms_model import (
@@ -426,22 +425,17 @@ def get_isms_soa_report(params: CollectionParameters, request_user: CmdbUser) ->
                                                                                 ManagerType.EXTENDABLE_OPTIONS,
                                                                                 request_user)
 
-        # Fetch both the implementation-state and source options in a single query, then split them
-        # by option_type into their lookup maps
-        options = extendable_options_manager.iterate_items(BuilderParameters(
-            {'option_type': {'$in': [OptionType.IMPLEMENTATION_STATE, OptionType.CONTROL_MEASURE]}}
-        ))
+        # Both option lists in a single projected query, already split by option_type. No model is
+        # built per option: three keys are read and only the value is kept, so building a
+        # CmdbExtendableOption per document just to convert it straight back was pure overhead
+        option_value_maps: dict[str, dict[int, str]] = extendable_options_manager.get_option_values_by_id(
+            [OptionType.IMPLEMENTATION_STATE.value, OptionType.CONTROL_MEASURE.value]
+        )
 
-        implementation_state_lookup: dict[int, str] = {}
-        source_lookup: dict[int, str] = {}
-
-        for option in options.results:
-            option_json = CmdbExtendableOption.to_json(option)
-
-            if option_json['option_type'] == OptionType.IMPLEMENTATION_STATE:
-                implementation_state_lookup[option_json['public_id']] = option_json['value']
-            else:
-                source_lookup[option_json['public_id']] = option_json['value']
+        implementation_state_lookup: dict[int, str] = option_value_maps.get(
+            OptionType.IMPLEMENTATION_STATE.value, {}
+        )
+        source_lookup: dict[int, str] = option_value_maps.get(OptionType.CONTROL_MEASURE.value, {})
 
         all_control_measures = control_measure_manager.get_many()
 

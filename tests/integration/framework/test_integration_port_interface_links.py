@@ -39,12 +39,19 @@ from cmdb.database import MongoDatabaseManager
 from cmdb.manager.port_interface_links_manager import PortInterfaceLinksManager
 from cmdb.models.object_model import CmdbObject
 from cmdb.models.port_interface_link_model import (
+    AssignableInterfaceKey,
+    AssignableInterfaceSubnetKey,
     CmdbPortInterfaceLink,
     InterfaceRelationType,
     PortInterfaceLinkKey,
     LINK_IDENTITY_INDEX_NAME,
 )
 from cmdb.models.special_type_model.ipam_constants import InterfaceField, IpamSection
+from cmdb.framework.port.assignable_interfaces import (
+    build_assignable_interface_rows,
+    build_subnet_lookup,
+    referenced_subnet_ids,
+)
 from cmdb.framework.port.cascade import delete_interface_links_of_ports
 from cmdb.framework.port.interface_links import collect_dangling_links, resolve_link_row
 # -------------------------------------------------------------------------------------------------------------------- #
@@ -63,13 +70,35 @@ LINK_IDS: list[int] = [49301, 49302, 49303]
 ROW_ID: int = 1
 OTHER_ROW_ID: int = 2
 
+ROW_IP: str = '10.0.0.1'
+OTHER_ROW_IP: str = '10.0.0.2'
+ROW_MAC: str = '00:1A:2B:3C:4D:5E'
+OTHER_ROW_MAC: str = '00:1A:2B:3C:4D:5F'
 
-def _interface_row(multi_data_id: int, ip: str) -> dict[str, Any]:
-    """One dg-ipam-interface MDS row."""
+
+def _interface_row(multi_data_id: int, ip: str, mac: str = ROW_MAC) -> dict[str, Any]:
+    """
+    One dg-ipam-interface MDS row, carrying both addresses the section declares
+
+    IP and MAC are the two values the interface is the single source of truth for - neither is copied
+    onto the port - so a row holding only the IP would not prove that a resolved read hands back
+    everything the interface stores.
+    """
     return {
         'multi_data_id': multi_data_id,
-        'data': [{'name': InterfaceField.IP.value, 'value': ip, 'type': 'text'}],
+        'data': [
+            {'name': InterfaceField.IP.value, 'value': ip, 'type': 'text'},
+            {'name': InterfaceField.MAC.value, 'value': mac, 'type': 'text'},
+        ],
     }
+
+
+def _row_value(interface_row: dict[str, Any], field_name: str) -> Any:
+    """Reads one field value out of an interface row, by name rather than by position."""
+    return next(
+        (entry.get('value') for entry in interface_row.get('data', []) if entry.get('name') == field_name),
+        None,
+    )
 
 
 def _host_doc(rows: list[dict[str, Any]]) -> dict[str, Any]:
@@ -133,8 +162,8 @@ def fixture_host(database_manager: MongoDatabaseManager, database_name: str):
     """Seeds the CmdbObject holding two interface rows, cleared around each test."""
     objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
     objects.delete_many({'public_id': HOST_OBJECT_ID})
-    objects.insert_one(_host_doc([_interface_row(ROW_ID, '10.0.0.1'),
-                                  _interface_row(OTHER_ROW_ID, '10.0.0.2')]))
+    objects.insert_one(_host_doc([_interface_row(ROW_ID, ROW_IP),
+                                  _interface_row(OTHER_ROW_ID, OTHER_ROW_IP, OTHER_ROW_MAC)]))
 
     yield objects
 
@@ -216,7 +245,11 @@ def test_a_link_survives_an_unrelated_object_write(links, host, manager) -> None
     stored_link = manager.get_item(LINK_IDS[0], as_dict=True)
     stored_host = host.find_one({'public_id': HOST_OBJECT_ID})
 
-    assert resolve_link_row(stored_link, stored_host) is not None
+    resolved = resolve_link_row(stored_link, stored_host)
+
+    assert resolved is not None
+    assert _row_value(resolved, InterfaceField.IP.value) == ROW_IP
+    assert _row_value(resolved, InterfaceField.MAC.value) == ROW_MAC
 
 
 def test_a_link_survives_another_row_being_removed(links, host, manager) -> None:
@@ -329,3 +362,94 @@ def test_the_manager_reads_both_directions(links, manager) -> None:
     assert len(manager.get_links_of_port(PORT_ID)) == 1
     assert len(manager.get_links_of_interface_object(HOST_OBJECT_ID)) == 2
     assert len(manager.get_links_of_ports(PORT_IDS)) == 2
+
+
+# -------------------------------------------------------------------------------------------------------------------- #
+#                                       THE PICKER, AGAINST THE STORED DOCUMENTS                                       #
+# -------------------------------------------------------------------------------------------------------------------- #
+# The unit tests hand the builders their documents; what is only observable here is that the rows the
+# picker offers are the rows the database actually holds - the exclusion is keyed on links read back
+# out of Mongo, and the subnet names come from a real second collection read
+SUBNET_OBJECT_ID: int = 49401
+SUBNET_NAME: str = 'Office LAN'
+
+
+def _stored_host(database_manager: MongoDatabaseManager, database_name: str) -> dict[str, Any]:
+    """Reads the seeded host document back out of the database"""
+    return database_manager.get_collection(CmdbObject.COLLECTION, database_name)\
+        .find_one({'public_id': HOST_OBJECT_ID}, {'_id': 0})
+
+
+def _offered(host_doc: dict[str, Any], manager: PortInterfaceLinksManager,
+             port_id: int = PORT_ID) -> list[dict[str, Any]]:
+    """Shapes the rows the picker would offer for one port, with the links read from Mongo"""
+    linked_rows = {
+        (link[PortInterfaceLinkKey.INTERFACE_OBJECT_ID.value],
+         link[PortInterfaceLinkKey.INTERFACE_MULTI_DATA_ID.value])
+        for link in manager.get_links_of_port(port_id)
+    }
+
+    return build_assignable_interface_rows([host_doc], linked_rows, {}, {}, {})
+
+
+def test_the_picker_offers_the_stored_rows(links, host, manager,
+                                           database_manager: MongoDatabaseManager,
+                                           database_name: str) -> None:
+    """Every interface row the object really holds is offered, with the values it really stores"""
+    rows = _offered(_stored_host(database_manager, database_name), manager)
+
+    assert [row[AssignableInterfaceKey.INTERFACE_MULTI_DATA_ID.value] for row in rows] == [ROW_ID, OTHER_ROW_ID]
+    assert [row[AssignableInterfaceKey.IP.value] for row in rows] == [ROW_IP, OTHER_ROW_IP]
+    assert [row[AssignableInterfaceKey.MAC.value] for row in rows] == [ROW_MAC, OTHER_ROW_MAC]
+
+
+def test_a_stored_link_removes_its_row_from_the_picker(links, host, manager,
+                                                       database_manager: MongoDatabaseManager,
+                                                       database_name: str) -> None:
+    """The exclusion is keyed on links read back out of Mongo, not on anything held in memory"""
+    manager.insert_item(CmdbPortInterfaceLink.from_data(_link_doc(LINK_IDS[0], multi_data_id=ROW_ID)))
+
+    rows = _offered(_stored_host(database_manager, database_name), manager)
+
+    assert [row[AssignableInterfaceKey.INTERFACE_MULTI_DATA_ID.value] for row in rows] == [OTHER_ROW_ID]
+
+
+def test_another_ports_link_leaves_the_row_offered(links, host, manager,
+                                                   database_manager: MongoDatabaseManager,
+                                                   database_name: str) -> None:
+    """N:M: the same interface row may be reached over several ports, so only THIS port's links exclude"""
+    manager.insert_item(CmdbPortInterfaceLink.from_data(
+        _link_doc(LINK_IDS[0], port_id=OTHER_PORT_ID, multi_data_id=ROW_ID)))
+
+    rows = _offered(_stored_host(database_manager, database_name), manager)
+
+    assert len(rows) == 2
+
+
+def test_the_subnet_name_comes_from_the_referenced_object(links, host, manager,
+                                                          database_manager: MongoDatabaseManager,
+                                                          database_name: str) -> None:
+    """The reference resolves through a real second read, and one read covers every row that shares it"""
+    objects = database_manager.get_collection(CmdbObject.COLLECTION, database_name)
+    objects.update_many(
+        {'public_id': HOST_OBJECT_ID},
+        {'$push': {'multi_data_sections.$[section].values.$[].data': {
+            'name': InterfaceField.SUBNET.value, 'value': SUBNET_OBJECT_ID, 'type': 'ref'}}},
+        array_filters=[{'section.section_id': IpamSection.INTERFACE.value}],
+    )
+    objects.delete_many({'public_id': SUBNET_OBJECT_ID})
+    objects.insert_one({'public_id': SUBNET_OBJECT_ID, 'type_id': 49002, 'active': True,
+                        'fields': [{'name': 'dg-name', 'value': SUBNET_NAME, 'type': 'text'}]})
+
+    host_doc = _stored_host(database_manager, database_name)
+    subnet_ids = referenced_subnet_ids([host_doc])
+    subnet_names = build_subnet_lookup(
+        list(objects.find({'public_id': {'$in': subnet_ids}}, {'_id': 0})),
+    )
+    rows = build_assignable_interface_rows([host_doc], set(), {}, {}, subnet_names)
+
+    objects.delete_many({'public_id': SUBNET_OBJECT_ID})
+
+    assert subnet_ids == [SUBNET_OBJECT_ID]
+    assert rows[0][AssignableInterfaceKey.SUBNET.value][
+        AssignableInterfaceSubnetKey.NAME.value] == SUBNET_NAME

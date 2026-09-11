@@ -31,6 +31,26 @@ class OcResponseKey(BaseStrEnum):
     FROM_CONNECTOR = 'fromConnector'
     TO_CONNECTOR = 'toConnector'
     PASSWORD = 'password'
+    #: The invoker block of a connector - its NAME is what identifies a DataGerry template
+    INVOKER = 'invoker'
+    NAME = 'name'
+    #: Carried by a flowchart of an execution log; rewritten in cloud mode so the tenant prefix
+    #: never reaches a client (see oc_connection_log_helper)
+    CONNECTOR_NAME = 'connectorName'
+
+
+class OcLogQueryParam(BaseStrEnum):
+    """
+    Query parameters the OpenCelium execution-log routes read
+
+    OpenCelium's own spellings (camelCase), which is why they are named here rather than left as
+    literals: the routes forward them to OpenCelium unchanged, so a typo would answer 400 for a
+    parameter the caller did send
+    """
+    LOOP_INDEX = 'loopIndex'
+    CONNECTION_ID = 'connectionId'
+    SCHEDULER_ID = 'schedulerId'
+    STATUS = 'status'
 
 
 # HTTP request header carrying the OpenCelium master password

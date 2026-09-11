@@ -51,7 +51,6 @@ from cmdb.manager.locations_manager_constants import (
 )
 
 from cmdb.models.location_model.cmdb_location import CmdbLocation
-from cmdb.framework.results import IterationResult
 
 from cmdb.models.location_model.location_constants import LocationKey, RootLocationDefault
 from cmdb.models.location_model.location_utils import sort_locations_by_name, to_location_document
@@ -143,12 +142,17 @@ class LocationsManager(BaseManager):
 
 # --------------------------------------------------- CRUD - CREATE -------------------------------------------------- #
 
-    def insert_location(self, location: CmdbLocation | dict) -> int:
+    def insert_location(self, location: dict[str, Any]) -> int:
         """
         Insert a CmdbLocation into the database
 
+        Takes a document, not a model: nothing writes a location through the model - the object
+        mirror and the POST route both assemble the document key by key (see ``LocationKey``), which
+        is why the CmdbLocation-or-dict union this used to accept was never exercised outside its
+        own test
+
         Args:
-            location (CmdbLocation | dict): Raw data of the CmdbLocation
+            location (dict[str, Any]): The CmdbLocation document to store
 
         Raises:
             LocationsManagerInsertError: When a CmdbLocation could not be inserted into the database,
@@ -158,9 +162,6 @@ class LocationsManager(BaseManager):
             int: The public_id of the created CmdbLocation
         """
         try:
-            if isinstance(location, CmdbLocation):
-                location = CmdbLocation.to_json(location)
-
             created_id: int | None = self.insert(location)
 
             # BaseManager.insert only answers with None when it is told to skip the public_id
@@ -178,29 +179,36 @@ class LocationsManager(BaseManager):
 
 # ---------------------------------------------------- CRUD - READ --------------------------------------------------- #
 
-    def iterate(self, builder_params: BuilderParameters) -> IterationResult[CmdbLocation]:
+    def iterate_location_documents(
+            self,
+            builder_params: BuilderParameters) -> tuple[list[dict[str, Any]], int]:
         """
-        Retrieves multiple CmdbLocations
+        Retrieves the matching CmdbLocations as canonical documents, with the total match count
+
+        The read behind the two list routes (the flat list and the eager tree). Answers documents
+        rather than model instances - the same key set ``CmdbLocation.to_json`` produces, through
+        ``to_location_document`` - because both routes only pass the result on as JSON: hydrating a
+        CmdbLocation per row and converting it straight back was two objects per location for a
+        response that is a document either way
 
         Args:
-            builder_params (BuilderParameters): Filter for which CmdbLocations should be retrieved
+            builder_params (BuilderParameters): Filter, sort and pagination for the read
 
         Raises:
             LocationsManagerIterationError: When the iteration failed
 
         Returns:
-            IterationResult[CmdbLocation]: All CmdbLocations matching the filter
+            tuple[list[dict[str, Any]], int]: The canonical documents of the page, and the total
+                number of matches (counted independently of the page)
         """
         try:
             aggregation_result, total = self.iterate_query(builder_params)
 
-            result: IterationResult[CmdbLocation] = IterationResult(aggregation_result, total, CmdbLocation)
-
-            return result
+            return [to_location_document(document) for document in aggregation_result], total
         except BaseManagerIterationError as err:
             raise LocationsManagerIterationError(str(err)) from err
         except Exception as err:
-            LOGGER.error("[iterate] Exception: %s. Type: %s", err, type(err))
+            LOGGER.error("[iterate_location_documents] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerIterationError(str(err)) from err
 
 
@@ -255,34 +263,84 @@ class LocationsManager(BaseManager):
             raise LocationsManagerGetError(str(err)) from err
 
 
-    def get_locations_by(self, **requirements: Any) -> list[CmdbLocation]:
+    def get_location_names(self, public_ids: list[int]) -> dict[int, str]:
         """
-        Retrieves all CmdbLocations matching the key-value pairs
+        Retrieves the display name of every given CmdbLocation, keyed by public_id
 
-        Hydrates every match into the model. Callers that only pass the result on as JSON should use
-        :meth:`get_child_location_documents` (or read the documents directly) instead of paying for
-        a dict -> model -> dict round trip
+        The read behind resolving a location reference into the label an export shows. One projected
+        '$in' query over the public_id index, and only the two keys a name lookup needs leave the
+        database - a caller that needs a name has no use for the render metadata, let alone for a
+        model built from it.
+
+        A location whose name is missing or is not text is left out rather than mapped to None: the
+        caller's lookup then does not resolve, which is the same outcome as a reference to a location
+        that no longer exists
 
         Args:
-            **requirements (Any): Key-value pairs used to filter the CmdbLocations
+            public_ids (list[int]): public_ids of the CmdbLocations to read; an empty selection
+                queries nothing
 
         Raises:
-            LocationsManagerGetError: If CmdbLocation could not be retrieved
+            LocationsManagerGetError: If the CmdbLocations could not be retrieved
 
         Returns:
-            list[CmdbLocation]: All CmdbLocations matching the requirements
+            dict[int, str]: {public_id: name} for every readable match
+        """
+        if not public_ids:
+            return {}
+
+        try:
+            documents: list[dict[str, Any]] = self.find(
+                criteria={LocationKey.PUBLIC_ID.value: {'$in': list(public_ids)}},
+                projection={
+                    LocationKey.PUBLIC_ID.value: 1,
+                    LocationKey.NAME.value: 1,
+                },
+            )
+
+            return {
+                document[LocationKey.PUBLIC_ID.value]: document[LocationKey.NAME.value]
+                for document in documents
+                if document.get(LocationKey.PUBLIC_ID.value) is not None
+                and isinstance(document.get(LocationKey.NAME.value), str)
+            }
+        except Exception as err:
+            LOGGER.error("[get_location_names] Exception: %s. Type: %s", err, type(err))
+            raise LocationsManagerGetError(str(err)) from err
+
+
+    def get_child_object_ids(self, parent_id: int) -> list[int]:
+        """
+        Retrieves the object_id of every direct child of a CmdbLocation
+
+        The read behind "which objects sit under this one" - the CI Explorer's location expansion and
+        the delete guard that refuses to strand a subtree. Projected to the single key both need, so
+        the render metadata of a whole tree level is never transferred
+
+        Args:
+            parent_id (int): public_id of the parent CmdbLocation
+
+        Raises:
+            LocationsManagerGetError: If the child CmdbLocations could not be retrieved
+
+        Returns:
+            list[int]: The object_ids of the direct children, in read order. A child without a
+                usable object_id is left out - the root's 0 sentinel is such a value, and no object
+                answers to it
         """
         try:
-            locations_list: list[CmdbLocation] = []
+            documents: list[dict[str, Any]] = self.find(
+                criteria={LocationKey.PARENT.value: parent_id},
+                projection={LocationKey.OBJECT_ID.value: 1},
+            )
 
-            locations: list[dict[str, Any]] = self.get_many(**requirements)
-
-            for location in locations:
-                locations_list.append(CmdbLocation.from_data(location))
-
-            return locations_list
+            return [
+                document[LocationKey.OBJECT_ID.value] for document in documents
+                if isinstance(document.get(LocationKey.OBJECT_ID.value), int)
+                and not isinstance(document.get(LocationKey.OBJECT_ID.value), bool)
+            ]
         except Exception as err:
-            LOGGER.error("[get_locations_by] Exception: %s. Type: %s", err, type(err))
+            LOGGER.error("[get_child_object_ids] Exception: %s. Type: %s", err, type(err))
             raise LocationsManagerGetError(str(err)) from err
 
 
@@ -538,21 +596,22 @@ class LocationsManager(BaseManager):
 
 # --------------------------------------------------- CRUD - UPDATE -------------------------------------------------- #
 
-    def update_location(self, object_id: int, data: CmdbLocation | dict) -> None:
+    def update_location(self, object_id: int, data: dict[str, Any]) -> None:
         """
         Updates the CmdbLocation linked to the given CmdbObject
 
+        Takes a document like ``insert_location``, and a **partial** one is normal: the object
+        mirror sends only the keys an object write can change (``parent`` and ``name``), which
+        BaseManager.update applies as a '$set'
+
         Args:
             object_id (int): public_id of the CmdbObject whose CmdbLocation should be updated
-            data (CmdbLocation | dict): The new data for the CmdbLocation
+            data (dict[str, Any]): The CmdbLocation keys to write
 
         Raises:
             LocationsManagerUpdateError: When the update operation fails
         """
         try:
-            if isinstance(data, CmdbLocation):
-                data = CmdbLocation.to_json(data)
-
             self.update({LocationKey.OBJECT_ID.value: object_id}, data)
         except Exception as err:
             LOGGER.error("[update_location] Exception: %s. Type: %s", err, type(err))

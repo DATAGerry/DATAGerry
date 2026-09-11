@@ -51,6 +51,7 @@ from cmdb.interface.rest_api.responses.response_parameters import CollectionPara
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.blueprints import APIBlueprint
 from cmdb.interface.rest_api.routes.exporter_routes.exporter_helper import resolve_export_format
+from cmdb.interface.rest_api.routes.exporter_routes.exporter_constants import ExporterRight
 from cmdb.utils import load_class
 from cmdb.security.acl.permission import AccessControlPermission
 
@@ -69,7 +70,7 @@ exporter_blueprint = APIBlueprint('exporter', __name__)
 @exporter_blueprint.route('/extensions', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@exporter_blueprint.protect(auth=True, right='base.export.object.*')
+@exporter_blueprint.protect(auth=True, right=ExporterRight.OBJECT.value)
 def get_export_file_types(request_user: CmdbUser) -> Response:  # pylint: disable=unused-argument
     """
     Endpoint to retrieve the supported export file types/extensions.
@@ -91,7 +92,7 @@ def get_export_file_types(request_user: CmdbUser) -> Response:  # pylint: disabl
 @exporter_blueprint.route('/', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@exporter_blueprint.protect(auth=True, right='base.export.object.*')
+@exporter_blueprint.protect(auth=True, right=ExporterRight.OBJECT.value)
 @exporter_blueprint.parse_collection_parameters(view='native')
 def export_objects(params: CollectionParameters, request_user: CmdbUser) -> Response:
     """
@@ -157,7 +158,7 @@ def export_objects(params: CollectionParameters, request_user: CmdbUser) -> Resp
 @exporter_blueprint.route('/template/<int:type_id>', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@exporter_blueprint.protect(auth=True, right='base.export.object.*')
+@exporter_blueprint.protect(auth=True, right=ExporterRight.OBJECT.value)
 def export_object_import_template(type_id: int, request_user: CmdbUser) -> Response:
     """
     Returns the object-import template of a CmdbType as a CSV holding only its header row

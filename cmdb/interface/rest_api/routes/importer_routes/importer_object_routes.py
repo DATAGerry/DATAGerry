@@ -97,6 +97,7 @@ from cmdb.interface.rest_api.routes.importer_routes.importer_constants import (
     NO_CONTENT_TO_IMPORT_MESSAGE,
     ImporterFormField,
     ImporterConfigKey,
+    ImporterRight,
 )
 
 from cmdb.errors.security import AccessDeniedError
@@ -118,7 +119,7 @@ importer_object_blueprint = APIBlueprint('importer_object', __name__)
 @importer_object_blueprint.route('/importer/', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_object_blueprint.protect(auth=True, right='base.import.object.*')
+@importer_object_blueprint.protect(auth=True, right=ImporterRight.OBJECT.value)
 def get_object_importer(request_user: CmdbUser) -> Response:  # pylint: disable=unused-argument
     """
     Retrieve a list of available object importers with their metadata
@@ -153,7 +154,7 @@ def get_object_importer(request_user: CmdbUser) -> Response:  # pylint: disable=
 @importer_object_blueprint.route('/importer/config/<string:importer_type>/', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_object_blueprint.protect(auth=True, right='base.import.object.*')
+@importer_object_blueprint.protect(auth=True, right=ImporterRight.OBJECT.value)
 def get_default_object_importer_config(  # pylint: disable=unused-argument
         importer_type: str,
         request_user: CmdbUser) -> Response:
@@ -187,7 +188,7 @@ def get_default_object_importer_config(  # pylint: disable=unused-argument
 @importer_object_blueprint.route('/parser/default/<string:parser_type>/', methods=['GET'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_object_blueprint.protect(auth=True, right='base.import.object.*')
+@importer_object_blueprint.protect(auth=True, right=ImporterRight.OBJECT.value)
 def get_default_object_parser_config(  # pylint: disable=unused-argument
         parser_type: str,
         request_user: CmdbUser) -> Response:
@@ -221,7 +222,7 @@ def get_default_object_parser_config(  # pylint: disable=unused-argument
 @importer_object_blueprint.route('/parse/', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_object_blueprint.protect(auth=True, right='base.import.object.*')
+@importer_object_blueprint.protect(auth=True, right=ImporterRight.OBJECT.value)
 def parse_objects(request_user: CmdbUser) -> Response:  # pylint: disable=unused-argument
     """
     Parse uploaded object data using the specified parser configuration
@@ -278,7 +279,7 @@ def parse_objects(request_user: CmdbUser) -> Response:  # pylint: disable=unused
 @importer_object_blueprint.route('/', methods=['POST'])
 @insert_request_user
 @verify_api_access(required_api_level=ApiLevel.LOCKED)
-@importer_object_blueprint.protect(auth=True, right='base.import.object.*')
+@importer_object_blueprint.protect(auth=True, right=ImporterRight.OBJECT.value)
 def import_objects(request_user: CmdbUser) -> Response:
     """
     Handle the full import of objects into the CMDB system using an uploaded file

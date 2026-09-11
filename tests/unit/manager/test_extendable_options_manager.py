@@ -29,6 +29,7 @@ import pytest
 
 from cmdb.manager import ExtendableOptionsManager
 from cmdb.manager.generic_manager import GenericManager
+from cmdb.manager.query_builder import BuilderParameters
 from cmdb.manager.manager_provider_model import ManagerType
 from cmdb.manager.manager_provider_model.manager_provider import ManagerProvider
 from cmdb.models.extendable_option_model import (
@@ -36,10 +37,11 @@ from cmdb.models.extendable_option_model import (
     ExtendableOptionKey,
     OptionType,
 )
-from cmdb.errors.manager import BaseManagerGetError
+from cmdb.errors.manager import BaseManagerGetError, BaseManagerIterationError
 from cmdb.errors.manager.extendable_options_manager import (
     EXTENDABLE_OPTIONS_MANAGER_ERRORS,
     ExtendableOptionsManagerGetError,
+    ExtendableOptionsManagerIterationError,
 )
 # -------------------------------------------------------------------------------------------------------------------- #
 
@@ -54,10 +56,15 @@ def fixture_manager() -> ExtendableOptionsManager:
 
 def _option(public_id: int, value: Any) -> dict[str, Any]:
     """A stored CmdbExtendableOption document"""
+    return _option_of(public_id, value, OptionType.CABLE_TYPE)
+
+
+def _option_of(public_id: int, value: Any, option_type: OptionType) -> dict[str, Any]:
+    """A stored CmdbExtendableOption document of the given OptionType"""
     return {
         ExtendableOptionKey.PUBLIC_ID.value: public_id,
         ExtendableOptionKey.VALUE.value: value,
-        ExtendableOptionKey.OPTION_TYPE.value: OptionType.CABLE_TYPE.value,
+        ExtendableOptionKey.OPTION_TYPE.value: option_type.value,
     }
 
 
@@ -141,3 +148,126 @@ class TestGetOptionValues:
 
         with pytest.raises(ExtendableOptionsManagerGetError):
             manager.get_option_values(OptionType.CABLE_TYPE.value)
+
+
+class TestGetOptionValuesById:
+    """The public_id -> value lookup a report resolves its option references through."""
+
+    def test_reads_every_requested_list_in_one_query(self, manager: ExtendableOptionsManager) -> None:
+        """One '$in' over the index's option_type prefix, not a query per list"""
+        manager.find = MagicMock(return_value=[])
+
+        manager.get_option_values_by_id([OptionType.IMPLEMENTATION_STATE.value, OptionType.CONTROL_MEASURE.value])
+
+        assert manager.find.call_count == 1
+        assert manager.find.call_args.kwargs['criteria'] == {
+            ExtendableOptionKey.OPTION_TYPE.value: {
+                '$in': [OptionType.IMPLEMENTATION_STATE.value, OptionType.CONTROL_MEASURE.value],
+            },
+        }
+
+    def test_reads_only_the_three_keys_a_label_lookup_needs(self, manager: ExtendableOptionsManager) -> None:
+        """The SOA report resolves labels for every control measure it lists; no document body is needed"""
+        manager.find = MagicMock(return_value=[])
+
+        manager.get_option_values_by_id([OptionType.CONTROL_MEASURE.value])
+
+        assert manager.find.call_args.kwargs['projection'] == {
+            ExtendableOptionKey.PUBLIC_ID.value: 1,
+            ExtendableOptionKey.VALUE.value: 1,
+            ExtendableOptionKey.OPTION_TYPE.value: 1,
+        }
+
+    def test_the_values_are_grouped_by_option_type(self, manager: ExtendableOptionsManager) -> None:
+        """Both lists come back from one read, and the caller needs them apart"""
+        manager.find = MagicMock(return_value=[
+            _option_of(1, 'Open', OptionType.IMPLEMENTATION_STATE),
+            _option_of(2, 'Implemented', OptionType.IMPLEMENTATION_STATE),
+            _option_of(3, 'ISO 27001:2022', OptionType.CONTROL_MEASURE),
+        ])
+
+        assert manager.get_option_values_by_id([
+            OptionType.IMPLEMENTATION_STATE.value, OptionType.CONTROL_MEASURE.value,
+        ]) == {
+            OptionType.IMPLEMENTATION_STATE.value: {1: 'Open', 2: 'Implemented'},
+            OptionType.CONTROL_MEASURE.value: {3: 'ISO 27001:2022'},
+        }
+
+    def test_an_empty_request_reads_nothing(self, manager: ExtendableOptionsManager) -> None:
+        """A caller with no option types to resolve must not send a '$in' over the whole collection"""
+        manager.find = MagicMock(return_value=[])
+
+        assert manager.get_option_values_by_id([]) == {}
+        assert manager.find.call_count == 0
+
+    def test_a_list_with_no_readable_option_gets_no_entry(self, manager: ExtendableOptionsManager) -> None:
+        """An absent entry and an empty map are the same answer: nothing resolves"""
+        manager.find = MagicMock(return_value=[])
+
+        assert manager.get_option_values_by_id([OptionType.CONTROL_MEASURE.value]) == {}
+
+    def test_a_drifted_document_is_left_out(self, manager: ExtendableOptionsManager) -> None:
+        """
+        An option missing its value or option_type simply does not resolve
+
+        Mapping it to None would put a null where the report shows a label, which reads as a
+        resolved value rather than as a missing one.
+        """
+        manager.find = MagicMock(return_value=[
+            _option_of(1, 'Open', OptionType.IMPLEMENTATION_STATE),
+            {ExtendableOptionKey.PUBLIC_ID.value: 2,
+             ExtendableOptionKey.OPTION_TYPE.value: OptionType.IMPLEMENTATION_STATE.value},
+            {ExtendableOptionKey.VALUE.value: 'orphan',
+             ExtendableOptionKey.OPTION_TYPE.value: OptionType.IMPLEMENTATION_STATE.value},
+        ])
+
+        assert manager.get_option_values_by_id([OptionType.IMPLEMENTATION_STATE.value]) == {
+            OptionType.IMPLEMENTATION_STATE.value: {1: 'Open'},
+        }
+
+    def test_wraps_a_read_failure(self, manager: ExtendableOptionsManager) -> None:
+        """A BaseManager failure surfaces as the manager's own error type"""
+        manager.find = MagicMock(side_effect=BaseManagerGetError('boom'))
+
+        with pytest.raises(ExtendableOptionsManagerGetError):
+            manager.get_option_values_by_id([OptionType.CONTROL_MEASURE.value])
+
+
+class TestIterateOptionDocuments:
+    """The read behind the list route, which answers documents rather than models."""
+
+    def test_it_answers_the_documents_and_the_total(self, manager: ExtendableOptionsManager) -> None:
+        """The route needs both: the page it sends and the total the envelope carries"""
+        documents = [_option(1, 'Cat6a'), _option(2, 'OM4')]
+        manager.iterate_query = MagicMock(return_value=(documents, 2))
+
+        assert manager.iterate_option_documents(BuilderParameters({})) == (documents, 2)
+
+    def test_no_model_is_built(self, manager: ExtendableOptionsManager) -> None:
+        """
+        Deliberately not iterate_items: that builds a model per document
+
+        The frontend asks for the whole list (limit=0) twice per ISMS or port form, and the route
+        converted every instance straight back into a dict.
+        """
+        manager.iterate_query = MagicMock(return_value=([_option(1, 'Cat6a')], 1))
+
+        documents, _ = manager.iterate_option_documents(BuilderParameters({}))
+
+        assert all(isinstance(document, dict) for document in documents)
+
+    def test_the_query_parameters_are_passed_through(self, manager: ExtendableOptionsManager) -> None:
+        """Filter, sort and pagination are the collection parameters the route parsed"""
+        builder_params = BuilderParameters({ExtendableOptionKey.OPTION_TYPE.value: OptionType.PORT_TYPE.value})
+        manager.iterate_query = MagicMock(return_value=([], 0))
+
+        manager.iterate_option_documents(builder_params)
+
+        assert manager.iterate_query.call_args.args[0] is builder_params
+
+    def test_wraps_a_read_failure(self, manager: ExtendableOptionsManager) -> None:
+        """A failed aggregation surfaces as the manager's iteration error, which the route maps to 400"""
+        manager.iterate_query = MagicMock(side_effect=BaseManagerIterationError('boom'))
+
+        with pytest.raises(ExtendableOptionsManagerIterationError):
+            manager.iterate_option_documents(BuilderParameters({}))

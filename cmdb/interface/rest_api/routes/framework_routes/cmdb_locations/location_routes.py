@@ -60,8 +60,6 @@ from cmdb.manager import (
 
 from cmdb.models.type_model.cmdb_type import CmdbType
 from cmdb.models.user_model import CmdbUser
-from cmdb.models.location_model.cmdb_location import CmdbLocation
-from cmdb.framework.results import IterationResult
 from cmdb.interface.route_utils import insert_request_user, verify_api_access
 from cmdb.interface.rest_api.api_level_enum import ApiLevel
 from cmdb.interface.blueprints import APIBlueprint
@@ -221,13 +219,13 @@ def get_cmdb_locations(params: CollectionParameters, request_user: CmdbUser) -> 
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
 
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
-        iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(builder_params)
 
-        location_list: list[dict[str, Any]] = [CmdbLocation.to_json(location)
-                                               for location in iteration_result.results]
+        # Canonical documents straight from the read: both list routes only pass the result on as
+        # JSON, so hydrating a CmdbLocation per row and converting it back was two objects per node
+        location_list, total = locations_manager.iterate_location_documents(builder_params)
 
         api_response = GetMultiResponse(location_list,
-                                        total=iteration_result.total,
+                                        total=total,
                                         params=params,
                                         url=request.url,
                                         body=request_wants_body())
@@ -271,14 +269,15 @@ def get_cmdb_locations_tree(params: CollectionParameters, request_user: CmdbUser
         locations_manager: LocationsManager = ManagerProvider.get_manager(ManagerType.LOCATIONS, request_user)
 
         builder_params = BuilderParameters(**CollectionParameters.get_builder_params(params))
-        iteration_result: IterationResult[CmdbLocation] = locations_manager.iterate(builder_params)
 
-        location_list: list[dict[str, Any]] = [CmdbLocation.to_json(location) for location in iteration_result.results]
+        # See the flat list route: documents, not models - and the forest is built from the same
+        # canonical key set either way
+        location_list, total = locations_manager.iterate_location_documents(builder_params)
 
         packed_locations: list[dict[str, Any]] = build_location_forest(location_list)
 
         api_response = GetMultiResponse(packed_locations,
-                                        total=iteration_result.total,
+                                        total=total,
                                         params=params,
                                         url=request.url,
                                         body=request_wants_body())

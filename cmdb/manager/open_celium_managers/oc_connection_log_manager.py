@@ -15,6 +15,12 @@
 # along with this program. If not, see <https://www.gnu.org/licenses/>.
 """
 Implementation of OpenCelium ConnectionLogManager
+
+Every method is one HTTP call to OpenCelium's execution-log API, and what comes back is **whatever
+that API answered** - `parse_response` hands the parsed JSON body through unchanged. The reads are
+therefore annotated `Any` rather than `dict[str, Any]`: the flowchart endpoint answers a list in
+practice, and a caller that trusted the dict annotation iterated it as a list of dicts (which is how
+the cloud-mode connector-name rewrite came to be written for a shape the annotation denied)
 """
 from logging import Logger, getLogger
 from typing import Any
@@ -40,7 +46,7 @@ class OcConnectionLogManager(OcBaseManager):
 
 # --------------------------------------------------- GET - ROUTES --------------------------------------------------- #
 
-    def get_details_method_or_operator(self, target_id: int) -> dict[str, Any]:
+    def get_details_method_or_operator(self, target_id: int) -> Any:
         """
         Retrieves details of Method or Operator
 
@@ -50,7 +56,7 @@ class OcConnectionLogManager(OcBaseManager):
             OcConnectionLogGetError: When the Method/Operator could not be retrieved
 
         Returns:
-            dict[str, Any]: The retrieved details of Method or Operator
+            Any: The details as OpenCelium answered them
         """
         return self.parse_response(
             self.oc_connector.oc_get(f"{EXECUTION_LOG_URL}/{target_id}/details"),
@@ -59,7 +65,7 @@ class OcConnectionLogManager(OcBaseManager):
         )
 
 
-    def get_operator_children(self, target_id: int, loop_index: int) -> dict[str, Any]:
+    def get_operator_children(self, target_id: int, loop_index: int) -> Any:
         """
         Retrieves Operator children
 
@@ -70,7 +76,7 @@ class OcConnectionLogManager(OcBaseManager):
             OcConnectionLogGetError: When the Operator children could not be retrieved
 
         Returns:
-            dict[str, Any]: The retrieved children of the Operator
+            Any: The Operator's children as OpenCelium answered them
         """
         return self.parse_response(
             self.oc_connector.oc_get(f"{EXECUTION_LOG_URL}/{target_id}/children?loopIndex={loop_index}"),
@@ -79,7 +85,7 @@ class OcConnectionLogManager(OcBaseManager):
         )
 
 
-    def get_flowcharts(self, execution_id: int) -> dict[str, Any]:
+    def get_flowcharts(self, execution_id: int) -> Any:
         """
         Retrieves a Flowchart for an execution
 
@@ -90,7 +96,7 @@ class OcConnectionLogManager(OcBaseManager):
             OcConnectionLogGetError: When the Flowcharts could not be retrieved
 
         Returns:
-            dict[str, Any]: The retrieved flowcharts
+            Any: The flowcharts as OpenCelium answered them - a LIST in practice
         """
         return self.parse_response(
             self.oc_connector.oc_get(f"{EXECUTION_LOG_URL}/{execution_id}/children"),
@@ -99,7 +105,7 @@ class OcConnectionLogManager(OcBaseManager):
         )
 
 
-    def get_first_level_logs(self, flowchart_id: int) -> dict[str, Any]:
+    def get_first_level_logs(self, flowchart_id: int) -> Any:
         """
         Retrieves first level Logs
 
@@ -110,7 +116,7 @@ class OcConnectionLogManager(OcBaseManager):
             OcConnectionLogGetError: When the first level Logs could not be retrieved
 
         Returns:
-            dict[str, Any]: The retrieved first level logs
+            Any: The first level logs as OpenCelium answered them
         """
         return self.parse_response(
             self.oc_connector.oc_get(f"{EXECUTION_LOG_URL}/{flowchart_id}/children"),
@@ -119,7 +125,7 @@ class OcConnectionLogManager(OcBaseManager):
         )
 
 
-    def get_log_list(self, connection_id: int, scheduler_id: int, status: Any) -> dict[str, Any]:
+    def get_log_list(self, connection_id: int, scheduler_id: int, status: Any) -> Any:
         """
         Retrieves the execution log list for a Connection/Scheduler
 
@@ -131,7 +137,7 @@ class OcConnectionLogManager(OcBaseManager):
             OcConnectionLogGetError: When the log list could not be retrieved
 
         Returns:
-            dict[str, Any]: The retrieved log list
+            Any: The log list as OpenCelium answered it
         """
         return self.parse_response(
             self.oc_connector.oc_get(

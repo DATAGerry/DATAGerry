@@ -24,6 +24,7 @@ from cmdb.models.type_model.field_type_enum import FieldType
 from cmdb.models.type_model.field_key_enum import FieldKey
 from cmdb.models.type_model.section_key_enum import SectionKey
 from cmdb.models.type_model.section_type_enum import SectionType
+from cmdb.models.type_model.type_reference_key_enum import TypeReferenceKey
 from cmdb.models.object_model.cmdb_object_key_enum import (
     CmdbObjectKey,
     CmdbObjectFieldKey,
@@ -44,7 +45,6 @@ TYPE_INFO_LABEL_KEY: str = 'type_label'
 TYPE_INFO_NAME_KEY: str = 'type_name'
 TYPE_INFO_ID_KEY: str = 'type_id'
 OBJECT_INFO_ID_KEY: str = 'object_id'
-REFERENCE_OBJECT_ID_KEY: str = 'object_id'
 
 # Value written into a tabular (CSV / XLSX) cell that carries no data: a continuation row's identity /
 # regular columns, or a multi-data-section column whose section has no entry for that row
@@ -539,18 +539,18 @@ class BaseExporterFormat:
         """
         value = field.get(FieldKey.VALUE.value)
         reference = field.get(RenderedFieldKey.REFERENCE.value) or {}
-        object_id = reference.get(REFERENCE_OBJECT_ID_KEY)
+        object_id = reference.get(TypeReferenceKey.OBJECT_ID.value)
 
         if not object_id:
             return EMPTY_CELL if value in (None, '') else str(value)
 
         summary_values = [
             to_export_cell(item.get(FieldKey.VALUE.value))
-            for item in reference.get(RenderedFieldKey.SUMMARIES.value, [])
+            for item in reference.get(TypeReferenceKey.SUMMARIES.value, [])
         ]
         summary_values = [summary for summary in summary_values if summary]
 
-        line = f"{reference.get(TYPE_INFO_LABEL_KEY, '')} #{object_id}".strip()
+        line = f"{reference.get(TypeReferenceKey.TYPE_LABEL.value, '')} #{object_id}".strip()
 
         if summary_values:
             line += ' | ' + ' | '.join(summary_values)

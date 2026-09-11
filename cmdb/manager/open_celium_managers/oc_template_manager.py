@@ -102,7 +102,10 @@ class OcTemplateManager(OcBaseManager):
 
         target = ALL_TEMPLATES_URL
 
-        if from_connector and to_connector:
+        # Both or neither: a single id cannot scope a connector PAIR. Compared against None rather
+        # than read for truthiness, because the route's converter accepts 0 - which used to fall
+        # through to the unscoped endpoint and answer every template OpenCelium has
+        if from_connector is not None and to_connector is not None:
             target = f"{ALL_TEMPLATES_URL}/{from_connector}/{to_connector}"
 
         all_templates_response = self.oc_connector.oc_get(target)
