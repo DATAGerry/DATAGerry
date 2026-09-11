@@ -68,7 +68,15 @@ export class GraphProfileService extends BaseApiService<FilterProfile> {
     showErrorNotification: (message: string) => void
   ): Observable<{ types: any[], relations: any[] }> {
     return new Observable(observer => {
-      const params = { filter: '', limit: 0, sort: 'sort', order: 1, page: 1 };
+      // Only the option label is built from the answer, so the rest of the type is left behind.
+      const params = {
+        filter: '',
+        projection: { public_id: 1, label: 1, name: 1 },
+        limit: 0,
+        sort: 'sort',
+        order: 1,
+        page: 1
+      };
       let typesResult: any[] = [];
       let relationsResult: any[] = [];
 
