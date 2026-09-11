@@ -87,6 +87,10 @@ export class SingleSectionBuilderHost implements BuilderSectionHost {
         return SECTION_EDIT_ICON;
     }
 
+    public getFieldCollapseIcon(): BuilderIcon {
+        return SECTION_EDIT_ICON;
+    }
+
     public getSectionHeaderClass(): Record<string, boolean> {
         return this.headerClass;
     }

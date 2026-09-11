@@ -58,6 +58,7 @@ export interface BuilderSectionHost {
     getSectionMode(section: BuilderSection): CmdbMode;
     getFieldMode(field: any): CmdbMode;
     getSectionCollapseIcon(section: BuilderSection): BuilderIcon;
+    getFieldCollapseIcon(field: any): BuilderIcon;
     getSectionHeaderClass(section: BuilderSection): Record<string, boolean>;
 
     /** ngx-drag-drop types the section's field zone accepts. */

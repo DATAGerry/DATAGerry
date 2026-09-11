@@ -170,3 +170,63 @@ describe('BuilderSectionComponent (fixed single section)', () => {
         expect(validationService.updateFieldValidityOnDeletion).toHaveBeenCalledWith('n1');
     });
 });
+
+
+/**
+ * A missing host method throws while the FIRST field header renders, which aborts the rest of the
+ * embedded view: field one keeps a partial header and every later field loses its label and actions.
+ */
+@Component({
+    standalone: true,
+    imports: [BuilderKernelModule],
+    template: `<section><dg-builder-section [section]="section" [host]="host" /></section>`
+})
+class PopulatedSectionHostComponent {
+    public section: any = {
+        name: 'section_template-1',
+        label: 'Template',
+        type: 'section',
+        fields: [
+            { name: 'text-1', label: 'First Field', type: 'text' },
+            { name: 'text-2', label: 'Second Field', type: 'text' }
+        ]
+    };
+    public host = new SingleSectionBuilderHost(() => this.section, this.validationService);
+
+    constructor(public validationService: ValidationService) {}
+}
+
+
+describe('BuilderSectionComponent (fixed section with fields)', () => {
+    let fixture: ComponentFixture<PopulatedSectionHostComponent>;
+    let element: HTMLElement;
+
+    beforeEach(async () => {
+        await TestBed.configureTestingModule({
+            imports: [PopulatedSectionHostComponent],
+            providers: [
+                provideHttpClient(withInterceptorsFromDi()),
+                provideHttpClientTesting()
+            ]
+        }).compileComponents();
+
+        fixture = TestBed.createComponent(PopulatedSectionHostComponent);
+        fixture.detectChanges();
+        element = fixture.nativeElement;
+    });
+
+
+    it('renders every field header with its label and actions', () => {
+        const headers = element.querySelectorAll('.fields.card > .card-header');
+
+        expect(headers.length).toBe(2);
+        expect(headers[0].textContent).toContain('First Field');
+        expect(headers[1].textContent).toContain('Second Field');
+        expect(headers[1].querySelectorAll('button').length).toBe(3);
+    });
+
+
+    it('gives every field its own collapsible config editor', () => {
+        expect(element.querySelectorAll('.fields.card > .card-body.collapse cmdb-config-edit').length).toBe(2);
+    });
+});
